@@ -23,6 +23,9 @@ dev = [
     "datamodel-code-generator>=0.26.0",
 ]
 
+[tool.setuptools]
+packages = ["core", "features"]
+
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["features"]
