@@ -27,8 +27,8 @@ generate: ## Regenerate types from OpenAPI spec
 migrate: ## Run database migrations
 	cd backend && alembic upgrade head
 
-new-feature: ## Scaffold a new feature (usage: make new-feature name=orders)
-	bash shared/scripts/scaffold-feature.sh $(name)
+new-feature: ## Scaffold a new feature (usage: make new-feature name=orders tier=2)
+	bash shared/scripts/scaffold-feature.sh $(name) $(tier)
 
 lint-arch: ## Run architecture boundary linter
 	python shared/scripts/lint-architecture.py
