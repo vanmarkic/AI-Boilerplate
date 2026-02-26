@@ -1,0 +1,13 @@
+name: user
+tier: 1
+description: User registration and profile management
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [postgresql]
+api_endpoints:
+  - POST /api/users
+  - GET /api/users/{id}
+models: [User]
+events_emitted: []
+events_consumed: []
