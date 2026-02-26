@@ -1,4 +1,4 @@
-.PHONY: dev test test-backend test-frontend generate migrate new-feature lint-arch lint help
+.PHONY: dev test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -32,6 +32,9 @@ new-feature: ## Scaffold a new feature (usage: make new-feature name=orders)
 
 lint-arch: ## Run architecture boundary linter
 	python shared/scripts/lint-architecture.py
+
+storybook: ## Start Storybook dev server
+	cd frontend && npx storybook dev -p 6006
 
 lint: ## Run all linters
 	cd backend && ruff check .
