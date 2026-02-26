@@ -1,0 +1,12 @@
+name: health
+tier: 1
+description: Health check endpoint for readiness/liveness probes
+version: 0.1.0
+dependencies:
+  internal: []
+  external: []
+api_endpoints:
+  - GET /api/health
+models: []
+events_emitted: []
+events_consumed: []

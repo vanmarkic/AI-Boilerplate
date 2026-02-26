@@ -2,9 +2,10 @@
 set -euo pipefail
 
 NAME=$1
+TIER=${2:-1}
 if [ -z "${NAME:-}" ]; then
-  echo "Usage: scaffold-feature.sh <feature-name>"
-  echo "Example: scaffold-feature.sh order"
+  echo "Usage: scaffold-feature.sh <feature-name> [tier]"
+  echo "Example: scaffold-feature.sh order 2"
   exit 1
 fi
 
@@ -113,7 +114,7 @@ PYEOF
 
 cat > "$BACKEND_DIR/manifest.yaml" << YAMLEOF
 name: ${SNAKE}
-tier: 1
+tier: ${TIER}
 description: TODO - describe this feature
 version: 0.1.0
 dependencies:
