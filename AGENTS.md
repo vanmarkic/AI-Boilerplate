@@ -20,3 +20,11 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 8. Auth is a stub — do not implement real authentication logic.
 9. Each feature has a `manifest.yaml` describing its capabilities and dependencies.
 10. Run `make lint-arch` before committing to check layer boundary violations.
+
+## Feature Tiering
+11. Every feature MUST have a `tier` field in its `manifest.yaml` (1, 2, or 3).
+12. Tier 1 = base features included in all builds.
+13. Features must NOT import from a higher tier (tier-1 cannot import tier-2 code).
+14. Use `make build-tier-N` to build Docker images for a specific tier.
+15. Runtime feature flags (`core/feature_flags.py`, `feature-flag.service.ts`) toggle features WITHIN the shipped tier.
+16. Scaffold new features with tier: `make new-feature name=analytics tier=2`.
