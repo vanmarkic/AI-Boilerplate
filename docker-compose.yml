@@ -17,8 +17,10 @@ services:
 
   api:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: backend/Dockerfile
+      args:
+        TIER: ${TIER:-3}
     ports:
       - "8000:8000"
     environment:
@@ -33,8 +35,10 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        TIER: ${TIER:-3}
     ports:
       - "4200:4200"
     volumes:
