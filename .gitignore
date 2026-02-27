@@ -14,7 +14,10 @@ dist/
 
 # Generated code (optional: commit or gitignore)
 backend/generated/
-frontend/src/app/shared/api/api-client.generated.ts
+frontend/src/app/shared/api/generated/
+
+# Worktrees
+.worktrees/
 
 # IDE
 .idea/
