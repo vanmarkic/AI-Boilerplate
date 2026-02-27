@@ -9,7 +9,7 @@ describe('LoginComponent', () => {
     await TestBed.configureTestingModule({
       imports: [LoginComponent],
       providers: [
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
+        { provide: Router, useValue: { navigate: vi.fn() } },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(LoginComponent);
