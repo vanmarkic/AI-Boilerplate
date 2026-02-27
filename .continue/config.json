@@ -1,0 +1,57 @@
+{
+  "models": [
+    {
+      "title": "Qwen 2.5 Coder",
+      "provider": "ollama",
+      "model": "qwen2.5-coder",
+      "apiBase": "http://localhost:11434",
+      "contextLength": 32768
+    },
+    {
+      "title": "Codestral",
+      "provider": "ollama",
+      "model": "codestral",
+      "apiBase": "http://localhost:11434",
+      "contextLength": 32768
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "Qwen 2.5 Coder (Autocomplete)",
+    "provider": "ollama",
+    "model": "qwen2.5-coder",
+    "apiBase": "http://localhost:11434"
+  },
+  "embeddingsProvider": {
+    "provider": "ollama",
+    "model": "nomic-embed-text",
+    "apiBase": "http://localhost:11434"
+  },
+  "contextProviders": [
+    { "name": "code" },
+    { "name": "diff" },
+    { "name": "terminal" },
+    { "name": "problems" },
+    { "name": "folder" },
+    {
+      "name": "codebase",
+      "params": { "nRetrieve": 20, "nFinal": 5 }
+    },
+    { "name": "tree" },
+    { "name": "file" },
+    { "name": "search", "params": {} }
+  ],
+  "slashCommands": [
+    {
+      "name": "share",
+      "description": "Export the current chat session to markdown"
+    },
+    {
+      "name": "cmd",
+      "description": "Generate a shell command"
+    },
+    {
+      "name": "commit",
+      "description": "Generate a conventional commit message"
+    }
+  ]
+}

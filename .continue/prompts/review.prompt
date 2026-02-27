@@ -1,0 +1,44 @@
+name: Review
+description: Review selected code against all project rules and report violations
+---
+Review the following code against the AI Boilerplate project rules.
+
+{{{ input }}}
+
+Check each category and report violations with file path and line number:
+
+### Universal
+- [ ] Any file > 250 lines? (> 150 for Angular UI primitives in `shared/ui/`)
+- [ ] Barrel exports (`index.ts` re-exporting multiple things)?
+- [ ] Any real auth logic (must remain a stub)?
+- [ ] Missing `manifest.yaml` or missing `tier` field?
+
+### Backend (Python/FastAPI)
+- [ ] Layer boundary violations? (repo importing router, service importing router, etc.)
+- [ ] Missing type hints on any function?
+- [ ] Raw integer HTTP status codes instead of `status.HTTP_XXX`?
+- [ ] Routes missing `/api/` prefix?
+- [ ] Sync SQLAlchemy session instead of `AsyncSession`?
+- [ ] Column defined without `Mapped[]` / `mapped_column()`?
+- [ ] ORM model missing `model_config = {"from_attributes": True}` in schema?
+- [ ] Manual DB changes instead of Alembic migration?
+
+### Frontend (Angular)
+- [ ] NgModule used?
+- [ ] `standalone: true` written explicitly (should be omitted)?
+- [ ] `@Input()` or `@Output()` decorators instead of `input()`/`output()` signals?
+- [ ] `*ngIf`, `*ngFor`, `*ngSwitch` instead of `@if`/`@for`/`@switch`?
+- [ ] `ngClass` or `ngStyle` instead of `[class]`/`[style]`?
+- [ ] Constructor injection instead of `inject()`?
+- [ ] `BehaviorSubject` for local state instead of `signal()`?
+- [ ] Missing `changeDetection: ChangeDetectionStrategy.OnPush`?
+- [ ] `any` type anywhere?
+- [ ] Arbitrary Tailwind values like `bg-[#...]` instead of design tokens?
+- [ ] `@HostBinding` / `@HostListener` instead of `host: {}`?
+
+### Testing
+- [ ] Tests are NOT colocated with source files?
+- [ ] Implementation written before a failing test?
+
+List each violation as: `path/to/file.ext:LINE — Rule N: description`
+If no violations, say "✓ No violations found."

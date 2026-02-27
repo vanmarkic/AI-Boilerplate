@@ -2,25 +2,25 @@
 
 @theme {
   /* Colors — semantic names only */
-  --color-primary: oklch(59.59% 0.24 255);
-  --color-primary-foreground: oklch(98% 0.01 255);
-  --color-secondary: oklch(96% 0.005 286);
-  --color-secondary-foreground: oklch(14% 0.004 286);
+  --color-primary: oklch(70% 0.18 47);              /* orange accent */
+  --color-primary-foreground: oklch(15% 0.006 250);
+  --color-secondary: oklch(26% 0.006 250);
+  --color-secondary-foreground: oklch(97% 0 0);
   --color-destructive: oklch(57% 0.24 27);
-  --color-destructive-foreground: oklch(98% 0.01 27);
-  --color-background: oklch(100% 0 0);
-  --color-foreground: oklch(14% 0.004 286);
-  --color-card: oklch(100% 0 0);
-  --color-card-foreground: oklch(14% 0.004 286);
-  --color-muted: oklch(96% 0.005 286);
-  --color-muted-foreground: oklch(55% 0.01 286);
-  --color-accent: oklch(96% 0.005 286);
-  --color-accent-foreground: oklch(14% 0.004 286);
-  --color-border: oklch(90% 0.01 286);
-  --color-input: oklch(90% 0.01 286);
-  --color-ring: oklch(59.59% 0.24 255);
-  --color-popover: oklch(100% 0 0);
-  --color-popover-foreground: oklch(14% 0.004 286);
+  --color-destructive-foreground: oklch(97% 0 0);
+  --color-background: oklch(16% 0.006 250);         /* dark charcoal */
+  --color-foreground: oklch(97% 0 0);               /* white */
+  --color-card: oklch(22% 0.006 250);               /* elevated surface */
+  --color-card-foreground: oklch(97% 0 0);
+  --color-muted: oklch(26% 0.006 250);
+  --color-muted-foreground: oklch(65% 0.005 250);
+  --color-accent: oklch(70% 0.18 47);               /* orange */
+  --color-accent-foreground: oklch(15% 0.006 250);
+  --color-border: oklch(30% 0.008 250);
+  --color-input: oklch(30% 0.008 250);
+  --color-ring: oklch(70% 0.18 47);                 /* orange focus ring */
+  --color-popover: oklch(22% 0.006 250);
+  --color-popover-foreground: oklch(97% 0 0);
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -36,19 +36,5 @@
   --radius-full: 9999px;
 
   /* Typography */
-  --font-sans: "Inter", system-ui, sans-serif;
-}
-
-/* Dark mode override */
-.dark {
-  --color-background: oklch(14% 0.004 286);
-  --color-foreground: oklch(98% 0.01 255);
-  --color-card: oklch(20% 0.005 286);
-  --color-card-foreground: oklch(98% 0.01 255);
-  --color-border: oklch(30% 0.01 286);
-  --color-input: oklch(30% 0.01 286);
-  --color-muted: oklch(25% 0.005 286);
-  --color-muted-foreground: oklch(65% 0.01 286);
-  --color-popover: oklch(20% 0.005 286);
-  --color-popover-foreground: oklch(98% 0.01 255);
+  --font-sans: "Source Sans 3", system-ui, sans-serif;
 }
