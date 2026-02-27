@@ -1,0 +1,48 @@
+name: Spec Workflow
+description: SPECIFY → PLAN → IMPLEMENT → VALIDATE — lock intent before writing code
+---
+Apply the full spec workflow to this request: {{{ input }}}
+
+## Step 1 — SPECIFY
+Define:
+- **Goal**: one sentence describing the outcome
+- **Acceptance criteria**: bulleted, testable statements
+- **Scope**: which files/features are touched
+- **OpenAPI changes**: list any new/modified endpoints (these must be written to `shared/openapi.yaml` first)
+- **Out of scope**: what we are explicitly NOT doing
+
+Stop here and wait for my approval before proceeding to Step 2.
+
+---
+
+## Step 2 — PLAN (after approval)
+Break work into tasks where each task:
+- Changes < 200 lines total
+- Has a single clear purpose
+- Starts with a failing test
+
+List tasks in dependency order. Note which are independent (can be parallelized).
+
+Stop here and wait for my approval before proceeding to Step 3.
+
+---
+
+## Step 3 — IMPLEMENT (after approval)
+Execute tasks one at a time:
+1. Write the failing test
+2. Watch it fail (confirm the failure message)
+3. Write minimal implementation to pass
+4. Refactor if needed
+5. Move to next task
+
+---
+
+## Step 4 — VALIDATE
+- [ ] Run `make lint-arch` — zero violations
+- [ ] All tests pass
+- [ ] No file exceeds 250 lines
+- [ ] No `any` in TypeScript
+- [ ] All Python functions have type hints
+- [ ] Each acceptance criterion from Step 1 is met
+
+Present results for each checklist item.

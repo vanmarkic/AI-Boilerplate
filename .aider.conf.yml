@@ -1,0 +1,26 @@
+# Aider base config — AI Boilerplate
+# Do not set model here. Use a profile instead:
+#   aider --config .aider-qwen.conf.yml [files...]
+#   aider --config .aider-codestral.conf.yml [files...]
+
+# Commits
+auto-commits: false
+dirty-commits: false
+attribute-author: true
+attribute-committer: false
+
+# Output
+pretty: true
+stream: true
+show-diffs: true
+
+# Behaviour
+suggest-shell-commands: false
+watch-files: false
+
+# Read-only context (always loaded, never edited)
+read:
+  - AGENTS.md
+  - backend/AGENTS.md
+  - frontend/AGENTS.md
+  - shared/openapi.yaml

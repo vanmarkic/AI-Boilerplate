@@ -1,0 +1,28 @@
+# Aider — Codestral profile
+# Usage: aider --config .aider-codestral.conf.yml [files...]
+
+model: ollama/codestral
+# Ollama defaults to http://localhost:11434
+# Override: set OLLAMA_API_BASE env var
+
+# Commits
+auto-commits: false
+dirty-commits: false
+attribute-author: true
+attribute-committer: false
+
+# Output
+pretty: true
+stream: true
+show-diffs: true
+
+# Behaviour
+suggest-shell-commands: false
+watch-files: false
+
+# Read-only context (always loaded, never edited)
+read:
+  - AGENTS.md
+  - backend/AGENTS.md
+  - frontend/AGENTS.md
+  - shared/openapi.yaml

@@ -1,0 +1,32 @@
+name: New Feature
+description: Scaffold a new feature following project conventions (OpenAPI-first, TDD, tiered)
+---
+Create a new feature called "{{{ input }}}".
+
+Follow this exact order:
+
+1. **Determine tier** — ask if unclear (1 = core/always shipped, 2 = optional, 3 = advanced)
+2. **OpenAPI first** — add the endpoint(s) to `shared/openapi.yaml` before writing any code
+3. **Scaffold** — run `make new-feature name={{{ input }}} tier=<N>` to create the folder
+4. **manifest.yaml** — fill in name, tier, description, and dependencies
+
+**Backend** (in `backend/features/{{{ input }}}/`):
+- `{{{ input }}}_model.py` — SQLAlchemy model with `Mapped[]` annotations
+- `{{{ input }}}_schema.py` — Pydantic request/response models
+- `{{{ input }}}_repository.py` — async DB operations only
+- `{{{ input }}}_service.py` — business logic, calls repository
+- `{{{ input }}}_router.py` — FastAPI routes, calls service, returns schema
+- `{{{ input }}}_test.py` — **write failing test first**, then implement
+
+**Frontend** (in `frontend/src/app/features/{{{ input }}}/`):
+- `types.ts` — TypeScript interfaces matching the OpenAPI schema
+- `{{{ input }}}.service.ts` — signal-based service, `firstValueFrom()` for HTTP
+- `{{{ input }}}.component.ts` — standalone, `inject()`, `OnPush`, signal state
+- `{{{ input }}}.routes.ts` — exports `FEATURE_ROUTES` constant
+- `{{{ input }}}.spec.ts` — **write failing test first**, then implement
+
+**Rules to enforce:**
+- No file > 250 lines
+- No `any` in TypeScript, no untyped Python functions
+- Auth stays a stub — use `Depends(get_current_user)` on protected endpoints
+- Run `make lint-arch` before finishing

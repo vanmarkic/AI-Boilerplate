@@ -2,7 +2,13 @@ import { Routes } from '@angular/router';
 import { authGuard } from './shared/auth/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+  {
+    path: '',
+    loadChildren: () =>
+      import('./features/landing/landing.routes').then(
+        (m) => m.LANDING_ROUTES
+      ),
+  },
   {
     path: 'dashboard',
     loadChildren: () =>

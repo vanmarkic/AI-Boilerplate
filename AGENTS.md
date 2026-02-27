@@ -28,3 +28,14 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 14. Use `make build-tier-N` to build Docker images for a specific tier.
 15. Runtime feature flags (`core/feature_flags.py`, `feature-flag.service.ts`) toggle features WITHIN the shipped tier.
 16. Scaffold new features with tier: `make new-feature name=analytics tier=2`.
+
+## Common Pitfalls
+- Do NOT import across tiers (tier-1 code must not import from tier-2 or tier-3).
+- Do NOT create a feature without a `manifest.yaml`.
+- Do NOT use barrel exports (`index.ts` re-exports).
+- Do NOT modify the database schema without an Alembic migration.
+- Do NOT use `any` in TypeScript or untyped signatures in Python.
+- Do NOT implement real auth logic — the auth stub is intentional.
+
+## Meta
+See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.

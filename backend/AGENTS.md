@@ -49,3 +49,11 @@ Pragmatic DDD with feature-sliced modules. Each feature is a flat folder under `
 ## Migrations
 30. Alembic for all schema changes. Never modify DB manually.
 31. Import all models in `alembic/env.py` for autogenerate detection.
+
+## Common Pitfalls
+- Do NOT import from a higher layer (e.g., `repository` must not import from `service`).
+- Do NOT return raw dicts from endpoints — always use Pydantic response models.
+- Do NOT use raw HTTP status integers — use `status.HTTP_200_OK` etc.
+- Do NOT skip type hints on any function signature.
+- Do NOT wire dependencies inline — use `core/dependencies.py`.
+- Do NOT modify the DB schema manually — always use Alembic migrations.

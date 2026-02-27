@@ -28,6 +28,13 @@
 - Use `inject()` function for dependency injection
 - Set `changeDetection: ChangeDetectionStrategy.OnPush` always
 
+## Layer Rules
+1. `feature component` imports from: feature service, shared/ui, shared/utils, core.
+2. `feature service` imports from: core/environment, shared/auth, generated API client.
+3. `shared/ui` imports from: shared/utils only — NO services, NO feature code.
+4. `core/` imports from: stdlib and Angular only.
+5. NEVER import from a sibling feature (feature-to-feature coupling is forbidden).
+
 ## Component Architecture
 
 ### UI Primitives (`shared/ui/`)
@@ -82,6 +89,32 @@ protected readonly hostClasses = computed(() =>
 22. Write failing test first, then implement.
 23. Test each variant and interaction state.
 
+## Angular CDK Usage
+
+### a11y — Focus Trap
+```typescript
+import { CdkTrapFocus } from '@angular/cdk/a11y';
+
+@Component({ imports: [CdkTrapFocus], template: `<div cdkTrapFocus>...</div>` })
+```
+Use `cdkTrapFocus` on any container that should trap keyboard focus (dialogs, drawers, popovers).
+
+### Dialog Pattern
+Use `app-dialog-panel` from `shared/ui/` for all dialogs. Wire `[open]` and `(closed)`:
+```html
+@if (showDialog()) {
+  <app-dialog-panel (closed)="showDialog.set(false)">
+    <span dialogTitle>Confirm Delete</span>
+    <p>This action cannot be undone.</p>
+    <ng-container dialogFooter>
+      <app-button variant="outline" (clicked)="showDialog.set(false)">Cancel</app-button>
+      <app-button variant="destructive" (clicked)="confirm()">Delete</app-button>
+    </ng-container>
+  </app-dialog-panel>
+}
+```
+Use `variant="destructive"` on the panel for confirmation dialogs.
+
 ## Routing
 24. Each feature exports a `FEATURE_ROUTES` constant.
 25. Top-level routes use `loadChildren()` for lazy loading.
@@ -92,3 +125,11 @@ protected readonly hostClasses = computed(() =>
 28. Use `firstValueFrom()` to convert HttpClient observables.
 29. Base URL configured in `core/environment.ts`.
 30. Auth token attached via `shared/auth/auth.interceptor.ts`.
+
+## Common Pitfalls
+- Do NOT use NgModules, `@Input()`/`@Output()`, `*ngIf`/`*ngFor`, or constructor injection.
+- Do NOT use `BehaviorSubject` for local state — use `signal()`.
+- Do NOT use arbitrary Tailwind values like `bg-[#3B82F6]` — use design tokens.
+- Do NOT put business logic or `inject()` calls in `shared/ui` components.
+- Do NOT import from a sibling feature — route through a shared service if needed.
+- Do NOT set `standalone: true` — it is the default and is omitted.

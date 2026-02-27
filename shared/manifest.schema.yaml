@@ -1,0 +1,73 @@
+# manifest.schema.yaml
+# Schema for feature manifest.yaml files.
+# Every feature folder (backend/features/*, frontend/src/app/features/*) must
+# include a manifest.yaml that conforms to this schema.
+# Validated by: make lint-arch (TODO: add manifest validation to lint-architecture.py)
+
+required_fields:
+  name:
+    type: string
+    description: "Feature folder name (snake_case for backend, kebab-case for frontend)."
+    example: "user_profile"
+
+  tier:
+    type: integer
+    enum: [1, 2, 3]
+    description: |
+      Build tier this feature belongs to.
+      1 = base, included in all builds.
+      2 = standard, included in tier-2+ builds.
+      3 = premium, included in tier-3 builds only.
+
+  description:
+    type: string
+    description: "One sentence describing what this feature does."
+    max_length: 120
+
+  version:
+    type: string
+    pattern: "semver (MAJOR.MINOR.PATCH)"
+    description: "Bump minor on new endpoints, patch on fixes."
+    example: "0.1.0"
+
+  dependencies:
+    type: object
+    required:
+      internal:
+        type: array
+        items: string
+        description: "Other feature folder names this feature imports from. Empty list if none."
+        example: ["user", "core"]
+      external:
+        type: array
+        items: string
+        description: "External services or systems required (e.g. postgresql, redis, s3)."
+        example: ["postgresql"]
+
+  api_endpoints:
+    type: array
+    items: string
+    description: |
+      HTTP method + path for every route this feature exposes.
+      Must mirror routes in shared/openapi.yaml — keep in sync.
+    example:
+      - "GET /api/users/{id}"
+      - "POST /api/users"
+
+  models:
+    type: array
+    items: string
+    description: "Database model class names owned by this feature. Empty list if none."
+    example: ["User"]
+
+  events_emitted:
+    type: array
+    items: string
+    description: "Domain event names this feature publishes. Empty list if none."
+    example: ["UserRegistered"]
+
+  events_consumed:
+    type: array
+    items: string
+    description: "Domain event names this feature subscribes to. Empty list if none."
+    example: ["PaymentCompleted"]

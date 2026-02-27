@@ -1,0 +1,68 @@
+# AI Boilerplate — Aider Rules
+
+## Stack
+- Frontend: Angular 18+ standalone components, signals, Tailwind CSS v4
+- Backend: FastAPI Python 3.12+, SQLAlchemy 2.0 async, Alembic, PostgreSQL 17
+- Contract: OpenAPI 3.1 at shared/openapi.yaml
+
+## Non-negotiable rules — follow every time
+
+ALWAYS modify shared/openapi.yaml BEFORE writing backend or frontend code.
+ALWAYS write a failing test BEFORE implementation (TDD).
+NEVER exceed 250 lines per file (150 for Angular UI primitives in shared/ui/).
+NEVER use barrel exports. Use direct imports only.
+NEVER implement real authentication. Auth is a stub.
+NEVER use sync SQLAlchemy sessions. Always use AsyncSession.
+NEVER use `any` in TypeScript. NEVER write untyped Python function signatures.
+Every feature folder MUST have manifest.yaml with a tier: 1|2|3 field.
+Run `make lint-arch` before finishing any backend or frontend task.
+
+## Backend layer import order (strictly enforced)
+router → service → repository → model/schema
+- router: can import service, schema, core
+- service: can import repository, model, schema, core
+- repository: can import model, core
+- model: can import core only
+- schema: can import stdlib only
+Never import from a higher layer.
+
+## Backend conventions
+- File names: underscores — user_model.py, user_service.py, user_router.py
+- Feature folder contains: model, schema, repository, service, router, test, manifest.yaml
+- Mount routers in main.py via app.include_router()
+- DI via Depends(). Wire in core/dependencies.py.
+- Return Pydantic models from all endpoints
+- Use status.HTTP_XXX constants, not raw integers
+- Prefix all routes with /api/
+- SQLAlchemy: Mapped[], mapped_column(), inherit from core.database.Base
+- Pydantic ORM models: model_config = {"from_attributes": True}
+- Testing: pytest + pytest-asyncio, httpx.AsyncClient + ASGITransport
+- Migrations: Alembic only, never modify DB manually
+
+## Frontend — NEVER generate
+- NgModules
+- standalone: true (it is the default, just omit it)
+- @Input() or @Output() decorators
+- *ngIf, *ngFor, *ngSwitch
+- ngClass or ngStyle
+- @HostBinding or @HostListener
+- Constructor injection
+- BehaviorSubject for local state
+
+## Frontend — ALWAYS generate
+- input() and output() signal functions for component IO
+- signal(), computed(), effect() for reactive state
+- @if, @for, @switch (native control flow)
+- inject() for dependency injection
+- changeDetection: ChangeDetectionStrategy.OnPush on every component
+- host: {} in @Component for host bindings
+
+## Styling
+- Semantic tokens only: bg-primary, text-foreground, border-border, p-sm, p-md
+- NEVER use arbitrary values like bg-[#3B82F6]
+
+## File organisation
+- Feature: component.ts, service.ts, types.ts, routes.ts, spec.ts
+- UI primitives: src/app/shared/ui/ with colocated .stories.ts
+- Each feature exports FEATURE_ROUTES constant
+- Lazy-load via loadChildren()
