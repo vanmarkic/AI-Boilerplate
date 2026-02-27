@@ -4,7 +4,7 @@ set -euo pipefail
 echo "Generating TypeScript client from OpenAPI spec..."
 cd "$(dirname "$0")/../.."
 
-npx @hey-api/openapi-ts \
+frontend/node_modules/.bin/openapi-ts \
   -i shared/openapi.yaml \
   -o frontend/src/app/shared/api/generated \
   -c @hey-api/client-fetch
