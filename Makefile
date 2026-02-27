@@ -1,16 +1,20 @@
-.PHONY: dev test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-dev: ## Start all services via Docker Compose
+dev: ## Start all services via Docker Compose (full Docker)
 	docker compose up --build
 
-dev-backend: ## Start backend + db only
+dev-local: ## Start db+api in Docker, Angular natively — best DX, instant HMR
+	docker compose up -d db api
+	cd frontend && npx ng serve
+
+dev-backend: ## Start backend + db only (Docker)
 	docker compose up --build api db
 
-dev-frontend: ## Start frontend only (expects backend running)
-	cd frontend && ng serve
+dev-frontend: ## Start Angular dev server natively (expects backend running)
+	cd frontend && npx ng serve
 
 test: test-backend test-frontend ## Run all tests
 
