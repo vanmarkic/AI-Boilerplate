@@ -1,8 +1,7 @@
-import { Component, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-card',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'class': 'block rounded-lg border border-border bg-card p-md shadow-sm' },
   template: `
     @if (title()) {
