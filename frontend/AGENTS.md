@@ -133,3 +133,22 @@ Use `variant="destructive"` on the panel for confirmation dialogs.
 - Do NOT put business logic or `inject()` calls in `shared/ui` components.
 - Do NOT import from a sibling feature — route through a shared service if needed.
 - Do NOT set `standalone: true` — it is the default and is omitted.
+
+## API Client
+
+- NEVER call `HttpClient` directly for API endpoints defined in `shared/openapi.yaml`
+- ALWAYS use the generated functions from `../../shared/api/generated` (e.g. `createUser`, `getUser`)
+- Run `make generate` from the repo root after modifying `shared/openapi.yaml`
+- Generated files live at `frontend/src/app/shared/api/generated/` — do NOT edit them manually
+- Import the fetch client from `client.gen.ts` directly (it is not re-exported via `index.ts`)
+- The client base URL is configured in `main.ts` — do not re-configure it in services
+
+## Forms
+
+- ALWAYS use `ReactiveFormsModule` and `FormGroup` for feature forms — never template-driven forms
+- ALWAYS set `nonNullable: true` on every `FormControl` — prevents null from appearing in typed values
+- ALWAYS use `form.getRawValue()` to read values — not `form.value` (disabled fields become undefined in `form.value`)
+- ALWAYS pair `<app-input formControlName="field">` with `<app-form-error [control]="form.controls.field" />`
+- DO NOT use `ngModel` in feature forms — only `formControlName` or `[formControl]`
+- Feature form components must import: `ReactiveFormsModule`, `InputComponent`, `ButtonComponent`, `FormErrorComponent`
+- Call `form.markAllAsTouched()` on failed submit to surface all validation errors at once

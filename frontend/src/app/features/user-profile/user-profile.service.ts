@@ -1,13 +1,9 @@
-import { inject, Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { getUser } from '../../shared/api/generated';
 import { User } from './user-profile.types';
-import { environment } from '../../core/environment';
 
 @Injectable({ providedIn: 'root' })
 export class UserProfileService {
-  private readonly http = inject(HttpClient);
-
   readonly user = signal<User | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
@@ -16,10 +12,8 @@ export class UserProfileService {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const result = await firstValueFrom(
-        this.http.get<User>(`${environment.apiBaseUrl}/api/users/${id}`)
-      );
-      this.user.set(result);
+      const { data } = await getUser({ path: { id } });
+      this.user.set(data ?? null);
     } catch {
       this.error.set('Failed to load user');
     } finally {

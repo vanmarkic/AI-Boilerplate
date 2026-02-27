@@ -1,0 +1,12 @@
+name: register
+tier: 1
+description: User registration form — demonstrates Angular reactive forms pattern
+version: 0.1.0
+dependencies:
+  internal: [user]
+  external: []
+api_endpoints:
+  - POST /api/users
+models: [RegisterFormValue]
+events_emitted: []
+events_consumed: []
