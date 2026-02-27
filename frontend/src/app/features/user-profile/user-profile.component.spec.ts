@@ -11,7 +11,7 @@ describe('UserProfileComponent', () => {
     user: signal<User | null>(null),
     loading: signal(false),
     error: signal<string | null>(null),
-    loadUser: jasmine.createSpy('loadUser'),
+    loadUser: vi.fn(),
   };
 
   beforeEach(async () => {
