@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { cn } from '../utils';
 
 @Component({
   selector: 'app-button',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'role': 'button',
     '[class]': 'hostClasses()',

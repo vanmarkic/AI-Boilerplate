@@ -1,9 +1,8 @@
-import { Component, ChangeDetectionStrategy, computed, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { cn } from '../utils';
 
 @Component({
   selector: 'app-badge',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
   template: `<ng-content />`,
 })

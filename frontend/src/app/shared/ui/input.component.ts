@@ -1,10 +1,9 @@
-import { Component, ChangeDetectionStrategy, input, model } from '@angular/core';
+import { Component, input, model } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { cn } from '../utils';
 
 @Component({
   selector: 'app-input',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   template: `
     @if (label()) {
@@ -16,8 +15,7 @@ import { cn } from '../utils';
       [id]="id()"
       [type]="type()"
       [placeholder]="placeholder()"
-      [ngModel]="value()"
-      (ngModelChange)="value.set($event)"
+      [(ngModel)]="value"
       [class]="inputClasses"
     />
   `,
