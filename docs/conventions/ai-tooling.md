@@ -7,21 +7,21 @@ This project uses multiple AI coding tools with shared conventions. This documen
 | Tool | Role | Model | Transport |
 |------|------|-------|-----------|
 | **Claude Code** | Orchestration, planning, multi-file features, reviews | Claude (cloud) | CLI |
-| **Continue.dev** | Inline edits, autocomplete, single-file agent tasks | Qwen3 Coder 30B (RunPod) | VSCode extension |
-| **Aider** | Focused TDD sessions, file-scoped implementation | Qwen3 Coder 30B (RunPod) | CLI |
+| **Continue.dev** | Inline edits, autocomplete, single-file agent tasks | GLM-4.7-Flash (RunPod) | VSCode extension |
+| **Aider** | Focused TDD sessions, file-scoped implementation | GLM-4.7-Flash (RunPod) | CLI |
 
 ## Task Orchestrator (MCP)
 
 All three tools share persistent task state via [Task Orchestrator](https://github.com/jpicklyk/task-orchestrator), an MCP server that tracks work items, dependencies, and context notes across sessions.
 
-**Why:** Local models (8-32K context) waste tokens rebuilding "where was I?" each session. Task Orchestrator provides a ~200-token briefing via `get_context()` so the model spends tokens on code, not orientation.
+**Why:** Local models (8-32K context) waste tokens rebuilding "where was I?" each session. Task Orchestrator provides a compact briefing via `get_context()` so the model spends tokens on code, not orientation.
 
 ### How It Works
 
 ```
 Session 1: Plan
   → create_work_tree("Feature X", children=[task1, task2, task3])
-  → Each task gets a requirements note (200 tokens)
+  → Each task gets a requirements note (400-700 tokens, pseudocode)
 
 Session 2: Implement task 1
   → get_context()              # instant briefing
@@ -74,13 +74,17 @@ Config file: `~/.continue/config.yaml` (global) + `.continue/config.json` (proje
 
 ### Models
 
-The primary model is Qwen3 Coder 30B-A3B running on RunPod (RTX 4090):
+The primary model is GLM-4.7-Flash running on RunPod (RTX 4090). Use `openai` provider (not `ollama`) for reliable tool-call JSON via the `/v1/chat/completions` endpoint:
 
 ```yaml
-- name: Qwen3 Coder 30B (RunPod)
-  provider: ollama
-  model: qwen3-coder:30b-a3b-q4_K_M
-  apiBase: https://<runpod-proxy>:11434
+- name: GLM-4.7-Flash (RunPod)
+  provider: openai
+  model: glm-4.7-flash:q4_K_M
+  apiBase: https://<runpod-proxy>/v1
+  apiKey: ollama
+  contextLength: 32768
+  requestOptions:
+    timeout: 120000
 ```
 
 ### Agent Mode Caveats
@@ -93,29 +97,30 @@ The primary model is Qwen3 Coder 30B-A3B running on RunPod (RTX 4090):
 
 Continue supports MCP servers (STDIO and SSE). Configured in `~/.continue/config.yaml` under `mcpServers`. Tool policies (Automatic/Ask/Excluded) are managed via the UI tools panel.
 
-### Recommended Model Alternatives
-
-For better agentic reliability under 24GB VRAM:
+### Model Alternatives (24GB VRAM)
 
 | Model | Active Params | VRAM (Q4_K_M) | Agentic Quality |
 |-------|--------------|----------------|-----------------|
-| GLM-4.7-Flash | 3B MoE | ~19 GB | Best tool-call reliability |
+| **GLM-4.7-Flash** | 3B MoE | ~19 GB | **Best tool-call reliability** (current) |
 | Qwen3 Coder 30B | 3B MoE | ~18 GB | Good code, weaker tool calls |
 | Qwen3 14B | 14B dense | ~10.5 GB | Best under 20GB, native tool support |
 
 ## Aider Configuration
 
-Config file: `.aider-qwen3-coder.conf.yml`
+Config file: `.aider-glm.conf.yml` (default) or `.aider-codestral.conf.yml`
 
 ```bash
-# Run with config
-aider --config .aider-qwen3-coder.conf.yml [files...]
+# Run with config (default uses GLM-4.7-Flash)
+aider --config .aider-glm.conf.yml [files...]
 
-# Makefile shortcuts
+# Makefile shortcuts (uses AIDER_CONF variable)
 make aider-tdd        # TDD session
 make aider-plan       # Write implementation plan
 make aider-execute    # Execute plan
 make aider-debug      # Systematic debugging
+
+# Override model per-session
+make aider-tdd AIDER_CONF=.aider-codestral.conf.yml
 ```
 
 ### Multi-Session Pattern for Aider
@@ -124,7 +129,7 @@ Aider has no built-in task persistence. Use a PLAN.md file as read-only context:
 
 ```bash
 # Pass plan as context each session
-aider --config .aider-qwen3-coder.conf.yml --read PLAN.md features/my_feature/*.py
+aider --config .aider-glm.conf.yml --read PLAN.md features/my_feature/*.py
 ```
 
 Update PLAN.md manually between sessions to track progress.
@@ -144,4 +149,5 @@ The script is macOS-compatible (no GNU-only bash features). It generates:
 3. **Reserve Agent mode for capable models** — GLM-4.7-Flash or cloud models
 4. **Provide explicit context** — use `@file` and `@codebase` in Continue, `--read` in Aider
 5. **Don't fight tool-call failures** — if the model outputs raw XML, re-prompt or switch modes
-6. **Use Task Orchestrator for multi-session work** — 200-token context handoff vs rebuilding 5000+ tokens
+6. **Use Task Orchestrator for multi-session work** — compact context handoff vs rebuilding 5000+ tokens
+7. **Use OpenAI-compatible endpoint** — `provider: openai` with `/v1` base URL gives better tool-call JSON than native Ollama API
