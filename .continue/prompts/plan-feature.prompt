@@ -1,55 +1,16 @@
 name: Plan Feature
 description: Break a feature design into Task Orchestrator work items with dependencies
 ---
-Break this feature design into Task Orchestrator work items:
+Break this feature into Task Orchestrator work items. Use MCP tools only — no code.
 
 {{{ input }}}
 
-## Instructions
+## Do this in order:
 
-You have access to the Task Orchestrator MCP server. Use it.
+1. Call `create_work_tree` with root title, 5-8 children (one per layer), deps as a linear chain, and `createNotes: true`. Dependency order: spec → model → schema → repository → service → router → tests.
 
-### Step 1: Analyze the design
+2. For each child, call `manage_notes` with key "requirements", role "queue", body: 2 sentences — what to build and which file to create.
 
-Identify 5-10 discrete tasks. Each task must be:
-- Completable in one session (~30 min)
-- Scoped to one layer (model OR schema OR repository OR service OR router OR test OR UI)
-- Under 200 lines of code
+3. Call `query_items` operation "overview" with the root ID to confirm.
 
-### Step 2: Create the work tree
-
-Call `create_work_tree` with:
-- `root`: feature title + summary
-- `children`: each task with a `ref` (short ID like "t1"), `title`, and `priority`
-- `deps`: dependency chain (which tasks block which)
-- `createNotes`: true
-
-Follow this dependency pattern for backend features:
-```
-openapi-spec → model → schema → repository → service → router → tests
-```
-
-For frontend features:
-```
-types → service → component → routes → spec
-```
-
-### Step 3: Add requirements notes
-
-For each task, call `manage_notes` to upsert a note with:
-- `key`: "requirements"
-- `role`: "queue"
-- `body`: 2-3 sentences describing what to implement, which files to touch, and acceptance criteria
-
-Keep notes under 200 tokens each. This is what the next session's agent will read — make it actionable, not descriptive.
-
-### Step 4: Confirm
-
-Call `query_items` with `operation: "overview"` and the root item ID to display the full plan.
-
-### Rules
-
-- Do NOT write any code. This is planning only.
-- Do NOT create tasks bigger than one file or one layer.
-- Do NOT skip the dependency chain — tasks must be ordered.
-- Each task title starts with a verb: "Define...", "Implement...", "Wire...", "Write..."
+No code. Only MCP tool calls.
