@@ -7,9 +7,15 @@ Break this feature into Task Orchestrator work items. Use MCP tools only — no 
 
 ## Do this in order:
 
-1. Call `create_work_tree` with root title, 5-8 children (one per layer), deps as a linear chain, and `createNotes: true`. Dependency order: spec → model → schema → repository → service → router → tests.
+1. Call `create_work_tree` with root title + summary, 5-10 children (one per layer), deps as a chain, and `createNotes: true`. Order: spec → model → schema → repository → service → router → wire-deps → tests → frontend-types → frontend-component.
 
-2. For each child, call `manage_notes` with key "requirements", role "queue", body: 2 sentences — what to build and which file to create.
+2. For each child, call `manage_notes` with key "requirements", role "queue". Each note body MUST include:
+   - Exact file path to create or edit
+   - Class/function signatures with parameter types and return types
+   - Field-level details (column types, schema shapes, endpoint paths)
+   - Business rules and edge cases (thresholds, error conditions)
+   - Import constraints (which layers this file may import from)
+   Target: 400-700 tokens per note. Write pseudocode, not prose.
 
 3. Call `query_items` operation "overview" with the root ID to confirm.
 
