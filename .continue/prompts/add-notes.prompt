@@ -1,0 +1,16 @@
+name: Add Notes
+description: Step 2/2 — Add requirement notes to Task Orchestrator work items
+---
+Read the work tree, then add detailed requirement notes.
+
+{{{ input }}}
+
+Step 1: Call `query_items` with operation "overview" and itemId for the root to get all children IDs.
+
+Step 2: Call `manage_notes` with operation "upsert" and a notes array. For each child, include:
+- itemId: the child's UUID from the overview
+- key: "requirements"
+- role: "queue"
+- body: 400-700 tokens with exact file path, class/function signatures with types, field details, business rules, and import constraints. Pseudocode, not prose.
+
+Make the tool calls. Do not write code.
