@@ -1,0 +1,41 @@
+name: Work Next
+description: Resume work using Task Orchestrator - loads context and picks up the next task
+---
+Resume work on the project. Use the Task Orchestrator MCP tools.
+
+## Step 1: Load context
+
+Call `get_context` to see:
+- Active tasks (in work or review)
+- Blocked tasks
+- What changed since last session
+
+## Step 2: Pick next task
+
+If no task is in progress, call `get_next_item` to get the highest-priority unblocked task.
+
+## Step 3: Read the task notes
+
+Call `query_notes` with the task's `itemId` to read its requirements note. This tells you what to implement.
+
+## Step 4: Start working
+
+Call `advance_item` with `trigger: "start"` to move the task from queue to work.
+
+Then implement the task following these rules:
+- Read existing code before writing new code
+- Follow project conventions in `.continue/rules/`
+- One layer at a time (model → schema → repository → service → router → test)
+- Under 200 lines per file
+
+## Step 5: Complete the task
+
+When done:
+1. Run relevant tests (`make test-backend` or `make test-frontend`)
+2. Run `make lint-arch` to check layer boundaries
+3. Call `advance_item` with `trigger: "start"` to advance (work → review → done)
+4. Call `manage_notes` to add a completion note with `key: "done-summary"`, `role: "review"`, describing what was implemented
+
+## Step 6: Next task or stop
+
+Call `get_next_item` again. If another task is ready, repeat from Step 3. If all remaining tasks are blocked, report what's blocking and stop.
