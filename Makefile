@@ -58,7 +58,7 @@ build-tier-3: ## Build for tier 3 (all features)
 
 # ── Aider Skills ──────────────────────────────────────────────
 # Default config; override with: make aider-tdd AIDER_CONF=.aider-codestral.conf.yml
-AIDER_CONF ?= .aider-qwen3-coder.conf.yml
+AIDER_CONF ?= .aider-glm.conf.yml
 
 aider-brainstorm: ## Brainstorm a feature with aider (usage: make aider-brainstorm)
 	aider --config $(AIDER_CONF) --read prompts/aider/brainstorm.md

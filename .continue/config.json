@@ -1,9 +1,9 @@
 {
   "models": [
     {
-      "title": "Qwen3 Coder 30B (RunPod)",
+      "title": "GLM-4.7-Flash (RunPod)",
       "provider": "openai",
-      "model": "qwen3-coder:30b-a3b-q4_K_M",
+      "model": "glm-4.7-flash:q4_K_M",
       "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1",
       "apiKey": "ollama",
       "contextLength": 32768,
@@ -27,10 +27,11 @@
     }
   ],
   "tabAutocompleteModel": {
-    "title": "Qwen3 Coder 30B (RunPod)",
-    "provider": "ollama",
-    "model": "qwen3-coder:30b-a3b-q4_K_M",
-    "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net"
+    "title": "GLM-4.7-Flash (RunPod)",
+    "provider": "openai",
+    "model": "glm-4.7-flash:q4_K_M",
+    "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1",
+    "apiKey": "ollama"
   },
   "embeddingsProvider": {
     "provider": "ollama",
