@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 aider-brainstorm aider-tdd aider-debug aider-plan aider-execute aider-verify aider-finish
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -55,3 +55,28 @@ build-tier-2: ## Build for tier 2
 
 build-tier-3: ## Build for tier 3 (all features)
 	TIER=3 docker compose build --build-arg TIER=3
+
+# ── Aider Skills ──────────────────────────────────────────────
+# Default config; override with: make aider-tdd AIDER_CONF=.aider-codestral.conf.yml
+AIDER_CONF ?= .aider-qwen3-coder.conf.yml
+
+aider-brainstorm: ## Brainstorm a feature with aider (usage: make aider-brainstorm)
+	aider --config $(AIDER_CONF) --read prompts/aider/brainstorm.md
+
+aider-tdd: ## Start TDD session with aider (usage: make aider-tdd)
+	aider --config $(AIDER_CONF) --read prompts/aider/tdd.md
+
+aider-debug: ## Start systematic debugging session (usage: make aider-debug)
+	aider --config $(AIDER_CONF) --read prompts/aider/debug.md
+
+aider-plan: ## Write an implementation plan (usage: make aider-plan)
+	aider --config $(AIDER_CONF) --read prompts/aider/write-plan.md
+
+aider-execute: ## Execute an implementation plan (usage: make aider-execute)
+	aider --config $(AIDER_CONF) --read prompts/aider/execute-plan.md
+
+aider-verify: ## Verify work is complete (usage: make aider-verify)
+	aider --config $(AIDER_CONF) --read prompts/aider/verify.md
+
+aider-finish: ## Finish a development branch (usage: make aider-finish)
+	aider --config $(AIDER_CONF) --read prompts/aider/finish-branch.md

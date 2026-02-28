@@ -1,0 +1,53 @@
+name: Finish Branch
+description: Complete a development branch — verify, present options, clean up
+---
+Finish the current development branch.
+
+## Step 1: Verify Tests
+
+```bash
+make test
+```
+
+If tests fail: STOP. Fix before proceeding.
+
+## Step 2: Determine Base Branch
+
+```bash
+git merge-base HEAD main 2>/dev/null || git merge-base HEAD master 2>/dev/null
+```
+
+## Step 3: Present Options
+
+```
+Implementation complete. What would you like to do?
+
+1. Merge back to <base-branch> locally
+2. Push and create a Pull Request
+3. Keep the branch as-is (I'll handle it later)
+4. Discard this work
+
+Which option?
+```
+
+## Step 4: Execute Choice
+
+**Option 1 — Merge Locally:**
+git checkout <base>, git pull, git merge <branch>, run tests, delete branch
+
+**Option 2 — Push and Create PR:**
+git push -u origin <branch>, gh pr create
+
+**Option 3 — Keep As-Is:**
+Report branch name and status
+
+**Option 4 — Discard:**
+List commits to be deleted, wait for explicit confirmation, then delete
+
+## Rules
+- NEVER proceed with failing tests
+- NEVER merge without verifying tests on merged result
+- NEVER delete work without explicit confirmation
+- ALWAYS present exactly 4 options
+
+Start by running the test suite.

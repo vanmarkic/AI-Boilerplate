@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "task-orchestrator": {
+      "command": "docker",
+      "args": [
+        "run", "--rm", "-i",
+        "-v", "mcp-task-data-ai-boilerplate:/app/data",
+        "ghcr.io/jpicklyk/task-orchestrator:latest"
+      ]
+    }
+  }
+}

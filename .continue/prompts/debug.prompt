@@ -1,0 +1,45 @@
+name: Debug
+description: Systematic root-cause debugging — no guessing, no random fixes
+---
+Debug this issue systematically: {{{ input }}}
+
+## The Iron Law
+
+```
+NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST
+```
+
+## Phase 1: Root Cause Investigation (do this FIRST)
+
+1. **Read error messages carefully** — full stack traces, line numbers, error codes
+2. **Reproduce consistently** — exact steps, every time
+3. **Check recent changes** — git diff, new deps, config changes
+4. **Trace data flow** — where does the bad value originate? Keep tracing up.
+
+## Phase 2: Pattern Analysis
+
+1. **Find working examples** — similar working code in this codebase
+2. **Compare differences** — list every difference, however small
+3. **Understand dependencies** — what settings, config, environment?
+
+## Phase 3: Hypothesis and Testing
+
+1. **Form single hypothesis** — "I think X because Y"
+2. **Test minimally** — smallest change, one variable at a time
+3. **If it didn't work** — form NEW hypothesis. Don't pile fixes.
+
+## Phase 4: Implementation
+
+1. **Create failing test** reproducing the bug
+2. **Implement single fix** — root cause only, no "while I'm here"
+3. **Verify** — test passes, no regressions
+4. **If 3+ fixes failed** — STOP. Question the architecture.
+
+## Red Flags — STOP and return to Phase 1
+
+- "Quick fix for now"
+- "Just try changing X"
+- "One more fix attempt" (after 2+ failures)
+- Proposing solutions before tracing data flow
+
+Start with Phase 1 for "{{{ input }}}".

@@ -1,0 +1,33 @@
+name: Brainstorm
+description: Explore ideas, requirements, and design before implementation
+---
+Brainstorm this idea: {{{ input }}}
+
+## Process
+
+**Step 1 — Understand the idea:**
+- Check the current project state (files, docs, recent commits)
+- Ask me questions one at a time to refine the idea
+- Prefer multiple choice questions when possible
+- Focus on: purpose, constraints, success criteria
+
+**Step 2 — Explore approaches:**
+- Propose 2-3 different approaches with trade-offs
+- Lead with your recommended option and explain why
+
+**Step 3 — Present the design:**
+- Break it into sections of 200-300 words
+- Ask after each section whether it looks right so far
+- Cover: architecture, components, data flow, error handling, testing
+
+**Step 4 — Document:**
+- Write the validated design to `docs/plans/YYYY-MM-DD-<topic>-design.md`
+- Commit the design document
+
+## Key Principles
+- **One question at a time** — don't overwhelm
+- **YAGNI ruthlessly** — remove unnecessary features
+- **Explore alternatives** — always 2-3 approaches
+- **Incremental validation** — present in sections, validate each
+
+Start by asking me your first clarifying question about "{{{ input }}}".

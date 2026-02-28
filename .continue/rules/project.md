@@ -1,3 +1,10 @@
+---
+name: Project Rules
+description: AI Boilerplate project conventions and architecture rules
+globs: "**/*"
+alwaysApply: true
+---
+
 # AI Boilerplate — Project Rules
 
 ## Stack

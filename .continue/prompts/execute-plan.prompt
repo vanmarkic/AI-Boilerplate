@@ -1,0 +1,43 @@
+name: Execute Plan
+description: Execute an implementation plan in batches with review checkpoints
+---
+Execute the implementation plan at: {{{ input }}}
+
+## Process
+
+### Step 1: Load and Review
+- Read the plan file
+- Identify any questions or concerns
+- If concerns: raise them before starting
+
+### Step 2: Execute in Batches of 3 Tasks
+For each task:
+1. Announce which task you're starting
+2. Follow each step exactly as written in the plan
+3. Run verifications as specified
+4. Announce completion with results
+
+### Step 3: Report After Each Batch
+- Show what was implemented
+- Show verification output
+- Say: "Batch complete. Ready for feedback before continuing."
+
+### Step 4: Wait for Feedback
+- Apply changes if needed
+- Then execute next batch
+- Repeat until complete
+
+### Step 5: Finish
+After all tasks complete:
+- Run full test suite
+- Run linters (`make lint-arch`)
+- Present options: merge, PR, or keep branch
+
+## Rules
+- Follow plan steps exactly
+- Don't skip verifications
+- Between batches: report and wait
+- Stop when blocked — don't guess
+- Ask for clarification rather than guessing
+
+Start by reading the plan at "{{{ input }}}".

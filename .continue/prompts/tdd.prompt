@@ -1,0 +1,42 @@
+name: TDD
+description: Implement using strict Test-Driven Development (red-green-refactor)
+---
+Implement this using strict TDD: {{{ input }}}
+
+## The Iron Law
+
+```
+NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST
+```
+
+Write code before the test? Delete it. Start over. No exceptions.
+
+## Red-Green-Refactor Cycle
+
+For each behavior:
+
+1. **RED** — Write one minimal failing test. Clear name, tests one behavior, real code.
+2. **Verify RED** — Run the test. Confirm it fails for the expected reason (feature missing, not typo). MANDATORY.
+3. **GREEN** — Write the simplest code to pass. Nothing more.
+4. **Verify GREEN** — Run the test. Confirm it passes and no other tests broke. MANDATORY.
+5. **REFACTOR** — Clean up. Keep tests green. Don't add behavior.
+6. **Repeat** — Next failing test for next behavior.
+
+## Rules
+
+- One behavior per test
+- Watch each test fail before implementing
+- Minimal code to pass — no over-engineering
+- Mocks only when unavoidable
+- Never fix bugs without a failing test first
+
+## Verification Checklist (before marking done)
+
+- [ ] Every new function has a test
+- [ ] Watched each test fail before implementing
+- [ ] Wrote minimal code to pass each test
+- [ ] All tests pass
+- [ ] Output pristine (no errors, warnings)
+- [ ] Edge cases covered
+
+Start by identifying the first behavior to test for "{{{ input }}}".
