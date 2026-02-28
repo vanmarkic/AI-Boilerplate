@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 NAME=$1
@@ -11,7 +11,8 @@ fi
 
 KEBAB=$(echo "$NAME" | sed 's/_/-/g')
 SNAKE=$(echo "$NAME" | sed 's/-/_/g')
-CLASS=$(echo "$SNAKE" | sed -E 's/(^|_)([a-z])/\U\2/g')
+CLASS=$(echo "$SNAKE" | awk -F_ '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1' OFS='')
+UPPER=$(echo "$SNAKE" | tr '[:lower:]' '[:upper:]')
 PLURAL="${SNAKE}s"
 
 # --- Backend ---
@@ -195,7 +196,7 @@ cat > "$FRONTEND_DIR/${KEBAB}.routes.ts" << TSEOF
 import { Routes } from '@angular/router';
 import { ${CLASS}Component } from './${KEBAB}.component';
 
-export const ${NAME^^}_ROUTES: Routes = [
+export const ${UPPER}_ROUTES: Routes = [
   { path: '', component: ${CLASS}Component },
 ];
 TSEOF

@@ -1,0 +1,59 @@
+name: Write Plan
+description: Create a detailed implementation plan with bite-sized TDD tasks
+---
+Create an implementation plan for: {{{ input }}}
+
+## Plan Format
+
+Save to: `docs/plans/YYYY-MM-DD-<feature-name>.md`
+
+### Header
+
+```markdown
+# [Feature Name] Implementation Plan
+
+**Goal:** [One sentence]
+**Architecture:** [2-3 sentences]
+**Tech Stack:** [Key technologies]
+
+---
+```
+
+### Each Task (< 200 lines changed)
+
+```markdown
+### Task N: [Component Name]
+
+**Files:**
+- Create: `exact/path/to/file`
+- Modify: `exact/path/to/existing:lines`
+- Test: `exact/path/to/test`
+
+**Step 1: Write failing test**
+(complete test code)
+
+**Step 2: Run test — verify it fails**
+Run: `exact command`
+Expected: FAIL with "reason"
+
+**Step 3: Write minimal implementation**
+(complete implementation code)
+
+**Step 4: Run test — verify it passes**
+Run: `exact command`
+Expected: PASS
+
+**Step 5: Commit**
+```
+
+## Rules
+
+- Exact file paths always
+- Complete code in plan (not "add validation")
+- Exact commands with expected output
+- DRY, YAGNI, TDD, frequent commits
+- Tasks in dependency order
+- Note which tasks are independent (parallelizable)
+- Each step is one action (2-5 minutes)
+
+Create the plan for "{{{ input }}}".
