@@ -1,8 +1,8 @@
-# Aider base config — AI Boilerplate
-# Do not set model here. Use a profile instead:
-#   aider --config .aider-qwen3-coder.conf.yml [files...]  ← RunPod RTX 4090
-#   aider --config .aider-qwen.conf.yml [files...]
-#   aider --config .aider-codestral.conf.yml [files...]
+# Aider — Qwen3 Coder 30B-A3B profile (RunPod RTX 4090)
+# Usage: aider --config .aider-qwen3-coder.conf.yml [files...]
+
+model: ollama_chat/qwen3-coder:30b-a3b-q4_K_M
+openai-api-base: https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net
 
 # Commits
 auto-commits: false
