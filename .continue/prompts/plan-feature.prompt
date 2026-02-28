@@ -1,22 +1,14 @@
 name: Plan Feature
-description: Break a feature design into Task Orchestrator work items with dependencies
+description: Step 1/2 — Create work tree in Task Orchestrator (run add-notes next)
 ---
-Break this feature into Task Orchestrator work items. Use MCP tools only — no code.
+Break this feature into Task Orchestrator work items.
 
 {{{ input }}}
 
-## Do this in order:
+Call `create_work_tree` with:
+- root: feature title + one-sentence summary
+- children: 5-10 tasks, one per layer. Each has ref (t1, t2...), title starting with a verb, and priority
+- deps: linear chain following spec → model → schema → repository → service → router → wire-deps → tests → frontend-types → frontend-component
+- createNotes: true
 
-1. Call `create_work_tree` with root title + summary, 5-10 children (one per layer), deps as a chain, and `createNotes: true`. Order: spec → model → schema → repository → service → router → wire-deps → tests → frontend-types → frontend-component.
-
-2. For each child, call `manage_notes` with key "requirements", role "queue". Each note body MUST include:
-   - Exact file path to create or edit
-   - Class/function signatures with parameter types and return types
-   - Field-level details (column types, schema shapes, endpoint paths)
-   - Business rules and edge cases (thresholds, error conditions)
-   - Import constraints (which layers this file may import from)
-   Target: 400-700 tokens per note. Write pseudocode, not prose.
-
-3. Call `query_items` operation "overview" with the root ID to confirm.
-
-No code. Only MCP tool calls.
+Make one tool call. Do not write code.
