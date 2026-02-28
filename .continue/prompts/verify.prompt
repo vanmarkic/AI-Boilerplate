@@ -1,0 +1,41 @@
+name: Verify
+description: Verify work is actually complete — evidence before claims
+---
+Verify that this work is complete: {{{ input }}}
+
+## The Iron Law
+
+```
+NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE
+```
+
+## The Gate Function
+
+For EACH claim you want to make:
+
+1. **IDENTIFY** — What command proves this claim?
+2. **RUN** — Execute the FULL command (fresh, complete)
+3. **READ** — Full output, check exit code, count failures
+4. **VERIFY** — Does output confirm the claim?
+   - NO: State actual status with evidence
+   - YES: State claim WITH evidence
+5. **ONLY THEN** — Make the claim
+
+## Verification Checklist
+
+Run each and report results:
+
+- [ ] `make test` — all tests pass (show count)
+- [ ] `make lint-arch` — zero architecture violations
+- [ ] `make lint` — zero linter errors
+- [ ] No file exceeds 250 lines
+- [ ] No `any` in TypeScript, no untyped Python functions
+- [ ] Each acceptance criterion is met (list them)
+
+## Red Flags
+
+- Using "should", "probably", "seems to" = STOP and run the command
+- "Looks correct" without running tests = STOP
+- Expressing satisfaction before verification = STOP
+
+Run the verification commands now for "{{{ input }}}".
