@@ -1,14 +1,21 @@
 {
   "models": [
     {
-      "title": "Qwen 2.5 Coder",
+      "title": "Qwen3 Coder 30B (RunPod)",
+      "provider": "ollama",
+      "model": "qwen3-coder:30b-a3b-q4_K_M",
+      "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net",
+      "contextLength": 8192
+    },
+    {
+      "title": "Qwen 2.5 Coder (local)",
       "provider": "ollama",
       "model": "qwen2.5-coder",
       "apiBase": "http://localhost:11434",
       "contextLength": 32768
     },
     {
-      "title": "Codestral",
+      "title": "Codestral (local)",
       "provider": "ollama",
       "model": "codestral",
       "apiBase": "http://localhost:11434",
@@ -16,10 +23,10 @@
     }
   ],
   "tabAutocompleteModel": {
-    "title": "Qwen 2.5 Coder (Autocomplete)",
+    "title": "Qwen3 Coder 30B (RunPod)",
     "provider": "ollama",
-    "model": "qwen2.5-coder",
-    "apiBase": "http://localhost:11434"
+    "model": "qwen3-coder:30b-a3b-q4_K_M",
+    "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net"
   },
   "embeddingsProvider": {
     "provider": "ollama",
