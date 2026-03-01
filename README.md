@@ -110,26 +110,21 @@ Small models default to NgModule-era Angular code (pre-v17). The frontend `AGENT
 
 Tests ship alongside source files (`user_test.py` in the same folder as `user_service.py`). IEEE research shows that including tests with problem statements yields a **12.78% improvement** on code generation benchmarks, and test failures provide structured feedback that small models can act on.
 
-## Recommended Local LLM Setup (17GB VRAM)
+## Recommended Local LLM Setup (24GB VRAM)
 
 | Role | Model | VRAM |
 |------|-------|------|
-| Chat + edit | Qwen 2.5 Coder 14B @ Q5_K_M | ~11 GB |
-| Autocomplete | Qwen 2.5 Coder 1.5B base | ~1 GB |
-| Embed (RAG) | Nomic Embed Text | ~0.3 GB |
+| Chat + edit + agent | GLM-4.7-Flash (RunPod RTX 4090) | ~19 GB |
+| Autocomplete | GLM-4.7-Flash (same instance) | shared |
+| Embed (RAG) | Nomic Embed Text (local) | ~0.3 GB |
 
-Enable flash attention and Q4 KV cache quantization to double usable context:
+Enable flash attention and Q4 KV cache quantization for extended context:
 
 ```bash
-# llama.cpp
-llama-server -m qwen2.5-coder-14b-instruct-Q5_K_M.gguf \
-  -c 32768 -fa -ngl 99 -ctk q4_0 -ctv q4_0 --jinja
-
-# Ollama
 OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q4_0 ollama serve
 ```
 
-Use **Aider** for terminal-based agentic work (`--edit-format whole` for 14B models), **Continue.dev** for IDE integration.
+Use **Continue.dev** Agent mode for agentic tasks with tool calls, **Aider** for terminal-based editing, **Claude Code** for orchestration. See [docs/conventions/ai-tooling.md](docs/conventions/ai-tooling.md) for full setup.
 
 ## Adding a Feature
 
