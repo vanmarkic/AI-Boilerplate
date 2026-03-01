@@ -1,7 +1,7 @@
 # Aider — GLM-4.7-Flash profile (RunPod RTX 4090)
 # Usage: aider --config .aider-glm.conf.yml [files...]
 
-model: openai/glm-4.7-flash:q4_K_M
+model: openai/glm-4.7-flash
 openai-api-base: https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1
 openai-api-key: ollama
 extra-params: keep_alive=1h
