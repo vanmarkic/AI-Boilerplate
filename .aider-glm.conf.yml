@@ -4,7 +4,8 @@
 model: openai/glm-4.7-flash
 openai-api-base: https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1
 openai-api-key: ollama
-extra-params: keep_alive=1h
+# GLM-4.7-Flash optimal inference params (from Unsloth docs)
+extra-params: temperature=0.7,top_p=1.0,repeat_penalty=1.0
 
 # Commits
 auto-commits: false

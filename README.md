@@ -118,10 +118,11 @@ Tests ship alongside source files (`user_test.py` in the same folder as `user_se
 | Autocomplete | GLM-4.7-Flash (same instance) | shared |
 | Embed (RAG) | Nomic Embed Text (local) | ~0.3 GB |
 
-Enable flash attention and Q4 KV cache quantization for extended context:
+Served via **llama-server** (not Ollama) for correct chat templates and tool-call reliability:
 
 ```bash
-OLLAMA_FLASH_ATTENTION=1 OLLAMA_KV_CACHE_TYPE=q4_0 ollama serve
+# On RunPod — one-time setup
+bash shared/scripts/setup-llama-server.sh
 ```
 
 Use **Continue.dev** Agent mode for agentic tasks with tool calls, **Aider** for terminal-based editing, **Claude Code** for orchestration. See [docs/conventions/ai-tooling.md](docs/conventions/ai-tooling.md) for full setup.
