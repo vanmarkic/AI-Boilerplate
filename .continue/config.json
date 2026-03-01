@@ -3,7 +3,7 @@
     {
       "title": "GLM-4.7-Flash (RunPod)",
       "provider": "openai",
-      "model": "glm-4.7-flash:q4_K_M",
+      "model": "glm-4.7-flash",
       "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1",
       "apiKey": "ollama",
       "contextLength": 32768,
@@ -29,7 +29,7 @@
   "tabAutocompleteModel": {
     "title": "GLM-4.7-Flash (RunPod)",
     "provider": "openai",
-    "model": "glm-4.7-flash:q4_K_M",
+    "model": "glm-4.7-flash",
     "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1",
     "apiKey": "ollama"
   },

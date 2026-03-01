@@ -79,7 +79,7 @@ The primary model is GLM-4.7-Flash running on RunPod (RTX 4090). Use `openai` pr
 ```yaml
 - name: GLM-4.7-Flash (RunPod)
   provider: openai
-  model: glm-4.7-flash:q4_K_M
+  model: glm-4.7-flash
   apiBase: https://<runpod-proxy>/v1
   apiKey: ollama
   contextLength: 32768
