@@ -8,7 +8,12 @@
       "apiKey": "ollama",
       "contextLength": 32768,
       "requestOptions": {
-        "timeout": 120000
+        "timeout": 120000,
+        "extraBodyProperties": {
+          "temperature": 0.7,
+          "top_p": 1.0,
+          "repeat_penalty": 1.0
+        }
       }
     },
     {

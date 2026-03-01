@@ -72,9 +72,26 @@ Each project uses its own Docker volume. The volume name `mcp-task-data-ai-boile
 
 Config file: `~/.continue/config.yaml` (global) + `.continue/config.json` (project-level, legacy)
 
-### Models
+### Model Serving: llama-server (not Ollama)
 
-The primary model is GLM-4.7-Flash running on RunPod (RTX 4090). Use `openai` provider (not `ollama`) for reliable tool-call JSON via the `/v1/chat/completions` endpoint:
+GLM-4.7-Flash runs on RunPod (RTX 4090) via **llama-server** (llama.cpp). Ollama is not recommended for this model due to chat template compatibility issues ([source](https://unsloth.ai/docs/models/glm-4.7-flash)). llama-server uses the Jinja2 template baked into the GGUF, ensuring correct tool-call formatting.
+
+**Setup:** Run `shared/scripts/setup-llama-server.sh` on the RunPod pod. It stops Ollama, builds llama-server, downloads the Unsloth UD-Q4_K_XL GGUF, and starts serving on port 11434 (same proxy URL).
+
+**Optimal inference params** (from Unsloth docs, for tool-calling):
+
+| Parameter | Value | Why |
+|---|---|---|
+| temperature | 0.7 | Lower than default for structured output |
+| top_p | 1.0 | No nucleus sampling (temperature handles randomness) |
+| min_p | 0.01 | Filters low-probability tokens |
+| repeat_penalty | 1.0 | Disabled — MoE models don't need it |
+
+These are set server-side in llama-server and also in client configs as overrides.
+
+### Client Config
+
+Use `openai` provider pointing at the RunPod proxy. llama-server's `/v1/chat/completions` is OpenAI-compatible:
 
 ```yaml
 - name: GLM-4.7-Flash (RunPod)
@@ -85,6 +102,10 @@ The primary model is GLM-4.7-Flash running on RunPod (RTX 4090). Use `openai` pr
   contextLength: 32768
   requestOptions:
     timeout: 120000
+    extraBodyProperties:
+      temperature: 0.7
+      top_p: 1.0
+      repeat_penalty: 1.0
 ```
 
 ### Agent Mode Caveats
@@ -150,4 +171,4 @@ The script is macOS-compatible (no GNU-only bash features). It generates:
 4. **Provide explicit context** — use `@file` and `@codebase` in Continue, `--read` in Aider
 5. **Don't fight tool-call failures** — if the model outputs raw XML, re-prompt or switch modes
 6. **Use Task Orchestrator for multi-session work** — compact context handoff vs rebuilding 5000+ tokens
-7. **Use OpenAI-compatible endpoint** — `provider: openai` with `/v1` base URL gives better tool-call JSON than native Ollama API
+7. **Use llama-server, not Ollama** — for GLM-4.7-Flash, llama-server with `--jinja` gives correct chat templates and reliable tool-call JSON
