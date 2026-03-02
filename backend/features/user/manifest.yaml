@@ -11,3 +11,9 @@ api_endpoints:
 models: [User]
 events_emitted: []
 events_consumed: []
+business_rules:
+  - "Email must be unique across all users (409 Conflict on duplicate)"
+  - "Email must be valid format (RFC 5322)"
+  - "Name is required, 1-100 characters"
+  - "created_at is set server-side at registration time (UTC)"
+  - "User IDs are auto-incrementing integers"

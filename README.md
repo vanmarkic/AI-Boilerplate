@@ -43,6 +43,8 @@ make lint-arch
 
 ```
 ai-boilerplate/
+├── SPECS.md                     # Product specification (domain, business rules, glossary)
+├── SPECS.template.md            # Blank template — copy when starting a new project
 ├── AGENTS.md                    # Root LLM instructions (~10 rules)
 ├── Makefile                     # Unified commands
 ├── docker-compose.yml
@@ -140,7 +142,7 @@ make lint-arch
 make generate
 ```
 
-Each scaffolded feature includes a `manifest.yaml` describing its capabilities, endpoints, and dependencies — providing 80x context compression for tools that index the repo.
+Each scaffolded feature includes a `manifest.yaml` describing its capabilities, endpoints, and dependencies — providing 80x context compression for tools that index the repo. Add `business_rules` to the manifest and update `SPECS.md` with the new feature's domain context so LLM agents understand what the feature does, not just how it's structured.
 
 ## License
 

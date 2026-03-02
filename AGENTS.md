@@ -1,5 +1,11 @@
 # AI Boilerplate
 
+## First Steps
+Before writing any code, check if `SPECS.md` exists and is filled in.
+If it is empty or missing, ask the user to define the product specification before proceeding.
+`SPECS.md` describes WHAT the software does (domain, business rules, glossary).
+This file describes HOW to write code (conventions, architecture, constraints).
+
 ## Stack
 - Frontend: Angular 18+ (standalone components, signals)
 - Backend: FastAPI (Python 3.12+)

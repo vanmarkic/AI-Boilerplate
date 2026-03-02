@@ -10,3 +10,7 @@ api_endpoints:
 models: []
 events_emitted: []
 events_consumed: []
+business_rules:
+  - "Always returns status 'ok' and the application version"
+  - "No authentication required"
+  - "Must respond in < 100ms"

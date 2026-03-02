@@ -1,7 +1,7 @@
 # AI-Optimized Full-Stack Boilerplate Design
 
 **Date**: 2026-02-26
-**Stack**: Angular 18+ / FastAPI / PostgreSQL
+**Stack**: Angular / FastAPI / PostgreSQL
 **Purpose**: Personal productivity boilerplate optimized for small local LLM coding agents (7B-14B)
 
 ---
