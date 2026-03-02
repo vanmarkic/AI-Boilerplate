@@ -1,9 +1,9 @@
-# Aider — GLM-4.7-Flash profile (RunPod RTX 4090)
+# Aider — GLM-4.7-Flash profile (RunPod RTX A4500, standalone llama-server)
 # Usage: aider --config .aider-glm.conf.yml [files...]
 
 model: openai/glm-4.7-flash
-openai-api-base: https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1
-openai-api-key: ollama
+openai-api-base: https://02p2i0ozb526qw-8080.proxy.runpod.net/v1
+openai-api-key: not-needed
 # GLM-4.7-Flash optimal inference params (from Unsloth docs)
 extra-params: temperature=0.7,top_p=1.0,repeat_penalty=1.0
 

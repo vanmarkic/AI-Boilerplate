@@ -71,3 +71,15 @@ required_fields:
     items: string
     description: "Domain event names this feature subscribes to. Empty list if none."
     example: ["PaymentCompleted"]
+
+optional_fields:
+  business_rules:
+    type: array
+    items: string
+    description: |
+      Domain-specific validation rules, constraints, and invariants for this feature.
+      Helps LLM agents understand WHAT the feature does, not just HOW it's coded.
+      Each rule should be a specific, falsifiable statement.
+    example:
+      - "Email must be unique across all users"
+      - "Display name is required, 2-50 characters"
