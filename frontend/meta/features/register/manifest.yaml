@@ -10,3 +10,8 @@ api_endpoints:
 models: [RegisterFormValue]
 events_emitted: []
 events_consumed: []
+business_rules:
+  - "Email field: required, email format validation, inline error on invalid"
+  - "Name field: required, 1-100 chars, inline error on invalid"
+  - "On 409 (duplicate email): show error, keep form populated"
+  - "On 201 (success): navigate to dashboard or confirmation"

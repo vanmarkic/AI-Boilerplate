@@ -4,9 +4,9 @@
       "title": "GLM-4.7-Flash (RunPod)",
       "provider": "openai",
       "model": "glm-4.7-flash",
-      "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1",
-      "apiKey": "ollama",
-      "contextLength": 32768,
+      "apiBase": "https://02p2i0ozb526qw-8080.proxy.runpod.net/v1",
+      "apiKey": "not-needed",
+      "contextLength": 8192,
       "requestOptions": {
         "timeout": 120000,
         "extraBodyProperties": {
@@ -35,8 +35,8 @@
     "title": "GLM-4.7-Flash (RunPod)",
     "provider": "openai",
     "model": "glm-4.7-flash",
-    "apiBase": "https://mrfsueorjb21wo-64411e80-11434.proxy.runpod.net/v1",
-    "apiKey": "ollama"
+    "apiBase": "https://02p2i0ozb526qw-8080.proxy.runpod.net/v1",
+    "apiKey": "not-needed"
   },
   "embeddingsProvider": {
     "provider": "ollama",
