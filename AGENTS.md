@@ -37,7 +37,7 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 
 ## Feature Workflow
 Follow `docs/conventions/feature-workflow.md` for end-to-end feature development.
-Quick reference: `make spec` → `make new-feature` → LLM fills in TODOs → `make validate` → git commit.
+Quick reference: `make spec` → edit openapi.yaml → `make generate` → `make new-feature` → LLM fills in TODOs → `make validate` → git commit.
 
 ## Common Pitfalls
 - Do NOT import across tiers (tier-1 code must not import from tier-2 or tier-3).

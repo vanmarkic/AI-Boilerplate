@@ -33,9 +33,6 @@ migrate: ## Run database migrations
 
 new-feature: ## Scaffold a new feature (usage: make new-feature name=orders tier=2)
 	bash shared/scripts/scaffold-feature.sh $(name) $(tier)
-	@echo ""
-	@echo "Regenerating types from OpenAPI spec..."
-	$(MAKE) generate
 
 spec: ## Print a SPECS.md section template (usage: make spec name=orders tier=2)
 	@echo ""
