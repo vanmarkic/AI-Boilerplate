@@ -21,24 +21,34 @@ make spec name=orders tier=2
 # Fill in: purpose, business rules, user stories, API endpoints
 ```
 
-Then update the API contract:
-- Add endpoints to `shared/openapi.yaml`
-- This is the source of truth — code is generated from it
+Then update the API contract and regenerate typed clients:
+
+```bash
+# 1. Edit shared/openapi.yaml — add your new endpoints
+# 2. Regenerate typed clients for both frontend and backend
+make generate
+```
+
+`make generate` produces:
+- `backend/generated/models.py` — Pydantic models from the spec
+- `frontend/src/app/shared/api/generated/` — TypeScript HTTP client from the spec
+
+These generated files are the typed API layer. Feature code imports from them.
 
 **LLM can help here:** "Help me draft the OpenAPI paths and SPECS.md section for an orders feature."
 
 ### Step 2: SCAFFOLD (human runs scripts)
 
 ```bash
-# Creates 12 skeleton files (backend + frontend) and regenerates types
+# Creates 12 skeleton files (backend + frontend)
 make new-feature name=orders tier=2
 ```
 
 This generates:
 - Backend: model, schema, repository, service, router, test, manifest, `__init__.py`
 - Frontend: types, service, component, routes, spec
-- Then auto-runs `make generate` to regenerate types from OpenAPI
 
+These are hand-written files with `TODO` markers — separate from the generated API client.
 No LLM needed — this is deterministic.
 
 ### Step 3: FILL IN (LLM does the creative work)
