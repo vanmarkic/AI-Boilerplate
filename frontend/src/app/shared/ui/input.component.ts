@@ -42,7 +42,9 @@ export class InputComponent implements ControlValueAccessor {
   protected readonly isDisabled = signal(false);
 
   private readonly cdr = inject(ChangeDetectorRef);
+  // eslint-disable-next-line @typescript-eslint/no-empty-function -- CVA placeholder
   private onChange: (value: string) => void = () => {};
+  // eslint-disable-next-line @typescript-eslint/no-empty-function -- CVA placeholder
   protected onTouched: () => void = () => {};
 
   readonly inputClasses = cn(
@@ -53,7 +55,7 @@ export class InputComponent implements ControlValueAccessor {
   );
 
   writeValue(value: string): void {
-    this.currentValue.set(value ?? '');
+    this.currentValue.set(value);
     this.cdr.markForCheck();
   }
 
