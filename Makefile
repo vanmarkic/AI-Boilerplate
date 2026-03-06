@@ -24,8 +24,8 @@ test-backend: ## Run backend tests
 test-frontend: ## Run frontend tests
 	cd frontend && npx ng test --watch=false --browsers=ChromeHeadless
 
-generate: ## Regenerate types from OpenAPI spec
-	bash shared/scripts/generate-backend.sh
+generate: ## Extract OpenAPI spec from FastAPI and regenerate frontend client
+	cd backend && python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
 	bash shared/scripts/generate-frontend.sh
 
 migrate: ## Run database migrations

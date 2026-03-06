@@ -21,21 +21,7 @@ make spec name=orders tier=2
 # Fill in: purpose, business rules, user stories, API endpoints
 ```
 
-Then update the API contract and regenerate typed clients:
-
-```bash
-# 1. Edit shared/openapi.yaml — add your new endpoints
-# 2. Regenerate typed clients for both frontend and backend
-make generate
-```
-
-`make generate` produces:
-- `backend/generated/models.py` — Pydantic models from the spec
-- `frontend/src/app/shared/api/generated/` — TypeScript HTTP client from the spec
-
-These generated files are the typed API layer. Feature code imports from them.
-
-**LLM can help here:** "Help me draft the OpenAPI paths and SPECS.md section for an orders feature."
+**LLM can help here:** "Help me draft the SPECS.md section for an orders feature."
 
 ### Step 2: SCAFFOLD (human runs scripts)
 
@@ -48,8 +34,7 @@ This generates:
 - Backend: model, schema, repository, service, router, test, manifest, `__init__.py`
 - Frontend: types, service, component, routes, spec
 
-These are hand-written files with `TODO` markers — separate from the generated API client.
-No LLM needed — this is deterministic.
+These are skeleton files with `TODO` markers. No LLM needed — this is deterministic.
 
 ### Step 3: FILL IN (LLM does the creative work)
 
@@ -64,8 +49,7 @@ make aider-fill-in
 
 **With Claude Code:**
 ```
-Fill in the orders feature. SPECS.md has the domain model.
-OpenAPI has the contract. Skeleton files are ready.
+Fill in the orders feature. SPECS.md has the domain model. Skeleton files are ready.
 ```
 
 The LLM fills in:
@@ -73,10 +57,12 @@ The LLM fills in:
 - Schema validation rules (from business rules)
 - Repository queries
 - Service logic
-- Router wiring
+- Router wiring (Pydantic models + FastAPI decorators define the API contract)
 - Test cases (TDD: test first, then implementation)
 - Frontend component + service logic
 - Alembic migration (`cd backend && alembic revision --autogenerate -m 'add orders'`)
+
+After filling in the backend routers, run `make generate` to extract the OpenAPI spec and regenerate the TypeScript client.
 
 ### Step 4: VALIDATE (human runs scripts)
 
@@ -101,7 +87,7 @@ CI runs automatically (`.github/workflows/ci.yml`).
 
 | Task | Tool | Why |
 |------|------|-----|
-| Draft spec / OpenAPI | **Any LLM** (conversation) | Creative, needs domain reasoning |
+| Draft spec | **Any LLM** (conversation) | Creative, needs domain reasoning |
 | Scaffold files | **`make new-feature`** | Deterministic, instant |
 | Fill in skeleton code | **Aider** (`make aider-fill-in`) | File-scoped TDD, diff-focused |
 | Fill in multi-file feature | **Claude Code** | Cross-file reasoning, large context |

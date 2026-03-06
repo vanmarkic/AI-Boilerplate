@@ -10,7 +10,7 @@ This file describes HOW to write code (conventions, architecture, constraints).
 - Frontend: Angular 18+ (standalone components, signals)
 - Backend: FastAPI (Python 3.12+)
 - Database: PostgreSQL 17 (SQLAlchemy 2.0 + Alembic)
-- Contract: OpenAPI 3.1 (shared/openapi.yaml)
+- Contract: OpenAPI 3.1 (code-first — generated from FastAPI routers via `make generate`)
 
 ## Architecture
 Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
@@ -19,7 +19,7 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 1. Maximum 250 lines per file. Split if exceeded.
 2. No barrel exports (index.ts re-exports). Use direct imports.
 3. Every feature is a flat folder under `features/`.
-4. API contract lives in `shared/openapi.yaml`. Modify spec first, then implement.
+4. API contract is code-first: define Pydantic models + FastAPI routers, then run `make generate` to extract the spec and regenerate the TypeScript client.
 5. Tests colocated with source files. Write failing test before implementation.
 6. Use strict TypeScript (`strict: true`). Use Python type hints on all functions.
 7. No `any` type in TypeScript. No untyped function signatures in Python.
@@ -37,7 +37,7 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 
 ## Feature Workflow
 Follow `docs/conventions/feature-workflow.md` for end-to-end feature development.
-Quick reference: `make spec` → edit openapi.yaml → `make generate` → `make new-feature` → LLM fills in TODOs → `make validate` → git commit.
+Quick reference: `make spec` → `make new-feature` → fill in routers + models → `make generate` → `make validate` → git commit.
 
 ## Common Pitfalls
 - Do NOT import across tiers (tier-1 code must not import from tier-2 or tier-3).

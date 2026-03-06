@@ -3,11 +3,11 @@
 ## Stack
 - Frontend: Angular 18+ standalone components, signals, Tailwind CSS v4
 - Backend: FastAPI Python 3.12+, SQLAlchemy 2.0 async, Alembic, PostgreSQL 17
-- Contract: OpenAPI 3.1 at shared/openapi.yaml
+- Contract: OpenAPI 3.1 (code-first — generated from FastAPI routers via `make generate`)
 
 ## Non-negotiable rules — follow every time
 
-ALWAYS modify shared/openapi.yaml BEFORE writing backend or frontend code.
+ALWAYS define Pydantic models and FastAPI routers first, then run `make generate` to update the frontend client.
 ALWAYS write a failing test BEFORE implementation (TDD).
 NEVER exceed 250 lines per file (150 for Angular UI primitives in shared/ui/).
 NEVER use barrel exports. Use direct imports only.
@@ -15,7 +15,7 @@ NEVER implement real authentication. Auth is a stub.
 NEVER use sync SQLAlchemy sessions. Always use AsyncSession.
 NEVER use `any` in TypeScript. NEVER write untyped Python function signatures.
 Every feature folder MUST have manifest.yaml with a tier: 1|2|3 field.
-Run `make lint-arch` before finishing any backend or frontend task.
+Run `make validate` before finishing any backend or frontend task.
 
 ## Backend layer import order (strictly enforced)
 router → service → repository → model/schema

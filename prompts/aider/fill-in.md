@@ -5,7 +5,6 @@ You are filling in a scaffolded feature. The skeleton files already exist (creat
 ## Inputs
 
 - **SPECS.md** — has the domain model, business rules, and user stories for this feature
-- **shared/openapi.yaml** — has the API contract (endpoints, request/response schemas)
 - **Skeleton files** — have the structure, you fill in the content
 
 ## Process
@@ -23,7 +22,7 @@ For each file, follow TDD:
 2. **Schema** (`*_schema.py`) — add request/response fields, validation rules
 3. **Repository** (`*_repository.py`) — add query methods
 4. **Service** (`*_service.py`) — add business logic from business rules
-5. **Router** (`*_router.py`) — wire endpoints to match openapi.yaml
+5. **Router** (`*_router.py`) — wire endpoints with Pydantic response models (these define the API contract)
 6. **Test** (`*_test.py`) — fill in test cases for each endpoint
 7. **Frontend types** (`*.types.ts`) — add fields matching API response
 8. **Frontend service** (`*.service.ts`) — add methods for each endpoint
@@ -34,6 +33,7 @@ For each file, follow TDD:
 
 - Update `manifest.yaml` with `api_endpoints` and `business_rules`
 - Create the Alembic migration: `cd backend && alembic revision --autogenerate -m 'add <feature>'`
+- Run `make generate` to extract the OpenAPI spec and regenerate the TypeScript client
 
 ## Rules
 
@@ -46,6 +46,5 @@ For each file, follow TDD:
 ## When stuck
 
 - Check SPECS.md for business rules
-- Check shared/openapi.yaml for the API contract
 - Check AGENTS.md (root, backend, frontend) for coding conventions
 - Ask the user if requirements are unclear

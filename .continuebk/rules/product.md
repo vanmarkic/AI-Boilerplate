@@ -12,4 +12,4 @@ If it is empty or missing, ask the user to define the product specification befo
 
 `SPECS.md` describes WHAT the software does (domain model, business rules, glossary).
 `AGENTS.md` describes HOW to write code (conventions, architecture, constraints).
-`shared/openapi.yaml` is the API contract — modify the spec first, then implement.
+The API contract is code-first: define Pydantic models + FastAPI routers, then run `make generate`.

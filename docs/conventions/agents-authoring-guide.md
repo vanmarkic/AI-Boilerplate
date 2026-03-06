@@ -22,7 +22,7 @@ SPECS.md is the single source of truth for **what the software does** — domain
 ### Relationship to other files
 - `AGENTS.md` has a `## First Steps` section that tells agents to check for SPECS.md before coding.
 - `.continue/rules/product.md` has a brief product context for Continue.dev.
-- `shared/openapi.yaml` has `description` fields on all endpoints, schemas, and properties.
+- The OpenAPI spec is generated from FastAPI routers via `make generate` (code-first).
 - Feature `manifest.yaml` files have `business_rules` arrays for per-feature domain context.
 
 ### Template
@@ -70,7 +70,7 @@ SPECS.md is the single source of truth for **what the software does** — domain
 ## manifest.yaml
 
 - Schema is defined in `shared/manifest.schema.yaml`. All fields listed there are required.
-- `api_endpoints` must mirror routes declared in `shared/openapi.yaml`. Keep them in sync.
+- `api_endpoints` must mirror routes declared in the FastAPI routers. Keep them in sync.
 - `dependencies.internal` lists feature folder names this feature imports from.
 - `version` uses semver. Bump minor on new endpoints, patch on fixes.
 - When scaffolding a new feature, copy an existing manifest and fill all fields. Empty lists (`[]`) are valid for fields with no values.

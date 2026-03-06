@@ -168,9 +168,9 @@ export const RegisterStore = signalStore(
 
 ## API Client
 
-- NEVER call `HttpClient` directly for API endpoints defined in `shared/openapi.yaml`
+- NEVER call `HttpClient` directly for API endpoints that have generated functions
 - ALWAYS use the generated functions from `../../shared/api/generated` (e.g. `createUser`, `getUser`)
-- Run `make generate` from the repo root after modifying `shared/openapi.yaml`
+- Run `make generate` from the repo root after changing backend routers or Pydantic models
 - Generated files live at `frontend/src/app/shared/api/generated/` — do NOT edit them manually
 - Import the fetch client from `client.gen.ts` directly (it is not re-exported via `index.ts`)
 - The client base URL is configured in `main.ts` — do not re-configure it in services
