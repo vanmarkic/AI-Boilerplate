@@ -10,3 +10,7 @@ END
 $$;
 
 GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+
+-- PostgreSQL 15+ requires explicit schema grants
+\c keycloak
+GRANT ALL ON SCHEMA public TO keycloak;
