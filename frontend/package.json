@@ -39,6 +39,7 @@
     "@ngrx/signals": "^21.0.1",
     "@tailwindcss/postcss": "^4.2.1",
     "clsx": "^2.1.1",
+    "keycloak-js": "^26.2.3",
     "postcss": "^8.5.6",
     "rxjs": "~7.8.0",
     "tailwind-merge": "^3.5.0",
