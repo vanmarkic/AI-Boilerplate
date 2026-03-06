@@ -30,11 +30,4 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
-  {
-    path: 'register',
-    loadChildren: () =>
-      import('./features/register/register.routes').then(
-        (m) => m.REGISTER_ROUTES
-      ),
-  },
 ];
