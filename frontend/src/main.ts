@@ -6,5 +6,6 @@ import { environment } from './app/core/environment';
 
 client.setConfig({ baseUrl: environment.apiBaseUrl });
 
-bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+bootstrapApplication(App, appConfig).catch((err: unknown) => {
+  console.error(err);
+});

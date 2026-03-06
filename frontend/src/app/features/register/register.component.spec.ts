@@ -3,38 +3,40 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { signal } from '@angular/core';
 import { client } from '../../shared/api/generated/client.gen';
 import { RegisterComponent } from './register.component';
-import { RegisterService } from './register.service';
+import { RegisterStore } from './register.store';
 
-describe('RegisterService', () => {
-  let service: RegisterService;
+describe('RegisterStore', () => {
+  let store: InstanceType<typeof RegisterStore>;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(RegisterService);
+    TestBed.configureTestingModule({
+      providers: [RegisterStore],
+    });
+    store = TestBed.inject(RegisterStore);
     vi.restoreAllMocks();
   });
 
   it('sets loading during registration', async () => {
     const mockData = { id: 1, email: 'a@b.com', name: 'A', created_at: '' };
     vi.spyOn(client, 'post').mockResolvedValueOnce({ data: mockData } as never);
-    const promise = service.register({ email: 'a@b.com', name: 'A' });
-    expect(service.loading()).toBe(true);
+    const promise = store.register({ email: 'a@b.com', name: 'A' });
+    expect(store.loading()).toBe(true);
     await promise;
-    expect(service.loading()).toBe(false);
+    expect(store.loading()).toBe(false);
   });
 
   it('sets success after registration', async () => {
     const mockData = { id: 1, email: 'a@b.com', name: 'A', created_at: '' };
     vi.spyOn(client, 'post').mockResolvedValueOnce({ data: mockData } as never);
-    await service.register({ email: 'a@b.com', name: 'A' });
-    expect(service.success()).toBe(true);
+    await store.register({ email: 'a@b.com', name: 'A' });
+    expect(store.success()).toBe(true);
   });
 
   it('sets error on failure', async () => {
     vi.spyOn(client, 'post').mockRejectedValueOnce(new Error('409'));
-    await service.register({ email: 'dup@b.com', name: 'A' });
-    expect(service.error()).toBeTruthy();
-    expect(service.success()).toBe(false);
+    await store.register({ email: 'dup@b.com', name: 'A' });
+    expect(store.error()).toBeTruthy();
+    expect(store.success()).toBe(false);
   });
 });
 
@@ -42,7 +44,7 @@ describe('RegisterComponent', () => {
   let fixture: ComponentFixture<RegisterComponent>;
   let component: RegisterComponent;
 
-  const mockService = {
+  const mockStore = {
     register: vi.fn().mockResolvedValue(undefined),
     loading: signal(false),
     success: signal(false),
@@ -51,14 +53,14 @@ describe('RegisterComponent', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    mockService.loading.set(false);
-    mockService.success.set(false);
-    mockService.error.set(null);
+    mockStore.loading.set(false);
+    mockStore.success.set(false);
+    mockStore.error.set(null);
 
     await TestBed.configureTestingModule({
       imports: [RegisterComponent, ReactiveFormsModule],
     })
-      .overrideProvider(RegisterService, { useValue: mockService })
+      .overrideProvider(RegisterStore, { useValue: mockStore })
       .compileComponents();
 
     fixture = TestBed.createComponent(RegisterComponent);
@@ -72,15 +74,15 @@ describe('RegisterComponent', () => {
     expect(btn.disabled).toBe(true);
   });
 
-  it('calls service.register with form values on valid submit', () => {
+  it('calls store.register with form values on valid submit', () => {
     component.form.setValue({ name: 'Alice', email: 'alice@example.com' });
     component.onSubmit();
-    expect(mockService.register).toHaveBeenCalledWith({ name: 'Alice', email: 'alice@example.com' });
+    expect(mockStore.register).toHaveBeenCalledWith({ name: 'Alice', email: 'alice@example.com' });
   });
 
-  it('does not call service when form is invalid', () => {
+  it('does not call store when form is invalid', () => {
     component.form.setValue({ name: '', email: 'not-email' });
     component.onSubmit();
-    expect(mockService.register).not.toHaveBeenCalled();
+    expect(mockStore.register).not.toHaveBeenCalled();
   });
 });

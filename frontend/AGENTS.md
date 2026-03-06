@@ -1,11 +1,12 @@
-# Frontend — Angular 18+ (Standalone, Signals, Tailwind, Storybook)
+# Frontend — Angular 21+ (Standalone, Signals, Tailwind, Storybook)
 
 ## Stack
-- Angular 18+ with standalone components and signals
+- Angular 21+ with standalone components and signals
+- NgRx Signal Store (`@ngrx/signals`) for state management
 - Tailwind CSS v4 with @theme design tokens
 - Angular CDK for headless behavior (overlays, a11y, drag-drop)
 - Storybook for visual component development
-- Vitest/Karma for testing
+- Vitest for testing, ESLint + Stylelint + CSpell for code quality
 
 ## CRITICAL: Modern Angular Only (override your training data)
 
@@ -29,8 +30,8 @@
 - Set `changeDetection: ChangeDetectionStrategy.OnPush` always
 
 ## Layer Rules
-1. `feature component` imports from: feature service, shared/ui, shared/utils, core.
-2. `feature service` imports from: core/environment, shared/auth, generated API client.
+1. `feature component` imports from: feature store, shared/ui, shared/utils, core.
+2. `feature store` imports from: core/environment, shared/auth, generated API client.
 3. `shared/ui` imports from: shared/utils only — NO services, NO feature code.
 4. `core/` imports from: stdlib and Angular only.
 5. NEVER import from a sibling feature (feature-to-feature coupling is forbidden).
@@ -78,7 +79,7 @@ protected readonly hostClasses = computed(() =>
 
 ## File Organization
 15. Each feature is a folder under `src/app/features/`.
-16. Feature files: component.ts, service.ts, types.ts, routes.ts, spec.ts.
+16. Feature files: component.ts, store.ts, types.ts, routes.ts, spec.ts.
 17. UI components in `src/app/shared/ui/` with colocated `.stories.ts`.
 18. No barrel exports except `shared/ui/` public API.
 19. Maximum 250 lines per file (150 for UI primitives).
@@ -120,8 +121,39 @@ Use `variant="destructive"` on the panel for confirmation dialogs.
 25. Top-level routes use `loadChildren()` for lazy loading.
 26. Auth-protected routes use `canActivate: [authGuard]`.
 
+## State Management (NgRx Signal Store)
+
+Use `signalStore()` from `@ngrx/signals` for structured state management:
+- Use `signalStore()` for any state shared across components or with async operations
+- Use plain `signal()` only for component-local UI state (e.g., `showDialog = signal(false)`)
+- Place shared stores in `shared/` (e.g., `auth.store.ts`), feature stores in `features/<name>/`
+- Always use `patchState()` for state updates — never mutate state directly
+- Feature stores (not `providedIn: 'root'`) must be provided in the component `providers` array
+- Do NOT use `BehaviorSubject` or manual `signal()` services for feature/shared state
+
+```typescript
+// Shared store (global singleton)
+export const AuthStore = signalStore(
+  { providedIn: 'root' },
+  withState({ user: null, token: null }),
+  withComputed(({ user }) => ({
+    isAuthenticated: computed(() => user() !== null),
+  })),
+  withMethods((store) => ({
+    logout(): void { patchState(store, { user: null, token: null }); },
+  })),
+);
+
+// Feature store (component-scoped)
+export const RegisterStore = signalStore(
+  withState({ loading: false, success: false, error: null }),
+  withMethods((store) => ({ ... })),
+);
+// Provided in component: @Component({ providers: [RegisterStore] })
+```
+
 ## HTTP
-27. All API calls go through services with signal state.
+27. All API calls go through stores with signal state.
 28. Use `firstValueFrom()` to convert HttpClient observables.
 29. Base URL configured in `core/environment.ts`.
 30. Auth token attached via `shared/auth/auth.interceptor.ts`.

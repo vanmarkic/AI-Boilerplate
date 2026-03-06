@@ -15,20 +15,20 @@ export class ButtonComponent {
   readonly variant = input<'default' | 'destructive' | 'outline' | 'ghost'>('default');
   readonly size = input<'sm' | 'default' | 'lg'>('default');
   readonly disabled = input(false);
-  readonly clicked = output<void>();
+  readonly clicked = output();
 
-  private readonly variantClasses: Record<string, string> = {
+  private readonly variantClasses = {
     default: 'bg-primary text-primary-foreground hover:bg-primary/90',
     destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
     outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
     ghost: 'hover:bg-accent hover:text-accent-foreground',
-  };
+  } as const;
 
-  private readonly sizeClasses: Record<string, string> = {
+  private readonly sizeClasses = {
     sm: 'h-8 px-3 text-xs',
     default: 'h-9 px-4 py-2 text-sm',
     lg: 'h-10 px-8 text-base',
-  };
+  } as const;
 
   protected readonly hostClasses = computed(() =>
     cn(

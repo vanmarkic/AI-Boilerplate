@@ -9,6 +9,7 @@ workflow:
 stages:
   - lint
   - test
+  - e2e
   - build
   - security
 
@@ -63,8 +64,8 @@ lint-frontend:
   extends: .node-cache
   script:
     - cd frontend
-    - npm ci
-    - npx ng lint
+    - npm ci --ignore-scripts
+    - npm run lint:all
 
 openapi-validate:
   stage: lint
@@ -98,16 +99,31 @@ test-backend:
 
 test-frontend:
   stage: test
-  image: node:22
+  image: node:22-slim
   extends: .node-cache
-  before_script:
-    - apt-get update -qq && apt-get install -y -qq chromium > /dev/null 2>&1
-    - export CHROME_BIN=/usr/bin/chromium
-    - export CHROMIUM_FLAGS="--no-sandbox"
   script:
     - cd frontend
-    - npm ci
-    - npx ng test --watch=false --browsers=ChromeHeadless
+    - npm ci --ignore-scripts
+    - npm run test:ci
+
+# ===========================================================================
+# E2E Stage
+# ===========================================================================
+
+e2e-frontend:
+  stage: e2e
+  image: node:22
+  extends: .node-cache
+  script:
+    - cd frontend
+    - npm ci --ignore-scripts
+    - npx playwright install --with-deps chromium
+    - npm run e2e
+  artifacts:
+    when: always
+    paths:
+      - frontend/playwright-report/
+    expire_in: 7 days
 
 # ===========================================================================
 # Build Stage – Docker images (default branch & MRs only)
