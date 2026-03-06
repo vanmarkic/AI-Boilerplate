@@ -62,7 +62,7 @@
 ## API Contract
 
 <!--
-  Summary table. Details live in shared/openapi.yaml.
+  Summary table. The full spec is generated from FastAPI routers via `make generate`.
 
   | Method | Path | Feature | Purpose |
   |--------|------|---------|---------|

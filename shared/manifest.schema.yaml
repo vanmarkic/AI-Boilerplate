@@ -49,7 +49,7 @@ required_fields:
     items: string
     description: |
       HTTP method + path for every route this feature exposes.
-      Must mirror routes in shared/openapi.yaml — keep in sync.
+      Must mirror routes declared in the FastAPI routers. Keep in sync.
     example:
       - "GET /api/users/{id}"
       - "POST /api/users"
