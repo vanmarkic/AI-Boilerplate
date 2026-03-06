@@ -10,19 +10,19 @@ alwaysApply: true
 ## Stack
 - Frontend: Angular 18+ standalone components, signals, Tailwind CSS v4
 - Backend: FastAPI Python 3.12+, SQLAlchemy 2.0 async, Alembic, PostgreSQL 17
-- Contract: OpenAPI 3.1 at `shared/openapi.yaml` — **modify spec first, then implement**
+- Contract: OpenAPI 3.1 (code-first — generated from FastAPI routers via `make generate`)
 
 ## Universal Rules
 1. Maximum **250 lines per file**. Split if exceeded (150 for Angular UI primitives).
 2. No barrel exports (`index.ts` re-exports). Use direct imports only.
 3. Every feature is a **flat folder** under `features/`.
-4. **OpenAPI contract first**: edit `shared/openapi.yaml` before writing any backend or frontend code.
+4. **Code-first API**: define Pydantic models + FastAPI routers, then run `make generate` to extract the spec and regenerate the TypeScript client.
 5. **Tests colocated** with source. Write failing test before implementation (TDD).
 6. Strict TypeScript (`strict: true`). Python: type hints on ALL function signatures.
 7. No `any` in TypeScript. No untyped Python functions.
 8. Auth is a stub — **never implement real authentication logic**.
 9. Every feature has a `manifest.yaml` with a `tier: 1|2|3` field.
-10. Run `make lint-arch` before committing to check layer boundary violations.
+10. Run `make validate` before committing (architecture linter + all linters + all tests).
 
 ## Feature Tiering
 - Tier 1 = base features in all builds

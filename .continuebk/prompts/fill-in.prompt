@@ -8,7 +8,6 @@ The skeleton files already exist (created by `make new-feature`). Replace every 
 ## Inputs
 
 - **SPECS.md** has the domain model and business rules
-- **shared/openapi.yaml** has the API contract
 - **Skeleton files** have the structure — you fill in the content
 
 ## Process
@@ -24,6 +23,7 @@ For each file, follow TDD:
 ### After filling in
 - Update `manifest.yaml` with `api_endpoints` and `business_rules`
 - Create the migration: `cd backend && alembic revision --autogenerate -m 'add {{{ input }}}'`
+- Run `make generate` to extract the OpenAPI spec and regenerate the TypeScript client
 
 ## Rules
 - No file > 250 lines
