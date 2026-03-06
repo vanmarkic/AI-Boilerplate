@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
     app_name: str = "AI Boilerplate API"
     app_version: str = "0.1.0"
+    keycloak_url: str = "http://localhost:8080"
+    keycloak_realm: str = "boilerplate"
+    keycloak_audience: str = "backend-api"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
