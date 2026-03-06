@@ -38,12 +38,12 @@ import { cn } from '../utils';
 })
 export class DialogPanelComponent {
   readonly variant = input<'default' | 'destructive'>('default');
-  readonly closed = output<void>();
+  readonly closed = output();
 
-  private readonly variantClasses: Record<string, string> = {
+  private readonly variantClasses = {
     default: 'border-border',
     destructive: 'border-destructive',
-  };
+  } as const;
 
   protected readonly panelClasses = computed(() =>
     cn(

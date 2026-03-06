@@ -2,17 +2,18 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { FormErrorComponent } from '../../shared/ui/form-error.component';
 import { InputComponent } from '../../shared/ui/input.component';
-import { RegisterService } from './register.service';
+import { RegisterStore } from './register.store';
 
 @Component({
   selector: 'app-register',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ReactiveFormsModule, InputComponent, FormErrorComponent],
+  providers: [RegisterStore],
   template: `
     <div class="max-w-sm mx-auto mt-lg p-lg">
       <h1 class="text-2xl font-bold text-foreground mb-lg">Create Account</h1>
 
-      @if (service.success()) {
+      @if (store.success()) {
         <p class="text-sm text-primary">Account created! You can now sign in.</p>
       } @else {
         <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
@@ -31,16 +32,16 @@ import { RegisterService } from './register.service';
           />
           <app-form-error [control]="form.controls.email" />
 
-          @if (service.error(); as error) {
+          @if (store.error(); as error) {
             <p class="text-sm text-destructive mb-sm">{{ error }}</p>
           }
 
           <button
             type="submit"
-            [disabled]="form.invalid || service.loading()"
+            [disabled]="form.invalid || store.loading()"
             class="w-full h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ service.loading() ? 'Creating account…' : 'Create account' }}
+            {{ store.loading() ? 'Creating account…' : 'Create account' }}
           </button>
         </form>
       }
@@ -48,7 +49,7 @@ import { RegisterService } from './register.service';
   `,
 })
 export class RegisterComponent {
-  protected readonly service = inject(RegisterService);
+  protected readonly store = inject(RegisterStore);
 
   readonly form = new FormGroup({
     name: new FormControl('', {
@@ -66,6 +67,6 @@ export class RegisterComponent {
       this.form.markAllAsTouched();
       return;
     }
-    this.service.register(this.form.getRawValue());
+    void this.store.register(this.form.getRawValue());
   }
 }

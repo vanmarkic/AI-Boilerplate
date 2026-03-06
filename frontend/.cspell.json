@@ -1,0 +1,51 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "oklch",
+    "tailwindcss",
+    "postcss",
+    "fontsource",
+    "clsx",
+    "tslib",
+    "vitest",
+    "jsdom",
+    "storybook",
+    "zoneless",
+    "ngrx",
+    "openapi",
+    "autofix",
+    "devkit",
+    "stylelint",
+    "cspell",
+    "prettierrc",
+    "pyyaml",
+    "playwright",
+    "chromium",
+    "wcag"
+  ],
+  "caseSensitive": false,
+  "allowCompoundWords": true,
+  "useGitignore": true,
+  "dictionaries": [
+    "css",
+    "html",
+    "node",
+    "npm",
+    "softwareTerms",
+    "typescript",
+    "filetypes",
+    "companies",
+    "fonts",
+    "misc"
+  ],
+  "ignorePaths": [
+    "**/*.json",
+    "**/*.yml",
+    "**/*.yaml",
+    "node_modules",
+    "dist",
+    ".angular",
+    "src/app/shared/api/generated"
+  ]
+}
