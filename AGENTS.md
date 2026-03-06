@@ -25,7 +25,7 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 7. No `any` type in TypeScript. No untyped function signatures in Python.
 8. Auth is a stub — do not implement real authentication logic.
 9. Each feature has a `manifest.yaml` describing its capabilities and dependencies.
-10. Run `make lint-arch` before committing to check layer boundary violations.
+10. Run `make validate` before committing (runs architecture linter + all linters + all tests).
 
 ## Feature Tiering
 11. Every feature MUST have a `tier` field in its `manifest.yaml` (1, 2, or 3).
@@ -34,6 +34,10 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 14. Use `make build-tier-N` to build Docker images for a specific tier.
 15. Runtime feature flags (`core/feature_flags.py`, `feature-flag.service.ts`) toggle features WITHIN the shipped tier.
 16. Scaffold new features with tier: `make new-feature name=analytics tier=2`.
+
+## Feature Workflow
+Follow `docs/conventions/feature-workflow.md` for end-to-end feature development.
+Quick reference: `make spec` → `make new-feature` → LLM fills in TODOs → `make validate` → git commit.
 
 ## Common Pitfalls
 - Do NOT import across tiers (tier-1 code must not import from tier-2 or tier-3).

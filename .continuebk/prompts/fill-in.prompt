@@ -1,0 +1,33 @@
+name: Fill In Feature
+description: Fill in a scaffolded feature with real implementation using TDD
+---
+Fill in the scaffolded feature: {{{ input }}}
+
+The skeleton files already exist (created by `make new-feature`). Replace every `TODO` marker with real implementation.
+
+## Inputs
+
+- **SPECS.md** has the domain model and business rules
+- **shared/openapi.yaml** has the API contract
+- **Skeleton files** have the structure — you fill in the content
+
+## Process
+
+For each file, follow TDD:
+1. Write a failing test for the behavior in SPECS.md
+2. Confirm it fails for the right reason
+3. Write minimal code to pass
+4. Confirm all tests pass
+
+### Order: model → schema → repository → service → router → test → frontend types → service → component → spec
+
+### After filling in
+- Update `manifest.yaml` with `api_endpoints` and `business_rules`
+- Create the migration: `cd backend && alembic revision --autogenerate -m 'add {{{ input }}}'`
+
+## Rules
+- No file > 250 lines
+- No `any` in TypeScript, no untyped Python functions
+- Auth stays a stub
+- Use generated API client in frontend, not raw HttpClient
+- Layer boundaries: router → service → repository → model

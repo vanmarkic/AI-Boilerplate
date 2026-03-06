@@ -240,11 +240,13 @@ describe('${CLASS}Component', () => {
 });
 TSEOF
 
-echo "Scaffolded feature: $NAME"
+echo "Scaffolded feature: $NAME (tier $TIER)"
 echo "  Backend:  $BACKEND_DIR/ (6 files + manifest)"
 echo "  Frontend: $FRONTEND_DIR/ (5 files)"
 echo ""
 echo "Next steps:"
-echo "  1. Update shared/openapi.yaml with new endpoints"
-echo "  2. Run: make generate"
-echo "  3. Implement the failing tests"
+echo "  1. Fill in the TODO markers with your domain model"
+echo "  2. Create migration: cd backend && alembic revision --autogenerate -m 'add ${SNAKE}'"
+echo "  3. Run: make validate"
+echo ""
+echo "See: docs/conventions/feature-workflow.md"
