@@ -135,25 +135,15 @@ Config file: `.aider-glm.conf.yml` (default) or `.aider-codestral.conf.yml`
 aider --config .aider-glm.conf.yml [files...]
 
 # Makefile shortcuts (uses AIDER_CONF variable)
-make aider-tdd        # TDD session
-make aider-plan       # Write implementation plan
-make aider-execute    # Execute plan
+make aider-fill-in    # Fill in scaffolded feature with TDD
 make aider-debug      # Systematic debugging
+make aider-review     # Review code against project rules
 
 # Override model per-session
-make aider-tdd AIDER_CONF=.aider-codestral.conf.yml
+make aider-fill-in AIDER_CONF=.aider-codestral.conf.yml
 ```
 
-### Multi-Session Pattern for Aider
-
-Aider has no built-in task persistence. Use a PLAN.md file as read-only context:
-
-```bash
-# Pass plan as context each session
-aider --config .aider-glm.conf.yml --read PLAN.md features/my_feature/*.py
-```
-
-Update PLAN.md manually between sessions to track progress.
+See `docs/conventions/feature-workflow.md` for the full development sequence.
 
 ## Scaffold Script
 

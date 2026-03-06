@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 aider-brainstorm aider-tdd aider-debug aider-plan aider-execute aider-verify aider-finish
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate spec aider-fill-in aider-debug aider-review
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -33,6 +33,26 @@ migrate: ## Run database migrations
 
 new-feature: ## Scaffold a new feature (usage: make new-feature name=orders tier=2)
 	bash shared/scripts/scaffold-feature.sh $(name) $(tier)
+	@echo ""
+	@echo "Regenerating types from OpenAPI spec..."
+	$(MAKE) generate
+
+spec: ## Print a SPECS.md section template (usage: make spec name=orders tier=2)
+	@echo ""
+	@echo "### Feature: $(name) (tier $(or $(tier),1), backend + frontend)"
+	@echo ""
+	@echo "- **Purpose:** TODO - what problem does this solve?"
+	@echo "- **Rules:**"
+	@echo "  - TODO - business rule 1"
+	@echo "  - TODO - business rule 2"
+	@echo "- **User stories:**"
+	@echo "  - As a [role], I want to [action] so that [benefit]."
+	@echo "- **API:**"
+	@echo "  - \`POST /api/$(name)s\` — Create a $(name)"
+	@echo "  - \`GET /api/$(name)s/:id\` — Get $(name) details"
+	@echo ""
+	@echo "Copy the above into SPECS.md under '## Features & Business Rules'"
+	@echo ""
 
 lint-arch: ## Run architecture boundary linter
 	python shared/scripts/lint-architecture.py
@@ -43,6 +63,8 @@ storybook: ## Start Storybook dev server
 lint: ## Run all linters
 	cd backend && ruff check .
 	cd frontend && npx ng lint
+
+validate: lint-arch lint test ## Validate everything: architecture + linters + tests
 
 build: ## Build all services for tier 3 (all features)
 	TIER=3 docker compose build
@@ -56,27 +78,15 @@ build-tier-2: ## Build for tier 2
 build-tier-3: ## Build for tier 3 (all features)
 	TIER=3 docker compose build --build-arg TIER=3
 
-# ── Aider Skills ──────────────────────────────────────────────
-# Default config; override with: make aider-tdd AIDER_CONF=.aider-codestral.conf.yml
+# ── Aider Sessions ───────────────────────────────────────────
+# Default config; override with: make aider-fill-in AIDER_CONF=.aider-codestral.conf.yml
 AIDER_CONF ?= .aider-glm.conf.yml
 
-aider-brainstorm: ## Brainstorm a feature with aider (usage: make aider-brainstorm)
-	aider --config $(AIDER_CONF) --read prompts/aider/brainstorm.md
+aider-fill-in: ## Fill in a scaffolded feature with TDD (step 3 of feature workflow)
+	aider --config $(AIDER_CONF) --read prompts/aider/fill-in.md
 
-aider-tdd: ## Start TDD session with aider (usage: make aider-tdd)
-	aider --config $(AIDER_CONF) --read prompts/aider/tdd.md
-
-aider-debug: ## Start systematic debugging session (usage: make aider-debug)
+aider-debug: ## Systematic debugging session
 	aider --config $(AIDER_CONF) --read prompts/aider/debug.md
 
-aider-plan: ## Write an implementation plan (usage: make aider-plan)
-	aider --config $(AIDER_CONF) --read prompts/aider/write-plan.md
-
-aider-execute: ## Execute an implementation plan (usage: make aider-execute)
-	aider --config $(AIDER_CONF) --read prompts/aider/execute-plan.md
-
-aider-verify: ## Verify work is complete (usage: make aider-verify)
-	aider --config $(AIDER_CONF) --read prompts/aider/verify.md
-
-aider-finish: ## Finish a development branch (usage: make aider-finish)
-	aider --config $(AIDER_CONF) --read prompts/aider/finish-branch.md
+aider-review: ## Review code against project rules
+	aider --config $(AIDER_CONF) --read prompts/aider/review.md
