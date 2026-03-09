@@ -1,6 +1,5 @@
 import { ChangeDetectorRef, Component, forwardRef, inject, input, model, signal } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { cn } from '../utils';
 
 @Component({
   selector: 'app-input',
@@ -26,7 +25,7 @@ import { cn } from '../utils';
       [disabled]="isDisabled()"
       (input)="onInput($event)"
       (blur)="onTouched()"
-      [class]="inputClasses"
+      class="input-base"
     />
   `,
   host: { 'class': 'block mb-sm' },
@@ -36,7 +35,7 @@ export class InputComponent implements ControlValueAccessor {
   readonly label = input('');
   readonly type = input<'text' | 'email' | 'password'>('text');
   readonly placeholder = input('');
-  readonly value = model('');  // kept for ngModel backwards-compat
+  readonly value = model('');
 
   protected readonly currentValue = signal('');
   protected readonly isDisabled = signal(false);
@@ -46,13 +45,6 @@ export class InputComponent implements ControlValueAccessor {
   private onChange: (value: string) => void = () => {};
   // eslint-disable-next-line @typescript-eslint/no-empty-function -- CVA placeholder
   protected onTouched: () => void = () => {};
-
-  readonly inputClasses = cn(
-    'flex h-9 w-full rounded-[--radius-md] border border-input bg-background px-3 py-1',
-    'text-sm text-foreground placeholder:text-muted-foreground',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-    'disabled:opacity-50 disabled:cursor-not-allowed',
-  );
 
   writeValue(value: string): void {
     this.currentValue.set(value);
@@ -76,6 +68,6 @@ export class InputComponent implements ControlValueAccessor {
     const value = (event.target as HTMLInputElement).value;
     this.currentValue.set(value);
     this.onChange(value);
-    this.value.set(value);  // keep model() in sync for ngModel users
+    this.value.set(value);
   }
 }

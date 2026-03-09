@@ -13,7 +13,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
       style="background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%)"
     ></div>
 
-    <div class="relative flex flex-col items-center gap-xl text-center w-full max-w-md">
+    <div class="relative flex flex-col items-center gap-xl text-center w-full max-w-container-md">
       <!-- Monospace tag -->
       <span class="font-mono text-xs tracking-widest uppercase text-muted-foreground border border-border px-sm py-xs rounded-[--radius-sm] whitespace-nowrap">
         v0.1 &middot; open source
@@ -36,11 +36,11 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
             [value]="email()"
             (input)="email.set($any($event.target).value)"
             required
-            class="flex-1 px-md py-sm rounded-[--radius-md] bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-base transition-[border-color] duration-normal"
+            class="input-base flex-1"
           />
           <button
             type="submit"
-            class="px-lg py-sm bg-primary text-primary-foreground rounded-[--radius-md] font-semibold text-base hover:brightness-110 active:brightness-95 transition-all duration-fast whitespace-nowrap"
+            class="control-base px-lg py-sm bg-primary text-primary-foreground text-base font-semibold hover:brightness-110 active:brightness-95 whitespace-nowrap"
           >
             Get access
           </button>
@@ -59,7 +59,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
       }
 
       <!-- Tech stack pills -->
-      <div class="flex flex-wrap justify-center gap-sm w-full">
+      <div class="flex flex-row flex-wrap justify-center gap-sm self-stretch">
         @for (tech of stack; track tech) {
           <span class="font-mono text-xs text-muted-foreground bg-card border border-border px-sm py-xs rounded-[--radius-sm]">
             {{ tech }}
