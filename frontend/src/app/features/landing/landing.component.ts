@@ -25,11 +25,11 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
             [value]="email()"
             (input)="email.set($any($event.target).value)"
             required
-            class="flex-1 px-md py-sm rounded-md bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-base"
+            class="flex-1 px-md py-sm rounded-[--radius-md] bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring text-base"
           />
           <button
             type="submit"
-            class="px-md py-sm bg-primary text-primary-foreground rounded-md font-semibold text-base hover:opacity-90 transition-opacity whitespace-nowrap"
+            class="px-md py-sm bg-primary text-primary-foreground rounded-[--radius-md] font-semibold text-base hover:opacity-90 transition-opacity whitespace-nowrap"
           >
             Get access
           </button>

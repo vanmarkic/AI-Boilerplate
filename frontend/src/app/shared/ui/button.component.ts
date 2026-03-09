@@ -32,8 +32,8 @@ export class ButtonComponent {
 
   protected readonly hostClasses = computed(() =>
     cn(
-      'inline-flex items-center justify-center rounded-md font-medium',
-      'transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+      'inline-flex items-center justify-center rounded-[--radius-md] font-medium',
+      'transition-colors duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
       'disabled:pointer-events-none disabled:opacity-50',
       this.variantClasses[this.variant()],
       this.sizeClasses[this.size()],
