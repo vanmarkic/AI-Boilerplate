@@ -24,24 +24,28 @@ export class AuthStore {
   readonly isAuthenticated = computed(() => this._user() !== null);
 
   async init(): Promise<void> {
-    const authenticated = await this.keycloak.init({
-      onLoad: 'check-sso',
-      silentCheckSsoRedirectUri:
-        window.location.origin + '/assets/silent-check-sso.html',
-      pkceMethod: 'S256',
-    });
-
-    if (authenticated) {
-      this.updateUserFromToken();
-    }
-
-    this.keycloak.onTokenExpired = () => {
-      void this.keycloak.updateToken(30).then((refreshed) => {
-        if (refreshed) {
-          this.updateUserFromToken();
-        }
+    try {
+      const authenticated = await this.keycloak.init({
+        onLoad: 'check-sso',
+        silentCheckSsoRedirectUri:
+          window.location.origin + '/assets/silent-check-sso.html',
+        pkceMethod: 'S256',
       });
-    };
+
+      if (authenticated) {
+        this.updateUserFromToken();
+      }
+
+      this.keycloak.onTokenExpired = () => {
+        void this.keycloak.updateToken(30).then((refreshed) => {
+          if (refreshed) {
+            this.updateUserFromToken();
+          }
+        });
+      };
+    } catch {
+      console.warn('Keycloak unavailable — running without auth');
+    }
   }
 
   login(): void {
