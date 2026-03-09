@@ -10,7 +10,7 @@ import { RegisterStore } from './register.store';
   imports: [ReactiveFormsModule, InputComponent, FormErrorComponent],
   providers: [RegisterStore],
   template: `
-    <div class="max-w-sm mx-auto mt-lg p-lg">
+    <div class="max-w-container-sm mx-auto mt-lg p-lg">
       <h1 class="text-2xl font-bold text-foreground mb-lg">Create Account</h1>
 
       @if (store.success()) {
@@ -39,7 +39,7 @@ import { RegisterStore } from './register.store';
           <button
             type="submit"
             [disabled]="form.invalid || store.loading()"
-            class="w-full h-9 px-4 rounded-[--radius-md] bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            class="control-base w-full h-control-md px-md bg-primary text-primary-foreground text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ store.loading() ? 'Creating account…' : 'Create account' }}
           </button>

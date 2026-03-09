@@ -47,7 +47,7 @@ export class DialogPanelComponent {
 
   protected readonly panelClasses = computed(() =>
     cn(
-      'fixed left-1/2 top-1/2 z-50 w-full max-w-md',
+      'fixed left-1/2 top-1/2 z-50 w-full max-w-container-md',
       '-translate-x-1/2 -translate-y-1/2',
       'rounded-[--radius-lg] border bg-card p-lg shadow-lg',
       this.variantClasses[this.variant()],
