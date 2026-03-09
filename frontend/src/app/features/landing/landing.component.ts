@@ -15,7 +15,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
     <div class="relative flex flex-col items-center gap-xl text-center w-full max-w-md">
       <!-- Monospace tag -->
-      <span class="font-mono text-xs tracking-widest uppercase text-muted-foreground border border-border px-sm py-xs rounded-[--radius-sm]">
+      <span class="font-mono text-xs tracking-widest uppercase text-muted-foreground border border-border px-sm py-xs rounded-[--radius-sm] whitespace-nowrap">
         v0.1 &middot; open source
       </span>
 
