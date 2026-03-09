@@ -25,16 +25,14 @@ export class ButtonComponent {
   } as const;
 
   private readonly sizeClasses = {
-    sm: 'h-8 px-3 text-xs',
-    default: 'h-9 px-4 py-2 text-sm',
-    lg: 'h-10 px-8 text-base',
+    sm: 'h-control-sm px-sm text-xs',
+    default: 'h-control-md px-md py-xs text-sm',
+    lg: 'h-control-lg px-xl text-base',
   } as const;
 
   protected readonly hostClasses = computed(() =>
     cn(
-      'inline-flex items-center justify-center rounded-[--radius-md] font-medium',
-      'transition-colors duration-[--duration-fast] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-      'disabled:pointer-events-none disabled:opacity-50',
+      'control-base',
       this.variantClasses[this.variant()],
       this.sizeClasses[this.size()],
     )
