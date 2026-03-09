@@ -39,7 +39,7 @@ import { RegisterStore } from './register.store';
           <button
             type="submit"
             [disabled]="form.invalid || store.loading()"
-            class="w-full h-9 px-4 rounded-md bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full h-9 px-4 rounded-[--radius-md] bg-primary text-primary-foreground text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ store.loading() ? 'Creating account…' : 'Create account' }}
           </button>

@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-card',
-  host: { 'class': 'block rounded-lg border border-border bg-card p-md shadow-sm' },
+  host: { 'class': 'block rounded-[--radius-lg] border border-border bg-card p-md shadow-sm' },
   template: `
     @if (title()) {
       <h3 class="text-lg font-semibold text-card-foreground mb-sm">{{ title() }}</h3>
