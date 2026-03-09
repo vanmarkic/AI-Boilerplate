@@ -1,40 +1,73 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colors — semantic names only */
-  --color-primary: oklch(70% 0.18 47);              /* orange accent */
-  --color-primary-foreground: oklch(15% 0.006 250);
-  --color-secondary: oklch(26% 0.006 250);
-  --color-secondary-foreground: oklch(97% 0 0);
-  --color-destructive: oklch(57% 0.24 27);
-  --color-destructive-foreground: oklch(97% 0 0);
-  --color-background: oklch(16% 0.006 250);         /* dark charcoal */
-  --color-foreground: oklch(97% 0 0);               /* white */
-  --color-card: oklch(22% 0.006 250);               /* elevated surface */
-  --color-card-foreground: oklch(97% 0 0);
-  --color-muted: oklch(26% 0.006 250);
-  --color-muted-foreground: oklch(65% 0.005 250);
-  --color-accent: oklch(70% 0.18 47);               /* orange */
-  --color-accent-foreground: oklch(15% 0.006 250);
-  --color-border: oklch(30% 0.008 250);
-  --color-input: oklch(30% 0.008 250);
-  --color-ring: oklch(70% 0.18 47);                 /* orange focus ring */
-  --color-popover: oklch(22% 0.006 250);
-  --color-popover-foreground: oklch(97% 0 0);
+  /* ── Base surfaces (dark → light) ─────────────────── */
+  --color-background: oklch(13% 0.008 250);            /* app bg, blacked-out */
+  --color-card: oklch(18% 0.008 250);                  /* elevated surface */
+  --color-popover: oklch(22% 0.008 250);               /* dropdowns, modals */
+  --color-secondary: oklch(22% 0.008 250);             /* secondary fills */
+  --color-muted: oklch(25% 0.008 250);                 /* disabled fills */
 
-  /* Spacing */
+  /* ── Borders & inputs ─────────────────────────────── */
+  --color-border: oklch(30% 0.010 250);
+  --color-input: oklch(30% 0.010 250);
+
+  /* ── Text ─────────────────────────────────────────── */
+  --color-foreground: oklch(92% 0 0);                  /* primary text */
+  --color-card-foreground: oklch(92% 0 0);
+  --color-popover-foreground: oklch(92% 0 0);
+  --color-secondary-foreground: oklch(85% 0 0);
+  --color-muted-foreground: oklch(55% 0.005 250);      /* placeholder/disabled */
+
+  /* ── Accent — steel blue ──────────────────────────── */
+  --color-primary: oklch(62% 0.10 245);                /* actions, links */
+  --color-primary-foreground: oklch(13% 0.008 250);    /* text on primary */
+  --color-accent: oklch(62% 0.10 245);                 /* hover highlights */
+  --color-accent-foreground: oklch(92% 0 0);
+  --color-ring: oklch(62% 0.10 245);                   /* focus rings */
+
+  /* ── Semantic signals ─────────────────────────────── */
+  --color-destructive: oklch(55% 0.22 27);             /* error / danger */
+  --color-destructive-foreground: oklch(92% 0 0);
+  --color-warning: oklch(72% 0.17 70);                 /* warning */
+  --color-warning-foreground: oklch(13% 0.008 250);
+  --color-success: oklch(62% 0.15 155);                /* success */
+  --color-success-foreground: oklch(13% 0.008 250);
+  --color-info: oklch(70% 0.08 245);                   /* informational */
+  --color-info-foreground: oklch(13% 0.008 250);
+
+  /* ── Spacing (4px base grid) ──────────────────────── */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
 
-  /* Border Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.375rem;
-  --radius-lg: 0.5rem;
+  /* ── Border radius (near-zero, tactical) ──────────── */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 6px;
   --radius-full: 9999px;
 
-  /* Typography */
-  --font-sans: "Source Sans 3", system-ui, sans-serif;
+  /* ── Typography ───────────────────────────────────── */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* ── Shadows (minimal, dark-UI tuned) ─────────────── */
+  --shadow-sm: 0 1px 2px oklch(0% 0 0 / 0.3);
+  --shadow-md: 0 2px 6px oklch(0% 0 0 / 0.4);
+  --shadow-lg: 0 4px 12px oklch(0% 0 0 / 0.5);
+
+  /* ── Motion ───────────────────────────────────────── */
+  --duration-fast: 100ms;
+  --duration-normal: 150ms;
+  --duration-slow: 250ms;
+  --ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* ── Z-index scale ────────────────────────────────── */
+  --z-base: 0;
+  --z-above: 10;
+  --z-modal: 50;
+  --z-toast: 100;
 }

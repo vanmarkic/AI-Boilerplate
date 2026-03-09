@@ -18,7 +18,7 @@ export class BadgeComponent {
 
   protected readonly hostClasses = computed(() =>
     cn(
-      'inline-flex items-center rounded-md px-2 py-0.5 text-xs font-medium',
+      'inline-flex items-center rounded-[--radius-sm] px-2 py-0.5 text-xs font-medium tracking-wide uppercase',
       this.variantClasses[this.variant()],
     )
   );
