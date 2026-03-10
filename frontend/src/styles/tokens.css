@@ -21,7 +21,7 @@
 
   /* ── Accent — steel blue ──────────────────────────── */
   --color-primary: oklch(62% 0.10 245);                /* actions, links */
-  --color-primary-foreground: oklch(13% 0.008 250);    /* text on primary */
+  --color-primary-foreground: oklch(98% 0 0);           /* text on primary */
   --color-accent: oklch(62% 0.10 245);                 /* hover highlights */
   --color-accent-foreground: oklch(92% 0 0);
   --color-ring: oklch(62% 0.10 245);                   /* focus rings */
@@ -50,8 +50,8 @@
    *  Font-size + line-height pairs.
    *  Registers as: text-xs, text-sm, text-base … text-6xl
    * ─────────────────────────────────────────────────── */
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "Inter Variable", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
 
   --font-size-xs: 0.75rem;
   --font-size-xs--line-height: 1rem;

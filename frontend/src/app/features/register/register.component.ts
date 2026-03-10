@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ButtonDirective } from '../../shared/ui/button.directive';
 import { FormErrorComponent } from '../../shared/ui/form-error.component';
 import { InputComponent } from '../../shared/ui/input.component';
 import { RegisterStore } from './register.store';
@@ -7,7 +8,7 @@ import { RegisterStore } from './register.store';
 @Component({
   selector: 'app-register',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, InputComponent, FormErrorComponent],
+  imports: [ReactiveFormsModule, InputComponent, FormErrorComponent, ButtonDirective],
   providers: [RegisterStore],
   template: `
     <div class="max-w-container-sm mx-auto mt-lg p-lg">
@@ -38,8 +39,9 @@ import { RegisterStore } from './register.store';
 
           <button
             type="submit"
+            appButton
+            class="w-full"
             [disabled]="form.invalid || store.loading()"
-            class="control-base w-full h-control-md px-md bg-primary text-primary-foreground text-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ store.loading() ? 'Creating account…' : 'Create account' }}
           </button>
