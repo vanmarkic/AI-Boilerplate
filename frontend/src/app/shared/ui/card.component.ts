@@ -2,12 +2,12 @@ import { Component, input } from '@angular/core';
 
 @Component({
   selector: 'app-card',
-  host: { 'class': 'block rounded-[--radius-lg] border border-border bg-card p-md shadow-sm' },
+  host: { class: 'card' },
   template: `
     @if (title()) {
-      <h3 class="text-lg font-semibold text-card-foreground mb-sm">{{ title() }}</h3>
+      <h3 class="card-title">{{ title() }}</h3>
     }
-    <div class="text-sm text-muted-foreground">
+    <div class="card-content">
       <ng-content />
     </div>
   `,

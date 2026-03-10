@@ -24,57 +24,41 @@ describe('ButtonDirective', () => {
     button = fixture.nativeElement.querySelector('button');
   });
 
-  it('should apply base classes', () => {
-    expect(button.className).toContain('inline-flex');
-    expect(button.className).toContain('items-center');
-    expect(button.className).toContain('cursor-pointer');
+  it('should set data-variant="default" by default', () => {
+    expect(button.getAttribute('data-variant')).toBe('default');
   });
 
-  it('should apply default variant classes', () => {
-    expect(button.className).toContain('bg-primary');
-    expect(button.className).toContain('text-primary-foreground');
-  });
-
-  it('should apply destructive variant classes', () => {
+  it('should set data-variant="destructive"', () => {
     fixture.componentInstance.variant.set('destructive');
     fixture.detectChanges();
-    expect(button.className).toContain('bg-destructive');
-    expect(button.className).toContain('text-destructive-foreground');
+    expect(button.getAttribute('data-variant')).toBe('destructive');
   });
 
-  it('should apply outline variant classes', () => {
+  it('should set data-variant="outline"', () => {
     fixture.componentInstance.variant.set('outline');
     fixture.detectChanges();
-    expect(button.className).toContain('border');
-    expect(button.className).toContain('bg-background');
+    expect(button.getAttribute('data-variant')).toBe('outline');
   });
 
-  it('should apply ghost variant classes', () => {
+  it('should set data-variant="ghost"', () => {
     fixture.componentInstance.variant.set('ghost');
     fixture.detectChanges();
-    expect(button.className).not.toContain('bg-primary');
-    expect(button.className).not.toContain('border');
+    expect(button.getAttribute('data-variant')).toBe('ghost');
   });
 
-  it('should apply default size classes', () => {
-    expect(button.className).toContain('h-control-md');
-    expect(button.className).toContain('px-md');
-    expect(button.className).toContain('text-sm');
+  it('should set data-size="default" by default', () => {
+    expect(button.getAttribute('data-size')).toBe('default');
   });
 
-  it('should apply sm size classes', () => {
+  it('should set data-size="sm"', () => {
     fixture.componentInstance.size.set('sm');
     fixture.detectChanges();
-    expect(button.className).toContain('h-control-sm');
-    expect(button.className).toContain('px-sm');
-    expect(button.className).toContain('text-xs');
+    expect(button.getAttribute('data-size')).toBe('sm');
   });
 
-  it('should apply lg size classes', () => {
+  it('should set data-size="lg"', () => {
     fixture.componentInstance.size.set('lg');
     fixture.detectChanges();
-    expect(button.className).toContain('h-control-lg');
-    expect(button.className).toContain('px-lg');
-    expect(button.className).toContain('text-base');
+    expect(button.getAttribute('data-size')).toBe('lg');
   });
 });
