@@ -15,22 +15,37 @@ describe('ButtonComponent', () => {
     expect(fixture.componentInstance).toBeTruthy();
   });
 
-  it('should apply default variant classes', () => {
+  it('should render a native button element', () => {
     fixture.detectChanges();
-    const el = fixture.nativeElement;
-    expect(el.className).toContain('bg-primary');
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button).toBeTruthy();
+  });
+
+  it('should apply default variant classes to inner button', () => {
+    fixture.detectChanges();
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button.className).toContain('bg-primary');
   });
 
   it('should apply destructive variant classes', () => {
     fixture.componentRef.setInput('variant', 'destructive');
     fixture.detectChanges();
-    const el = fixture.nativeElement;
-    expect(el.className).toContain('bg-destructive');
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button.className).toContain('bg-destructive');
   });
 
   it('should be disabled when disabled input is true', () => {
     fixture.componentRef.setInput('disabled', true);
     fixture.detectChanges();
-    expect(fixture.nativeElement.getAttribute('disabled')).not.toBeNull();
+    const button = fixture.nativeElement.querySelector('button');
+    expect(button.disabled).toBe(true);
+  });
+
+  it('should emit clicked on button click', () => {
+    fixture.detectChanges();
+    const spy = vi.fn();
+    fixture.componentInstance.clicked.subscribe(spy);
+    fixture.nativeElement.querySelector('button').click();
+    expect(spy).toHaveBeenCalled();
   });
 });

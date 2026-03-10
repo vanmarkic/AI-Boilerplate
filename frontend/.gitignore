@@ -39,6 +39,9 @@ testem.log
 /typings
 __screenshots__/
 
+# Storybook
+/storybook-static/
+
 # Playwright
 /test-results/
 /playwright-report/

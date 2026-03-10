@@ -1,8 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ButtonDirective } from '../../shared/ui/button.directive';
 
 @Component({
   selector: 'app-landing',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [ButtonDirective],
   host: {
     class: 'flex min-h-screen items-center justify-center bg-background px-md relative overflow-hidden',
   },
@@ -38,10 +40,7 @@ import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
             required
             class="input-base flex-1"
           />
-          <button
-            type="submit"
-            class="control-base px-lg py-sm bg-primary text-primary-foreground text-base font-semibold hover:brightness-110 active:brightness-95 whitespace-nowrap"
-          >
+          <button type="submit" appButton size="lg">
             Get access
           </button>
         </form>
