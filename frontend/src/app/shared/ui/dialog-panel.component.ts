@@ -1,6 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
-import { cn } from '../utils';
 
 @Component({
   selector: 'app-dialog-panel',
@@ -10,27 +9,26 @@ import { cn } from '../utils';
     '(keydown.escape)': 'closed.emit()',
   },
   template: `
-    <!-- Backdrop -->
     <div
-      class="fixed inset-0 z-50 bg-black/50"
+      class="dialog-backdrop"
       aria-hidden="true"
       (click)="closed.emit()"
     ></div>
 
-    <!-- Panel -->
     <div
       cdkTrapFocus
       role="dialog"
       aria-modal="true"
-      [class]="panelClasses()"
+      class="dialog-panel"
+      [attr.data-variant]="variant()"
     >
-      <div class="mb-sm font-semibold text-foreground">
+      <div class="dialog-title">
         <ng-content select="[dialogTitle]" />
       </div>
-      <div class="text-sm text-muted-foreground">
+      <div class="dialog-body">
         <ng-content />
       </div>
-      <div class="mt-md flex justify-end gap-sm">
+      <div class="dialog-footer">
         <ng-content select="[dialogFooter]" />
       </div>
     </div>
@@ -39,18 +37,4 @@ import { cn } from '../utils';
 export class DialogPanelComponent {
   readonly variant = input<'default' | 'destructive'>('default');
   readonly closed = output();
-
-  private readonly variantClasses = {
-    default: 'border-border',
-    destructive: 'border-destructive',
-  } as const;
-
-  protected readonly panelClasses = computed(() =>
-    cn(
-      'fixed left-1/2 top-1/2 z-50 w-full max-w-container-md',
-      '-translate-x-1/2 -translate-y-1/2',
-      'rounded-[--radius-lg] border bg-card p-lg shadow-lg',
-      this.variantClasses[this.variant()],
-    ),
-  );
 }

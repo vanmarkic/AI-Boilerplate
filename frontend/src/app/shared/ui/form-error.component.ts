@@ -13,7 +13,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   template: `
     @if (control() && control()!.invalid && control()!.touched) {
       @for (key of errorKeys(); track key) {
-        <p class="text-xs text-destructive mt-xs">{{ getMessage(key) }}</p>
+        <p class="form-error">{{ getMessage(key) }}</p>
       }
     }
   `,

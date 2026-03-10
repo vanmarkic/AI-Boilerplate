@@ -11,13 +11,13 @@ import { ButtonDirective } from '../../shared/ui/button.directive';
   template: `
     <!-- Subtle radial glow behind content -->
     <div
-      class="pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-150 h-150 rounded-full opacity-[0.07]"
-      style="background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%)"
+      class="pointer-events-none absolute center-xy rounded-full"
+      style="width: 37.5rem; height: 37.5rem; opacity: 0.07; background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%)"
     ></div>
 
     <div class="relative flex flex-col items-center gap-xl text-center w-full max-w-container-md">
       <!-- Monospace tag -->
-      <span class="font-mono text-xs tracking-widest uppercase text-muted-foreground border border-border px-sm py-xs rounded-[--radius-sm] whitespace-nowrap">
+      <span class="font-mono text-xs tracking-widest uppercase text-muted-foreground border px-sm py-xs rounded-sm whitespace-nowrap">
         v0.1 &middot; open source
       </span>
 
@@ -46,8 +46,8 @@ import { ButtonDirective } from '../../shared/ui/button.directive';
         </form>
       } @else {
         <div class="flex flex-col gap-sm items-center">
-          <div class="w-8 h-8 rounded-full border-2 border-primary flex items-center justify-center">
-            <svg class="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+          <div class="rounded-full border-2 border-primary flex items-center justify-center" style="width: 2rem; height: 2rem">
+            <svg class="text-primary" style="width: 1rem; height: 1rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -60,7 +60,7 @@ import { ButtonDirective } from '../../shared/ui/button.directive';
       <!-- Tech stack pills -->
       <div class="flex flex-row flex-wrap justify-center gap-sm self-stretch">
         @for (tech of stack; track tech) {
-          <span class="font-mono text-xs text-muted-foreground bg-card border border-border px-sm py-xs rounded-[--radius-sm]">
+          <span class="font-mono text-xs text-muted-foreground bg-card border px-sm py-xs rounded-sm">
             {{ tech }}
           </span>
         }
@@ -71,7 +71,7 @@ import { ButtonDirective } from '../../shared/ui/button.directive';
 export class LandingComponent {
   protected readonly email = signal('');
   protected readonly submitted = signal(false);
-  protected readonly stack = ['Angular', 'FastAPI', 'Postgres', 'Keycloak', 'Tailwind'];
+  protected readonly stack = ['Angular', 'FastAPI', 'Postgres', 'Keycloak'];
 
   submit(): void {
     if (this.email().trim()) {
