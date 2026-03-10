@@ -3,10 +3,7 @@
   "language": "en",
   "words": [
     "oklch",
-    "tailwindcss",
-    "postcss",
     "fontsource",
-    "clsx",
     "tslib",
     "vitest",
     "jsdom",

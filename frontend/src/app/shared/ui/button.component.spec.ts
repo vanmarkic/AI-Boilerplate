@@ -21,17 +21,17 @@ describe('ButtonComponent', () => {
     expect(button).toBeTruthy();
   });
 
-  it('should apply default variant classes to inner button', () => {
+  it('should set data-variant="default" on inner button by default', () => {
     fixture.detectChanges();
     const button = fixture.nativeElement.querySelector('button');
-    expect(button.className).toContain('bg-primary');
+    expect(button.getAttribute('data-variant')).toBe('default');
   });
 
-  it('should apply destructive variant classes', () => {
+  it('should set data-variant="destructive" on inner button', () => {
     fixture.componentRef.setInput('variant', 'destructive');
     fixture.detectChanges();
     const button = fixture.nativeElement.querySelector('button');
-    expect(button.className).toContain('bg-destructive');
+    expect(button.getAttribute('data-variant')).toBe('destructive');
   });
 
   it('should be disabled when disabled input is true', () => {

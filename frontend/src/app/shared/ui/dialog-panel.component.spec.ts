@@ -47,15 +47,15 @@ describe('DialogPanelComponent', () => {
     expect(emitted).toBe(true);
   });
 
-  it('should apply default variant border class', () => {
+  it('should set data-variant="default" on panel by default', () => {
     const panel = fixture.nativeElement.querySelector('[role="dialog"]');
-    expect(panel.className).toContain('border-border');
+    expect(panel.getAttribute('data-variant')).toBe('default');
   });
 
-  it('should apply destructive variant border class', () => {
+  it('should set data-variant="destructive" on panel', () => {
     fixture.componentRef.setInput('variant', 'destructive');
     fixture.detectChanges();
     const panel = fixture.nativeElement.querySelector('[role="dialog"]');
-    expect(panel.className).toContain('border-destructive');
+    expect(panel.getAttribute('data-variant')).toBe('destructive');
   });
 });

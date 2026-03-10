@@ -13,7 +13,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/f
   ],
   template: `
     @if (label()) {
-      <label [for]="id()" class="block text-sm font-medium text-foreground mb-xs">
+      <label [for]="id()" class="input-label">
         {{ label() }}
       </label>
     }
@@ -28,7 +28,7 @@ import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/f
       class="input-base"
     />
   `,
-  host: { 'class': 'block mb-sm' },
+  host: { class: 'input-wrapper' },
 })
 export class InputComponent implements ControlValueAccessor {
   readonly id = input('');

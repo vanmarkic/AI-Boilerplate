@@ -5,10 +5,12 @@
     "at-rule-no-unknown": [
       true,
       {
-        "ignoreAtRules": ["theme", "import", "apply", "tailwind", "layer"]
+        "ignoreAtRules": ["import", "layer"]
       }
     ],
     "import-notation": null,
-    "hue-degree-notation": null
+    "hue-degree-notation": null,
+    "custom-property-pattern": null,
+    "no-descending-specificity": null
   }
 }
