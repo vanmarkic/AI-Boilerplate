@@ -7,10 +7,12 @@ If it is empty or missing, ask the user to define the product specification befo
 This file describes HOW to write code (conventions, architecture, constraints).
 
 ## Stack
-- Frontend: Angular 18+ (standalone components, signals)
+- Frontend: Angular 21+ (standalone components, signals, zoneless)
 - Backend: FastAPI (Python 3.12+)
 - Database: PostgreSQL 17 (SQLAlchemy 2.0 + Alembic)
+- Auth: Keycloak (OIDC, JWT validation via PyJWT)
 - Contract: OpenAPI 3.1 (code-first — generated from FastAPI routers via `make generate`)
+- Design System: `@aspect/design-system` — framework-agnostic CSS (OKLCH tokens, CSS layers, no Tailwind)
 
 ## Architecture
 Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
@@ -23,7 +25,7 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 5. Tests colocated with source files. Write failing test before implementation.
 6. Use strict TypeScript (`strict: true`). Use Python type hints on all functions.
 7. No `any` type in TypeScript. No untyped function signatures in Python.
-8. Auth is a stub — do not implement real authentication logic.
+8. Auth uses Keycloak (OIDC + JWT). Backend validates tokens via `core/auth.py`. Do not bypass or stub out auth.
 9. Each feature has a `manifest.yaml` describing its capabilities and dependencies.
 10. Run `make validate` before committing (runs architecture linter + all linters + all tests).
 
@@ -45,7 +47,7 @@ Quick reference: `make spec` → `make new-feature` → fill in routers + models
 - Do NOT use barrel exports (`index.ts` re-exports).
 - Do NOT modify the database schema without an Alembic migration.
 - Do NOT use `any` in TypeScript or untyped signatures in Python.
-- Do NOT implement real auth logic — the auth stub is intentional.
+- Do NOT bypass Keycloak auth — all protected endpoints must use `Depends(get_current_user)`.
 
 ## Meta
 See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
