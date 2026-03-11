@@ -1,4 +1,5 @@
 import os
+from collections.abc import AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -12,23 +13,26 @@ TEST_DB_URL = os.getenv(
     "DATABASE_URL",
     "sqlite+aiosqlite:///:memory:",
 )
-test_engine = create_async_engine(TEST_DB_URL)
-TestSession = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
 @pytest.fixture(autouse=True)
-async def setup_db():
-    async with test_engine.begin() as conn:
+async def setup_db() -> AsyncGenerator[None]:
+    engine = create_async_engine(TEST_DB_URL)
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    async with test_engine.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
 
 
 @pytest.fixture
-async def client():
-    async def override_session():
-        async with TestSession() as session:
+async def client() -> AsyncGenerator[AsyncClient]:
+    engine = create_async_engine(TEST_DB_URL)
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+
+    async def override_session() -> AsyncGenerator[AsyncSession]:
+        async with session_factory() as session:
             async with session.begin():
                 yield session
 
@@ -37,3 +41,4 @@ async def client():
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
+    await engine.dispose()
