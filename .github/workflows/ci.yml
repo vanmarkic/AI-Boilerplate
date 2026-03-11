@@ -82,6 +82,53 @@ jobs:
       - run: npm run lint:all
         working-directory: frontend
 
+  verify-tier1-build:
+    name: Verify Tier-1 Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pyyaml
+      - name: Filter backend features (tier 1)
+        run: python shared/scripts/filter-features.py --tier=1 --src=backend/features --dest=/tmp/tier1-backend
+      - name: Filter frontend features (tier 1)
+        run: python shared/scripts/filter-features.py --tier=1 --src=frontend/src/app/features --dest=/tmp/tier1-frontend --frontend
+      - name: Verify no higher-tier leaks
+        run: python shared/scripts/verify-tier-build.py --tier=1 --backend-dest=/tmp/tier1-backend --frontend-dest=/tmp/tier1-frontend
+
+  tier1-e2e:
+    name: Tier-1 E2E Tests
+    needs: [verify-tier1-build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install pyyaml
+      - name: Filter frontend features to tier 1
+        run: |
+          python shared/scripts/filter-features.py --tier=1 --src=frontend/src/app/features --dest=/tmp/tier1-fe --frontend
+          rm -rf frontend/src/app/features
+          cp -r /tmp/tier1-fe frontend/src/app/features
+      - run: npm ci --ignore-scripts
+        working-directory: frontend
+      - run: npx playwright install --with-deps chromium
+        working-directory: frontend
+      - run: npx playwright test e2e/tests/tier1-surface.spec.ts
+        working-directory: frontend
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: tier1-e2e-report
+          path: frontend/playwright-report/
+          retention-days: 7
+
   openapi-validate:
     name: OpenAPI Validation
     runs-on: ubuntu-latest
