@@ -31,9 +31,15 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - run: npm ci --ignore-scripts
-        working-directory: frontend
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - run: pip install -e ".[dev]"
+        working-directory: backend
+      - run: python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
+        working-directory: backend
+      - run: bash shared/scripts/generate-frontend.sh
       - run: npm run build-storybook
         working-directory: frontend
       - uses: actions/upload-pages-artifact@v3
