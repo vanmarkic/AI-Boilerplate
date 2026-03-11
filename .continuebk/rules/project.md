@@ -8,8 +8,9 @@ alwaysApply: true
 # AI Boilerplate — Project Rules
 
 ## Stack
-- Frontend: Angular 18+ standalone components, signals, Tailwind CSS v4
+- Frontend: Angular 21+ standalone components, signals, zoneless, `@aspect/design-system` (CSS tokens + utilities, no Tailwind)
 - Backend: FastAPI Python 3.12+, SQLAlchemy 2.0 async, Alembic, PostgreSQL 17
+- Auth: Keycloak (OIDC, JWT validation via PyJWT)
 - Contract: OpenAPI 3.1 (code-first — generated from FastAPI routers via `make generate`)
 
 ## Universal Rules
@@ -20,7 +21,7 @@ alwaysApply: true
 5. **Tests colocated** with source. Write failing test before implementation (TDD).
 6. Strict TypeScript (`strict: true`). Python: type hints on ALL function signatures.
 7. No `any` in TypeScript. No untyped Python functions.
-8. Auth is a stub — **never implement real authentication logic**.
+8. Auth uses Keycloak (OIDC + JWT). Backend validates tokens via `core/auth.py`.
 9. Every feature has a `manifest.yaml` with a `tier: 1|2|3` field.
 10. Run `make validate` before committing (architecture linter + all linters + all tests).
 
@@ -77,7 +78,7 @@ router → service → repository → model/schema
 
 ---
 
-## Frontend Rules (Angular 18+)
+## Frontend Rules (Angular 21+)
 
 ### NEVER generate
 - No NgModules — all components are standalone
@@ -101,15 +102,18 @@ router → service → repository → model/schema
 ### Component Architecture
 - **UI Primitives** (`shared/ui/`): inline template, single `.ts`, ≤150 lines, no `inject()`, pure input/output, OnPush, colocated `.stories.ts`
 - **Feature Components** (`features/`): wire services, can use `inject()`, lazy-loaded
-- Variants: `computed()` + `Record<string, string>` maps
-- Use `cn()` from `shared/utils.ts` for class merging
+- Variants: `data-*` HTML attributes + CSS attribute selectors (zero runtime cost)
+- No `cn()`, `clsx`, or `tailwind-merge`
 
-### Styling (Tailwind v4)
-- Semantic tokens only: `bg-primary`, `text-foreground`, `border-border`
-- **NEVER** arbitrary values like `bg-[#3B82F6]`
+### Styling (`@aspect/design-system`)
+- All styles live in `packages/design-system/` — the single source of truth for CSS
+- No Tailwind, no PostCSS, no preprocessors — pure web-native CSS
+- CSS layers: `@layer reset, tokens, utilities, components`
+- Utility classes: `bg-primary`, `text-foreground`, `flex`, `gap-md`, etc.
 - Spacing via token scale: `p-xs`, `p-sm`, `p-md`, `p-lg`, `p-xl`
 - Base classes via `host: { 'class': '...' }` in `@Component`
 - Component-scoped styles only for animations or pseudo-elements
+- Do NOT write new CSS in Angular components or `frontend/src/styles/`
 
 ### Routing & HTTP
 - Each feature exports a `FEATURE_ROUTES` constant
