@@ -13,9 +13,7 @@ dist/
 .env.local
 
 # Generated code
-shared/openapi.json
 backend/generated/
-frontend/src/app/shared/api/generated/
 
 # Worktrees
 .worktrees/
