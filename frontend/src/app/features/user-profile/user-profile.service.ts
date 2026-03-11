@@ -12,7 +12,7 @@ export class UserProfileService {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const { data } = await getUser({ path: { id } });
+      const { data } = await getUser({ path: { user_id: id } });
       this.user.set(data ?? null);
     } catch {
       this.error.set('Failed to load user');

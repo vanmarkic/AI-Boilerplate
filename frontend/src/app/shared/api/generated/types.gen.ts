@@ -5,12 +5,44 @@ export type CreateUserRequest = {
     name: string;
 };
 
+export type HttpValidationError = {
+    detail?: Array<ValidationError>;
+};
+
 export type UserResponse = {
     id: number;
     email: string;
     name: string;
     created_at: string;
 };
+
+export type ValidationError = {
+    loc: Array<string | number>;
+    msg: string;
+    type: string;
+    input?: unknown;
+    ctx?: {
+        [key: string]: unknown;
+    };
+};
+
+export type HealthCheckApiHealthGetData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/health';
+};
+
+export type HealthCheckApiHealthGetResponses = {
+    /**
+     * Successful Response
+     */
+    200: {
+        [key: string]: string;
+    };
+};
+
+export type HealthCheckApiHealthGetResponse = HealthCheckApiHealthGetResponses[keyof HealthCheckApiHealthGetResponses];
 
 export type CreateUserData = {
     body: CreateUserRequest;
@@ -19,9 +51,18 @@ export type CreateUserData = {
     url: '/api/users';
 };
 
+export type CreateUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type CreateUserError = CreateUserErrors[keyof CreateUserErrors];
+
 export type CreateUserResponses = {
     /**
-     * Created
+     * Successful Response
      */
     201: UserResponse;
 };
@@ -31,15 +72,24 @@ export type CreateUserResponse = CreateUserResponses[keyof CreateUserResponses];
 export type GetUserData = {
     body?: never;
     path: {
-        id: number;
+        user_id: number;
     };
     query?: never;
-    url: '/api/users/{id}';
+    url: '/api/users/{user_id}';
 };
+
+export type GetUserErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetUserError = GetUserErrors[keyof GetUserErrors];
 
 export type GetUserResponses = {
     /**
-     * OK
+     * Successful Response
      */
     200: UserResponse;
 };
