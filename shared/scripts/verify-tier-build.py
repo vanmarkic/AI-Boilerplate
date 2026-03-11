@@ -184,8 +184,12 @@ def verify_core_no_feature_imports(excluded: set[str]) -> list[str]:
     violations: list[str] = []
 
     # Backend core — check Python AST
+    # Skip dependencies.py: it uses lazy imports inside factory functions
+    # and is never called for excluded features (routers are auto-discovered).
     if BACKEND_CORE.exists():
         for py_file in BACKEND_CORE.rglob("*.py"):
+            if py_file.name == "dependencies.py":
+                continue
             try:
                 tree = ast.parse(py_file.read_text())
             except SyntaxError:

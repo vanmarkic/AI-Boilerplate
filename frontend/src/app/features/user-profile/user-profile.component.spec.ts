@@ -1,24 +1,26 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { UserProfileComponent } from './user-profile.component';
-import { UserProfileService } from './user-profile.service';
+import { UserProfileStore } from './user-profile.store';
 import { User } from './user-profile.types';
 
 describe('UserProfileComponent', () => {
   let fixture: ComponentFixture<UserProfileComponent>;
 
-  const mockService = {
-    user: signal<User | null>(null),
+  const mockStore = {
+    item: signal<User | null>(null),
+    items: signal<User[]>([]),
     loading: signal(false),
     error: signal<string | null>(null),
     loadUser: vi.fn(),
+    run: vi.fn(),
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [UserProfileComponent],
       providers: [
-        { provide: UserProfileService, useValue: mockService },
+        { provide: UserProfileStore, useValue: mockStore },
       ],
     }).compileComponents();
 
@@ -30,14 +32,14 @@ describe('UserProfileComponent', () => {
   });
 
   it('should display loading state', () => {
-    mockService.loading.set(true);
+    mockStore.loading.set(true);
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Loading...');
   });
 
   it('should display user name when loaded', () => {
-    mockService.loading.set(false);
-    mockService.user.set({
+    mockStore.loading.set(false);
+    mockStore.item.set({
       id: 1,
       email: 'jane@test.com',
       name: 'Jane Doe',
@@ -48,8 +50,8 @@ describe('UserProfileComponent', () => {
   });
 
   it('should display error message', () => {
-    mockService.loading.set(false);
-    mockService.error.set('Failed to load user');
+    mockStore.loading.set(false);
+    mockStore.error.set('Failed to load user');
     fixture.detectChanges();
     expect(fixture.nativeElement.textContent).toContain('Failed to load user');
   });
