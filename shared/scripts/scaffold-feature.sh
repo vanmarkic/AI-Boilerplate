@@ -20,7 +20,6 @@ BACKEND_DIR="backend/features/$SNAKE"
 mkdir -p "$BACKEND_DIR"
 
 cat > "$BACKEND_DIR/${SNAKE}_model.py" << PYEOF
-from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
@@ -65,7 +64,6 @@ PYEOF
 cat > "$BACKEND_DIR/${SNAKE}_service.py" << PYEOF
 from fastapi import HTTPException, status
 
-from features.${SNAKE}.${SNAKE}_model import ${CLASS}
 from features.${SNAKE}.${SNAKE}_repository import ${CLASS}Repository
 from features.${SNAKE}.${SNAKE}_schema import Create${CLASS}Request, ${CLASS}Response
 
@@ -90,9 +88,9 @@ PYEOF
 cat > "$BACKEND_DIR/${SNAKE}_router.py" << PYEOF
 from fastapi import APIRouter, Depends, status
 
+from core.dependencies import get_${SNAKE}_service
 from features.${SNAKE}.${SNAKE}_schema import Create${CLASS}Request, ${CLASS}Response
 from features.${SNAKE}.${SNAKE}_service import ${CLASS}Service
-from core.dependencies import get_${SNAKE}_service
 
 router = APIRouter(prefix="/api/${PLURAL}", tags=["${PLURAL}"])
 
