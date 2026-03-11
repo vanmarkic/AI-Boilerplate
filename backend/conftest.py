@@ -1,4 +1,5 @@
 import os
+from collections.abc import AsyncGenerator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -17,7 +18,7 @@ TestSession = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
 @pytest.fixture(autouse=True)
-async def setup_db():
+async def setup_db() -> AsyncGenerator[None]:
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
@@ -26,8 +27,8 @@ async def setup_db():
 
 
 @pytest.fixture
-async def client():
-    async def override_session():
+async def client() -> AsyncGenerator[AsyncClient]:
+    async def override_session() -> AsyncGenerator[AsyncSession]:
         async with TestSession() as session:
             async with session.begin():
                 yield session
