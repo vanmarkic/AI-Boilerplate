@@ -116,8 +116,8 @@ jobs:
           python shared/scripts/filter-features.py --tier=1 --src=frontend/src/app/features --dest=/tmp/tier1-fe --frontend
           rm -rf frontend/src/app/features
           cp -r /tmp/tier1-fe frontend/src/app/features
-      - run: npm ci --ignore-scripts
-        working-directory: frontend
+      - run: npm ci
+      - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
       - run: npx playwright install --with-deps chromium
         working-directory: frontend
       - run: npx playwright test e2e/tests/tier1-surface.spec.ts
