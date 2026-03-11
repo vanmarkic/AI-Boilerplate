@@ -1,9 +1,9 @@
-# Frontend — Angular 21+ (Standalone, Signals, Tailwind, Storybook)
+# Frontend — Angular 21+ (Standalone, Signals, CSS Design System, Storybook)
 
 ## Stack
 - Angular 21+ with standalone components and signals
 - NgRx Signal Store (`@ngrx/signals`) for state management
-- Tailwind CSS v4 with @theme design tokens
+- `@aspect/design-system` — framework-agnostic CSS package (tokens, utilities, components)
 - Angular CDK for headless behavior (overlays, a11y, drag-drop)
 - Storybook for visual component development
 - Vitest for testing, ESLint + Stylelint + CSpell for code quality
@@ -42,9 +42,8 @@
 1. Inline templates, single .ts file, <= 150 lines.
 2. No services or inject() calls — pure inputs/outputs.
 3. OnPush change detection always.
-4. Variants via `computed()` + `Record<string, string>` maps.
-5. Use `cn()` from `shared/utils.ts` for class merging.
-6. Each component has a `.stories.ts` file for Storybook.
+4. Variants via `data-*` attributes + CSS attribute selectors (zero runtime cost).
+5. Each component has a `.stories.ts` file for Storybook.
 
 ### Feature Components (`features/`)
 7. Wire services to UI components.
@@ -52,29 +51,36 @@
 9. Lazy-loaded via feature routes.
 
 ## Styling Rules
-10. Use semantic token names: `bg-primary`, `text-foreground`, `border-border`.
-11. NEVER use arbitrary values like `bg-[#3B82F6]`.
-12. All spacing via token scale: `p-xs`, `p-sm`, `p-md`, `p-lg`.
+
+**All styles live in `packages/design-system/` — the single source of truth for CSS.**
+Do NOT write new CSS in Angular components or `frontend/src/styles/`. If a utility class or component style is missing, add it to the design-system package.
+
+10. Use utility classes from `@aspect/design-system` (e.g., `bg-primary`, `flex`, `gap-md`).
+11. NEVER hardcode colors, spacing, or font sizes — always use design tokens via CSS custom properties or utility classes.
+12. All spacing via token scale: `p-xs`, `p-sm`, `p-md`, `p-lg`, `p-xl`.
 13. Apply base classes via `host: { 'class': '...' }`.
-14. Component-scoped styles only for animations or pseudo-elements.
+14. Component-scoped `styles` only for animations or pseudo-elements — never for layout, color, or spacing.
+15. No Tailwind, no PostCSS, no `cn()`, no `clsx`, no `tailwind-merge`.
 
 ## Variant Pattern
 ```typescript
-readonly variant = input<'default' | 'outline'>('default');
-private readonly variantClasses: Record<string, string> = {
-  default: 'bg-primary text-primary-foreground',
-  outline: 'border border-input bg-background',
-};
-protected readonly hostClasses = computed(() =>
-  cn('base-classes', this.variantClasses[this.variant()])
-);
+// Variants use data-* attributes, styled in packages/design-system/components.css
+host: {
+  '[attr.data-variant]': 'variant()',
+  '[attr.data-size]': 'size()',
+}
+```
+```css
+/* In packages/design-system/components.css */
+[appButton][data-variant="destructive"] { background-color: var(--color-destructive); }
 ```
 
 ## Available Design Tokens
-- Colors: primary, secondary, accent, destructive, muted
+- Colors: primary, secondary, accent, destructive, muted, warning, success, info
 - Surfaces: background, foreground, card, popover
 - Borders: border, input, ring
-- Spacing: xs (0.25rem), sm (0.5rem), md (1rem), lg (1.5rem), xl (2rem)
+- Spacing: xs (0.25rem), sm (0.5rem), md (1rem), lg (1.5rem), xl (2rem), 2xl (3rem)
+- Containers: xs–5xl (20rem–96rem)
 - Radius: sm, md, lg, full
 
 ## File Organization
@@ -161,7 +167,9 @@ export const RegisterStore = signalStore(
 ## Common Pitfalls
 - Do NOT use NgModules, `@Input()`/`@Output()`, `*ngIf`/`*ngFor`, or constructor injection.
 - Do NOT use `BehaviorSubject` for local state — use `signal()`.
-- Do NOT use arbitrary Tailwind values like `bg-[#3B82F6]` — use design tokens.
+- Do NOT write new CSS in components or `frontend/src/styles/` — add missing styles to `packages/design-system/`.
+- Do NOT use Tailwind, `cn()`, `clsx`, or runtime class computation — use utility classes and `data-*` variants.
+- Do NOT hardcode colors, spacing, or font sizes — use design tokens.
 - Do NOT put business logic or `inject()` calls in `shared/ui` components.
 - Do NOT import from a sibling feature — route through a shared service if needed.
 - Do NOT set `standalone: true` — it is the default and is omitted.
