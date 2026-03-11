@@ -44,7 +44,7 @@ export type HistogramVariant = 'default' | 'success' | 'destructive' | 'muted';
 export class HistogramTimelineComponent {
   readonly bars = input.required<HistogramBar[]>();
   readonly labels = input<HistogramLabel[]>([]);
-  readonly ariaLabel = input<string>('');
+  readonly ariaLabel = input.required<string>();
   readonly variant = input<HistogramVariant>('default');
 
   protected readonly max = computed(() => {
