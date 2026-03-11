@@ -13,23 +13,26 @@ TEST_DB_URL = os.getenv(
     "DATABASE_URL",
     "sqlite+aiosqlite:///:memory:",
 )
-test_engine = create_async_engine(TEST_DB_URL)
-TestSession = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
 @pytest.fixture(autouse=True)
 async def setup_db() -> AsyncGenerator[None]:
-    async with test_engine.begin() as conn:
+    engine = create_async_engine(TEST_DB_URL)
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     yield
-    async with test_engine.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+    await engine.dispose()
 
 
 @pytest.fixture
 async def client() -> AsyncGenerator[AsyncClient]:
+    engine = create_async_engine(TEST_DB_URL)
+    session_factory = async_sessionmaker(engine, expire_on_commit=False)
+
     async def override_session() -> AsyncGenerator[AsyncSession]:
-        async with TestSession() as session:
+        async with session_factory() as session:
             async with session.begin():
                 yield session
 
@@ -38,3 +41,4 @@ async def client() -> AsyncGenerator[AsyncClient]:
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
     app.dependency_overrides.clear()
+    await engine.dispose()
