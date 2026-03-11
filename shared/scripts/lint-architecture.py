@@ -65,17 +65,17 @@ def check_imports(filepath: Path) -> list[str]:
             if module.startswith("features."):
                 parts = module.split(".")
                 if len(parts) >= 3:
-                    imported_layer = parts[-1].split(".")[-1]
-                    # Extract layer from module like features.user.user_service
-                    for segment in parts[2:]:
-                        sub = segment.split("_")
-                        for s in sub:
-                            if s in LAYER_RULES and s not in allowed:
-                                violations.append(
-                                    f"{filepath}:{node.lineno} - "
-                                    f"'{layer}' layer imports '{s}' "
-                                    f"(allowed: {sorted(allowed)})"
-                                )
+                    # Extract layer from the last segment's suffix only.
+                    # e.g. features.test_widget.test_widget_service → "service"
+                    # This avoids false positives when feature names contain
+                    # layer keywords (e.g. "test_runner", "model_viewer").
+                    imported_suffix = parts[-1].rsplit("_", 1)[-1]
+                    if imported_suffix in LAYER_RULES and imported_suffix not in allowed:
+                        violations.append(
+                            f"{filepath}:{node.lineno} - "
+                            f"'{layer}' layer imports '{imported_suffix}' "
+                            f"(allowed: {sorted(allowed)})"
+                        )
     return violations
 
 
