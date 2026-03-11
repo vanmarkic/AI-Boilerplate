@@ -114,14 +114,14 @@ test.describe('Tier-1 backend API', () => {
   test('GET /api/health returns status ok', async ({ request }) => {
     const res = await request.get('/api/health');
     test.skip(!res.ok(), 'Backend not available');
-    const body = await res.json();
+    const body = (await res.json()) as { status: string; version: string };
     expect(body.status).toBe('ok');
     expect(body).toHaveProperty('version');
   });
 
   test('POST /api/users accepts valid registration', async ({ request }) => {
     const res = await request.post('/api/users', {
-      data: { name: 'E2E Test', email: `e2e-${Date.now()}@test.local` },
+      data: { name: 'E2E Test', email: `e2e-${String(Date.now())}@test.local` },
     });
     test.skip(res.status() === 0 || res.status() >= 500, 'Backend not available');
     // 201 Created or 409 Conflict (duplicate) are both valid in tier-1
