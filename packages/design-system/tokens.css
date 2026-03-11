@@ -80,6 +80,12 @@
     --container-lg: 32rem;
     --container-xl: 40rem;
     --container-2xl: 48rem;
+    --container-3xl: 64rem;   /* 1024px */
+    --container-4xl: 80rem;   /* 1280px */
+    --container-5xl: 96rem;   /* 1536px */
+
+    /* ── Layout ─────────────────────────────────────────── */
+    --sidebar-width: 16rem;
 
     /* ── Control heights ──────────────────────────────── */
     --control-sm: 2rem;
