@@ -72,19 +72,20 @@ describe('HistogramTimelineComponent', () => {
   it('should render labels at correct positions', () => {
     const labels = host.querySelectorAll('.histogram-label');
     expect(labels.length).toBe(2);
-    expect(labels[0].textContent?.trim()).toBe('8:00');
-    expect(labels[1].textContent?.trim()).toBe('10:00');
+    expect(labels[0].textContent.trim()).toBe('8:00');
+    expect(labels[1].textContent.trim()).toBe('10:00');
   });
 
   it('should set --label-position and --bar-count on labels', () => {
-    const labels = host.querySelectorAll('.histogram-label') as NodeListOf<HTMLElement>;
+    const labels = host.querySelectorAll<HTMLElement>('.histogram-label');
     expect(labels[0].style.getPropertyValue('--label-position')).toBe('0');
     expect(labels[1].style.getPropertyValue('--label-position')).toBe('2');
   });
 
   it('should set --bar-count on the labels container', () => {
-    const labelsContainer = host.querySelector('.histogram-labels') as HTMLElement;
-    expect(labelsContainer.style.getPropertyValue('--bar-count')).toBe('3');
+    const labelsContainer = host.querySelectorAll<HTMLElement>('.histogram-labels');
+    expect(labelsContainer.length).toBeGreaterThan(0);
+    expect(labelsContainer[0].style.getPropertyValue('--bar-count')).toBe('3');
   });
 
   it('should set data-variant="default" by default', () => {
