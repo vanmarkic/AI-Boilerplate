@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate spec aider-fill-in aider-debug aider-review
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate spec aider-fill-in aider-debug aider-review setup-hooks
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -50,6 +50,11 @@ spec: ## Print a SPECS.md section template (usage: make spec name=orders tier=2)
 	@echo ""
 	@echo "Copy the above into SPECS.md under '## Features & Business Rules'"
 	@echo ""
+
+setup-hooks: ## Install git hooks (run once after clone)
+	cp shared/scripts/pre-push.sh .git/hooks/pre-push
+	chmod +x .git/hooks/pre-push
+	@echo "✓ Git hooks installed"
 
 lint-arch: ## Run architecture boundary linter
 	python shared/scripts/lint-architecture.py
