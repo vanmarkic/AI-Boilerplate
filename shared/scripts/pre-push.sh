@@ -43,17 +43,14 @@ fi
 echo ""
 echo "═══ pre-push: running linters ═══"
 
-cd "$ROOT"
-
 echo "→ backend: ruff check"
-if ! cd "$ROOT/backend" && ruff check .; then
+if ! (cd "$ROOT/backend" && ruff check .); then
   echo "✗ Backend lint failed"
   exit 1
 fi
 
-echo "→ frontend: ng lint"
-cd "$ROOT/frontend"
-if ! npx ng lint; then
+echo "→ frontend: eslint"
+if ! (cd "$ROOT/frontend" && npx eslint "**/*.{js,ts,html,json}"); then
   echo "✗ Frontend lint failed"
   exit 1
 fi
