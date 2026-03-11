@@ -62,18 +62,7 @@ Do NOT write new CSS in Angular components or `frontend/src/styles/`. If a utili
 14. Component-scoped `styles` only for animations or pseudo-elements — never for layout, color, or spacing.
 15. No Tailwind, no PostCSS, no `cn()`, no `clsx`, no `tailwind-merge`.
 
-## Variant Pattern
-```typescript
-// Variants use data-* attributes, styled in packages/design-system/components.css
-host: {
-  '[attr.data-variant]': 'variant()',
-  '[attr.data-size]': 'size()',
-}
-```
-```css
-/* In packages/design-system/components.css */
-[appButton][data-variant="destructive"] { background-color: var(--color-destructive); }
-```
+See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, CDK usage, dialog pattern, store examples).
 
 ## Available Design Tokens
 - Colors: primary, secondary, accent, destructive, muted, warning, success, info
@@ -85,7 +74,7 @@ host: {
 
 ## File Organization
 15. Each feature is a folder under `src/app/features/`.
-16. Feature files: component.ts, store.ts, types.ts, routes.ts, spec.ts.
+16. Feature files: component.ts, store.ts (NgRx signalStore with `withResource`), types.ts, routes.ts, spec.ts.
 17. UI components in `src/app/shared/ui/` with colocated `.stories.ts`.
 18. No barrel exports except `shared/ui/` public API.
 19. Maximum 250 lines per file (150 for UI primitives).
@@ -96,32 +85,6 @@ host: {
 22. Write failing test first, then implement.
 23. Test each variant and interaction state.
 
-## Angular CDK Usage
-
-### a11y — Focus Trap
-```typescript
-import { CdkTrapFocus } from '@angular/cdk/a11y';
-
-@Component({ imports: [CdkTrapFocus], template: `<div cdkTrapFocus>...</div>` })
-```
-Use `cdkTrapFocus` on any container that should trap keyboard focus (dialogs, drawers, popovers).
-
-### Dialog Pattern
-Use `app-dialog-panel` from `shared/ui/` for all dialogs. Wire `[open]` and `(closed)`:
-```html
-@if (showDialog()) {
-  <app-dialog-panel (closed)="showDialog.set(false)">
-    <span dialogTitle>Confirm Delete</span>
-    <p>This action cannot be undone.</p>
-    <ng-container dialogFooter>
-      <app-button variant="outline" (clicked)="showDialog.set(false)">Cancel</app-button>
-      <app-button variant="destructive" (clicked)="confirm()">Delete</app-button>
-    </ng-container>
-  </app-dialog-panel>
-}
-```
-Use `variant="destructive"` on the panel for confirmation dialogs.
-
 ## Routing
 24. Each feature exports a `FEATURE_ROUTES` constant.
 25. Top-level routes use `loadChildren()` for lazy loading.
@@ -129,34 +92,13 @@ Use `variant="destructive"` on the panel for confirmation dialogs.
 
 ## State Management (NgRx Signal Store)
 
-Use `signalStore()` from `@ngrx/signals` for structured state management:
 - Use `signalStore()` for any state shared across components or with async operations
+- Use `withResource<T>()` from `shared/data/with-resource.ts` for the standard loading/error/item pattern in feature stores
 - Use plain `signal()` only for component-local UI state (e.g., `showDialog = signal(false)`)
 - Place shared stores in `shared/` (e.g., `auth.store.ts`), feature stores in `features/<name>/`
 - Always use `patchState()` for state updates — never mutate state directly
 - Feature stores (not `providedIn: 'root'`) must be provided in the component `providers` array
 - Do NOT use `BehaviorSubject` or manual `signal()` services for feature/shared state
-
-```typescript
-// Shared store (global singleton)
-export const AuthStore = signalStore(
-  { providedIn: 'root' },
-  withState({ user: null, token: null }),
-  withComputed(({ user }) => ({
-    isAuthenticated: computed(() => user() !== null),
-  })),
-  withMethods((store) => ({
-    logout(): void { patchState(store, { user: null, token: null }); },
-  })),
-);
-
-// Feature store (component-scoped)
-export const RegisterStore = signalStore(
-  withState({ loading: false, success: false, error: null }),
-  withMethods((store) => ({ ... })),
-);
-// Provided in component: @Component({ providers: [RegisterStore] })
-```
 
 ## HTTP
 27. All API calls go through stores with signal state.
