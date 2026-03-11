@@ -36,7 +36,7 @@ if cd "$ROOT/backend" && python -c "import json; from main import create_app; pr
   fi
 else
   echo "⚠ Backend not available — skipping generation (using committed stubs)"
-  rm -f "$ROOT/shared/openapi.json"  # clean up partial file
+  git checkout -- "$ROOT/shared/openapi.json" 2>/dev/null  # restore committed version
 fi
 
 # Step 4: Lint (must pass to push)
