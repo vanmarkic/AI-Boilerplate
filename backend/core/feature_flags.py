@@ -1,6 +1,8 @@
 import json
 import os
+from collections.abc import Callable, Coroutine
 from functools import lru_cache
+from typing import Any
 
 from fastapi import Depends, HTTPException, status
 
@@ -27,7 +29,7 @@ def get_feature_flags() -> FeatureFlags:
     return FeatureFlags()
 
 
-def require_feature(feature_name: str):
+def require_feature(feature_name: str) -> Callable[..., Coroutine[Any, Any, None]]:
     """FastAPI dependency that gates an endpoint behind a feature flag.
 
     Usage: @router.get("/analytics", dependencies=[Depends(require_feature("analytics"))])
