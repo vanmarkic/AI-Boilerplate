@@ -1,0 +1,20 @@
+{
+  "name": "@aspect/design-system",
+  "version": "0.1.0",
+  "description": "Framework-agnostic CSS design system — tokens, reset, utilities, components",
+  "license": "MIT",
+  "type": "module",
+  "style": "index.css",
+  "exports": {
+    ".": "./index.css",
+    "./tokens.css": "./tokens.css",
+    "./reset.css": "./reset.css",
+    "./utilities.css": "./utilities.css",
+    "./components.css": "./components.css"
+  },
+  "files": [
+    "*.css",
+    "docs/"
+  ],
+  "keywords": ["css", "design-system", "tokens", "oklch", "css-layers"]
+}
