@@ -64,7 +64,7 @@ storybook: ## Start Storybook dev server
 
 lint: ## Run all linters
 	cd backend && ruff check .
-	cd frontend && npx ng lint
+	cd frontend && npx eslint "**/*.{js,ts,html,json}"
 
 validate: lint-arch lint test ## Validate everything: architecture + linters + tests
 
