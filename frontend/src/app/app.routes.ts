@@ -26,8 +26,22 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'register',
+    loadChildren: () =>
+      import('./features/register/register.routes').then(
+        (m) => m.REGISTER_ROUTES
+      ),
+  },
+  {
     path: 'auth',
     loadChildren: () =>
       import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
+  },
+  {
+    path: 'canary',
+    loadChildren: () =>
+      import('./features/canary/canary.routes').then(
+        (m) => m.CANARY_ROUTES
+      ),
   },
 ];

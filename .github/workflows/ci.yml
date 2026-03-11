@@ -82,6 +82,57 @@ jobs:
       - run: npm run lint:all
         working-directory: frontend
 
+  tier1-build-smoke:
+    name: Tier-1 Build Smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: pip install pyyaml
+
+      - name: Filter features to tier 1
+        run: |
+          python shared/scripts/filter-features.py --tier=1 \
+            --src=backend/features --dest=/tmp/tier1-be
+          python shared/scripts/filter-features.py --tier=1 \
+            --src=frontend/src/app/features --dest=/tmp/tier1-fe --frontend
+
+      - name: Apply filtered features to working tree
+        run: |
+          rm -rf frontend/src/app/features
+          cp -r /tmp/tier1-fe frontend/src/app/features
+          cp /tmp/app.routes.filtered.ts frontend/src/app/app.routes.ts
+
+      - name: Static verification (no higher-tier leaks)
+        run: >
+          python shared/scripts/verify-tier-build.py --tier=1
+          --backend-dest=/tmp/tier1-be
+          --frontend-dest=/tmp/tier1-fe
+
+      - run: npm ci
+      - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
+
+      - name: Build tier-1 production bundle
+        run: npm run build
+        working-directory: frontend
+
+      - name: Verify canary markers absent
+        run: |
+          if grep -r 'CANARY_TIER2_FRONTEND_MARKER' frontend/dist/ 2>/dev/null; then
+            echo "FAIL: tier-2 canary found in tier-1 frontend bundle"
+            exit 1
+          fi
+          if grep -r 'CANARY_TIER2_BACKEND_MARKER' /tmp/tier1-be/ 2>/dev/null; then
+            echo "FAIL: tier-2 canary found in tier-1 backend"
+            exit 1
+          fi
+          echo "OK: no tier-2 canary markers in tier-1 build"
+
   openapi-validate:
     name: OpenAPI Validation
     runs-on: ubuntu-latest
