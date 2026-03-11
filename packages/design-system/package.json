@@ -16,5 +16,12 @@
     "*.css",
     "docs/"
   ],
-  "keywords": ["css", "design-system", "tokens", "oklch", "css-layers"]
+  "keywords": ["css", "design-system", "tokens", "oklch", "css-layers"],
+  "scripts": {
+    "lint": "stylelint \"*.css\""
+  },
+  "devDependencies": {
+    "stylelint": "^16.0.0",
+    "stylelint-config-standard": "^37.0.0"
+  }
 }
