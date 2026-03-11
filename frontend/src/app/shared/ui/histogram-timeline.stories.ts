@@ -30,7 +30,7 @@ type Story = StoryObj<HistogramTimelineComponent>;
 export const Default: Story = {
   args: {
     bars: generateBars(60, 20),
-    labels: generateLabels(60, 10, i => `${i}m`),
+    labels: generateLabels(60, 10, i => `${String(i)}m`),
     ariaLabel: 'Events per minute (1 hour)',
     variant: 'default',
   },
@@ -39,7 +39,7 @@ export const Default: Story = {
 export const Dense720Bars: Story = {
   args: {
     bars: generateBars(720, 50),
-    labels: generateLabels(720, 60, i => `${Math.floor(i / 60)}:${String(i % 60).padStart(2, '0')}`),
+    labels: generateLabels(720, 60, i => `${String(Math.floor(i / 60))}:${String(i % 60).padStart(2, '0')}`),
     ariaLabel: 'Events per minute (12 hours)',
     variant: 'default',
   },
@@ -48,7 +48,7 @@ export const Dense720Bars: Story = {
 export const Success: Story = {
   args: {
     bars: generateBars(30, 100),
-    labels: generateLabels(30, 5, i => `Day ${i + 1}`),
+    labels: generateLabels(30, 5, i => `Day ${String(i + 1)}`),
     ariaLabel: 'Successful deployments per day',
     variant: 'success',
   },
@@ -57,7 +57,7 @@ export const Success: Story = {
 export const Destructive: Story = {
   args: {
     bars: generateBars(24, 15),
-    labels: generateLabels(24, 4, i => `${i}:00`),
+    labels: generateLabels(24, 4, i => `${String(i)}:00`),
     ariaLabel: 'Errors per hour',
     variant: 'destructive',
   },
@@ -66,7 +66,7 @@ export const Destructive: Story = {
 export const Muted: Story = {
   args: {
     bars: generateBars(90, 30),
-    labels: generateLabels(90, 15, i => `${i}d`),
+    labels: generateLabels(90, 15, i => `${String(i)}d`),
     ariaLabel: 'Background activity (90 days)',
     variant: 'muted',
   },
