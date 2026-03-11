@@ -19,7 +19,11 @@
     "pyyaml",
     "playwright",
     "chromium",
-    "wcag"
+    "wcag",
+    "aspect",
+    "btn",
+    "Pydantic",
+    "pkce"
   ],
   "caseSensitive": false,
   "allowCompoundWords": true,
