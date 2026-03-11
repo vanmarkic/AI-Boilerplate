@@ -31,8 +31,12 @@ make new-feature name=orders tier=2
 ```
 
 This generates:
-- Backend: model, schema, repository, service, router, test, manifest, `__init__.py`
-- Frontend: types, service, component, routes, spec
+- Backend: model, schema, repository (extends `CrudRepository`), service, router, test, manifest, `__init__.py`
+- Frontend: types, store (NgRx `signalStore` with `withResource`), component, routes, spec
+
+It also:
+- Auto-appends the dependency factory to `backend/core/dependencies.py`
+- Router is auto-discovered by `main.py` — no manual registration needed
 
 These are skeleton files with `TODO` markers. No LLM needed — this is deterministic.
 
@@ -54,12 +58,12 @@ Fill in the orders feature. SPECS.md has the domain model. Skeleton files are re
 
 The LLM fills in:
 - Model fields (from SPECS.md domain model)
-- Schema validation rules (from business rules)
-- Repository queries
-- Service logic
-- Router wiring (Pydantic models + FastAPI decorators define the API contract)
+- Schema request fields and response fields (from business rules)
+- Custom repository queries (CRUD methods inherited from `CrudRepository`)
+- Service creation logic (get/list/delete pre-filled, create is TODO)
 - Test cases (TDD: test first, then implementation)
-- Frontend component + service logic
+- Frontend store load method (replace TODO with generated API client call)
+- Frontend component template
 - Alembic migration (`cd backend && alembic revision --autogenerate -m 'add orders'`)
 
 After filling in the backend routers, run `make generate` to extract the OpenAPI spec and regenerate the TypeScript client.

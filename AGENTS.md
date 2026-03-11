@@ -39,7 +39,8 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 
 ## Feature Workflow
 Follow `docs/conventions/feature-workflow.md` for end-to-end feature development.
-Quick reference: `make spec` → `make new-feature` → fill in routers + models → `make generate` → `make validate` → git commit.
+Quick reference: `make spec` → `make new-feature` → fill in TODOs (model, schema, service create, frontend store) → `make generate` → `make validate` → git commit.
+Router registration and dependency wiring are automatic — no manual edits to `main.py` or `dependencies.py` needed.
 
 ## Common Pitfalls
 - Do NOT import across tiers (tier-1 code must not import from tier-2 or tier-3).

@@ -17,8 +17,8 @@ Pragmatic DDD with feature-sliced modules. Each feature is a flat folder under `
 9. Maximum 250 lines per file.
 
 ## FastAPI Conventions
-10. All routers mounted in `main.py` via `app.include_router()`.
-11. Use `Depends()` for dependency injection. Wire in `core/dependencies.py`.
+10. Routers are auto-discovered from `features/*/` by `main.py`. No manual registration needed.
+11. Use `Depends()` for dependency injection. Dependencies are auto-appended to `core/dependencies.py` by `scaffold-feature.sh`. Use lazy imports inside factory functions.
 12. All endpoints return Pydantic response models.
 13. Use `status.HTTP_XXX` constants, not raw integers.
 14. Prefix all routes with `/api/`.
@@ -29,9 +29,13 @@ Pragmatic DDD with feature-sliced modules. Each feature is a flat folder under `
 17. All models inherit from `core.database.Base`.
 18. Use async sessions via `AsyncSession`.
 
+## Base Classes (in `core/`)
+- `ResponseBase` (`core/base_schema.py`): extends `BaseModel` with `from_attributes`. All response schemas extend this.
+- `CrudRepository[T]` (`core/base_repository.py`): generic CRUD repo with `get_by_id`, `list`, `create`, `delete`. Feature repos extend this and add custom queries.
+
 ## Pydantic
-19. All request/response bodies are Pydantic `BaseModel` subclasses.
-20. Use `model_config = {"from_attributes": True}` for ORM-to-Pydantic.
+19. Request bodies extend `BaseModel`. Response bodies extend `ResponseBase` from `core/base_schema.py`.
+20. `ResponseBase` already sets `model_config = {"from_attributes": True}` — do NOT repeat it.
 21. Use `EmailStr` for email fields.
 
 ## Testing
@@ -56,5 +60,7 @@ Pragmatic DDD with feature-sliced modules. Each feature is a flat folder under `
 - Do NOT return raw dicts from endpoints — always use Pydantic response models.
 - Do NOT use raw HTTP status integers — use `status.HTTP_200_OK` etc.
 - Do NOT skip type hints on any function signature.
-- Do NOT wire dependencies inline — use `core/dependencies.py`.
+- Do NOT wire dependencies inline — use `core/dependencies.py` (auto-appended by scaffold).
+- Do NOT manually register routers in `main.py` — auto-discovery handles it.
+- Do NOT repeat `model_config = {"from_attributes": True}` — extend `ResponseBase` instead.
 - Do NOT modify the DB schema manually — always use Alembic migrations.
