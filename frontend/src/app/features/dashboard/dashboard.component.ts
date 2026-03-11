@@ -5,6 +5,7 @@ import {
   type HistogramBar,
   type HistogramLabel,
 } from '../../shared/ui/histogram-timeline.component';
+import { EventsListComponent, type Event } from '../../shared/ui/events-list.component';
 
 function seededRandom(seed: number) {
   return () => {
@@ -43,7 +44,7 @@ interface ActivityItem {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [HistogramTimelineComponent, BadgeComponent],
+  imports: [HistogramTimelineComponent, BadgeComponent, EventsListComponent],
   template: `
     <div class="flex flex-col gap-xl px-lg py-lg mx-auto" style="max-width: 72rem">
 
@@ -137,6 +138,12 @@ interface ActivityItem {
           </div>
         </div>
       </div>
+
+      <!-- Events section -->
+      <div class="card">
+        <h2 class="card-title">Upcoming events</h2>
+        <app-events-list [events]="events" />
+      </div>
     </div>
   `,
 })
@@ -175,5 +182,53 @@ export class DashboardComponent {
     { label: 'Memory', value: '4.2 / 8 GB' },
     { label: 'Disk', value: '67% used' },
     { label: 'DB connections', value: '42 / 100' },
+  ];
+
+  protected readonly events: Event[] = [
+    {
+      id: '1',
+      title: 'Team standup',
+      description: 'Daily sync with engineering team',
+      time: 'Today at 10:00 AM',
+      status: 'upcoming',
+      type: 'meeting',
+      badge: 'outline',
+    },
+    {
+      id: '2',
+      title: 'Release v2.5.0',
+      description: 'Production deployment scheduled',
+      time: 'Today at 2:00 PM',
+      status: 'upcoming',
+      type: 'milestone',
+      badge: 'default',
+    },
+    {
+      id: '3',
+      title: 'Database maintenance',
+      description: 'Scheduled backup and optimization',
+      time: 'Today at 6:00 PM',
+      status: 'upcoming',
+      type: 'deadline',
+      badge: 'secondary',
+    },
+    {
+      id: '4',
+      title: 'Code review complete',
+      description: 'PR #1247 approved and merged',
+      time: '2 hours ago',
+      status: 'completed',
+      type: 'notification',
+      badge: 'default',
+    },
+    {
+      id: '5',
+      title: 'Performance optimization',
+      description: 'API response time reduced by 25%',
+      time: '1 day ago',
+      status: 'completed',
+      type: 'milestone',
+      badge: 'default',
+    },
   ];
 }
