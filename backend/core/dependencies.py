@@ -20,3 +20,14 @@ async def get_user_service(
 
     repository = UserRepository(session)
     return UserService(repository)
+
+
+async def get_incident_service(
+    session: AsyncSession = Depends(get_session),
+) -> "IncidentService":  # noqa: F821
+    """Wire up the IncidentService with its repository."""
+    from features.incidents.incidents_repository import IncidentRepository
+    from features.incidents.incidents_service import IncidentService
+
+    repository = IncidentRepository(session)
+    return IncidentService(repository)

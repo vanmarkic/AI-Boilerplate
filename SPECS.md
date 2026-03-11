@@ -21,18 +21,23 @@
 
 <!-- One subsection per feature. Example: -->
 
-### Feature: orders (tier 2, backend + frontend)
+### Feature: incidents (tier 2, backend + frontend)
 
-- **Purpose:** Order placement and tracking.
+- **Purpose:** Track and visualize technical incidents with timeline and histogram view for incident management and analysis.
 - **Rules:**
-  - Minimum order value: $5.00
-  - Order status transitions: pending → paid → shipped → delivered
-  - Refunds allowed within 30 days of delivery
+  - Incidents have a title, description, severity level (critical, high, medium, low), start time, and optional end time
+  - Incidents can be created by authorized users
+  - Incidents can be filtered by severity, date range, and status (ongoing, resolved)
+  - Timeline view shows incidents chronologically with histogram aggregation by time period
 - **User stories:**
-  - As a buyer, I want to place an order so that I receive my items.
+  - As an operations engineer, I want to view a timeline of incidents so that I can track when issues occurred
+  - As a team lead, I want to see a histogram of incidents grouped by time period so that I can identify patterns
 - **API:**
-  - `POST /api/orders` — Place a new order
-  - `GET /api/orders/:id` — Get order details
+  - `POST /api/incidents` — Create a new incident
+  - `GET /api/incidents` — List incidents with optional filters (severity, date_from, date_to, status)
+  - `GET /api/incidents/:id` — Get incident details
+  - `PATCH /api/incidents/:id` — Update incident
+  - `GET /api/incidents/timeline/histogram` — Get histogram data for timeline visualization
 
 ## Glossary
 
