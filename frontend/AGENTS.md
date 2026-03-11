@@ -85,7 +85,7 @@ host: {
 
 ## File Organization
 15. Each feature is a folder under `src/app/features/`.
-16. Feature files: component.ts, store.ts, types.ts, routes.ts, spec.ts.
+16. Feature files: component.ts, store.ts (NgRx signalStore with `withResource`), types.ts, routes.ts, spec.ts.
 17. UI components in `src/app/shared/ui/` with colocated `.stories.ts`.
 18. No barrel exports except `shared/ui/` public API.
 19. Maximum 250 lines per file (150 for UI primitives).
@@ -131,6 +131,7 @@ Use `variant="destructive"` on the panel for confirmation dialogs.
 
 Use `signalStore()` from `@ngrx/signals` for structured state management:
 - Use `signalStore()` for any state shared across components or with async operations
+- Use `withResource<T>()` from `shared/data/with-resource.ts` for the standard loading/error/item pattern in feature stores
 - Use plain `signal()` only for component-local UI state (e.g., `showDialog = signal(false)`)
 - Place shared stores in `shared/` (e.g., `auth.store.ts`), feature stores in `features/<name>/`
 - Always use `patchState()` for state updates — never mutate state directly
