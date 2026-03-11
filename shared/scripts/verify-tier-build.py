@@ -49,8 +49,14 @@ def _read_tier(feature_dir: Path) -> int:
     manifest = feature_dir / "manifest.yaml"
     if not manifest.exists() or not HAS_YAML:
         return 1
-    with open(manifest) as f:
-        return yaml.safe_load(f).get("tier", 1)
+    try:
+        with open(manifest) as f:
+            data = yaml.safe_load(f)
+    except (OSError, yaml.YAMLError):
+        return 1
+    if not isinstance(data, dict):
+        return 1
+    return data.get("tier", 1)
 
 
 def _feature_names(src_dir: Path) -> dict[str, int]:
@@ -136,13 +142,13 @@ def verify_backend_entrypoint(excluded: set[str]) -> list[str]:
         return [f"[backend/main.py] SyntaxError — cannot parse"]
 
     for node in ast.walk(tree):
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            module = ""
-            if isinstance(node, ast.ImportFrom) and node.module:
-                module = node.module
-            elif isinstance(node, ast.Import):
-                module = ".".join(alias.name for alias in node.names)
+        modules: list[str] = []
+        if isinstance(node, ast.ImportFrom) and node.module:
+            modules.append(node.module)
+        elif isinstance(node, ast.Import):
+            modules.extend(alias.name for alias in node.names)
 
+        for module in modules:
             if module.startswith("features."):
                 feature_name = module.split(".")[1]
                 if feature_name in excluded:
@@ -185,12 +191,12 @@ def verify_core_no_feature_imports(excluded: set[str]) -> list[str]:
             except SyntaxError:
                 continue
             for node in ast.walk(tree):
-                if isinstance(node, (ast.Import, ast.ImportFrom)):
-                    module = ""
-                    if isinstance(node, ast.ImportFrom) and node.module:
-                        module = node.module
-                    elif isinstance(node, ast.Import):
-                        module = ".".join(alias.name for alias in node.names)
+                modules: list[str] = []
+                if isinstance(node, ast.ImportFrom) and node.module:
+                    modules.append(node.module)
+                elif isinstance(node, ast.Import):
+                    modules.extend(alias.name for alias in node.names)
+                for module in modules:
                     if module.startswith("features."):
                         feature_name = module.split(".")[1]
                         if feature_name in excluded:
