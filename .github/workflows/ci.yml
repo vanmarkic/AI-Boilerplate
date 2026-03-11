@@ -57,14 +57,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - run: npm ci
-      - run: pip install -e ".[dev]"
-        working-directory: backend
-      - run: python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
-        working-directory: backend
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run test:ci
         working-directory: frontend
@@ -83,10 +76,6 @@ jobs:
       - run: pip install ruff && ruff check .
         working-directory: backend
       - run: npm ci
-      - run: pip install -e ".[dev]"
-        working-directory: backend
-      - run: python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
-        working-directory: backend
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run lint:all
         working-directory: frontend
@@ -96,14 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: pip install -e ".[dev]"
-        working-directory: backend
-      - run: python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
-        working-directory: backend
       - run: npx @redocly/cli lint shared/openapi.json

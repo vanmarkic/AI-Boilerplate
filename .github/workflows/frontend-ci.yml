@@ -3,10 +3,10 @@ name: Frontend CI
 on:
   push:
     branches: [master]
-    paths: ['frontend/**', 'packages/**']
+    paths: ['frontend/**', 'packages/**', 'shared/openapi.json']
   pull_request:
     branches: [master]
-    paths: ['frontend/**', 'packages/**']
+    paths: ['frontend/**', 'packages/**', 'shared/openapi.json']
 
 permissions:
   contents: read
@@ -28,15 +28,8 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - run: npm ci
         working-directory: .
-      - run: pip install -e ".[dev]"
-        working-directory: backend
-      - run: python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
-        working-directory: backend
       - run: bash shared/scripts/generate-frontend.sh
         working-directory: .
       - uses: actions/cache/save@v4
