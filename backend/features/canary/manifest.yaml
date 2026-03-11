@@ -1,0 +1,3 @@
+name: canary
+tier: 2
+description: Canary feature for tier-filtering smoke tests. Must never appear in tier-1 builds.
