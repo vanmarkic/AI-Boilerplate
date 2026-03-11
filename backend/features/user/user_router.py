@@ -7,7 +7,9 @@ from features.user.user_service import UserService
 router = APIRouter(prefix="/api/users", tags=["users"])
 
 
-@router.post("", status_code=status.HTTP_201_CREATED, response_model=UserResponse)
+@router.post(
+    "", status_code=status.HTTP_201_CREATED, response_model=UserResponse, operation_id="createUser"
+)
 async def create_user(
     request: CreateUserRequest,
     service: UserService = Depends(get_user_service),
@@ -15,7 +17,7 @@ async def create_user(
     return await service.create_user(request)
 
 
-@router.get("/{user_id}", response_model=UserResponse)
+@router.get("/{user_id}", response_model=UserResponse, operation_id="getUser")
 async def get_user(
     user_id: int,
     service: UserService = Depends(get_user_service),
