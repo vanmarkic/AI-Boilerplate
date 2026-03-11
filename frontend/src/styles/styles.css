@@ -1,11 +1,6 @@
-/* ── Layer Order Declaration ──────────────────────────────
- *  Establishes deterministic cascade:
- *  reset < tokens < utilities < components
+/* ── Design System ───────────────────────────────────────
+ * Imports the full design system from @aspect/design-system.
+ * Local overrides (if any) go after this import.
  * ──────────────────────────────────────────────────────── */
 
-@layer reset, tokens, utilities, components;
-
-@import "./tokens.css";
-@import "./reset.css";
-@import "./utilities.css";
-@import "./components.css";
+@import "@aspect/design-system";
