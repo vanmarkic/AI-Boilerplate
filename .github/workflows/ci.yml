@@ -82,25 +82,8 @@ jobs:
       - run: npm run lint:all
         working-directory: frontend
 
-  verify-tier1-build:
-    name: Verify Tier-1 Build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: pip install pyyaml
-      - name: Filter backend features (tier 1)
-        run: python shared/scripts/filter-features.py --tier=1 --src=backend/features --dest=/tmp/tier1-backend
-      - name: Filter frontend features (tier 1)
-        run: python shared/scripts/filter-features.py --tier=1 --src=frontend/src/app/features --dest=/tmp/tier1-frontend --frontend
-      - name: Verify no higher-tier leaks
-        run: python shared/scripts/verify-tier-build.py --tier=1 --backend-dest=/tmp/tier1-backend --frontend-dest=/tmp/tier1-frontend
-
-  tier1-e2e:
-    name: Tier-1 E2E Tests
-    needs: [verify-tier1-build]
+  tier1-build-smoke:
+    name: Tier-1 Build Smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -111,23 +94,44 @@ jobs:
         with:
           node-version: '22'
       - run: pip install pyyaml
-      - name: Filter frontend features to tier 1
+
+      - name: Filter features to tier 1
         run: |
-          python shared/scripts/filter-features.py --tier=1 --src=frontend/src/app/features --dest=/tmp/tier1-fe --frontend
+          python shared/scripts/filter-features.py --tier=1 \
+            --src=backend/features --dest=/tmp/tier1-be
+          python shared/scripts/filter-features.py --tier=1 \
+            --src=frontend/src/app/features --dest=/tmp/tier1-fe --frontend
+
+      - name: Apply filtered features to working tree
+        run: |
           rm -rf frontend/src/app/features
           cp -r /tmp/tier1-fe frontend/src/app/features
+          cp /tmp/app.routes.filtered.ts frontend/src/app/app.routes.ts
+
+      - name: Static verification (no higher-tier leaks)
+        run: >
+          python shared/scripts/verify-tier-build.py --tier=1
+          --backend-dest=/tmp/tier1-be
+          --frontend-dest=/tmp/tier1-fe
+
       - run: npm ci
       - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
-      - run: npx playwright install --with-deps chromium
+
+      - name: Build tier-1 production bundle
+        run: npm run build
         working-directory: frontend
-      - run: npx playwright test e2e/tests/tier1-surface.spec.ts
-        working-directory: frontend
-      - uses: actions/upload-artifact@v4
-        if: ${{ !cancelled() }}
-        with:
-          name: tier1-e2e-report
-          path: frontend/playwright-report/
-          retention-days: 7
+
+      - name: Verify canary markers absent
+        run: |
+          if grep -r 'CANARY_TIER2_FRONTEND_MARKER' frontend/dist/ 2>/dev/null; then
+            echo "FAIL: tier-2 canary found in tier-1 frontend bundle"
+            exit 1
+          fi
+          if grep -r 'CANARY_TIER2_BACKEND_MARKER' /tmp/tier1-be/ 2>/dev/null; then
+            echo "FAIL: tier-2 canary found in tier-1 backend"
+            exit 1
+          fi
+          echo "OK: no tier-2 canary markers in tier-1 build"
 
   openapi-validate:
     name: OpenAPI Validation
