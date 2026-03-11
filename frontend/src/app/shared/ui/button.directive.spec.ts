@@ -24,6 +24,10 @@ describe('ButtonDirective', () => {
     button = fixture.nativeElement.querySelector('button');
   });
 
+  it('should have btn class on host', () => {
+    expect(button.classList.contains('btn')).toBe(true);
+  });
+
   it('should set data-variant="default" by default', () => {
     expect(button.getAttribute('data-variant')).toBe('default');
   });
