@@ -58,6 +58,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm ci
+      - run: npm i
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run test:ci
         working-directory: frontend
@@ -76,6 +77,7 @@ jobs:
       - run: pip install ruff && ruff check .
         working-directory: backend
       - run: npm ci
+      - run: npm i
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run lint:all
         working-directory: frontend
