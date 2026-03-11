@@ -50,4 +50,5 @@ Quick reference: `make spec` → `make new-feature` → fill in routers + models
 - Do NOT bypass Keycloak auth — all protected endpoints must use `Depends(get_current_user)`.
 
 ## Meta
-See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
+- See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
+- Do NOT create a `CLAUDE.md` file. All project instructions live in AGENTS.md files.
