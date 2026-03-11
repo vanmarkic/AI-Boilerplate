@@ -37,4 +37,11 @@ export const routes: Routes = [
     loadChildren: () =>
       import('./features/auth/auth.routes').then((m) => m.AUTH_ROUTES),
   },
+  {
+    path: 'canary',
+    loadChildren: () =>
+      import('./features/canary/canary.routes').then(
+        (m) => m.CANARY_ROUTES
+      ),
+  },
 ];
