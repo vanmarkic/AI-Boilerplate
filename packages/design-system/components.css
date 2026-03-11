@@ -348,13 +348,12 @@
 
   /* ── Size variants ── */
   .collapsible-panel[data-size="sm"] {
-    & > .collapsible-panel-trigger {
+    & .collapsible-panel-trigger {
       padding: var(--spacing-sm);
       font-size: var(--font-size-xs);
       line-height: var(--font-size-xs--line-height);
     }
 
-    & > .collapsible-panel-content,
     & .collapsible-panel-content {
       padding-inline: var(--spacing-sm);
       padding-block-end: var(--spacing-sm);
@@ -364,13 +363,12 @@
   }
 
   .collapsible-panel[data-size="lg"] {
-    & > .collapsible-panel-trigger {
+    & .collapsible-panel-trigger {
       padding: var(--spacing-lg);
       font-size: var(--font-size-base);
       line-height: var(--font-size-base--line-height);
     }
 
-    & > .collapsible-panel-content,
     & .collapsible-panel-content {
       padding-inline: var(--spacing-lg);
       padding-block-end: var(--spacing-lg);
