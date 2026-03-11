@@ -1,0 +1,8 @@
+extends:
+  - recommended
+
+rules:
+  no-empty-servers: warn
+  security-defined: warn
+  info-license: warn
+  operation-4xx-response: warn
