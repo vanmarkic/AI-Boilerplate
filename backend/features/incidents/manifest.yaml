@@ -1,0 +1,16 @@
+name: incidents
+tier: 2
+description: Track and visualize technical incidents with timeline and histogram view for incident management and analysis.
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [postgresql]
+api_endpoints:
+  - POST /api/incidents
+  - GET /api/incidents
+  - GET /api/incidents/{incident_id}
+  - PATCH /api/incidents/{incident_id}
+  - GET /api/incidents/timeline/histogram
+models: [Incident]
+events_emitted: []
+events_consumed: []
