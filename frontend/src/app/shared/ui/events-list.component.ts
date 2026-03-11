@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { BadgeComponent } from './badge.component';
 
 export interface Event {
@@ -13,7 +13,9 @@ export interface Event {
 
 @Component({
   selector: 'app-events-list',
+  standalone: true,
   imports: [BadgeComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-col gap-sm">
       @for (event of events(); track event.id) {

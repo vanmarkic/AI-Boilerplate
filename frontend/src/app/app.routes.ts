@@ -44,4 +44,12 @@ export const routes: Routes = [
         (m) => m.CANARY_ROUTES
       ),
   },
+  {
+    path: 'events',
+    loadChildren: () =>
+      import('./features/events/events.routes').then(
+        (m) => m.EVENTS_ROUTES
+      ),
+    canActivate: [authGuard],
+  },
 ];
