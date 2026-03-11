@@ -38,19 +38,22 @@ No runtime class computation. No `cn()`, `clsx`, or `tailwind-merge`.
 
 ### Design Tokens
 
-All visual decisions in `frontend/src/styles/tokens.css` as CSS custom properties on `:root`.
+All visual decisions in `packages/design-system/tokens.css` as CSS custom properties on `:root`.
 OKLCH color space. 4px spacing grid. Never hardcode colors/spacing in components.
 
 ### CSS Architecture
 
+**`packages/design-system/` is the single source of truth for all CSS.**
+Do NOT write new CSS in Angular components or `frontend/src/styles/`. If a utility class or component style is missing, add it to the design-system package.
+
 Pure web-native CSS. No Tailwind, no PostCSS, no preprocessors.
-CSS lives in `packages/design-system/` and is consumed via `@import "@aspect/design-system"` in `frontend/src/styles/styles.css`.
+Consumed via `@import "@aspect/design-system"` in `frontend/src/styles/styles.css`.
 ```
 @layer reset, tokens, utilities, components;   ← cascade order in styles.css
 ```
 - `tokens.css` — `:root` custom properties (colors, spacing, typography, shadows)
 - `reset.css` — minimal box-sizing + body defaults
-- `utilities.css` — single-responsibility utility classes (~80)
+- `utilities.css` — single-responsibility utility classes (~100)
 - `components.css` — semantic component styles with `data-*` attribute selectors
 
 Uses: `@layer`, native nesting, `oklch()`, `color-mix()`, logical properties.
