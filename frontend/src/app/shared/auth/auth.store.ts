@@ -60,9 +60,10 @@ export class AuthStore {
     const parsed = this.keycloak.tokenParsed;
     if (parsed) {
       this._user.set({
-        id: parsed['sub'] ?? '',
+        id: parsed.sub ?? '',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         email: parsed['email'] ?? '',
-        roles: parsed['realm_access']?.['roles'] ?? [],
+        roles: parsed.realm_access?.roles ?? [],
       });
       this._token.set(this.keycloak.token ?? null);
     }
