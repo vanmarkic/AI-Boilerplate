@@ -41,10 +41,11 @@ Pragmatic DDD with feature-sliced modules. Each feature is a flat folder under `
 25. Override `get_session` dependency for test database isolation.
 26. Write failing test first. Watch it fail. Then implement.
 
-## Auth
-27. Auth is a stub in `core/auth.py`. Do NOT implement real auth.
+## Auth (Keycloak)
+27. Auth uses Keycloak OIDC. `core/auth.py` validates JWTs via PyJWT + JWKS.
 28. Protected endpoints use `Depends(get_current_user)`.
-29. `CurrentUser` dataclass provides id, email, roles.
+29. `CurrentUser` dataclass provides id, email, roles (extracted from JWT claims).
+30. Keycloak config: `settings.keycloak_url`, `settings.keycloak_realm`, `settings.keycloak_audience`.
 
 ## Migrations
 30. Alembic for all schema changes. Never modify DB manually.
