@@ -279,18 +279,18 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-xs);
-  }
 
-  .histogram-timeline[data-variant="success"] {
-    --histogram-bar-color: var(--color-success);
-  }
+    &[data-variant="success"] {
+      --histogram-bar-color: var(--color-success);
+    }
 
-  .histogram-timeline[data-variant="destructive"] {
-    --histogram-bar-color: var(--color-destructive);
-  }
+    &[data-variant="destructive"] {
+      --histogram-bar-color: var(--color-destructive);
+    }
 
-  .histogram-timeline[data-variant="muted"] {
-    --histogram-bar-color: var(--color-muted-foreground);
+    &[data-variant="muted"] {
+      --histogram-bar-color: var(--color-muted-foreground);
+    }
   }
 
   .histogram-bars {

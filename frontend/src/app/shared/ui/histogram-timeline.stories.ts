@@ -1,9 +1,17 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { HistogramTimelineComponent } from './histogram-timeline.component';
 
-function generateBars(count: number, maxValue: number) {
+function seededRandom(seed: number) {
+  return () => {
+    seed = (seed * 16807) % 2147483647;
+    return (seed - 1) / 2147483646;
+  };
+}
+
+function generateBars(count: number, maxValue: number, seed = 42) {
+  const rand = seededRandom(seed);
   return Array.from({ length: count }, () => ({
-    value: Math.floor(Math.random() * maxValue),
+    value: Math.floor(rand() * maxValue),
   }));
 }
 
