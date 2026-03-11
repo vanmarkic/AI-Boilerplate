@@ -10,6 +10,7 @@ from core.database import Base
 
 # Import all models so Alembic detects them
 from features.user.user_model import User  # noqa: F401
+from features.events.event_model import Event  # noqa: F401
 
 config = context.config
 if config.config_file_name is not None:

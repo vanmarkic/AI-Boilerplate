@@ -20,3 +20,14 @@ async def get_user_service(
 
     repository = UserRepository(session)
     return UserService(repository)
+
+
+async def get_event_service(
+    session: AsyncSession = Depends(get_session),
+) -> "EventService":  # noqa: F821
+    """Wire up the EventService with its repository."""
+    from features.events.event_repository import EventRepository
+    from features.events.event_service import EventService
+
+    repository = EventRepository(session)
+    return EventService(repository)
