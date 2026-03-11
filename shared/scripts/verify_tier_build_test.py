@@ -60,6 +60,24 @@ class TestReadTier:
         (d / "manifest.yaml").write_text("name: feat\n")
         assert vtb._read_tier(d) == 1
 
+    def test_empty_manifest_defaults_to_1(self, tmp_path: Path) -> None:
+        d = tmp_path / "feat"
+        d.mkdir()
+        (d / "manifest.yaml").write_text("")
+        assert vtb._read_tier(d) == 1
+
+    def test_non_mapping_manifest_defaults_to_1(self, tmp_path: Path) -> None:
+        d = tmp_path / "feat"
+        d.mkdir()
+        (d / "manifest.yaml").write_text("- just\n- a\n- list\n")
+        assert vtb._read_tier(d) == 1
+
+    def test_invalid_yaml_defaults_to_1(self, tmp_path: Path) -> None:
+        d = tmp_path / "feat"
+        d.mkdir()
+        (d / "manifest.yaml").write_text(": : :\nbad yaml {{{\n")
+        assert vtb._read_tier(d) == 1
+
 
 # ── _feature_names ───────────────────────────────────────────
 
@@ -195,6 +213,22 @@ class TestVerifyBackendEntrypoint:
         assert "analytics" in violations[0]
         assert "main.py:2" in violations[0]
 
+    def test_detects_multi_import_on_single_line(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        """import features.health, features.analytics on one line."""
+        main_py = tmp_path / "main.py"
+        main_py.write_text("import features.health, features.analytics\n")
+        monkeypatch.setattr(vtb, "BACKEND_MAIN", main_py)
+        violations = vtb.verify_backend_entrypoint({"analytics"})
+        assert len(violations) == 1
+        assert "analytics" in violations[0]
+
+    def test_multi_import_catches_both_excluded(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+        main_py = tmp_path / "main.py"
+        main_py.write_text("import features.analytics, features.ml\n")
+        monkeypatch.setattr(vtb, "BACKEND_MAIN", main_py)
+        violations = vtb.verify_backend_entrypoint({"analytics", "ml"})
+        assert len(violations) == 2
+
     def test_missing_main_returns_empty(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         monkeypatch.setattr(vtb, "BACKEND_MAIN", tmp_path / "nope.py")
         violations = vtb.verify_backend_entrypoint({"analytics"})
@@ -277,6 +311,17 @@ class TestVerifyCoreNoFeatureImports:
         violations = vtb.verify_core_no_feature_imports({"analytics"})
         assert len(violations) == 1
         assert "shared/helper.ts" in violations[0]
+
+    def test_detects_multi_import_in_core(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        core = tmp_path / "core"
+        core.mkdir()
+        (core / "deps.py").write_text("import features.analytics, features.ml\n")
+        monkeypatch.setattr(vtb, "BACKEND_CORE", core)
+        monkeypatch.setattr(vtb, "FRONTEND_SHARED", tmp_path / "nope")
+        violations = vtb.verify_core_no_feature_imports({"analytics", "ml"})
+        assert len(violations) == 2
 
     def test_allows_included_feature_import_in_core(
         self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
