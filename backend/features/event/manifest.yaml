@@ -1,0 +1,23 @@
+name: event
+tier: 2
+description: Record, retrieve, and visualize technical events in a dense histogram timeline.
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [postgresql]
+api_endpoints:
+  - method: POST
+    path: /api/events
+    description: Create a new event
+  - method: GET
+    path: /api/events/{event_id}
+    description: Get event details by ID
+models: [Event]
+events_emitted: []
+events_consumed: []
+business_rules:
+  - Events must have timestamp, type, and severity
+  - Event types are deployment, error, metric, alert
+  - Severity levels are info, warning, error, critical
+  - Timestamps are UTC and immutable after creation
+  - Events are tracked by creator user ID from JWT

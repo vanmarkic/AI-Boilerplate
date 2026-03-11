@@ -11,28 +11,51 @@
 
 ## What This Is
 
-<!-- 1-2 paragraphs answering: What domain? Who are the users? What problem does it solve? -->
+AI Boilerplate is a full-stack application for monitoring and visualizing technical events. It provides real-time dashboards, historical analysis, and alerting for distributed systems and applications. Users can track deployments, errors, performance metrics, and other technical events across their infrastructure.
 
 ## Domain Model
 
-<!-- Entity-relationship overview. Use ASCII diagrams. -->
+```
+User
+  ├── Event (created_by)
+  │   ├── event_type (deployment, error, metric, alert)
+  │   ├── timestamp
+  │   ├── severity
+  │   └── metadata (JSON)
+  │
+  └── Dashboard
+      └── EventTimeline (displays events)
+```
+
+**Core Entities:**
+- **Event:** Atomic record of something that happened in the system (deployment, error, metric spike, etc.)
+- **EventType:** Category of event (deployment, error, metric, alert)
+- **Severity:** Impact level (info, warning, error, critical)
+- **Timestamp:** UTC timestamp when event occurred
 
 ## Features & Business Rules
 
 <!-- One subsection per feature. Example: -->
 
-### Feature: orders (tier 2, backend + frontend)
+### Feature: event (tier 2, backend + frontend)
 
-- **Purpose:** Order placement and tracking.
+- **Purpose:** Record, retrieve, and visualize technical events in a dense histogram timeline.
 - **Rules:**
-  - Minimum order value: $5.00
-  - Order status transitions: pending → paid → shipped → delivered
-  - Refunds allowed within 30 days of delivery
+  - Events must have a timestamp, type, and severity level
+  - Event types: `deployment`, `error`, `metric`, `alert`
+  - Severity levels: `info`, `warning`, `error`, `critical`
+  - Timestamps are UTC and immutable once created
+  - Timeline can aggregate up to 720 bars (e.g., 12 hours @ 1-minute intervals)
+  - Events are keyed by creator user ID
 - **User stories:**
-  - As a buyer, I want to place an order so that I receive my items.
+  - As an engineer, I want to see all events for a time window so that I can understand system behavior.
+  - As an operator, I want to view a dense histogram timeline of events so that I can spot patterns and anomalies.
+  - As a developer, I want to programmatically create events so that I can track deployments, errors, and metrics.
 - **API:**
-  - `POST /api/orders` — Place a new order
-  - `GET /api/orders/:id` — Get order details
+  - `POST /api/events` — Create a new event
+  - `GET /api/events/:id` — Get event details
+  - `GET /api/events?type=deployment&severity=error&start_time=...&end_time=...` — Query events by filter
+  - `GET /api/events/timeline?start_time=...&end_time=...&bucket_size=60` — Get aggregated event counts for histogram
 
 ## Glossary
 
@@ -40,3 +63,9 @@
 
 | Term | Definition |
 |------|-----------|
+| **Event** | Atomic record of something that occurred in the system (e.g., deployment, error spike, alert). Immutable once created. |
+| **Event Type** | Category of event: `deployment`, `error`, `metric`, `alert`. |
+| **Severity** | Impact level: `info` (informational), `warning`, `error`, `critical`. |
+| **Histogram Timeline** | Dense, visual representation of event density over time. Each bar represents event count in a time bucket. |
+| **Bucket** | Time interval for aggregating events (e.g., 60 seconds). Used in histogram calculations. |
+| **Time Window** | Start and end timestamps (UTC) defining the query range. |

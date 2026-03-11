@@ -1,0 +1,3 @@
+name: event
+tier: 2
+description: Display technical events in a dense histogram timeline with filtering and details view.
