@@ -1,0 +1,11 @@
+name: events_timeline
+tier: 2
+description: TODO - describe this feature
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [postgresql]
+api_endpoints: []
+models: [EventsTimeline]
+events_emitted: []
+events_consumed: []

@@ -26,6 +26,14 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'events-timeline',
+    loadChildren: () =>
+      import('./features/events-timeline/events-timeline.routes').then(
+        (m) => m.EVENTS_TIMELINE_ROUTES
+      ),
+    canActivate: [authGuard],
+  },
+  {
     path: 'register',
     loadChildren: () =>
       import('./features/register/register.routes').then(

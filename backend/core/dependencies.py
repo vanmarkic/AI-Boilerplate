@@ -20,3 +20,14 @@ async def get_user_service(
 
     repository = UserRepository(session)
     return UserService(repository)
+
+
+async def get_events_timeline_service(
+    session: AsyncSession = Depends(get_session),
+) -> "EventsTimelineService":  # noqa: F821
+    """Wire up the EventsTimelineService with its repository."""
+    from features.events_timeline.events_timeline_repository import EventsTimelineRepository
+    from features.events_timeline.events_timeline_service import EventsTimelineService
+
+    repository = EventsTimelineRepository(session)
+    return EventsTimelineService(repository)
