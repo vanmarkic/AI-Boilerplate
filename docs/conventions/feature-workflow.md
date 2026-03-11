@@ -13,8 +13,8 @@ Scripts drive the structure. LLMs fill in the domain-specific content.
 ## The Sequence
 
 ```
-  SPECIFY ──→ SCAFFOLD ──→ FILL IN ──→ VALIDATE ──→ SHIP
-  (human)     (scripts)    (LLM)       (scripts)    (git)
+  SPECIFY ──────→ SCAFFOLD ──→ FILL IN ──→ VALIDATE ──→ SHIP
+  (human + LLM)   (scripts)    (LLM)       (scripts)    (git)
 ```
 
 ### Step 1: SPECIFY (human writes, LLM assists)
@@ -64,7 +64,7 @@ make aider-fill-in
 Fill in the orders feature. SPECS.md has the domain model. Skeleton files are ready.
 ```
 
-The LLM fills in:
+The LLM fills in **every `TODO` marker** in the skeleton files:
 - Model fields (from SPECS.md domain model)
 - Schema request fields and response fields (from business rules)
 - Custom repository queries (CRUD methods inherited from `CrudRepository`)
@@ -73,6 +73,8 @@ The LLM fills in:
 - Frontend store load method (replace TODO with generated API client call)
 - Frontend component template
 - Alembic migration (`cd backend && alembic revision --autogenerate -m 'add orders'`)
+
+Do not move to Step 4 until all `TODO` markers are resolved.
 
 After filling in the backend routers, run `make generate` to extract the OpenAPI spec and regenerate the TypeScript client.
 
@@ -101,17 +103,14 @@ CI runs automatically (`.github/workflows/ci.yml`).
 |------|------|-----|
 | Draft spec | **Any LLM** (conversation) | Creative, needs domain reasoning |
 | Scaffold files | **`make new-feature`** | Deterministic, instant |
-| Fill in skeleton code | **Aider** (`make aider-fill-in`) | File-scoped TDD, diff-focused |
-| Fill in multi-file feature | **Claude Code** | Cross-file reasoning, large context |
+| Fill in skeleton code | **Aider** (`make aider-fill-in`) | File-scoped TDD, diff-focused — run `make new-feature` first |
+| Fill in multi-file feature | **Claude Code** | Cross-file reasoning — run `make new-feature` first |
 | Debug a failure | **Aider** (`make aider-debug`) or **Claude Code** | Root cause analysis |
 | Review code | **Claude Code** | Multi-file reasoning |
 | Validate | **`make validate`** | Deterministic, comprehensive |
 | Autocomplete / inline edits | **Continue.dev** | IDE-integrated, fast |
 
-## Anti-Patterns
+## Additional Anti-Patterns
 
-- **Don't** start coding before SPECS.md has the feature section
-- **Don't** ask the LLM to scaffold — use `make new-feature`
-- **Don't** ask the LLM to run tests — use `make validate`
 - **Don't** use multiple LLM tools for the same phase — pick one
 - **Don't** use brainstorm/plan/verify prompts — the scripts handle the lifecycle
