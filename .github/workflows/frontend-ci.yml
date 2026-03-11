@@ -65,6 +65,8 @@ jobs:
             packages/design-system/node_modules
             frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
       - run: npm run lint:all
 
   test:
@@ -84,6 +86,8 @@ jobs:
             packages/design-system/node_modules
             frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
       - run: npm run test:ci
 
   build:
@@ -103,6 +107,8 @@ jobs:
             packages/design-system/node_modules
             frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
       - run: npm run build
 
   e2e:
@@ -122,6 +128,8 @@ jobs:
             packages/design-system/node_modules
             frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
       - uses: actions/upload-artifact@v4
