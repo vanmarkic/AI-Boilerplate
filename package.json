@@ -3,5 +3,8 @@
   "workspaces": [
     "packages/*",
     "frontend"
-  ]
+  ],
+  "overrides": {
+    "tinygradient": "^2.0.0"
+  }
 }
