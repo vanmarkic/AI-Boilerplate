@@ -3,7 +3,10 @@ name: Deploy Storybook to GitHub Pages
 on:
   push:
     branches: [master]
-    paths: ['frontend/**', 'packages/design-system/**']
+    paths:
+      - 'frontend/**'
+      - 'packages/design-system/**'
+      - '.github/workflows/deploy-storybook.yml'
   workflow_dispatch:
 
 permissions:
@@ -28,8 +31,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-          cache-dependency-path: package-lock.json
+          cache-dependency-path: frontend/package-lock.json
       - run: npm ci --ignore-scripts
+        working-directory: frontend
       - run: npm run build-storybook
         working-directory: frontend
       - uses: actions/upload-pages-artifact@v3
