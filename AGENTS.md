@@ -1,8 +1,10 @@
 # AI Boilerplate
 
 ## First Steps
-Before writing any code, check if `SPECS.md` exists and is filled in.
-If it is empty or missing, ask the user to define the product specification before proceeding.
+Before writing any code:
+1. Check if `SPECS.md` exists and is filled in. If it is empty or missing, ask the user questions to gather the required information (domain, users, business rules, API endpoints) and fill in `SPECS.md` on their behalf before writing any code.
+2. Read the relevant subdirectory AGENTS.md for the area you are working in: `frontend/AGENTS.md` for frontend work, `backend/AGENTS.md` for backend work.
+
 `SPECS.md` describes WHAT the software does (domain, business rules, glossary).
 This file describes HOW to write code (conventions, architecture, constraints).
 
@@ -38,11 +40,24 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 16. Scaffold new features with tier: `make new-feature name=analytics tier=2`.
 
 ## Feature Workflow
-Follow `docs/conventions/feature-workflow.md` for end-to-end feature development.
-Quick reference: `make spec` → `make new-feature` → fill in TODOs (model, schema, service create, frontend store) → `make generate` → `make validate` → git commit.
-Router registration and dependency wiring are automatic — no manual edits to `main.py` or `dependencies.py` needed.
+
+**STOP — Do NOT create feature files manually.** Always use the scaffold script first.
+
+```
+make spec name=<name> tier=<N>        # 1. Generate SPECS.md section template, fill it in
+make new-feature name=<name> tier=<N> # 2. Generates 12+ skeleton files (backend + frontend)
+                                       # 3. Fill in the TODO markers in the generated files
+make generate                          # 4. Extract OpenAPI spec, regenerate TypeScript client
+make validate                          # 5. Run all linters + tests
+git commit                             # 6. Commit
+```
+
+Router registration and dependency wiring are automatic — no manual edits to `main.py` or `dependencies.py` needed. See `docs/conventions/feature-workflow.md` for full details.
 
 ## Common Pitfalls
+- Do NOT create feature files manually — always run `make new-feature name=<name> tier=<N>` first.
+- Do NOT write CSS in Angular component `styles` arrays or `frontend/src/styles/` — add styles to `packages/design-system/components.css` instead.
+- Do NOT hardcode colors, spacing, or font sizes — use design tokens (`var(--color-primary)`, `var(--spacing-md)`, etc.).
 - Do NOT import across tiers (tier-1 code must not import from tier-2 or tier-3).
 - Do NOT create a feature without a `manifest.yaml`.
 - Do NOT use barrel exports (`index.ts` re-exports).
@@ -52,4 +67,4 @@ Router registration and dependency wiring are automatic — no manual edits to `
 
 ## Meta
 - See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
-- Do NOT create a `CLAUDE.md` file. All project instructions live in AGENTS.md files.
+- Do NOT edit `CLAUDE.md` — it is a read-only entry point that loads this file into Claude Code's context.
