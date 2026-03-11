@@ -7,10 +7,12 @@ workflow:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
 stages:
+  - prepare
   - lint
   - test
   - e2e
   - build
+  - deploy
   - security
 
 variables:
@@ -20,6 +22,7 @@ variables:
   POSTGRES_USER: dev
   POSTGRES_PASSWORD: dev
   FF_NETWORK_PER_BUILD: "true"
+  NODE_VERSION: "22"
 
 # ---------------------------------------------------------------------------
 # Cache templates
@@ -36,6 +39,30 @@ variables:
     paths:
       - .cache/npm
       - frontend/node_modules
+
+# ===========================================================================
+# Prepare Stage – Install dependencies & generate OpenAPI client
+# ===========================================================================
+
+install-and-generate:
+  stage: prepare
+  image: node:22
+  extends: .node-cache
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq python3 python3-pip python3-venv > /dev/null
+    - cd backend && python3 -m pip install --break-system-packages -e ".[dev]" && cd ..
+  script:
+    - npm ci
+    - cd backend && python3 -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json && cd ..
+    - bash shared/scripts/generate-frontend.sh
+  artifacts:
+    paths:
+      - node_modules/
+      - frontend/node_modules/
+      - packages/design-system/node_modules/
+      - frontend/src/app/shared/api/generated/
+      - shared/openapi.json
+    expire_in: 1 hour
 
 # ===========================================================================
 # Lint Stage
@@ -61,21 +88,18 @@ lint-backend:
 lint-frontend:
   stage: lint
   image: node:22-slim
-  extends: .node-cache
+  needs:
+    - install-and-generate
   script:
     - cd frontend
-    - npm ci --ignore-scripts
     - npm run lint:all
 
 openapi-validate:
   stage: lint
   image: node:22
-  extends: .python-cache
-  before_script:
-    - apt-get update -qq && apt-get install -y -qq python3 python3-pip python3-venv > /dev/null
-    - cd backend && python3 -m pip install --break-system-packages -e ".[dev]"
+  needs:
+    - install-and-generate
   script:
-    - cd backend && python3 -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
     - npx @redocly/cli lint shared/openapi.json
 
 # ===========================================================================
@@ -104,10 +128,10 @@ test-backend:
 test-frontend:
   stage: test
   image: node:22-slim
-  extends: .node-cache
+  needs:
+    - install-and-generate
   script:
     - cd frontend
-    - npm ci --ignore-scripts
     - npm run test:ci
 
 # ===========================================================================
@@ -117,10 +141,11 @@ test-frontend:
 e2e-frontend:
   stage: e2e
   image: node:22
-  extends: .node-cache
+  needs:
+    - lint-frontend
+    - test-frontend
   script:
     - cd frontend
-    - npm ci --ignore-scripts
     - npx playwright install --with-deps chromium
     - npm run e2e
   artifacts:
@@ -130,8 +155,18 @@ e2e-frontend:
     expire_in: 7 days
 
 # ===========================================================================
-# Build Stage – Docker images (default branch & MRs only)
+# Build Stage
 # ===========================================================================
+
+build-frontend:
+  stage: build
+  image: node:22-slim
+  needs:
+    - lint-frontend
+    - test-frontend
+  script:
+    - cd frontend
+    - npm run build
 
 .docker-build:
   stage: build
@@ -163,6 +198,29 @@ build-frontend-image:
       if [ -n "$CI_REGISTRY_IMAGE" ]; then
         docker push "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA"
       fi
+
+# ===========================================================================
+# Deploy Stage – Storybook to GitLab Pages
+# ===========================================================================
+
+pages:
+  stage: deploy
+  image: node:22
+  needs:
+    - install-and-generate
+  script:
+    - cd frontend
+    - npm run build-storybook
+    - mv storybook-static ../public
+  artifacts:
+    paths:
+      - public
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      changes:
+        - frontend/**
+        - packages/design-system/**
+        - .gitlab-ci.yml
 
 # ===========================================================================
 # Security Stage – GitLab built-in security templates
