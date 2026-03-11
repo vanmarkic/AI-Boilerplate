@@ -268,4 +268,96 @@
     gap: var(--spacing-sm);
     margin-block-start: var(--spacing-md);
   }
+
+
+  /* ── Histogram Timeline ──────────────────────────────── */
+
+  .histogram-timeline {
+    --histogram-height: 8rem;
+    --histogram-bar-color: var(--color-primary);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .histogram-timeline[data-variant="success"] {
+    --histogram-bar-color: var(--color-success);
+  }
+
+  .histogram-timeline[data-variant="destructive"] {
+    --histogram-bar-color: var(--color-destructive);
+  }
+
+  .histogram-timeline[data-variant="muted"] {
+    --histogram-bar-color: var(--color-muted-foreground);
+  }
+
+  .histogram-bars {
+    display: flex;
+    align-items: flex-end;
+    height: var(--histogram-height);
+    gap: 0;
+  }
+
+  .histogram-bar {
+    flex: 1 1 0%;
+    height: calc(var(--bar-value) * 100%);
+    min-height: 1px;
+    background-color: var(--histogram-bar-color);
+    position: relative;
+    transition: background-color var(--duration-fast) var(--ease-default);
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      padding-inline: 2px;
+      margin-inline: -2px;
+    }
+
+    &::after {
+      content: attr(data-count);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding-inline: var(--spacing-xs);
+      padding-block: 2px;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-popover);
+      color: var(--color-popover-foreground);
+      font-size: var(--font-size-xs);
+      line-height: var(--font-size-xs--line-height);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--duration-fast) var(--ease-default);
+      z-index: var(--z-above);
+    }
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--histogram-bar-color) 80%, white);
+
+      &::after {
+        opacity: 1;
+      }
+    }
+  }
+
+  .histogram-labels {
+    position: relative;
+    height: var(--font-size-xs--line-height);
+  }
+
+  .histogram-label {
+    position: absolute;
+    top: 0;
+    left: calc(var(--label-position) / var(--bar-count) * 100%);
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    color: var(--color-muted-foreground);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
 }
