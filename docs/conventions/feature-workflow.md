@@ -2,6 +2,14 @@
 
 Scripts drive the structure. LLMs fill in the domain-specific content.
 
+## Anti-Patterns (read first)
+
+- **Don't** create feature files manually — use `make new-feature`
+- **Don't** start coding before SPECS.md has the feature section
+- **Don't** ask the LLM to scaffold — scripts handle the structure
+- **Don't** ask the LLM to run tests — use `make validate`
+- **Don't** write CSS in Angular component `styles` arrays — add styles to `packages/design-system/components.css`
+
 ## The Sequence
 
 ```
