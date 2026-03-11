@@ -6,6 +6,7 @@ export type ButtonSize = 'sm' | 'default' | 'lg';
 @Directive({
   selector: 'button[appButton], a[appButton]',
   host: {
+    'class': 'btn',
     '[attr.data-variant]': 'variant()',
     '[attr.data-size]': 'size()',
   },
