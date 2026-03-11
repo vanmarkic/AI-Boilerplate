@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate spec aider-fill-in aider-debug aider-review setup-hooks
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -65,6 +65,13 @@ storybook: ## Start Storybook dev server
 lint: ## Run all linters
 	cd backend && ruff check .
 	cd frontend && npx eslint "**/*.{js,ts,html,json}"
+
+verify-tier: ## Verify tier-N build has no higher-tier leaks (usage: make verify-tier TIER=1)
+	@rm -rf /tmp/verify-tier-be /tmp/verify-tier-fe
+	python shared/scripts/filter-features.py --tier=$(or $(TIER),1) --src=backend/features --dest=/tmp/verify-tier-be
+	python shared/scripts/filter-features.py --tier=$(or $(TIER),1) --src=frontend/src/app/features --dest=/tmp/verify-tier-fe --frontend
+	python shared/scripts/verify-tier-build.py --tier=$(or $(TIER),1) --backend-dest=/tmp/verify-tier-be --frontend-dest=/tmp/verify-tier-fe
+	@rm -rf /tmp/verify-tier-be /tmp/verify-tier-fe
 
 validate: lint-arch lint test ## Validate everything: architecture + linters + tests
 
