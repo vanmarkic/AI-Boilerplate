@@ -25,12 +25,17 @@ export class AuthStore {
 
   async init(): Promise<void> {
     try {
-      const authenticated = await this.keycloak.init({
-        onLoad: 'check-sso',
-        silentCheckSsoRedirectUri:
-          window.location.origin + '/assets/silent-check-sso.html',
-        pkceMethod: 'S256',
-      });
+      const authenticated = await Promise.race([
+        this.keycloak.init({
+          onLoad: 'check-sso',
+          silentCheckSsoRedirectUri:
+            window.location.origin + '/assets/silent-check-sso.html',
+          pkceMethod: 'S256',
+        }),
+        new Promise<boolean>((_, reject) =>
+          setTimeout(() => reject(new Error('Keycloak init timeout')), 3_000),
+        ),
+      ]);
 
       if (authenticated) {
         this.updateUserFromToken();
