@@ -10,9 +10,6 @@ if [ ! -f shared/openapi.json ]; then
   exit 1
 fi
 
-npx --workspace=frontend openapi-ts \
-  -i "$PROJECT_ROOT/shared/openapi.json" \
-  -o "$PROJECT_ROOT/frontend/src/app/shared/api/generated" \
-  -c @hey-api/client-fetch
+npx --workspace=frontend openapi-ts
 
 echo "✓ Frontend API client generated at frontend/src/app/shared/api/generated/"

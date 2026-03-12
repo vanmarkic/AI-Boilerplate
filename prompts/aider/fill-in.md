@@ -25,13 +25,13 @@ For each file, follow TDD:
 5. **Router** (`*_router.py`) — wire endpoints with Pydantic response models (these define the API contract)
 6. **Test** (`*_test.py`) — fill in test cases for each endpoint
 7. **Frontend types** (`*.types.ts`) — add fields matching API response
-8. **Frontend service** (`*.service.ts`) — add methods for each endpoint
+8. **Frontend store** (`*.store.ts`) — replace `throw new Error('Not implemented')` with generated API calls
 9. **Frontend component** (`*.component.ts`) — add UI for the feature
 10. **Frontend spec** (`*.component.spec.ts`) — add component tests
 
 ### After filling in
 
-- Update `manifest.yaml` with `api_endpoints` and `business_rules`
+- Update `manifest.yaml` with `business_rules` (api_endpoints are pre-populated by the scaffold — update if you added/removed endpoints)
 - Create the Alembic migration: `cd backend && alembic revision --autogenerate -m 'add <feature>'`
 - Run `make generate` to extract the OpenAPI spec and regenerate the TypeScript client
 

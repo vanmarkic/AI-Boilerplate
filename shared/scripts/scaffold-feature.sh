@@ -4,8 +4,9 @@ set -euo pipefail
 NAME=$1
 TIER=${2:-1}
 if [ -z "${NAME:-}" ]; then
-  echo "Usage: scaffold-feature.sh <feature-name> [tier]"
+  echo "Usage: scaffold-feature.sh <feature-name> [tier] [plural]"
   echo "Example: scaffold-feature.sh order 2"
+  echo "Example: scaffold-feature.sh status 1 statuses"
   exit 1
 fi
 
@@ -13,7 +14,7 @@ KEBAB=$(echo "$NAME" | sed 's/_/-/g')
 SNAKE=$(echo "$NAME" | sed 's/-/_/g')
 CLASS=$(echo "$SNAKE" | awk -F_ '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2)}1' OFS='')
 UPPER=$(echo "$SNAKE" | tr '[:lower:]' '[:upper:]')
-PLURAL="${SNAKE}s"
+PLURAL=${3:-"${SNAKE}s"}
 
 # --- Backend ---
 BACKEND_DIR="backend/features/$SNAKE"
@@ -133,7 +134,9 @@ version: 0.1.0
 dependencies:
   internal: []
   external: [postgresql]
-api_endpoints: []
+api_endpoints:
+  - POST /api/${PLURAL}
+  - GET /api/${PLURAL}/{${SNAKE}_id}
 models: [${CLASS}]
 events_emitted: []
 events_consumed: []
@@ -142,7 +145,8 @@ YAMLEOF
 cat > "$BACKEND_DIR/__init__.py" << PYEOF
 PYEOF
 
-# --- Auto-append dependency wiring ---
+# --- Auto-append dependency wiring (idempotent) ---
+if ! grep -q "def get_${SNAKE}_service" "backend/core/dependencies.py"; then
 cat >> "backend/core/dependencies.py" << PYEOF
 
 
@@ -156,6 +160,9 @@ async def get_${SNAKE}_service(
     repository = ${CLASS}Repository(session)
     return ${CLASS}Service(repository)
 PYEOF
+else
+  echo "  (dependency get_${SNAKE}_service already exists — skipped)"
+fi
 
 # --- Frontend ---
 FRONTEND_DIR="frontend/src/app/features/$KEBAB"
@@ -179,8 +186,10 @@ export const ${CLASS}Store = signalStore(
   withMethods((store) => ({
     async load(id: number): Promise<void> {
       const result = await store.run('load ${SNAKE}', async () => {
-        // TODO: Replace with generated API client function after running make generate
-        // Example: const { data } = await get${CLASS}({ path: { ${SNAKE}_id: id } });
+        // TODO: Replace throw below with the generated API call after running make generate
+        // import { get${CLASS} } from '../../shared/api/generated';
+        // const { data } = await get${CLASS}({ path: { ${SNAKE}_id: id } });
+        // return data;
         throw new Error('Not implemented');
       });
       if (result) {
@@ -226,6 +235,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ${CLASS}Component } from './${KEBAB}.component';
 import { ${CLASS}Store } from './${KEBAB}.store';
 import { signal } from '@angular/core';
+import { vi } from 'vitest';
 
 describe('${CLASS}Component', () => {
   let fixture: ComponentFixture<${CLASS}Component>;

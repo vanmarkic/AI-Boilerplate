@@ -119,5 +119,5 @@ router → service → repository → model/schema
 - Each feature exports a `FEATURE_ROUTES` constant
 - Top-level: `loadChildren()` for lazy loading
 - Auth-protected: `canActivate: [authGuard]`
-- API calls through services with signal state, use `firstValueFrom()`
+- API calls through stores with signal state — generated client returns Promises, use `await` directly
 - Base URL in `core/environment.ts`, auth token via `shared/auth/auth.interceptor.ts`

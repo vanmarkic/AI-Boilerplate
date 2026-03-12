@@ -29,10 +29,11 @@ LLM can ask questions and write the SPECS.md section on the user's behalf.
 ### Step 2: SCAFFOLD
 
 ```bash
-make new-feature name=orders tier=2   # generates 12+ skeleton files
+make new-feature name=orders tier=2                  # generates 12+ skeleton files
+make new-feature name=status tier=1 plural=statuses  # override naive plural
 ```
 
-Generates: backend (model, schema, repository, service, router, test, manifest) + frontend (types, store, component, routes, spec). Auto-wires dependencies and router — no manual edits to `main.py` or `dependencies.py`.
+Generates: backend (model, schema, repository, service, router, test, manifest) + frontend (types, store, component, routes, spec). Auto-wires dependencies and router — no manual edits to `main.py` or `dependencies.py`. Idempotent — safe to re-run.
 
 ### Step 3: FILL IN
 

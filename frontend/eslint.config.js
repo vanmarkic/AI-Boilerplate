@@ -14,6 +14,7 @@ export default config(
       'storybook-static/*',
       'src/app/shared/api/generated/*',
       '.storybook/*',
+      'openapi-ts.config.ts',
     ],
   },
   {
