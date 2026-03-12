@@ -122,8 +122,8 @@ See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, 
 - ALWAYS use the generated functions from `../../shared/api/generated` (e.g. `createUser`, `getUser`)
 - Run `make generate` from the repo root after changing backend routers or Pydantic models
 - Generated files live at `frontend/src/app/shared/api/generated/` — do NOT edit them manually
-- Import the fetch client from `client.gen.ts` directly (it is not re-exported via `index.ts`)
-- The client base URL is configured in `main.ts` — do not re-configure it in services
+- The Angular client is provided via `provideHeyApiClient(client)` in `app.config.ts` — it uses `HttpClient` internally so interceptors apply
+- Configure the client base URL via `client.setConfig({ baseUrl })` in `app.config.ts` — do not re-configure in services
 
 ## Forms
 
