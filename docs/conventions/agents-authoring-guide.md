@@ -73,5 +73,5 @@ SPECS.md is the single source of truth for **what the software does** — domain
 - `api_endpoints` must mirror routes declared in the FastAPI routers. Keep them in sync.
 - `dependencies.internal` lists feature folder names this feature imports from.
 - `version` uses semver. Bump minor on new endpoints, patch on fixes.
-- When scaffolding a new feature, copy an existing manifest and fill all fields. Empty lists (`[]`) are valid for fields with no values.
+- The scaffold auto-populates `api_endpoints` from the generated router. Update them when adding/removing endpoints.
 - `business_rules` (optional) lists domain-specific validation rules, constraints, and invariants. Each rule should be specific and falsifiable. Helps LLM agents understand feature behavior without reading SPECS.md.

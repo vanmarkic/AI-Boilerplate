@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend test-scaffold generate migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -24,15 +24,18 @@ test-backend: ## Run backend tests
 test-frontend: ## Run frontend tests
 	cd frontend && npx ng test --watch=false --browsers=ChromeHeadless
 
+test-scaffold: ## Test the scaffold script
+	bash shared/scripts/scaffold_test.sh
+
 generate: ## Extract OpenAPI spec from FastAPI and regenerate frontend client
-	cd backend && python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
+	cd backend && python -m commands.export_openapi
 	bash shared/scripts/generate-frontend.sh
 
 migrate: ## Run database migrations
 	cd backend && alembic upgrade head
 
-new-feature: ## Scaffold a new feature (usage: make new-feature name=orders tier=2)
-	bash shared/scripts/scaffold-feature.sh $(name) $(tier)
+new-feature: ## Scaffold a new feature (usage: make new-feature name=order tier=2 plural=orders)
+	bash shared/scripts/scaffold-feature.sh $(name) $(tier) $(plural)
 
 spec: ## Print a SPECS.md section template (usage: make spec name=orders tier=2)
 	@echo ""
