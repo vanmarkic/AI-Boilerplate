@@ -82,6 +82,8 @@ jobs:
       - run: npm i
         working-directory: .
       - run: npm run test:ci
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
   build:
     name: Build
