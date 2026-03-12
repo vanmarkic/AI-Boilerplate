@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "python-layer-lint"
+version = "0.1.0"
+description = "AST-based architecture linter enforcing layer dependency rules and tier boundaries"
+license = "MIT"
+requires-python = ">=3.12"
+dependencies = []
+
+[project.optional-dependencies]
+yaml = ["pyyaml>=6.0"]
+dev = ["pytest>=8.0", "pyyaml>=6.0"]
+
+[project.scripts]
+layer-lint = "python_layer_lint.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/python_layer_lint"]
