@@ -3,6 +3,7 @@ set -euo pipefail
 
 echo "Generating TypeScript client from OpenAPI spec..."
 cd "$(dirname "$0")/../.."
+PROJECT_ROOT="$(pwd)"
 
 if [ ! -f shared/openapi.json ]; then
   echo "Error: shared/openapi.json not found. Run 'make generate' from the project root."
@@ -10,8 +11,8 @@ if [ ! -f shared/openapi.json ]; then
 fi
 
 npx --workspace=frontend openapi-ts \
-  -i shared/openapi.json \
-  -o frontend/src/app/shared/api/generated \
+  -i "$PROJECT_ROOT/shared/openapi.json" \
+  -o "$PROJECT_ROOT/frontend/src/app/shared/api/generated" \
   -c @hey-api/client-fetch
 
 echo "✓ Frontend API client generated at frontend/src/app/shared/api/generated/"
