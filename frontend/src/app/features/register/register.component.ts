@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ButtonDirective } from '../../shared/ui/button.directive';
-import { FormErrorComponent } from '../../shared/ui/form-error.component';
-import { InputComponent } from '../../shared/ui/input.component';
+import { ButtonDirective, FormErrorComponent, InputComponent } from '@aspect/ui';
 import { RegisterStore } from './register.store';
 
 @Component({
