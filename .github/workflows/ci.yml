@@ -16,6 +16,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pyyaml
+      - run: pip install packages/python-layer-lint/
       - run: python shared/scripts/lint-architecture.py
 
   test-backend:
@@ -94,6 +95,7 @@ jobs:
         with:
           node-version: '22'
       - run: pip install pyyaml
+      - run: pip install packages/monorepo-tier-filter/
 
       - name: Filter features to tier 1
         run: |
