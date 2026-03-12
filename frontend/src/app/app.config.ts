@@ -12,12 +12,14 @@ import { routes } from './app.routes';
 import { GlobalErrorHandler } from './core/error-handler';
 import { authInterceptor } from './shared/auth/auth.interceptor';
 import { AuthStore } from './shared/auth/auth.store';
+import { provideHeyApiClient, client } from './shared/api/generated/client.gen';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZonelessChangeDetection(),
     provideRouter(routes),
     provideHttpClient(withInterceptors([authInterceptor])),
+    provideHeyApiClient(client),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideAppInitializer(() => inject(AuthStore).init()),
   ],
