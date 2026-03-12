@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'asp-card',
+  selector: 'ui-card',
   host: { class: 'card' },
   template: `
     @if (title()) {

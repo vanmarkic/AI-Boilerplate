@@ -4,7 +4,7 @@ export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'default' | 'lg';
 
 @Directive({
-  selector: 'button[aspButton], a[aspButton]',
+  selector: 'button[uiButton], a[uiButton]',
   host: {
     'class': 'btn',
     '[attr.data-variant]': 'variant()',

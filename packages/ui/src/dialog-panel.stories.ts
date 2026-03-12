@@ -31,14 +31,14 @@ const meta: Meta<DialogArgs> = {
   render: (args) => ({
     props: args,
     template: `
-      <asp-dialog-panel [variant]="variant">
+      <ui-dialog-panel [variant]="variant">
         <span dialogTitle>{{ title }}</span>
         <p>{{ body }}</p>
         <ng-container dialogFooter>
-          <asp-button variant="outline">{{ cancelLabel }}</asp-button>
-          <asp-button [variant]="variant === 'destructive' ? 'destructive' : 'default'">{{ confirmLabel }}</asp-button>
+          <ui-button variant="outline">{{ cancelLabel }}</ui-button>
+          <ui-button [variant]="variant === 'destructive' ? 'destructive' : 'default'">{{ confirmLabel }}</ui-button>
         </ng-container>
-      </asp-dialog-panel>
+      </ui-dialog-panel>
     `,
     moduleMetadata: { imports: [DialogPanelComponent, ButtonComponent] },
   }),

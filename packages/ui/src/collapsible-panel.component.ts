@@ -4,7 +4,7 @@ export type CollapsiblePanelVariant = 'default' | 'ghost' | 'outline';
 export type CollapsiblePanelSize = 'sm' | 'default' | 'lg';
 
 @Component({
-  selector: 'asp-collapsible-panel',
+  selector: 'ui-collapsible-panel',
   host: {
     'class': 'collapsible-panel',
     '[attr.data-variant]': 'variant()',

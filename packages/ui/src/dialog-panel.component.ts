@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 
 @Component({
-  selector: 'asp-dialog-panel',
+  selector: 'ui-dialog-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CdkTrapFocus],
   host: {
