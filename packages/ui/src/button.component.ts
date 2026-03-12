@@ -2,11 +2,11 @@ import { Component, input, output } from '@angular/core';
 import { ButtonDirective, type ButtonSize, type ButtonVariant } from './button.directive';
 
 @Component({
-  selector: 'asp-button',
+  selector: 'ui-button',
   imports: [ButtonDirective],
   template: `
     <button
-      aspButton
+      uiButton
       [variant]="variant()"
       [size]="size()"
       [disabled]="disabled()"

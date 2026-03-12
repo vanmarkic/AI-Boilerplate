@@ -15,7 +15,7 @@ const meta: Meta<CardComponent & { content: string }> = {
   },
   render: (args) => ({
     props: args,
-    template: `<asp-card [title]="title">{{ content }}</asp-card>`,
+    template: `<ui-card [title]="title">{{ content }}</ui-card>`,
     moduleMetadata: { imports: [CardComponent] },
   }),
 };
