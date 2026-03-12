@@ -1,23 +1,18 @@
-#!/usr/bin/env python3
-"""Architecture boundary linter.
-
-Thin wrapper around the python-layer-lint package.
-See packages/python-layer-lint/ for the extracted library.
-"""
+"""CLI entry point for python-layer-lint."""
 import sys
 from pathlib import Path
 
 from python_layer_lint.linter import lint_features_dir
 
-FEATURES_DIR = Path(__file__).resolve().parent.parent.parent / "backend" / "features"
-
 
 def main() -> int:
-    if not FEATURES_DIR.exists():
-        print(f"Features directory not found: {FEATURES_DIR}")
-        return 0
+    features_dir = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("backend/features")
 
-    violations = lint_features_dir(FEATURES_DIR)
+    if not features_dir.exists():
+        print(f"Features directory not found: {features_dir}")
+        return 0  # Not an error if backend isn't set up yet
+
+    violations = lint_features_dir(features_dir)
 
     if violations:
         print("Architecture boundary violations found:\n")
