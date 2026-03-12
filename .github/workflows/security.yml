@@ -61,14 +61,20 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     env:
+      TRIVY_VERSION: '0.57.1'
       TRIVY_DB_REPOSITORY: 'ghcr.io/aquasecurity/trivy-db:2'
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Trivy
-        uses: aquasecurity/setup-trivy@v0.2.2
+      - name: Cache Trivy binary
+        id: trivy-bin-cache
+        uses: actions/cache@v4
         with:
-          version: v0.57.1
-          cache: true
+          path: /usr/local/bin/trivy
+          key: trivy-bin-${{ runner.os }}-${{ env.TRIVY_VERSION }}
+      - name: Install Trivy
+        if: steps.trivy-bin-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Trivy DB
@@ -135,14 +141,20 @@ jobs:
     continue-on-error: true
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files_url, 'Dockerfile'))
     env:
+      TRIVY_VERSION: '0.57.1'
       TRIVY_DB_REPOSITORY: 'ghcr.io/aquasecurity/trivy-db:2'
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Trivy
-        uses: aquasecurity/setup-trivy@v0.2.2
+      - name: Cache Trivy binary
+        id: trivy-bin-cache
+        uses: actions/cache@v4
         with:
-          version: v0.57.1
-          cache: true
+          path: /usr/local/bin/trivy
+          key: trivy-bin-${{ runner.os }}-${{ env.TRIVY_VERSION }}
+      - name: Install Trivy
+        if: steps.trivy-bin-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Trivy DB
