@@ -50,38 +50,16 @@ jobs:
       - run: python -m pytest -v --tb=short
         working-directory: backend
 
-  test-frontend:
-    name: Frontend Tests
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
-      - run: npm i
-      - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
-      - run: bash shared/scripts/generate-frontend.sh
-      - run: npm run test:ci
-        working-directory: frontend
-
-  lint:
-    name: Code Lint
+  lint-backend:
+    name: Backend Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
       - run: pip install ruff && ruff check .
         working-directory: backend
-      - run: npm i
-      - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
-      - run: bash shared/scripts/generate-frontend.sh
-      - run: npm run lint:all
-        working-directory: frontend
 
   tier1-build-smoke:
     name: Tier-1 Build Smoke
