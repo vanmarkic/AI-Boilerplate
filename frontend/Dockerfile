@@ -11,7 +11,7 @@ FROM node:22-slim
 WORKDIR /app
 
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci
+RUN npm i
 
 COPY frontend/ .
 COPY --from=feature-filter /filtered-features/ ./src/app/features/

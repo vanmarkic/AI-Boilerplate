@@ -1,8 +1,17 @@
 import type { StorybookConfig } from '@storybook/angular';
 
 const config: StorybookConfig = {
-  stories: ['../src/**/*.mdx', '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
+  stories: [
+    '../src/**/*.mdx',
+    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+  ],
   addons: ['@storybook/addon-a11y', '@storybook/addon-docs'],
   framework: '@storybook/angular',
+  webpackFinal: async (config) => {
+    if (config.resolve) {
+      config.resolve.symlinks = false;
+    }
+    return config;
+  },
 };
 export default config;

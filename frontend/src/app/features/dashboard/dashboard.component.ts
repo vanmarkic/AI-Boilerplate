@@ -1,10 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { BadgeComponent } from '../../shared/ui/badge.component';
-import {
-  HistogramTimelineComponent,
-  type HistogramBar,
-  type HistogramLabel,
-} from '../../shared/ui/histogram-timeline.component';
+import { BadgeComponent, HistogramTimelineComponent, type HistogramBar, type HistogramLabel } from '@aspect/ui';
 
 function seededRandom(seed: number) {
   return () => {
@@ -53,7 +48,7 @@ interface ActivityItem {
           <h1 class="text-2xl font-bold text-foreground">Dashboard</h1>
           <p class="text-sm text-muted-foreground mt-xs">Monday, March 11 2026</p>
         </div>
-        <app-badge variant="outline">Live</app-badge>
+        <ui-badge variant="outline">Live</ui-badge>
       </div>
 
       <!-- Stat cards row -->
@@ -78,7 +73,7 @@ interface ActivityItem {
             <h2 class="card-title" style="margin-block-end: 0">Events per minute</h2>
             <span class="font-mono text-xs text-muted-foreground border px-sm py-xs rounded-sm">12h window</span>
           </div>
-          <app-histogram-timeline
+          <ui-histogram-timeline
             [bars]="bars()"
             [labels]="labels()"
             [ariaLabel]="'Events per minute, last 12 hours'"
@@ -93,7 +88,7 @@ interface ActivityItem {
               <div class="flex flex-col gap-xs py-sm" style="border-bottom: 1px solid var(--color-border)">
                 <div class="flex flex-row items-center justify-between">
                   <span class="text-sm text-foreground font-medium">{{ item.action }}</span>
-                  <app-badge [variant]="item.badge">{{ item.badgeLabel }}</app-badge>
+                  <ui-badge [variant]="item.badge">{{ item.badgeLabel }}</ui-badge>
                 </div>
                 <p class="text-xs text-muted-foreground">{{ item.target }}</p>
                 <p class="text-xs text-muted-foreground" style="opacity: 0.6">{{ item.time }}</p>
@@ -110,9 +105,9 @@ interface ActivityItem {
         <div class="card col-span-2">
           <div class="flex flex-row items-center justify-between mb-md">
             <h2 class="card-title" style="margin-block-end: 0">Error rate</h2>
-            <app-badge variant="destructive">3 spikes</app-badge>
+            <ui-badge variant="destructive">3 spikes</ui-badge>
           </div>
-          <app-histogram-timeline
+          <ui-histogram-timeline
             [bars]="errorBars()"
             [labels]="errorLabels()"
             [ariaLabel]="'Errors per hour, last 24 hours'"

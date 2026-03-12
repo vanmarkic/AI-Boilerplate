@@ -22,7 +22,7 @@ const meta: Meta<ButtonComponent & { label: string }> = {
   render: (args) => ({
     props: args,
     template: `
-      <app-button [variant]="variant" [size]="size" [disabled]="disabled">{{ label }}</app-button>
+      <ui-button [variant]="variant" [size]="size" [disabled]="disabled">{{ label }}</ui-button>
     `,
     moduleMetadata: { imports: [ButtonComponent] },
   }),
@@ -44,10 +44,10 @@ export const DirectiveUsage: StoryObj = {
   render: () => ({
     template: `
       <div style="display: flex; gap: 8px; align-items: center;">
-        <button appButton>Default</button>
-        <button appButton variant="destructive">Destructive</button>
-        <button appButton variant="outline">Outline</button>
-        <button appButton variant="ghost">Ghost</button>
+        <button uiButton>Default</button>
+        <button uiButton variant="destructive">Destructive</button>
+        <button uiButton variant="outline">Outline</button>
+        <button uiButton variant="ghost">Ghost</button>
       </div>
     `,
   }),
