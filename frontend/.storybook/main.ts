@@ -1,4 +1,8 @@
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import type { StorybookConfig } from '@storybook/angular';
+
+const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
 const config: StorybookConfig = {
   stories: [
@@ -11,6 +15,14 @@ const config: StorybookConfig = {
     if (config.resolve) {
       config.resolve.symlinks = false;
     }
+    // Font packages are hoisted to the workspace root node_modules.
+    // Storybook webpack resolves style paths relative to frontend/,
+    // so we alias them to the root where they actually live.
+    config.resolve ??= {};
+    config.resolve.alias = {
+      ...(config.resolve.alias as Record<string, string>),
+      'node_modules/@fontsource-variable': resolve(rootDir, 'node_modules/@fontsource-variable'),
+    };
     return config;
   },
 };
