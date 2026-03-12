@@ -14,6 +14,7 @@ A full-stack monorepo (Angular 21 / FastAPI / PostgreSQL) architected to maximiz
 | Auth | Keycloak — OIDC, JWT validation via PyJWT |
 | Contract | OpenAPI 3.1 — code-first from FastAPI, TypeScript client via `@hey-api/openapi-ts` |
 | Design System | Framework-agnostic CSS package (`@aspect/design-system`) — OKLCH tokens, CSS layers, native nesting |
+| UI Components | `@aspect/ui` — Angular component library (symlinked into frontend) |
 | State | `@ngrx/signals` |
 | Testing | Vitest (frontend), pytest-asyncio (backend), Playwright (E2E) |
 | Docs | Storybook 10 + `@storybook/angular` |
@@ -59,26 +60,30 @@ ai-boilerplate/
 ├── package.json                     # npm workspaces root
 │
 ├── packages/
-│   └── design-system/               # Framework-agnostic CSS design system
-│       ├── tokens.css               #   :root custom properties (OKLCH, 4px grid)
-│       ├── reset.css                #   minimal reset
-│       ├── utilities.css            #   single-responsibility utility classes
-│       └── components.css           #   component styles with data-* selectors
+│   ├── design-system/               # Framework-agnostic CSS design system
+│   │   ├── tokens.css               #   :root custom properties (OKLCH, 4px grid)
+│   │   ├── reset.css                #   minimal reset
+│   │   ├── utilities.css            #   single-responsibility utility classes
+│   │   └── components.css           #   component styles with data-* selectors
+│   ├── ui/                          # @aspect/ui — Angular component library
+│   │   └── src/                     #   button, badge, card, input, dialog-panel, etc.
+│   ├── ng-feature-flags/            # @aspect/ng-feature-flags — Angular feature flag guard + service
+│   ├── ngrx-with-resource/          # @aspect/ngrx-with-resource — withResource() for NgRx Signal Store
+│   ├── monorepo-tier-filter/        # Python: filter features by tier for Docker builds
+│   ├── python-layer-lint/           # Python: layer boundary linter
+│   └── security-scan/               # Shell: Trivy + npm audit wrapper
 │
 ├── frontend/                        # Angular 21 (zoneless, signals, standalone)
 │   └── src/app/
 │       ├── core/                    #   environment, error handling
 │       ├── features/                #   smart feature containers
 │       │   ├── auth/
+│       │   ├── canary/
 │       │   ├── dashboard/
 │       │   ├── landing/
 │       │   ├── register/
 │       │   └── user-profile/
-│       └── shared/ui/               #   headless directives + display components
-│           ├── button (directive)
-│           ├── badge, card (components)
-│           ├── input, dialog-panel, form-error
-│           └── histogram-timeline
+│       └── shared/ui/ → packages/ui/src  # symlink to @aspect/ui source
 │
 ├── backend/                         # FastAPI + async SQLAlchemy
 │   ├── core/                        #   config, database, auth, middleware, DI
@@ -89,6 +94,7 @@ ai-boilerplate/
 │   └── main.py
 │
 ├── keycloak/                        # Keycloak config + realm export
+├── security-reports/                # Committed Trivy/npm audit reports
 ├── shared/
 │   ├── manifest.schema.yaml         # Feature manifest schema
 │   └── scripts/                     # generate-frontend.sh, scaffold-feature.sh, lint-architecture.py
@@ -108,10 +114,10 @@ Consumed via `@import "@aspect/design-system"` in the frontend, layered as:
 
 Components use `data-*` HTML attributes for variants, styled via CSS attribute selectors:
 ```html
-<button appButton variant="destructive" size="lg">Delete</button>
+<button uiButton variant="destructive" size="lg">Delete</button>
 ```
 ```css
-[appButton][data-variant="destructive"] { background-color: var(--color-destructive); }
+[uiButton][data-variant="destructive"] { background-color: var(--color-destructive); }
 ```
 
 ## Design Decisions for LLM Agents
@@ -121,7 +127,7 @@ Components use `data-*` HTML attributes for variants, styled via CSS attribute s
 3. **Code-first API (OpenAPI)** — FastAPI routers are the single source of truth; `make generate` regenerates the TS client
 4. **Strict types everywhere** — TypeScript `strict: true`, Python type hints on all signatures
 5. **No barrel exports** — direct imports only, faster builds, less token waste
-6. **AGENTS.md at 3 levels** — root (~10 rules), backend (~30), frontend (~50)
+6. **AGENTS.md at 3 levels** — root (~16 rules), backend (~31), frontend (~50+)
 7. **Angular: correcting stale training data** — explicit overrides for modern Angular patterns (signals, `inject()`, no NgModules)
 8. **Colocated TDD** — tests ship alongside source files
 
@@ -132,6 +138,8 @@ Components use `data-*` HTML attributes for variants, styled via CSS attribute s
 | `ci.yml` | push/PR to `main` | Architecture lint, backend tests, frontend tests, code lint, OpenAPI validation |
 | `frontend-ci.yml` | push/PR to `master` (frontend paths) | Lint, unit tests, build, E2E (Playwright) |
 | `deploy-storybook.yml` | push to `main` (frontend/design-system paths) | Build Storybook → deploy to GitHub Pages |
+| `security.yml` | push/PR + weekly schedule | Trivy container/filesystem scan, npm audit, CodeQL analysis |
+| `security-reports.yml` | weekly schedule | Generate and commit security scan reports to `security-reports/` |
 
 ## Adding a Feature
 

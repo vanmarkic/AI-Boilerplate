@@ -38,12 +38,13 @@
 
 ## Component Architecture
 
-### UI Primitives (`shared/ui/`)
+### UI Primitives (`packages/ui/src/`, symlinked at `shared/ui/`)
 1. Inline templates, single .ts file, <= 150 lines.
 2. No services or inject() calls — pure inputs/outputs.
 3. OnPush change detection always.
 4. Variants via `data-*` attributes + CSS attribute selectors (zero runtime cost).
 5. Each component has a `.stories.ts` file for Storybook.
+6. All component selectors use `ui-` prefix (e.g., `ui-button`, `ui-card`, `ui-input`). The button directive selector is `uiButton`.
 
 ### Feature Components (`features/`)
 7. Wire services to UI components.
@@ -75,8 +76,8 @@ See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, 
 ## File Organization
 15. Each feature is a folder under `src/app/features/`.
 16. Feature files: component.ts, store.ts (NgRx signalStore with `withResource`), types.ts, routes.ts, spec.ts.
-17. UI components in `src/app/shared/ui/` with colocated `.stories.ts`.
-18. No barrel exports except `shared/ui/` public API.
+17. UI components live in `packages/ui/src/` (symlinked at `src/app/shared/ui/`) with colocated `.stories.ts`.
+18. No barrel exports except `packages/ui/src/public-api.ts`.
 19. Maximum 250 lines per file (150 for UI primitives).
 
 ## Testing
@@ -112,9 +113,11 @@ See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, 
 - Do NOT write new CSS in components or `frontend/src/styles/` — add missing styles to `packages/design-system/`.
 - Do NOT use Tailwind, `cn()`, `clsx`, or runtime class computation — use utility classes and `data-*` variants.
 - Do NOT hardcode colors, spacing, or font sizes — use design tokens.
-- Do NOT put business logic or `inject()` calls in `shared/ui` components.
+- Do NOT put business logic or `inject()` calls in `packages/ui/` components.
 - Do NOT import from a sibling feature — route through a shared service if needed.
 - Do NOT set `standalone: true` — it is the default and is omitted.
+- Do NOT use `app-` prefix for UI component selectors — use `ui-` prefix (e.g., `ui-button`, `ui-card`).
+- Do NOT edit generated API client files in `shared/api/generated/` — run `make generate` instead.
 
 ## API Client
 
@@ -122,7 +125,7 @@ See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, 
 - ALWAYS use the generated functions from `../../shared/api/generated` (e.g. `createUser`, `getUser`)
 - Run `make generate` from the repo root after changing backend routers or Pydantic models
 - Generated files live at `frontend/src/app/shared/api/generated/` — do NOT edit them manually
-- The Angular client is provided via `provideHeyApiClient(client)` in `app.config.ts` — it uses `HttpClient` internally so interceptors apply
+- The Angular client uses `@hey-api/client-angular` and is provided via `provideHeyApiClient(client)` in `app.config.ts` — it uses `HttpClient` internally so interceptors apply
 - Configure the client base URL via `client.setConfig({ baseUrl })` in `app.config.ts` — do not re-configure in services
 
 ## Forms
@@ -130,7 +133,7 @@ See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, 
 - ALWAYS use `ReactiveFormsModule` and `FormGroup` for feature forms — never template-driven forms
 - ALWAYS set `nonNullable: true` on every `FormControl` — prevents null from appearing in typed values
 - ALWAYS use `form.getRawValue()` to read values — not `form.value` (disabled fields become undefined in `form.value`)
-- ALWAYS pair `<app-input formControlName="field">` with `<app-form-error [control]="form.controls.field" />`
+- ALWAYS pair `<ui-input formControlName="field">` with `<ui-form-error [control]="form.controls.field" />`
 - DO NOT use `ngModel` in feature forms — only `formControlName` or `[formControl]`
-- Feature form components must import: `ReactiveFormsModule`, `InputComponent`, `ButtonComponent`, `FormErrorComponent`
+- Feature form components must import: `ReactiveFormsModule`, `InputComponent`, `ButtonDirective`, `FormErrorComponent` from `@aspect/ui`
 - Call `form.markAllAsTouched()` on failed submit to surface all validation errors at once
