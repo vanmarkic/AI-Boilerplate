@@ -40,7 +40,7 @@ import { ButtonDirective } from '@aspect/ui';
             required
             class="input-base flex-1"
           />
-          <button type="submit" appButton size="lg">
+          <button type="submit" aspButton size="lg">
             Get access
           </button>
         </form>

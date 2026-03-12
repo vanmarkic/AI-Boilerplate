@@ -9,7 +9,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 @Component({
-  selector: 'app-form-error',
+  selector: 'asp-form-error',
   template: `
     @if (control() && control()!.invalid && control()!.touched) {
       @for (key of errorKeys(); track key) {

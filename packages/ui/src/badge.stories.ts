@@ -15,7 +15,7 @@ const meta: Meta<BadgeComponent & { label: string }> = {
   },
   render: (args) => ({
     props: args,
-    template: `<app-badge [variant]="variant">{{ label }}</app-badge>`,
+    template: `<asp-badge [variant]="variant">{{ label }}</asp-badge>`,
     moduleMetadata: { imports: [BadgeComponent] },
   }),
 };

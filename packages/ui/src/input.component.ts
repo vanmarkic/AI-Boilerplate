@@ -2,7 +2,7 @@ import { ChangeDetectorRef, Component, forwardRef, inject, input, model, signal 
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
-  selector: 'app-input',
+  selector: 'asp-input',
   imports: [FormsModule],
   providers: [
     {
