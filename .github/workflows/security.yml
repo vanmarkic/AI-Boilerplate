@@ -60,15 +60,32 @@ jobs:
     name: Trivy Filesystem Scan
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      TRIVY_VERSION: '0.57.1'
+      TRIVY_DB_REPOSITORY: 'ghcr.io/aquasecurity/trivy-db:2'
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.29.0
+      - name: Cache Trivy binary
+        id: trivy-bin-cache
+        uses: actions/cache@v4
         with:
-          scan-type: fs
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          format: sarif
-          output: trivy-fs.sarif
+          path: /usr/local/bin/trivy
+          key: trivy-bin-${{ runner.os }}-${{ env.TRIVY_VERSION }}
+      - name: Install Trivy
+        if: steps.trivy-bin-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
+      - name: Run Trivy filesystem scan
+        run: trivy fs --severity HIGH,CRITICAL --format sarif --output trivy-fs.sarif .
       - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('trivy-fs.sarif') != ''
         with:
@@ -123,16 +140,34 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files_url, 'Dockerfile'))
+    env:
+      TRIVY_VERSION: '0.57.1'
+      TRIVY_DB_REPOSITORY: 'ghcr.io/aquasecurity/trivy-db:2'
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Trivy binary
+        id: trivy-bin-cache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/trivy
+          key: trivy-bin-${{ runner.os }}-${{ env.TRIVY_VERSION }}
+      - name: Install Trivy
+        if: steps.trivy-bin-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
       - name: Build backend Docker image
         run: docker build -t ai-boilerplate-backend:scan backend/
-      - uses: aquasecurity/trivy-action@0.29.0
-        with:
-          image-ref: ai-boilerplate-backend:scan
-          severity: HIGH,CRITICAL
-          format: sarif
-          output: trivy-docker.sarif
+      - name: Run Trivy image scan
+        run: trivy image --severity HIGH,CRITICAL --format sarif --output trivy-docker.sarif ai-boilerplate-backend:scan
       - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('trivy-docker.sarif') != ''
         with:
