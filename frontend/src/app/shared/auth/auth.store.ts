@@ -33,7 +33,7 @@ export class AuthStore {
           pkceMethod: 'S256',
         }),
         new Promise<boolean>((_, reject) => {
-          setTimeout(() => reject(new Error('Keycloak init timeout')), 3_000);
+          setTimeout(() => { reject(new Error('Keycloak init timeout')); }, 3_000);
         }),
       ]);
 
