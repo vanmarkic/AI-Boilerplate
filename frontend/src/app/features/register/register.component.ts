@@ -16,20 +16,20 @@ import { RegisterStore } from './register.store';
         <p class="text-sm text-primary">Account created! You can now sign in.</p>
       } @else {
         <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-          <asp-input
+          <ui-input
             formControlName="name"
             label="Full name"
             placeholder="Alice Smith"
           />
-          <asp-form-error [control]="form.controls.name" />
+          <ui-form-error [control]="form.controls.name" />
 
-          <asp-input
+          <ui-input
             formControlName="email"
             type="email"
             label="Email address"
             placeholder="alice@example.com"
           />
-          <asp-form-error [control]="form.controls.email" />
+          <ui-form-error [control]="form.controls.email" />
 
           @if (store.error(); as error) {
             <p class="text-sm text-destructive mb-sm">{{ error }}</p>
@@ -37,7 +37,7 @@ import { RegisterStore } from './register.store';
 
           <button
             type="submit"
-            aspButton
+            uiButton
             class="w-full"
             [disabled]="form.invalid || store.loading()"
           >

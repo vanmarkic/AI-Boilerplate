@@ -4,7 +4,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { InputComponent } from './input.component';
 
 @Component({
-  template: `<asp-input [formControl]="control" />`,
+  template: `<ui-input [formControl]="control" />`,
   imports: [InputComponent, ReactiveFormsModule],
 })
 class TestHostComponent {

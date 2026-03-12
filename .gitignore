@@ -11,6 +11,7 @@ node_modules/
 .angular/
 dist/
 .env.local
+package-lock.json
 
 # Generated code
 backend/generated/

@@ -12,7 +12,7 @@ export interface HistogramLabel {
 export type HistogramVariant = 'default' | 'success' | 'destructive' | 'muted';
 
 @Component({
-  selector: 'asp-histogram-timeline',
+  selector: 'ui-histogram-timeline',
   host: {
     'class': 'histogram-timeline',
     '[attr.data-variant]': 'variant()',

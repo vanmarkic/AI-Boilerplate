@@ -1,7 +1,7 @@
 import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'asp-badge',
+  selector: 'ui-badge',
   host: {
     'class': 'badge',
     '[attr.data-variant]': 'variant()',

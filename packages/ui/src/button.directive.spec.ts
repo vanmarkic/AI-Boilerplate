@@ -4,7 +4,7 @@ import { ButtonDirective, type ButtonSize, type ButtonVariant } from './button.d
 
 @Component({
   imports: [ButtonDirective],
-  template: `<button aspButton [variant]="variant()" [size]="size()">Click</button>`,
+  template: `<button uiButton [variant]="variant()" [size]="size()">Click</button>`,
 })
 class TestHost {
   variant = signal<ButtonVariant>('default');

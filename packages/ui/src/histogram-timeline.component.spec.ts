@@ -10,7 +10,7 @@ import {
 @Component({
   imports: [HistogramTimelineComponent],
   template: `
-    <asp-histogram-timeline
+    <ui-histogram-timeline
       [bars]="bars()"
       [labels]="labels()"
       [ariaLabel]="ariaLabel()"
@@ -35,7 +35,7 @@ describe('HistogramTimelineComponent', () => {
     }).compileComponents();
     fixture = TestBed.createComponent(TestHost);
     fixture.detectChanges();
-    host = fixture.nativeElement.querySelector('asp-histogram-timeline');
+    host = fixture.nativeElement.querySelector('ui-histogram-timeline');
   });
 
   it('should have histogram-timeline class on host', () => {
