@@ -12,7 +12,7 @@ RUN python3 /filter.py --tier=$TIER --src=/all-features/ --dest=/filtered-featur
 FROM node:22-slim
 WORKDIR /app
 
-COPY frontend/package.json frontend/package-lock.json ./
+COPY frontend/package.json ./
 RUN npm i
 
 COPY frontend/ .
