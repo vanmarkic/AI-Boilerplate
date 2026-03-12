@@ -151,7 +151,7 @@ See `docs/conventions/feature-workflow.md` for the full development sequence.
 
 The script is macOS-compatible (no GNU-only bash features). It generates:
 - Backend: model, schema, repository, service, router, test, manifest.yaml, __init__.py
-- Frontend: types, service, component, routes, spec
+- Frontend: types, store, component, routes, spec
 
 ## Best Practices for Local Models
 
