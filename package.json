@@ -3,5 +3,10 @@
   "workspaces": [
     "packages/*",
     "frontend"
-  ]
+  ],
+  "devDependencies": {
+    "@angular/compiler": "^21.2.0",
+    "@angular/compiler-cli": "^21.2.0",
+    "typescript": "~5.9.2"
+  }
 }
