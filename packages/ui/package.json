@@ -8,7 +8,8 @@
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
     "@angular/cdk": "^21.0.0",
-    "@aspect/design-system": "*"
+    "@aspect/design-system": "*",
+    "maplibre-gl": "^5.0.0"
   },
   "devDependencies": {
     "ng-packagr": "^21.0.0",
