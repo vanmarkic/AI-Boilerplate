@@ -47,14 +47,17 @@ jobs:
         run: bash shared/scripts/security-scan.sh
 
       - name: Generate summary report
+        env:
+          SCAN_BRANCH: ${{ github.head_ref || github.ref_name }}
+          SCAN_COMMIT: ${{ github.sha }}
         run: |
           REPORT_DIR=security-reports
           SUMMARY="${REPORT_DIR}/SUMMARY.md"
           echo "# Security Scan Summary" > "$SUMMARY"
           echo "" >> "$SUMMARY"
           echo "**Generated:** $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$SUMMARY"
-          echo "**Branch:** ${{ github.head_ref || github.ref_name }}" >> "$SUMMARY"
-          echo "**Commit:** ${{ github.sha }}" >> "$SUMMARY"
+          echo "**Branch:** $SCAN_BRANCH" >> "$SUMMARY"
+          echo "**Commit:** $SCAN_COMMIT" >> "$SUMMARY"
           echo "" >> "$SUMMARY"
           echo "## Reports" >> "$SUMMARY"
           echo "" >> "$SUMMARY"
