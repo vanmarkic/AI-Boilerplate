@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "monorepo-tier-filter"
+version = "0.1.0"
+description = "Tier-based feature filtering and build verification for monorepos using manifest.yaml"
+license = "MIT"
+requires-python = ">=3.11"
+dependencies = ["pyyaml>=6.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+tier-filter = "monorepo_tier_filter.filter_features:main"
+tier-verify = "monorepo_tier_filter.verify_tier_build:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/monorepo_tier_filter"]
