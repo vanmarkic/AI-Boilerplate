@@ -1,0 +1,23 @@
+{
+  "name": "@aspect/security-scan",
+  "version": "0.1.0",
+  "description": "Orchestrate multiple security scanners (npm audit, pip-audit, bandit, semgrep, trivy, gitleaks) with graceful skip-if-missing and JSON reports",
+  "license": "MIT",
+  "bin": {
+    "security-scan": "./bin/security-scan.sh"
+  },
+  "files": [
+    "bin/"
+  ],
+  "keywords": [
+    "security",
+    "scanner",
+    "npm-audit",
+    "pip-audit",
+    "bandit",
+    "semgrep",
+    "trivy",
+    "gitleaks",
+    "devsecops"
+  ]
+}

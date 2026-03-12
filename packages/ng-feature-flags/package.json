@@ -1,0 +1,25 @@
+{
+  "name": "@aspect/ng-feature-flags",
+  "version": "0.1.0",
+  "description": "Lightweight Angular feature flags with signals — service + route guard",
+  "license": "MIT",
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": [
+    "src/"
+  ],
+  "keywords": [
+    "angular",
+    "feature-flags",
+    "signals",
+    "guard",
+    "route-guard"
+  ],
+  "peerDependencies": {
+    "@angular/core": ">=19.0.0",
+    "@angular/router": ">=19.0.0"
+  }
+}
