@@ -62,6 +62,8 @@ jobs:
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run test:ci
         working-directory: frontend
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
 
   lint:
     name: Code Lint
