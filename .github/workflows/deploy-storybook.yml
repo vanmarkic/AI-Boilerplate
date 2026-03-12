@@ -6,6 +6,7 @@ on:
     paths:
       - 'frontend/**'
       - 'packages/design-system/**'
+      - 'packages/ui/**'
       - '.github/workflows/deploy-storybook.yml'
   workflow_dispatch:
 
