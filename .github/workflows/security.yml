@@ -60,15 +60,26 @@ jobs:
     name: Trivy Filesystem Scan
     runs-on: ubuntu-latest
     continue-on-error: true
+    env:
+      TRIVY_DB_REPOSITORY: 'ghcr.io/aquasecurity/trivy-db:2'
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.29.0
+      - name: Set up Trivy
+        uses: aquasecurity/setup-trivy@v0.2.2
         with:
-          scan-type: fs
-          scan-ref: .
-          severity: HIGH,CRITICAL
-          format: sarif
-          output: trivy-fs.sarif
+          version: v0.57.1
+          cache: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
+      - name: Run Trivy filesystem scan
+        run: trivy fs --severity HIGH,CRITICAL --format sarif --output trivy-fs.sarif .
       - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('trivy-fs.sarif') != ''
         with:
@@ -123,16 +134,28 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && contains(github.event.pull_request.changed_files_url, 'Dockerfile'))
+    env:
+      TRIVY_DB_REPOSITORY: 'ghcr.io/aquasecurity/trivy-db:2'
     steps:
       - uses: actions/checkout@v4
+      - name: Set up Trivy
+        uses: aquasecurity/setup-trivy@v0.2.2
+        with:
+          version: v0.57.1
+          cache: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Cache Trivy DB
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/trivy
+          key: trivy-db-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            trivy-db-${{ runner.os }}-
       - name: Build backend Docker image
         run: docker build -t ai-boilerplate-backend:scan backend/
-      - uses: aquasecurity/trivy-action@0.29.0
-        with:
-          image-ref: ai-boilerplate-backend:scan
-          severity: HIGH,CRITICAL
-          format: sarif
-          output: trivy-docker.sarif
+      - name: Run Trivy image scan
+        run: trivy image --severity HIGH,CRITICAL --format sarif --output trivy-docker.sarif ai-boilerplate-backend:scan
       - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('trivy-docker.sarif') != ''
         with:
