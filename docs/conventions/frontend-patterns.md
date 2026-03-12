@@ -12,7 +12,7 @@ host: {
 ```
 ```css
 /* In packages/design-system/components.css */
-[appButton][data-variant="destructive"] { background-color: var(--color-destructive); }
+[uiButton][data-variant="destructive"] { background-color: var(--color-destructive); }
 ```
 
 ## Angular CDK Usage
@@ -26,17 +26,17 @@ import { CdkTrapFocus } from '@angular/cdk/a11y';
 Use `cdkTrapFocus` on any container that should trap keyboard focus (dialogs, drawers, popovers).
 
 ### Dialog Pattern
-Use `app-dialog-panel` from `shared/ui/` for all dialogs. Wire `[open]` and `(closed)`:
+Use `ui-dialog-panel` from `shared/ui/` for all dialogs. Wire `[open]` and `(closed)`:
 ```html
 @if (showDialog()) {
-  <app-dialog-panel (closed)="showDialog.set(false)">
+  <ui-dialog-panel (closed)="showDialog.set(false)">
     <span dialogTitle>Confirm Delete</span>
     <p>This action cannot be undone.</p>
     <ng-container dialogFooter>
-      <app-button variant="outline" (clicked)="showDialog.set(false)">Cancel</app-button>
-      <app-button variant="destructive" (clicked)="confirm()">Delete</app-button>
+      <ui-button variant="outline" (clicked)="showDialog.set(false)">Cancel</ui-button>
+      <ui-button variant="destructive" (clicked)="confirm()">Delete</ui-button>
     </ng-container>
-  </app-dialog-panel>
+  </ui-dialog-panel>
 }
 ```
 Use `variant="destructive"` on the panel for confirmation dialogs.

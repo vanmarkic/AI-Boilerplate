@@ -1,6 +1,6 @@
 # Angular Recipe
 
-Angular 17+ with signals and standalone components.
+Angular 21+ with signals, standalone components, and zoneless change detection.
 
 ## Setup
 
@@ -38,7 +38,7 @@ export type ButtonVariant = 'default' | 'destructive' | 'outline' | 'ghost';
 export type ButtonSize = 'sm' | 'default' | 'lg';
 
 @Directive({
-  selector: 'button[appButton], a[appButton]',
+  selector: 'button[uiButton], a[uiButton]',
   host: {
     'class': 'btn',
     '[attr.data-variant]': 'variant()',
@@ -54,8 +54,8 @@ export class ButtonDirective {
 Usage:
 
 ```html
-<button appButton variant="destructive" size="lg">Delete</button>
-<a appButton variant="outline" href="/settings">Settings</a>
+<button uiButton variant="destructive" size="lg">Delete</button>
+<a uiButton variant="outline" href="/settings">Settings</a>
 ```
 
 ### BadgeComponent
@@ -64,7 +64,7 @@ Usage:
 import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'app-badge',
+  selector: 'ui-badge',
   host: {
     'class': 'badge',
     '[attr.data-variant]': 'variant()',
@@ -79,7 +79,7 @@ export class BadgeComponent {
 Usage:
 
 ```html
-<app-badge variant="destructive">Error</app-badge>
+<ui-badge variant="destructive">Error</ui-badge>
 ```
 
 ### CardComponent
@@ -88,7 +88,7 @@ Usage:
 import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'app-card',
+  selector: 'ui-card',
   host: { class: 'card' },
   template: `
     @if (title()) {
@@ -107,9 +107,9 @@ export class CardComponent {
 Usage:
 
 ```html
-<app-card title="Account">
+<ui-card title="Account">
   <p>Manage your account settings.</p>
-</app-card>
+</ui-card>
 ```
 
 ### Input
@@ -129,7 +129,7 @@ For reactive forms, wrap in a component with `NG_VALUE_ACCESSOR`:
 import { Component, input } from '@angular/core';
 
 @Component({
-  selector: 'app-input',
+  selector: 'ui-input',
   host: { class: 'input-wrapper' },
   template: `
     @if (label()) {
@@ -171,7 +171,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 };
 
 @Component({
-  selector: 'app-form-error',
+  selector: 'ui-form-error',
   template: `
     @if (control() && control()!.invalid && control()!.touched) {
       @for (key of errorKeys(); track key) {
@@ -199,7 +199,7 @@ export class FormErrorComponent {
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 @Component({
-  selector: 'app-dialog-panel',
+  selector: 'ui-dialog-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(keydown.escape)': 'closed.emit()',
@@ -228,12 +228,12 @@ export class DialogPanelComponent {
 Usage:
 
 ```html
-<app-dialog-panel variant="destructive" (closed)="onClose()">
+<ui-dialog-panel variant="destructive" (closed)="onClose()">
   <h2 dialogTitle>Delete account?</h2>
   <p>This action cannot be undone.</p>
   <div dialogFooter>
-    <button appButton variant="outline" (click)="onClose()">Cancel</button>
-    <button appButton variant="destructive" (click)="onDelete()">Delete</button>
+    <button uiButton variant="outline" (click)="onClose()">Cancel</button>
+    <button uiButton variant="destructive" (click)="onDelete()">Delete</button>
   </div>
-</app-dialog-panel>
+</ui-dialog-panel>
 ```
