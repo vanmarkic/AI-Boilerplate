@@ -29,6 +29,8 @@
   "packageManager": "npm@10.8.2",
   "dependencies": {
     "@aspect/design-system": "*",
+    "@aspect/ng-feature-flags": "*",
+    "@aspect/ngrx-with-resource": "*",
     "@aspect/ui": "*",
     "@angular/cdk": "^21.2.2",
     "@angular/common": "^21.2.3",
