@@ -1,4 +1,4 @@
-"""Tests for verify-tier-build.py.
+"""Tests for monorepo_tier_filter.verify_tier_build.
 
 Uses tmp_path to create isolated fake feature directories, then asserts that
 each verification function catches (or allows) the expected patterns.
@@ -8,16 +8,7 @@ from pathlib import Path
 
 import pytest
 
-# Import the module under test — adjust sys.path so the import works
-# regardless of working directory.
-import importlib.util
-import sys
-
-_SCRIPT = Path(__file__).resolve().parent / "verify-tier-build.py"
-_spec = importlib.util.spec_from_file_location("verify_tier_build", _SCRIPT)
-vtb = importlib.util.module_from_spec(_spec)
-sys.modules["verify_tier_build"] = vtb
-_spec.loader.exec_module(vtb)
+from monorepo_tier_filter import verify_tier_build as vtb
 
 
 # ── Helpers ──────────────────────────────────────────────────
@@ -191,47 +182,42 @@ class TestVerifyFilteredOutput:
 
 
 class TestVerifyBackendEntrypoint:
-    def test_clean_main_passes(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_clean_main_passes(self, tmp_path: Path) -> None:
         main_py = tmp_path / "main.py"
         main_py.write_text(textwrap.dedent("""\
             from features.health.health_router import router as health_router
             from features.user.user_router import router as user_router
         """))
-        monkeypatch.setattr(vtb, "BACKEND_MAIN", main_py)
-        violations = vtb.verify_backend_entrypoint({"analytics", "ml"})
+        violations = vtb.verify_backend_entrypoint(main_py, {"analytics", "ml"})
         assert violations == []
 
-    def test_detects_excluded_import(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_detects_excluded_import(self, tmp_path: Path) -> None:
         main_py = tmp_path / "main.py"
         main_py.write_text(textwrap.dedent("""\
             from features.health.health_router import router as health_router
             from features.analytics.analytics_router import router as analytics_router
         """))
-        monkeypatch.setattr(vtb, "BACKEND_MAIN", main_py)
-        violations = vtb.verify_backend_entrypoint({"analytics"})
+        violations = vtb.verify_backend_entrypoint(main_py, {"analytics"})
         assert len(violations) == 1
         assert "analytics" in violations[0]
         assert "main.py:2" in violations[0]
 
-    def test_detects_multi_import_on_single_line(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_detects_multi_import_on_single_line(self, tmp_path: Path) -> None:
         """import features.health, features.analytics on one line."""
         main_py = tmp_path / "main.py"
         main_py.write_text("import features.health, features.analytics\n")
-        monkeypatch.setattr(vtb, "BACKEND_MAIN", main_py)
-        violations = vtb.verify_backend_entrypoint({"analytics"})
+        violations = vtb.verify_backend_entrypoint(main_py, {"analytics"})
         assert len(violations) == 1
         assert "analytics" in violations[0]
 
-    def test_multi_import_catches_both_excluded(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_multi_import_catches_both_excluded(self, tmp_path: Path) -> None:
         main_py = tmp_path / "main.py"
         main_py.write_text("import features.analytics, features.ml\n")
-        monkeypatch.setattr(vtb, "BACKEND_MAIN", main_py)
-        violations = vtb.verify_backend_entrypoint({"analytics", "ml"})
+        violations = vtb.verify_backend_entrypoint(main_py, {"analytics", "ml"})
         assert len(violations) == 2
 
-    def test_missing_main_returns_empty(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(vtb, "BACKEND_MAIN", tmp_path / "nope.py")
-        violations = vtb.verify_backend_entrypoint({"analytics"})
+    def test_missing_main_returns_empty(self, tmp_path: Path) -> None:
+        violations = vtb.verify_backend_entrypoint(tmp_path / "nope.py", {"analytics"})
         assert violations == []
 
 
@@ -239,7 +225,7 @@ class TestVerifyBackendEntrypoint:
 
 
 class TestVerifyFrontendRoutes:
-    def test_clean_routes_pass(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_clean_routes_pass(self, tmp_path: Path) -> None:
         routes = tmp_path / "app.routes.ts"
         routes.write_text(textwrap.dedent("""\
             import { Routes } from '@angular/router';
@@ -248,11 +234,10 @@ class TestVerifyFrontendRoutes:
               { path: 'register', loadChildren: () => import('./features/register/register.routes').then(m => m.REGISTER_ROUTES) },
             ];
         """))
-        monkeypatch.setattr(vtb, "FRONTEND_ROUTES", routes)
-        violations = vtb.verify_frontend_routes({"analytics", "ml"})
+        violations = vtb.verify_frontend_routes(routes, {"analytics", "ml"})
         assert violations == []
 
-    def test_detects_excluded_route(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_detects_excluded_route(self, tmp_path: Path) -> None:
         routes = tmp_path / "app.routes.ts"
         routes.write_text(textwrap.dedent("""\
             import { Routes } from '@angular/router';
@@ -261,15 +246,13 @@ class TestVerifyFrontendRoutes:
               { path: 'analytics', loadChildren: () => import('./features/analytics/analytics.routes').then(m => m.ANALYTICS_ROUTES) },
             ];
         """))
-        monkeypatch.setattr(vtb, "FRONTEND_ROUTES", routes)
-        violations = vtb.verify_frontend_routes({"analytics"})
+        violations = vtb.verify_frontend_routes(routes, {"analytics"})
         assert len(violations) == 1
         assert "analytics" in violations[0]
         assert "app.routes.ts:4" in violations[0]
 
-    def test_missing_routes_file_returns_empty(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-        monkeypatch.setattr(vtb, "FRONTEND_ROUTES", tmp_path / "nope.ts")
-        violations = vtb.verify_frontend_routes({"analytics"})
+    def test_missing_routes_file_returns_empty(self, tmp_path: Path) -> None:
+        violations = vtb.verify_frontend_routes(tmp_path / "nope.ts", {"analytics"})
         assert violations == []
 
 
@@ -277,62 +260,52 @@ class TestVerifyFrontendRoutes:
 
 
 class TestVerifyCoreNoFeatureImports:
-    def test_clean_core_passes(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_clean_core_passes(self, tmp_path: Path) -> None:
         core = tmp_path / "core"
         core.mkdir()
         (core / "config.py").write_text("DATABASE_URL = 'sqlite://'\n")
-        monkeypatch.setattr(vtb, "BACKEND_CORE", core)
-        monkeypatch.setattr(vtb, "FRONTEND_SHARED", tmp_path / "nope")
-        violations = vtb.verify_core_no_feature_imports({"analytics"})
+        violations = vtb.verify_core_no_feature_imports(core, tmp_path / "nope", {"analytics"})
         assert violations == []
 
     def test_detects_backend_core_importing_excluded_feature(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+        self, tmp_path: Path
     ) -> None:
         core = tmp_path / "core"
         core.mkdir()
         (core / "deps.py").write_text("from features.analytics.service import AnalyticsService\n")
-        monkeypatch.setattr(vtb, "BACKEND_CORE", core)
-        monkeypatch.setattr(vtb, "FRONTEND_SHARED", tmp_path / "nope")
-        violations = vtb.verify_core_no_feature_imports({"analytics"})
+        violations = vtb.verify_core_no_feature_imports(core, tmp_path / "nope", {"analytics"})
         assert len(violations) == 1
         assert "core/deps.py" in violations[0]
 
     def test_detects_frontend_shared_importing_excluded_feature(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+        self, tmp_path: Path
     ) -> None:
-        monkeypatch.setattr(vtb, "BACKEND_CORE", tmp_path / "nope")
         shared = tmp_path / "shared"
         shared.mkdir()
         (shared / "helper.ts").write_text(
             "import { Foo } from '../../features/analytics/analytics.service';\n"
         )
-        monkeypatch.setattr(vtb, "FRONTEND_SHARED", shared)
-        violations = vtb.verify_core_no_feature_imports({"analytics"})
+        violations = vtb.verify_core_no_feature_imports(tmp_path / "nope", shared, {"analytics"})
         assert len(violations) == 1
         assert "shared/helper.ts" in violations[0]
 
     def test_detects_multi_import_in_core(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+        self, tmp_path: Path
     ) -> None:
         core = tmp_path / "core"
         core.mkdir()
         (core / "deps.py").write_text("import features.analytics, features.ml\n")
-        monkeypatch.setattr(vtb, "BACKEND_CORE", core)
-        monkeypatch.setattr(vtb, "FRONTEND_SHARED", tmp_path / "nope")
-        violations = vtb.verify_core_no_feature_imports({"analytics", "ml"})
+        violations = vtb.verify_core_no_feature_imports(core, tmp_path / "nope", {"analytics", "ml"})
         assert len(violations) == 2
 
     def test_allows_included_feature_import_in_core(
-        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+        self, tmp_path: Path
     ) -> None:
         core = tmp_path / "core"
         core.mkdir()
         (core / "deps.py").write_text("from features.user.user_service import UserService\n")
-        monkeypatch.setattr(vtb, "BACKEND_CORE", core)
-        monkeypatch.setattr(vtb, "FRONTEND_SHARED", tmp_path / "nope")
         # 'user' is not in excluded set, so no violation
-        violations = vtb.verify_core_no_feature_imports({"analytics"})
+        violations = vtb.verify_core_no_feature_imports(core, tmp_path / "nope", {"analytics"})
         assert violations == []
 
 
@@ -409,7 +382,7 @@ class TestIntegrationFakeTier2:
     """Simulates adding a tier-2 feature and verifying a tier-1 build catches it."""
 
     @pytest.fixture()
-    def fake_repo(self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> dict[str, Path]:
+    def fake_repo(self, tmp_path: Path) -> dict[str, Path]:
         # Backend features
         be_all = tmp_path / "all_backend"
         _make_feature(be_all, "health", tier=1)
@@ -456,14 +429,12 @@ class TestIntegrationFakeTier2:
         shared.mkdir()
         (shared / "util.ts").write_text("export const VERSION = '0.1';\n")
 
-        monkeypatch.setattr(vtb, "BACKEND_ALL", be_all)
-        monkeypatch.setattr(vtb, "FRONTEND_ALL", fe_all)
-        monkeypatch.setattr(vtb, "BACKEND_MAIN", main_py)
-        monkeypatch.setattr(vtb, "FRONTEND_ROUTES", routes_ts)
-        monkeypatch.setattr(vtb, "BACKEND_CORE", core)
-        monkeypatch.setattr(vtb, "FRONTEND_SHARED", shared)
-
-        return {"be_dest": be_dest, "fe_dest": fe_dest, "be_all": be_all, "fe_all": fe_all}
+        return {
+            "be_dest": be_dest, "fe_dest": fe_dest,
+            "be_all": be_all, "fe_all": fe_all,
+            "main_py": main_py, "routes_ts": routes_ts,
+            "core": core, "shared": shared,
+        }
 
     def test_clean_tier1_build_passes_all_checks(self, fake_repo: dict[str, Path]) -> None:
         """A properly filtered tier-1 build with clean entrypoints passes."""
@@ -484,14 +455,14 @@ class TestIntegrationFakeTier2:
         # All 10 checks should pass
         assert vtb.verify_included_tiers(be, 1, "backend") == []
         assert vtb.verify_filtered_output(be, excluded_be, "backend") == []
-        assert vtb.verify_backend_entrypoint(excluded_be) == []
-        assert vtb.verify_core_no_feature_imports(excluded_be) == []
+        assert vtb.verify_backend_entrypoint(fake_repo["main_py"], excluded_be) == []
+        assert vtb.verify_core_no_feature_imports(fake_repo["core"], fake_repo["shared"], excluded_be) == []
         assert vtb.verify_backend_generated_init(be, included_be) == []
 
         assert vtb.verify_included_tiers(fe, 1, "frontend") == []
         assert vtb.verify_filtered_output(fe, excluded_fe, "frontend") == []
-        assert vtb.verify_frontend_routes(excluded_fe) == []
-        assert vtb.verify_core_no_feature_imports(excluded_fe) == []
+        assert vtb.verify_frontend_routes(fake_repo["routes_ts"], excluded_fe) == []
+        assert vtb.verify_core_no_feature_imports(fake_repo["core"], fake_repo["shared"], excluded_fe) == []
         assert vtb.verify_frontend_generated_routes(fe, included_fe) == []
 
     def test_tier2_dir_leaked_into_build_is_caught(self, fake_repo: dict[str, Path]) -> None:
@@ -503,48 +474,51 @@ class TestIntegrationFakeTier2:
         assert "analytics" in violations[0]
 
     def test_main_py_importing_excluded_feature_is_caught(
-        self, fake_repo: dict[str, Path], monkeypatch: pytest.MonkeyPatch
+        self, fake_repo: dict[str, Path]
     ) -> None:
         """If someone adds `from features.analytics...` to main.py."""
-        main_py = vtb.BACKEND_MAIN
+        main_py = fake_repo["main_py"]
         main_py.write_text(textwrap.dedent("""\
             from features.health.health_router import router as health_router
             from features.analytics.analytics_router import router as analytics_router
         """))
-        violations = vtb.verify_backend_entrypoint({"analytics"})
+        violations = vtb.verify_backend_entrypoint(main_py, {"analytics"})
         assert len(violations) == 1
 
     def test_routes_ts_importing_excluded_feature_is_caught(
         self, fake_repo: dict[str, Path]
     ) -> None:
         """If someone adds a tier-2 route to app.routes.ts."""
-        vtb.FRONTEND_ROUTES.write_text(textwrap.dedent("""\
+        routes_ts = fake_repo["routes_ts"]
+        routes_ts.write_text(textwrap.dedent("""\
             export const routes = [
               { path: '', loadChildren: () => import('./features/landing/landing.routes') },
               { path: 'analytics-dash', loadChildren: () => import('./features/analytics-dash/analytics-dash.routes') },
             ];
         """))
-        violations = vtb.verify_frontend_routes({"analytics-dash"})
+        violations = vtb.verify_frontend_routes(routes_ts, {"analytics-dash"})
         assert len(violations) == 1
 
     def test_core_importing_excluded_feature_is_caught(
         self, fake_repo: dict[str, Path]
     ) -> None:
         """If backend/core/ imports a tier-2 feature module."""
-        (vtb.BACKEND_CORE / "deps.py").write_text(
+        core = fake_repo["core"]
+        (core / "deps.py").write_text(
             "from features.analytics.service import AnalyticsService\n"
         )
-        violations = vtb.verify_core_no_feature_imports({"analytics"})
+        violations = vtb.verify_core_no_feature_imports(core, fake_repo["shared"], {"analytics"})
         assert len(violations) == 1
 
     def test_shared_importing_excluded_feature_is_caught(
         self, fake_repo: dict[str, Path]
     ) -> None:
         """If frontend/shared/ imports a tier-2 feature path."""
-        (vtb.FRONTEND_SHARED / "helper.ts").write_text(
+        shared = fake_repo["shared"]
+        (shared / "helper.ts").write_text(
             "import { X } from '../../features/analytics-dash/service';\n"
         )
-        violations = vtb.verify_core_no_feature_imports({"analytics-dash"})
+        violations = vtb.verify_core_no_feature_imports(fake_repo["core"], shared, {"analytics-dash"})
         assert len(violations) == 1
 
     def test_filtered_output_referencing_excluded_name_is_caught(
