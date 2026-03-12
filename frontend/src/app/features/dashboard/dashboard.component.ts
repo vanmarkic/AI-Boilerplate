@@ -1,10 +1,5 @@
 import { Component, signal } from '@angular/core';
-import { BadgeComponent } from '../../shared/ui/badge.component';
-import {
-  HistogramTimelineComponent,
-  type HistogramBar,
-  type HistogramLabel,
-} from '../../shared/ui/histogram-timeline.component';
+import { BadgeComponent, HistogramTimelineComponent, type HistogramBar, type HistogramLabel } from '@aspect/ui';
 
 function seededRandom(seed: number) {
   return () => {

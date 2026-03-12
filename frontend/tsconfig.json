@@ -12,8 +12,12 @@
     "isolatedModules": true,
     "experimentalDecorators": true,
     "importHelpers": true,
+    "preserveSymlinks": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "preserve",
+    "paths": {
+      "@aspect/ui": ["./src/app/shared/ui/public-api.ts"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

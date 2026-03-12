@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { ButtonDirective } from '../../shared/ui/button.directive';
+import { ButtonDirective } from '@aspect/ui';
 
 @Component({
   selector: 'app-landing',
