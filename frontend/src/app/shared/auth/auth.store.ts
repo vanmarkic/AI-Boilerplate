@@ -32,9 +32,9 @@ export class AuthStore {
             window.location.origin + '/assets/silent-check-sso.html',
           pkceMethod: 'S256',
         }),
-        new Promise<boolean>((_, reject) =>
-          setTimeout(() => reject(new Error('Keycloak init timeout')), 3_000),
-        ),
+        new Promise<boolean>((_, reject) => {
+          setTimeout(() => reject(new Error('Keycloak init timeout')), 3_000);
+        }),
       ]);
 
       if (authenticated) {

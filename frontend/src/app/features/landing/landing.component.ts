@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { ButtonDirective } from '../../shared/ui/button.directive';
+import { ButtonDirective } from '@aspect/ui';
 
 @Component({
   selector: 'app-landing',
@@ -40,7 +40,7 @@ import { ButtonDirective } from '../../shared/ui/button.directive';
             required
             class="input-base flex-1"
           />
-          <button type="submit" appButton size="lg">
+          <button type="submit" uiButton size="lg">
             Get access
           </button>
         </form>
