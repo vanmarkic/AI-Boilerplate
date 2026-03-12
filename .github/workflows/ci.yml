@@ -57,7 +57,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: '22'
-      - run: npm ci
+      - run: npm i
       - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run test:ci
@@ -76,7 +76,7 @@ jobs:
           node-version: '22'
       - run: pip install ruff && ruff check .
         working-directory: backend
-      - run: npm ci
+      - run: npm i
       - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run lint:all
@@ -114,7 +114,7 @@ jobs:
           --backend-dest=/tmp/tier1-be
           --frontend-dest=/tmp/tier1-fe
 
-      - run: npm ci
+      - run: npm i
       - run: node -e "require('@rollup/rollup-linux-x64-gnu')" 2>/dev/null || npm i @rollup/rollup-linux-x64-gnu
 
       - name: Build tier-1 production bundle
