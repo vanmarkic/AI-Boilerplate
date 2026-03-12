@@ -1,12 +1,14 @@
 # API Client Codegen + Angular Reactive Forms — Implementation Plan
 
+> **Superseded (client):** `@hey-api/client-fetch` was replaced by `@hey-api/client-angular` (bundled in `@hey-api/openapi-ts ^0.93.0`). Config moved to `frontend/openapi-ts.config.ts`. See `app.config.ts` for `provideHeyApiClient` setup. The forms pattern below is still current.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Wire up the existing OpenAPI codegen script so services use generated typed functions, and add an Angular reactive forms pattern via a Register feature that demonstrates typed `FormGroup` + validation + `ControlValueAccessor` on `InputComponent`.
 
-**Architecture:** Generated fetch client (`@hey-api/client-fetch`) configured once in `main.ts`; services import generated SDK functions instead of calling `HttpClient` directly. `InputComponent` gains `ControlValueAccessor` for reactive form binding. New `register` feature wires everything together end-to-end.
+**Architecture:** Generated Angular client (`@hey-api/client-angular`) provided via `provideHeyApiClient(client)` in `app.config.ts`; stores import generated SDK functions instead of calling `HttpClient` directly. `InputComponent` gains `ControlValueAccessor` for reactive form binding. New `register` feature wires everything together end-to-end.
 
-**Tech Stack:** Angular 19+, `@hey-api/openapi-ts`, `@hey-api/client-fetch`, Angular `ReactiveFormsModule`, vitest (via `ng test`)
+**Tech Stack:** Angular 21+, `@hey-api/openapi-ts`, `@hey-api/client-angular` (bundled), Angular `ReactiveFormsModule`, vitest (via `ng test`)
 
 **Working directory:** `/Users/dragan/AI-Boilerplate/.worktrees/api-codegen-forms`
 **Test command (frontend):** `cd frontend && npx ng test --watch=false`

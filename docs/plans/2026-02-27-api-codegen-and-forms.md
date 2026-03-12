@@ -2,6 +2,7 @@
 
 **Date:** 2026-02-27
 **Status:** Approved
+**Superseded (client):** `@hey-api/client-fetch` was replaced by `@hey-api/client-angular` (bundled in `@hey-api/openapi-ts ^0.93.0`). Config moved to `frontend/openapi-ts.config.ts`. See `app.config.ts` for `provideHeyApiClient` setup.
 
 ## Problem
 

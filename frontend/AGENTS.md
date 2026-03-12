@@ -102,7 +102,7 @@ See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, 
 
 ## HTTP
 27. All API calls go through stores with signal state.
-28. Use `firstValueFrom()` to convert HttpClient observables.
+28. Generated API client functions return Promises — use `await` directly, no `firstValueFrom()` needed.
 29. Base URL configured in `core/environment.ts`.
 30. Auth token attached via `shared/auth/auth.interceptor.ts`.
 
