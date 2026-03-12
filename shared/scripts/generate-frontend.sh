@@ -9,7 +9,7 @@ if [ ! -f shared/openapi.json ]; then
   exit 1
 fi
 
-frontend/node_modules/.bin/openapi-ts \
+npx --workspace=frontend openapi-ts \
   -i shared/openapi.json \
   -o frontend/src/app/shared/api/generated \
   -c @hey-api/client-fetch
