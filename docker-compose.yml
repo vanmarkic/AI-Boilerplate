@@ -1,7 +1,6 @@
-# Base image overrides — set these to use an internal registry:
-#   POSTGRES_IMAGE=registry.corp.com/postgres:17 docker compose up --build
+# Build image overrides — set these to use an internal registry:
+#   PYTHON_IMAGE=registry.corp.com/python:3.12-slim docker compose up --build
 x-images:
-  postgres: &postgres-image ${POSTGRES_IMAGE:-postgres:17}
   python: &python-image ${PYTHON_IMAGE:-python:3.12-slim}
   node: &node-image ${NODE_IMAGE:-node:22-slim}
   uv: &uv-image ${UV_IMAGE:-ghcr.io/astral-sh/uv:0.8}
@@ -9,7 +8,7 @@ x-images:
 
 services:
   db:
-    image: *postgres-image
+    image: postgres:17
     environment:
       POSTGRES_DB: boilerplate
       POSTGRES_USER: dev
