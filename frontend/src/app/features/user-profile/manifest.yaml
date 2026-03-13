@@ -1,0 +1,3 @@
+name: user-profile
+tier: 1
+description: User profile display with loading and error states

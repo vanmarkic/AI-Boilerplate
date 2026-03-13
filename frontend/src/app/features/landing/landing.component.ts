@@ -11,8 +11,7 @@ import { ButtonDirective } from '@aspect/ui';
   template: `
     <!-- Subtle radial glow behind content -->
     <div
-      class="pointer-events-none absolute center-xy rounded-full"
-      style="width: 37.5rem; height: 37.5rem; opacity: 0.07; background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%)"
+      class="pointer-events-none absolute center-xy rounded-full landing-glow"
     ></div>
 
     <div class="relative flex flex-col items-center gap-xl text-center w-full max-w-container-md">
@@ -46,8 +45,8 @@ import { ButtonDirective } from '@aspect/ui';
         </form>
       } @else {
         <div class="flex flex-col gap-sm items-center">
-          <div class="rounded-full border-2 border-primary flex items-center justify-center" style="width: 2rem; height: 2rem">
-            <svg class="text-primary" style="width: 1rem; height: 1rem" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+          <div class="rounded-full border-2 border-primary flex items-center justify-center size-xl">
+            <svg class="text-primary size-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
