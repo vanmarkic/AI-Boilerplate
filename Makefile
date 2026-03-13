@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend test-scaffold generate lock migrate new-feature lint-arch lint storybook help deploy build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend test-scaffold generate lock migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -83,13 +83,6 @@ validate: lint-arch lint test ## Validate everything: architecture + linters + t
 
 security-scan: ## Run security scans and save reports to security-reports/
 	bash shared/scripts/security-scan.sh
-
-deploy: ## Deploy for a target (usage: make deploy TARGET=customer-acme)
-	@test -n "$(TARGET)" || (echo "Usage: make deploy TARGET=<name>" && exit 1)
-	@test -d "deployments/$(TARGET)" || (echo "No deployment config at deployments/$(TARGET)" && exit 1)
-	cp deployments/$(TARGET)/.env .env
-	@echo "Loaded config from deployments/$(TARGET)/.env"
-	docker compose up --build -d
 
 build: ## Build all services for tier 3 (all features)
 	TIER=3 docker compose build
