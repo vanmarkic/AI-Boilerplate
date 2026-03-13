@@ -23,7 +23,7 @@ import type {
   MapPaint,
   MapLayout,
 } from './map-view.types';
-import { resolveColors, applyColorsToMap } from './map-view.style-builder';
+import { resolveColors, applyColorsToMap } from './map-view.colors';
 import { registerPmtilesProtocol } from './map-view.pmtiles';
 
 @Component({
