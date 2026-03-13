@@ -23,7 +23,7 @@ import type {
   MapPaint,
   MapLayout,
 } from './map-view.types';
-import { resolveColors } from './map-view.style-builder';
+import { resolveColors, applyColorsToMap } from './map-view.style-builder';
 
 @Component({
   selector: 'ui-map-view',
@@ -113,7 +113,7 @@ export class MapViewComponent {
   }
 
   private initMap(): void {
-    resolveColors(this.colors(), this.doc);
+    const colors = resolveColors(this.colors(), this.doc);
     const map = new MlMap({
       container: this.container().nativeElement,
       style: this.styleUrl(),
@@ -143,6 +143,7 @@ export class MapViewComponent {
 
     map.on('load', () => {
       if (destroyed) return;
+      applyColorsToMap(map, colors);
       this.mapInstance.set(map);
       this.mapLoad.emit();
     });
