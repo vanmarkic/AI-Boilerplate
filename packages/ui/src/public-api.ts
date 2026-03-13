@@ -23,6 +23,7 @@ export { PageHeaderComponent } from './page-header.component';
 export { DataTableComponent } from './data-table.component';
 export { DataTableColumnComponent } from './data-table-column.component';
 export { DataTableFilterComponent } from './data-table-filter.component';
+export { DataTableTreeFilterComponent } from './data-table-tree-filter.component';
 export type { TableSize, ColumnAlign, SortDirection, SortState } from './data-table.types';
 export type {
   FilterPosition,
@@ -32,6 +33,11 @@ export type {
   FilterState,
   FilterChangeEvent,
 } from './data-table-filter.types';
+export type {
+  TreeFilterNode,
+  FlatTreeNode,
+  TreeSelectionChangeEvent,
+} from './data-table-tree-filter.types';
 export type {
   MapCenter,
   MapBounds,
