@@ -24,7 +24,7 @@ COPY backend/alembic.ini ./
 COPY backend/alembic/ ./alembic/
 COPY --from=feature-filter /filtered-features/ ./features/
 
-# Reproducible install from lock file (falls back to pip if uv.lock missing)
+# Reproducible install from lock file (requires uv.lock to be present)
 RUN uv sync --frozen --no-dev --no-cache
 
 RUN useradd --create-home appuser
