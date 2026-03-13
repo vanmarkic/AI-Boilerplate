@@ -48,6 +48,11 @@ __screenshots__/
 /blob-report/
 /playwright/.cache/
 
+# Protomaps assets (large binaries — download locally, don't commit)
+public/assets/protomaps/tiles/*.pmtiles
+public/assets/protomaps/fonts/**/*.pbf
+public/assets/protomaps/sprites/*.png
+
 # System files
 .DS_Store
 Thumbs.db

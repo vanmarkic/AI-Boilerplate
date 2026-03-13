@@ -12,7 +12,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-import { Map as MlMap, type AddLayerObject } from 'maplibre-gl';
+import { Map as MlMap, type AddLayerObject, type StyleSpecification } from 'maplibre-gl';
 import type { GeoJSON } from 'geojson';
 import type {
   MapCenter,
@@ -23,7 +23,8 @@ import type {
   MapPaint,
   MapLayout,
 } from './map-view.types';
-import { resolveColors } from './map-view.style-builder';
+import { resolveColors, applyColorsToMap } from './map-view.style-builder';
+import { registerPmtilesProtocol } from './map-view.pmtiles';
 
 @Component({
   selector: 'ui-map-view',
@@ -39,7 +40,7 @@ import { resolveColors } from './map-view.style-builder';
 export class MapViewComponent {
   readonly center = input<MapCenter>({ lng: 0, lat: 0 });
   readonly zoom = input<number>(2);
-  readonly styleUrl = input.required<string>();
+  readonly styleUrl = input.required<string | StyleSpecification>();
   readonly variant = input<MapVariant>('default');
   readonly ariaLabel = input<string>('Interactive map');
   readonly colors = input<Partial<MapStyleColors>>({});
@@ -113,10 +114,13 @@ export class MapViewComponent {
   }
 
   private initMap(): void {
-    resolveColors(this.colors(), this.doc);
+    registerPmtilesProtocol();
+    const style = this.styleUrl();
+    const isUrl = typeof style === 'string';
+
     const map = new MlMap({
       container: this.container().nativeElement,
-      style: this.styleUrl(),
+      style,
       center: [this.center().lng, this.center().lat],
       zoom: this.zoom(),
       interactive: this.interactive(),
@@ -143,6 +147,10 @@ export class MapViewComponent {
 
     map.on('load', () => {
       if (destroyed) return;
+      if (isUrl) {
+        const colors = resolveColors(this.colors(), this.doc);
+        applyColorsToMap(map, colors);
+      }
       this.mapInstance.set(map);
       this.mapLoad.emit();
     });
