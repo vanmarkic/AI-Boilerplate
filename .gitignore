@@ -11,7 +11,9 @@ node_modules/
 .angular/
 dist/
 .env.local
-*.lock
+
+# Lock files — commit uv.lock for reproducible Python builds.
+# npm lock files are ignored (regenerated on install).
 package-lock.json
 pnpm-lock.yaml
 
