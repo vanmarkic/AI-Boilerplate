@@ -27,12 +27,12 @@ const { values: flags } = parseArgs({
 /* ── Parse tokens.css ─────────────────────────────────── */
 
 const TOKEN_MAP = {
-  background: '--color-background',
-  water:      '--color-background',
-  land:       '--color-card',
-  roads:      '--color-border',
-  buildings:  '--color-muted',
-  labels:     '--color-muted-foreground',
+  background: '--color-map-background',
+  water:      '--color-map-water',
+  land:       '--color-map-land',
+  roads:      '--color-map-roads',
+  buildings:  '--color-map-buildings',
+  labels:     '--color-map-labels',
 };
 
 function parseTokens(css) {
@@ -41,7 +41,16 @@ function parseTokens(css) {
     const re = new RegExp(`${prop.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:\\s*([^;]+);`);
     const match = css.match(re);
     if (!match) throw new Error(`Token ${prop} not found in tokens.css`);
-    colors[key] = match[1].trim();
+    let value = match[1].trim();
+    // Resolve var() references (e.g. var(--color-muted-foreground))
+    const varMatch = value.match(/^var\(([^)]+)\)$/);
+    if (varMatch) {
+      const refProp = varMatch[1].trim();
+      const refRe = new RegExp(`${refProp.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}:\\s*([^;]+);`);
+      const refMatch = css.match(refRe);
+      if (refMatch) value = refMatch[1].trim();
+    }
+    colors[key] = value;
   }
   return colors;
 }
