@@ -7,7 +7,7 @@
  * in angular.json, and build with `ng build --configuration=<target>`.
  */
 
-import type { EnvironmentConfig } from './environment';
+import type { EnvironmentConfig } from './environment.config';
 
 export const environment: EnvironmentConfig = {
   production: true,
