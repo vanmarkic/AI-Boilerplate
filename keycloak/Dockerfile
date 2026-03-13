@@ -1,5 +1,4 @@
-ARG KEYCLOAK_IMAGE=quay.io/keycloak/keycloak:26.1
-FROM ${KEYCLOAK_IMAGE}
+FROM quay.io/keycloak/keycloak:26.1
 
 USER keycloak
 
