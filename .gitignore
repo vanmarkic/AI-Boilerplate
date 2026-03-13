@@ -13,8 +13,8 @@ dist/
 .env.local
 
 # Lock files — commit uv.lock for reproducible Python builds.
-# npm: package-lock.json is regenerated on install; committed optionally.
-# pnpm-lock.yaml excluded (not used).
+# npm lock files are ignored (regenerated on install).
+package-lock.json
 pnpm-lock.yaml
 
 # Generated code
