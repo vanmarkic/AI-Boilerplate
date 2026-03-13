@@ -105,6 +105,34 @@ export const DefaultSorted: Story = {
   }),
 };
 
+export const ClickableRows: Story = {
+  args: { dataSource: SAMPLE_DATA, size: 'default', striped: false, multiSort: false },
+  render: (args) => ({
+    props: { ...args, lastClicked: null, onRowClick: (row: Product) => { args['lastClicked'] = row; } },
+    template: `
+      <ui-data-table
+        [dataSource]="dataSource"
+        [size]="size"
+        [striped]="striped"
+        [clickableRows]="true"
+        (rowClick)="onRowClick($event)"
+      >
+        <ui-data-table-column columnDef="id" label="ID" align="center" />
+        <ui-data-table-column columnDef="name" label="Name" [sortable]="true" />
+        <ui-data-table-column columnDef="category" label="Category" />
+        <ui-data-table-column columnDef="price" label="Price" align="end" />
+        <ui-data-table-column columnDef="status" label="Status" />
+      </ui-data-table>
+      @if (lastClicked) {
+        <p style="margin-top:1rem;font-size:0.875rem">
+          Clicked: <strong>{{ lastClicked.name }}</strong>
+        </p>
+      }
+    `,
+    moduleMetadata: { imports: TABLE_IMPORTS },
+  }),
+};
+
 export const Empty: Story = {
   args: { dataSource: [] as Product[], size: 'default', striped: false, multiSort: false },
   render: (args) => ({

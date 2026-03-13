@@ -116,6 +116,17 @@
     }
   }
 
+  /* ── Clickable rows ────────────────────────────────────── */
+
+  .data-table-row[data-clickable] {
+    cursor: pointer;
+  }
+
+  .data-table-row[data-clickable]:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--color-ring);
+  }
+
   /* ── Body cells ────────────────────────────────────────── */
 
   .data-table-cell {
