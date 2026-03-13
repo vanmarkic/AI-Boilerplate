@@ -8,21 +8,25 @@ COPY shared/scripts/filter-features.py /filter.py
 COPY backend/features/ /all-features/
 RUN python /filter.py --tier=$TIER --src=/all-features/ --dest=/filtered-features/
 
+FROM ghcr.io/astral-sh/uv:0.8 AS uv
+
 # Stage 2: Build backend with only filtered features
 FROM python:3.12-slim
 
 WORKDIR /app
 
+COPY --from=uv /uv /uvx /bin/
+
 # Copy source first so setuptools can find packages
-COPY backend/pyproject.toml ./
+COPY backend/pyproject.toml backend/uv.lock ./
 COPY backend/core/ ./core/
 COPY backend/main.py ./
 COPY backend/alembic.ini ./
 COPY backend/alembic/ ./alembic/
 COPY --from=feature-filter /filtered-features/ ./features/
 
-# Non-editable install (editable not needed in containers)
-RUN pip install --no-cache-dir ".[dev]"
+# Reproducible install from lock file (requires uv.lock to be present)
+RUN uv sync --frozen --no-dev --no-cache
 
 RUN useradd --create-home appuser
 USER appuser
