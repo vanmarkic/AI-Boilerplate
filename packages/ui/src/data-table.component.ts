@@ -53,6 +53,10 @@ import { type FilterRef, applyGroup, compareValues } from './data-table.utils';
             cdk-row
             *cdkRowDef="let row; columns: displayedColumns()"
             class="data-table-row"
+            [attr.data-clickable]="clickableRows() || null"
+            [attr.tabindex]="clickableRows() ? 0 : null"
+            (click)="onRowClick(row)"
+            (keydown.enter)="onRowClick(row)"
           ></tr>
         </table>
         @if (displayData().length === 0) {
@@ -72,10 +76,12 @@ export class DataTableComponent<T = Record<string, unknown>>
   readonly multiSort = input(false);
   readonly size = input<TableSize>('default');
   readonly striped = input(false);
+  readonly clickableRows = input(false);
   readonly filterLogic = input<FilterLogic>('and');
   readonly masterFilterPosition = input<FilterPosition>('top');
 
   readonly sortChange = output<SortState[]>();
+  readonly rowClick = output<T>();
 
   readonly activeSorts = signal<SortState[]>([]);
   readonly displayedColumns = signal<string[]>([]);
@@ -153,6 +159,12 @@ export class DataTableComponent<T = Record<string, unknown>>
       this.registerColumns();
     });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
+  }
+
+  onRowClick(row: T): void {
+    if (this.clickableRows()) {
+      this.rowClick.emit(row);
+    }
   }
 
   toggleSort(columnDef: string): void {
