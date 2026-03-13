@@ -4,9 +4,9 @@
   "description": "Lightweight Angular feature flags with signals — service + route guard",
   "license": "MIT",
   "type": "module",
-  "main": "./src/index.ts",
+  "main": "./src/public-api.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/public-api.ts"
   },
   "files": [
     "src/"

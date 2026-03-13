@@ -1,0 +1,146 @@
+/* ── Layout Component Classes ──────────────────────────────
+ *  Stack, Grid, Page Layout, Sidebar Layout, Page Header.
+ *  Native CSS nesting.
+ * ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Stack ───────────────────────────────────────────── */
+
+  .stack {
+    display: flex;
+    flex-direction: column;
+
+    &[data-direction="horizontal"] {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    &[data-gap="xs"]  { gap: var(--spacing-xs); }
+    &[data-gap="sm"]  { gap: var(--spacing-sm); }
+    &, &[data-gap="md"] { gap: var(--spacing-md); }
+    &[data-gap="lg"]  { gap: var(--spacing-lg); }
+    &[data-gap="xl"]  { gap: var(--spacing-xl); }
+    &[data-gap="2xl"] { gap: var(--spacing-2xl); }
+    &[data-gap="none"] { gap: 0; }
+
+    &[data-align="start"]   { align-items: flex-start; }
+    &[data-align="center"]  { align-items: center; }
+    &[data-align="end"]     { align-items: flex-end; }
+    &[data-align="stretch"] { align-items: stretch; }
+
+    &[data-justify="start"]   { justify-content: flex-start; }
+    &[data-justify="center"]  { justify-content: center; }
+    &[data-justify="end"]     { justify-content: flex-end; }
+    &[data-justify="between"] { justify-content: space-between; }
+  }
+
+
+  /* ── Layout Grid ─────────────────────────────────────── */
+
+  .layout-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols, 1), minmax(0, 1fr));
+
+    &[data-gap="xs"]  { gap: var(--spacing-xs); }
+    &[data-gap="sm"]  { gap: var(--spacing-sm); }
+    &, &[data-gap="md"] { gap: var(--spacing-md); }
+    &[data-gap="lg"]  { gap: var(--spacing-lg); }
+    &[data-gap="xl"]  { gap: var(--spacing-xl); }
+    &[data-gap="none"] { gap: 0; }
+  }
+
+
+  /* ── Page Layout ─────────────────────────────────────── */
+
+  .page-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
+  .page-layout-header {
+    flex-shrink: 0;
+  }
+
+  .page-layout-main {
+    flex: 1 1 0%;
+    overflow: auto;
+  }
+
+  .page-layout-footer {
+    flex-shrink: 0;
+  }
+
+
+  /* ── Sidebar Layout ──────────────────────────────────── */
+
+  .sidebar-layout {
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+
+    &[data-side="right"] {
+      flex-direction: row-reverse;
+    }
+  }
+
+  .sidebar-layout-sidebar {
+    width: var(--sidebar-width);
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+
+  .sidebar-layout-main {
+    flex: 1 1 0%;
+    min-width: 0;
+    overflow: auto;
+  }
+
+
+  /* ── Page Header ─────────────────────────────────────── */
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding-block: var(--spacing-md);
+  }
+
+  .page-header-heading {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .page-header-title {
+    font-size: var(--font-size-2xl);
+    font-weight: 600;
+    line-height: var(--font-size-2xl--line-height);
+    color: var(--color-foreground);
+    margin: 0;
+  }
+
+  .page-header-subtitle {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-muted-foreground);
+    margin: 0;
+  }
+
+  .page-header-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    flex-shrink: 0;
+  }
+
+  /* ── Landing glow ─────────────────────────────────── */
+
+  .landing-glow {
+    width: 37.5rem;
+    height: 37.5rem;
+    opacity: 0.07;
+    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+  }
+}

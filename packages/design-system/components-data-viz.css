@@ -1,0 +1,191 @@
+/* ── Data Visualization Component Classes ──────────────────
+ *  Histogram Timeline & Map View components.
+ *  Native CSS nesting, color-mix() for hover states.
+ * ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Histogram Timeline ──────────────────────────────── */
+
+  .histogram-timeline {
+    --histogram-height: 8rem;
+    --histogram-bar-color: var(--color-primary);
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+
+    &[data-variant="success"] {
+      --histogram-bar-color: var(--color-success);
+    }
+
+    &[data-variant="destructive"] {
+      --histogram-bar-color: var(--color-destructive);
+    }
+
+    &[data-variant="muted"] {
+      --histogram-bar-color: var(--color-muted-foreground);
+    }
+  }
+
+  .histogram-bars {
+    display: flex;
+    align-items: flex-end;
+    height: var(--histogram-height);
+    gap: 0;
+  }
+
+  .histogram-bar {
+    flex: 1 1 0%;
+    height: calc(var(--bar-value) * 100%);
+    min-height: 1px;
+    background-color: var(--histogram-bar-color);
+    position: relative;
+    transition: background-color var(--duration-fast) var(--ease-default);
+
+    &::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      padding-inline: 2px;
+      margin-inline: -2px;
+    }
+
+    &::after {
+      content: attr(data-count);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding-inline: var(--spacing-xs);
+      padding-block: 2px;
+      border-radius: var(--radius-sm);
+      background-color: var(--color-popover);
+      color: var(--color-popover-foreground);
+      font-size: var(--font-size-xs);
+      line-height: var(--font-size-xs--line-height);
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--duration-fast) var(--ease-default);
+      z-index: var(--z-above);
+    }
+
+    &:hover {
+      background-color: color-mix(in oklch, var(--histogram-bar-color) 80%, white);
+
+      &::after {
+        opacity: 1;
+      }
+    }
+  }
+
+  .histogram-labels {
+    position: relative;
+    height: var(--font-size-xs--line-height);
+  }
+
+  .histogram-label {
+    position: absolute;
+    top: 0;
+    left: calc(var(--label-position) / var(--bar-count) * 100%);
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    color: var(--color-muted-foreground);
+    transform: translateX(-50%);
+    white-space: nowrap;
+  }
+
+  /* -- Map View ----------------------------------------------------------- */
+
+  .map-view {
+    --map-height: 24rem;
+
+    display: block;
+    position: relative;
+    height: var(--map-height);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    overflow: hidden;
+
+    &[data-variant="muted"] {
+      opacity: 0.7;
+    }
+
+    &[data-variant="satellite"] {
+      border-color: transparent;
+    }
+  }
+
+  .map-view-canvas {
+    position: absolute;
+    inset: 0;
+  }
+
+  .map-layer {
+    display: none;
+  }
+
+  .map-marker {
+    pointer-events: auto;
+    cursor: pointer;
+  }
+
+  .map-popup-container {
+    .maplibregl-popup-content {
+      all: unset;
+    }
+
+    .maplibregl-popup-tip {
+      border-top-color: var(--color-card);
+    }
+  }
+
+  .map-popup {
+    position: relative;
+    background-color: var(--color-card);
+    color: var(--color-card-foreground);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    min-width: 10rem;
+    max-width: 20rem;
+
+    &[data-variant="tooltip"] {
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      pointer-events: none;
+    }
+  }
+
+  .map-popup-content {
+    padding: var(--spacing-md);
+  }
+
+  .map-popup-close {
+    position: absolute;
+    top: var(--spacing-xs);
+    right: var(--spacing-xs);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-muted-foreground);
+    font-size: var(--font-size-lg);
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--color-muted);
+      color: var(--color-foreground);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-ring);
+      outline-offset: 2px;
+    }
+  }
+}
