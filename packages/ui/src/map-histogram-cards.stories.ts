@@ -109,7 +109,7 @@ export const Default: Story = {
           `${String(Math.floor(i / 60))}:${String(i % 60).padStart(2, '0')}`,
       ),
       toggleDrawer() {
-        this.drawerOpen = !this.drawerOpen;
+        this['drawerOpen'] = !this['drawerOpen'];
       },
     },
     template: `
