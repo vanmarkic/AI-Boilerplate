@@ -155,16 +155,13 @@ export default meta;
 type Story = StoryObj;
 
 export const SingleSelect: Story = {
-  render: () => ({ props: {}, template: '<ui-tree-filter-single-story />' }),
-  moduleMetadata: { imports: [SingleSelectHost] },
+  render: () => ({ props: {}, template: '<ui-tree-filter-single-story />', moduleMetadata: { imports: [SingleSelectHost] } }),
 };
 
 export const MultiSelect: Story = {
-  render: () => ({ props: {}, template: '<ui-tree-filter-multi-story />' }),
-  moduleMetadata: { imports: [MultiSelectHost] },
+  render: () => ({ props: {}, template: '<ui-tree-filter-multi-story />', moduleMetadata: { imports: [MultiSelectHost] } }),
 };
 
 export const TopPosition: Story = {
-  render: () => ({ props: {}, template: '<ui-tree-filter-top-story />' }),
-  moduleMetadata: { imports: [TopPositionHost] },
+  render: () => ({ props: {}, template: '<ui-tree-filter-top-story />', moduleMetadata: { imports: [TopPositionHost] } }),
 };
