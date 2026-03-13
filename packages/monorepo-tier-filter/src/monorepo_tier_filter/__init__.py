@@ -14,6 +14,11 @@ from monorepo_tier_filter._verify_checks import (
 __all__ = [
     "filter_features",
     "get_feature_tier",
-    "verify_included_tiers",
+    "verify_backend_entrypoint",
+    "verify_backend_generated_init",
+    "verify_core_no_feature_imports",
     "verify_filtered_output",
+    "verify_frontend_generated_routes",
+    "verify_frontend_routes",
+    "verify_included_tiers",
 ]
