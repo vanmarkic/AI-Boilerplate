@@ -39,13 +39,13 @@ type FilterRef = {
   template: `
     @if (hasTopFilters()) {
       <div class="data-table-filters-top">
-        <ng-content select="ui-data-table-filter[position=top]" />
+        <ng-content select="ui-data-table-filter[position=top], ui-data-table-tree-filter[position=top]" />
       </div>
     }
     <div class="data-table-body-wrapper">
       @if (hasLeftFilters()) {
         <div class="data-table-filters-left">
-          <ng-content select="ui-data-table-filter[position=left]" />
+          <ng-content select="ui-data-table-filter[position=left], ui-data-table-tree-filter[position=left]" />
         </div>
       }
       <div class="data-table-content">

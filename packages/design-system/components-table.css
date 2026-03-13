@@ -199,6 +199,68 @@
     color: var(--color-foreground);
   }
 
+  /* ── Tree filter ──────────────────────────────────────── */
+
+  .tree-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tree-filter-node {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding-block: 2px;
+    font-size: var(--font-size-sm);
+    color: var(--color-foreground);
+    white-space: nowrap;
+  }
+
+  .tree-filter-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--color-muted-foreground);
+    cursor: pointer;
+    font-size: 0.5rem;
+    transition: color var(--duration-fast) var(--ease-default);
+
+    &:hover {
+      color: var(--color-foreground);
+    }
+  }
+
+  .tree-filter-arrow {
+    display: inline-block;
+    transition: transform var(--duration-fast) var(--ease-default);
+  }
+
+  .tree-filter-arrow-open {
+    transform: rotate(90deg);
+  }
+
+  .tree-filter-spacer {
+    display: inline-block;
+    width: 1rem;
+  }
+
+  .tree-filter-input {
+    margin: 0;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+  }
+
+  .tree-filter-label {
+    cursor: default;
+    user-select: none;
+  }
+
   /* ── Footer row ────────────────────────────────────────── */
 
   .data-table-footer-row {
