@@ -1,7 +1,8 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'ui-badge',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'class': 'badge',
     '[attr.data-variant]': 'variant()',

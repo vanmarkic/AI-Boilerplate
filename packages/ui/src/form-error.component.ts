@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { AbstractControl } from '@angular/forms';
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -10,6 +10,7 @@ const ERROR_MESSAGES: Record<string, string> = {
 
 @Component({
   selector: 'ui-form-error',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (control() && control()!.invalid && control()!.touched) {
       @for (key of errorKeys(); track key) {

@@ -1,7 +1,8 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'ui-card',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'card' },
   template: `
     @if (title()) {
