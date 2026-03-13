@@ -1,5 +1,5 @@
 import {
-  AfterContentInit,
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ContentChildren,
@@ -48,8 +48,8 @@ import type { SortDirection, SortState, TableSize } from './data-table.types';
     }
   `,
 })
-export class DataTableComponent<T extends Record<string, unknown>>
-  implements AfterContentInit
+export class DataTableComponent<T = Record<string, unknown>>
+  implements AfterViewInit
 {
   readonly dataSource = input.required<T[]>();
   readonly defaultSort = input<SortState[]>([]);
@@ -69,9 +69,9 @@ export class DataTableComponent<T extends Record<string, unknown>>
 
     return data.sort((a, b) => {
       for (const sort of sorts) {
-        const aVal = a[sort.column];
-        const bVal = b[sort.column];
-        const cmp = this.compare(aVal, bVal);
+        const row = a as Record<string, unknown>;
+        const rowB = b as Record<string, unknown>;
+        const cmp = this.compare(row[sort.column], rowB[sort.column]);
         if (cmp !== 0) return sort.direction === 'asc' ? cmp : -cmp;
       }
       return 0;
@@ -92,7 +92,7 @@ export class DataTableComponent<T extends Record<string, unknown>>
     });
   }
 
-  ngAfterContentInit(): void {
+  ngAfterViewInit(): void {
     this.activeSorts.set(this.defaultSort());
     this.registerColumns();
 
@@ -127,7 +127,9 @@ export class DataTableComponent<T extends Record<string, unknown>>
     const sorted = this.columns.toArray();
 
     for (const col of sorted) {
-      names.push(col.columnDef());
+      const name = col.columnDef();
+      col.column.name = name;
+      names.push(name);
       this.table.addColumnDef(col.column);
       col.sortCallback = (def: string) => this.toggleSort(def);
     }
