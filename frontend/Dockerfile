@@ -18,5 +18,7 @@ RUN npm i
 COPY frontend/ .
 COPY --from=feature-filter /filtered-features/ ./src/app/features/
 
+USER node
+
 EXPOSE 4200
 CMD ["npx", "ng", "serve", "--host", "0.0.0.0"]
