@@ -122,10 +122,49 @@ function buildStyle(c, tileUrl, glyphs, sprite) {
   };
 }
 
+/* ── OKLCH → hex (pure math, no DOM) ─────────────────── */
+
+function oklchToHex(color) {
+  const m = color.match(/oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)\s*\)/);
+  if (!m) return color;
+  const L = parseFloat(m[1]) <= 1 ? parseFloat(m[1]) : parseFloat(m[1]) / 100;
+  const C = parseFloat(m[2]);
+  const H = parseFloat(m[3]) * (Math.PI / 180);
+
+  const a_ = C * Math.cos(H);
+  const b_ = C * Math.sin(H);
+
+  const l_ = L + 0.3963377774 * a_ + 0.2158037573 * b_;
+  const m_ = L - 0.1055613458 * a_ - 0.0638541728 * b_;
+  const s_ = L - 0.0894841775 * a_ - 1.2914855480 * b_;
+
+  const l3 = l_ * l_ * l_;
+  const m3 = m_ * m_ * m_;
+  const s3 = s_ * s_ * s_;
+
+  const r = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
+  const g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
+  const b = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3;
+
+  const toSrgb = (x) => {
+    const c = Math.max(0, Math.min(1, x));
+    return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+  };
+  const toHexByte = (x) =>
+    Math.round(Math.max(0, Math.min(255, toSrgb(x) * 255)))
+      .toString(16)
+      .padStart(2, '0');
+
+  return `#${toHexByte(r)}${toHexByte(g)}${toHexByte(b)}`;
+}
+
 /* ── Main ─────────────────────────────────────────────── */
 
 const css = readFileSync(TOKENS_PATH, 'utf-8');
-const colors = parseTokens(css);
+const rawColors = parseTokens(css);
+const colors = Object.fromEntries(
+  Object.entries(rawColors).map(([k, v]) => [k, oklchToHex(v)])
+);
 const style = buildStyle(colors, flags['tile-url'], flags['glyphs'], flags['sprite']);
 
 mkdirSync(dirname(OUT_PATH), { recursive: true });

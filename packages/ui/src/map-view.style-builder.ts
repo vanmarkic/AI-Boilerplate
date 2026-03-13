@@ -1,6 +1,54 @@
 import type { Map as MlMap, StyleSpecification } from 'maplibre-gl';
 import type { MapStyleColors } from './map-view.types';
 
+/* ── OKLCH → hex (pure math, no DOM) ─────────────────── */
+
+/** Convert an oklch() CSS string to a #rrggbb hex string for MapLibre. */
+export function oklchToHex(color: string): string {
+  const m = color.match(/oklch\(\s*([\d.]+)%?\s+([\d.]+)\s+([\d.]+)\s*\)/);
+  if (!m) return color;
+  const L = parseFloat(m[1]) <= 1 ? parseFloat(m[1]) : parseFloat(m[1]) / 100;
+  const C = parseFloat(m[2]);
+  const H = parseFloat(m[3]) * (Math.PI / 180);
+
+  const a_ = C * Math.cos(H);
+  const b_ = C * Math.sin(H);
+
+  const l_ = L + 0.3963377774 * a_ + 0.2158037573 * b_;
+  const m_ = L - 0.1055613458 * a_ - 0.0638541728 * b_;
+  const s_ = L - 0.0894841775 * a_ - 1.2914855480 * b_;
+
+  const l3 = l_ * l_ * l_;
+  const m3 = m_ * m_ * m_;
+  const s3 = s_ * s_ * s_;
+
+  const r = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
+  const g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
+  const b = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3;
+
+  const toSrgb = (x: number) => {
+    const c = Math.max(0, Math.min(1, x));
+    return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+  };
+  const toHex = (x: number) =>
+    Math.round(Math.max(0, Math.min(255, toSrgb(x) * 255)))
+      .toString(16)
+      .padStart(2, '0');
+
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function ensureHexColors(colors: MapStyleColors): MapStyleColors {
+  return {
+    background: oklchToHex(colors.background),
+    land: oklchToHex(colors.land),
+    water: oklchToHex(colors.water),
+    roads: oklchToHex(colors.roads),
+    buildings: oklchToHex(colors.buildings),
+    labels: oklchToHex(colors.labels),
+  };
+}
+
 /* ── Protomaps style builder (pure — no DOM) ─────────── */
 
 const GLYPHS_CDN =
@@ -28,12 +76,14 @@ export function buildProtomapsStyle(
 
   const url = tileUrl.startsWith('pmtiles://') ? tileUrl : `pmtiles://${tileUrl}`;
 
+  const hex = ensureHexColors(colors);
+
   return {
     version: 8,
     sources: { protomaps: { type: 'vector', url } },
     glyphs,
     sprite,
-    layers: buildLayers(colors),
+    layers: buildLayers(hex),
   } as StyleSpecification;
 }
 
@@ -156,6 +206,33 @@ const FALLBACK_COLORS: MapStyleColors = {
   labels: 'oklch(55% 0.005 250)',
 };
 
+/**
+ * Convert any CSS color string (including oklch) to an rgb() string
+ * that MapLibre GL JS can parse. MapLibre only supports hex, rgb(a),
+ * hsl(a), and named colors — not oklch.
+ */
+function toMapLibreColor(cssColor: string, doc: Document): string {
+  if (!cssColor.includes('oklch')) return cssColor;
+  const el = doc.createElement('div');
+  el.style.color = cssColor;
+  doc.body.appendChild(el);
+  const rgb = getComputedStyle(el).color;
+  el.remove();
+  return rgb || cssColor;
+}
+
+function toMapLibreColors(colors: MapStyleColors, doc?: Document): MapStyleColors {
+  if (!doc) return ensureHexColors(colors);
+  return {
+    background: toMapLibreColor(colors.background, doc),
+    land: toMapLibreColor(colors.land, doc),
+    water: toMapLibreColor(colors.water, doc),
+    roads: toMapLibreColor(colors.roads, doc),
+    buildings: toMapLibreColor(colors.buildings, doc),
+    labels: toMapLibreColor(colors.labels, doc),
+  };
+}
+
 /** Read design tokens from a Document for runtime color overrides. */
 export function resolveColors(
   overrides: Partial<MapStyleColors>,
@@ -176,7 +253,8 @@ export function resolveColors(
       }
     : { ...FALLBACK_COLORS };
 
-  return { ...base, ...overrides };
+  const merged = { ...base, ...overrides };
+  return toMapLibreColors(merged, doc);
 }
 
 /** Apply colors to an already-loaded map (for demotiles or similar). */
