@@ -11,7 +11,7 @@ export { CollapsiblePanelComponent, type CollapsiblePanelVariant, type Collapsib
 export { HistogramTimelineComponent, type HistogramBar, type HistogramLabel, type HistogramVariant } from './histogram-timeline.component';
 export { MapViewComponent } from './map-view.component';
 export { registerPmtilesProtocol } from './map-view.pmtiles';
-export { resolveColors, buildProtomapsStyle, type ProtomapsStyleOptions } from './map-view.style-builder';
+export { buildProtomapsStyle, type ProtomapsStyleOptions } from './map-view.style-builder';
 export { MapLayerComponent } from './map-layer.component';
 export { MapMarkerComponent } from './map-marker.component';
 export { MapPopupComponent } from './map-popup.component';
