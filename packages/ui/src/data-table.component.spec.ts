@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DataTableComponent } from './data-table.component';
 import { DataTableColumnComponent } from './data-table-column.component';
@@ -28,7 +28,9 @@ const TEST_DATA: TestRow[] = [
       [striped]="striped()"
       [multiSort]="multiSort()"
       [defaultSort]="defaultSort()"
+      [clickableRows]="clickableRows()"
       (sortChange)="lastSortEvent = $event"
+      (rowClick)="lastRowClickEvent = $event"
     >
       <ui-data-table-column columnDef="id" label="ID" [sortable]="true" align="center" />
       <ui-data-table-column columnDef="name" label="Name" [sortable]="true" />
@@ -44,7 +46,9 @@ class TestHostComponent {
   readonly striped = input(false);
   readonly multiSort = input(false);
   readonly defaultSort = input<SortState[]>([]);
+  readonly clickableRows = input(false);
   lastSortEvent: SortState[] = [];
+  lastRowClickEvent: TestRow | null = null;
 }
 
 function getHeaderCells(el: HTMLElement): HTMLElement[] {
@@ -71,6 +75,7 @@ async function setup(
     striped: boolean;
     multiSort: boolean;
     defaultSort: SortState[];
+    clickableRows: boolean;
   }> = {},
 ): Promise<{ fixture: ComponentFixture<TestHostComponent>; el: HTMLElement }> {
   const fixture = TestBed.createComponent(TestHostComponent);
@@ -79,6 +84,7 @@ async function setup(
   if (overrides.striped !== undefined) fixture.componentRef.setInput('striped', overrides.striped);
   if (overrides.multiSort !== undefined) fixture.componentRef.setInput('multiSort', overrides.multiSort);
   if (overrides.defaultSort) fixture.componentRef.setInput('defaultSort', overrides.defaultSort);
+  if (overrides.clickableRows !== undefined) fixture.componentRef.setInput('clickableRows', overrides.clickableRows);
   fixture.detectChanges();
   await fixture.whenStable();
   fixture.detectChanges();
@@ -346,6 +352,58 @@ describe('DataTableComponent', () => {
       const { fixture, el } = await setup();
       clickHeader(fixture, 2);
       expect(columnValues(el, 2)).toEqual(['10', '20', '30', '40']);
+    });
+  });
+
+  describe('clickableRows', () => {
+    it('should not set data-clickable on rows by default', async () => {
+      const { el } = await setup();
+      const rows = getBodyRows(el);
+      expect(rows[0].getAttribute('data-clickable')).toBeNull();
+    });
+
+    it('should set data-clickable on rows when clickableRows is true', async () => {
+      const { el } = await setup({ clickableRows: true });
+      const rows = getBodyRows(el);
+      rows.forEach((row) => {
+        expect(row.getAttribute('data-clickable')).toBe('true');
+      });
+    });
+
+    it('should set tabindex=0 on rows when clickableRows is true', async () => {
+      const { el } = await setup({ clickableRows: true });
+      const rows = getBodyRows(el);
+      rows.forEach((row) => {
+        expect(row.getAttribute('tabindex')).toBe('0');
+      });
+    });
+
+    it('should not set tabindex on rows when clickableRows is false', async () => {
+      const { el } = await setup({ clickableRows: false });
+      const rows = getBodyRows(el);
+      expect(rows[0].getAttribute('tabindex')).toBeNull();
+    });
+
+    it('should emit rowClick with row data when a row is clicked', async () => {
+      const { fixture, el } = await setup({ clickableRows: true });
+      getBodyRows(el)[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.lastRowClickEvent).toEqual(TEST_DATA[0]);
+    });
+
+    it('should not emit rowClick when clickableRows is false', async () => {
+      const { fixture, el } = await setup({ clickableRows: false });
+      getBodyRows(el)[0].click();
+      fixture.detectChanges();
+      expect(fixture.componentInstance.lastRowClickEvent).toBeNull();
+    });
+
+    it('should emit rowClick with correct row on keyboard Enter', async () => {
+      const { fixture, el } = await setup({ clickableRows: true });
+      const row = getBodyRows(el)[1];
+      row.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      fixture.detectChanges();
+      expect(fixture.componentInstance.lastRowClickEvent).toEqual(TEST_DATA[1]);
     });
   });
 });
