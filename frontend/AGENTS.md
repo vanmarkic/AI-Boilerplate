@@ -40,7 +40,7 @@
 
 ### UI Primitives (`packages/ui/src/`, symlinked at `shared/ui/`)
 1. Inline templates, single .ts file, <= 150 lines.
-2. No services or inject() calls — pure inputs/outputs.
+2. No services or inject() calls — pure inputs/outputs. Exception: compound UI components (e.g., map-marker injecting parent MapViewComponent) and ControlValueAccessor components (e.g., input injecting ChangeDetectorRef) may use inject() for Angular primitives only (ElementRef, DestroyRef, ChangeDetectorRef, parent component refs). Never inject application services.
 3. OnPush change detection always.
 4. Variants via `data-*` attributes + CSS attribute selectors (zero runtime cost).
 5. Each component has a `.stories.ts` file for Storybook.

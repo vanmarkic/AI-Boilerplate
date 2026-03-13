@@ -1,8 +1,9 @@
-import { ChangeDetectorRef, Component, forwardRef, inject, input, model, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, input, model, signal } from '@angular/core';
 import { ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   selector: 'ui-input',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule],
   providers: [
     {

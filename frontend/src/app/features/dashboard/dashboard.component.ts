@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { BadgeComponent, HistogramTimelineComponent, type HistogramBar, type HistogramLabel } from '@aspect/ui';
 
 function seededRandom(seed: number) {
@@ -38,9 +38,10 @@ interface ActivityItem {
 
 @Component({
   selector: 'app-dashboard',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [HistogramTimelineComponent, BadgeComponent],
   template: `
-    <div class="flex flex-col gap-xl px-lg py-lg mx-auto" style="max-width: 72rem">
+    <div class="flex flex-col gap-xl px-lg py-lg mx-auto max-w-container-4xl">
 
       <!-- Header -->
       <div class="flex flex-row items-center justify-between">
@@ -70,7 +71,7 @@ interface ActivityItem {
         <!-- Histogram card (2/3 width) -->
         <div class="card col-span-2">
           <div class="flex flex-row items-center justify-between mb-md">
-            <h2 class="card-title" style="margin-block-end: 0">Events per minute</h2>
+            <h2 class="card-title mb-0">Events per minute</h2>
             <span class="font-mono text-xs text-muted-foreground border px-sm py-xs rounded-sm">12h window</span>
           </div>
           <ui-histogram-timeline
@@ -85,13 +86,13 @@ interface ActivityItem {
           <h2 class="card-title">Recent activity</h2>
           <div class="flex flex-col gap-sm flex-1">
             @for (item of activity; track item.time) {
-              <div class="flex flex-col gap-xs py-sm" style="border-bottom: 1px solid var(--color-border)">
+              <div class="flex flex-col gap-xs py-sm border-b">
                 <div class="flex flex-row items-center justify-between">
                   <span class="text-sm text-foreground font-medium">{{ item.action }}</span>
                   <ui-badge [variant]="item.badge">{{ item.badgeLabel }}</ui-badge>
                 </div>
                 <p class="text-xs text-muted-foreground">{{ item.target }}</p>
-                <p class="text-xs text-muted-foreground" style="opacity: 0.6">{{ item.time }}</p>
+                <p class="text-xs text-muted-foreground opacity-muted">{{ item.time }}</p>
               </div>
             }
           </div>
@@ -104,7 +105,7 @@ interface ActivityItem {
         <!-- Error rate histogram -->
         <div class="card col-span-2">
           <div class="flex flex-row items-center justify-between mb-md">
-            <h2 class="card-title" style="margin-block-end: 0">Error rate</h2>
+            <h2 class="card-title mb-0">Error rate</h2>
             <ui-badge variant="destructive">3 spikes</ui-badge>
           </div>
           <ui-histogram-timeline
@@ -124,9 +125,9 @@ interface ActivityItem {
               <span class="font-mono text-sm text-foreground">{{ item.value }}</span>
             </div>
           }
-          <div style="border-top: 1px solid var(--color-border)" class="py-sm mt-sm">
+          <div class="border-t py-sm mt-sm">
             <div class="flex flex-row items-center gap-sm">
-              <span class="rounded-full bg-primary" style="width: 0.5rem; height: 0.5rem"></span>
+              <span class="rounded-full bg-primary size-sm"></span>
               <span class="text-xs text-muted-foreground">All systems operational</span>
             </div>
           </div>

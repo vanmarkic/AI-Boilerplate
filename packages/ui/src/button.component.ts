@@ -1,8 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { ButtonDirective, type ButtonSize, type ButtonVariant } from './button.directive';
 
 @Component({
   selector: 'ui-button',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonDirective],
   template: `
     <button

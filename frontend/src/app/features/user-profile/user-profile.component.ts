@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { UserProfileStore } from './user-profile.store';
 
 @Component({
   selector: 'app-user-profile',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (store.loading()) {
       <p>Loading...</p>
