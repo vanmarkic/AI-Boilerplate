@@ -41,6 +41,14 @@
     --color-info: oklch(70% 0.08 245);
     --color-info-foreground: oklch(13% 0.008 250);
 
+    /* ── Map surfaces ──────────────────────────────────── */
+    --color-map-background: oklch(13% 0.008 250);
+    --color-map-land: oklch(15% 0.008 250);
+    --color-map-water: oklch(18% 0.04 245);
+    --color-map-roads: oklch(25% 0.008 250);
+    --color-map-buildings: oklch(22% 0.008 250);
+    --color-map-labels: var(--color-muted-foreground);
+
     /* ── Spacing (4 px base grid) ─────────────────────── */
     --spacing-xs: 0.25rem;
     --spacing-sm: 0.5rem;
