@@ -13,10 +13,18 @@ import {
 import { DataTableComponent } from './data-table.component';
 import type { FilterPosition } from './data-table-filter.types';
 import type {
-  FlatTreeNode,
   TreeFilterNode,
   TreeSelectionChangeEvent,
 } from './data-table-tree-filter.types';
+import {
+  filterByPaths,
+  flatten,
+  isAncestorExpanded,
+  isPathPrefix,
+  pathKey,
+  selectionState,
+  updateSelection,
+} from './data-table-tree-filter.utils';
 
 @Component({
   selector: 'ui-data-table-tree-filter',
@@ -28,7 +36,7 @@ import type {
   },
   template: `
     @for (node of visibleNodes(); track node.path.join('.')) {
-      <div class="tree-filter-node" [style.padding-left.rem]="node.depth * 1.25">
+      <div class="tree-filter-node" [style.--tree-depth]="node.depth">
         @if (node.expandable) {
           <button class="tree-filter-toggle"
             (click)="toggleExpand(node.path)" type="button">
@@ -80,7 +88,7 @@ export class DataTableTreeFilterComponent<T = Record<string, unknown>>
       .map((n) => ({
         ...n,
         expanded: expanded.has(pathKey(n.path)),
-        ...this.selectionState(n, selected),
+        ...selectionState(n, selected, all),
       }));
   });
 
@@ -104,12 +112,7 @@ export class DataTableTreeFilterComponent<T = Record<string, unknown>>
   applyFilter(rows: T[]): T[] {
     const paths = this.value();
     if (!paths || paths.length === 0) return rows;
-    const col = this.column();
-    return rows.filter((row) => {
-      const cellPath = (row as Record<string, unknown>)[col];
-      if (!Array.isArray(cellPath)) return false;
-      return paths.some((selPath) => isPathPrefix(selPath, cellPath));
-    });
+    return filterByPaths(rows, paths, this.column());
   }
 
   toggleExpand(path: string[]): void {
@@ -123,48 +126,13 @@ export class DataTableTreeFilterComponent<T = Record<string, unknown>>
 
   toggleSelect(path: string[]): void {
     const key = pathKey(path);
-    const isMulti = this.multi();
-    const all = this.flatNodes();
-    const descendants = all.filter(
+    const descendants = this.flatNodes().filter(
       (n) => n.path.length > path.length && isPathPrefix(path, n.path),
     );
-
-    this.selectedKeys.update((prev) => {
-      const next = isMulti ? new Set(prev) : new Set<string>();
-      const wasSelected = prev.has(key);
-      if (wasSelected) {
-        next.delete(key);
-        for (const d of descendants) next.delete(pathKey(d.path));
-      } else {
-        next.add(key);
-        for (const d of descendants) next.add(pathKey(d.path));
-      }
-      return next;
-    });
-
-    this.emitChange();
-  }
-
-  private selectionState(
-    node: FlatTreeNode,
-    selected: Set<string>,
-  ): { selected: boolean; indeterminate: boolean } {
-    const isSel = selected.has(pathKey(node.path));
-    if (!node.expandable) return { selected: isSel, indeterminate: false };
-
-    const all = this.flatNodes();
-    const descs = all.filter(
-      (n) =>
-        !n.expandable &&
-        n.path.length > node.path.length &&
-        isPathPrefix(node.path, n.path),
+    this.selectedKeys.update((prev) =>
+      updateSelection(prev, key, descendants, this.multi()),
     );
-    if (descs.length === 0) return { selected: isSel, indeterminate: false };
-
-    const selCount = descs.filter((d) => selected.has(pathKey(d.path))).length;
-    if (selCount === 0) return { selected: false, indeterminate: false };
-    if (selCount === descs.length) return { selected: true, indeterminate: false };
-    return { selected: false, indeterminate: true };
+    this.emitChange();
   }
 
   private emitChange(): void {
@@ -174,45 +142,4 @@ export class DataTableTreeFilterComponent<T = Record<string, unknown>>
       selectedPaths: paths ?? [],
     });
   }
-}
-
-function pathKey(path: string[]): string {
-  return path.join('\0');
-}
-
-function isPathPrefix(prefix: string[], full: string[]): boolean {
-  if (prefix.length > full.length) return false;
-  return prefix.every((v, i) => v === full[i]);
-}
-
-function isAncestorExpanded(path: string[], expanded: Set<string>): boolean {
-  for (let i = 1; i < path.length; i++) {
-    if (!expanded.has(pathKey(path.slice(0, i)))) return false;
-  }
-  return true;
-}
-
-function flatten(
-  nodes: TreeFilterNode[],
-  parentPath: string[],
-): FlatTreeNode[] {
-  const result: FlatTreeNode[] = [];
-  for (const node of nodes) {
-    const path = [...parentPath, node.value];
-    const expandable = !!node.children?.length;
-    result.push({
-      value: node.value,
-      label: node.label ?? node.value,
-      path,
-      depth: parentPath.length,
-      expandable,
-      expanded: false,
-      selected: false,
-      indeterminate: false,
-    });
-    if (node.children) {
-      result.push(...flatten(node.children, path));
-    }
-  }
-  return result;
 }
