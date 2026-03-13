@@ -1,6 +1,15 @@
 import type { MapStyleColors } from './map-view.types';
 
-const DEFAULT_COLORS: MapStyleColors = {
+const TOKEN_MAP: Record<keyof MapStyleColors, string> = {
+  background: '--color-map-background',
+  land: '--color-map-land',
+  water: '--color-map-water',
+  roads: '--color-map-roads',
+  buildings: '--color-map-buildings',
+  labels: '--color-map-labels',
+};
+
+const FALLBACK_COLORS: MapStyleColors = {
   background: 'oklch(13% 0.008 250)',
   land: 'oklch(15% 0.008 250)',
   water: 'oklch(18% 0.04 245)',
@@ -9,15 +18,43 @@ const DEFAULT_COLORS: MapStyleColors = {
   labels: 'oklch(55% 0.005 250)',
 };
 
+function readToken(
+  rootStyle: CSSStyleDeclaration,
+  key: keyof MapStyleColors,
+): string {
+  const value = rootStyle.getPropertyValue(TOKEN_MAP[key]).trim();
+  return value || FALLBACK_COLORS[key];
+}
+
 export function resolveColors(
   overrides: Partial<MapStyleColors>,
+  doc?: Document,
 ): MapStyleColors {
-  return { ...DEFAULT_COLORS, ...overrides };
+  const rootStyle = doc
+    ? getComputedStyle(doc.documentElement)
+    : undefined;
+
+  const base: MapStyleColors = rootStyle
+    ? {
+        background: readToken(rootStyle, 'background'),
+        land: readToken(rootStyle, 'land'),
+        water: readToken(rootStyle, 'water'),
+        roads: readToken(rootStyle, 'roads'),
+        buildings: readToken(rootStyle, 'buildings'),
+        labels: readToken(rootStyle, 'labels'),
+      }
+    : { ...FALLBACK_COLORS };
+
+  return { ...base, ...overrides };
 }
 
 export function buildBaseStyle(
   styleUrl: string,
-  _colors: Partial<MapStyleColors>,
+  colors: Partial<MapStyleColors>,
+  doc?: Document,
 ): string {
+  // Resolve colors for future use in programmatic style generation.
+  // Currently returns the external style URL as-is.
+  resolveColors(colors, doc);
   return styleUrl;
 }
