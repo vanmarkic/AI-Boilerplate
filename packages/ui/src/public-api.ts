@@ -17,6 +17,9 @@ export { GridComponent, type GridCols, type GridGap } from './grid.component';
 export { PageLayoutComponent } from './page-layout.component';
 export { SidebarLayoutComponent, type SidebarSide } from './sidebar-layout.component';
 export { PageHeaderComponent } from './page-header.component';
+export { DataTableComponent } from './data-table.component';
+export { DataTableColumnComponent } from './data-table-column.component';
+export type { TableSize, ColumnAlign, SortDirection, SortState } from './data-table.types';
 export type {
   MapCenter,
   MapBounds,
