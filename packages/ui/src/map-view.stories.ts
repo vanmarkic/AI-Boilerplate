@@ -40,6 +40,7 @@ export const Default: Story = {
 };
 
 export const MutedVariant: Story = {
+  tags: ['!autodocs'],
   args: {
     center: { lng: -73.98, lat: 40.75 },
     zoom: 12,
@@ -50,6 +51,7 @@ export const MutedVariant: Story = {
 };
 
 export const SatelliteVariant: Story = {
+  tags: ['!autodocs'],
   args: {
     center: { lng: 2.35, lat: 48.86 },
     zoom: 14,
@@ -60,6 +62,7 @@ export const SatelliteVariant: Story = {
 };
 
 export const NonInteractive: Story = {
+  tags: ['!autodocs'],
   args: {
     center: { lng: 139.69, lat: 35.69 },
     zoom: 8,
@@ -71,6 +74,7 @@ export const NonInteractive: Story = {
 };
 
 export const CustomColors: Story = {
+  tags: ['!autodocs'],
   args: {
     center: { lng: -0.12, lat: 51.51 },
     zoom: 11,
@@ -112,6 +116,7 @@ export const WithMarker: Story = {
 };
 
 export const WithDraggableMarker: Story = {
+  tags: ['!autodocs'],
   render: (args) => ({
     props: {
       ...args,
@@ -136,6 +141,7 @@ export const WithDraggableMarker: Story = {
 };
 
 export const WithMultipleMarkers: Story = {
+  tags: ['!autodocs'],
   render: () => ({
     props: {
       center: { lng: -122.42, lat: 37.77 },

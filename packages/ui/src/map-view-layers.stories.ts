@@ -93,6 +93,7 @@ const pointsSource = {
 // --- Composed: Layers ---
 
 export const WithFillLayer: Story = {
+  tags: ['!autodocs'],
   render: () => ({
     props: {
       center: { lng: -122.48, lat: 37.769 },
@@ -117,6 +118,7 @@ export const WithFillLayer: Story = {
 };
 
 export const WithLineLayer: Story = {
+  tags: ['!autodocs'],
   render: () => ({
     props: {
       center: { lng: -122.41, lat: 37.783 },
@@ -141,6 +143,7 @@ export const WithLineLayer: Story = {
 };
 
 export const WithCircleLayer: Story = {
+  tags: ['!autodocs'],
   render: () => ({
     props: {
       center: { lng: -122.406, lat: 37.79 },
@@ -167,6 +170,7 @@ export const WithCircleLayer: Story = {
 // --- Composed: Popup ---
 
 export const WithPopup: Story = {
+  tags: ['!autodocs'],
   render: () => ({
     props: {
       center: { lng: -73.98, lat: 40.75 },
@@ -187,6 +191,7 @@ export const WithPopup: Story = {
 };
 
 export const WithTooltip: Story = {
+  tags: ['!autodocs'],
   render: () => ({
     props: {
       center: { lng: -73.98, lat: 40.75 },
