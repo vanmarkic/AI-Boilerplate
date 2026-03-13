@@ -8,13 +8,17 @@ COPY shared/scripts/filter-features.py /filter.py
 COPY backend/features/ /all-features/
 RUN python /filter.py --tier=$TIER --src=/all-features/ --dest=/filtered-features/
 
+# uv image — override to use an internal registry:
+#   docker build --build-arg UV_IMAGE=registry.corp.com/astral/uv:0.8 ...
+ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.8
+FROM ${UV_IMAGE} AS uv
+
 # Stage 2: Build backend with only filtered features
 FROM python:3.12-slim
 
 WORKDIR /app
 
-# Install uv for fast, reproducible installs from lock file
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+COPY --from=uv /uv /uvx /bin/
 
 # Copy source first so setuptools can find packages
 COPY backend/pyproject.toml backend/uv.lock ./
