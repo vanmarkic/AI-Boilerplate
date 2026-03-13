@@ -47,7 +47,7 @@ export default config(
       ],
       '@angular-eslint/component-selector': [
         'error',
-        { type: 'element', prefix: 'app', style: 'kebab-case' },
+        { type: 'element', prefix: ['app', 'ui'], style: 'kebab-case' },
       ],
       '@typescript-eslint/no-extraneous-class': 'off',
       '@typescript-eslint/unbound-method': ['error', { ignoreStatic: true }],

@@ -50,7 +50,11 @@ export function resolveColors(
 
 export function buildBaseStyle(
   styleUrl: string,
-  _colors: Partial<MapStyleColors>,
+  colors: Partial<MapStyleColors>,
+  doc?: Document,
 ): string {
+  // Resolve colors for future use in programmatic style generation.
+  // Currently returns the external style URL as-is.
+  resolveColors(colors, doc);
   return styleUrl;
 }
