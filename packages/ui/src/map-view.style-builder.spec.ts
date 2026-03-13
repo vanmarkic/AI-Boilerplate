@@ -34,13 +34,13 @@ describe('map-view style-builder', () => {
         },
       } as CSSStyleDeclaration;
 
-      jest.spyOn(globalThis, 'getComputedStyle').mockReturnValue(fakeStyle);
+      vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue(fakeStyle);
 
       const colors = resolveColors({}, fakeDoc);
       expect(colors.background).toBe('oklch(10% 0.01 240)');
       expect(colors.water).toBe('oklch(15% 0.05 240)');
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('should fall back for missing tokens in document', () => {
@@ -52,12 +52,12 @@ describe('map-view style-builder', () => {
         getPropertyValue: () => '',
       } as unknown as CSSStyleDeclaration;
 
-      jest.spyOn(globalThis, 'getComputedStyle').mockReturnValue(fakeStyle);
+      vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue(fakeStyle);
 
       const colors = resolveColors({}, fakeDoc);
       expect(colors.background).toBe('oklch(13% 0.008 250)');
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
 
     it('should let overrides win over document tokens', () => {
@@ -70,12 +70,12 @@ describe('map-view style-builder', () => {
           prop === '--color-map-water' ? 'oklch(15% 0.05 240)' : '',
       } as CSSStyleDeclaration;
 
-      jest.spyOn(globalThis, 'getComputedStyle').mockReturnValue(fakeStyle);
+      vi.spyOn(globalThis, 'getComputedStyle').mockReturnValue(fakeStyle);
 
       const colors = resolveColors({ water: 'red' }, fakeDoc);
       expect(colors.water).toBe('red');
 
-      jest.restoreAllMocks();
+      vi.restoreAllMocks();
     });
   });
 
