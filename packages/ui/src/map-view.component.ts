@@ -33,7 +33,7 @@ import { resolveColors } from './map-view.style-builder';
     '[attr.aria-label]': 'ariaLabel()',
     'role': 'application',
   },
-  template: `<div class="map-view-canvas" #mapContainer></div><ng-content />`,
+  template: `<div class="map-view-canvas" style="position:absolute;inset:0" #mapContainer></div><ng-content />`,
 })
 export class MapViewComponent {
   readonly center = input<MapCenter>({ lng: 0, lat: 0 });
