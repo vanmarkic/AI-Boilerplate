@@ -11,6 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Map as MlMap, type AddLayerObject } from 'maplibre-gl';
 import type { GeoJSON } from 'geojson';
 import type {
@@ -52,6 +53,7 @@ export class MapViewComponent {
   private readonly container =
     viewChild.required<ElementRef<HTMLDivElement>>('mapContainer');
   private readonly destroyRef = inject(DestroyRef);
+  private readonly doc = inject(DOCUMENT);
 
   constructor() {
     afterNextRender(() => { this.initMap(); });
@@ -111,7 +113,7 @@ export class MapViewComponent {
   }
 
   private initMap(): void {
-    resolveColors(this.colors());
+    resolveColors(this.colors(), this.doc);
     const map = new MlMap({
       container: this.container().nativeElement,
       style: this.styleUrl(),
