@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/angular';
+import { ButtonComponent } from './button.component';
 import { CardComponent } from './card.component';
-import { CollapsiblePanelComponent } from './collapsible-panel.component';
+import { DrawerPanelComponent } from './drawer-panel.component';
 import { GridComponent } from './grid.component';
 import { HistogramTimelineComponent } from './histogram-timeline.component';
 import { MapMarkerComponent } from './map-marker.component';
 import { MapViewComponent } from './map-view.component';
-import { SidebarLayoutComponent } from './sidebar-layout.component';
-import { StackComponent } from './stack.component';
 
 function seededRandom(seed: number) {
   return () => {
@@ -94,6 +93,7 @@ type Story = StoryObj;
 export const Default: Story = {
   render: () => ({
     props: {
+      drawerOpen: true,
       mapCenter: { lng: -122.42, lat: 37.77 },
       markers: [
         { lng: -122.42, lat: 37.77 },
@@ -108,36 +108,25 @@ export const Default: Story = {
         (i) =>
           `${String(Math.floor(i / 60))}:${String(i % 60).padStart(2, '0')}`,
       ),
+      toggleDrawer() {
+        this.drawerOpen = !this.drawerOpen;
+      },
     },
     template: `
       <div style="height: 100dvh; display: flex; flex-direction: column">
-        <ui-sidebar-layout side="right" style="flex: 1; min-height: 0">
-          <!-- Main content: 4 groups of 4 cards -->
-          <div style="padding: var(--spacing-lg); overflow-y: auto">
-            <ui-grid [cols]="2" gap="md">
-              ${cardGroupsTemplate}
-            </ui-grid>
-          </div>
+        <!-- Top bar with map toggle -->
+        <div style="padding: var(--spacing-sm) var(--spacing-lg); border-bottom: 1px solid var(--color-border); display: flex; justify-content: flex-end">
+          <ui-button variant="outline" (click)="toggleDrawer()">
+            {{ drawerOpen ? 'Hide Map' : 'Show Map' }}
+          </ui-button>
+        </div>
 
-          <!-- Right sidebar: collapsible map -->
-          <aside sidebar style="width: 380px; border-left: 1px solid var(--color-border); display: flex; flex-direction: column">
-            <ui-collapsible-panel [open]="true" variant="ghost">
-              <span panelTitle>Map</span>
-              <ui-map-view
-                [center]="mapCenter"
-                [zoom]="11"
-                styleUrl="https://demotiles.maplibre.org/style.json"
-                ariaLabel="Operational map view"
-                style="width: 100%; height: 320px; display: block;">
-                @for (m of markers; track m.lng) {
-                  <ui-map-marker [lngLat]="m">
-                    <div style="width: 18px; height: 18px; background: var(--color-primary); border-radius: 50%; border: 2px solid white;"></div>
-                  </ui-map-marker>
-                }
-              </ui-map-view>
-            </ui-collapsible-panel>
-          </aside>
-        </ui-sidebar-layout>
+        <!-- Main content: 4 groups of 4 cards -->
+        <div style="flex: 1; min-height: 0; overflow-y: auto; padding: var(--spacing-lg)">
+          <ui-grid [cols]="2" gap="md">
+            ${cardGroupsTemplate}
+          </ui-grid>
+        </div>
 
         <!-- Bottom: histogram with 720 bars -->
         <div style="border-top: 1px solid var(--color-border); padding: var(--spacing-sm) var(--spacing-lg)">
@@ -147,18 +136,34 @@ export const Default: Story = {
             ariaLabel="Events per minute (12 hours)"
             variant="default" />
         </div>
+
+        <!-- Right drawer with map -->
+        <ui-drawer-panel [open]="drawerOpen" side="right" (closed)="toggleDrawer()">
+          <span drawerTitle class="text-sm font-semibold">Map</span>
+          <ui-map-view
+            [center]="mapCenter"
+            [zoom]="11"
+            styleUrl="https://demotiles.maplibre.org/style.json"
+            ariaLabel="Operational map view"
+            style="width: 100%; height: 360px; display: block;">
+            @for (m of markers; track m.lng) {
+              <ui-map-marker [lngLat]="m">
+                <div style="width: 18px; height: 18px; background: var(--color-primary); border-radius: 50%; border: 2px solid white;"></div>
+              </ui-map-marker>
+            }
+          </ui-map-view>
+        </ui-drawer-panel>
       </div>
     `,
     moduleMetadata: {
       imports: [
-        SidebarLayoutComponent,
-        CollapsiblePanelComponent,
+        DrawerPanelComponent,
         MapViewComponent,
         MapMarkerComponent,
         HistogramTimelineComponent,
         GridComponent,
         CardComponent,
-        StackComponent,
+        ButtonComponent,
       ],
     },
   }),
