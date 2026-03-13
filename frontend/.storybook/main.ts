@@ -1,8 +1,14 @@
 import { resolve, dirname } from 'node:path';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { StorybookConfig } from '@storybook/angular';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
+
+const maplibreCss = readFileSync(
+  resolve(rootDir, 'node_modules/maplibre-gl/dist/maplibre-gl.css'),
+  'utf-8',
+);
 
 const config: StorybookConfig = {
   stories: [
@@ -13,6 +19,7 @@ const config: StorybookConfig = {
   ],
   addons: ['@storybook/addon-a11y', '@storybook/addon-docs'],
   framework: '@storybook/angular',
+  previewHead: (head) => `${head}\n<style>${maplibreCss}</style>`,
   webpackFinal: async (config) => {
     if (config.resolve) {
       config.resolve.symlinks = false;
