@@ -5,7 +5,6 @@ each verification function catches (or allows) the expected patterns.
 """
 from pathlib import Path
 
-import pytest
 
 from monorepo_tier_filter import verify_tier_build as vtb
 
