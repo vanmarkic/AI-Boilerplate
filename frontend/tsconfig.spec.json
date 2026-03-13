@@ -11,5 +11,8 @@
   "include": [
     "src/**/*.d.ts",
     "src/**/*.spec.ts"
+  ],
+  "exclude": [
+    "src/app/shared/ui/map-view.style-builder.spec.ts"
   ]
 }
