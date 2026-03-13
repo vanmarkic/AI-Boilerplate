@@ -1,6 +1,5 @@
 # Stage 1: Filter features by tier
-ARG PYTHON_IMAGE=python:3.12-slim
-FROM ${PYTHON_IMAGE} AS feature-filter
+FROM python:3.12-slim AS feature-filter
 ARG TIER=3
 RUN pip install pyyaml
 COPY packages/monorepo-tier-filter/ /monorepo-tier-filter/
@@ -9,12 +8,10 @@ COPY shared/scripts/filter-features.py /filter.py
 COPY backend/features/ /all-features/
 RUN python /filter.py --tier=$TIER --src=/all-features/ --dest=/filtered-features/
 
-ARG UV_IMAGE=ghcr.io/astral-sh/uv:0.8
-FROM ${UV_IMAGE} AS uv
+FROM ghcr.io/astral-sh/uv:0.8 AS uv
 
 # Stage 2: Build backend with only filtered features
-ARG PYTHON_IMAGE=python:3.12-slim
-FROM ${PYTHON_IMAGE}
+FROM python:3.12-slim
 
 WORKDIR /app
 
