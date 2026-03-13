@@ -3,6 +3,7 @@ export { ButtonComponent } from './button.component';
 export { InputComponent } from './input.component';
 export { BadgeComponent } from './badge.component';
 export { CardComponent } from './card.component';
+export { CardGroupComponent, type CardGroupMode } from './card-group.component';
 export { FormErrorComponent } from './form-error.component';
 export { DialogPanelComponent } from './dialog-panel.component';
 export { DrawerPanelComponent, type DrawerSide } from './drawer-panel.component';
