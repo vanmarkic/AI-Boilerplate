@@ -83,6 +83,16 @@ export class DataTableFilterComponent<T = Record<string, unknown>>
   }
 }
 
+function toComparable(v: unknown): number {
+  if (v instanceof Date) return v.getTime();
+  return Number(v);
+}
+
+function isEqual(a: unknown, b: unknown): boolean {
+  if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
+  return a === b;
+}
+
 function matchOperator(
   cellValue: unknown,
   filterValue: unknown,
@@ -90,23 +100,24 @@ function matchOperator(
 ): boolean {
   switch (op) {
     case 'equals':
-      return cellValue === filterValue;
+      return isEqual(cellValue, filterValue);
     case 'not-equals':
-      return cellValue !== filterValue;
+      return !isEqual(cellValue, filterValue);
     case 'contains':
       return String(cellValue)
         .toLowerCase()
         .includes(String(filterValue).toLowerCase());
     case 'gt':
-      return Number(cellValue) > Number(filterValue);
+      return toComparable(cellValue) > toComparable(filterValue);
     case 'lt':
-      return Number(cellValue) < Number(filterValue);
+      return toComparable(cellValue) < toComparable(filterValue);
     case 'gte':
-      return Number(cellValue) >= Number(filterValue);
+      return toComparable(cellValue) >= toComparable(filterValue);
     case 'lte':
-      return Number(cellValue) <= Number(filterValue);
+      return toComparable(cellValue) <= toComparable(filterValue);
     case 'in':
-      return Array.isArray(filterValue) && filterValue.includes(cellValue);
+      return Array.isArray(filterValue) &&
+        filterValue.some((v) => isEqual(cellValue, v));
     case 'custom':
       return true;
     default:
