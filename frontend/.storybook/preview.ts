@@ -1,26 +1,17 @@
 import type { Preview } from '@storybook/angular';
+import { withThemeByDataAttribute } from '@storybook/addon-themes';
 
 const preview: Preview = {
-  globalTypes: {
-    theme: {
-      description: 'Color theme',
-      toolbar: {
-        title: 'Theme',
-        icon: 'paintbrush',
-        items: [
-          { value: '', title: 'Default' },
-          { value: 'ocean', title: 'Ocean' },
-        ],
-        dynamicTitle: true,
-      },
-    },
-  },
   decorators: [
-    (story, context) => {
-      const theme = context.globals['theme'] || '';
-      document.documentElement.setAttribute('data-theme', theme);
-      return story();
-    },
+    withThemeByDataAttribute({
+      themes: {
+        Default: '',
+        Ocean: 'ocean',
+      },
+      defaultTheme: 'Default',
+      attributeName: 'data-theme',
+      parentSelector: 'html',
+    }),
   ],
   parameters: {
     controls: {
