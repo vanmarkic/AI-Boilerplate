@@ -1,0 +1,134 @@
+/* ── Card, Input, Form & Dialog Component Classes ──────────
+ *  Semantic styles with variant logic via data-* selectors.
+ *  Native CSS nesting.
+ * ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Card ───────────────────────────────────────────── */
+
+  .card {
+    display: block;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .card-title {
+    font-size: var(--font-size-lg);
+    line-height: var(--font-size-lg--line-height);
+    font-weight: 600;
+    color: var(--color-card-foreground);
+    margin-block-end: var(--spacing-sm);
+  }
+
+  .card-content {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-muted-foreground);
+  }
+
+
+  /* ── Input ──────────────────────────────────────────── */
+
+  .input-base {
+    display: flex;
+    width: 100%;
+    height: var(--control-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-input);
+    background-color: var(--color-background);
+    padding-block: var(--spacing-xs);
+    padding-inline: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-foreground);
+
+    &::placeholder {
+      color: var(--color-muted-foreground);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--color-ring);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .input-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    font-weight: 500;
+    color: var(--color-foreground);
+    margin-block-end: var(--spacing-xs);
+  }
+
+  .input-wrapper {
+    display: block;
+    margin-block-end: var(--spacing-sm);
+  }
+
+
+  /* ── Form Error ─────────────────────────────────────── */
+
+  .form-error {
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    color: var(--color-destructive);
+    margin-block-start: var(--spacing-xs);
+  }
+
+
+  /* ── Dialog ─────────────────────────────────────────── */
+
+  .dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background-color: oklch(0% 0 0 / 50%);
+  }
+
+  .dialog-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: var(--z-modal);
+    width: 100%;
+    max-width: var(--container-md);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-lg);
+
+    &[data-variant="destructive"] {
+      border-color: var(--color-destructive);
+    }
+  }
+
+  .dialog-title {
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-block-end: var(--spacing-sm);
+  }
+
+  .dialog-body {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-muted-foreground);
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-block-start: var(--spacing-md);
+  }
+}

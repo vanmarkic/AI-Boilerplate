@@ -1,10 +1,11 @@
-import { Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 export type CollapsiblePanelVariant = 'default' | 'ghost' | 'outline';
 export type CollapsiblePanelSize = 'sm' | 'default' | 'lg';
 
 @Component({
   selector: 'ui-collapsible-panel',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'class': 'collapsible-panel',
     '[attr.data-variant]': 'variant()',

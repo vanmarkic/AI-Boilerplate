@@ -2,12 +2,14 @@
 
 from fastapi import APIRouter
 
+from features.canary.canary_schema import CanaryResponse
+
 # This marker must never appear in a tier-1 build output.
 CANARY_TIER2_BACKEND_MARKER = "canary-tier2-backend-present"
 
-router = APIRouter(prefix="/canary", tags=["canary"])
+router = APIRouter(prefix="/api/canary", tags=["canary"])
 
 
 @router.get("/ping")
-def ping() -> dict[str, str]:
-    return {"marker": CANARY_TIER2_BACKEND_MARKER}
+def ping() -> CanaryResponse:
+    return CanaryResponse(marker=CANARY_TIER2_BACKEND_MARKER)
