@@ -4,5 +4,5 @@
     "outDir": "./out-tsc/node",
     "types": ["node"]
   },
-  "include": ["*.ts"]
+  "include": ["vitest.config.ts"]
 }
