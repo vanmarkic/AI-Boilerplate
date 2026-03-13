@@ -18,14 +18,7 @@ import { CdkTable, CdkTableModule } from '@angular/cdk/table';
 import { DataTableColumnComponent } from './data-table-column.component';
 import type { FilterLogic, FilterPosition } from './data-table-filter.types';
 import type { SortDirection, SortState, TableSize } from './data-table.types';
-
-type FilterRef = {
-  applyFilter(rows: unknown[]): unknown[];
-  position: () => FilterPosition;
-  dependsOn: () => string | null;
-  filterId: () => string;
-  value: () => unknown;
-};
+import { type FilterRef, applyGroup, compareValues } from './data-table.utils';
 
 @Component({
   selector: 'ui-data-table',
@@ -107,8 +100,8 @@ export class DataTableComponent<T = Record<string, unknown>>
     const master = allFilters.filter((f) => f.position() === masterPos);
     const secondary = allFilters.filter((f) => f.position() !== masterPos);
 
-    const afterMaster = this.applyGroup(master, data, logic);
-    return this.applyGroup(secondary, afterMaster, logic);
+    const afterMaster = applyGroup(master, data, logic);
+    return applyGroup(secondary, afterMaster, logic);
   });
 
   readonly displayData = computed(() => {
@@ -120,7 +113,7 @@ export class DataTableComponent<T = Record<string, unknown>>
       for (const sort of sorts) {
         const rowA = a as Record<string, unknown>;
         const rowB = b as Record<string, unknown>;
-        const cmp = this.compare(rowA[sort.column], rowB[sort.column]);
+        const cmp = compareValues(rowA[sort.column], rowB[sort.column]);
         if (cmp !== 0) return sort.direction === 'asc' ? cmp : -cmp;
       }
       return 0;
@@ -182,48 +175,6 @@ export class DataTableComponent<T = Record<string, unknown>>
     this.sortChange.emit(next);
   }
 
-  private applyGroup(group: FilterRef[], data: T[], logic: FilterLogic): T[] {
-    const active = group.filter(
-      (f) => f.value() !== null && f.value() !== undefined && f.value() !== '',
-    );
-    if (active.length === 0) return [...data];
-
-    if (logic === 'or') {
-      const seen = new Set<T>();
-      for (const filter of active) {
-        for (const row of filter.applyFilter(data) as T[]) {
-          seen.add(row);
-        }
-      }
-      return data.filter((row) => seen.has(row));
-    }
-
-    const sorted = this.topoSort(active);
-    let result: T[] = [...data];
-    for (const filter of sorted) {
-      result = filter.applyFilter(result) as T[];
-    }
-    return result;
-  }
-
-  private topoSort(filters: FilterRef[]): FilterRef[] {
-    const byId = new Map(filters.map((f) => [f.filterId(), f]));
-    const visited = new Set<string>();
-    const result: FilterRef[] = [];
-
-    const visit = (f: FilterRef): void => {
-      const id = f.filterId();
-      if (visited.has(id)) return;
-      visited.add(id);
-      const depId = f.dependsOn();
-      if (depId && byId.has(depId)) visit(byId.get(depId)!);
-      result.push(f);
-    };
-
-    for (const f of filters) visit(f);
-    return result;
-  }
-
   private registerColumns(): void {
     const names: string[] = [];
     const sorted = this.columns.toArray();
@@ -249,12 +200,4 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
   }
 
-  private compare(a: unknown, b: unknown): number {
-    if (a == null && b == null) return 0;
-    if (a == null) return -1;
-    if (b == null) return 1;
-    if (typeof a === 'number' && typeof b === 'number') return a - b;
-    if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
-    return String(a).localeCompare(String(b));
-  }
 }
