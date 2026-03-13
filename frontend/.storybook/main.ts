@@ -7,7 +7,7 @@ const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 const config: StorybookConfig = {
   stories: [
     '../src/**/*.mdx',
-    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
+    '../src/**/!(ui)/*.stories.@(js|jsx|mjs|ts|tsx)',
     '../../packages/ui/src/**/*.mdx',
     '../../packages/ui/src/**/*.stories.@(js|jsx|mjs|ts|tsx)',
   ],
