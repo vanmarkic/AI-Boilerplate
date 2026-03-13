@@ -4,7 +4,8 @@ import { MapViewComponent } from './map-view.component';
 import { MapLayerComponent } from './map-layer.component';
 import { MapMarkerComponent } from './map-marker.component';
 import { MapPopupComponent } from './map-popup.component';
-import { resolveColors, buildProtomapsStyle } from './map-view.style-builder';
+import { buildProtomapsStyle } from './map-view.style-builder';
+import type { MapStyleColors } from './map-view.types';
 
 const meta: Meta<MapViewComponent> = {
   title: 'UI/MapView',
@@ -169,15 +170,26 @@ export const WithMultipleMarkers: Story = {
   }),
 };
 
-// --- Protomaps: self-hosted vector tiles ---
+// --- Protomaps: static style.json generated from design tokens ---
+// Run `make generate-map-style` to regenerate from tokens.css.
+// The style below overrides the tile URL to use the Firenze test extract.
 
 const FIRENZE_TILES =
   'https://pmtiles.io/protomaps(vector)ODbL_firenze.pmtiles';
 
-const protomapsStyle = buildProtomapsStyle(
-  resolveColors(document.documentElement, {}),
-  { tileUrl: FIRENZE_TILES },
-);
+/** Baked-in token colors matching the generated style.json. */
+const TOKEN_COLORS: MapStyleColors = {
+  background: 'oklch(13% 0.008 250)',
+  water: 'oklch(13% 0.008 250)',
+  land: 'oklch(18% 0.008 250)',
+  roads: 'oklch(30% 0.010 250)',
+  buildings: 'oklch(25% 0.008 250)',
+  labels: 'oklch(55% 0.005 250)',
+};
+
+const protomapsStyle = buildProtomapsStyle(TOKEN_COLORS, {
+  tileUrl: FIRENZE_TILES,
+});
 
 export const Protomaps: Story = {
   args: {
