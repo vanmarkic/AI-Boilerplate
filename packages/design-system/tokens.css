@@ -124,6 +124,55 @@
     --z-toast: 100;
   }
 
+  /* ── Ocean theme ─────────────────────────────────────────
+   *  Dark teal / slate palette with golden-yellow accent.
+   *  Activate with data-theme="ocean" on <html> or any root.
+   * ──────────────────────────────────────────────────────── */
+  [data-theme="ocean"] {
+    /* ── Base surfaces (dark → light) ─────────────────── */
+    --color-background: oklch(16% 0.03 210);
+    --color-card: oklch(21% 0.04 200);
+    --color-popover: oklch(25% 0.04 200);
+    --color-secondary: oklch(25% 0.04 200);
+    --color-muted: oklch(30% 0.04 200);
+
+    /* ── Borders & inputs ─────────────────────────────── */
+    --color-border: oklch(35% 0.03 200);
+    --color-input: oklch(35% 0.03 200);
+
+    /* ── Text ─────────────────────────────────────────── */
+    --color-foreground: oklch(90% 0 0);
+    --color-card-foreground: oklch(90% 0 0);
+    --color-popover-foreground: oklch(90% 0 0);
+    --color-secondary-foreground: oklch(82% 0 0);
+    --color-muted-foreground: oklch(55% 0.01 200);
+
+    /* ── Accent — golden yellow ──────────────────────── */
+    --color-primary: oklch(78% 0.15 85);
+    --color-primary-foreground: oklch(15% 0.02 85);
+    --color-accent: oklch(78% 0.15 85);
+    --color-accent-foreground: oklch(15% 0.02 85);
+    --color-ring: oklch(78% 0.15 85);
+
+    /* ── Semantic signals ─────────────────────────────── */
+    --color-destructive: oklch(55% 0.22 27);
+    --color-destructive-foreground: oklch(92% 0 0);
+    --color-warning: oklch(72% 0.17 70);
+    --color-warning-foreground: oklch(15% 0.02 85);
+    --color-success: oklch(62% 0.15 155);
+    --color-success-foreground: oklch(15% 0.02 85);
+    --color-info: oklch(68% 0.08 210);
+    --color-info-foreground: oklch(15% 0.02 85);
+
+    /* ── Map surfaces ─────────────────────────────────── */
+    --color-map-background: oklch(16% 0.03 210);
+    --color-map-land: oklch(19% 0.03 200);
+    --color-map-water: oklch(22% 0.06 210);
+    --color-map-roads: oklch(30% 0.03 200);
+    --color-map-buildings: oklch(25% 0.04 200);
+    --color-map-labels: var(--color-muted-foreground);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     :root {
       --duration-fast: 0ms;
