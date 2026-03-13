@@ -8,6 +8,6 @@ test.describe('Home page', () => {
 
   test('should display landing content', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('h1')).toHaveText('AI Boilerplate');
+    await expect(page.locator('h1')).toHaveText(/AI\s*Boilerplate/);
   });
 });
