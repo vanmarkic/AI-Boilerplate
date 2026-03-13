@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend test-scaffold generate lock migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
+.PHONY: dev dev-local dev-backend dev-frontend test test-backend test-frontend test-scaffold generate generate-map-style lock migrate new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -27,9 +27,12 @@ test-frontend: ## Run frontend tests
 test-scaffold: ## Test the scaffold script
 	bash shared/scripts/scaffold_test.sh
 
-generate: ## Extract OpenAPI spec from FastAPI and regenerate frontend client
+generate: generate-map-style ## Extract OpenAPI spec from FastAPI and regenerate frontend client
 	cd backend && python -m commands.export_openapi
 	bash shared/scripts/generate-frontend.sh
+
+generate-map-style: ## Generate Protomaps style.json from design-system tokens
+	cd frontend && node meta/generate-map-style.mjs
 
 lock: ## Regenerate Python lock file (run after changing pyproject.toml)
 	cd backend && uv lock
