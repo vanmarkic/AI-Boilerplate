@@ -121,7 +121,10 @@ export class MapViewComponent {
       attributionControl: false,
     });
 
+    let destroyed = false;
+
     map.on('moveend', () => {
+      if (destroyed) return;
       const c = map.getCenter();
       const b = map.getBounds();
       this.mapMove.emit({
@@ -137,10 +140,11 @@ export class MapViewComponent {
     });
 
     map.on('load', () => {
+      if (destroyed) return;
       this.mapInstance.set(map);
       this.mapLoad.emit();
     });
 
-    this.destroyRef.onDestroy(() => { map.remove(); });
+    this.destroyRef.onDestroy(() => { destroyed = true; map.remove(); });
   }
 }
