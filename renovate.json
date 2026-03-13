@@ -1,0 +1,60 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":separateMajorReleases",
+    ":automergeMinor",
+    ":automergeDigest",
+    "schedule:weekly"
+  ],
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "description": "Group Angular packages together (they must be updated in lockstep)",
+      "matchPackagePatterns": ["^@angular/", "^@angular-devkit/", "^@schematics/angular"],
+      "groupName": "angular",
+      "automerge": false
+    },
+    {
+      "description": "Group NgRx packages",
+      "matchPackagePatterns": ["^@ngrx/"],
+      "groupName": "ngrx",
+      "automerge": false
+    },
+    {
+      "description": "Group Storybook packages",
+      "matchPackagePatterns": ["^@storybook/", "^storybook"],
+      "groupName": "storybook"
+    },
+    {
+      "description": "Group Python linting/testing tools",
+      "matchPackageNames": ["ruff", "pytest", "pytest-asyncio"],
+      "groupName": "python-dev-tools"
+    },
+    {
+      "description": "Group FastAPI + Pydantic (tightly coupled)",
+      "matchPackageNames": ["fastapi", "pydantic", "pydantic-settings"],
+      "groupName": "fastapi-stack",
+      "automerge": false
+    },
+    {
+      "description": "Group Docker base image updates",
+      "matchDatasources": ["docker"],
+      "groupName": "docker-images"
+    },
+    {
+      "description": "Auto-merge patch updates for dev dependencies",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["patch"],
+      "automerge": true
+    }
+  ],
+  "postUpdateOptions": ["npmDedupe"],
+  "pip_requirements": {
+    "enabled": false
+  },
+  "pep621": {
+    "enabled": true,
+    "fileMatch": ["backend/pyproject.toml"]
+  }
+}

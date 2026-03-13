@@ -13,16 +13,19 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# Install uv for fast, reproducible installs from lock file
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
 # Copy source first so setuptools can find packages
-COPY backend/pyproject.toml ./
+COPY backend/pyproject.toml backend/uv.lock ./
 COPY backend/core/ ./core/
 COPY backend/main.py ./
 COPY backend/alembic.ini ./
 COPY backend/alembic/ ./alembic/
 COPY --from=feature-filter /filtered-features/ ./features/
 
-# Non-editable install (editable not needed in containers)
-RUN pip install --no-cache-dir ".[dev]"
+# Reproducible install from lock file (falls back to pip if uv.lock missing)
+RUN uv sync --frozen --no-dev --no-cache
 
 RUN useradd --create-home appuser
 USER appuser
