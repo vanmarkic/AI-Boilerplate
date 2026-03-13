@@ -117,7 +117,6 @@ export class MapViewComponent {
     registerPmtilesProtocol();
     const style = this.styleUrl();
     const isUrl = typeof style === 'string';
-    const colors = resolveColors(this.colors(), this.doc);
 
     const map = new MlMap({
       container: this.container().nativeElement,
@@ -148,7 +147,10 @@ export class MapViewComponent {
 
     map.on('load', () => {
       if (destroyed) return;
-      if (isUrl) applyColorsToMap(map, colors);
+      if (isUrl) {
+        const colors = resolveColors(this.colors(), this.doc);
+        applyColorsToMap(map, colors);
+      }
       this.mapInstance.set(map);
       this.mapLoad.emit();
     });
