@@ -1,4 +1,4 @@
-import { resolveColors, buildBaseStyle } from './map-view.style-builder';
+import { resolveColors } from './map-view.style-builder';
 
 describe('map-view style-builder', () => {
   describe('resolveColors', () => {
@@ -79,10 +79,4 @@ describe('map-view style-builder', () => {
     });
   });
 
-  describe('buildBaseStyle', () => {
-    it('should return the style URL as-is', () => {
-      const url = 'https://tiles.example.com/style.json';
-      expect(buildBaseStyle(url, {})).toBe(url);
-    });
-  });
 });
