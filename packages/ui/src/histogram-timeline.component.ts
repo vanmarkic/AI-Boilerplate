@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 export interface HistogramBar {
   value: number;
@@ -13,6 +13,7 @@ export type HistogramVariant = 'default' | 'success' | 'destructive' | 'muted';
 
 @Component({
   selector: 'ui-histogram-timeline',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'class': 'histogram-timeline',
     '[attr.data-variant]': 'variant()',

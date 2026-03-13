@@ -3,7 +3,7 @@ from typing import Annotated
 
 import httpx
 import jwt
-from fastapi import Header, HTTPException
+from fastapi import Header, HTTPException, status
 
 from core.config import settings
 
@@ -50,7 +50,7 @@ async def get_current_user(
 ) -> CurrentUser:
     """Validate JWT from Authorization header and return the current user."""
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or invalid token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing or invalid token")
 
     token = authorization.removeprefix("Bearer ")
 
@@ -64,7 +64,7 @@ async def get_current_user(
             issuer=f"{settings.keycloak_url}/realms/{settings.keycloak_realm}",
         )
     except jwt.PyJWTError:
-        raise HTTPException(status_code=401, detail="Invalid or expired token")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 
     roles = payload.get("realm_access", {}).get("roles", [])
 
