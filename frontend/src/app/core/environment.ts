@@ -6,11 +6,7 @@
  * (environment.staging.ts, etc.) — see angular.json "configurations".
  */
 
-export interface EnvironmentConfig {
-  production: boolean;
-  apiBaseUrl: string;
-  keycloak: { url: string; realm: string; clientId: string };
-}
+import type { EnvironmentConfig } from './environment.config';
 
 export const environment: EnvironmentConfig = {
   production: false,
