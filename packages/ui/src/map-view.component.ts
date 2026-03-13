@@ -136,9 +136,11 @@ export class MapViewComponent {
       });
     });
 
-    map.on('load', () => { this.mapLoad.emit(); });
+    map.on('load', () => {
+      this.mapInstance.set(map);
+      this.mapLoad.emit();
+    });
 
-    this.mapInstance.set(map);
     this.destroyRef.onDestroy(() => { map.remove(); });
   }
 }
