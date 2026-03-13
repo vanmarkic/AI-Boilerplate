@@ -16,7 +16,9 @@ import {
 import { CdkTable, CdkTableModule } from '@angular/cdk/table';
 
 import { DataTableColumnComponent } from './data-table-column.component';
+import type { FilterLogic, FilterPosition } from './data-table-filter.types';
 import type { SortDirection, SortState, TableSize } from './data-table.types';
+import { type FilterRef, applyGroup, compareValues } from './data-table.utils';
 
 @Component({
   selector: 'ui-data-table',
@@ -28,24 +30,38 @@ import type { SortDirection, SortState, TableSize } from './data-table.types';
     '[attr.data-striped]': 'striped()',
   },
   template: `
-    <table cdk-table [dataSource]="sortedData()" class="data-table-table">
-      <ng-content />
-      <tr
-        cdk-header-row
-        *cdkHeaderRowDef="displayedColumns()"
-        class="data-table-header-row"
-      ></tr>
-      <tr
-        cdk-row
-        *cdkRowDef="let row; columns: displayedColumns()"
-        class="data-table-row"
-      ></tr>
-    </table>
-    @if (sortedData().length === 0) {
-      <div class="data-table-empty">
-        <ng-content select="[emptyState]" />
+    @if (hasTopFilters()) {
+      <div class="data-table-filters-top">
+        <ng-content select="ui-data-table-filter[position=top], ui-data-table-tree-filter[position=top]" />
       </div>
     }
+    <div class="data-table-body-wrapper">
+      @if (hasLeftFilters()) {
+        <div class="data-table-filters-left">
+          <ng-content select="ui-data-table-filter[position=left], ui-data-table-tree-filter[position=left]" />
+        </div>
+      }
+      <div class="data-table-content">
+        <table cdk-table [dataSource]="displayData()" class="data-table-table">
+          <ng-content />
+          <tr
+            cdk-header-row
+            *cdkHeaderRowDef="displayedColumns()"
+            class="data-table-header-row"
+          ></tr>
+          <tr
+            cdk-row
+            *cdkRowDef="let row; columns: displayedColumns()"
+            class="data-table-row"
+          ></tr>
+        </table>
+        @if (displayData().length === 0) {
+          <div class="data-table-empty">
+            <ng-content select="[emptyState]" />
+          </div>
+        }
+      </div>
+    </div>
   `,
 })
 export class DataTableComponent<T = Record<string, unknown>>
@@ -56,27 +72,56 @@ export class DataTableComponent<T = Record<string, unknown>>
   readonly multiSort = input(false);
   readonly size = input<TableSize>('default');
   readonly striped = input(false);
+  readonly filterLogic = input<FilterLogic>('and');
+  readonly masterFilterPosition = input<FilterPosition>('top');
 
   readonly sortChange = output<SortState[]>();
 
   readonly activeSorts = signal<SortState[]>([]);
   readonly displayedColumns = signal<string[]>([]);
 
-  readonly sortedData = computed(() => {
-    const data = [...this.dataSource()];
+  private readonly filters = signal<FilterRef[]>([]);
+
+  readonly hasTopFilters = computed(() =>
+    this.filters().some((f) => f.position() === 'top'),
+  );
+
+  readonly hasLeftFilters = computed(() =>
+    this.filters().some((f) => f.position() === 'left'),
+  );
+
+  readonly filteredData = computed(() => {
+    const data = this.dataSource();
+    const allFilters = this.filters();
+    if (allFilters.length === 0) return [...data];
+
+    const masterPos = this.masterFilterPosition();
+    const logic = this.filterLogic();
+    const master = allFilters.filter((f) => f.position() === masterPos);
+    const secondary = allFilters.filter((f) => f.position() !== masterPos);
+
+    const afterMaster = applyGroup(master, data, logic);
+    return applyGroup(secondary, afterMaster, logic);
+  });
+
+  readonly displayData = computed(() => {
+    const data = [...this.filteredData()];
     const sorts = this.activeSorts();
     if (sorts.length === 0) return data;
 
     return data.sort((a, b) => {
       for (const sort of sorts) {
-        const row = a as Record<string, unknown>;
+        const rowA = a as Record<string, unknown>;
         const rowB = b as Record<string, unknown>;
-        const cmp = this.compare(row[sort.column], rowB[sort.column]);
+        const cmp = compareValues(rowA[sort.column], rowB[sort.column]);
         if (cmp !== 0) return sort.direction === 'asc' ? cmp : -cmp;
       }
       return 0;
     });
   });
+
+  /** @deprecated Use displayData() instead. Kept for backwards compat. */
+  readonly sortedData = this.displayData;
 
   @ContentChildren(DataTableColumnComponent, { descendants: true })
   columns!: QueryList<DataTableColumnComponent>;
@@ -90,6 +135,14 @@ export class DataTableComponent<T = Record<string, unknown>>
       const sorts = this.activeSorts();
       this.syncColumnSortState(sorts);
     });
+  }
+
+  registerFilter(filter: FilterRef): void {
+    this.filters.update((prev) => [...prev, filter]);
+  }
+
+  unregisterFilter(filter: FilterRef): void {
+    this.filters.update((prev) => prev.filter((f) => f !== filter));
   }
 
   ngAfterViewInit(): void {
@@ -147,12 +200,4 @@ export class DataTableComponent<T = Record<string, unknown>>
     }
   }
 
-  private compare(a: unknown, b: unknown): number {
-    if (a == null && b == null) return 0;
-    if (a == null) return -1;
-    if (b == null) return 1;
-    if (typeof a === 'number' && typeof b === 'number') return a - b;
-    if (a instanceof Date && b instanceof Date) return a.getTime() - b.getTime();
-    return String(a).localeCompare(String(b));
-  }
 }
