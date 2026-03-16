@@ -1,0 +1,10 @@
+{
+  "name": "@aspect/tfc-shared",
+  "version": "0.1.0",
+  "description": "Shared types and constants for Training Flow Control",
+  "license": "MIT",
+  "type": "module",
+  "exports": {
+    ".": "./src/public-api.ts"
+  }
+}

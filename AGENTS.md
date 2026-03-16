@@ -15,7 +15,7 @@ This file describes HOW to write code (conventions, architecture, constraints).
 - Auth: Keycloak (OIDC, JWT validation via PyJWT)
 - Contract: OpenAPI 3.1 (code-first — generated from FastAPI routers via `make generate`)
 - Design System: `@aspect/design-system` — framework-agnostic CSS (OKLCH tokens, CSS layers, no Tailwind)
-- UI Components: `@aspect/ui` — Angular component library (`packages/ui/`, symlinked at `frontend/src/app/shared/ui/`)
+- UI Components: `@aspect/ui` — Angular component library (`packages/ui/`, symlinked at `frontend/src/app/shared/ui/`). **Must contain only generic, reusable building blocks** (buttons, cards, dialogs, inputs, layout primitives). App-specific or domain-specific components belong in the app's own `features/` folder, not in `packages/ui/`.
 
 ## Architecture
 Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
@@ -66,6 +66,7 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - Do NOT use `any` in TypeScript or untyped signatures in Python.
 - Do NOT bypass Keycloak auth — all protected endpoints must use `Depends(get_current_user)`.
 - Do NOT use `app-` prefix for UI component selectors — use `ui-` prefix (e.g., `ui-button`, `ui-card`). Button directive selector is `uiButton`.
+- Do NOT add app-specific or domain-specific components to `packages/ui/`. The shared UI library is for generic building blocks only. If a component is only meaningful within a single app (e.g., an exercise-specific panel), it belongs in that app's `features/` folder.
 - Do NOT edit generated API client files in `frontend/src/app/shared/api/generated/` — run `make generate` instead.
 
 ## Meta

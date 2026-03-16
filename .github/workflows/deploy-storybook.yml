@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - 'frontend/**'
+      - 'apps/main/frontend/**'
       - 'packages/design-system/**'
       - 'packages/ui/**'
       - '.github/workflows/deploy-storybook.yml'
@@ -36,22 +36,22 @@ jobs:
           python-version: '3.12'
       - run: npm i
       - run: pip install -e ".[dev]"
-        working-directory: backend
+        working-directory: apps/main/backend
       - run: python -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json
-        working-directory: backend
+        working-directory: apps/main/backend
       - run: bash shared/scripts/generate-frontend.sh
       - run: npm run build-storybook
-        working-directory: frontend
+        working-directory: apps/main/frontend
         env:
           STORYBOOK_GIT_SHA: ${{ github.sha }}
       - run: |
           SHA="${{ github.sha }}"
           SHORT="${SHA:0:7}"
-          echo "<script>console.log('Storybook build: ${SHORT}');</script><div id='sb-git-sha' style='position:fixed;bottom:4px;right:4px;font-size:10px;color:#888;z-index:99999;pointer-events:none;'>${SHORT}</div>" >> frontend/storybook-static/index.html
+          echo "<script>console.log('Storybook build: ${SHORT}');</script><div id='sb-git-sha' style='position:fixed;bottom:4px;right:4px;font-size:10px;color:#888;z-index:99999;pointer-events:none;'>${SHORT}</div>" >> apps/main/frontend/storybook-static/index.html
         shell: bash
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: frontend/storybook-static
+          path: apps/main/frontend/storybook-static
 
   deploy:
     name: Deploy

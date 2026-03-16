@@ -1,5 +1,3 @@
-/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
-/* To learn more about Angular compiler options: https://angular.dev/reference/configs/angular-compiler-options. */
 {
   "compileOnSave": false,
   "compilerOptions": {
@@ -16,9 +14,9 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@aspect/ngrx-with-resource": ["../packages/ngrx-with-resource/src/public-api.ts"],
-      "@aspect/ng-feature-flags": ["../packages/ng-feature-flags/src/public-api.ts"],
-      "@aspect/ui": ["./src/app/shared/ui/public-api.ts"]
+      "@aspect/ui": ["../../../packages/ui/src/public-api.ts"],
+      "@aspect/tfc-shared": ["../../../packages/tfc-shared/src/public-api.ts"],
+      "@aspect/ngrx-with-resource": ["../../../packages/ngrx-with-resource/src/public-api.ts"]
     }
   },
   "angularCompilerOptions": {
@@ -34,12 +32,6 @@
     },
     {
       "path": "./tsconfig.spec.json"
-    },
-    {
-      "path": "./tsconfig.e2e.json"
-    },
-    {
-      "path": "./tsconfig.node.json"
     }
   ]
 }
