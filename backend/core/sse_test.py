@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
-from core.sse import EventBus, _SUBSCRIBER_QUEUE_MAX
+from core.sse import _SUBSCRIBER_QUEUE_MAX, EventBus
 
 
 class TestEventBusLifecycle:

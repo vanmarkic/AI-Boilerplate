@@ -27,7 +27,12 @@ PUBLIC_EXACT_PATHS: frozenset[str] = frozenset({
     "/api/health",
     "/api/canary/ping",
     "/api/users",  # registration endpoint (no auth required)
+    "/api/events",  # SSE channel listing (no auth required)
 })
+
+PUBLIC_API_PREFIXES: tuple[str, ...] = (
+    "/api/events/",  # SSE subscriptions (intentionally unauthenticated)
+)
 
 _DEFAULT_TTL: float = 60.0
 
@@ -160,7 +165,12 @@ class RBACMiddleware(BaseHTTPMiddleware):
         if path in PUBLIC_EXACT_PATHS:
             return await call_next(request)
 
-        # Skip public prefix paths
+        # Skip public API prefixes (e.g. SSE)
+        for prefix in PUBLIC_API_PREFIXES:
+            if path.startswith(prefix):
+                return await call_next(request)
+
+        # Skip public prefix paths (docs, etc.)
         for prefix in PUBLIC_PATH_PREFIXES:
             if path.startswith(prefix):
                 return await call_next(request)
