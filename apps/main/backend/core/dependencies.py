@@ -33,3 +33,12 @@ async def get_admin_permissions_service(
 
     repository = RbacRepository(session)
     return AdminPermissionsService(repository)
+
+
+async def get_admin_users_service() -> "AdminUsersService":  # noqa: F821
+    """Wire up the AdminUsersService with KeycloakAdminClient."""
+    from core.keycloak_admin import KeycloakAdminClient
+    from features.admin_users.admin_users_service import AdminUsersService
+
+    client = KeycloakAdminClient()
+    return AdminUsersService(client)
