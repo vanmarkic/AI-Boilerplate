@@ -1,10 +1,14 @@
+from typing import Generic, TypeVar
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import Base
 
+T = TypeVar("T", bound=Base)
 
-class CrudRepository[T: Base]:
+
+class CrudRepository(Generic[T]):
     """Generic CRUD repository for SQLAlchemy models.
 
     Subclass and pass the model type:
