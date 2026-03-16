@@ -97,9 +97,10 @@ async def test_tick_processes_events() -> None:
     engine = ExerciseEngine(_config(events=[evt]))
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
-    with patch("engine.time_manager._now_ms", return_value=100.0):
         engine._time._paused = False
-        changes = await engine.tick()
+        await engine.tick()  # -> pending
+    with patch("engine.time_manager._now_ms", return_value=100.0):
+        changes = await engine.tick()  # -> running
     assert any(c.get("action") == "started" for c in changes)
 
 
@@ -114,6 +115,7 @@ async def test_event_completion_triggers_linked_issues() -> None:
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
+        await engine.tick()  # event -> pending
         await engine.tick()  # event -> running at pt=0
     with patch("engine.time_manager._now_ms", return_value=100.0):
         changes = await engine.tick()  # event -> completed, issue activated
@@ -160,7 +162,8 @@ async def test_decision_event_pauses_engine() -> None:
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
-        changes = await engine.tick()
+        await engine.tick()  # -> pending
+        changes = await engine.tick()  # -> running, triggers decision
     # Engine should have auto-paused
     assert engine.phase == EnginePhase.PAUSED
     # A decision_opened change should be in the list
@@ -181,7 +184,8 @@ async def test_close_decision_resumes_engine() -> None:
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
-        await engine.tick()  # auto-pause on decision
+        await engine.tick()  # -> pending
+        await engine.tick()  # -> running, auto-pause on decision
     assert engine.phase == EnginePhase.PAUSED
     # Close the decision
     change = engine.decision_manager.close_decision("d1", current_pt_ms=100.0)
@@ -210,7 +214,8 @@ async def test_reset_clears_decisions() -> None:
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
-        await engine.tick()  # opens a decision
+        await engine.tick()  # -> pending
+        await engine.tick()  # -> running, opens a decision
     assert len(engine.decision_manager.get_open_decisions()) == 1
     await engine.reset()
     assert len(engine.decision_manager.get_open_decisions()) == 0

@@ -84,12 +84,12 @@ class EventScheduler:
                     self._transition(event, EventLifecycle.PENDING)
                     changes.append(self._change(event, "activated"))
 
-            if event.lifecycle == EventLifecycle.PENDING:
+            elif event.lifecycle == EventLifecycle.PENDING:
                 self._transition(event, EventLifecycle.RUNNING)
                 event.started_at_pt_ms = current_pt_ms
                 changes.append(self._change(event, "started"))
 
-            if event.lifecycle == EventLifecycle.RUNNING and event.duration_ms:
+            elif event.lifecycle == EventLifecycle.RUNNING and event.duration_ms:
                 if event.started_at_pt_ms is not None:
                     elapsed = current_pt_ms - event.started_at_pt_ms
                     if elapsed >= event.duration_ms:

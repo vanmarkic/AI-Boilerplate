@@ -52,8 +52,4 @@ class AuditService:
                 real_time_ms=real_time_ms,
                 details=change,
             )
-            self.session_add(entry)
-
-    def session_add(self, entry: AuditEntry) -> None:
-        """Direct add without flush — caller handles commit."""
-        self.repository.session.add(entry)
+            self.repository.session.add(entry)
