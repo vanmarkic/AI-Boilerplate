@@ -1,0 +1,23 @@
+name: admin_users
+tier: 1
+description: Admin API for Keycloak user-role management and realm role CRUD
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [keycloak]
+api_endpoints:
+  - GET /api/admin/users
+  - GET /api/admin/users/{user_id}/roles
+  - POST /api/admin/users/{user_id}/roles
+  - DELETE /api/admin/users/{user_id}/roles
+  - GET /api/admin/roles
+  - POST /api/admin/roles
+  - DELETE /api/admin/roles/{role_name}
+models: []
+events_emitted: []
+events_consumed: []
+business_rules:
+  - Only admin and role_manager can assign/remove roles
+  - role_manager cannot assign or remove protected roles (admin, role_manager)
+  - Only admin can create or delete realm roles
+  - Protected roles (admin, role_manager, user) cannot be deleted
