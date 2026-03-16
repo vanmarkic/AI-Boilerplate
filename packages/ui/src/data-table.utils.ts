@@ -54,6 +54,22 @@ export function topoSort(filters: FilterRef[]): FilterRef[] {
   return result;
 }
 
+/** Apply master + secondary filter groups in sequence. */
+export function applyFilterPipeline<T>(
+  allFilters: FilterRef[],
+  data: T[],
+  masterPosition: FilterPosition,
+  logic: 'and' | 'or',
+): T[] {
+  if (allFilters.length === 0) return [...data];
+
+  const master = allFilters.filter((f) => f.position() === masterPosition);
+  const secondary = allFilters.filter((f) => f.position() !== masterPosition);
+
+  const afterMaster = applyGroup(master, data, logic);
+  return applyGroup(secondary, afterMaster, logic);
+}
+
 export function compareValues(a: unknown, b: unknown): number {
   if (a == null && b == null) return 0;
   if (a == null) return -1;

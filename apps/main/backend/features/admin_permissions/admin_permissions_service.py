@@ -1,6 +1,5 @@
-from fastapi import HTTPException, status
-
 from core.auth import CurrentUser
+from core.exceptions import ForbiddenError, NotFoundError
 from core.rbac_model import RolePermission
 from core.rbac_repository import RbacRepository
 from features.admin_permissions.admin_permissions_schema import (
@@ -43,10 +42,7 @@ class AdminPermissionsService:
         """Update an existing role-permission mapping."""
         existing = await self.repository.get_by_id(perm_id)
         if not existing:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Permission not found",
-            )
+            raise NotFoundError("Permission not found")
         self._check_protected_role(existing.role, current_user)
         if request.role is not None:
             self._check_protected_role(request.role, current_user)
@@ -62,10 +58,7 @@ class AdminPermissionsService:
         """Delete a role-permission mapping."""
         existing = await self.repository.get_by_id(perm_id)
         if not existing:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Permission not found",
-            )
+            raise NotFoundError("Permission not found")
         self._check_protected_role(existing.role, current_user)
         return await self.repository.delete(perm_id)
 
@@ -78,10 +71,7 @@ class AdminPermissionsService:
     ) -> None:
         """Block non-admin users from modifying protected role permissions."""
         if role in PROTECTED_ROLES and "admin" not in user.roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "Only admin can modify permissions for "
-                    f"protected role '{role}'"
-                ),
+            raise ForbiddenError(
+                "Only admin can modify permissions for "
+                f"protected role '{role}'"
             )
