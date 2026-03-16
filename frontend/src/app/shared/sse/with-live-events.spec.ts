@@ -1,6 +1,6 @@
-import { Component, DestroyRef, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
+import { signalStore, withState, patchState, withMethods } from '@ngrx/signals';
 import { Subject } from 'rxjs';
 import { EventSourceService } from './event-source.service';
 import { withLiveEvents } from './with-live-events';
@@ -17,8 +17,10 @@ interface TestState {
 const TestStore = signalStore(
   { providedIn: 'root' },
   withState<TestState>({ items: [] }),
-  withLiveEvents<TestEvent, TestState>('test-channel', {
-    append: (state, event) => ({ items: [...state.items, event] }),
+  withLiveEvents<TestEvent>('test-channel', {
+    reduce: (event) => ({
+      items: (prev: TestEvent[]) => [...prev, event],
+    }),
   }),
 );
 
@@ -67,7 +69,7 @@ describe('withLiveEvents', () => {
     expect(store.liveConnected()).toBe(true);
   });
 
-  it('incoming events update store state via append', () => {
+  it('incoming events update store state via reduce', () => {
     store.connectLive();
 
     fakeChannel$.next({ id: 1, text: 'hello' });
@@ -111,8 +113,6 @@ describe('withLiveEvents', () => {
     fixture.destroy();
 
     fakeChannel$.next({ id: 2, text: 'dead' });
-    // Cannot read liveConnected after destroy, but the Subject
-    // subscriber count proves cleanup happened.
     expect(fakeChannel$.observed).toBe(false);
   });
 });
