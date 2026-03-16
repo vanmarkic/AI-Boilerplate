@@ -34,7 +34,7 @@ export const UsersTabStore = signalStore(
         const { data } = await listUsersApiAdminUsersGet({
           query: { search: search ?? undefined, offset: 0, limit: 50 },
         });
-        const body = data as { users: KeycloakUser[]; total: number };
+        const body = data as { users: KeycloakUser[]; total: number } | undefined;
         patchState(store, {
           users: body?.users ?? [],
           total: body?.total ?? 0,
@@ -51,7 +51,7 @@ export const UsersTabStore = signalStore(
     async loadRoles(): Promise<void> {
       try {
         const { data } = await listRolesApiAdminRolesGet();
-        const body = data as { roles: KeycloakRole[] };
+        const body = data as { roles: KeycloakRole[] } | undefined;
         patchState(store, { allRoles: body?.roles ?? [] });
       } catch {
         /* roles load failure is non-critical */
