@@ -30,3 +30,25 @@ async def get_scenario_service(
 
     repository = ScenarioRepository(session)
     return ScenarioService(repository)
+
+
+async def get_decision_service(
+    session: AsyncSession = Depends(get_session),
+) -> "DecisionService":  # noqa: F821
+    """Wire up the DecisionService with its repository."""
+    from features.decision.decision_repository import DecisionRepository
+    from features.decision.decision_service import DecisionService
+
+    repository = DecisionRepository(session)
+    return DecisionService(repository)
+
+
+async def get_audit_service(
+    session: AsyncSession = Depends(get_session),
+) -> "AuditService":  # noqa: F821
+    """Wire up the AuditService with its repository."""
+    from features.audit.audit_repository import AuditRepository
+    from features.audit.audit_service import AuditService
+
+    repository = AuditRepository(session)
+    return AuditService(repository)
