@@ -15,7 +15,7 @@
  */
 
 import { Injectable } from '@angular/core';
-import { Observable, retry, shareReplay, Subject, timer } from 'rxjs';
+import { Observable, retry, shareReplay, timer } from 'rxjs';
 import { environment } from '../../core/environment';
 
 const MAX_RETRY_DELAY_MS = 8_000;
