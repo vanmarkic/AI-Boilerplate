@@ -20,3 +20,16 @@ async def get_user_service(
 
     repository = UserRepository(session)
     return UserService(repository)
+
+
+async def get_admin_permissions_service(
+    session: AsyncSession = Depends(get_session),
+) -> "AdminPermissionsService":  # noqa: F821
+    """Wire up the AdminPermissionsService with its repository."""
+    from core.rbac_repository import RbacRepository
+    from features.admin_permissions.admin_permissions_service import (
+        AdminPermissionsService,
+    )
+
+    repository = RbacRepository(session)
+    return AdminPermissionsService(repository)

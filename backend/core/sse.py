@@ -72,7 +72,7 @@ class EventBus:
         raw = json.dumps(payload, default=str)
         conn: asyncpg.Connection = await asyncpg.connect(dsn=_pg_dsn())
         try:
-            await conn.execute(f"SELECT pg_notify($1, $2)", channel, raw)
+            await conn.execute("SELECT pg_notify($1, $2)", channel, raw)
         finally:
             await conn.close()
 

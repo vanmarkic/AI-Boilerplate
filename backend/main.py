@@ -1,10 +1,9 @@
 import importlib.util
 import re
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from types import ModuleType
-
-from contextlib import asynccontextmanager
-from collections.abc import AsyncGenerator
 
 from fastapi import FastAPI
 
