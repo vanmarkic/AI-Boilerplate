@@ -14,7 +14,7 @@ def _issue(
     trigger_mode: TriggerMode = TriggerMode.TIME_BASED,
     trigger_time_pt_ms: float | None = None,
     trigger_event_id: str | None = None,
-    etbol_ms: float = 0.0,
+    auto_resolve_ms: float = 0.0,
 ) -> TrackedIssue:
     return TrackedIssue(
         id=id,
@@ -23,7 +23,7 @@ def _issue(
         trigger_mode=trigger_mode,
         trigger_time_pt_ms=trigger_time_pt_ms,
         trigger_event_id=trigger_event_id,
-        etbol_ms=etbol_ms,
+        auto_resolve_ms=auto_resolve_ms,
     )
 
 
@@ -110,15 +110,15 @@ class TestMitigateResolve:
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
 
 
-class TestETBOLCountdown:
-    def test_etbol_auto_resolves(self) -> None:
+class TestAutoResolveCountdown:
+    def test_auto_resolve_expires(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, etbol_ms=1000.0)])
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, auto_resolve_ms=1000.0)])
         mgr.tick(0.0, set())  # activates
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
         changes = mgr.tick(1000.0, set())
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
-        assert any(c["action"] == "etbol_expired" for c in changes)
+        assert any(c["action"] == "auto_resolve_expired" for c in changes)
 
 
 class TestReleaseToPlayers:

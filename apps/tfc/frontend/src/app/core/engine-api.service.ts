@@ -28,7 +28,7 @@ export interface IssueSnapshot {
   title: string;
   description: string;
   trigger_mode: string;
-  etbol_ms: number;
+  auto_resolve_ms: number;
   lifecycle: string;
   activated_at_pt_ms: number | null;
   resolved_at_pt_ms: number | null;
