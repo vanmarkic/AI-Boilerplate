@@ -115,7 +115,7 @@ jobs:
           python-version: '3.12'
       - run: pip install pip-audit
       - run: pip install -e ".[dev]"
-        working-directory: backend
+        working-directory: apps/main/backend
       - run: pip-audit
 
   bandit:
@@ -128,7 +128,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install bandit[sarif]
-      - run: bandit -r backend/ -f sarif -o bandit.sarif || true
+      - run: bandit -r apps/main/backend/ -f sarif -o bandit.sarif || true
       - uses: github/codeql-action/upload-sarif@v4
         if: always() && hashFiles('bandit.sarif') != ''
         with:
@@ -165,7 +165,7 @@ jobs:
           restore-keys: |
             trivy-db-${{ runner.os }}-
       - name: Build backend Docker image
-        run: docker build -t ai-boilerplate-backend:scan backend/
+        run: docker build -t ai-boilerplate-backend:scan apps/main/backend/
       - name: Run Trivy image scan
         run: trivy image --severity HIGH,CRITICAL --format sarif --output trivy-docker.sarif ai-boilerplate-backend:scan
       - uses: github/codeql-action/upload-sarif@v4
