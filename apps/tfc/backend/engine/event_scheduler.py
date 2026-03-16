@@ -8,6 +8,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from engine.state_changes import EventChange
+
 
 class EventLifecycle(StrEnum):
     SCHEDULED = "scheduled"
@@ -158,7 +160,7 @@ class EventScheduler:
         event.lifecycle = target
 
     @staticmethod
-    def _change(event: ScheduledEvent, action: str) -> dict:
+    def _change(event: ScheduledEvent, action: str) -> EventChange:
         return {
             "type": "event_change",
             "event_id": event.id,

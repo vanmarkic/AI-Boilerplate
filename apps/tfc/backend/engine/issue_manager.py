@@ -9,6 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
+from engine.state_changes import IssueChange
+
 
 class IssueLifecycle(StrEnum):
     INACTIVE = "inactive"
@@ -181,7 +183,7 @@ class IssueManager:
         issue.lifecycle = target
 
     @staticmethod
-    def _change(issue: TrackedIssue, action: str) -> dict:
+    def _change(issue: TrackedIssue, action: str) -> IssueChange:
         return {
             "type": "issue_change",
             "issue_id": issue.id,

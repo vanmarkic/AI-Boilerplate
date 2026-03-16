@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
+from engine.state_changes import DecisionClosed, DecisionOpened
+
 
 @dataclass
 class ActiveDecision:
@@ -44,7 +46,7 @@ class DecisionManager:
         completion_mode: str,
         target_roles: list[str],
         current_pt_ms: float,
-    ) -> dict:
+    ) -> DecisionOpened:
         """Register a new open decision. Returns a change dict."""
         decision = ActiveDecision(
             id=id,
@@ -71,7 +73,7 @@ class DecisionManager:
 
     def close_decision(
         self, decision_id: str, *, current_pt_ms: float,
-    ) -> dict | None:
+    ) -> DecisionClosed | None:
         """Close a decision. Returns a change dict or None."""
         decision = self._decisions.get(decision_id)
         if decision is None or decision.status == "closed":
