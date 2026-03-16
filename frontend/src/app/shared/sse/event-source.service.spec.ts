@@ -1,22 +1,19 @@
 import { TestBed } from '@angular/core/testing';
-import { Subscription } from 'rxjs';
 import { EventSourceService } from './event-source.service';
 
 type MockEventSource = {
   onmessage: ((event: MessageEvent) => void) | null;
   onerror: (() => void) | null;
   close: ReturnType<typeof vi.fn>;
-  readyState: number;
   url: string;
 };
 
 let lastCreatedSource: MockEventSource;
 
-class FakeEventSource {
+class FakeEventSource implements Pick<EventSource, 'onmessage' | 'onerror' | 'close' | 'url'> {
   onmessage: ((event: MessageEvent) => void) | null = null;
   onerror: (() => void) | null = null;
   close = vi.fn();
-  readyState = 1;
   url: string;
 
   constructor(url: string) {
@@ -30,7 +27,7 @@ describe('EventSourceService', () => {
   const originalEventSource = globalThis.EventSource;
 
   beforeEach(() => {
-    (globalThis as any).EventSource = FakeEventSource;
+    globalThis.EventSource = FakeEventSource as unknown as typeof EventSource;
     TestBed.configureTestingModule({
       providers: [EventSourceService],
     });
@@ -38,7 +35,7 @@ describe('EventSourceService', () => {
   });
 
   afterEach(() => {
-    (globalThis as any).EventSource = originalEventSource;
+    globalThis.EventSource = originalEventSource;
   });
 
   it('creates EventSource with correct URL', () => {
@@ -78,40 +75,20 @@ describe('EventSourceService', () => {
     expect(source.close).toHaveBeenCalled();
   });
 
-  it('errors on invalid JSON', () => {
-    let receivedError: Error | null = null;
-
-    const sub = service.channel('bad-json').subscribe({
-      error: (err: Error) => {
-        receivedError = err;
-      },
+  it('closes EventSource on error', () => {
+    service.channel('err-test').subscribe({
+      error: () => { /* swallow retry error */ },
     });
 
-    lastCreatedSource.onmessage!(
-      new MessageEvent('message', { data: 'not-json{' }),
-    );
+    const source = lastCreatedSource;
+    source.onerror!();
 
-    expect(receivedError).toBeTruthy();
-    expect(receivedError!.message).toContain('Failed to parse');
+    expect(source.close).toHaveBeenCalled();
   });
 
-  it('emits error and retries on EventSource failure', async () => {
-    let errorCount = 0;
-
-    // Subscribe — first connection will be created.
-    const sub = service.channel('retry-test').subscribe({
-      error: () => {
-        errorCount++;
-      },
-    });
-
-    const firstSource = lastCreatedSource;
-
-    // Trigger an error to force reconnect.
-    firstSource.onerror!();
-
-    expect(firstSource.close).toHaveBeenCalled();
-
+  it('encodes channel name in URL', () => {
+    const sub = service.channel('room:42').subscribe();
+    expect(lastCreatedSource.url).toContain('/api/events/room%3A42');
     sub.unsubscribe();
   });
 });

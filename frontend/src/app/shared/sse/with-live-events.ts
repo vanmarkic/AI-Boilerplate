@@ -10,8 +10,8 @@
  *   export const CommentStore = signalStore(
  *     withState<CommentState>({ comments: [], loading: false }),
  *     withLiveEvents<CommentResponse>('comments', {
- *       reduce: (event) => ({
- *         comments: (prev) => [...prev, event],
+ *       reduce: (event) => (state) => ({
+ *         comments: [...state['comments'], event],
  *       }),
  *     }),
  *     withMethods((store) => ({ ... })),
@@ -37,11 +37,15 @@ import { Subscription } from 'rxjs';
 import { EventSourceService } from './event-source.service';
 
 /**
- * Maps an incoming event to a partial state patch.
- * Each value can be a static value or an updater function
- * that receives the current signal store instance.
+ * Maps an incoming event to a patchState updater.
+ *
+ * Return either:
+ *  - A partial state object: `{ count: 5 }`
+ *  - An updater function: `(state) => ({ items: [...state.items, event] })`
  */
-type EventReducer<TEvent> = (event: TEvent) => Record<string, unknown>;
+type EventReducer<TEvent> = (
+  event: TEvent,
+) => Record<string, unknown> | ((state: Record<string, unknown>) => Record<string, unknown>);
 
 interface LiveEventsState {
   readonly liveConnected: boolean;
@@ -72,7 +76,8 @@ export function withLiveEvents<TEvent>(
 
           subscription = sse.channel<TEvent>(channel).subscribe((event) => {
             const patch = config.reduce(event);
-            patchState(store, { ...patch, liveConnected: true });
+            patchState(store, patch);
+            patchState(store, { liveConnected: true });
           });
 
           patchState(store, { liveConnected: true });

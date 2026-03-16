@@ -22,7 +22,7 @@ class TestEventBusLifecycle:
         self, mock_connect: AsyncMock,
     ) -> None:
         mock_conn = AsyncMock()
-        mock_conn.is_closed.return_value = False
+        mock_conn.is_closed = MagicMock(return_value=False)
         mock_connect.return_value = mock_conn
 
         bus = EventBus()
