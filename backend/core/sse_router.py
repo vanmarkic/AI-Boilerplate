@@ -6,12 +6,15 @@ real-time JSON payloads via Server-Sent Events.
 The channel name is validated against an allow-list that features
 register at import time (see `register_channel`). Unregistered channels
 return 404 — this prevents arbitrary LISTEN on the Postgres connection.
+
+Channel names are exposed as an enum in the OpenAPI spec so the
+generated TypeScript client gets a typed union.
 """
 
-import asyncio
 import logging
+from typing import Annotated
 
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Path, Request, status
 from fastapi.responses import StreamingResponse
 
 from core.sse import event_bus
@@ -40,13 +43,41 @@ def get_allowed_channels() -> dict[str, str]:
     return dict(_allowed_channels)
 
 
+def patch_channel_enum(openapi_schema: dict) -> dict:
+    """Inject registered channel names as an enum into the OpenAPI spec.
+
+    Called from the OpenAPI export command *after* all routers are
+    discovered, so every register_channel() call has already executed.
+    """
+    paths = openapi_schema.get("paths", {})
+    channel_path = paths.get("/api/events/{channel}", {})
+    for method_spec in channel_path.values():
+        if not isinstance(method_spec, dict):
+            continue
+        for param in method_spec.get("parameters", []):
+            if param.get("name") == "channel" and param.get("in") == "path":
+                param["schema"] = {
+                    "type": "string",
+                    "enum": sorted(_allowed_channels.keys()),
+                    "description": "Available SSE channels: "
+                    + ", ".join(
+                        f"{k} ({v})" if v else k
+                        for k, v in sorted(_allowed_channels.items())
+                    ),
+                }
+    return openapi_schema
+
+
 @router.get(
     "/{channel}",
     response_class=StreamingResponse,
     summary="Subscribe to real-time events on a channel",
     operation_id="subscribeToChannel",
 )
-async def subscribe(channel: str, request: Request) -> StreamingResponse:
+async def subscribe(
+    channel: Annotated[str, Path(description="SSE channel name")],
+    request: Request,
+) -> StreamingResponse:
     """Stream events to the client via SSE."""
     if channel not in _allowed_channels:
         return StreamingResponse(
