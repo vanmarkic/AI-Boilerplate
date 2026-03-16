@@ -1,10 +1,8 @@
 from fastapi import HTTPException, status
 
 from core.auth import CurrentUser
-from features.admin_permissions.admin_permissions_model import RolePermission
-from features.admin_permissions.admin_permissions_repository import (
-    AdminPermissionsRepository,
-)
+from core.rbac_model import RolePermission
+from core.rbac_repository import RbacRepository
 from features.admin_permissions.admin_permissions_schema import (
     PermissionCreate,
     PermissionResponse,
@@ -17,7 +15,7 @@ PROTECTED_ROLES: frozenset[str] = frozenset({"admin", "role_manager"})
 class AdminPermissionsService:
     """Business logic for role-permission management."""
 
-    def __init__(self, repository: AdminPermissionsRepository) -> None:
+    def __init__(self, repository: RbacRepository) -> None:
         self.repository = repository
 
     async def list_permissions(

@@ -15,6 +15,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
 from core.database import async_session_factory
+from core.rbac_model import RolePermission
 
 PUBLIC_PATH_PREFIXES: tuple[str, ...] = (
     "/docs",
@@ -103,10 +104,6 @@ def _check_permission(
 
 async def _load_permissions() -> dict[str, list[PermissionRule]]:
     """Load all permissions from DB, grouped by role."""
-    from features.admin_permissions.admin_permissions_model import (
-        RolePermission,
-    )
-
     async with async_session_factory() as session:
         result = await session.execute(select(RolePermission))
         permissions = result.scalars().all()

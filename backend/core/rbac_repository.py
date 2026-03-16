@@ -2,10 +2,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.base_repository import CrudRepository
-from features.admin_permissions.admin_permissions_model import RolePermission
+from core.rbac_model import RolePermission
 
 
-class AdminPermissionsRepository(CrudRepository[RolePermission]):
+class RbacRepository(CrudRepository[RolePermission]):
     """Repository for role-permission CRUD and role-based queries."""
 
     def __init__(self, session: AsyncSession) -> None:
