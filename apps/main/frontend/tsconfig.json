@@ -16,8 +16,8 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@aspect/ngrx-with-resource": ["../packages/ngrx-with-resource/src/public-api.ts"],
-      "@aspect/ng-feature-flags": ["../packages/ng-feature-flags/src/public-api.ts"],
+      "@aspect/ngrx-with-resource": ["../../../packages/ngrx-with-resource/src/public-api.ts"],
+      "@aspect/ng-feature-flags": ["../../../packages/ng-feature-flags/src/public-api.ts"],
       "@aspect/ui": ["./src/app/shared/ui/public-api.ts"]
     }
   },

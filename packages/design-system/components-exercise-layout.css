@@ -1,0 +1,155 @@
+/* ── Exercise Layout ─────────────────────────────────────
+ *  4-row grid layout for exercise views (game-master, player).
+ *  Row 1: Header (exercise title, clocks, phase)
+ *  Row 2: Overview (timeline + issue list)
+ *  Row 3: Details (collapsible)
+ *  Row 4: Controls (action bar)
+ * ──────────────────────────────────────────────────────── */
+
+@layer components {
+  .exercise-layout {
+    display: grid;
+    grid-template-rows: auto 1fr auto auto;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .exercise-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-muted);
+    background: var(--color-card);
+  }
+
+  .exercise-header__title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  .exercise-header__clocks {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: center;
+  }
+
+  .exercise-clock {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-2xs);
+  }
+
+  .exercise-clock__label {
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .exercise-clock__value {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    color: var(--color-foreground);
+  }
+
+  .exercise-overview {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    overflow: auto;
+  }
+
+  .exercise-overview--wide {
+    grid-template-columns: 2fr 1fr;
+  }
+
+  .exercise-details {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-top: 1px solid var(--color-muted);
+    background: var(--color-card);
+    overflow: auto;
+    max-height: 30vh;
+  }
+
+  .exercise-details[hidden] {
+    display: none;
+  }
+
+  .exercise-controls {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    border-top: 1px solid var(--color-muted);
+    background: var(--color-card);
+  }
+
+  .exercise-controls__group {
+    display: flex;
+    gap: var(--spacing-sm);
+    align-items: center;
+  }
+
+  .exercise-controls__spacer {
+    flex: 1;
+  }
+
+  /* Speed factor slider */
+  .exercise-speed {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .exercise-speed__label {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+  }
+
+  .exercise-speed__value {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    min-width: 3ch;
+    text-align: center;
+  }
+
+  /* Phase badge */
+  .exercise-phase {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-2xs);
+    padding: var(--spacing-2xs) var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .exercise-phase[data-phase="setup"] {
+    background: oklch(0.75 0.08 250);
+    color: oklch(0.25 0.08 250);
+  }
+
+  .exercise-phase[data-phase="running"] {
+    background: oklch(0.75 0.15 145);
+    color: oklch(0.25 0.15 145);
+  }
+
+  .exercise-phase[data-phase="paused"] {
+    background: oklch(0.80 0.12 80);
+    color: oklch(0.30 0.12 80);
+  }
+
+  .exercise-phase[data-phase="completed"] {
+    background: var(--color-muted);
+    color: var(--color-muted-foreground);
+  }
+}

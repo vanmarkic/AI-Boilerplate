@@ -44,11 +44,11 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -e ".[dev]"
-        working-directory: backend
+        working-directory: apps/main/backend
       - run: alembic upgrade head
-        working-directory: backend
+        working-directory: apps/main/backend
       - run: python -m pytest -v --tb=short
-        working-directory: backend
+        working-directory: apps/main/backend
 
   lint-backend:
     name: Backend Lint
@@ -59,7 +59,7 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install ruff && ruff check .
-        working-directory: backend
+        working-directory: apps/main/backend
 
   tier1-build-smoke:
     name: Tier-1 Build Smoke
@@ -78,15 +78,15 @@ jobs:
       - name: Filter features to tier 1
         run: |
           python shared/scripts/filter-features.py --tier=1 \
-            --src=backend/features --dest=/tmp/tier1-be
+            --src=apps/main/backend/features --dest=/tmp/tier1-be
           python shared/scripts/filter-features.py --tier=1 \
-            --src=frontend/src/app/features --dest=/tmp/tier1-fe --frontend
+            --src=apps/main/frontend/src/app/features --dest=/tmp/tier1-fe --frontend
 
       - name: Apply filtered features to working tree
         run: |
-          rm -rf frontend/src/app/features
-          cp -r /tmp/tier1-fe frontend/src/app/features
-          cp /tmp/app.routes.filtered.ts frontend/src/app/app.routes.ts
+          rm -rf apps/main/frontend/src/app/features
+          cp -r /tmp/tier1-fe apps/main/frontend/src/app/features
+          cp /tmp/app.routes.filtered.ts apps/main/frontend/src/app/app.routes.ts
 
       - name: Static verification (no higher-tier leaks)
         run: >
@@ -99,11 +99,11 @@ jobs:
 
       - name: Build tier-1 production bundle
         run: npm run build
-        working-directory: frontend
+        working-directory: apps/main/frontend
 
       - name: Verify canary markers absent
         run: |
-          if grep -r 'CANARY_TIER2_FRONTEND_MARKER' frontend/dist/ 2>/dev/null; then
+          if grep -r 'CANARY_TIER2_FRONTEND_MARKER' apps/main/frontend/dist/ 2>/dev/null; then
             echo "FAIL: tier-2 canary found in tier-1 frontend bundle"
             exit 1
           fi
