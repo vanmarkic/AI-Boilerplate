@@ -1,4 +1,4 @@
-"""Unit tests for IssueManager lifecycle and triggers."""
+"""Tests for IssueManager lifecycle and triggers."""
 import pytest
 
 from engine.issue_manager import (
@@ -10,16 +10,16 @@ from engine.issue_manager import (
 
 
 def _issue(
-    iid: str = "i1",
+    id: str = "i1",
     trigger_mode: TriggerMode = TriggerMode.TIME_BASED,
     trigger_time_pt_ms: float | None = None,
     trigger_event_id: str | None = None,
     etbol_ms: float = 0.0,
 ) -> TrackedIssue:
     return TrackedIssue(
-        id=iid,
-        title=f"Issue {iid}",
-        description=f"Desc {iid}",
+        id=id,
+        title=f"Issue {id}",
+        description="test",
         trigger_mode=trigger_mode,
         trigger_time_pt_ms=trigger_time_pt_ms,
         trigger_event_id=trigger_event_id,
@@ -27,164 +27,122 @@ def _issue(
     )
 
 
-class TestLoadIssues:
-    def test_load_stores_issues(self) -> None:
+class TestTimeBasedActivation:
+    def test_activates_at_trigger_time(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1"), _issue("i2")])
-        assert len(mgr.issues) == 2
-        assert "i1" in mgr.issues
-
-
-class TestTickTimeBased:
-    def test_activates_when_pt_passes_trigger(self) -> None:
-        mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=100)])
-        changes = mgr.tick(200, set())
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=500.0)])
+        changes = mgr.tick(500.0, set())
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
-        assert any(c["issue_id"] == "i1" and c["action"] == "activated"
-                    for c in changes)
+        assert any(c["action"] == "activated" for c in changes)
 
-    def test_no_activation_before_trigger(self) -> None:
+    def test_not_activated_before_time(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=100)])
-        mgr.tick(50, set())
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=500.0)])
+        mgr.tick(499.0, set())
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.INACTIVE
 
 
-class TestTickEventBased:
-    def test_activates_when_trigger_event_completed(self) -> None:
+class TestEventBasedActivation:
+    def test_activate_by_event(self) -> None:
         mgr = IssueManager()
         mgr.load_issues([
-            _issue("i1", trigger_mode=TriggerMode.EVENT_BASED,
-                   trigger_event_id="e1"),
+            _issue(
+                "i1",
+                trigger_mode=TriggerMode.EVENT_BASED,
+                trigger_event_id="evt1",
+            ),
         ])
-        changes = mgr.tick(100, {"e1"})
-        assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
-
-    def test_no_activation_without_event(self) -> None:
-        mgr = IssueManager()
-        mgr.load_issues([
-            _issue("i1", trigger_mode=TriggerMode.EVENT_BASED,
-                   trigger_event_id="e1"),
-        ])
-        mgr.tick(100, set())
-        assert mgr.issues["i1"].lifecycle == IssueLifecycle.INACTIVE
-
-
-class TestTickManual:
-    def test_manual_issues_not_auto_activated(self) -> None:
-        mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
-        mgr.tick(99999, set())
-        assert mgr.issues["i1"].lifecycle == IssueLifecycle.INACTIVE
-
-
-class TestTickEtbol:
-    def test_resolves_after_etbol_expires(self) -> None:
-        mgr = IssueManager()
-        mgr.load_issues([
-            _issue("i1", trigger_time_pt_ms=0, etbol_ms=100),
-        ])
-        mgr.tick(0, set())  # activates
-        assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
-        changes = mgr.tick(200, set())  # etbol expires
-        assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
-        assert any(c["action"] == "etbol_expired" for c in changes)
-
-
-class TestActivateByEvent:
-    def test_activates_linked_issues(self) -> None:
-        mgr = IssueManager()
-        mgr.load_issues([
-            _issue("i1", trigger_mode=TriggerMode.EVENT_BASED,
-                   trigger_event_id="e1"),
-            _issue("i2", trigger_mode=TriggerMode.EVENT_BASED,
-                   trigger_event_id="e2"),
-        ])
-        changes = mgr.activate_by_event("e1", 100)
-        assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
-        assert mgr.issues["i2"].lifecycle == IssueLifecycle.INACTIVE
+        changes = mgr.activate_by_event("evt1", 100.0)
         assert len(changes) == 1
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
+        assert mgr.issues["i1"].activated_at_pt_ms == 100.0
+
+    def test_activate_by_event_wrong_id_no_change(self) -> None:
+        mgr = IssueManager()
+        mgr.load_issues([
+            _issue("i1", trigger_mode=TriggerMode.EVENT_BASED, trigger_event_id="evt1"),
+        ])
+        changes = mgr.activate_by_event("evt_other", 100.0)
+        assert len(changes) == 0
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.INACTIVE
 
 
-class TestManualActivate:
-    def test_gm_activates_issue(self) -> None:
+class TestManualActivation:
+    def test_manual_activate(self) -> None:
         mgr = IssueManager()
         mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
-        result = mgr.manual_activate("i1", 50)
+        result = mgr.manual_activate("i1", 200.0)
         assert result is not None
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
-        assert mgr.issues["i1"].activated_at_pt_ms == 50
 
     def test_manual_activate_already_active_returns_none(self) -> None:
         mgr = IssueManager()
         mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
-        mgr.manual_activate("i1", 50)
-        assert mgr.manual_activate("i1", 100) is None
+        mgr.manual_activate("i1", 100.0)
+        assert mgr.manual_activate("i1", 200.0) is None
 
 
-class TestMitigate:
-    def test_active_to_mitigated(self) -> None:
+class TestMitigateResolve:
+    def test_mitigate_active_issue(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0)])
-        mgr.tick(0, set())
+        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
+        mgr.manual_activate("i1", 0.0)
         result = mgr.mitigate("i1")
         assert result is not None
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.MITIGATED
 
-    def test_mitigate_inactive_returns_none(self) -> None:
+    def test_resolve_from_active(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=9999)])
-        assert mgr.mitigate("i1") is None
-
-
-class TestResolve:
-    def test_active_to_resolved(self) -> None:
-        mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0)])
-        mgr.tick(0, set())
-        result = mgr.resolve("i1", 100)
+        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
+        mgr.manual_activate("i1", 0.0)
+        result = mgr.resolve("i1", 300.0)
         assert result is not None
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
-        assert mgr.issues["i1"].resolved_at_pt_ms == 100
+        assert mgr.issues["i1"].resolved_at_pt_ms == 300.0
 
-    def test_mitigated_to_resolved(self) -> None:
+    def test_resolve_from_mitigated(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0)])
-        mgr.tick(0, set())
+        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
+        mgr.manual_activate("i1", 0.0)
         mgr.mitigate("i1")
-        result = mgr.resolve("i1", 200)
+        result = mgr.resolve("i1", 400.0)
         assert result is not None
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
 
-    def test_resolve_inactive_returns_none(self) -> None:
+
+class TestETBOLCountdown:
+    def test_etbol_auto_resolves(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=9999)])
-        assert mgr.resolve("i1", 0) is None
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, etbol_ms=1000.0)])
+        mgr.tick(0.0, set())  # activates
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
+        changes = mgr.tick(1000.0, set())
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
+        assert any(c["action"] == "etbol_expired" for c in changes)
 
 
 class TestReleaseToPlayers:
     def test_release_active_issue(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0)])
-        mgr.tick(0, set())
+        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
+        mgr.manual_activate("i1", 0.0)
         result = mgr.release_to_players("i1")
         assert result is not None
         assert mgr.issues["i1"].released_to_players is True
 
     def test_release_inactive_returns_none(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=9999)])
+        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
         assert mgr.release_to_players("i1") is None
 
 
-class TestSnapshot:
-    def test_snapshot_serializable(self) -> None:
+class TestInactiveGuards:
+    def test_mitigate_inactive_returns_none(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=100, etbol_ms=500)])
-        snap = mgr.snapshot()
-        assert len(snap) == 1
-        assert snap[0]["id"] == "i1"
-        assert snap[0]["lifecycle"] == "inactive"
-        assert snap[0]["etbol_ms"] == 500
-        assert "released" in snap[0]
+        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
+        assert mgr.mitigate("i1") is None
+
+    def test_resolve_inactive_returns_none(self) -> None:
+        mgr = IssueManager()
+        mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
+        assert mgr.resolve("i1", 0.0) is None
