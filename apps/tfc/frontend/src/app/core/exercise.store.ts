@@ -1,6 +1,7 @@
 import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import type { EngineSnapshot, EventSnapshot, IssueSnapshot } from './engine-api.service';
+import type { ActiveDecision, ScenarioContext } from './decision-api.service';
 import { formatTimeMs } from './format-time';
 
 interface ExerciseState {
@@ -13,6 +14,9 @@ interface ExerciseState {
   paused: boolean;
   events: EventSnapshot[];
   issues: IssueSnapshot[];
+  decisions: ActiveDecision[];
+  context: ScenarioContext | null;
+  playerRole: string;
   loading: boolean;
   error: string | null;
 }
@@ -27,6 +31,9 @@ const initialState: ExerciseState = {
   paused: true,
   events: [],
   issues: [],
+  decisions: [],
+  context: null,
+  playerRole: 'player',
   loading: false,
   error: null,
 };
@@ -42,6 +49,8 @@ export const ExerciseStore = signalStore(
     completedEvents: computed(() => store.events().filter((e) => e.lifecycle === 'completed')),
     activeIssues: computed(() => store.issues().filter((i) => i.lifecycle === 'active')),
     releasedIssues: computed(() => store.issues().filter((i) => i.released)),
+    openDecisions: computed(() => store.decisions().filter((d) => d.status === 'open')),
+    hasOpenDecision: computed(() => store.decisions().filter((d) => d.status === 'open').length > 0),
     phaseBadgeVariant: computed<'default' | 'secondary' | 'destructive'>(() => {
       switch (store.phase()) {
         case 'running': return 'default';
@@ -108,6 +117,25 @@ export const ExerciseStore = signalStore(
 
     setError(error: string): void {
       patchState(store, { error, loading: false });
+    },
+
+    applyDecisions(decisions: ActiveDecision[]): void {
+      patchState(store, { decisions });
+    },
+
+    setContext(ctx: ScenarioContext): void {
+      patchState(store, { context: ctx });
+    },
+
+    setPlayerRole(role: string): void {
+      patchState(store, { playerRole: role });
+    },
+
+    closeDecision(decisionId: string): void {
+      const decisions = store.decisions().map((d) =>
+        d.id === decisionId ? { ...d, status: 'closed' } : d,
+      );
+      patchState(store, { decisions });
     },
   })),
 );
