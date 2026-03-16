@@ -9,7 +9,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from engine.connection_manager import ConnectionManager, connection_manager
+from features.exercise.adapters.connection_manager import ConnectionManager, connection_manager
 
 
 # ── Unit tests ───────────────────────────────────────────────────────────
