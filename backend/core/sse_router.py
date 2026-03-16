@@ -12,6 +12,7 @@ generated TypeScript client gets a typed union.
 """
 
 import logging
+from collections.abc import AsyncGenerator
 from typing import Annotated
 
 from fastapi import APIRouter, Path, Request, status
@@ -86,7 +87,7 @@ async def subscribe(
             media_type="text/event-stream",
         )
 
-    async def _stream() -> bytes:  # type: ignore[override]
+    async def _stream() -> AsyncGenerator[bytes, None]:
         async for payload in event_bus.subscribe(channel):
             if await request.is_disconnected():
                 break

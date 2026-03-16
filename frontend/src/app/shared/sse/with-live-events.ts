@@ -10,9 +10,8 @@
  *   export const CommentStore = signalStore(
  *     withState<CommentState>({ comments: [], loading: false }),
  *     withLiveEvents<CommentResponse>('comments', {
- *       append: (state, event) => ({
- *         ...state,
- *         comments: [...state.comments, event],
+ *       reduce: (event) => ({
+ *         comments: (prev) => [...prev, event],
  *       }),
  *     }),
  *     withMethods((store) => ({ ... })),
@@ -31,41 +30,37 @@ import {
   signalStoreFeature,
   withMethods,
   withState,
-  type,
-  withHooks,
 } from '@ngrx/signals';
 import { DestroyRef, inject } from '@angular/core';
 import { patchState } from '@ngrx/signals';
 import { Subscription } from 'rxjs';
 import { EventSourceService } from './event-source.service';
 
-type Updater<TState extends object, TEvent> = (
-  state: TState,
-  event: TEvent,
-) => Partial<TState>;
+/**
+ * Maps an incoming event to a partial state patch.
+ * Each value can be a static value or an updater function
+ * that receives the current signal store instance.
+ */
+type EventReducer<TEvent> = (event: TEvent) => Record<string, unknown>;
 
 interface LiveEventsState {
   readonly liveConnected: boolean;
 }
 
 /**
- * Add real-time SSE capabilities to any signal store.
+ * Add real-time SSE capabilities to a signal store.
  *
- * @param channel  - The SSE channel name to subscribe to.
- * @param config.append - Pure function: receives current state + incoming
- *   event, returns a partial state update (like a reducer).
+ * @param channel - The SSE channel name to subscribe to.
+ * @param config.reduce - Pure function that maps an incoming event
+ *   to a partial state patch passed to `patchState`.
  */
-export function withLiveEvents<
-  TEvent,
-  TState extends object = object,
->(
+export function withLiveEvents<TEvent>(
   channel: string,
-  config: { append: Updater<TState, TEvent> },
+  config: { reduce: EventReducer<TEvent> },
 ) {
   return signalStoreFeature(
-    { state: type<TState>() },
     withState<LiveEventsState>({ liveConnected: false }),
-    withMethods((store: any) => {
+    withMethods((store) => {
       let subscription: Subscription | null = null;
 
       return {
@@ -76,12 +71,7 @@ export function withLiveEvents<
           const destroyRef = inject(DestroyRef);
 
           subscription = sse.channel<TEvent>(channel).subscribe((event) => {
-            const currentState = Object.fromEntries(
-              Object.entries(store).filter(
-                ([, v]) => typeof v === 'function' && 'asReadonly' in (v as any),
-              ).map(([k, v]) => [k, (v as any)()]),
-            ) as TState;
-            const patch = config.append(currentState, event);
+            const patch = config.reduce(event);
             patchState(store, { ...patch, liveConnected: true });
           });
 
