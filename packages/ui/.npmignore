@@ -1,0 +1,8 @@
+src/
+tsconfig.lib.json
+ng-package.json
+*.spec.ts
+*.test.ts
+.env*
+*.pem
+*.key

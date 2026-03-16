@@ -4,6 +4,14 @@
   "description": "Reusable NgRx signal store feature for async resource loading with loading/error state machine",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vanmarkic/AI-Boilerplate.git",
+    "directory": "packages/ngrx-with-resource"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./src/public-api.ts",
   "exports": {
     ".": "./src/public-api.ts"

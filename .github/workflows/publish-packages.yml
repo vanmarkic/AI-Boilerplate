@@ -1,0 +1,241 @@
+name: Publish Packages
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: 'Dry run (skip actual publish)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  # ── Security gates ──────────────────────────────────────────────────
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  npm-audit:
+    name: npm Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: npm ci
+      - run: npm audit --audit-level=high
+
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v6
+      - run: semgrep ci --config auto
+        env:
+          SEMGREP_RULES: auto
+
+  trivy:
+    name: Trivy Vulnerability Scan
+    runs-on: ubuntu-latest
+    env:
+      TRIVY_VERSION: '0.57.1'
+      TRIVY_DB_REPOSITORY: 'ghcr.io/aquasecurity/trivy-db:2'
+    steps:
+      - uses: actions/checkout@v6
+      - name: Cache Trivy binary
+        id: trivy-bin-cache
+        uses: actions/cache@v5
+        with:
+          path: /usr/local/bin/trivy
+          key: trivy-bin-${{ runner.os }}-${{ env.TRIVY_VERSION }}
+      - name: Install Trivy
+        if: steps.trivy-bin-cache.outputs.cache-hit != 'true'
+        run: |
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v${{ env.TRIVY_VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Trivy filesystem scan
+        run: trivy fs --severity HIGH,CRITICAL --exit-code 1 packages/
+
+  # ── Build & test ────────────────────────────────────────────────────
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+
+      - name: Lint design system
+        run: npm run lint
+        working-directory: packages/design-system
+
+      - name: Build @aspect/ui
+        run: npm run build
+        working-directory: packages/ui
+
+      - name: Verify build output exists
+        run: |
+          test -d packages/ui/dist || { echo "FAIL: ui dist/ not found"; exit 1; }
+          echo "OK: ui build output verified"
+
+      - name: Run frontend tests
+        run: npm test -- --run
+        working-directory: frontend
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-builds
+          path: packages/ui/dist/
+          retention-days: 1
+
+  # ── Package contents check ──────────────────────────────────────────
+  verify-packages:
+    name: Verify Package Contents
+    needs: [build-and-test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+      - run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: package-builds
+          path: packages/ui/dist/
+
+      - name: Pack and inspect @aspect/ui
+        working-directory: packages/ui/dist
+        run: |
+          npm pack --dry-run 2>&1 | tee /tmp/ui-pack.txt
+          echo "--- @aspect/ui package contents ---"
+          cat /tmp/ui-pack.txt
+
+      - name: Pack and inspect @aspect/design-system
+        working-directory: packages/design-system
+        run: |
+          npm pack --dry-run 2>&1 | tee /tmp/ds-pack.txt
+          echo "--- @aspect/design-system package contents ---"
+          cat /tmp/ds-pack.txt
+
+      - name: Pack and inspect @aspect/ng-feature-flags
+        working-directory: packages/ng-feature-flags
+        run: |
+          npm pack --dry-run 2>&1 | tee /tmp/ff-pack.txt
+          echo "--- @aspect/ng-feature-flags package contents ---"
+          cat /tmp/ff-pack.txt
+
+      - name: Pack and inspect @aspect/ngrx-with-resource
+        working-directory: packages/ngrx-with-resource
+        run: |
+          npm pack --dry-run 2>&1 | tee /tmp/ngrx-pack.txt
+          echo "--- @aspect/ngrx-with-resource package contents ---"
+          cat /tmp/ngrx-pack.txt
+
+      - name: Check for sensitive files in packages
+        run: |
+          FAIL=0
+          for pkg in packages/ui/dist packages/design-system packages/ng-feature-flags packages/ngrx-with-resource; do
+            cd "$GITHUB_WORKSPACE/$pkg"
+            PACK_FILES=$(npm pack --dry-run 2>&1)
+
+            # Check for env files, credentials, private keys
+            if echo "$PACK_FILES" | grep -iE '\.env|\.pem|\.key|credentials|secret|\.p12|\.pfx|\.jks|id_rsa|id_ed25519'; then
+              echo "FAIL: sensitive file detected in $pkg"
+              FAIL=1
+            fi
+          done
+
+          if [ "$FAIL" -eq 1 ]; then
+            echo "Aborting: sensitive files found in package contents"
+            exit 1
+          fi
+          echo "OK: no sensitive files detected in any package"
+
+  # ── Publish ─────────────────────────────────────────────────────────
+  publish:
+    name: Publish to npm
+    needs: [secret-scan, npm-audit, semgrep, trivy, build-and-test, verify-packages]
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: package-builds
+          path: packages/ui/dist/
+
+      - name: Publish @aspect/design-system
+        if: ${{ !inputs.dry-run }}
+        working-directory: packages/design-system
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @aspect/ui
+        if: ${{ !inputs.dry-run }}
+        working-directory: packages/ui/dist
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @aspect/ng-feature-flags
+        if: ${{ !inputs.dry-run }}
+        working-directory: packages/ng-feature-flags
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @aspect/ngrx-with-resource
+        if: ${{ !inputs.dry-run }}
+        working-directory: packages/ngrx-with-resource
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Dry-run publish (all packages)
+        if: ${{ inputs.dry-run }}
+        run: |
+          echo "=== DRY RUN: @aspect/design-system ==="
+          cd packages/design-system && npm publish --dry-run --access public && cd ../..
+
+          echo "=== DRY RUN: @aspect/ui ==="
+          cd packages/ui/dist && npm publish --dry-run --access public && cd ../../..
+
+          echo "=== DRY RUN: @aspect/ng-feature-flags ==="
+          cd packages/ng-feature-flags && npm publish --dry-run --access public && cd ../..
+
+          echo "=== DRY RUN: @aspect/ngrx-with-resource ==="
+          cd packages/ngrx-with-resource && npm publish --dry-run --access public && cd ../..

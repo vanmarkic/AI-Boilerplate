@@ -4,6 +4,15 @@
   "description": "Angular UI component library — buttons, inputs, cards, dialogs, and more",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vanmarkic/AI-Boilerplate.git",
+    "directory": "packages/ui"
+  },
+  "publishConfig": {
+    "access": "public",
+    "directory": "dist"
+  },
   "peerDependencies": {
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",

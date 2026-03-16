@@ -4,6 +4,14 @@
   "description": "Framework-agnostic CSS design system — tokens, reset, utilities, components",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vanmarkic/AI-Boilerplate.git",
+    "directory": "packages/design-system"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "style": "index.css",
   "exports": {
     ".": "./index.css",

@@ -1,0 +1,6 @@
+*.spec.ts
+*.test.ts
+.env*
+*.pem
+*.key
+node_modules/

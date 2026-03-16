@@ -4,6 +4,14 @@
   "description": "Lightweight Angular feature flags with signals — service + route guard",
   "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vanmarkic/AI-Boilerplate.git",
+    "directory": "packages/ng-feature-flags"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "./src/public-api.ts",
   "exports": {
     ".": "./src/public-api.ts"
