@@ -9,6 +9,8 @@ from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Callable, Awaitable
 
+from engine.state_changes import PhaseChange, StateChange
+
 from engine.time_manager import TimeManager
 from engine.event_scheduler import EventScheduler, ScheduledEvent, EventLifecycle, EventType
 from engine.issue_manager import IssueManager, TrackedIssue
@@ -133,11 +135,11 @@ class ExerciseEngine:
         self._decisions.clear()
         return self._phase_change("reset")
 
-    def set_speed(self, factor: float) -> dict:
+    def set_speed(self, factor: float) -> StateChange:
         self._time.factor = factor
         return {"type": "speed_change", "factor": factor}
 
-    async def tick(self) -> list[dict]:
+    async def tick(self) -> list[StateChange]:
         """Advance time, check triggers, return state changes."""
         changes: list[dict] = []
 
@@ -241,7 +243,7 @@ class ExerciseEngine:
         except asyncio.CancelledError:
             pass
 
-    def _phase_change(self, action: str) -> dict:
+    def _phase_change(self, action: str) -> PhaseChange:
         return {
             "type": "phase_change",
             "action": action,

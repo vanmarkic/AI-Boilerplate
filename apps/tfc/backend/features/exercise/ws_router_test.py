@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from starlette.testclient import TestClient
 
-from engine.connection_manager import ConnectionManager
+from features.exercise.adapters.connection_manager import ConnectionManager
 
 
 class TestWsRouterIntegration:

@@ -10,7 +10,7 @@ import logging
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
-from engine.connection_manager import connection_manager
+from features.exercise.adapters.connection_manager import connection_manager
 
 logger = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from core.dependencies import get_exercise_service, get_scenario_service
-from engine.connection_manager import connection_manager
+from features.exercise.adapters.connection_manager import connection_manager
 from engine.exercise_engine import EngineConfig
 from engine.session_store import session_store
 from features.exercise.exercise_service import ExerciseService
