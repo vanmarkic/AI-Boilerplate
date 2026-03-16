@@ -65,21 +65,19 @@ export class PermissionFormComponent {
     frontend_route: new FormControl('', { nonNullable: true }),
   });
 
-  constructor() {
-    effect(() => {
-      const perm = this.permission();
-      if (perm) {
-        this.form.patchValue({
-          role: perm.role,
-          route_pattern: perm.route_pattern,
-          method: perm.method,
-          frontend_route: perm.frontend_route ?? '',
-        });
-      } else {
-        this.form.reset();
-      }
-    });
-  }
+  private readonly _syncForm = effect(() => {
+    const perm = this.permission();
+    if (perm) {
+      this.form.patchValue({
+        role: perm.role,
+        route_pattern: perm.route_pattern,
+        method: perm.method,
+        frontend_route: perm.frontend_route ?? '',
+      });
+    } else {
+      this.form.reset();
+    }
+  });
 
   protected onSubmit(): void {
     this.form.markAllAsTouched();
