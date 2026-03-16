@@ -10,7 +10,6 @@ from core.rbac import (
     clear_permissions_cache,
 )
 
-
 # ---------------------------------------------------------------------------
 # Route pattern matching unit tests
 # ---------------------------------------------------------------------------
@@ -82,12 +81,12 @@ def _mock_cache() -> dict[str, list[PermissionRule]]:
 
 
 @pytest.fixture(autouse=True)
-def _seed_rbac_cache() -> None:
-    """Pre-populate the RBAC cache so tests don't need a DB."""
+def _seed_rbac_cache(_bypass_rbac: None) -> None:  # noqa: ANN001
+    """Override the global bypass fixture with real permission data."""
     import core.rbac as rbac_module
 
     rbac_module._cache = _mock_cache()
-    rbac_module._cache_loaded_at = 1e18  # far future → never expires
+    rbac_module._cache_loaded_at = 1e18  # far future — never expires
     yield
     clear_permissions_cache()
 
@@ -102,8 +101,13 @@ class TestRBACMiddleware:
     async def test_returns_401_for_missing_token(
         self, client: AsyncClient
     ) -> None:
-        resp = await client.get("/api/admin/permissions")
-        assert resp.status_code == 401
+        with patch(
+            "core.auth.parse_jwt_roles",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            resp = await client.get("/api/admin/permissions")
+            assert resp.status_code == 401
 
     @patch("core.auth.parse_jwt_roles", new_callable=AsyncMock)
     async def test_admin_can_access_any_route(
@@ -134,7 +138,6 @@ class TestProtectedRoles:
 
     async def test_non_admin_cannot_create_admin_permission(self) -> None:
         from features.admin_permissions.admin_permissions_service import (
-            AdminPermissionsService,
             PROTECTED_ROLES,
         )
 

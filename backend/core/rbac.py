@@ -24,6 +24,8 @@ PUBLIC_PATH_PREFIXES: tuple[str, ...] = (
 
 PUBLIC_EXACT_PATHS: frozenset[str] = frozenset({
     "/api/health",
+    "/api/canary/ping",
+    "/api/users",  # registration endpoint (no auth required)
 })
 
 _DEFAULT_TTL: float = 60.0

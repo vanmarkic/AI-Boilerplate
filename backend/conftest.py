@@ -1,5 +1,6 @@
 import os
 from collections.abc import AsyncGenerator
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -14,6 +15,8 @@ TEST_DB_URL = os.getenv(
     "sqlite+aiosqlite:///:memory:",
 )
 
+_BYPASS_ROLE = "__test_bypass__"
+
 
 @pytest.fixture(autouse=True)
 async def setup_db() -> AsyncGenerator[None]:
@@ -24,6 +27,31 @@ async def setup_db() -> AsyncGenerator[None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
+
+
+@pytest.fixture(autouse=True)
+def _bypass_rbac() -> AsyncGenerator[None]:
+    """Pre-seed RBAC cache and mock JWT parsing so feature tests
+    that don't care about authorization are not blocked by the middleware.
+    Individual test files can override the cache and mock as needed.
+    """
+    import core.rbac as rbac_module
+    from core.rbac import PermissionRule
+
+    rbac_module._cache = {
+        _BYPASS_ROLE: [PermissionRule(route_pattern="/api/**", method="*")],
+    }
+    rbac_module._cache_loaded_at = 1e18  # far future — never expires
+
+    with patch(
+        "core.auth.parse_jwt_roles",
+        new_callable=AsyncMock,
+        return_value=[_BYPASS_ROLE],
+    ):
+        yield
+
+    rbac_module._cache = {}
+    rbac_module._cache_loaded_at = 0.0
 
 
 @pytest.fixture
