@@ -20,6 +20,8 @@ export { GridComponent, type GridCols, type GridGap } from './grid.component';
 export { PageLayoutComponent } from './page-layout.component';
 export { SidebarLayoutComponent, type SidebarSide } from './sidebar-layout.component';
 export { PageHeaderComponent } from './page-header.component';
+export { TabNavComponent } from './tab-nav.component';
+export { TabLinkDirective } from './tab-link.directive';
 export { DataTableComponent } from './data-table.component';
 export { DataTableColumnComponent } from './data-table-column.component';
 export { DataTableFilterComponent } from './data-table-filter.component';
