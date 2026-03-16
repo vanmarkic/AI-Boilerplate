@@ -79,7 +79,12 @@ async def subscribe(
     channel: Annotated[str, Path(description="SSE channel name")],
     request: Request,
 ) -> StreamingResponse:
-    """Stream events to the client via SSE."""
+    """Stream events to the client via SSE.
+
+    AUTH: intentionally unauthenticated for now. EventSource API cannot
+    send Bearer headers. Add signed-ticket auth here when a feature
+    requires it. See Depends(get_current_user) in core/auth.py.
+    """
     if channel not in _allowed_channels:
         return StreamingResponse(
             content=f'data: {{"error": "unknown channel: {channel}"}}\n\n',
