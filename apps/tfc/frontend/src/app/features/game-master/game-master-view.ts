@@ -8,10 +8,15 @@ import {
   ClockDisplayComponent,
   PhaseBadgeComponent,
   SpeedDisplayComponent,
+  ContextPanelComponent,
 } from '@aspect/ui';
 import { EngineApiService } from '../../core/engine-api.service';
-import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
+import { DecisionApiService } from '../../core/decision-api.service';
+import type { DecisionDetail } from '../../core/decision-api.service';
+import { ExerciseWsService } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
+import { handleGmWsMessage } from './gm-ws-handler';
+import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-engine-actions';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -22,6 +27,7 @@ import { Subscription } from 'rxjs';
     PageHeaderComponent, CardComponent, BadgeComponent,
     ButtonDirective, CollapsiblePanelComponent,
     ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent,
+    ContextPanelComponent,
   ],
   template: `
     <div class="exercise-layout">
@@ -93,15 +99,55 @@ import { Subscription } from 'rxjs';
             <p class="text-muted-foreground text-sm p-sm">No issues loaded.</p>
           }
         </ui-card>
+
+        <ui-card title="Decisions">
+          @for (decision of store.openDecisions(); track decision.id) {
+            <div class="flex items-center justify-between p-sm border-b">
+              <div>
+                <span class="text-sm font-medium">{{ decision.title }}</span>
+                <ui-badge variant="default">open</ui-badge>
+              </div>
+              <div class="flex gap-xs">
+                <button uiButton variant="outline" size="sm"
+                  (click)="viewDecision(decision.id)">View</button>
+                <button uiButton variant="destructive" size="sm"
+                  (click)="closeDecision(decision.id)">Close</button>
+              </div>
+            </div>
+          } @empty {
+            <p class="text-muted-foreground text-sm p-sm">No active decisions.</p>
+          }
+        </ui-card>
       </div>
 
       <div class="exercise-details">
         <ui-collapsible-panel>
           <span panelTitle>Detail Panel</span>
-          <p class="text-muted-foreground text-sm">
-            Select an event or issue to view full context.
-          </p>
+          @if (selectedDecision(); as detail) {
+            <p class="text-sm font-medium">{{ detail.title }}</p>
+            <p class="text-sm text-muted-foreground">{{ detail.description }}</p>
+            @for (resp of detail.responses; track resp.id) {
+              <div class="flex items-center justify-between p-sm border-b">
+                <span class="text-sm">{{ resp.participant_name }}</span>
+                <span class="text-xs text-muted-foreground">{{ resp.submitted_at }}</span>
+              </div>
+            } @empty {
+              <p class="text-muted-foreground text-sm">No responses yet.</p>
+            }
+          } @else {
+            <p class="text-muted-foreground text-sm">
+              Select an event, issue, or decision to view full context.
+            </p>
+          }
         </ui-collapsible-panel>
+
+        @if (store.context(); as ctx) {
+          <ui-context-panel
+            [title]="ctx.title"
+            [briefing]="ctx.briefing"
+            [objectives]="ctx.objectives"
+            [rules]="ctx.rules" />
+        }
       </div>
 
       <footer class="exercise-controls">
@@ -132,17 +178,22 @@ import { Subscription } from 'rxjs';
 export class GameMasterView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
   private readonly api = inject(EngineApiService);
+  private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
+  protected readonly selectedDecision = signal<DecisionDetail | null>(null);
   private readonly exerciseId = signal(1); // TODO: from route param
   private sub: Subscription | null = null;
 
   ngOnInit(): void {
     const id = this.exerciseId();
     this.ws.connect(id, 'gm');
-    this.sub = this.ws.messages$.subscribe((msg) => this.handleWsMessage(msg));
+    this.sub = this.ws.messages$.subscribe((msg) => handleGmWsMessage(msg, this.store));
     this.api.snapshot(id).subscribe({
       next: (snap) => this.store.applySnapshot(snap),
       error: () => this.store.setError('Failed to load snapshot'),
+    });
+    this.decisionApi.getContext(id).subscribe({
+      next: (ctx) => this.store.setContext(ctx),
     });
   }
 
@@ -151,94 +202,32 @@ export class GameMasterView implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  private handleWsMessage(msg: WsMessage): void {
-    if (msg.type === 'snapshot') {
-      this.store.applySnapshot(msg as never);
-    }
-    if (msg.type === 'state_changes' && msg.changes) {
-      for (const change of msg.changes) {
-        if (change.type === 'phase_change') {
-          this.store.applyPhaseChange(change['phase'] as string);
-          if (change['time']) {
-            this.store.applyTimeUpdate(change['time'] as never);
-          }
-        }
-        if (change.type === 'event_change') {
-          this.store.updateEvent(change['event_id'] as string, change['lifecycle'] as string);
-        }
-        if (change.type === 'issue_change') {
-          this.store.updateIssue(
-            change['issue_id'] as string,
-            change['lifecycle'] as string,
-            change['released'] as boolean,
-          );
-        }
-      }
-    }
-  }
-
-  protected onStart(): void {
-    this.api.start(this.exerciseId()).subscribe({
-      next: (r) => {
-        this.store.applyPhaseChange(r.phase);
-        this.store.applyTimeUpdate(r.time);
-      },
+  protected viewDecision(decisionId: string): void {
+    this.decisionApi.getDecisionDetail(Number(decisionId)).subscribe({
+      next: (detail) => this.selectedDecision.set(detail),
     });
   }
 
-  protected onPause(): void {
-    this.api.pause(this.exerciseId()).subscribe({
-      next: (r) => {
-        this.store.applyPhaseChange(r.phase);
-        this.store.applyTimeUpdate(r.time);
-      },
+  protected closeDecision(decisionId: string): void {
+    this.decisionApi.closeEngineDecision(this.exerciseId(), decisionId).subscribe({
+      next: () => this.store.closeDecision(decisionId),
     });
   }
 
-  protected onReset(): void {
-    this.api.reset(this.exerciseId()).subscribe({
-      next: (r) => {
-        this.store.applyPhaseChange(r.phase);
-        this.store.applyTimeUpdate(r.time);
-      },
-    });
-  }
-
-  protected onComplete(): void {
-    this.api.complete(this.exerciseId()).subscribe({
-      next: (r) => {
-        this.store.applyPhaseChange(r.phase);
-        this.store.applyTimeUpdate(r.time);
-      },
-    });
-  }
+  protected onStart(): void { startExercise(this.api, this.store, this.exerciseId()); }
+  protected onPause(): void { pauseExercise(this.api, this.store, this.exerciseId()); }
+  protected onReset(): void { resetExercise(this.api, this.store, this.exerciseId()); }
+  protected onComplete(): void { completeExercise(this.api, this.store, this.exerciseId()); }
 
   protected onSpeedChange(event: Event): void {
     const factor = parseFloat((event.target as HTMLInputElement).value);
     this.api.setSpeed(this.exerciseId(), factor).subscribe();
   }
 
-  protected triggerEvent(eventId: string): void {
-    this.api.triggerEvent(this.exerciseId(), eventId).subscribe();
-  }
-
-  protected cancelEvent(eventId: string): void {
-    this.api.cancelEvent(this.exerciseId(), eventId).subscribe();
-  }
-
-  protected completeEvent(eventId: string): void {
-    this.api.completeEvent(this.exerciseId(), eventId).subscribe();
-  }
-
-  protected activateIssue(issueId: string): void {
-    this.api.activateIssue(this.exerciseId(), issueId).subscribe();
-  }
-
-  protected mitigateIssue(issueId: string): void {
-    this.api.mitigateIssue(this.exerciseId(), issueId).subscribe();
-  }
-
-  protected resolveIssue(issueId: string): void {
-    this.api.resolveIssue(this.exerciseId(), issueId).subscribe();
-  }
+  protected triggerEvent(id: string): void { this.api.triggerEvent(this.exerciseId(), id).subscribe(); }
+  protected cancelEvent(id: string): void { this.api.cancelEvent(this.exerciseId(), id).subscribe(); }
+  protected completeEvent(id: string): void { this.api.completeEvent(this.exerciseId(), id).subscribe(); }
+  protected activateIssue(id: string): void { this.api.activateIssue(this.exerciseId(), id).subscribe(); }
+  protected mitigateIssue(id: string): void { this.api.mitigateIssue(this.exerciseId(), id).subscribe(); }
+  protected resolveIssue(id: string): void { this.api.resolveIssue(this.exerciseId(), id).subscribe(); }
 }

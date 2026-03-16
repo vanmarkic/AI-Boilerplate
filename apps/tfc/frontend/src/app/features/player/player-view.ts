@@ -6,17 +6,25 @@ import {
   ButtonDirective,
   ClockDisplayComponent,
   PhaseBadgeComponent,
+  DecisionPanelComponent,
+  ContextPanelComponent,
 } from '@aspect/ui';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
+import { DecisionApiService } from '../../core/decision-api.service';
+import type { ActiveDecision, DecisionDetail } from '../../core/decision-api.service';
 import { Subscription } from 'rxjs';
+import { handleDecisionWsChanges } from './player-ws-handler';
 
 @Component({
   selector: 'tfc-player-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore],
-  imports: [PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective, ClockDisplayComponent, PhaseBadgeComponent],
+  imports: [
+    PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective,
+    ClockDisplayComponent, PhaseBadgeComponent, DecisionPanelComponent, ContextPanelComponent,
+  ],
   template: `
     <div class="exercise-layout">
       <header class="exercise-header">
@@ -74,7 +82,38 @@ import { Subscription } from 'rxjs';
             Select an issue to view details and submit a decision.
           </p>
         }
+
+        @if (store.context(); as ctx) {
+          <ui-context-panel
+            [title]="ctx.title"
+            [briefing]="ctx.briefing"
+            [objectives]="ctx.objectives"
+            [rules]="ctx.rules" />
+        }
+
+        <ui-card title="Decision History">
+          @for (decision of decisionHistory(); track decision.id) {
+            <div class="flex items-center justify-between p-sm border-b">
+              <span class="text-sm font-medium">{{ decision.title }}</span>
+              <ui-badge variant="secondary">{{ decision.status }}</ui-badge>
+            </div>
+          } @empty {
+            <p class="text-muted-foreground text-sm p-sm">No past decisions.</p>
+          }
+        </ui-card>
       </div>
+
+      @if (activeDecision(); as decision) {
+        <div class="overlay">
+          <ui-decision-panel
+            [title]="decision.title"
+            [description]="decision.description"
+            [questionType]="decision.question_type"
+            [options]="decision.options"
+            (submitted)="onDecisionSubmitted(decision, $event)"
+            (closed)="store.closeDecision(decision.id)" />
+        </div>
+      }
 
       <footer class="exercise-controls">
         <div class="exercise-controls__group">
@@ -89,8 +128,10 @@ import { Subscription } from 'rxjs';
 export class PlayerView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
   private readonly api = inject(EngineApiService);
+  private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
   protected readonly selectedIssueId = signal<string | null>(null);
+  protected readonly decisionHistory = signal<DecisionDetail[]>([]);
   private readonly exerciseId = signal(1); // TODO: from route param
   private sub: Subscription | null = null;
 
@@ -98,6 +139,10 @@ export class PlayerView implements OnInit, OnDestroy {
     return this.store.events().filter(
       (e) => e.lifecycle === 'running' || e.lifecycle === 'completed',
     );
+  }
+
+  protected activeDecision(): ActiveDecision | undefined {
+    return this.store.openDecisions()[0];
   }
 
   ngOnInit(): void {
@@ -108,6 +153,12 @@ export class PlayerView implements OnInit, OnDestroy {
       next: (snap) => this.store.applySnapshot(snap),
       error: () => this.store.setError('Failed to load snapshot'),
     });
+    this.decisionApi.getContext(id).subscribe({
+      next: (ctx) => this.store.setContext(ctx),
+    });
+    this.decisionApi.listDecisions(id, 'closed').subscribe({
+      next: (decisions) => this.decisionHistory.set(decisions),
+    });
   }
 
   ngOnDestroy(): void {
@@ -117,6 +168,20 @@ export class PlayerView implements OnInit, OnDestroy {
 
   protected selectIssue(issueId: string): void {
     this.selectedIssueId.set(issueId);
+  }
+
+  protected onDecisionSubmitted(
+    decision: ActiveDecision,
+    event: { selectedOptions: string[]; freeText: string },
+  ): void {
+    this.decisionApi.submitResponse(Number(decision.id), {
+      participant_id: 'current-user', // TODO: from auth
+      participant_name: 'Player',
+      selected_options: event.selectedOptions,
+      free_text: event.freeText || null,
+    }).subscribe({
+      next: () => this.store.closeDecision(decision.id),
+    });
   }
 
   private handleWsMessage(msg: WsMessage): void {
@@ -141,6 +206,7 @@ export class PlayerView implements OnInit, OnDestroy {
             change['released'] as boolean,
           );
         }
+        handleDecisionWsChanges(change, this.store);
       }
     }
   }

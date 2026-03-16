@@ -119,113 +119,121 @@ async def get_engine_snapshot(exercise_id: int) -> dict:
 # ── Event actions ────────────────────────────────────────────────────────
 
 
-@router.post(
-    "/events/{event_id}/trigger",
-    operation_id="triggerEvent",
-)
+def _or_404(result: dict | None, detail: str) -> dict:
+    """Return result or raise 404."""
+    if result is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
+    return result
+
+
+@router.post("/events/{event_id}/trigger", operation_id="triggerEvent")
 async def trigger_event(exercise_id: int, event_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    result = engine.event_scheduler.force_trigger(event_id, pt)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Event {event_id} not found or not triggerable",
-        )
-    return result
+    return _or_404(
+        engine.event_scheduler.force_trigger(event_id, pt),
+        f"Event {event_id} not found or not triggerable",
+    )
 
 
-@router.post(
-    "/events/{event_id}/cancel",
-    operation_id="cancelEvent",
-)
+@router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
 async def cancel_event(exercise_id: int, event_id: str) -> dict:
-    engine = _get_engine(exercise_id)
-    result = engine.event_scheduler.cancel_event(event_id)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Event {event_id} not found or not cancellable",
-        )
-    return result
+    return _or_404(
+        _get_engine(exercise_id).event_scheduler.cancel_event(event_id),
+        f"Event {event_id} not found or not cancellable",
+    )
 
 
-@router.post(
-    "/events/{event_id}/complete",
-    operation_id="completeEvent",
-)
+@router.post("/events/{event_id}/complete", operation_id="completeEvent")
 async def complete_event(exercise_id: int, event_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    result = engine.event_scheduler.complete_event(event_id, pt)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Event {event_id} not found or not completable",
-        )
-    return result
+    return _or_404(
+        engine.event_scheduler.complete_event(event_id, pt),
+        f"Event {event_id} not found or not completable",
+    )
 
 
 # ── Issue actions ────────────────────────────────────────────────────────
 
 
-@router.post(
-    "/issues/{issue_id}/activate",
-    operation_id="activateIssue",
-)
+@router.post("/issues/{issue_id}/activate", operation_id="activateIssue")
 async def activate_issue(exercise_id: int, issue_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    result = engine.issue_manager.manual_activate(issue_id, pt)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Issue {issue_id} not found or not activatable",
-        )
-    return result
+    return _or_404(
+        engine.issue_manager.manual_activate(issue_id, pt),
+        f"Issue {issue_id} not found or not activatable",
+    )
 
 
-@router.post(
-    "/issues/{issue_id}/mitigate",
-    operation_id="mitigateIssue",
-)
+@router.post("/issues/{issue_id}/mitigate", operation_id="mitigateIssue")
 async def mitigate_issue(exercise_id: int, issue_id: str) -> dict:
-    engine = _get_engine(exercise_id)
-    result = engine.issue_manager.mitigate(issue_id)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Issue {issue_id} not found or not mitigatable",
-        )
-    return result
+    return _or_404(
+        _get_engine(exercise_id).issue_manager.mitigate(issue_id),
+        f"Issue {issue_id} not found or not mitigatable",
+    )
 
 
-@router.post(
-    "/issues/{issue_id}/resolve",
-    operation_id="resolveIssue",
-)
+@router.post("/issues/{issue_id}/resolve", operation_id="resolveIssue")
 async def resolve_issue(exercise_id: int, issue_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    result = engine.issue_manager.resolve(issue_id, pt)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Issue {issue_id} not found or not resolvable",
-        )
-    return result
+    return _or_404(
+        engine.issue_manager.resolve(issue_id, pt),
+        f"Issue {issue_id} not found or not resolvable",
+    )
 
 
-@router.post(
-    "/issues/{issue_id}/release",
-    operation_id="releaseIssue",
-)
+@router.post("/issues/{issue_id}/release", operation_id="releaseIssue")
 async def release_issue(exercise_id: int, issue_id: str) -> dict:
+    return _or_404(
+        _get_engine(exercise_id).issue_manager.release_to_players(issue_id),
+        f"Issue {issue_id} not found or not releasable",
+    )
+
+
+# ── Decision actions ─────────────────────────────────────────────────────
+
+
+@router.get("/decisions", operation_id="getOpenDecisions")
+async def get_open_decisions(exercise_id: int) -> list[dict]:
     engine = _get_engine(exercise_id)
-    result = engine.issue_manager.release_to_players(issue_id)
+    return [
+        {"id": d.id, "title": d.title, "question_type": d.question_type,
+         "options": d.options, "target_roles": d.target_roles, "status": d.status}
+        for d in engine.decision_manager.get_open_decisions()
+    ]
+
+
+@router.post("/decisions/{decision_id}/close", operation_id="closeDecision")
+async def close_decision(exercise_id: int, decision_id: str) -> dict:
+    engine = _get_engine(exercise_id)
+    pt = engine.time_manager.play_time_ms
+    result = engine.decision_manager.close_decision(decision_id, current_pt_ms=pt)
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Issue {issue_id} not found or not releasable",
+            detail=f"Decision {decision_id} not found or already closed",
         )
+    # Resume if no other open decisions remain
+    if not engine.decision_manager.get_open_decisions():
+        await engine.resume()
     return result
+
+
+# ── Context ──────────────────────────────────────────────────────────────
+
+
+@router.get("/context", operation_id="getEngineContext")
+async def get_engine_context(exercise_id: int) -> dict:
+    engine = _get_engine(exercise_id)
+    ctx = engine._config.context
+    return {
+        "title": ctx.title,
+        "description": ctx.description,
+        "briefing": ctx.briefing,
+        "objectives": ctx.objectives,
+        "rules": ctx.rules,
+        "default_time_factor": engine._config.time_factor,
+    }
