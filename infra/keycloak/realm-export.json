@@ -88,6 +88,19 @@
       "enabled": true,
       "bearerOnly": true,
       "publicClient": false
+    },
+    {
+      "clientId": "admin-api",
+      "enabled": true,
+      "publicClient": false,
+      "bearerOnly": false,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "standardFlowEnabled": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "admin-api-secret",
+      "defaultClientScopes": [],
+      "optionalClientScopes": []
     }
   ],
   "users": [

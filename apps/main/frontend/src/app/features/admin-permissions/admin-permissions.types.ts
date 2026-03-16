@@ -7,3 +7,17 @@ export interface PermissionMapping {
   created_at: string;
   updated_at: string;
 }
+
+export interface KeycloakUser {
+  id: string;
+  username: string;
+  email: string | null;
+  enabled: boolean;
+  roles: string[];
+}
+
+export interface KeycloakRole {
+  id: string;
+  name: string;
+  description: string | null;
+}
