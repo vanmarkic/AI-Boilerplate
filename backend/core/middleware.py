@@ -5,6 +5,8 @@ from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from core.rbac import RBACMiddleware
+
 
 def setup_middleware(app: FastAPI) -> None:
     """Configure all application middleware."""
@@ -15,6 +17,8 @@ def setup_middleware(app: FastAPI) -> None:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    app.add_middleware(RBACMiddleware)
 
     @app.middleware("http")
     async def request_id_middleware(

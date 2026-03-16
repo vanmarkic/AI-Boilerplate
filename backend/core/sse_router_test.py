@@ -1,3 +1,4 @@
+from collections.abc import AsyncGenerator
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -69,7 +70,7 @@ class TestSubscribeEndpoint:
     ) -> None:
         register_channel("comments")
 
-        async def fake_subscribe(channel: str):  # type: ignore[no-untyped-def]
+        async def fake_subscribe(channel: str) -> AsyncGenerator[str, None]:  # type: ignore[no-untyped-def]
             yield '{"id": 1}'
 
         mock_bus.subscribe = fake_subscribe

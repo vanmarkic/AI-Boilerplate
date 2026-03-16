@@ -1,6 +1,7 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import Keycloak from 'keycloak-js';
 import { environment } from '../../core/environment';
+import { PermissionsStore } from './permissions.store';
 
 export interface AuthUser {
   id: string;
@@ -10,6 +11,8 @@ export interface AuthUser {
 
 @Injectable({ providedIn: 'root' })
 export class AuthStore {
+  private readonly permissionsStore = inject(PermissionsStore);
+
   private readonly keycloak = new Keycloak({
     url: environment.keycloak.url,
     realm: environment.keycloak.realm,
@@ -39,6 +42,7 @@ export class AuthStore {
 
       if (authenticated) {
         this.updateUserFromToken();
+        await this.permissionsStore.load();
       }
 
       this.keycloak.onTokenExpired = () => {
@@ -58,6 +62,7 @@ export class AuthStore {
   }
 
   logout(): void {
+    this.permissionsStore.clear();
     void this.keycloak.logout({ redirectUri: window.location.origin });
   }
 
