@@ -4,6 +4,8 @@ Maps exercise_id -> ExerciseEngine for all running/paused sessions.
 """
 from __future__ import annotations
 
+from typing import Awaitable, Callable
+
 from engine.exercise_engine import ExerciseEngine, EngineConfig
 
 
@@ -16,9 +18,13 @@ class SessionStore:
     def get(self, exercise_id: int) -> ExerciseEngine | None:
         return self._sessions.get(exercise_id)
 
-    def create(self, config: EngineConfig) -> ExerciseEngine:
+    def create(
+        self,
+        config: EngineConfig,
+        on_state_change: Callable[[list[dict]], Awaitable[None]] | None = None,
+    ) -> ExerciseEngine:
         """Create a new engine session. Overwrites any existing session."""
-        engine = ExerciseEngine(config)
+        engine = ExerciseEngine(config, on_state_change=on_state_change)
         self._sessions[config.exercise_id] = engine
         return engine
 

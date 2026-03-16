@@ -7,10 +7,14 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from core.dependencies import get_exercise_service
+from core.dependencies import get_exercise_service, get_scenario_service
+from engine.connection_manager import connection_manager
 from engine.exercise_engine import EngineConfig
 from engine.session_store import session_store
 from features.exercise.exercise_service import ExerciseService
+from features.scenario.scenario_content import ScenarioContent
+from features.scenario.scenario_loader import build_engine_config
+from features.scenario.scenario_service import ScenarioService
 
 router = APIRouter(prefix="/api/exercises/{exercise_id}/engine", tags=["engine"])
 
@@ -30,6 +34,26 @@ def _get_engine(exercise_id: int):
     return engine
 
 
+async def _build_config(
+    exercise: object, scenario_service: ScenarioService,
+) -> EngineConfig:
+    """Build EngineConfig, loading scenario content if linked."""
+    if hasattr(exercise, "scenario_id") and exercise.scenario_id is not None:
+        scenario = await scenario_service.get_scenario(exercise.scenario_id)
+        if scenario.content:
+            content = ScenarioContent.model_validate(scenario.content)
+            return build_engine_config(
+                exercise_id=exercise.id,
+                title=exercise.title,
+                content=content,
+            )
+    return EngineConfig(
+        exercise_id=exercise.id,
+        title=exercise.title,
+        time_factor=exercise.time_factor,
+    )
+
+
 # ── Lifecycle ────────────────────────────────────────────────────────────
 
 
@@ -37,16 +61,22 @@ def _get_engine(exercise_id: int):
 async def start_engine(
     exercise_id: int,
     service: ExerciseService = Depends(get_exercise_service),
+    scenario_service: ScenarioService = Depends(get_scenario_service),
 ) -> dict:
     engine = session_store.get(exercise_id)
     if engine is None:
         exercise = await service.get_exercise(exercise_id)
-        config = EngineConfig(
-            exercise_id=exercise.id,
-            title=exercise.title,
-            time_factor=exercise.time_factor,
+        config = await _build_config(exercise, scenario_service)
+
+        async def _broadcast_changes(changes: list[dict]) -> None:
+            await connection_manager.broadcast(
+                exercise_id,
+                {"type": "state_changes", "changes": changes},
+            )
+
+        engine = session_store.create(
+            config, on_state_change=_broadcast_changes
         )
-        engine = session_store.create(config)
     return await engine.start()
 
 

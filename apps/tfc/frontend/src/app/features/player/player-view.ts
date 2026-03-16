@@ -1,73 +1,153 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import {
   PageHeaderComponent,
   CardComponent,
   BadgeComponent,
+  ButtonDirective,
 } from '@aspect/ui';
+import { EngineApiService } from '../../core/engine-api.service';
+import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
+import { ExerciseStore } from '../../core/exercise.store';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'tfc-player-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeaderComponent, CardComponent, BadgeComponent],
+  providers: [ExerciseStore],
+  imports: [PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective],
   template: `
     <div class="exercise-layout">
-      <!-- Row 1: Header (read-only) -->
-      <header class="flex items-center justify-between p-md border-b">
-        <ui-page-header title="Exercise Dashboard" />
-        <div class="flex items-center gap-md">
-          <div class="flex flex-col items-center">
-            <span class="text-xs text-muted-foreground uppercase tracking-wide">RT</span>
-            <span class="text-lg font-mono font-semibold">{{ rtClock() }}</span>
+      <header class="exercise-header">
+        <span class="exercise-header__title">{{ store.title() || 'Exercise Dashboard' }}</span>
+        <div class="exercise-header__clocks">
+          <div class="exercise-clock">
+            <span class="exercise-clock__label">RT</span>
+            <span class="exercise-clock__value">{{ store.rtClock() }}</span>
           </div>
-          <div class="flex flex-col items-center">
-            <span class="text-xs text-muted-foreground uppercase tracking-wide">PT</span>
-            <span class="text-lg font-mono font-semibold">{{ ptClock() }}</span>
+          <div class="exercise-clock">
+            <span class="exercise-clock__label">PT</span>
+            <span class="exercise-clock__value">{{ store.ptClock() }}</span>
           </div>
-          <ui-badge [variant]="phaseBadgeVariant()">{{ currentPhase() }}</ui-badge>
+          <span class="exercise-phase" [attr.data-phase]="store.phase()">
+            {{ store.phase() }}
+          </span>
         </div>
       </header>
 
-      <!-- Row 2: Released Events & Active Issues -->
-      <div class="grid grid-cols-2 gap-md p-md">
+      <div class="exercise-overview">
         <ui-card title="Released Events">
-          <p class="text-muted-foreground text-sm">
-            Events released by the Game Master will appear here as they are
-            triggered during the exercise.
-          </p>
+          @for (event of visibleEvents(); track event.id) {
+            <div class="flex items-center justify-between p-sm border-b">
+              <span class="text-sm font-medium">{{ event.title }}</span>
+              <ui-badge variant="secondary">{{ event.lifecycle }}</ui-badge>
+            </div>
+          } @empty {
+            <p class="text-muted-foreground text-sm p-sm">No events released yet.</p>
+          }
         </ui-card>
+
         <ui-card title="Active Issues">
-          <p class="text-muted-foreground text-sm">
-            Issues requiring your attention will be listed here. Select an
-            issue to view details and submit a decision.
-          </p>
+          @for (issue of store.releasedIssues(); track issue.id) {
+            <div class="flex items-center justify-between p-sm border-b"
+              [class.cursor-pointer]="issue.lifecycle === 'active'"
+              (click)="selectIssue(issue.id)">
+              <span class="text-sm font-medium">{{ issue.title }}</span>
+              <ui-badge [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'">
+                {{ issue.lifecycle }}
+              </ui-badge>
+            </div>
+          } @empty {
+            <p class="text-muted-foreground text-sm p-sm">No issues assigned yet.</p>
+          }
         </ui-card>
       </div>
 
-      <!-- Row 3: Event/Issue Details (read-only) -->
-      <div class="p-md">
-        <ui-card title="Details">
-          <p class="text-muted-foreground text-sm">
-            Select an event or issue above to view its full details,
-            attachments, and context information.
+      <div class="exercise-details">
+        @if (selectedIssueId()) {
+          <ui-card title="Issue Details">
+            @for (issue of store.releasedIssues(); track issue.id) {
+              @if (issue.id === selectedIssueId()) {
+                <p class="text-sm">{{ issue.description }}</p>
+                <div class="flex gap-sm mt-md">
+                  <ui-badge variant="secondary">{{ issue.trigger_mode }}</ui-badge>
+                  <ui-badge variant="secondary">{{ issue.lifecycle }}</ui-badge>
+                </div>
+              }
+            }
+          </ui-card>
+        } @else {
+          <p class="text-muted-foreground text-sm p-sm">
+            Select an issue to view details and submit a decision.
           </p>
-        </ui-card>
+        }
       </div>
 
-      <!-- Row 4: Decision Form -->
-      <footer class="p-md border-t">
-        <ui-card title="Submit Decision">
-          <p class="text-muted-foreground text-sm">
-            Select an active issue above to submit your decision. Decision
-            forms will appear here based on the issue type.
+      <footer class="exercise-controls">
+        <div class="exercise-controls__group">
+          <p class="text-sm text-muted-foreground">
+            Waiting for Game Master actions...
           </p>
-        </ui-card>
+        </div>
       </footer>
     </div>
   `,
 })
-export class PlayerView {
-  protected readonly rtClock = signal('00:00:00');
-  protected readonly ptClock = signal('00:00:00');
-  protected readonly currentPhase = signal('Setup');
-  protected readonly phaseBadgeVariant = signal<'default' | 'secondary'>('secondary');
+export class PlayerView implements OnInit, OnDestroy {
+  protected readonly store = inject(ExerciseStore);
+  private readonly api = inject(EngineApiService);
+  private readonly ws = inject(ExerciseWsService);
+  protected readonly selectedIssueId = signal<string | null>(null);
+  private readonly exerciseId = signal(1); // TODO: from route param
+  private sub: Subscription | null = null;
+
+  protected visibleEvents() {
+    return this.store.events().filter(
+      (e) => e.lifecycle === 'running' || e.lifecycle === 'completed',
+    );
+  }
+
+  ngOnInit(): void {
+    const id = this.exerciseId();
+    this.ws.connect(id, 'player');
+    this.sub = this.ws.messages$.subscribe((msg) => this.handleWsMessage(msg));
+    this.api.snapshot(id).subscribe({
+      next: (snap) => this.store.applySnapshot(snap),
+      error: () => this.store.setError('Failed to load snapshot'),
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.ws.disconnect();
+    this.sub?.unsubscribe();
+  }
+
+  protected selectIssue(issueId: string): void {
+    this.selectedIssueId.set(issueId);
+  }
+
+  private handleWsMessage(msg: WsMessage): void {
+    if (msg.type === 'snapshot') {
+      this.store.applySnapshot(msg as never);
+    }
+    if (msg.type === 'state_changes' && msg.changes) {
+      for (const change of msg.changes) {
+        if (change.type === 'phase_change') {
+          this.store.applyPhaseChange(change['phase'] as string);
+          if (change['time']) {
+            this.store.applyTimeUpdate(change['time'] as never);
+          }
+        }
+        if (change.type === 'event_change') {
+          this.store.updateEvent(change['event_id'] as string, change['lifecycle'] as string);
+        }
+        if (change.type === 'issue_change') {
+          this.store.updateIssue(
+            change['issue_id'] as string,
+            change['lifecycle'] as string,
+            change['released'] as boolean,
+          );
+        }
+      }
+    }
+  }
 }

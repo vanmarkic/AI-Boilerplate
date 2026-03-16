@@ -1,0 +1,72 @@
+/* ── TFC Domain Themes ───────────────────────────────────
+ *  Domain-specific color palettes for exercise contexts.
+ *  Activate with data-theme="tfc-cyber" etc. on <html>.
+ * ──────────────────────────────────────────────────────── */
+
+@layer tokens {
+  /* ── Cybersecurity: dark green/terminal aesthetic ───── */
+  [data-theme="tfc-cyber"] {
+    --color-background: oklch(10% 0.02 145);
+    --color-card: oklch(15% 0.02 145);
+    --color-popover: oklch(19% 0.02 145);
+    --color-secondary: oklch(19% 0.02 145);
+    --color-muted: oklch(22% 0.02 145);
+
+    --color-border: oklch(28% 0.02 145);
+    --color-input: oklch(28% 0.02 145);
+
+    --color-foreground: oklch(88% 0.04 145);
+    --color-card-foreground: oklch(88% 0.04 145);
+    --color-muted-foreground: oklch(55% 0.03 145);
+
+    --color-primary: oklch(68% 0.18 145);
+    --color-primary-foreground: oklch(10% 0.02 145);
+    --color-accent: oklch(68% 0.18 145);
+    --color-accent-foreground: oklch(10% 0.02 145);
+    --color-ring: oklch(68% 0.18 145);
+  }
+
+  /* ── Healthcare: clinical blue/white aesthetic ──────── */
+  [data-theme="tfc-health"] {
+    --color-background: oklch(14% 0.01 230);
+    --color-card: oklch(19% 0.015 230);
+    --color-popover: oklch(23% 0.015 230);
+    --color-secondary: oklch(23% 0.015 230);
+    --color-muted: oklch(27% 0.015 230);
+
+    --color-border: oklch(32% 0.01 230);
+    --color-input: oklch(32% 0.01 230);
+
+    --color-foreground: oklch(92% 0 0);
+    --color-card-foreground: oklch(92% 0 0);
+    --color-muted-foreground: oklch(55% 0.01 230);
+
+    --color-primary: oklch(62% 0.14 230);
+    --color-primary-foreground: oklch(98% 0 0);
+    --color-accent: oklch(62% 0.14 230);
+    --color-accent-foreground: oklch(98% 0 0);
+    --color-ring: oklch(62% 0.14 230);
+  }
+
+  /* ── Military: olive/sand tactical aesthetic ────────── */
+  [data-theme="tfc-military"] {
+    --color-background: oklch(14% 0.02 95);
+    --color-card: oklch(19% 0.025 95);
+    --color-popover: oklch(23% 0.025 95);
+    --color-secondary: oklch(23% 0.025 95);
+    --color-muted: oklch(27% 0.025 95);
+
+    --color-border: oklch(32% 0.02 95);
+    --color-input: oklch(32% 0.02 95);
+
+    --color-foreground: oklch(90% 0.01 95);
+    --color-card-foreground: oklch(90% 0.01 95);
+    --color-muted-foreground: oklch(55% 0.02 95);
+
+    --color-primary: oklch(72% 0.12 85);
+    --color-primary-foreground: oklch(14% 0.02 95);
+    --color-accent: oklch(72% 0.12 85);
+    --color-accent-foreground: oklch(14% 0.02 95);
+    --color-ring: oklch(72% 0.12 85);
+  }
+}
