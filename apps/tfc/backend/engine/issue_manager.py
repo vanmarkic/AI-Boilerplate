@@ -1,8 +1,8 @@
-"""Manages issue lifecycle with activation triggers and ETBOL countdowns.
+"""Manages issue lifecycle with activation triggers and auto-resolve countdowns.
 
 Issues progress through: inactive -> active -> mitigated -> resolved.
 Trigger modes: time-based, event-based, manual (GM).
-ETBOL = Estimated Time Before Operational Loss (countdown in PT).
+Auto-resolve countdown = time in PT before the issue resolves automatically.
 """
 from __future__ import annotations
 
@@ -40,7 +40,7 @@ class TrackedIssue:
     trigger_mode: TriggerMode
     trigger_time_pt_ms: float | None = None
     trigger_event_id: str | None = None
-    etbol_ms: float = 0.0
+    auto_resolve_ms: float = 0.0
     lifecycle: IssueLifecycle = IssueLifecycle.INACTIVE
     activated_at_pt_ms: float | None = None
     resolved_at_pt_ms: float | None = None
@@ -48,7 +48,7 @@ class TrackedIssue:
 
 
 class IssueManager:
-    """Manages issue activation, ETBOL countdowns, and lifecycle."""
+    """Manages issue activation, auto-resolve countdowns, and lifecycle."""
 
     def __init__(self) -> None:
         self._issues: dict[str, TrackedIssue] = {}
@@ -68,7 +68,7 @@ class IssueManager:
         current_pt_ms: float,
         completed_event_ids: set[str],
     ) -> list[dict]:
-        """Check all issues for activation and ETBOL expiry.
+        """Check all issues for activation and auto-resolve expiry.
 
         Args:
             current_pt_ms: Current play time in milliseconds.
@@ -85,13 +85,13 @@ class IssueManager:
                     self._activate(issue, current_pt_ms)
                     changes.append(self._change(issue, "activated"))
 
-            if issue.lifecycle == IssueLifecycle.ACTIVE and issue.etbol_ms > 0:
+            if issue.lifecycle == IssueLifecycle.ACTIVE and issue.auto_resolve_ms > 0:
                 if issue.activated_at_pt_ms is not None:
                     elapsed = current_pt_ms - issue.activated_at_pt_ms
-                    if elapsed >= issue.etbol_ms:
+                    if elapsed >= issue.auto_resolve_ms:
                         self._transition(issue, IssueLifecycle.RESOLVED)
                         issue.resolved_at_pt_ms = current_pt_ms
-                        changes.append(self._change(issue, "etbol_expired"))
+                        changes.append(self._change(issue, "auto_resolve_expired"))
 
         return changes
 
@@ -198,7 +198,7 @@ class IssueManager:
                 "title": i.title,
                 "description": i.description,
                 "trigger_mode": i.trigger_mode.value,
-                "etbol_ms": i.etbol_ms,
+                "auto_resolve_ms": i.auto_resolve_ms,
                 "lifecycle": i.lifecycle.value,
                 "activated_at_pt_ms": i.activated_at_pt_ms,
                 "resolved_at_pt_ms": i.resolved_at_pt_ms,
