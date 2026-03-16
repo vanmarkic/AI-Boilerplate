@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './shared/auth/auth.guard';
+import { permissionsGuard } from './shared/auth/permissions.guard';
 
 export const routes: Routes = [
   {
@@ -16,6 +17,7 @@ export const routes: Routes = [
         (m) => m.DASHBOARD_ROUTES
       ),
     canActivate: [authGuard],
+    canMatch: [permissionsGuard],
   },
   {
     path: 'profile',
@@ -24,6 +26,16 @@ export const routes: Routes = [
         (m) => m.USER_PROFILE_ROUTES
       ),
     canActivate: [authGuard],
+    canMatch: [permissionsGuard],
+  },
+  {
+    path: 'admin',
+    loadChildren: () =>
+      import('./features/admin-permissions/admin-permissions.routes').then(
+        (m) => m.ADMIN_PERMISSIONS_ROUTES
+      ),
+    canActivate: [authGuard],
+    canMatch: [permissionsGuard],
   },
   {
     path: 'register',

@@ -45,21 +45,19 @@ async def _get_signing_key() -> bytes:
     return _jwks_cache
 
 
-async def get_current_user(
-    authorization: Annotated[str | None, Header()] = None,
-) -> CurrentUser:
-    """Validate JWT from Authorization header and return the current user."""
+async def _decode_token(authorization: str | None) -> dict | None:
+    """Decode and validate a JWT from an Authorization header.
+
+    Returns the full payload dict, or None if the token is missing/invalid.
+    """
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Missing or invalid token",
-        )
+        return None
 
     token = authorization.removeprefix("Bearer ")
 
     try:
         signing_key = await _get_signing_key()
-        payload = jwt.decode(
+        return jwt.decode(
             token,
             signing_key,
             algorithms=["RS256"],
@@ -67,9 +65,26 @@ async def get_current_user(
             issuer=f"{settings.keycloak_url}/realms/{settings.keycloak_realm}",
         )
     except jwt.PyJWTError:
+        return None
+
+
+async def parse_jwt_roles(authorization: str | None) -> list[str] | None:
+    """Parse JWT and return realm roles, or None if token is invalid."""
+    payload = await _decode_token(authorization)
+    if payload is None:
+        return None
+    return payload.get("realm_access", {}).get("roles", [])
+
+
+async def get_current_user(
+    authorization: Annotated[str | None, Header()] = None,
+) -> CurrentUser:
+    """Validate JWT from Authorization header and return the current user."""
+    payload = await _decode_token(authorization)
+    if payload is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Missing or invalid token",
         )
 
     roles = payload.get("realm_access", {}).get("roles", [])

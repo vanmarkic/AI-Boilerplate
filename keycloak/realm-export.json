@@ -50,6 +50,7 @@
   "roles": {
     "realm": [
       { "name": "admin", "composite": false },
+      { "name": "role_manager", "composite": false },
       { "name": "user", "composite": false }
     ]
   },
@@ -119,6 +120,21 @@
         }
       ],
       "realmRoles": ["user"]
+    },
+    {
+      "username": "manager@local.dev",
+      "email": "manager@local.dev",
+      "emailVerified": true,
+      "enabled": true,
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "manager",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["role_manager"]
     }
   ]
 }
