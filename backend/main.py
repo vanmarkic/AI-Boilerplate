@@ -3,10 +3,14 @@ import re
 from pathlib import Path
 from types import ModuleType
 
+from contextlib import asynccontextmanager
+from collections.abc import AsyncGenerator
+
 from fastapi import FastAPI
 
 from core.config import settings
 from core.middleware import setup_middleware
+from core.sse import event_bus
 
 _FEATURE_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
@@ -47,13 +51,27 @@ def discover_routers(app: FastAPI) -> None:
             app.include_router(module.router)
 
 
+@asynccontextmanager
+async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """Manage startup/shutdown for long-lived resources."""
+    await event_bus.connect()
+    yield
+    await event_bus.disconnect()
+
+
 def create_app() -> FastAPI:
     """Application factory."""
     application = FastAPI(
         title=settings.app_name,
         version=settings.app_version,
+        lifespan=_lifespan,
     )
     setup_middleware(application)
+
+    # Register the core SSE router (not a feature — always available).
+    from core.sse_router import router as sse_router
+    application.include_router(sse_router)
+
     discover_routers(application)
     return application
 
