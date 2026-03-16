@@ -9,6 +9,7 @@ from core.config import settings
 from core.database import Base
 
 # Import all models so Alembic detects them
+from core.rbac_model import RolePermission  # noqa: F401
 from features.user.user_model import User  # noqa: F401
 
 config = context.config
