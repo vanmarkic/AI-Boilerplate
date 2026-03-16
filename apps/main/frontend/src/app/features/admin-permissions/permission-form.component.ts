@@ -53,7 +53,7 @@ export interface PermissionFormValue {
 export class PermissionFormComponent {
   readonly permission = input<PermissionMapping | null>(null);
   readonly submitted = output<PermissionFormValue>();
-  readonly cancelled = output<void>();
+  readonly cancelled = output();
 
   readonly form = new FormGroup({
     role: new FormControl('', { nonNullable: true, validators: [Validators.required] }),

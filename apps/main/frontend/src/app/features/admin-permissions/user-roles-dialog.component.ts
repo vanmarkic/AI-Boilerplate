@@ -48,7 +48,7 @@ const PROTECTED_ROLES = new Set(['admin', 'role_manager']);
 export class UserRolesDialogComponent {
   readonly user = input.required<KeycloakUser>();
   readonly allRoles = input.required<KeycloakRole[]>();
-  readonly closed = output<void>();
+  readonly closed = output();
   readonly rolesChanged = output<{ added: string[]; removed: string[] }>();
 
   private readonly auth = inject(AuthStore);
@@ -57,10 +57,6 @@ export class UserRolesDialogComponent {
   );
   protected readonly selectedRoles = signal<Set<string>>(new Set());
   private initialized = false;
-
-  constructor() {
-    // no effect needed — initialize on first allRoles/user read
-  }
 
   private ensureInitialized(): void {
     if (!this.initialized) {
