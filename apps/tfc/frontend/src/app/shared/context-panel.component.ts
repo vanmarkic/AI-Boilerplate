@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { CollapsiblePanelComponent } from './collapsible-panel.component';
+import { CollapsiblePanelComponent } from '@aspect/ui';
 
 @Component({
-  selector: 'ui-context-panel',
+  selector: 'tfc-context-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CollapsiblePanelComponent],
   host: { 'class': 'context-panel' },

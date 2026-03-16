@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/angular';
 import { ContextPanelComponent } from './context-panel.component';
 
 const meta: Meta<ContextPanelComponent> = {
-  title: 'UI/ContextPanel',
+  title: 'TFC/ContextPanel',
   component: ContextPanelComponent,
   tags: ['autodocs'],
   argTypes: {
@@ -12,12 +12,12 @@ const meta: Meta<ContextPanelComponent> = {
   render: (args) => ({
     props: args,
     template: `
-      <ui-context-panel
+      <tfc-context-panel
         [title]="title"
         [briefing]="briefing"
         [objectives]="objectives"
         [rules]="rules"
-      ></ui-context-panel>
+      ></tfc-context-panel>
     `,
     moduleMetadata: { imports: [ContextPanelComponent] },
   }),

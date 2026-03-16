@@ -8,8 +8,8 @@ import {
   ClockDisplayComponent,
   PhaseBadgeComponent,
   SpeedDisplayComponent,
-  ContextPanelComponent,
 } from '@aspect/ui';
+import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { EngineApiService } from '../../core/engine-api.service';
 import { DecisionApiService } from '../../core/decision-api.service';
 import type { DecisionDetail } from '../../core/decision-api.service';
@@ -142,7 +142,7 @@ import { Subscription } from 'rxjs';
         </ui-collapsible-panel>
 
         @if (store.context(); as ctx) {
-          <ui-context-panel
+          <tfc-context-panel
             [title]="ctx.title"
             [briefing]="ctx.briefing"
             [objectives]="ctx.objectives"
