@@ -5,6 +5,9 @@ import {
   BadgeComponent,
   ButtonDirective,
   CollapsiblePanelComponent,
+  ClockDisplayComponent,
+  PhaseBadgeComponent,
+  SpeedDisplayComponent,
 } from '@aspect/ui';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
@@ -18,27 +21,17 @@ import { Subscription } from 'rxjs';
   imports: [
     PageHeaderComponent, CardComponent, BadgeComponent,
     ButtonDirective, CollapsiblePanelComponent,
+    ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent,
   ],
   template: `
     <div class="exercise-layout">
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || 'Exercise Control Panel' }}</span>
         <div class="exercise-header__clocks">
-          <div class="exercise-clock">
-            <span class="exercise-clock__label">RT</span>
-            <span class="exercise-clock__value">{{ store.rtClock() }}</span>
-          </div>
-          <div class="exercise-clock">
-            <span class="exercise-clock__label">PT</span>
-            <span class="exercise-clock__value">{{ store.ptClock() }}</span>
-          </div>
-          <div class="exercise-speed">
-            <span class="exercise-speed__label">Speed</span>
-            <span class="exercise-speed__value">{{ store.speedFactor() }}x</span>
-          </div>
-          <span class="exercise-phase" [attr.data-phase]="store.phase()">
-            {{ store.phase() }}
-          </span>
+          <ui-clock-display label="RT" [value]="store.rtClock()" />
+          <ui-clock-display label="PT" [value]="store.ptClock()" />
+          <ui-speed-display [value]="store.speedFactor()" />
+          <ui-phase-badge [phase]="store.phase()" />
         </div>
       </header>
 
@@ -127,13 +120,11 @@ import { Subscription } from 'rxjs';
           <button uiButton variant="destructive" (click)="onReset()">Reset</button>
         </div>
         <div class="exercise-controls__spacer"></div>
-        <div class="exercise-speed">
-          <span class="exercise-speed__label">Speed</span>
+        <ui-speed-display [value]="store.speedFactor()">
           <input type="range" min="0.5" max="10" step="0.5"
             [value]="store.speedFactor()"
             (input)="onSpeedChange($event)" />
-          <span class="exercise-speed__value">{{ store.speedFactor() }}x</span>
-        </div>
+        </ui-speed-display>
       </footer>
     </div>
   `,
