@@ -1,5 +1,5 @@
 import os
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Generator
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -30,10 +30,9 @@ async def setup_db() -> AsyncGenerator[None]:
 
 
 @pytest.fixture(autouse=True)
-def _bypass_rbac() -> AsyncGenerator[None]:
+def _bypass_rbac() -> Generator[None, None, None]:
     """Pre-seed RBAC cache and mock JWT parsing so feature tests
     that don't care about authorization are not blocked by the middleware.
-    Individual test files can override the cache and mock as needed.
     """
     import core.rbac as rbac_module
     from core.rbac import PermissionRule
