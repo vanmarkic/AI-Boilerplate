@@ -61,7 +61,7 @@ def _full_content() -> dict:
                 "description": "Communications failure",
                 "trigger_mode": "event-based",
                 "trigger_event_id": "evt-1",
-                "etbol_ms": 300_000,
+                "auto_resolve_ms": 300_000,
             },
             {
                 "id": "iss-2",
@@ -69,7 +69,7 @@ def _full_content() -> dict:
                 "description": "Generator offline",
                 "trigger_mode": "time-based",
                 "trigger_time_pt_ms": 180_000,
-                "etbol_ms": 0,
+                "auto_resolve_ms": 0,
             },
         ],
         "decision_templates": [
@@ -154,7 +154,7 @@ def test_scenario_issue_def_trigger_modes() -> None:
         "trigger_mode": "manual",
     })
     assert manual_issue.trigger_mode == "manual"
-    assert manual_issue.etbol_ms == 0
+    assert manual_issue.auto_resolve_ms == 0
 
 
 # ── Loader tests ─────────────────────────────────────────────────────────
@@ -187,7 +187,7 @@ def test_load_scenario_issues_converts_all() -> None:
     comms = next(i for i in issues if i.id == "iss-1")
     assert comms.trigger_mode == TriggerMode.EVENT_BASED
     assert comms.trigger_event_id == "evt-1"
-    assert comms.etbol_ms == 300_000
+    assert comms.auto_resolve_ms == 300_000
 
     power = next(i for i in issues if i.id == "iss-2")
     assert power.trigger_mode == TriggerMode.TIME_BASED

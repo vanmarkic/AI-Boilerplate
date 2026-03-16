@@ -21,7 +21,7 @@ export interface ScenarioIssueDef {
   trigger_mode: string;
   trigger_time_pt_ms: number | null;
   trigger_event_id: string | null;
-  etbol_ms: number;
+  auto_resolve_ms: number;
 }
 
 export interface DecisionOptionDef {

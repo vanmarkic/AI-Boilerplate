@@ -167,7 +167,7 @@ class ExerciseEngine:
                 issue_changes = self._issues.activate_by_event(event_id, pt)
                 changes.extend(issue_changes)
 
-        # 5. Check issue triggers and ETBOL countdowns
+        # 5. Check issue triggers and auto-resolve countdowns
         issue_changes = self._issues.tick(pt, completed_events)
         changes.extend(issue_changes)
 

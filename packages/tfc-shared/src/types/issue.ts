@@ -13,7 +13,7 @@ export interface Issue {
   lifecycle: IssueLifecycle;
   triggerMode: TriggerMode;
   triggerCondition: string;
-  etbol: PlayTimeMs;
+  autoResolveMs: PlayTimeMs;
   controlMode: ControlMode;
   activatedAt: PlayTimeMs | null;
   resolvedAt: PlayTimeMs | null;

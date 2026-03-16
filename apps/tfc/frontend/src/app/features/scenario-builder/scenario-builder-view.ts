@@ -192,7 +192,7 @@ export class ScenarioBuilderView implements OnInit {
       trigger_mode: 'manual',
       trigger_time_pt_ms: null,
       trigger_event_id: null,
-      etbol_ms: 0,
+      auto_resolve_ms: 0,
     });
     this.newIssueTitle.set('');
   }
