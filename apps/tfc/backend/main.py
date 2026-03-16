@@ -46,6 +46,13 @@ def discover_routers(app: FastAPI) -> None:
             app.include_router(module.router)
 
 
+def _register_extra_routers(application: FastAPI) -> None:
+    """Register routers that live outside the {name}_router.py convention."""
+    from features.exercise.engine_router import router as engine_router
+
+    application.include_router(engine_router)
+
+
 def create_app() -> FastAPI:
     """Application factory."""
     application = FastAPI(
@@ -54,6 +61,7 @@ def create_app() -> FastAPI:
     )
     setup_middleware(application)
     discover_routers(application)
+    _register_extra_routers(application)
     return application
 
 
