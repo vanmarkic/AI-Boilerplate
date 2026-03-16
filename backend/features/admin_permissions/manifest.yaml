@@ -1,0 +1,21 @@
+name: admin_permissions
+tier: 1
+description: Database-driven RBAC permission management
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [postgresql]
+api_endpoints:
+  - GET /api/admin/permissions
+  - POST /api/admin/permissions
+  - PUT /api/admin/permissions/{id}
+  - DELETE /api/admin/permissions/{id}
+  - POST /api/admin/permissions/reload
+  - GET /api/me/permissions
+models: [RolePermission]
+events_emitted: []
+events_consumed: []
+business_rules:
+  - Protected roles (admin, role_manager) can only be modified by admin
+  - Permissions cached in memory with 60s TTL
+  - Cache force-refreshed via POST /api/admin/permissions/reload
