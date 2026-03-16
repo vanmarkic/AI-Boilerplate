@@ -26,7 +26,7 @@ export const PermissionsTabStore = signalStore(
       try {
         const { data } = await listPermissionsApiAdminPermissionsGet();
         patchState(store, {
-          permissions: (data as PermissionMapping[]) ?? [],
+          permissions: (data as PermissionMapping[] | undefined) ?? [],
           loading: false,
         });
       } catch (e) {

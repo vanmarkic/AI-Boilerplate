@@ -53,12 +53,14 @@ describe('UserRolesDialogComponent', () => {
   });
 
   it('should have user role pre-checked', () => {
-    const checkboxes = fixture.nativeElement.querySelectorAll(
-      'input[type="checkbox"]',
-    ) as NodeListOf<HTMLInputElement>;
-    const userCheckbox = Array.from(checkboxes).find((cb) => {
+    const checkboxes: HTMLInputElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll(
+        'input[type="checkbox"]',
+      ) as NodeListOf<HTMLInputElement>,
+    );
+    const userCheckbox = checkboxes.find((cb) => {
       const label = cb.closest('label');
-      return label?.textContent?.includes('user');
+      return label?.textContent.includes('user');
     });
     expect(userCheckbox?.checked).toBe(true);
   });
@@ -68,20 +70,23 @@ describe('UserRolesDialogComponent', () => {
     component.rolesChanged.subscribe(spy);
 
     // Toggle 'custom' on
-    const checkboxes = fixture.nativeElement.querySelectorAll(
-      'input[type="checkbox"]',
-    ) as NodeListOf<HTMLInputElement>;
-    const customCb = Array.from(checkboxes).find((cb) => {
+    const checkboxes: HTMLInputElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll(
+        'input[type="checkbox"]',
+      ) as NodeListOf<HTMLInputElement>,
+    );
+    const customCb = checkboxes.find((cb) => {
       const label = cb.closest('label');
-      return label?.textContent?.includes('custom');
+      return label?.textContent.includes('custom');
     });
     customCb?.click();
     fixture.detectChanges();
 
-    const saveBtn = Array.from(
-      fixture.nativeElement.querySelectorAll('button[uibutton]'),
-    ).find((b) => (b as HTMLElement).textContent?.includes('Save'));
-    (saveBtn as HTMLElement)?.click();
+    const buttons: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('button[uibutton]') as NodeListOf<HTMLElement>,
+    );
+    const saveBtn = buttons.find((b) => b.textContent.includes('Save'));
+    (saveBtn)?.click();
 
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({ added: ['custom'], removed: [] }),

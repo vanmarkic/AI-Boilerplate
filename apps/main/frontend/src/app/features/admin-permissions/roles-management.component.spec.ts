@@ -50,19 +50,20 @@ describe('RolesManagementComponent', () => {
   });
 
   it('should show Create Role button for admin', () => {
-    const btn = Array.from(
-      fixture.nativeElement.querySelectorAll('button[uibutton]'),
-    ).find((b) =>
-      (b as HTMLElement).textContent?.includes('Create Role'),
+    const buttons: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('button[uibutton]') as NodeListOf<HTMLElement>,
+    );
+    const btn = buttons.find((b) =>
+      b.textContent.includes('Create Role'),
     );
     expect(btn).toBeTruthy();
   });
 
   it('should show Delete button only for non-system roles', () => {
-    const deleteBtns = Array.from(
+    const deleteBtns: HTMLElement[] = Array.from(
       fixture.nativeElement.querySelectorAll(
         'button[uibutton][data-variant="destructive"]',
-      ),
+      ) as NodeListOf<HTMLElement>,
     );
     expect(deleteBtns.length).toBe(1);
   });
