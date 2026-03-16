@@ -4,9 +4,9 @@ import {
   CardComponent,
   BadgeComponent,
   ButtonDirective,
-  ClockDisplayComponent,
-  PhaseBadgeComponent,
 } from '@aspect/ui';
+import { ClockDisplayComponent } from '../../shared/clock-display.component';
+import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { DecisionPanelComponent } from '../../shared/decision-panel.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { EngineApiService } from '../../core/engine-api.service';
@@ -30,9 +30,9 @@ import { handleDecisionWsChanges } from './player-ws-handler';
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || 'Exercise Dashboard' }}</span>
         <div class="exercise-header__clocks">
-          <ui-clock-display label="RT" [value]="store.rtClock()" />
-          <ui-clock-display label="PT" [value]="store.ptClock()" />
-          <ui-phase-badge [phase]="store.phase()" />
+          <tfc-clock-display label="RT" [value]="store.rtClock()" />
+          <tfc-clock-display label="PT" [value]="store.ptClock()" />
+          <tfc-phase-badge [phase]="store.phase()" />
         </div>
       </header>
 

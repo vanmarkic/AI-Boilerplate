@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
-  selector: 'ui-clock-display',
+  selector: 'tfc-clock-display',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'class': 'exercise-clock' },
   template: `
