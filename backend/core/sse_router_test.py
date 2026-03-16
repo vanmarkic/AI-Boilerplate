@@ -1,14 +1,15 @@
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
 from core.sse_router import (
     _allowed_channels,
     patch_channel_enum,
     register_channel,
+    router,
 )
-from main import app
 
 
 @pytest.fixture(autouse=True)
@@ -20,8 +21,16 @@ def _clean_channels() -> None:
 
 
 @pytest.fixture
-async def client() -> AsyncClient:
-    transport = ASGITransport(app=app)
+def test_app() -> FastAPI:
+    """Minimal app with just the SSE router."""
+    app = FastAPI()
+    app.include_router(router)
+    return app
+
+
+@pytest.fixture
+async def client(test_app: FastAPI) -> AsyncClient:
+    transport = ASGITransport(app=test_app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
 
@@ -60,7 +69,7 @@ class TestSubscribeEndpoint:
     ) -> None:
         register_channel("comments")
 
-        async def fake_subscribe(channel: str):
+        async def fake_subscribe(channel: str):  # type: ignore[no-untyped-def]
             yield '{"id": 1}'
 
         mock_bus.subscribe = fake_subscribe

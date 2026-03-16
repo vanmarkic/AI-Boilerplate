@@ -1,6 +1,12 @@
-import { Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Injector,
+  inject,
+  runInInjectionContext,
+} from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { signalStore, withState, patchState, withMethods } from '@ngrx/signals';
+import { signalStore, withState } from '@ngrx/signals';
 import { Subject } from 'rxjs';
 import { EventSourceService } from './event-source.service';
 import { withLiveEvents } from './with-live-events';
@@ -15,26 +21,28 @@ interface TestState {
 }
 
 const TestStore = signalStore(
-  { providedIn: 'root' },
   withState<TestState>({ items: [] }),
   withLiveEvents<TestEvent>('test-channel', {
-    reduce: (event) => ({
-      items: (prev: TestEvent[]) => [...prev, event],
+    reduce: (event) => (state) => ({
+      items: [...(state['items'] as TestEvent[]), event],
     }),
   }),
 );
 
 @Component({
   template: '',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [TestStore],
 })
 class TestHostComponent {
   readonly store = inject(TestStore);
+  readonly injector = inject(Injector);
 }
 
 describe('withLiveEvents', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let store: InstanceType<typeof TestStore>;
+  let injector: Injector;
   let fakeChannel$: Subject<TestEvent>;
   let mockSseService: { channel: ReturnType<typeof vi.fn> };
 
@@ -46,17 +54,23 @@ describe('withLiveEvents', () => {
 
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-    })
-      .overrideProvider(EventSourceService, { useValue: mockSseService })
-      .compileComponents();
+      providers: [
+        { provide: EventSourceService, useValue: mockSseService },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);
     store = fixture.componentInstance.store;
+    injector = fixture.componentInstance.injector;
     fixture.detectChanges();
   });
 
+  function connectInContext(): void {
+    runInInjectionContext(injector, () => store.connectLive());
+  }
+
   it('connectLive subscribes to SSE channel', () => {
-    store.connectLive();
+    connectInContext();
 
     expect(mockSseService.channel).toHaveBeenCalledWith('test-channel');
   });
@@ -64,13 +78,13 @@ describe('withLiveEvents', () => {
   it('liveConnected is true after connectLive', () => {
     expect(store.liveConnected()).toBe(false);
 
-    store.connectLive();
+    connectInContext();
 
     expect(store.liveConnected()).toBe(true);
   });
 
   it('incoming events update store state via reduce', () => {
-    store.connectLive();
+    connectInContext();
 
     fakeChannel$.next({ id: 1, text: 'hello' });
     fakeChannel$.next({ id: 2, text: 'world' });
@@ -82,7 +96,7 @@ describe('withLiveEvents', () => {
   });
 
   it('disconnectLive sets liveConnected to false', () => {
-    store.connectLive();
+    connectInContext();
     expect(store.liveConnected()).toBe(true);
 
     store.disconnectLive();
@@ -90,7 +104,7 @@ describe('withLiveEvents', () => {
   });
 
   it('disconnectLive stops receiving events', () => {
-    store.connectLive();
+    connectInContext();
 
     fakeChannel$.next({ id: 1, text: 'before' });
     store.disconnectLive();
@@ -100,19 +114,18 @@ describe('withLiveEvents', () => {
   });
 
   it('connectLive is idempotent', () => {
-    store.connectLive();
-    store.connectLive();
+    connectInContext();
+    connectInContext();
 
     expect(mockSseService.channel).toHaveBeenCalledTimes(1);
   });
 
   it('DestroyRef cleanup unsubscribes', () => {
-    store.connectLive();
+    connectInContext();
     fakeChannel$.next({ id: 1, text: 'alive' });
 
     fixture.destroy();
 
-    fakeChannel$.next({ id: 2, text: 'dead' });
     expect(fakeChannel$.observed).toBe(false);
   });
 });
