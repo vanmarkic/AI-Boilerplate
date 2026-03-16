@@ -4,6 +4,8 @@ import {
   CardComponent,
   BadgeComponent,
   ButtonDirective,
+  ClockDisplayComponent,
+  PhaseBadgeComponent,
 } from '@aspect/ui';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
@@ -14,23 +16,15 @@ import { Subscription } from 'rxjs';
   selector: 'tfc-player-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore],
-  imports: [PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective],
+  imports: [PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective, ClockDisplayComponent, PhaseBadgeComponent],
   template: `
     <div class="exercise-layout">
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || 'Exercise Dashboard' }}</span>
         <div class="exercise-header__clocks">
-          <div class="exercise-clock">
-            <span class="exercise-clock__label">RT</span>
-            <span class="exercise-clock__value">{{ store.rtClock() }}</span>
-          </div>
-          <div class="exercise-clock">
-            <span class="exercise-clock__label">PT</span>
-            <span class="exercise-clock__value">{{ store.ptClock() }}</span>
-          </div>
-          <span class="exercise-phase" [attr.data-phase]="store.phase()">
-            {{ store.phase() }}
-          </span>
+          <ui-clock-display label="RT" [value]="store.rtClock()" />
+          <ui-clock-display label="PT" [value]="store.ptClock()" />
+          <ui-phase-badge [phase]="store.phase()" />
         </div>
       </header>
 
