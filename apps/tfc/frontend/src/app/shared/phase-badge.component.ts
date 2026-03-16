@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
-  selector: 'ui-phase-badge',
+  selector: 'tfc-phase-badge',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     'class': 'exercise-phase',

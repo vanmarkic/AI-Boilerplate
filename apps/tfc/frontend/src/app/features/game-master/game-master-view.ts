@@ -5,10 +5,10 @@ import {
   BadgeComponent,
   ButtonDirective,
   CollapsiblePanelComponent,
-  ClockDisplayComponent,
-  PhaseBadgeComponent,
-  SpeedDisplayComponent,
 } from '@aspect/ui';
+import { ClockDisplayComponent } from '../../shared/clock-display.component';
+import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
+import { SpeedDisplayComponent } from '../../shared/speed-display.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { EngineApiService } from '../../core/engine-api.service';
 import { DecisionApiService } from '../../core/decision-api.service';
@@ -34,10 +34,10 @@ import { Subscription } from 'rxjs';
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || 'Exercise Control Panel' }}</span>
         <div class="exercise-header__clocks">
-          <ui-clock-display label="RT" [value]="store.rtClock()" />
-          <ui-clock-display label="PT" [value]="store.ptClock()" />
-          <ui-speed-display [value]="store.speedFactor()" />
-          <ui-phase-badge [phase]="store.phase()" />
+          <tfc-clock-display label="RT" [value]="store.rtClock()" />
+          <tfc-clock-display label="PT" [value]="store.ptClock()" />
+          <tfc-speed-display [value]="store.speedFactor()" />
+          <tfc-phase-badge [phase]="store.phase()" />
         </div>
       </header>
 
@@ -166,11 +166,11 @@ import { Subscription } from 'rxjs';
           <button uiButton variant="destructive" (click)="onReset()">Reset</button>
         </div>
         <div class="exercise-controls__spacer"></div>
-        <ui-speed-display [value]="store.speedFactor()">
+        <tfc-speed-display [value]="store.speedFactor()">
           <input type="range" min="0.5" max="10" step="0.5"
             [value]="store.speedFactor()"
             (input)="onSpeedChange($event)" />
-        </ui-speed-display>
+        </tfc-speed-display>
       </footer>
     </div>
   `,

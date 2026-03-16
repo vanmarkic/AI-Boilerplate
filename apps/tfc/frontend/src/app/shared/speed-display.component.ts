@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
-  selector: 'ui-speed-display',
+  selector: 'tfc-speed-display',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { 'class': 'exercise-speed' },
   template: `
