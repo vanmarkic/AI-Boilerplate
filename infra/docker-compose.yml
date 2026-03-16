@@ -18,8 +18,8 @@ services:
 
   keycloak:
     build:
-      context: .
-      dockerfile: keycloak/Dockerfile
+      context: ..
+      dockerfile: infra/keycloak/Dockerfile
     environment:
       KC_DB: postgres
       KC_DB_URL: jdbc:postgresql://db:5432/keycloak
@@ -45,10 +45,12 @@ services:
       retries: 12
       start_period: 30s
 
+  # ── Main App ──────────────────────────────────────────────
+
   api:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ..
+      dockerfile: apps/main/backend/Dockerfile
       args:
         TIER: ${TIER:-3}
     ports:
@@ -63,21 +65,42 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./backend:/app
+      - ../apps/main/backend:/app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 
   frontend:
     build:
-      context: .
-      dockerfile: frontend/Dockerfile
+      context: ..
+      dockerfile: apps/main/frontend/Dockerfile
       args:
         TIER: ${TIER:-3}
     ports:
       - "4200:4200"
     volumes:
-      - ./frontend:/app
+      - ../apps/main/frontend:/app
       - /app/node_modules
     command: npx ng serve --host 0.0.0.0
+
+  # ── TFC App ───────────────────────────────────────────────
+
+  tfc-api:
+    build:
+      context: ..
+      dockerfile: apps/tfc/backend/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://dev:dev@db:5432/boilerplate
+      ENVIRONMENT: development
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: boilerplate
+      KEYCLOAK_AUDIENCE: tfc-api
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../apps/tfc/backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
 
 volumes:
   pgdata:

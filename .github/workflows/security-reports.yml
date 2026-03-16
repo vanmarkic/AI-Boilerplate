@@ -30,7 +30,7 @@ jobs:
         run: |
           pip install pip-audit bandit[sarif]
           npm i
-          cd frontend && npm i
+          cd apps/main/frontend && npm i
 
       - name: Install trivy
         run: |

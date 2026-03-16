@@ -3,10 +3,10 @@ name: Frontend CI
 on:
   push:
     branches: [master]
-    paths: ['frontend/**', 'packages/**', 'shared/openapi.json']
+    paths: ['apps/main/frontend/**', 'packages/**', 'shared/openapi.json']
   pull_request:
     branches: [master]
-    paths: ['frontend/**', 'packages/**', 'shared/openapi.json']
+    paths: ['apps/main/frontend/**', 'packages/**', 'shared/openapi.json']
 
 permissions:
   contents: read
@@ -16,7 +16,7 @@ env:
 
 defaults:
   run:
-    working-directory: frontend
+    working-directory: apps/main/frontend
 
 jobs:
   install:
@@ -35,9 +35,9 @@ jobs:
         with:
           path: |
             node_modules
-            frontend/node_modules
+            apps/main/frontend/node_modules
             packages/design-system/node_modules
-            frontend/src/app/shared/api/generated
+            apps/main/frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
 
   lint:
@@ -53,9 +53,9 @@ jobs:
         with:
           path: |
             node_modules
-            frontend/node_modules
+            apps/main/frontend/node_modules
             packages/design-system/node_modules
-            frontend/src/app/shared/api/generated
+            apps/main/frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -74,9 +74,9 @@ jobs:
         with:
           path: |
             node_modules
-            frontend/node_modules
+            apps/main/frontend/node_modules
             packages/design-system/node_modules
-            frontend/src/app/shared/api/generated
+            apps/main/frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -95,9 +95,9 @@ jobs:
         with:
           path: |
             node_modules
-            frontend/node_modules
+            apps/main/frontend/node_modules
             packages/design-system/node_modules
-            frontend/src/app/shared/api/generated
+            apps/main/frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -116,9 +116,9 @@ jobs:
         with:
           path: |
             node_modules
-            frontend/node_modules
+            apps/main/frontend/node_modules
             packages/design-system/node_modules
-            frontend/src/app/shared/api/generated
+            apps/main/frontend/src/app/shared/api/generated
           key: frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -128,5 +128,5 @@ jobs:
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: frontend/playwright-report/
+          path: apps/main/frontend/playwright-report/
           retention-days: 7
