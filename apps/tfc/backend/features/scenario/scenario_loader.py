@@ -6,7 +6,11 @@ ScheduledEvent / TrackedIssue / EngineConfig dataclasses.
 from __future__ import annotations
 
 from engine.event_scheduler import EventType, ScheduledEvent
-from engine.exercise_engine import EngineConfig
+from engine.exercise_engine import (
+    DecisionTemplate,
+    EngineConfig,
+    ScenarioContext,
+)
 from engine.issue_manager import TrackedIssue, TriggerMode
 from features.scenario.scenario_content import ScenarioContent
 
@@ -48,16 +52,46 @@ def load_scenario_issues(content: ScenarioContent) -> list[TrackedIssue]:
     return issues
 
 
+def load_decision_templates(
+    content: ScenarioContent,
+) -> list[DecisionTemplate]:
+    """Convert scenario decision template defs to engine DecisionTemplate."""
+    return [
+        DecisionTemplate(
+            id=dt.id,
+            title=dt.title,
+            description=dt.description,
+            issue_id=dt.issue_id,
+            question_type=dt.question_type,
+            options=[
+                {"id": o.id, "label": o.label, "score": o.score}
+                for o in dt.options
+            ],
+            completion_mode=dt.completion_mode,
+        )
+        for dt in content.decision_templates
+    ]
+
+
 def build_engine_config(
     exercise_id: int,
     title: str,
     content: ScenarioContent,
 ) -> EngineConfig:
     """Build a full EngineConfig from a validated ScenarioContent."""
+    context = ScenarioContext(
+        title=title,
+        description="",
+        briefing=content.briefing,
+        objectives=list(content.objectives),
+        rules=list(content.rules),
+    )
     return EngineConfig(
         exercise_id=exercise_id,
         title=title,
         time_factor=content.default_time_factor,
         events=load_scenario_events(content),
         issues=load_scenario_issues(content),
+        decision_templates=load_decision_templates(content),
+        context=context,
     )

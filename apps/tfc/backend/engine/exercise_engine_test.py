@@ -137,3 +137,81 @@ def test_snapshot_returns_full_state() -> None:
     assert "time" in snap
     assert "events" in snap
     assert "issues" in snap
+
+
+# ── Decision integration tests ───────────────────────────────────────────
+
+
+def _decision_event(
+    id: str, scheduled_pt_ms: float = 0.0, **kw: object,
+) -> ScheduledEvent:
+    return ScheduledEvent(
+        id=id, title=f"DE-{id}", description="Decision event",
+        event_type=EventType.DECISION,
+        scheduled_pt_ms=scheduled_pt_ms, **kw,
+    )
+
+
+@pytest.mark.asyncio
+async def test_decision_event_pauses_engine() -> None:
+    """A DECISION event starting should auto-pause the engine."""
+    evt = _decision_event("d1", scheduled_pt_ms=0.0)
+    engine = ExerciseEngine(_config(events=[evt]))
+    with patch("engine.time_manager._now_ms", return_value=0.0):
+        engine._time.start()
+        engine._time._paused = False
+        changes = await engine.tick()
+    # Engine should have auto-paused
+    assert engine.phase == EnginePhase.PAUSED
+    # A decision_opened change should be in the list
+    decision_changes = [c for c in changes if c.get("type") == "decision_opened"]
+    assert len(decision_changes) == 1
+    assert decision_changes[0]["decision_id"] == "d1"
+    # Decision manager should track it
+    open_decisions = engine.decision_manager.get_open_decisions()
+    assert len(open_decisions) == 1
+    assert open_decisions[0].id == "d1"
+
+
+@pytest.mark.asyncio
+async def test_close_decision_resumes_engine() -> None:
+    """Closing the last open decision allows resuming the engine."""
+    evt = _decision_event("d1", scheduled_pt_ms=0.0)
+    engine = ExerciseEngine(_config(events=[evt]))
+    with patch("engine.time_manager._now_ms", return_value=0.0):
+        engine._time.start()
+        engine._time._paused = False
+        await engine.tick()  # auto-pause on decision
+    assert engine.phase == EnginePhase.PAUSED
+    # Close the decision
+    change = engine.decision_manager.close_decision("d1", current_pt_ms=100.0)
+    assert change is not None
+    assert change["type"] == "decision_closed"
+    # Engine can now resume
+    with patch("engine.time_manager._now_ms", return_value=200.0):
+        result = await engine.resume()
+    assert engine.phase == EnginePhase.RUNNING
+    engine._stop_tick_loop()
+
+
+def test_snapshot_includes_decisions() -> None:
+    """Snapshot should include a decisions key."""
+    engine = ExerciseEngine(_config())
+    snap = engine.snapshot()
+    assert "decisions" in snap
+    assert isinstance(snap["decisions"], list)
+
+
+@pytest.mark.asyncio
+async def test_reset_clears_decisions() -> None:
+    """Reset should clear all tracked decisions."""
+    evt = _decision_event("d1", scheduled_pt_ms=0.0)
+    engine = ExerciseEngine(_config(events=[evt]))
+    with patch("engine.time_manager._now_ms", return_value=0.0):
+        engine._time.start()
+        engine._time._paused = False
+        await engine.tick()  # opens a decision
+    assert len(engine.decision_manager.get_open_decisions()) == 1
+    await engine.reset()
+    assert len(engine.decision_manager.get_open_decisions()) == 0
+    assert engine.decision_manager.snapshot() == []

@@ -70,3 +70,6 @@ class ScenarioContent(BaseModel):
     issues: list[ScenarioIssueDef] = []
     decision_templates: list[DecisionTemplateDef] = []
     default_time_factor: float = 1.0
+    briefing: str = ""
+    objectives: list[str] = []
+    rules: list[str] = []

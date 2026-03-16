@@ -1,0 +1,85 @@
+/* ── Decision Panel ─────────────────────────────────────── */
+
+@layer components {
+  .decision-panel__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .decision-panel__options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin: var(--spacing-md) 0;
+  }
+
+  .decision-panel__option {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: var(--font-size-sm);
+    transition: background 150ms ease;
+  }
+
+  .decision-panel__option:hover {
+    background: var(--color-secondary);
+  }
+
+  .decision-panel__option--selected {
+    background: var(--color-secondary);
+    border-color: var(--color-primary);
+  }
+
+  .decision-panel__textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-input);
+    color: var(--color-foreground);
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    resize: vertical;
+  }
+
+  .decision-panel__textarea:focus {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+
+  /* ── Context Panel ────────────────────────────────────── */
+
+  .context-panel__section {
+    margin-bottom: var(--spacing-md);
+  }
+
+  .context-panel__section:last-child {
+    margin-bottom: 0;
+  }
+
+  .context-panel__heading {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .context-panel__text {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    line-height: 1.5;
+  }
+
+  .context-panel__list {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    padding-left: var(--spacing-lg);
+    line-height: 1.6;
+  }
+}
