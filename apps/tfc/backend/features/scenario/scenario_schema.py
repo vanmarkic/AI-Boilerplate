@@ -1,0 +1,33 @@
+from datetime import datetime
+from typing import Any
+
+from pydantic import BaseModel
+
+from core.base_schema import ResponseBase
+
+
+class CreateScenarioRequest(BaseModel):
+    title: str
+    description: str = ""
+    domain_id: int | None = None
+    content: dict[str, Any] | None = None
+    version: int = 1
+
+
+class UpdateScenarioRequest(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    domain_id: int | None = None
+    content: dict[str, Any] | None = None
+    version: int | None = None
+
+
+class ScenarioResponse(ResponseBase):
+    id: int
+    title: str
+    description: str
+    domain_id: int | None
+    content: dict[str, Any] | None
+    version: int
+    created_at: datetime
+    updated_at: datetime
