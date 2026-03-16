@@ -152,7 +152,9 @@ class DecisionService:
             opt["id"]: opt.get("score", 0) for opt in decision.options
         }
         if decision.question_type == "single_choice":
-            selected_id = request.selected_options[0]
+            selected_id = request.selected_options[0] if request.selected_options else None
+            if selected_id is None:
+                return None
             return float(options_map.get(selected_id, 0))
         total = sum(
             options_map.get(oid, 0) for oid in request.selected_options

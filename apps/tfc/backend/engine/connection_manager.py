@@ -51,6 +51,7 @@ class ConnectionManager:
         if not conns:
             return
         text = json.dumps(message)
+        dead: list[WebSocket] = []
         for ws, _role in conns:
             try:
                 await ws.send_text(text)
@@ -58,6 +59,9 @@ class ConnectionManager:
                 logger.warning(
                     "Failed to send to WS for exercise=%d", exercise_id
                 )
+                dead.append(ws)
+        for ws in dead:
+            self.disconnect(exercise_id, ws)
 
     async def broadcast_to_role(
         self, exercise_id: int, role: str, message: dict[str, Any]
@@ -67,6 +71,7 @@ class ConnectionManager:
         if not conns:
             return
         text = json.dumps(message)
+        dead: list[WebSocket] = []
         for ws, ws_role in conns:
             if ws_role == role:
                 try:
@@ -77,6 +82,9 @@ class ConnectionManager:
                         role,
                         exercise_id,
                     )
+                    dead.append(ws)
+        for ws in dead:
+            self.disconnect(exercise_id, ws)
 
     def get_connections(
         self, exercise_id: int
