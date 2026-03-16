@@ -9,7 +9,7 @@ interface DecisionPanelArgs {
 }
 
 const meta: Meta<DecisionPanelArgs> = {
-  title: 'UI/DecisionPanel',
+  title: 'TFC/DecisionPanel',
   component: DecisionPanelComponent,
   tags: ['autodocs'],
   argTypes: {
@@ -30,12 +30,12 @@ const meta: Meta<DecisionPanelArgs> = {
   render: (args) => ({
     props: args,
     template: `
-      <ui-decision-panel
+      <tfc-decision-panel
         [title]="title"
         [description]="description"
         [questionType]="questionType"
         [options]="options"
-      ></ui-decision-panel>
+      ></tfc-decision-panel>
     `,
     moduleMetadata: { imports: [DecisionPanelComponent] },
   }),

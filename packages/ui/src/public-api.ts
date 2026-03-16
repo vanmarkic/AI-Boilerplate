@@ -8,8 +8,6 @@ export { FormErrorComponent } from './form-error.component';
 export { DialogPanelComponent } from './dialog-panel.component';
 export { DrawerPanelComponent, type DrawerSide } from './drawer-panel.component';
 export { CollapsiblePanelComponent, type CollapsiblePanelVariant, type CollapsiblePanelSize } from './collapsible-panel.component';
-export { DecisionPanelComponent, type DecisionOption } from './decision-panel.component';
-export { ContextPanelComponent } from './context-panel.component';
 export { HistogramTimelineComponent, type HistogramBar, type HistogramLabel, type HistogramVariant } from './histogram-timeline.component';
 export { MapViewComponent } from './map-view.component';
 export { registerPmtilesProtocol } from './map-view.pmtiles';
