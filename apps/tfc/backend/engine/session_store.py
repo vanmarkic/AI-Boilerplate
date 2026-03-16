@@ -23,7 +23,16 @@ class SessionStore:
         config: EngineConfig,
         on_state_change: Callable[[list[dict]], Awaitable[None]] | None = None,
     ) -> ExerciseEngine:
-        """Create a new engine session. Overwrites any existing session."""
+        """Create a new engine session.
+
+        Raises ValueError if a session already exists for the exercise ID.
+        Call remove() first if you need to replace an existing session.
+        """
+        if config.exercise_id in self._sessions:
+            raise ValueError(
+                f"Engine already exists for exercise_id={config.exercise_id}. "
+                "Remove the existing session before creating a new one."
+            )
         engine = ExerciseEngine(config, on_state_change=on_state_change)
         self._sessions[config.exercise_id] = engine
         return engine

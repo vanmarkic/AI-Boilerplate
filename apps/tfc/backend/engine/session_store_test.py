@@ -62,10 +62,20 @@ class TestCount:
         assert store.count == 1
 
 
-class TestOverwrite:
-    def test_overwrite_existing_session(self) -> None:
+class TestDuplicateCreate:
+    def test_create_raises_if_engine_already_exists(self) -> None:
+        store = SessionStore()
+        store.create(_config(1))
+        try:
+            store.create(_config(1))
+            assert False, "Expected ValueError"
+        except ValueError:
+            pass
+
+    def test_remove_then_create_succeeds(self) -> None:
         store = SessionStore()
         first = store.create(_config(1))
+        store.remove(1)
         second = store.create(_config(1))
         assert first is not second
         assert store.get(1) is second
