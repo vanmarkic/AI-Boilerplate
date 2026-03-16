@@ -6,9 +6,9 @@ import {
   ButtonDirective,
   ClockDisplayComponent,
   PhaseBadgeComponent,
-  DecisionPanelComponent,
-  ContextPanelComponent,
 } from '@aspect/ui';
+import { DecisionPanelComponent } from '../../shared/decision-panel.component';
+import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
@@ -84,7 +84,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
         }
 
         @if (store.context(); as ctx) {
-          <ui-context-panel
+          <tfc-context-panel
             [title]="ctx.title"
             [briefing]="ctx.briefing"
             [objectives]="ctx.objectives"
@@ -105,7 +105,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
 
       @if (activeDecision(); as decision) {
         <div class="overlay">
-          <ui-decision-panel
+          <tfc-decision-panel
             [title]="decision.title"
             [description]="decision.description"
             [questionType]="decision.question_type"
