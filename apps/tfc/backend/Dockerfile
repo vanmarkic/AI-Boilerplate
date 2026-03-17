@@ -8,6 +8,7 @@ COPY --from=uv /uv /uvx /bin/
 
 COPY apps/tfc/backend/pyproject.toml ./
 COPY apps/tfc/backend/core/ ./core/
+COPY apps/tfc/backend/engine/ ./engine/
 COPY apps/tfc/backend/main.py ./
 COPY apps/tfc/backend/alembic.ini ./
 COPY apps/tfc/backend/alembic/ ./alembic/
