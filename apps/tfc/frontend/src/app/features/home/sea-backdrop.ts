@@ -29,6 +29,27 @@ import * as THREE from 'three';
   `],
   template: `<canvas #canvas></canvas>`,
 })
+/** Signal allegiance — maps to color. */
+const enum SignalType { Friendly, Hostile, Neutral }
+
+const SIGNAL_COLORS: Record<SignalType, THREE.Color> = {
+  [SignalType.Friendly]: new THREE.Color(0x22d68a),  // green
+  [SignalType.Hostile]:  new THREE.Color(0xe84057),   // red
+  [SignalType.Neutral]:  new THREE.Color(0xd4c35c),   // amber
+};
+
+const MAX_SIGNALS = 18;
+const SIGNAL_LIFESPAN = 4; // seconds
+
+interface Signal {
+  type: SignalType;
+  x: number;         // fixed world x
+  z: number;         // fixed world z
+  birth: number;     // time (s) when spawned
+  pointLight: THREE.PointLight;
+  sprite: THREE.Sprite;
+}
+
 export class SeaBackdrop implements OnInit, OnDestroy {
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private renderer!: THREE.WebGLRenderer;
@@ -37,6 +58,8 @@ export class SeaBackdrop implements OnInit, OnDestroy {
   private plane!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
   private animationId = 0;
   private resizeObserver!: ResizeObserver;
+  private signals: Signal[] = [];
+  private nextSpawn = 0;
 
   /** Read the CSS custom property --color-primary from the page theme. */
   private get themeColor(): THREE.Color {
