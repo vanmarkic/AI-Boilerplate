@@ -230,11 +230,30 @@
   .opacity-muted { opacity: 0.6; }
 
   /* ── Square sizes (width + height) ────────────────── */
-  .size-xs  { width: var(--spacing-xs); height: var(--spacing-xs); }
-  .size-sm  { width: var(--spacing-sm); height: var(--spacing-sm); }
-  .size-md  { width: var(--spacing-md); height: var(--spacing-md); }
-  .size-lg  { width: var(--spacing-lg); height: var(--spacing-lg); }
-  .size-xl  { width: var(--spacing-xl); height: var(--spacing-xl); }
+  .size-xs {
+    width: var(--spacing-xs);
+    height: var(--spacing-xs);
+  }
+
+  .size-sm {
+    width: var(--spacing-sm);
+    height: var(--spacing-sm);
+  }
+
+  .size-md {
+    width: var(--spacing-md);
+    height: var(--spacing-md);
+  }
+
+  .size-lg {
+    width: var(--spacing-lg);
+    height: var(--spacing-lg);
+  }
+
+  .size-xl {
+    width: var(--spacing-xl);
+    height: var(--spacing-xl);
+  }
 
   /* ── Interaction ────────────────────────────────────── */
   .pointer-events-none { pointer-events: none; }
