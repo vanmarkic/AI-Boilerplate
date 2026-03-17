@@ -37,8 +37,27 @@ type Fixtures = {
 export class MockApi {
   /** Accumulated participants per exercise_id (mirrors server state). */
   readonly rooms = new Map<number, MockParticipant[]>();
+  /** Session code → exercise lookup payload. */
+  readonly codeMap = new Map<string, object>();
 
   constructor(private readonly page: Page) {}
+
+  /** Register a session code so by-code lookup returns this exercise. */
+  seedCode(code: string, exerciseId: number, gameMode = 'classic'): void {
+    this.codeMap.set(code.toUpperCase(), {
+      id: exerciseId,
+      title: 'Seeded Exercise',
+      description: '',
+      phase: 'setup',
+      scenario_id: null,
+      domain_id: null,
+      time_factor: 1.0,
+      game_mode: gameMode,
+      session_code: code.toUpperCase(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  }
 
   /** Install default API route handlers. Call once per test. */
   async install(): Promise<void> {
@@ -50,6 +69,7 @@ export class MockApi {
       }
       const body = route.request().postDataJSON();
       const id = Math.floor(Math.random() * 9000) + 1000;
+      const sessionCode = Math.random().toString(36).slice(2, 8).toUpperCase();
       await route.fulfill({
         status: 201,
         contentType: 'application/json',
@@ -61,9 +81,31 @@ export class MockApi {
           scenario_id: null,
           domain_id: null,
           time_factor: 1.0,
+          game_mode: body.game_mode ?? 'classic',
+          session_code: sessionCode,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }),
+      });
+    });
+
+    // GET /api/exercises/by-code/:code — session code lookup
+    await this.page.route('**/api/exercises/by-code/**', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.fallback();
+        return;
+      }
+      const url = route.request().url();
+      const code = url.split('/by-code/')[1]?.toUpperCase() ?? '';
+      const stored = this.codeMap.get(code);
+      if (!stored) {
+        await route.fulfill({ status: 404 });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(stored),
       });
     });
 
