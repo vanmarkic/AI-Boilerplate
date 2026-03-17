@@ -22,9 +22,12 @@ export class ExerciseWsService implements OnDestroy {
   readonly messages$ = this._messages$.asObservable();
   readonly connected$ = this._connected$.asObservable();
 
-  connect(exerciseId: number, role: 'gm' | 'player'): void {
+  connect(exerciseId: number, role: 'gm' | 'player', participantId?: string): void {
     this.disconnect();
-    const url = `${environment.wsBaseUrl}/api/exercises/${exerciseId}/ws?role=${role}`;
+    let url = `${environment.wsBaseUrl}/api/exercises/${exerciseId}/ws?role=${role}`;
+    if (participantId) {
+      url += `&participant_id=${encodeURIComponent(participantId)}`;
+    }
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => this._connected$.next(true);

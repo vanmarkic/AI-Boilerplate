@@ -1,6 +1,7 @@
 import type { WsMessage, WsStateChange } from '../../core/exercise-ws.service';
 import type { ActiveDecision } from '../../core/decision-api.service';
 import type { ExerciseStore } from '../../core/exercise.store';
+import type { ParticipantPresence } from '../../core/exercise.store';
 
 type StoreInstance = InstanceType<typeof ExerciseStore>;
 
@@ -31,6 +32,9 @@ function handleStateChange(change: WsStateChange, store: StoreInstance): void {
       change['lifecycle'] as string,
       change['released'] as boolean,
     );
+  }
+  if (change.type === 'presence_update') {
+    store.updatePresence(change['participants'] as ParticipantPresence[]);
   }
   handleDecisionChange(change, store);
 }
