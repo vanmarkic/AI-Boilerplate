@@ -12,7 +12,7 @@ import { test, expect, mockParticipant } from '../fixtures/base.fixture';
 // ── Join page — collaborative mode ─────────────────────────────────────
 
 test.describe('Join page — collaborative session code', () => {
-  test('pre-fills session code from ?code= query param', async ({
+  test('uses session code from ?code= query param on join', async ({
     page,
     mockApi,
   }) => {
@@ -20,10 +20,12 @@ test.describe('Join page — collaborative session code', () => {
     await mockApi.install();
 
     await page.goto('/join?code=ABC123');
+    // Fill name and click join — the code from ?code= param drives the lookup
+    await page.locator('input[placeholder="Enter your name"]').fill('Alice');
+    await page.getByRole('button', { name: 'Join' }).click();
 
-    await expect(
-      page.getByPlaceholder('e.g. ABC123'),
-    ).toHaveValue('ABC123');
+    await expect(page).toHaveURL(/waiting-room/);
+    await expect(page).toHaveURL(/gameMode=simple_collaborative/);
   });
 
   test('hides role selector for simple_collaborative exercise', async ({
@@ -34,8 +36,8 @@ test.describe('Join page — collaborative session code', () => {
     await mockApi.install();
 
     await page.goto('/join');
-    await page.getByPlaceholder('e.g. ABC123').fill('COLLAB');
-    await page.getByPlaceholder('Enter your name').fill('Alice');
+    await page.locator('input[placeholder="e.g. ABC123"]').fill('COLLAB');
+    await page.locator('input[placeholder="Enter your name"]').fill('Alice');
 
     // Trigger the by-code lookup by clicking join
     // Role selector should be hidden after lookup resolves
@@ -67,7 +69,7 @@ test.describe('Join page — collaborative session code', () => {
     await mockApi.install();
 
     await page.goto('/join?code=SW2026');
-    await page.getByPlaceholder('Enter your name').fill('Alice');
+    await page.locator('input[placeholder="Enter your name"]').fill('Alice');
     await page.getByRole('button', { name: 'Join' }).click();
 
     await expect(page).toHaveURL(/waiting-room/);
@@ -203,14 +205,11 @@ test.describe('Full collaborative onboarding', () => {
     mockApi.seedCode('SILENT', exerciseId, 'simple_collaborative');
     await mockApi.install();
 
-    // 1. Land on join with pre-filled code
+    // 1. Land on join with code in query param
     await page.goto('/join?code=SILENT');
-    await expect(
-      page.getByPlaceholder('e.g. ABC123'),
-    ).toHaveValue('SILENT');
 
-    // 2. Enter name and join
-    await page.getByPlaceholder('Enter your name').fill('Alice');
+    // 2. Enter name and join — session code from ?code= drives lookup
+    await page.locator('input[placeholder="Enter your name"]').fill('Alice');
     await page.getByRole('button', { name: 'Join' }).click();
 
     // 3. In collaborative waiting room
