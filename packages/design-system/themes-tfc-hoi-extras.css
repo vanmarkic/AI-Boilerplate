@@ -44,8 +44,7 @@
   }
 
   /* Embossed card panels — inset highlight + shadow */
-  [data-theme="tfc-hoi"] .card,
-  [data-theme="tfc-hoi"] .panel {
+  [data-theme="tfc-hoi"] .card {
     border: var(--emboss-border);
     box-shadow: var(--emboss-inset), var(--shadow-sm);
   }
