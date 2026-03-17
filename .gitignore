@@ -44,6 +44,9 @@ test-results/
 playwright-report/
 screenshots/
 
+# Hypothesis (property testing)
+.hypothesis/
+
 # Coverage
 htmlcov/
 coverage/
