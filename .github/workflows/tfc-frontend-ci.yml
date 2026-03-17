@@ -108,8 +108,8 @@ jobs:
           path: apps/tfc/frontend/playwright-report/
           retention-days: 7
       - uses: actions/upload-artifact@v4
-        if: failure()
+        if: ${{ !cancelled() }}
         with:
-          name: tfc-playwright-screenshots
-          path: apps/tfc/frontend/test-results/
+          name: tfc-route-screenshots
+          path: apps/tfc/frontend/screenshots/
           retention-days: 7
