@@ -11,6 +11,7 @@ import { DomainService } from '../../core/domain.service';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
+import { formatTimeMs } from '../../core/format-time';
 import { DecisionApiService } from '../../core/decision-api.service';
 import type { ActiveDecision, DecisionDetail } from '../../core/decision-api.service';
 import { Subscription } from 'rxjs';
@@ -56,6 +57,11 @@ import { handleDecisionWsChanges } from './player-ws-handler';
               <ui-badge [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'">
                 {{ issue.lifecycle }}
               </ui-badge>
+              @if (getIssueCountdown(issue.id); as cd) {
+                <span class="text-xs text-muted-foreground ml-sm">
+                  Auto-resolve: {{ cd }}
+                </span>
+              }
             </div>
           } @empty {
             <p class="text-muted-foreground text-sm p-sm">No issues assigned yet.</p>
@@ -142,28 +148,48 @@ export class PlayerView implements OnInit, OnDestroy {
   }
 
   protected activeDecision(): ActiveDecision | undefined {
-    return this.store.openDecisions()[0];
+    const role = this.store.playerRole();
+    return this.store.openDecisions().find((d) => {
+      if (!d.target_roles || d.target_roles.length === 0) return true;
+      return d.target_roles.includes(role);
+    });
   }
 
   ngOnInit(): void {
     const id = this.exerciseId();
     this.ws.connect(id, 'player');
     this.sub = this.ws.messages$.subscribe((msg) => this.handleWsMessage(msg));
-    this.api.snapshot(id).subscribe({
-      next: (snap) => this.store.applySnapshot(snap),
-      error: () => this.store.setError('Failed to load snapshot'),
-    });
+    this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
       next: (ctx) => this.store.setContext(ctx),
     });
     this.decisionApi.listDecisions(id, 'closed').subscribe({
       next: (decisions) => this.decisionHistory.set(decisions),
     });
+    this.connSub = this.ws.connected$.subscribe((connected) => {
+      if (connected) this.loadSnapshot(id);
+    });
+  }
+
+  private connSub: Subscription | null = null;
+
+  private loadSnapshot(exerciseId: number): void {
+    this.api.snapshot(exerciseId).subscribe({
+      next: (snap) => this.store.applySnapshot(snap),
+      error: () => this.store.setError('Failed to load snapshot'),
+    });
   }
 
   ngOnDestroy(): void {
     this.ws.disconnect();
     this.sub?.unsubscribe();
+    this.connSub?.unsubscribe();
+  }
+
+  protected getIssueCountdown(issueId: string): string | null {
+    const item = this.store.issuesWithCountdown().find((i) => i.id === issueId);
+    if (!item || item.remaining_ms <= 0) return null;
+    return formatTimeMs(item.remaining_ms);
   }
 
   protected selectIssue(issueId: string): void {

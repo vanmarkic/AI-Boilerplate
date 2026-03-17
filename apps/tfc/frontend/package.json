@@ -9,8 +9,9 @@
     "build": "ng build",
     "test": "ng test",
     "test:ci": "ng test --watch=false",
-    "e2e": "npx playwright test",
-    "e2e:ui": "npx playwright test --ui"
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:headed": "playwright test --headed"
   },
   "dependencies": {
     "@angular/cdk": "^21.2.2",

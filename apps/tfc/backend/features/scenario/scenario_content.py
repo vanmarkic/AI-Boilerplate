@@ -24,6 +24,7 @@ class DecisionTemplateDef(BaseModel):
     question_type: str  # single_choice, multi_choice, free_text, scale
     options: list[DecisionOptionDef] = []
     completion_mode: str = "first_response"
+    timeout_ms: float = 0  # 0 = no timeout
 
 
 class ScenarioEventDef(BaseModel):

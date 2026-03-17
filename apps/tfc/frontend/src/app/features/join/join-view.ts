@@ -1,12 +1,20 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import {
   CardComponent,
   InputComponent,
   ButtonDirective,
 } from '@aspect/ui';
 import { WaitingRoomApiService } from '../../core/waiting-room-api.service';
+import { environment } from '../../core/environment';
+
+interface ExerciseLookup {
+  id: number;
+  title: string;
+  session_code: string;
+}
 
 @Component({
   selector: 'tfc-join-view',
@@ -19,9 +27,15 @@ import { WaitingRoomApiService } from '../../core/waiting-room-api.service';
           <ui-input
             id="session-code"
             label="Session Code"
-            placeholder="Enter exercise ID"
+            placeholder="e.g. ABC123"
             [(value)]="sessionCode"
           />
+
+          @if (exerciseTitle()) {
+            <p class="text-sm">
+              Exercise: <strong>{{ exerciseTitle() }}</strong>
+            </p>
+          }
 
           <ui-input
             id="display-name"
@@ -31,7 +45,7 @@ import { WaitingRoomApiService } from '../../core/waiting-room-api.service';
           />
 
           <div class="flex flex-col gap-sm">
-            <label class="text-sm font-medium">Initial Role</label>
+            <label class="text-sm font-medium">Role</label>
             <select
               class="input-base"
               [value]="selectedRole()"
@@ -62,6 +76,7 @@ import { WaitingRoomApiService } from '../../core/waiting-room-api.service';
 })
 export class JoinView {
   private readonly router = inject(Router);
+  private readonly http = inject(HttpClient);
   private readonly waitingRoomApi = inject(WaitingRoomApiService);
 
   protected readonly sessionCode = signal('');
@@ -69,6 +84,8 @@ export class JoinView {
   protected readonly selectedRole = signal<string>('player');
   protected readonly joining = signal(false);
   protected readonly error = signal('');
+  protected readonly exerciseTitle = signal('');
+  private resolvedExerciseId: number | null = null;
 
   protected canJoin(): boolean {
     return this.sessionCode().trim().length > 0
@@ -81,15 +98,39 @@ export class JoinView {
   }
 
   protected onJoin(): void {
-    const exerciseId = Number(this.sessionCode().trim());
-    if (isNaN(exerciseId) || exerciseId <= 0) {
-      this.error.set('Session code must be a valid exercise ID');
+    const code = this.sessionCode().trim().toUpperCase();
+    if (!code) {
+      this.error.set('Please enter a session code');
       return;
     }
 
     this.joining.set(true);
     this.error.set('');
 
+    // Try session code lookup first, fall back to numeric ID
+    const isNumeric = /^\d+$/.test(code);
+    if (isNumeric) {
+      this.joinExercise(Number(code));
+    } else {
+      this.http
+        .get<ExerciseLookup>(
+          `${environment.apiBaseUrl}/api/exercises/by-code/${code}`,
+        )
+        .subscribe({
+          next: (exercise) => {
+            this.exerciseTitle.set(exercise.title);
+            this.joinExercise(exercise.id);
+          },
+          error: () => {
+            this.joining.set(false);
+            this.error.set('Session code not found. Check and try again.');
+          },
+        });
+    }
+  }
+
+  private joinExercise(exerciseId: number): void {
+    this.resolvedExerciseId = exerciseId;
     this.waitingRoomApi
       .join(exerciseId, this.displayName().trim(), this.selectedRole())
       .subscribe({

@@ -37,6 +37,18 @@ async def list_exercises(
 
 
 @router.get(
+    "/by-code/{session_code}",
+    response_model=ExerciseResponse,
+    operation_id="getExerciseByCode",
+)
+async def get_exercise_by_code(
+    session_code: str,
+    service: ExerciseService = Depends(get_exercise_service),
+) -> ExerciseResponse:
+    return await service.get_exercise_by_code(session_code.upper())
+
+
+@router.get(
     "/{exercise_id}",
     response_model=ExerciseResponse,
     operation_id="getExercise",
