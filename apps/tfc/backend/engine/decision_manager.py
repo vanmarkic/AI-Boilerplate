@@ -8,7 +8,7 @@ from __future__ import annotations
 import time as _time_mod
 from dataclasses import dataclass, field
 
-from engine.state_changes import DecisionClosed, DecisionOpened
+from engine.state_changes import DecisionClosed, DecisionOpened, RecommendationSubmitted
 
 
 @dataclass
@@ -28,6 +28,7 @@ class ActiveDecision:
     opened_at_pt_ms: float = 0.0
     opened_at_rt_ms: float = 0.0  # wall clock for timeout tracking
     closed_at_pt_ms: float | None = None
+    recommendations: dict[str, str] = field(default_factory=dict)
 
 
 class DecisionManager:
@@ -110,6 +111,21 @@ class DecisionManager:
                 })
         return changes
 
+    def submit_recommendation(
+        self, decision_id: str, participant_id: str, option_id: str,
+    ) -> RecommendationSubmitted | None:
+        """Record an advisor's recommendation. Returns a change dict or None."""
+        decision = self._decisions.get(decision_id)
+        if decision is None or decision.status != "open":
+            return None
+        decision.recommendations[participant_id] = option_id
+        return {
+            "type": "recommendation_submitted",
+            "decision_id": decision_id,
+            "participant_id": participant_id,
+            "option_id": option_id,
+        }
+
     def get_open_decisions(self) -> list[ActiveDecision]:
         """Return only decisions with status 'open'."""
         return [d for d in self._decisions.values() if d.status == "open"]
@@ -131,6 +147,7 @@ class DecisionManager:
                 "status": d.status,
                 "opened_at_pt_ms": d.opened_at_pt_ms,
                 "closed_at_pt_ms": d.closed_at_pt_ms,
+                "recommendations": dict(d.recommendations),
             }
             for d in self._decisions.values()
         ]

@@ -23,6 +23,7 @@ export interface ActiveDecision {
   status: string;
   opened_at_pt_ms: number;
   closed_at_pt_ms: number | null;
+  recommendations: Record<string, string>;
 }
 
 export interface DecisionSubmission {
@@ -98,6 +99,14 @@ export class DecisionApiService {
     return this.http.get<DecisionDetail[]>(
       `${this.base}/api/decisions`,
       { params },
+    );
+  }
+
+  /** Submit an advisor recommendation on an open decision */
+  submitRecommendation(exerciseId: number, decisionId: string, optionId: string): Observable<unknown> {
+    return this.http.post(
+      `${this.base}/api/exercises/${exerciseId}/engine/decisions/recommend`,
+      { decision_id: decisionId, option_id: optionId },
     );
   }
 
