@@ -195,6 +195,18 @@
   .shadow-md { box-shadow: var(--shadow-md); }
   .shadow-lg { box-shadow: var(--shadow-lg); }
 
+  /* ── Glow (controlled by --glow-strength) ─────────── */
+  .glow-sm { box-shadow: var(--glow-sm); }
+  .glow    { box-shadow: var(--glow-primary); }
+  .glow-lg { box-shadow: var(--glow-lg); }
+
+  /* ── Glass (controlled by --glass-strength) ────────── */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+  }
+
   /* ── Z-index ────────────────────────────────────────── */
   .z-above { z-index: var(--z-above); }
   .z-modal { z-index: var(--z-modal); }
