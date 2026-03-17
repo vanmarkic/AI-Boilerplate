@@ -5,7 +5,10 @@ import {
   BadgeComponent, CollapsiblePanelComponent,
 } from '@aspect/ui';
 import { ScenarioApiService } from '../../core/scenario-api.service';
+import type { DecisionTemplateDef } from '../../core/scenario-api.service';
 import { ScenarioBuilderStore } from './scenario-builder.store';
+import { ScenarioEventEditorComponent } from './scenario-event-editor';
+import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
 
 @Component({
   selector: 'tfc-scenario-builder-view',
@@ -14,6 +17,7 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
   imports: [
     FormsModule, PageHeaderComponent, CardComponent, ButtonDirective,
     InputComponent, BadgeComponent, CollapsiblePanelComponent,
+    ScenarioEventEditorComponent, ScenarioIssueEditorComponent,
   ],
   template: `
     <div class="flex flex-col gap-md p-lg">
@@ -27,63 +31,67 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
         <button uiButton variant="default" (click)="save()">
           {{ store.scenarioId() ? 'Update' : 'Create' }}
         </button>
+        @if (store.scenarioId()) {
+          <button uiButton variant="outline" (click)="store.reset()">New</button>
+        }
       </div>
 
       <div class="grid grid-cols-2 gap-md">
-        <ui-card title="Events">
-          @for (event of store.content().events; track event.id) {
-            <div class="flex items-center justify-between p-sm border-b">
-              <div>
-                <span class="text-sm font-medium">{{ event.title }}</span>
-                <span class="text-xs text-muted-foreground ml-sm">
-                  @ {{ event.scheduled_pt_ms / 1000 }}s
-                </span>
-              </div>
-              <button uiButton variant="destructive" size="sm"
-                (click)="store.removeEvent(event.id)">Remove</button>
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No events yet.</p>
-          }
-          <div class="flex gap-sm p-sm border-t">
-            <ui-input id="event-title" label="" placeholder="Event title"
-              [(value)]="newEventTitle" />
-            <ui-input id="event-time" label="" placeholder="PT (ms)"
-              [(value)]="newEventTime" />
-            <button uiButton variant="outline" size="sm" (click)="addEvent()">Add</button>
-          </div>
-        </ui-card>
-
-        <ui-card title="Issues">
-          @for (issue of store.content().issues; track issue.id) {
-            <div class="flex items-center justify-between p-sm border-b">
-              <div>
-                <span class="text-sm font-medium">{{ issue.title }}</span>
-                <ui-badge variant="secondary">{{ issue.trigger_mode }}</ui-badge>
-              </div>
-              <button uiButton variant="destructive" size="sm"
-                (click)="store.removeIssue(issue.id)">Remove</button>
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No issues yet.</p>
-          }
-          <div class="flex gap-sm p-sm border-t">
-            <ui-input id="issue-title" label="" placeholder="Issue title"
-              [(value)]="newIssueTitle" />
-            <button uiButton variant="outline" size="sm" (click)="addIssue()">Add</button>
-          </div>
-        </ui-card>
+        <tfc-scenario-event-editor />
+        <tfc-scenario-issue-editor />
 
         <ui-card title="Decision Templates">
           @for (dt of store.content().decision_templates; track dt.id) {
-            <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm font-medium">{{ dt.title }}</span>
-              <button uiButton variant="destructive" size="sm"
-                (click)="store.removeDecisionTemplate(dt.id)">Remove</button>
+            <div class="flex flex-col gap-xs p-sm border-b">
+              @if (editingDtId() === dt.id) {
+                <div class="flex flex-col gap-xs">
+                  <ui-input id="edit-dt-title" label="Title"
+                    [value]="editDtTitle()" (valueChange)="editDtTitle.set($event)" />
+                  <ui-input id="edit-dt-desc" label="Description"
+                    [value]="editDtDesc()" (valueChange)="editDtDesc.set($event)" />
+                  <div class="flex gap-sm">
+                    <ui-input id="edit-dt-issue" label="Issue ID"
+                      [value]="editDtIssueId()" (valueChange)="editDtIssueId.set($event)" />
+                    <div class="flex flex-col gap-xs" style="flex:1">
+                      <label class="text-xs">Question Type</label>
+                      <select class="input-base" [value]="editDtQType()"
+                        (change)="editDtQType.set(sel($event))">
+                        <option value="single_choice">Single Choice</option>
+                        <option value="multi_choice">Multi Choice</option>
+                        <option value="free_text">Free Text</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="flex gap-sm">
+                    <button uiButton variant="default" size="sm" (click)="saveDt(dt.id)">Save</button>
+                    <button uiButton variant="outline" size="sm" (click)="editingDtId.set(null)">Cancel</button>
+                  </div>
+                </div>
+              } @else {
+                <div class="flex items-center justify-between">
+                  <div>
+                    <span class="text-sm font-medium">{{ dt.title }}</span>
+                    <ui-badge variant="secondary">{{ dt.question_type }}</ui-badge>
+                    <span class="text-xs text-muted-foreground ml-sm">issue: {{ dt.issue_id }}</span>
+                  </div>
+                  <div class="flex gap-xs">
+                    <button uiButton variant="outline" size="sm" (click)="editDt(dt)">Edit</button>
+                    <button uiButton variant="destructive" size="sm"
+                      (click)="store.removeDecisionTemplate(dt.id)">Remove</button>
+                  </div>
+                </div>
+              }
             </div>
           } @empty {
             <p class="text-muted-foreground text-sm p-sm">No decision templates yet.</p>
           }
+          <div class="flex gap-sm p-sm border-t">
+            <ui-input id="dt-title" label="" placeholder="Decision title"
+              [(value)]="newDtTitle" />
+            <ui-input id="dt-issue" label="" placeholder="Issue ID"
+              [(value)]="newDtIssueId" />
+            <button uiButton variant="outline" size="sm" (click)="addDt()">Add</button>
+          </div>
         </ui-card>
 
         <ui-card title="Settings">
@@ -93,6 +101,12 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
               <input type="number" class="input-base" style="width: 80px"
                 [value]="store.content().default_time_factor"
                 (change)="onTimeFactorChange($event)" />
+            </div>
+            <div class="flex flex-col gap-xs">
+              <span class="text-sm">Briefing:</span>
+              <textarea class="input-base" rows="3"
+                [value]="store.content().briefing ?? ''"
+                (input)="onBriefingChange($event)"></textarea>
             </div>
           </div>
         </ui-card>
@@ -118,15 +132,21 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
 export class ScenarioBuilderView implements OnInit {
   protected readonly store = inject(ScenarioBuilderStore);
   private readonly api = inject(ScenarioApiService);
-
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
-  protected readonly newEventTitle = signal('');
-  protected readonly newEventTime = signal('');
-  protected readonly newIssueTitle = signal('');
   private counter = 0;
 
-  ngOnInit(): void {
-    this.loadList();
+  protected readonly newDtTitle = signal('');
+  protected readonly newDtIssueId = signal('');
+  protected readonly editingDtId = signal<string | null>(null);
+  protected readonly editDtTitle = signal('');
+  protected readonly editDtDesc = signal('');
+  protected readonly editDtIssueId = signal('');
+  protected readonly editDtQType = signal('single_choice');
+
+  ngOnInit(): void { this.loadList(); }
+
+  protected sel(event: Event): string {
+    return (event.target as HTMLSelectElement).value;
   }
 
   private loadList(): void {
@@ -164,41 +184,41 @@ export class ScenarioBuilderView implements OnInit {
     this.api.delete(id).subscribe({ next: () => this.loadList() });
   }
 
-  protected addEvent(): void {
-    const title = this.newEventTitle().trim();
-    const time = parseFloat(this.newEventTime()) || 0;
-    if (!title) return;
-    this.store.addEvent({
-      id: `evt-${++this.counter}`,
-      title,
-      description: '',
-      event_type: 'operational',
-      scheduled_pt_ms: time,
-      duration_ms: null,
-      dependencies: [],
-      triggered_issues: [],
+  protected addDt(): void {
+    const title = this.newDtTitle().trim();
+    const issueId = this.newDtIssueId().trim();
+    if (!title || !issueId) return;
+    this.store.addDecisionTemplate({
+      id: `dt-${++this.counter}`, title, description: '',
+      issue_id: issueId, question_type: 'single_choice',
+      options: [], completion_mode: 'first_response',
     });
-    this.newEventTitle.set('');
-    this.newEventTime.set('');
+    this.newDtTitle.set('');
+    this.newDtIssueId.set('');
   }
 
-  protected addIssue(): void {
-    const title = this.newIssueTitle().trim();
-    if (!title) return;
-    this.store.addIssue({
-      id: `iss-${++this.counter}`,
-      title,
-      description: '',
-      trigger_mode: 'manual',
-      trigger_time_pt_ms: null,
-      trigger_event_id: null,
-      auto_resolve_ms: 0,
+  protected editDt(dt: DecisionTemplateDef): void {
+    this.editingDtId.set(dt.id);
+    this.editDtTitle.set(dt.title);
+    this.editDtDesc.set(dt.description);
+    this.editDtIssueId.set(dt.issue_id);
+    this.editDtQType.set(dt.question_type);
+  }
+
+  protected saveDt(dtId: string): void {
+    this.store.updateDecisionTemplate(dtId, {
+      title: this.editDtTitle(), description: this.editDtDesc(),
+      issue_id: this.editDtIssueId(), question_type: this.editDtQType(),
     });
-    this.newIssueTitle.set('');
+    this.editingDtId.set(null);
   }
 
   protected onTimeFactorChange(event: Event): void {
     const val = parseFloat((event.target as HTMLInputElement).value);
     if (val > 0) this.store.setTimeFactor(val);
+  }
+
+  protected onBriefingChange(event: Event): void {
+    this.store.setBriefing((event.target as HTMLTextAreaElement).value);
   }
 }

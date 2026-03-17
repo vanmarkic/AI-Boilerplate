@@ -121,6 +121,34 @@ export class EngineApiService {
     );
   }
 
+  pauseEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+    return this.http.post<Record<string, unknown>>(
+      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/pause`,
+      {},
+    );
+  }
+
+  resumeEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+    return this.http.post<Record<string, unknown>>(
+      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/resume`,
+      {},
+    );
+  }
+
+  delayEvent(exerciseId: number, eventId: string, delayMs: number): Observable<Record<string, unknown>> {
+    return this.http.post<Record<string, unknown>>(
+      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/delay`,
+      { delay_ms: delayMs },
+    );
+  }
+
+  skipEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+    return this.http.post<Record<string, unknown>>(
+      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/skip`,
+      {},
+    );
+  }
+
   activateIssue(exerciseId: number, issueId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
       `${this.base}/api/exercises/${exerciseId}/engine/issues/${issueId}/activate`,

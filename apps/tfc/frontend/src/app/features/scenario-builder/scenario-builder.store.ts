@@ -21,6 +21,9 @@ const emptyContent: ScenarioContent = {
   issues: [],
   decision_templates: [],
   default_time_factor: 1.0,
+  briefing: '',
+  objectives: [],
+  rules: [],
 };
 
 export const ScenarioBuilderStore = signalStore(
@@ -98,6 +101,17 @@ export const ScenarioBuilderStore = signalStore(
       });
     },
 
+    updateIssue(issueId: string, updates: Partial<ScenarioIssueDef>): void {
+      patchState(store, {
+        content: {
+          ...store.content(),
+          issues: store.content().issues.map((i) =>
+            i.id === issueId ? { ...i, ...updates } : i,
+          ),
+        },
+      });
+    },
+
     addDecisionTemplate(template: DecisionTemplateDef): void {
       patchState(store, {
         content: {
@@ -113,6 +127,23 @@ export const ScenarioBuilderStore = signalStore(
           ...store.content(),
           decision_templates: store.content().decision_templates.filter((d) => d.id !== templateId),
         },
+      });
+    },
+
+    updateDecisionTemplate(templateId: string, updates: Partial<DecisionTemplateDef>): void {
+      patchState(store, {
+        content: {
+          ...store.content(),
+          decision_templates: store.content().decision_templates.map((d) =>
+            d.id === templateId ? { ...d, ...updates } : d,
+          ),
+        },
+      });
+    },
+
+    setBriefing(briefing: string): void {
+      patchState(store, {
+        content: { ...store.content(), briefing },
       });
     },
 

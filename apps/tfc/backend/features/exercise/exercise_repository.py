@@ -14,3 +14,13 @@ class ExerciseRepository(CrudRepository[Exercise]):
         stmt = select(Exercise).where(Exercise.phase == phase)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+
+    async def get_by_session_code(
+        self, session_code: str,
+    ) -> Exercise | None:
+        """Look up an exercise by its session code."""
+        stmt = select(Exercise).where(
+            Exercise.session_code == session_code,
+        )
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()

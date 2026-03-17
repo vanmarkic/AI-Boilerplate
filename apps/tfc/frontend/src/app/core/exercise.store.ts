@@ -48,6 +48,16 @@ export const ExerciseStore = signalStore(
     scheduledEvents: computed(() => store.events().filter((e) => e.lifecycle === 'scheduled')),
     completedEvents: computed(() => store.events().filter((e) => e.lifecycle === 'completed')),
     activeIssues: computed(() => store.issues().filter((i) => i.lifecycle === 'active')),
+    issuesWithCountdown: computed(() => {
+      const pt = store.playTimeMs();
+      return store.issues()
+        .filter((i) => i.lifecycle === 'active' && i.auto_resolve_ms > 0 && i.activated_at_pt_ms !== null)
+        .map((i) => {
+          const elapsed = pt - (i.activated_at_pt_ms ?? 0);
+          const remaining = Math.max(0, i.auto_resolve_ms - elapsed);
+          return { ...i, remaining_ms: remaining };
+        });
+    }),
     releasedIssues: computed(() => store.issues().filter((i) => i.released)),
     openDecisions: computed(() => store.decisions().filter((d) => d.status === 'open')),
     hasOpenDecision: computed(() => store.decisions().filter((d) => d.status === 'open').length > 0),
