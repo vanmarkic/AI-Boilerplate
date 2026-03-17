@@ -26,6 +26,7 @@ class Exercise(Base):
         Integer, ForeignKey("tfc_domain_configs.id"), nullable=True,
     )
     time_factor: Mapped[float] = mapped_column(default=1.0)
+    game_mode: Mapped[str] = mapped_column(String(50), default="classic")
     session_code: Mapped[str] = mapped_column(
         String(6), default=_generate_session_code, unique=True,
     )
