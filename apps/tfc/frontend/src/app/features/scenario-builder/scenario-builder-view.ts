@@ -4,6 +4,7 @@ import {
   PageHeaderComponent, CardComponent, ButtonDirective, InputComponent,
   BadgeComponent, CollapsiblePanelComponent,
 } from '@aspect/ui';
+import { DomainService } from '../../core/domain.service';
 import { ScenarioApiService } from '../../core/scenario-api.service';
 import { ScenarioBuilderStore } from './scenario-builder.store';
 
@@ -30,7 +31,7 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
       </div>
 
       <div class="grid grid-cols-2 gap-md">
-        <ui-card title="Events">
+        <ui-card [title]="domain.term('event') + 's'">
           @for (event of store.content().events; track event.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <div>
@@ -54,7 +55,7 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
           </div>
         </ui-card>
 
-        <ui-card title="Issues">
+        <ui-card [title]="domain.term('issue') + 's'">
           @for (issue of store.content().issues; track issue.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <div>
@@ -74,7 +75,7 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
           </div>
         </ui-card>
 
-        <ui-card title="Decision Templates">
+        <ui-card [title]="domain.term('decision') + ' Templates'">
           @for (dt of store.content().decision_templates; track dt.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <span class="text-sm font-medium">{{ dt.title }}</span>
@@ -117,6 +118,7 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
 })
 export class ScenarioBuilderView implements OnInit {
   protected readonly store = inject(ScenarioBuilderStore);
+  protected readonly domain = inject(DomainService);
   private readonly api = inject(ScenarioApiService);
 
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
