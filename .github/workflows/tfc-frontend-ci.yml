@@ -1,0 +1,109 @@
+name: TFC Frontend CI
+
+on:
+  push:
+    branches: [master]
+    paths: ['apps/tfc/frontend/**', 'packages/**']
+  pull_request:
+    branches: [master]
+    paths: ['apps/tfc/frontend/**', 'packages/**']
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+
+defaults:
+  run:
+    working-directory: apps/tfc/frontend
+
+jobs:
+  install:
+    name: Install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: npm i
+        working-directory: .
+      - uses: actions/cache/save@v5
+        with:
+          path: |
+            node_modules
+            apps/tfc/frontend/node_modules
+            packages/design-system/node_modules
+            packages/tfc-shared/node_modules
+          key: tfc-frontend-${{ github.sha }}
+
+  test:
+    name: Unit Tests
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/cache/restore@v5
+        with:
+          path: |
+            node_modules
+            apps/tfc/frontend/node_modules
+            packages/design-system/node_modules
+            packages/tfc-shared/node_modules
+          key: tfc-frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
+      - run: npm run test:ci
+
+  build:
+    name: Build
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/cache/restore@v5
+        with:
+          path: |
+            node_modules
+            apps/tfc/frontend/node_modules
+            packages/design-system/node_modules
+            packages/tfc-shared/node_modules
+          key: tfc-frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
+      - run: npm run build
+
+  e2e:
+    name: E2E Tests
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/cache/restore@v5
+        with:
+          path: |
+            node_modules
+            apps/tfc/frontend/node_modules
+            packages/design-system/node_modules
+            packages/tfc-shared/node_modules
+          key: tfc-frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: tfc-playwright-report
+          path: apps/tfc/frontend/playwright-report/
+          retention-days: 7
