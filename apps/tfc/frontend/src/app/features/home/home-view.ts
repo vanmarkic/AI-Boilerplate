@@ -53,30 +53,35 @@ import { SeaBackdrop } from './sea-backdrop';
     .menu-card {
       display: flex;
       flex-direction: column;
-      gap: var(--space-xs);
-      padding: var(--space-lg);
-      background: color-mix(in oklch, var(--color-card) 85%, transparent);
-      backdrop-filter: blur(12px);
-      border: 1px solid var(--color-border);
+      gap: var(--space-sm);
+      padding: var(--space-xl);
+      background: var(--glass-bg);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border: 1px solid var(--glass-border);
       border-radius: var(--radius-lg, 0.75rem);
+      box-shadow: var(--glass-shadow);
       text-decoration: none;
       color: inherit;
-      transition: border-color 0.15s, background 0.15s;
+      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
       cursor: pointer;
     }
 
     .menu-card:hover {
       border-color: var(--color-primary);
-      background: color-mix(in oklch, var(--color-card) 90%, var(--color-primary) 10%);
+      background: color-mix(in oklch, var(--glass-bg) 80%, var(--color-primary) 20%);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
     }
 
     .menu-card[data-primary] {
       border-color: var(--color-primary);
-      background: color-mix(in oklch, var(--color-primary) 12%, var(--color-card) 85%);
+      background: color-mix(in oklch, var(--glass-bg) 85%, var(--color-primary) 15%);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
     }
 
     .menu-card[data-primary]:hover {
-      background: color-mix(in oklch, var(--color-primary) 20%, var(--color-card) 85%);
+      background: color-mix(in oklch, var(--glass-bg) 75%, var(--color-primary) 25%);
+      box-shadow: var(--glass-shadow), var(--glow-primary);
     }
 
     .card-icon {
