@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { BadgeComponent, ButtonDirective, CollapsiblePanelComponent } from '@aspect/ui';
 import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
@@ -137,6 +138,7 @@ export class GameMasterView implements OnDestroy {
   private readonly exerciseApi = inject(ExerciseApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
+  private readonly router = inject(Router);
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
   protected readonly exerciseId = signal<number | null>(null);
   private sub: Subscription | null = null;
@@ -153,7 +155,14 @@ export class GameMasterView implements OnDestroy {
       time_factor: scenario.content?.default_time_factor ?? 1.0,
       game_mode: gameMode,
     }).subscribe({
-      next: (ex) => { this.exerciseId.set(ex.id); this.connectExercise(ex.id); },
+      next: (ex) => {
+        if (gameMode === 'simple_collaborative') {
+          this.router.navigate(['/join'], { queryParams: { code: ex.session_code } });
+        } else {
+          this.exerciseId.set(ex.id);
+          this.connectExercise(ex.id);
+        }
+      },
       error: () => this.store.setError('Failed to create exercise'),
     });
   }
