@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import {
   CardComponent,
   InputComponent,
   ButtonDirective,
 } from '@aspect/ui';
+import { WaitingRoomApiService } from '../../core/waiting-room-api.service';
 
 @Component({
   selector: 'tfc-join-view',
@@ -17,7 +19,7 @@ import {
           <ui-input
             id="session-code"
             label="Session Code"
-            placeholder="Enter session code"
+            placeholder="Enter exercise ID"
             [(value)]="sessionCode"
           />
 
@@ -29,7 +31,7 @@ import {
           />
 
           <div class="flex flex-col gap-sm">
-            <label class="text-sm font-medium">Role</label>
+            <label class="text-sm font-medium">Initial Role</label>
             <select
               class="input-base"
               [value]="selectedRole()"
@@ -37,16 +39,21 @@ import {
             >
               <option value="player">Player</option>
               <option value="observer">Observer</option>
+              <option value="game-master">Game Master</option>
             </select>
           </div>
+
+          @if (error()) {
+            <p class="text-sm" style="color: var(--color-destructive)">{{ error() }}</p>
+          }
 
           <button
             uiButton
             variant="default"
             (click)="onJoin()"
-            [disabled]="!canJoin()"
+            [disabled]="!canJoin() || joining()"
           >
-            Join
+            {{ joining() ? 'Joining...' : 'Join' }}
           </button>
         </div>
       </ui-card>
@@ -54,9 +61,14 @@ import {
   `,
 })
 export class JoinView {
+  private readonly router = inject(Router);
+  private readonly waitingRoomApi = inject(WaitingRoomApiService);
+
   protected readonly sessionCode = signal('');
   protected readonly displayName = signal('');
-  protected readonly selectedRole = signal<'player' | 'observer'>('player');
+  protected readonly selectedRole = signal<string>('player');
+  protected readonly joining = signal(false);
+  protected readonly error = signal('');
 
   protected canJoin(): boolean {
     return this.sessionCode().trim().length > 0
@@ -64,11 +76,35 @@ export class JoinView {
   }
 
   protected onRoleChange(event: Event): void {
-    const value = (event.target as HTMLSelectElement).value as 'player' | 'observer';
+    const value = (event.target as HTMLSelectElement).value;
     this.selectedRole.set(value);
   }
 
   protected onJoin(): void {
-    // TODO: navigate to player/gm view based on role after joining session
+    const exerciseId = Number(this.sessionCode().trim());
+    if (isNaN(exerciseId) || exerciseId <= 0) {
+      this.error.set('Session code must be a valid exercise ID');
+      return;
+    }
+
+    this.joining.set(true);
+    this.error.set('');
+
+    this.waitingRoomApi
+      .join(exerciseId, this.displayName().trim(), this.selectedRole())
+      .subscribe({
+        next: (participant) => {
+          this.router.navigate(['/waiting-room'], {
+            queryParams: {
+              exerciseId,
+              participantId: participant.id,
+            },
+          });
+        },
+        error: () => {
+          this.joining.set(false);
+          this.error.set('Failed to join. Check the session code and try again.');
+        },
+      });
   }
 }
