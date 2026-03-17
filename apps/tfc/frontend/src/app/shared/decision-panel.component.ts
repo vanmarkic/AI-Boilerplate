@@ -1,5 +1,9 @@
-import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, input, output, signal,
+  inject, ElementRef, AfterViewInit,
+} from '@angular/core';
 import { DialogPanelComponent, ButtonComponent } from '@aspect/ui';
+import { AnimationService } from '../core/animation.service';
 
 export interface DecisionOption {
   id: string;
@@ -58,7 +62,9 @@ export interface DecisionOption {
     </ui-dialog-panel>
   `,
 })
-export class DecisionPanelComponent {
+export class DecisionPanelComponent implements AfterViewInit {
+  private readonly anim = inject(AnimationService);
+  private readonly el = inject(ElementRef);
   readonly title = input.required<string>();
   readonly description = input<string>('');
   readonly questionType = input.required<string>();
@@ -68,6 +74,11 @@ export class DecisionPanelComponent {
 
   protected readonly selectedOptions = signal<string[]>([]);
   protected readonly freeText = signal('');
+
+  ngAfterViewInit(): void {
+    const options = this.el.nativeElement.querySelectorAll('.decision-panel__option');
+    this.anim.staggerIn(options);
+  }
 
   protected canSubmit(): boolean {
     if (this.questionType() === 'free_text') return this.freeText().trim().length > 0;
