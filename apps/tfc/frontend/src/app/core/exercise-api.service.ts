@@ -34,7 +34,8 @@ export class ExerciseApiService {
   }
 
   list(phase?: string): Observable<ExerciseResponse[]> {
-    const params = phase ? { phase } : {};
+    const params: Record<string, string> = {};
+    if (phase) params['phase'] = phase;
     return this.http.get<ExerciseResponse[]>(`${this.base}/api/exercises`, { params });
   }
 
