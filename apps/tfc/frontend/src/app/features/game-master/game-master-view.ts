@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import {
-  PageHeaderComponent,
   CardComponent,
   BadgeComponent,
   ButtonDirective,
@@ -24,7 +23,7 @@ import { Subscription } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore],
   imports: [
-    PageHeaderComponent, CardComponent, BadgeComponent,
+    CardComponent, BadgeComponent,
     ButtonDirective, CollapsiblePanelComponent,
     ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent,
     ContextPanelComponent,
