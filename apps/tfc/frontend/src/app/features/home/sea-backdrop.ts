@@ -34,7 +34,7 @@ export class SeaBackdrop implements OnInit, OnDestroy {
   private renderer!: THREE.WebGLRenderer;
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
-  private plane!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshStandardMaterial>;
+  private plane!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
   private animationId = 0;
   private resizeObserver!: ResizeObserver;
 
@@ -108,18 +108,15 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     pointLight2.position.set(-4, 1, -2);
     this.scene.add(pointLight2);
 
-    // Sea plane — wide to fill the viewport
-    const geometry = new THREE.PlaneGeometry(20, 12, 90, 60);
+    // Sea plane — coarse grid for visible polygons
+    const geometry = new THREE.PlaneGeometry(20, 12, 40, 25);
     geometry.rotateX(-Math.PI / 2);
 
-    const material = new THREE.MeshStandardMaterial({
-      color: primary.clone().multiplyScalar(0.6),
-      flatShading: true,
+    const material = new THREE.MeshBasicMaterial({
+      color: primary,
+      wireframe: true,
       transparent: true,
-      opacity: 0.85,
-      side: THREE.DoubleSide,
-      metalness: 0.2,
-      roughness: 0.6,
+      opacity: 0.5,
     });
 
     this.plane = new THREE.Mesh(geometry, material);
@@ -154,11 +151,12 @@ export class SeaBackdrop implements OnInit, OnDestroy {
       const x = positions.getX(i);
       const z = positions.getZ(i);
 
-      // Layered sine waves for organic slow motion
+      // Layered sine waves — taller, more dramatic
       const y =
-        Math.sin(x * 0.4 + t * 0.6) * 0.18 +
-        Math.sin(z * 0.6 + t * 0.4) * 0.12 +
-        Math.sin((x + z) * 0.3 + t * 0.3) * 0.08;
+        Math.sin(x * 0.5 + t * 0.7) * 0.45 +
+        Math.sin(z * 0.7 + t * 0.5) * 0.3 +
+        Math.sin((x + z) * 0.35 + t * 0.4) * 0.2 +
+        Math.sin(x * 1.2 - t * 0.3) * 0.1;
 
       positions.setY(i, y);
     }
