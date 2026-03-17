@@ -1,6 +1,5 @@
 import os
 from collections.abc import AsyncGenerator
-from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -25,16 +24,6 @@ async def setup_db() -> AsyncGenerator[None]:
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
     await engine.dispose()
-
-
-@pytest.fixture(autouse=True)
-def _bypass_auth() -> AsyncGenerator[None]:
-    """Mock JWT validation so tests are not blocked by auth."""
-    with patch(
-        "core.auth.get_current_user",
-        new_callable=AsyncMock,
-    ):
-        yield
 
 
 @pytest.fixture

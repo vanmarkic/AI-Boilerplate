@@ -4,10 +4,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
-    database_url: str = "postgresql+asyncpg://dev:dev@localhost:5432/boilerplate"
-    keycloak_url: str = "http://localhost:8080"
-    keycloak_realm: str = "boilerplate"
-    keycloak_audience: str = "tfc-api"
+    database_url: str = "postgresql+asyncpg://dev:dev@localhost:5433/tfc"
     environment: str = "development"
     debug: bool = True
     api_prefix: str = "/api"

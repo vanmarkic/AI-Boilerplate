@@ -8,8 +8,8 @@ A real-time exercise simulation platform. A Game Master loads a scenario, starts
 |-------|-----------|
 | Frontend | Angular 21 — zoneless, signals, standalone components (port 4201) |
 | Backend | FastAPI — Python 3.12+, async, Pydantic v2 (port 8001) |
-| Database | PostgreSQL 17 — SQLAlchemy 2.0 (async), Alembic migrations |
-| Auth | Keycloak — OIDC, JWT validation via PyJWT |
+| Database | PostgreSQL 17 — SQLAlchemy 2.0 (async), Alembic migrations (port 5433, separate from main) |
+| Auth | None (disabled — anonymous access) |
 | Real-time | WebSocket — engine state broadcast + client commands |
 | Shared types | `@aspect/tfc-shared` — TypeScript types and lifecycle constants |
 | Design System | `@aspect/design-system` + `@aspect/ui` (shared with main app) |
@@ -17,7 +17,7 @@ A real-time exercise simulation platform. A Game Master loads a scenario, starts
 ## Quick Start
 
 ```bash
-# Full Docker stack (db + keycloak + tfc-api)
+# Full Docker stack (db + tfc-api)
 make dev-tfc
 
 # Best DX: DB + TFC API in Docker, Angular natively (instant HMR)
