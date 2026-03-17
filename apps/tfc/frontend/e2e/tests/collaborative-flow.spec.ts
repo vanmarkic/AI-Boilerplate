@@ -21,7 +21,9 @@ test.describe('Join page — collaborative session code', () => {
 
     await page.goto('/join?code=ABC123');
 
-    await expect(page.locator('#session-code')).toHaveValue('ABC123');
+    await expect(
+      page.getByPlaceholder('e.g. ABC123'),
+    ).toHaveValue('ABC123');
   });
 
   test('hides role selector for simple_collaborative exercise', async ({
@@ -32,8 +34,8 @@ test.describe('Join page — collaborative session code', () => {
     await mockApi.install();
 
     await page.goto('/join');
-    await page.locator('#session-code').fill('COLLAB');
-    await page.locator('#display-name').fill('Alice');
+    await page.getByPlaceholder('e.g. ABC123').fill('COLLAB');
+    await page.getByPlaceholder('Enter your name').fill('Alice');
 
     // Trigger the by-code lookup by clicking join
     // Role selector should be hidden after lookup resolves
@@ -65,7 +67,7 @@ test.describe('Join page — collaborative session code', () => {
     await mockApi.install();
 
     await page.goto('/join?code=SW2026');
-    await page.locator('#display-name').fill('Alice');
+    await page.getByPlaceholder('Enter your name').fill('Alice');
     await page.getByRole('button', { name: 'Join' }).click();
 
     await expect(page).toHaveURL(/waiting-room/);
@@ -203,10 +205,12 @@ test.describe('Full collaborative onboarding', () => {
 
     // 1. Land on join with pre-filled code
     await page.goto('/join?code=SILENT');
-    await expect(page.locator('#session-code')).toHaveValue('SILENT');
+    await expect(
+      page.getByPlaceholder('e.g. ABC123'),
+    ).toHaveValue('SILENT');
 
     // 2. Enter name and join
-    await page.locator('#display-name').fill('Alice');
+    await page.getByPlaceholder('Enter your name').fill('Alice');
     await page.getByRole('button', { name: 'Join' }).click();
 
     // 3. In collaborative waiting room

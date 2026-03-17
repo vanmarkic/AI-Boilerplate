@@ -22,8 +22,8 @@ import { SeaBackdrop } from './sea-backdrop';
       align-items: center;
       justify-content: center;
       min-height: 100dvh;
-      padding: var(--space-xl);
-      gap: var(--space-xl);
+      padding: var(--spacing-xl);
+      gap: var(--spacing-xl);
     }
 
     .home-hero {
@@ -34,7 +34,7 @@ import { SeaBackdrop } from './sea-backdrop';
       font-size: var(--font-size-3xl, 2rem);
       font-weight: 700;
       letter-spacing: -0.02em;
-      margin: 0 0 var(--space-xs);
+      margin: 0 0 var(--spacing-xs);
     }
 
     .home-hero p {
@@ -45,16 +45,18 @@ import { SeaBackdrop } from './sea-backdrop';
     .home-menu {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: var(--space-md);
+      gap: var(--spacing-md);
       width: 100%;
       max-width: 560px;
     }
 
     .menu-card {
+      --glass-strength: 2.5;
+      --glow-strength: 1.5;
       display: flex;
       flex-direction: column;
-      gap: var(--space-sm);
-      padding: var(--space-xl);
+      gap: var(--spacing-sm);
+      padding: var(--spacing-xl);
       background: var(--glass-bg);
       backdrop-filter: blur(var(--glass-blur));
       -webkit-backdrop-filter: blur(var(--glass-blur));
