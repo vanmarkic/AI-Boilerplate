@@ -77,6 +77,26 @@ Identified during review, ordered by severity:
 | 5 | **Score not in snapshot** | `exercise_engine.snapshot()` | Reconnecting player loses score display |
 | 6 | **PlayerType never set from scenario** | Frontend store `setPlayerType()` never called | Advisor/decision-maker distinction dead in UI |
 | 7 | **No `max_selections` field** | `DecisionTemplateDef` | Cannot express "pick up to 2 cards" constraint |
+| 8 | **Domain terminology hardcoded** | `tfc-shared/constants/domains.ts`, `domain.service.ts` | See §4.1 |
+
+### §4.1 Domain terminology should live in the DB
+
+`DomainConfig` (terminology, theme, roles, severity levels) is currently hardcoded as compile-time constants in two places:
+
+- **Shared package:** `packages/tfc-shared/src/constants/domains.ts` — 3 presets (default, cybersecurity, healthcare)
+- **Frontend service:** `apps/tfc/frontend/src/app/core/domain.service.ts` — 4 presets (default, cybersecurity, healthcare, military) with a different `DomainConfig` interface
+
+Problems:
+1. **Duplicated and divergent.** The two `DomainConfig` interfaces don't match (shared has `theme: ThemeConfig` object, frontend has `theme: string`). The preset lists differ (shared has no military, frontend has no `scenario` term).
+2. **Not scenario-bound.** A scenario author cannot pick or customize terminology — it's a frontend-only toggle with no persistence.
+3. **Not extensible.** Adding a new domain (e.g., naval, emergency management) requires code changes and a redeploy.
+
+Target state:
+- `DomainConfig` becomes a DB entity, seeded with current presets.
+- A scenario references a `domain_config_id`. When the exercise loads, terminology is fetched from the API and applied.
+- `DomainService` loads from the API at exercise start instead of from a hardcoded map.
+- The shared package defines the **interface only** (`TerminologyMap`, `DomainConfig`), not the presets.
+- This is functionally i18n: the scenario says "use military locale" and all UI terms resolve at runtime.
 
 ## 5. Property Test Coverage
 
