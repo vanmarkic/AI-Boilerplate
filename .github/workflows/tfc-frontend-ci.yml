@@ -107,3 +107,9 @@ jobs:
           name: tfc-playwright-report
           path: apps/tfc/frontend/playwright-report/
           retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: tfc-playwright-screenshots
+          path: apps/tfc/frontend/test-results/
+          retention-days: 7
