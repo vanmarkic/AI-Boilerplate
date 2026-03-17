@@ -108,22 +108,42 @@ import { handleDecisionWsChanges } from './player-ws-handler';
         </ui-card>
       </div>
 
-      @if (activeDecision(); as decision) {
-        <div class="overlay">
-          <tfc-decision-panel
-            [title]="decision.title"
-            [description]="decision.description"
-            [questionType]="decision.question_type"
-            [options]="decision.options"
-            (submitted)="onDecisionSubmitted(decision, $event)"
-            (closed)="store.closeDecision(decision.id)" />
+      @if (store.score(); as score) {
+        <div class="score-bar">
+          <span class="text-sm font-medium">Turn {{ score.turnNumber }}</span>
+          <span class="text-sm">Score: {{ score.totalScore }}</span>
+          <span class="text-sm text-muted-foreground">Next: {{ score.nextDecisionTimeMs / 1000 }}s</span>
         </div>
       }
-
+      @if (activeDecision(); as decision) {
+        <div class="overlay">
+          @if (store.isCollaborative() && !store.isDecisionMaker()) {
+            <tfc-decision-panel [title]="'[Advisor] ' + decision.title" [description]="decision.description"
+              [questionType]="decision.question_type" [options]="decision.options"
+              (submitted)="onRecommendationSubmitted(decision, $event)" />
+          } @else {
+            @if (store.isCollaborative() && recommendationEntries(decision).length > 0) {
+              <ui-card title="Advisor Recommendations">
+                @for (entry of recommendationEntries(decision); track entry[0]) {
+                  <div class="flex items-center justify-between p-sm border-b">
+                    <span class="text-sm">{{ entry[0] }}</span>
+                    <ui-badge variant="secondary">{{ entry[1] }}</ui-badge>
+                  </div>
+                }
+              </ui-card>
+            }
+            <tfc-decision-panel [title]="decision.title" [description]="decision.description"
+              [questionType]="decision.question_type" [options]="decision.options"
+              (submitted)="onDecisionSubmitted(decision, $event)" (closed)="store.closeDecision(decision.id)" />
+          }
+        </div>
+      }
       <footer class="exercise-controls">
         <div class="exercise-controls__group">
           <p class="text-sm text-muted-foreground">
-            Waiting for {{ domain.term('gameMaster') }} actions...
+            @if (store.isCollaborative()) {
+              {{ store.isDecisionMaker() ? 'You are the Decision Maker' : 'You are an Advisor' }}
+            } @else { Waiting for {{ domain.term('gameMaster') }} actions... }
           </p>
         </div>
       </footer>
@@ -196,6 +216,23 @@ export class PlayerView implements OnInit, OnDestroy {
     this.selectedIssueId.set(issueId);
   }
 
+  protected readonly Object = Object;
+
+  protected recommendationEntries(decision: ActiveDecision): [string, string][] {
+    return Object.entries(decision.recommendations || {});
+  }
+
+  protected onRecommendationSubmitted(
+    decision: ActiveDecision,
+    event: { selectedOptions: string[]; freeText: string },
+  ): void {
+    const optionId = event.selectedOptions[0];
+    if (!optionId) return;
+    this.decisionApi.submitRecommendation(
+      this.exerciseId(), decision.id, optionId,
+    ).subscribe();
+  }
+
   protected onDecisionSubmitted(
     decision: ActiveDecision,
     event: { selectedOptions: string[]; freeText: string },
@@ -233,6 +270,16 @@ export class PlayerView implements OnInit, OnDestroy {
           );
         }
         handleDecisionWsChanges(change, this.store);
+        if (change.type === 'score_change') {
+          this.store.applyScoreChange(change as never);
+        }
+        if (change.type === 'recommendation_submitted') {
+          this.store.applyRecommendation(
+            change['decision_id'] as string,
+            change['participant_id'] as string,
+            change['option_id'] as string,
+          );
+        }
       }
     }
   }
