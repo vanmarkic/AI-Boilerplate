@@ -1,0 +1,10 @@
+[build]
+builder = "dockerfile"
+dockerfilePath = "apps/tfc/frontend/Dockerfile.railway"
+watchPatterns = ["apps/tfc/frontend/**", "packages/**"]
+
+[deploy]
+healthcheckPath = "/"
+healthcheckTimeout = 15
+restartPolicyType = "on_failure"
+restartPolicyMaxRetries = 3
