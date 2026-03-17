@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 80" preserveAspectRatio="none" fill="none">
+  <!-- Layered wave pattern for ambient background -->
+  <path d="M0 40 C360 20 720 60 1080 40 C1260 30 1380 50 1440 40 L1440 80 L0 80 Z"
+    fill="currentColor" opacity="0.04"/>
+  <path d="M0 50 C240 30 480 65 720 45 C960 25 1200 60 1440 50 L1440 80 L0 80 Z"
+    fill="currentColor" opacity="0.06"/>
+  <path d="M0 60 C180 50 360 70 540 55 C720 40 900 65 1080 55 C1260 45 1380 60 1440 55 L1440 80 L0 80 Z"
+    fill="currentColor" opacity="0.08"/>
+</svg>
