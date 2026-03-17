@@ -26,7 +26,7 @@ A full-stack monorepo (Angular 21 / FastAPI / PostgreSQL) architected to maximiz
 # Main app (db + keycloak + api + frontend)
 make dev
 
-# TFC app (db + keycloak + tfc-api)
+# TFC app (db + tfc-api)
 make dev-tfc
 
 # Both apps together
