@@ -1,21 +1,22 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import {
-  CardComponent,
-  BadgeComponent,
-} from '@aspect/ui';
+import { CardComponent, BadgeComponent } from '@aspect/ui';
 import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { DecisionPanelComponent } from '../../shared/decision-panel.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
+import { AmbientBackgroundComponent } from '../../shared/ambient-background.component';
+import { TurnBannerComponent } from '../../shared/turn-banner.component';
+import { AdvisorBubblesComponent, AdvisorRecommendation } from '../../shared/advisor-bubbles.component';
+import { ScoreBarComponent } from '../../shared/score-bar.component';
 import { DomainService } from '../../core/domain.service';
 import { EngineApiService } from '../../core/engine-api.service';
-import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
+import { ExerciseWsService } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
 import { formatTimeMs } from '../../core/format-time';
 import { DecisionApiService } from '../../core/decision-api.service';
 import type { ActiveDecision, DecisionDetail } from '../../core/decision-api.service';
 import { Subscription } from 'rxjs';
-import { handleDecisionWsChanges } from './player-ws-handler';
+import { handlePlayerWsMessage } from './player-ws-handler';
 
 @Component({
   selector: 'tfc-player-view',
@@ -24,8 +25,12 @@ import { handleDecisionWsChanges } from './player-ws-handler';
   imports: [
     CardComponent, BadgeComponent,
     ClockDisplayComponent, PhaseBadgeComponent, DecisionPanelComponent, ContextPanelComponent,
+    AmbientBackgroundComponent, TurnBannerComponent,
+    AdvisorBubblesComponent, ScoreBarComponent,
   ],
   template: `
+    <tfc-ambient-background />
+
     <div class="exercise-layout">
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || domain.term('exercise') + ' Dashboard' }}</span>
@@ -35,6 +40,12 @@ import { handleDecisionWsChanges } from './player-ws-handler';
           <tfc-phase-badge [phase]="store.phase()" />
         </div>
       </header>
+
+      @if (store.score(); as score) {
+        <tfc-turn-banner
+          [label]="'Turn ' + score.turnNumber"
+          [turnNumber]="score.turnNumber" />
+      }
 
       <div class="exercise-overview">
         <ui-card [title]="'Released ' + domain.term('event') + 's'">
@@ -58,9 +69,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
                 {{ issue.lifecycle }}
               </ui-badge>
               @if (getIssueCountdown(issue.id); as cd) {
-                <span class="text-xs text-muted-foreground ml-sm">
-                  Auto-resolve: {{ cd }}
-                </span>
+                <span class="text-xs text-muted-foreground ml-sm">Auto-resolve: {{ cd }}</span>
               }
             </div>
           } @empty {
@@ -90,10 +99,8 @@ import { handleDecisionWsChanges } from './player-ws-handler';
 
         @if (store.context(); as ctx) {
           <tfc-context-panel
-            [title]="ctx.title"
-            [briefing]="ctx.briefing"
-            [objectives]="ctx.objectives"
-            [rules]="ctx.rules" />
+            [title]="ctx.title" [briefing]="ctx.briefing"
+            [objectives]="ctx.objectives" [rules]="ctx.rules" />
         }
 
         <ui-card [title]="domain.term('decision') + ' History'">
@@ -109,12 +116,9 @@ import { handleDecisionWsChanges } from './player-ws-handler';
       </div>
 
       @if (store.score(); as score) {
-        <div class="score-bar">
-          <span class="text-sm font-medium">Turn {{ score.turnNumber }}</span>
-          <span class="text-sm">Score: {{ score.totalScore }}</span>
-          <span class="text-sm text-muted-foreground">Next: {{ score.nextDecisionTimeMs / 1000 }}s</span>
-        </div>
+        <tfc-score-bar [score]="score" />
       }
+
       @if (activeDecision(); as decision) {
         <div class="overlay">
           @if (store.isCollaborative() && !store.isDecisionMaker()) {
@@ -122,15 +126,8 @@ import { handleDecisionWsChanges } from './player-ws-handler';
               [questionType]="decision.question_type" [options]="decision.options"
               (submitted)="onRecommendationSubmitted(decision, $event)" />
           } @else {
-            @if (store.isCollaborative() && recommendationEntries(decision).length > 0) {
-              <ui-card title="Advisor Recommendations">
-                @for (entry of recommendationEntries(decision); track entry[0]) {
-                  <div class="flex items-center justify-between p-sm border-b">
-                    <span class="text-sm">{{ entry[0] }}</span>
-                    <ui-badge variant="secondary">{{ entry[1] }}</ui-badge>
-                  </div>
-                }
-              </ui-card>
+            @if (store.isCollaborative() && advisorRecs(decision).length > 0) {
+              <tfc-advisor-bubbles [recommendations]="advisorRecs(decision)" />
             }
             <tfc-decision-panel [title]="decision.title" [description]="decision.description"
               [questionType]="decision.question_type" [options]="decision.options"
@@ -138,6 +135,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
           }
         </div>
       }
+
       <footer class="exercise-controls">
         <div class="exercise-controls__group">
           <p class="text-sm text-muted-foreground">
@@ -160,6 +158,7 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
   private readonly exerciseId = signal(1); // TODO: from route param
   private sub: Subscription | null = null;
+  private connSub: Subscription | null = null;
 
   protected visibleEvents() {
     return this.store.events().filter(
@@ -175,10 +174,19 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   }
 
+  protected advisorRecs(decision: ActiveDecision): AdvisorRecommendation[] {
+    const recs = decision.recommendations || {};
+    return Object.entries(recs).map(([pid, oid]) => ({
+      participantId: pid,
+      participantName: pid,
+      optionId: oid,
+    }));
+  }
+
   ngOnInit(): void {
     const id = this.exerciseId();
     this.ws.connect(id, 'player');
-    this.sub = this.ws.messages$.subscribe((msg) => this.handleWsMessage(msg));
+    this.sub = this.ws.messages$.subscribe((msg) => handlePlayerWsMessage(msg, this.store));
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
       next: (ctx) => this.store.setContext(ctx),
@@ -190,8 +198,6 @@ export class PlayerView implements OnInit, OnDestroy {
       if (connected) this.loadSnapshot(id);
     });
   }
-
-  private connSub: Subscription | null = null;
 
   private loadSnapshot(exerciseId: number): void {
     this.api.snapshot(exerciseId).subscribe({
@@ -216,12 +222,6 @@ export class PlayerView implements OnInit, OnDestroy {
     this.selectedIssueId.set(issueId);
   }
 
-  protected readonly Object = Object;
-
-  protected recommendationEntries(decision: ActiveDecision): [string, string][] {
-    return Object.entries(decision.recommendations || {});
-  }
-
   protected onRecommendationSubmitted(
     decision: ActiveDecision,
     event: { selectedOptions: string[]; freeText: string },
@@ -238,7 +238,7 @@ export class PlayerView implements OnInit, OnDestroy {
     event: { selectedOptions: string[]; freeText: string },
   ): void {
     this.decisionApi.submitResponse(Number(decision.id), {
-      participant_id: 'current-user', // TODO: from auth
+      participant_id: 'current-user',
       participant_name: 'Player',
       selected_options: event.selectedOptions,
       free_text: event.freeText || null,
@@ -247,40 +247,4 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   }
 
-  private handleWsMessage(msg: WsMessage): void {
-    if (msg.type === 'snapshot') {
-      this.store.applySnapshot(msg as never);
-    }
-    if (msg.type === 'state_changes' && msg.changes) {
-      for (const change of msg.changes) {
-        if (change.type === 'phase_change') {
-          this.store.applyPhaseChange(change['phase'] as string);
-          if (change['time']) {
-            this.store.applyTimeUpdate(change['time'] as never);
-          }
-        }
-        if (change.type === 'event_change') {
-          this.store.updateEvent(change['event_id'] as string, change['lifecycle'] as string);
-        }
-        if (change.type === 'issue_change') {
-          this.store.updateIssue(
-            change['issue_id'] as string,
-            change['lifecycle'] as string,
-            change['released'] as boolean,
-          );
-        }
-        handleDecisionWsChanges(change, this.store);
-        if (change.type === 'score_change') {
-          this.store.applyScoreChange(change as never);
-        }
-        if (change.type === 'recommendation_submitted') {
-          this.store.applyRecommendation(
-            change['decision_id'] as string,
-            change['participant_id'] as string,
-            change['option_id'] as string,
-          );
-        }
-      }
-    }
-  }
 }
