@@ -58,10 +58,10 @@ function createGlowTexture(): THREE.Texture {
 
 function waveY(x: number, z: number, t: number): number {
   return (
-    Math.sin(x * 0.5 + t * 0.7) * 0.45 +
-    Math.sin(z * 0.7 + t * 0.5) * 0.3 +
-    Math.sin((x + z) * 0.35 + t * 0.4) * 0.2 +
-    Math.sin(x * 1.2 - t * 0.3) * 0.1
+    Math.sin(x * 0.4 + t * 0.6) * 0.8 +
+    Math.sin(z * 0.55 + t * 0.45) * 0.55 +
+    Math.sin((x + z) * 0.3 + t * 0.35) * 0.35 +
+    Math.sin(x * 0.9 - t * 0.25) * 0.2
   );
 }
 
@@ -166,22 +166,22 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     pointLight2.position.set(-4, 1, -2);
     this.scene.add(pointLight2);
 
-    // Sea mesh
-    const geometry = new THREE.PlaneGeometry(20, 12, 40, 25);
+    // Sea mesh — coarse grid for chunky low-poly wireframe
+    const geometry = new THREE.PlaneGeometry(24, 14, 18, 12);
     geometry.rotateX(-Math.PI / 2);
 
     const material = new THREE.MeshBasicMaterial({
       color: primary,
       wireframe: true,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.85,
     });
 
     this.plane = new THREE.Mesh(geometry, material);
     this.plane.position.y = -0.3;
     this.scene.add(this.plane);
 
-    this.scene.fog = new THREE.Fog(bgColor, 6, 14);
+    this.scene.fog = new THREE.Fog(bgColor, 8, 16);
 
     // Glow texture for signal sprites
     this.glowTexture = createGlowTexture();
@@ -201,9 +201,9 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     const x = (Math.random() - 0.5) * 14;
     const z = (Math.random() - 0.5) * 8;
 
-    // Small point light for local glow on the wireframe
-    const light = new THREE.PointLight(color, 0, 3);
-    light.position.set(x, waveY(x, z, t) + 0.3 - 0.3, z);
+    // Point light for local glow on the wireframe
+    const light = new THREE.PointLight(color, 0, 5);
+    light.position.set(x, waveY(x, z, t), z);
     this.scene.add(light);
 
     // Sprite billboard
@@ -216,7 +216,7 @@ export class SeaBackdrop implements OnInit, OnDestroy {
       depthWrite: false,
     });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(0.6, 0.6, 1);
+    sprite.scale.set(0.8, 0.8, 1);
     sprite.position.copy(light.position);
     this.scene.add(sprite);
 
@@ -256,12 +256,12 @@ export class SeaBackdrop implements OnInit, OnDestroy {
       const intensity = fade * pulse;
 
       // Float on waves
-      const y = waveY(s.x, s.z, t) + 0.3 - 0.3;
-      s.light.position.set(s.x, y + 0.15, s.z);
-      s.light.intensity = intensity * 2;
-      s.sprite.position.set(s.x, y + 0.15, s.z);
-      (s.sprite.material as THREE.SpriteMaterial).opacity = intensity * 0.8;
-      s.sprite.scale.setScalar(0.4 + intensity * 0.3);
+      const y = waveY(s.x, s.z, t);
+      s.light.position.set(s.x, y + 0.25, s.z);
+      s.light.intensity = intensity * 3;
+      s.sprite.position.set(s.x, y + 0.25, s.z);
+      (s.sprite.material as THREE.SpriteMaterial).opacity = intensity * 0.9;
+      s.sprite.scale.setScalar(0.5 + intensity * 0.4);
     }
   }
 
