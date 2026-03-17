@@ -8,8 +8,8 @@ test.describe('Scenario Builder', () => {
 
   test('should have title and description inputs', async ({ page }) => {
     await page.goto('/builder');
-    const titleInput = page.locator('#scenario-title');
-    const descInput = page.locator('#scenario-desc');
+    const titleInput = page.locator('input#scenario-title');
+    const descInput = page.locator('input#scenario-desc, textarea#scenario-desc');
     await expect(titleInput).toBeVisible();
     await expect(descInput).toBeVisible();
   });
