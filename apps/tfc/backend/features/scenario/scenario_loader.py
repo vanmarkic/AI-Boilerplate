@@ -68,6 +68,7 @@ def load_decision_templates(
                 for o in dt.options
             ],
             completion_mode=dt.completion_mode,
+            timeout_ms=dt.timeout_ms,
         )
         for dt in content.decision_templates
     ]

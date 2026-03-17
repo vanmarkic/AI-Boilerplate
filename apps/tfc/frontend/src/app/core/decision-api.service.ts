@@ -19,6 +19,7 @@ export interface ActiveDecision {
   options: DecisionOption[];
   completion_mode: string;
   target_roles: string[];
+  timeout_ms: number;
   status: string;
   opened_at_pt_ms: number;
   closed_at_pt_ms: number | null;

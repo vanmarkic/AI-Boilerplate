@@ -10,6 +10,7 @@ import logging
 
 from fastapi import APIRouter, Query, WebSocket, WebSocketDisconnect
 
+from engine.session_store import session_store
 from features.exercise.adapters.connection_manager import connection_manager
 from features.exercise.adapters.presence_service import broadcast_presence
 
@@ -34,6 +35,14 @@ async def exercise_ws(
     await websocket.accept()
     connection_manager.connect(exercise_id, websocket, role, participant_id)
     await broadcast_presence(exercise_id)
+
+    # Send snapshot on connect so client can re-sync
+    engine = session_store.get(exercise_id)
+    if engine is not None:
+        snapshot = engine.snapshot()
+        await websocket.send_text(
+            json.dumps({"type": "snapshot", **snapshot}),
+        )
     try:
         while True:
             raw = await websocket.receive_text()

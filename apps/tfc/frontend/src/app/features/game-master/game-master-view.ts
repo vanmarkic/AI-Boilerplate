@@ -70,10 +70,8 @@ import { Subscription } from 'rxjs';
                 <ui-badge variant="default">open</ui-badge>
               </div>
               <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm"
-                  (click)="viewDecision(decision.id)">View</button>
-                <button uiButton variant="destructive" size="sm"
-                  (click)="closeDecision(decision.id)">Close</button>
+                <button uiButton variant="outline" size="sm" (click)="viewDecision(decision.id)">View</button>
+                <button uiButton variant="destructive" size="sm" (click)="closeDecision(decision.id)">Close</button>
               </div>
             </div>
           } @empty {
@@ -97,12 +95,9 @@ import { Subscription } from 'rxjs';
               <p class="text-muted-foreground text-sm">No responses yet.</p>
             }
           } @else {
-            <p class="text-muted-foreground text-sm">
-              Select an event, issue, or decision to view full context.
-            </p>
+            <p class="text-muted-foreground text-sm">Select a decision to view context.</p>
           }
         </ui-collapsible-panel>
-
         @if (store.context(); as ctx) {
           <tfc-context-panel
             [title]="ctx.title" [briefing]="ctx.briefing"
@@ -145,6 +140,7 @@ export class GameMasterView implements OnDestroy {
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
   protected readonly exerciseId = signal<number | null>(null);
   private sub: Subscription | null = null;
+  private connSub: Subscription | null = null;
 
   protected onScenarioSelected(scenario: ScenarioResponse): void {
     if (scenario.domain_id != null) {
@@ -164,14 +160,19 @@ export class GameMasterView implements OnDestroy {
   private connectExercise(id: number): void {
     this.ws.connect(id, 'gm');
     this.sub = this.ws.messages$.subscribe((msg) => handleGmWsMessage(msg, this.store));
+    this.loadSnapshot(id);
+    this.decisionApi.getContext(id).subscribe({ next: (ctx) => this.store.setContext(ctx) });
+    this.connSub = this.ws.connected$.subscribe((c) => { if (c) this.loadSnapshot(id); });
+  }
+
+  ngOnDestroy(): void { this.ws.disconnect(); this.sub?.unsubscribe(); this.connSub?.unsubscribe(); }
+
+  private loadSnapshot(id: number): void {
     this.api.snapshot(id).subscribe({
       next: (snap) => this.store.applySnapshot(snap),
       error: () => this.store.setError('Failed to load snapshot'),
     });
-    this.decisionApi.getContext(id).subscribe({ next: (ctx) => this.store.setContext(ctx) });
   }
-
-  ngOnDestroy(): void { this.ws.disconnect(); this.sub?.unsubscribe(); }
 
   protected viewDecision(id: string): void {
     this.decisionApi.getDecisionDetail(Number(id)).subscribe({
