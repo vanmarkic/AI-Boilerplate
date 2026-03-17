@@ -11,19 +11,24 @@
     --color-popover: oklch(19% 0.02 145);
     --color-secondary: oklch(19% 0.02 145);
     --color-muted: oklch(22% 0.02 145);
-
     --color-border: oklch(28% 0.02 145);
     --color-input: oklch(28% 0.02 145);
-
     --color-foreground: oklch(88% 0.04 145);
     --color-card-foreground: oklch(88% 0.04 145);
     --color-muted-foreground: oklch(55% 0.03 145);
-
     --color-primary: oklch(68% 0.18 145);
     --color-primary-foreground: oklch(10% 0.02 145);
     --color-accent: oklch(68% 0.18 145);
     --color-accent-foreground: oklch(10% 0.02 145);
     --color-ring: oklch(68% 0.18 145);
+
+    /* ── Glow + Glass (on by default) ──────────────── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(68% 0.18 145);
+    --glow-sm:      0 0 8px  oklch(68% 0.18 145 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(68% 0.18 145 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(68% 0.18 145 / calc(0.5 * var(--glow-strength)));
   }
 
   /* ── Healthcare: clinical blue/white aesthetic ──────── */
@@ -33,19 +38,24 @@
     --color-popover: oklch(23% 0.015 230);
     --color-secondary: oklch(23% 0.015 230);
     --color-muted: oklch(27% 0.015 230);
-
     --color-border: oklch(32% 0.01 230);
     --color-input: oklch(32% 0.01 230);
-
     --color-foreground: oklch(92% 0 0);
     --color-card-foreground: oklch(92% 0 0);
     --color-muted-foreground: oklch(55% 0.01 230);
-
     --color-primary: oklch(62% 0.14 230);
     --color-primary-foreground: oklch(98% 0 0);
     --color-accent: oklch(62% 0.14 230);
     --color-accent-foreground: oklch(98% 0 0);
     --color-ring: oklch(62% 0.14 230);
+
+    /* ── Glow + Glass (on by default) ──────────────── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(62% 0.14 230);
+    --glow-sm:      0 0 8px  oklch(62% 0.14 230 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(62% 0.14 230 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(62% 0.14 230 / calc(0.5 * var(--glow-strength)));
   }
 
   /* ── Military: olive/sand tactical aesthetic ────────── */
@@ -55,18 +65,23 @@
     --color-popover: oklch(23% 0.025 95);
     --color-secondary: oklch(23% 0.025 95);
     --color-muted: oklch(27% 0.025 95);
-
     --color-border: oklch(32% 0.02 95);
     --color-input: oklch(32% 0.02 95);
-
     --color-foreground: oklch(90% 0.01 95);
     --color-card-foreground: oklch(90% 0.01 95);
     --color-muted-foreground: oklch(55% 0.02 95);
-
     --color-primary: oklch(72% 0.12 85);
     --color-primary-foreground: oklch(14% 0.02 95);
     --color-accent: oklch(72% 0.12 85);
     --color-accent-foreground: oklch(14% 0.02 95);
     --color-ring: oklch(72% 0.12 85);
+
+    /* ── Glow + Glass (on by default) ──────────────── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(72% 0.12 85);
+    --glow-sm:      0 0 8px  oklch(72% 0.12 85 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(72% 0.12 85 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(72% 0.12 85 / calc(0.5 * var(--glow-strength)));
   }
 }
