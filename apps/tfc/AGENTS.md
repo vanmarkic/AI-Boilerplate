@@ -87,7 +87,7 @@ Exports TypeScript types and lifecycle constants consumed by both frontend and b
 ## Development Commands
 
 ```bash
-make dev-tfc              # Full TFC Docker stack (db + keycloak + tfc-api)
+make dev-tfc              # Full TFC Docker stack (db + tfc-api)
 make dev-tfc-local        # DB + TFC API in Docker, Angular natively (instant HMR)
 make dev-tfc-frontend     # TFC Angular only (expects backend running)
 make dev-tfc-backend      # TFC backend + db (Docker)
