@@ -7,10 +7,10 @@ import { DomainService } from '../core/domain.service';
   template: `
     <select
       class="input-base"
-      [value]="domain.activeDomain().id"
+      [value]="domain.activeDomain().slug"
       (change)="onDomainChange($event)">
-      @for (d of domain.availableDomains; track d.id) {
-        <option [value]="d.id" [selected]="d.id === domain.activeDomain().id">
+      @for (d of domain.availableDomains(); track d.slug) {
+        <option [value]="d.slug" [selected]="d.slug === domain.activeDomain().slug">
           {{ d.name }}
         </option>
       }
