@@ -14,7 +14,7 @@ import { ExerciseApiService } from '../../core/exercise-api.service';
 import { ExerciseWsService } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
 import { ScenarioPickerComponent } from './scenario-picker';
-import type { ScenarioResponse } from '../../core/scenario-api.service';
+import type { ScenarioSelection } from './scenario-picker';
 import { handleGmWsMessage } from './gm-ws-handler';
 import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-engine-actions';
 import { EventTimelineComponent } from './event-timeline.component';
@@ -142,7 +142,7 @@ export class GameMasterView implements OnDestroy {
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
 
-  protected onScenarioSelected(scenario: ScenarioResponse): void {
+  protected onScenarioSelected({ scenario, gameMode }: ScenarioSelection): void {
     if (scenario.domain_id != null) {
       const domainMap: Record<number, string> = { 1: 'cybersecurity', 2: 'healthcare', 3: 'military' };
       this.domain.setDomain(domainMap[scenario.domain_id] ?? 'default');
@@ -151,6 +151,7 @@ export class GameMasterView implements OnDestroy {
       title: scenario.title,
       scenario_id: scenario.id,
       time_factor: scenario.content?.default_time_factor ?? 1.0,
+      game_mode: gameMode,
     }).subscribe({
       next: (ex) => { this.exerciseId.set(ex.id); this.connectExercise(ex.id); },
       error: () => this.store.setError('Failed to create exercise'),
