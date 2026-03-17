@@ -1,9 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
 import {
-  PageHeaderComponent,
   CardComponent,
   BadgeComponent,
-  ButtonDirective,
 } from '@aspect/ui';
 import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
@@ -22,7 +20,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore],
   imports: [
-    PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective,
+    CardComponent, BadgeComponent,
     ClockDisplayComponent, PhaseBadgeComponent, DecisionPanelComponent, ContextPanelComponent,
   ],
   template: `

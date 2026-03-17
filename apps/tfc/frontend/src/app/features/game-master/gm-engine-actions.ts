@@ -1,4 +1,4 @@
-import type { EngineApiService } from '../../core/engine-api.service';
+import type { EngineApiService, PhaseChange } from '../../core/engine-api.service';
 import type { ExerciseStore } from '../../core/exercise.store';
 
 type StoreInstance = InstanceType<typeof ExerciseStore>;
@@ -6,7 +6,7 @@ type StoreInstance = InstanceType<typeof ExerciseStore>;
 /** Apply a phase+time response from an engine action to the store */
 function applyPhaseResponse(
   store: StoreInstance,
-  response: { phase: string; time: Record<string, unknown> },
+  response: PhaseChange,
 ): void {
   store.applyPhaseChange(response.phase);
   store.applyTimeUpdate(response.time as never);

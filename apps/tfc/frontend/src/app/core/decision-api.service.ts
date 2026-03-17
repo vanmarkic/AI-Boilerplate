@@ -92,10 +92,11 @@ export class DecisionApiService {
 
   /** List all decisions for an exercise */
   listDecisions(exerciseId: number, status?: string): Observable<DecisionDetail[]> {
-    const params = status ? { status } : {};
+    const params: Record<string, string | number> = { exercise_id: exerciseId };
+    if (status) { params['status'] = status; }
     return this.http.get<DecisionDetail[]>(
       `${this.base}/api/decisions`,
-      { params: { exercise_id: exerciseId, ...params } },
+      { params },
     );
   }
 
