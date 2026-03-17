@@ -58,6 +58,51 @@
     --glow-lg:      0 0 20px oklch(62% 0.14 230 / calc(0.5 * var(--glow-strength)));
   }
 
+  /* ── Hearts of Iron: warm brown/gold WW2 aesthetic ──── */
+  [data-theme="tfc-hoi"] {
+    --color-background: oklch(13% 0.02 55);
+    --color-card: oklch(18% 0.025 50);
+    --color-popover: oklch(22% 0.025 50);
+    --color-secondary: oklch(22% 0.025 50);
+    --color-muted: oklch(26% 0.02 50);
+    --color-border: oklch(32% 0.03 55);
+    --color-input: oklch(30% 0.025 50);
+    --color-foreground: oklch(88% 0.02 75);
+    --color-card-foreground: oklch(88% 0.02 75);
+    --color-muted-foreground: oklch(55% 0.025 60);
+    --color-primary: oklch(75% 0.12 80);
+    --color-primary-foreground: oklch(13% 0.02 55);
+    --color-accent: oklch(75% 0.12 80);
+    --color-accent-foreground: oklch(13% 0.02 55);
+    --color-ring: oklch(75% 0.12 80);
+
+    /* ── Semantic signals (warm-shifted) ──────────── */
+    --color-destructive: oklch(55% 0.2 25);
+    --color-destructive-foreground: oklch(92% 0 0);
+    --color-warning: oklch(72% 0.14 75);
+    --color-warning-foreground: oklch(13% 0.02 55);
+    --color-success: oklch(60% 0.12 145);
+    --color-success-foreground: oklch(13% 0.02 55);
+    --color-info: oklch(65% 0.06 60);
+    --color-info-foreground: oklch(13% 0.02 55);
+
+    /* ── Map surfaces (sepia-toned) ───────────────── */
+    --color-map-background: oklch(16% 0.02 55);
+    --color-map-land: oklch(22% 0.03 55);
+    --color-map-water: oklch(18% 0.03 220);
+    --color-map-roads: oklch(30% 0.02 55);
+    --color-map-buildings: oklch(25% 0.025 50);
+    --color-map-labels: oklch(55% 0.025 60);
+
+    /* ── Glow + Glass (warm amber, on by default) ── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(75% 0.12 80);
+    --glow-sm:      0 0 8px  oklch(75% 0.12 80 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(75% 0.12 80 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(75% 0.12 80 / calc(0.5 * var(--glow-strength)));
+  }
+
   /* ── Military: olive/sand tactical aesthetic ────────── */
   [data-theme="tfc-military"] {
     --color-background: oklch(14% 0.02 95);
