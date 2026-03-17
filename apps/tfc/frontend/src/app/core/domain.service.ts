@@ -19,7 +19,7 @@ export interface DomainConfig {
 const DEFAULT_DOMAIN: DomainConfig = {
   id: 'default',
   name: 'Default',
-  theme: '',
+  theme: 'tfc-hoi',
   terminology: {
     event: 'Event',
     issue: 'Issue',
@@ -83,6 +83,10 @@ const DOMAINS: Record<string, DomainConfig> = {
 export class DomainService {
   readonly activeDomain = signal<DomainConfig>(DEFAULT_DOMAIN);
   readonly availableDomains = Object.values(DOMAINS);
+
+  constructor() {
+    this.applyTheme(DEFAULT_DOMAIN.theme);
+  }
 
   setDomain(domainId: string): void {
     const domain = DOMAINS[domainId] ?? DEFAULT_DOMAIN;
