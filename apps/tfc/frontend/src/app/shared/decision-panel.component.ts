@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
-import { DialogPanelComponent, ButtonComponent, BadgeComponent } from '@aspect/ui';
+import { DialogPanelComponent, ButtonComponent } from '@aspect/ui';
 
 export interface DecisionOption {
   id: string;
@@ -9,7 +9,7 @@ export interface DecisionOption {
 @Component({
   selector: 'tfc-decision-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DialogPanelComponent, ButtonComponent, BadgeComponent],
+  imports: [DialogPanelComponent, ButtonComponent],
   template: `
     <ui-dialog-panel (closed)="closed.emit()">
       <span dialogTitle>{{ title() }}</span>
