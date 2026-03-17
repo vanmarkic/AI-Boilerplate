@@ -13,6 +13,14 @@
     background-color: var(--color-card);
     padding: var(--spacing-md);
     box-shadow: var(--shadow-sm);
+
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
+    }
   }
 
   .card-title {
@@ -39,6 +47,14 @@
     background-color: var(--color-card);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
+
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
+    }
   }
 
   .card-group-toggle {
@@ -127,6 +143,10 @@
     &:focus-visible {
       outline: none;
       box-shadow: 0 0 0 2px var(--color-ring);
+
+      [data-effects="glow-glass"] & {
+        box-shadow: 0 0 0 2px var(--color-ring), var(--glow-primary);
+      }
     }
 
     &:disabled {
@@ -182,6 +202,14 @@
     background-color: var(--color-card);
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-lg);
+
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-primary);
+    }
 
     &[data-variant="destructive"] {
       border-color: var(--color-destructive);
