@@ -11,10 +11,18 @@ export interface ParticipantPresence {
   connected: boolean;
 }
 
+interface ScoreState {
+  totalScore: number;
+  turnNumber: number;
+  nextDecisionTimeMs: number;
+  penaltyMs: number;
+}
+
 interface ExerciseState {
   exerciseId: number | null;
   title: string;
   phase: string;
+  gameMode: string;
   playTimeMs: number;
   realTimeMs: number;
   speedFactor: number;
@@ -25,6 +33,8 @@ interface ExerciseState {
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
   playerRole: string;
+  playerType: string;
+  score: ScoreState | null;
   loading: boolean;
   error: string | null;
 }
@@ -33,6 +43,7 @@ const initialState: ExerciseState = {
   exerciseId: null,
   title: '',
   phase: 'setup',
+  gameMode: 'classic',
   playTimeMs: 0,
   realTimeMs: 0,
   speedFactor: 1,
@@ -43,6 +54,8 @@ const initialState: ExerciseState = {
   participants: [],
   context: null,
   playerRole: 'player',
+  playerType: 'advisor',
+  score: null,
   loading: false,
   error: null,
 };
@@ -72,6 +85,8 @@ export const ExerciseStore = signalStore(
     hasOpenDecision: computed(() => store.decisions().filter((d) => d.status === 'open').length > 0),
     connectedParticipants: computed(() => store.participants().filter((p) => p.connected)),
     connectedCount: computed(() => store.participants().filter((p) => p.connected).length),
+    isCollaborative: computed(() => store.gameMode() === 'simple-collaborative'),
+    isDecisionMaker: computed(() => store.playerType() === 'decision_maker'),
     phaseBadgeVariant: computed<'default' | 'secondary' | 'destructive'>(() => {
       switch (store.phase()) {
         case 'running': return 'default';
@@ -161,6 +176,34 @@ export const ExerciseStore = signalStore(
 
     updatePresence(participants: ParticipantPresence[]): void {
       patchState(store, { participants });
+    },
+
+    setGameMode(mode: string): void {
+      patchState(store, { gameMode: mode });
+    },
+
+    setPlayerType(playerType: string): void {
+      patchState(store, { playerType });
+    },
+
+    applyScoreChange(change: { total_score: number; penalty_ms: number; next_decision_time_ms: number; turn_number: number }): void {
+      patchState(store, {
+        score: {
+          totalScore: change.total_score,
+          penaltyMs: change.penalty_ms,
+          nextDecisionTimeMs: change.next_decision_time_ms,
+          turnNumber: change.turn_number,
+        },
+      });
+    },
+
+    applyRecommendation(decisionId: string, participantId: string, optionId: string): void {
+      const decisions = store.decisions().map((d) =>
+        d.id === decisionId
+          ? { ...d, recommendations: { ...d.recommendations, [participantId]: optionId } }
+          : d,
+      );
+      patchState(store, { decisions });
     },
   })),
 );
