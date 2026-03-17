@@ -96,10 +96,13 @@ export class JoinView implements OnInit {
   private resolvedExerciseId: number | null = null;
 
   ngOnInit(): void {
-    const role = this.route.snapshot.queryParams['role'];
+    const { role, code } = this.route.snapshot.queryParams;
     const validRoles = ['player', 'observer', 'game-master'];
     if (role && validRoles.includes(role)) {
       this.selectedRole.set(role);
+    }
+    if (code) {
+      this.sessionCode.set((code as string).toUpperCase());
     }
   }
 

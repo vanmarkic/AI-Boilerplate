@@ -10,6 +10,7 @@ export interface CreateExerciseRequest {
   scenario_id?: number | null;
   domain_id?: number | null;
   time_factor?: number;
+  game_mode?: string;
 }
 
 export interface ExerciseResponse {
@@ -20,6 +21,8 @@ export interface ExerciseResponse {
   scenario_id: number | null;
   domain_id: number | null;
   time_factor: number;
+  game_mode: string;
+  session_code: string;
   created_at: string;
   updated_at: string;
 }

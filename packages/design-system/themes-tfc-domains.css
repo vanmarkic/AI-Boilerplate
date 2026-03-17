@@ -115,6 +115,37 @@
                     0 0 20px oklch(75% 0.12 80 / calc(0.15 * var(--glow-strength)));
   }
 
+  /* ── Naval Operations IV: deep radar / sonar aesthetic ─ */
+  [data-theme="tfc-noi4"] {
+    --color-background: oklch(7% 0.03 225);
+    --color-card: oklch(11% 0.03 225);
+    --color-popover: oklch(15% 0.03 225);
+    --color-secondary: oklch(15% 0.03 225);
+    --color-muted: oklch(19% 0.025 225);
+    --color-border: oklch(25% 0.025 225);
+    --color-input: oklch(25% 0.025 225);
+    --color-foreground: oklch(90% 0.03 200);
+    --color-card-foreground: oklch(90% 0.03 200);
+    --color-muted-foreground: oklch(55% 0.025 210);
+    --color-primary: oklch(70% 0.25 195);
+    --color-primary-foreground: oklch(7% 0.03 225);
+    --color-accent: oklch(70% 0.25 195);
+    --color-accent-foreground: oklch(7% 0.03 225);
+    --color-ring: oklch(70% 0.25 195);
+
+    /* ── Glow + Glass (sonar phosphor, on by default) ── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(70% 0.25 195);
+    --glow-sm:      0 0 14px oklch(70% 0.25 195 / calc(0.5 * var(--glow-strength)));
+    --glow-primary: 0 0 28px oklch(70% 0.25 195 / calc(0.75 * var(--glow-strength)));
+    --glow-lg:      0 0 48px oklch(70% 0.25 195 / calc(1.0 * var(--glow-strength)));
+    --glow-xl:      0 0 72px oklch(70% 0.25 195 / calc(0.6 * var(--glow-strength))),
+                    0 0 120px oklch(70% 0.25 195 / calc(0.25 * var(--glow-strength)));
+    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+                    0 0 20px oklch(70% 0.25 195 / calc(0.15 * var(--glow-strength)));
+  }
+
   /* ── Military: olive/sand tactical aesthetic ────────── */
   [data-theme="tfc-military"] {
     --color-background: oklch(14% 0.02 95);
