@@ -42,25 +42,38 @@ apps/tfc/
 ├── backend/
 │   ├── core/                         # Config, database, auth, middleware, DI
 │   ├── engine/                       # Pure-Python exercise runtime
+│   │   ├── engine_config.py          #   DecisionTemplate, EngineConfig dataclasses
 │   │   ├── time_manager.py           #   Wall-clock → play-time with speed factor
 │   │   ├── event_scheduler.py        #   Trigger events by play-time offset
 │   │   ├── issue_manager.py          #   Issue lifecycle (dormant → active → resolved)
 │   │   ├── decision_manager.py       #   Decision point tracking
 │   │   ├── exercise_engine.py        #   Orchestrator (250ms tick loop)
-│   │   └── session_store.py          #   In-memory engine instance registry
+│   │   ├── session_store.py          #   In-memory engine instance registry
+│   │   ├── state_changes.py          #   State change event types
+│   │   ├── strategies.py             #   Hypothesis data generators for property tests
+│   │   └── game_modes/               #   Pluggable game mode strategies
+│   │       ├── classic.py            #     ClassicMode — GM-driven, no scoring
+│   │       └── simple_collaborative.py #   SimpleCollaborativeMode — advisor/decision-maker roles
 │   ├── features/
 │   │   ├── audit/                    #   Audit trail
 │   │   ├── decision/                 #   Decision CRUD
+│   │   ├── domain_config/            #   DB-backed domain terminology dictionary
 │   │   ├── exercise/                 #   Exercise lifecycle + engine API + WebSocket
 │   │   ├── health/                   #   Health check
-│   │   └── scenario/                 #   Scenario CRUD + content loader
+│   │   ├── scenario/                 #   Scenario CRUD + content loader
+│   │   └── waiting_room/             #   Pre-exercise lobby (presence, ready-up)
 │   └── main.py                       # App factory with auto-discovery
 │
 ├── frontend/
 │   └── src/app/
 │       ├── core/                     # Environment config
 │       ├── shared/                   # TFC shared components, services, store
-│       │   ├── components/           #   Clock, context panel, decision panel, phase badge
+│       │   ├── components/           #   Clock, context panel, decision panel, phase badge,
+│       │   │                         #   advisor bubbles, ambient background, domain selector,
+│       │   │                         #   presence indicator, score bar, turn banner
+│       │   ├── components-animations.css   # GSAP animation classes
+│       │   ├── components-decision.css     # Decision panel styles
+│       │   ├── components-exercise-layout.css  # Exercise layout primitives
 │       │   ├── *.service.ts          #   Engine API, WebSocket, scenario, audit, decision
 │       │   └── exercise.store.ts     #   Central NgRx Signal Store
 │       └── features/
@@ -68,7 +81,8 @@ apps/tfc/
 │           ├── player/               #   Player view (events, decisions)
 │           ├── join/                 #   Exercise join / lobby
 │           ├── review/               #   Post-exercise review
-│           └── scenario-builder/     #   Scenario creation UI
+│           ├── scenario-builder/     #   Scenario creation UI
+│           └── waiting-room/         #   Pre-exercise lobby (presence, ready-up)
 │
 packages/tfc-shared/                  # Shared TypeScript types + constants
     └── src/
@@ -100,6 +114,18 @@ Decision events automatically pause the engine until the GM or players resolve t
 - **Events**: Scheduled occurrences (`NARRATIVE`, `DECISION`, `INJECT`) with lifecycle `pending → active → completed`.
 - **Issues**: Problems triggered by events, with lifecycle `dormant → active → mitigated → resolved`.
 - **Decisions**: Questions posed to players when a `DECISION` event fires. The engine pauses until resolved.
+- **Domain Config**: Terminology and labels are stored in the database via `features/domain_config/`, not hardcoded. This lets each scenario use its own vocabulary.
+
+### Game Modes
+
+Game modes are pluggable strategies in `engine/game_modes/` that change how decisions, scoring, and roles work:
+
+| Mode | Description |
+|------|-------------|
+| `ClassicMode` | GM-driven. No scoring. Engine pauses on DECISION events for GM to resolve. |
+| `SimpleCollaborativeMode` | No GM required. Advisors submit recommendations; decision-maker makes the final call. Decisions chain sequentially. Wrong answers shrink time available for subsequent decisions. |
+
+To add a new mode, create a class in `engine/game_modes/` implementing `should_pause_on_decision()` and any scoring hooks, then wire it into `EngineConfig`.
 
 ## Development
 

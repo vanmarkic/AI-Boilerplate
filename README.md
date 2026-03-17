@@ -86,19 +86,25 @@ ai-boilerplate/
 │   └── src/app/
 │       ├── core/                    #   environment, error handling
 │       ├── features/                #   smart feature containers
+│       │   ├── admin-permissions/
 │       │   ├── auth/
 │       │   ├── canary/
 │       │   ├── dashboard/
 │       │   ├── landing/
 │       │   ├── register/
-│       │   └── user-profile/
+│       │   ├── user-profile/
+│       │   └── weather/
 │       └── shared/ui/ → packages/ui/src  # symlink to @aspect/ui source
 │
 ├── backend/                         # FastAPI + async SQLAlchemy
 │   ├── core/                        #   config, database, auth, middleware, DI
 │   ├── features/
+│   │   ├── admin_permissions/
+│   │   ├── admin_users/
+│   │   ├── canary/
 │   │   ├── health/
-│   │   └── user/
+│   │   ├── user/
+│   │   └── weather/
 │   ├── alembic/                     #   database migrations
 │   └── main.py
 │
