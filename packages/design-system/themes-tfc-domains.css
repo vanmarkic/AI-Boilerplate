@@ -24,6 +24,14 @@
     --color-accent: oklch(68% 0.18 145);
     --color-accent-foreground: oklch(10% 0.02 145);
     --color-ring: oklch(68% 0.18 145);
+
+    /* ── Glow + Glass (on by default) ──────────────── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(68% 0.18 145);
+    --glow-sm:      0 0 8px  oklch(68% 0.18 145 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(68% 0.18 145 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(68% 0.18 145 / calc(0.5 * var(--glow-strength)));
   }
 
   /* ── Healthcare: clinical blue/white aesthetic ──────── */
@@ -46,6 +54,14 @@
     --color-accent: oklch(62% 0.14 230);
     --color-accent-foreground: oklch(98% 0 0);
     --color-ring: oklch(62% 0.14 230);
+
+    /* ── Glow + Glass (on by default) ──────────────── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(62% 0.14 230);
+    --glow-sm:      0 0 8px  oklch(62% 0.14 230 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(62% 0.14 230 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(62% 0.14 230 / calc(0.5 * var(--glow-strength)));
   }
 
   /* ── Military: olive/sand tactical aesthetic ────────── */
@@ -68,5 +84,13 @@
     --color-accent: oklch(72% 0.12 85);
     --color-accent-foreground: oklch(14% 0.02 95);
     --color-ring: oklch(72% 0.12 85);
+
+    /* ── Glow + Glass (on by default) ──────────────── */
+    --glow-strength: 1;
+    --glass-strength: 1;
+    --glow-color: oklch(72% 0.12 85);
+    --glow-sm:      0 0 8px  oklch(72% 0.12 85 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(72% 0.12 85 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(72% 0.12 85 / calc(0.5 * var(--glow-strength)));
   }
 }
