@@ -155,6 +155,14 @@
     overflow-y: auto;
     transition: transform var(--duration-slow) var(--ease-default);
 
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-lg);
+    }
+
     &[data-side="right"] {
       right: 0;
       transform: translateX(0);
@@ -203,9 +211,9 @@
   /* ── Landing glow ─────────────────────────────────── */
 
   .landing-glow {
-    width: 37.5rem;
-    height: 37.5rem;
-    opacity: calc(0.07 * var(--glow-strength));
-    background: radial-gradient(circle, var(--color-primary) 0%, transparent 70%);
+    width: 50rem;
+    height: 50rem;
+    opacity: calc(0.15 * var(--glow-strength));
+    background: radial-gradient(circle, var(--glow-color) 0%, transparent 70%);
   }
 }

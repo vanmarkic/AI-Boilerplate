@@ -26,9 +26,13 @@
     --glow-strength: 1;
     --glass-strength: 1;
     --glow-color: oklch(68% 0.18 145);
-    --glow-sm:      0 0 8px  oklch(68% 0.18 145 / calc(0.25 * var(--glow-strength)));
-    --glow-primary: 0 0 14px oklch(68% 0.18 145 / calc(0.4 * var(--glow-strength)));
-    --glow-lg:      0 0 20px oklch(68% 0.18 145 / calc(0.5 * var(--glow-strength)));
+    --glow-sm:      0 0 14px oklch(68% 0.18 145 / calc(0.5 * var(--glow-strength)));
+    --glow-primary: 0 0 28px oklch(68% 0.18 145 / calc(0.75 * var(--glow-strength)));
+    --glow-lg:      0 0 48px oklch(68% 0.18 145 / calc(1.0 * var(--glow-strength)));
+    --glow-xl:      0 0 72px oklch(68% 0.18 145 / calc(0.6 * var(--glow-strength))),
+                    0 0 120px oklch(68% 0.18 145 / calc(0.25 * var(--glow-strength)));
+    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+                    0 0 20px oklch(68% 0.18 145 / calc(0.15 * var(--glow-strength)));
   }
 
   /* ── Healthcare: clinical blue/white aesthetic ──────── */
@@ -53,9 +57,13 @@
     --glow-strength: 1;
     --glass-strength: 1;
     --glow-color: oklch(62% 0.14 230);
-    --glow-sm:      0 0 8px  oklch(62% 0.14 230 / calc(0.25 * var(--glow-strength)));
-    --glow-primary: 0 0 14px oklch(62% 0.14 230 / calc(0.4 * var(--glow-strength)));
-    --glow-lg:      0 0 20px oklch(62% 0.14 230 / calc(0.5 * var(--glow-strength)));
+    --glow-sm:      0 0 14px oklch(62% 0.14 230 / calc(0.5 * var(--glow-strength)));
+    --glow-primary: 0 0 28px oklch(62% 0.14 230 / calc(0.75 * var(--glow-strength)));
+    --glow-lg:      0 0 48px oklch(62% 0.14 230 / calc(1.0 * var(--glow-strength)));
+    --glow-xl:      0 0 72px oklch(62% 0.14 230 / calc(0.6 * var(--glow-strength))),
+                    0 0 120px oklch(62% 0.14 230 / calc(0.25 * var(--glow-strength)));
+    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+                    0 0 20px oklch(62% 0.14 230 / calc(0.15 * var(--glow-strength)));
   }
 
   /* ── Hearts of Iron: warm brown/gold WW2 aesthetic ──── */
@@ -98,9 +106,13 @@
     --glow-strength: 1;
     --glass-strength: 1;
     --glow-color: oklch(75% 0.12 80);
-    --glow-sm:      0 0 8px  oklch(75% 0.12 80 / calc(0.25 * var(--glow-strength)));
-    --glow-primary: 0 0 14px oklch(75% 0.12 80 / calc(0.4 * var(--glow-strength)));
-    --glow-lg:      0 0 20px oklch(75% 0.12 80 / calc(0.5 * var(--glow-strength)));
+    --glow-sm:      0 0 14px oklch(75% 0.12 80 / calc(0.5 * var(--glow-strength)));
+    --glow-primary: 0 0 28px oklch(75% 0.12 80 / calc(0.75 * var(--glow-strength)));
+    --glow-lg:      0 0 48px oklch(75% 0.12 80 / calc(1.0 * var(--glow-strength)));
+    --glow-xl:      0 0 72px oklch(75% 0.12 80 / calc(0.6 * var(--glow-strength))),
+                    0 0 120px oklch(75% 0.12 80 / calc(0.25 * var(--glow-strength)));
+    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+                    0 0 20px oklch(75% 0.12 80 / calc(0.15 * var(--glow-strength)));
   }
 
   /* ── Military: olive/sand tactical aesthetic ────────── */
@@ -125,8 +137,12 @@
     --glow-strength: 1;
     --glass-strength: 1;
     --glow-color: oklch(72% 0.12 85);
-    --glow-sm:      0 0 8px  oklch(72% 0.12 85 / calc(0.25 * var(--glow-strength)));
-    --glow-primary: 0 0 14px oklch(72% 0.12 85 / calc(0.4 * var(--glow-strength)));
-    --glow-lg:      0 0 20px oklch(72% 0.12 85 / calc(0.5 * var(--glow-strength)));
+    --glow-sm:      0 0 14px oklch(72% 0.12 85 / calc(0.5 * var(--glow-strength)));
+    --glow-primary: 0 0 28px oklch(72% 0.12 85 / calc(0.75 * var(--glow-strength)));
+    --glow-lg:      0 0 48px oklch(72% 0.12 85 / calc(1.0 * var(--glow-strength)));
+    --glow-xl:      0 0 72px oklch(72% 0.12 85 / calc(0.6 * var(--glow-strength))),
+                    0 0 120px oklch(72% 0.12 85 / calc(0.25 * var(--glow-strength)));
+    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+                    0 0 20px oklch(72% 0.12 85 / calc(0.15 * var(--glow-strength)));
   }
 }
