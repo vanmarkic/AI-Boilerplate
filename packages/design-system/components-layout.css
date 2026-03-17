@@ -11,8 +11,7 @@
     flex-direction: column;
 
     &[data-direction="horizontal"] {
-      flex-direction: row;
-      flex-wrap: wrap;
+      flex-flow: row wrap;
     }
 
     &[data-gap="xs"]  { gap: var(--spacing-xs); }
