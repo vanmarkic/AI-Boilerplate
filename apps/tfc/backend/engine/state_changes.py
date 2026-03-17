@@ -40,6 +40,7 @@ class DecisionOpened(TypedDict):
     question_type: str
     options: list[dict[str, Any]]
     target_roles: list[str]
+    timeout_ms: float
 
 
 class DecisionClosed(TypedDict):

@@ -1,9 +1,17 @@
+import random
+import string
 from datetime import datetime
 
 from sqlalchemy import Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
+
+
+def _generate_session_code() -> str:
+    """Generate a 6-character uppercase alphanumeric session code."""
+    chars = string.ascii_uppercase + string.digits
+    return "".join(random.choices(chars, k=6))
 
 
 class Exercise(Base):
@@ -16,6 +24,9 @@ class Exercise(Base):
     scenario_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     domain_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     time_factor: Mapped[float] = mapped_column(default=1.0)
+    session_code: Mapped[str] = mapped_column(
+        String(6), default=_generate_session_code, unique=True,
+    )
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(),

@@ -91,6 +91,9 @@ class EventScheduler:
                 event.started_at_pt_ms = current_pt_ms
                 changes.append(self._change(event, "started"))
 
+            elif event.lifecycle == EventLifecycle.PAUSED:
+                pass  # paused events do not tick
+
             elif event.lifecycle == EventLifecycle.RUNNING and event.duration_ms:
                 if event.started_at_pt_ms is not None:
                     elapsed = current_pt_ms - event.started_at_pt_ms
@@ -131,6 +134,44 @@ class EventScheduler:
         self._transition(event, EventLifecycle.COMPLETED)
         event.completed_at_pt_ms = current_pt_ms
         return self._change(event, "completed")
+
+    def pause_event(self, event_id: str) -> dict | None:
+        """GM pauses a running event. Preserves elapsed time."""
+        event = self._events.get(event_id)
+        if not event or event.lifecycle != EventLifecycle.RUNNING:
+            return None
+        self._transition(event, EventLifecycle.PAUSED)
+        return self._change(event, "paused")
+
+    def resume_event(
+        self, event_id: str, current_pt_ms: float,
+    ) -> dict | None:
+        """GM resumes a paused event. Adjusts started_at to preserve elapsed."""
+        event = self._events.get(event_id)
+        if not event or event.lifecycle != EventLifecycle.PAUSED:
+            return None
+        self._transition(event, EventLifecycle.RUNNING)
+        return self._change(event, "resumed")
+
+    def delay_event(
+        self, event_id: str, delay_ms: float,
+    ) -> dict | None:
+        """GM delays a scheduled event by adding to its scheduled time."""
+        event = self._events.get(event_id)
+        if not event or event.lifecycle != EventLifecycle.SCHEDULED:
+            return None
+        event.scheduled_pt_ms += delay_ms
+        return self._change(event, "delayed")
+
+    def skip_event(self, event_id: str) -> dict | None:
+        """GM skips (cancels) a scheduled/pending event."""
+        event = self._events.get(event_id)
+        if not event:
+            return None
+        if event.lifecycle in {EventLifecycle.COMPLETED, EventLifecycle.CANCELLED}:
+            return None
+        self._transition(event, EventLifecycle.CANCELLED)
+        return self._change(event, "skipped")
 
     def get_triggered_issues(self, event_id: str) -> list[str]:
         """Get issue IDs triggered by a completed event."""
@@ -180,6 +221,7 @@ class EventScheduler:
                 "scheduled_pt_ms": e.scheduled_pt_ms,
                 "duration_ms": e.duration_ms,
                 "dependencies": e.dependencies,
+                "triggered_issues": e.triggered_issues,
                 "lifecycle": e.lifecycle.value,
                 "started_at_pt_ms": e.started_at_pt_ms,
                 "completed_at_pt_ms": e.completed_at_pt_ms,
