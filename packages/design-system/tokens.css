@@ -111,6 +111,17 @@
     --shadow-md: 0 2px 6px oklch(0% 0 0 / 40%);
     --shadow-lg: 0 4px 12px oklch(0% 0 0 / 50%);
 
+    /* ── Glow + Glass (off by default) ───────────────── */
+    --glow-strength: 0;
+    --glass-strength: 0;
+    --glow-color: oklch(62% 0.10 245);
+    --glow-sm:      0 0 8px  oklch(62% 0.10 245 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(62% 0.10 245 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(62% 0.10 245 / calc(0.5 * var(--glow-strength)));
+    --glass-bg:     oklch(100% 0 0 / calc(0.08 * var(--glass-strength)));
+    --glass-border: oklch(100% 0 0 / calc(0.12 * var(--glass-strength)));
+    --glass-blur:   calc(12px * var(--glass-strength));
+
     /* ── Motion ───────────────────────────────────────── */
     --duration-fast: 100ms;
     --duration-normal: 150ms;
@@ -154,6 +165,12 @@
     --color-accent-foreground: oklch(15% 0.02 85);
     --color-ring: oklch(78% 0.15 85);
 
+    /* ── Glow color (theme-matched) ──────────────────── */
+    --glow-color: oklch(78% 0.15 85);
+    --glow-sm:      0 0 8px  oklch(78% 0.15 85 / calc(0.25 * var(--glow-strength)));
+    --glow-primary: 0 0 14px oklch(78% 0.15 85 / calc(0.4 * var(--glow-strength)));
+    --glow-lg:      0 0 20px oklch(78% 0.15 85 / calc(0.5 * var(--glow-strength)));
+
     /* ── Semantic signals ─────────────────────────────── */
     --color-destructive: oklch(55% 0.22 27);
     --color-destructive-foreground: oklch(92% 0 0);
@@ -173,11 +190,34 @@
     --color-map-labels: var(--color-muted-foreground);
   }
 
+  /* ── Effects toggle — explicit override ─────────────────
+   *  data-effects="glow-glass" → force on (e.g. base theme)
+   *  data-effects="none"       → force off (e.g. TFC opt-out)
+   * ──────────────────────────────────────────────────────── */
+  [data-effects="glow-glass"] {
+    --glow-strength: 1;
+    --glass-strength: 1;
+  }
+
+  [data-effects="none"] {
+    --glow-strength: 0;
+    --glass-strength: 0;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     :root {
       --duration-fast: 0ms;
       --duration-normal: 0ms;
       --duration-slow: 0ms;
+      --glow-strength: 0;
+      --glass-strength: 0;
+    }
+  }
+
+  @media (prefers-contrast: more) {
+    :root {
+      --glow-strength: 0;
+      --glass-strength: 0;
     }
   }
 }
