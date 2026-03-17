@@ -1,3 +1,12 @@
+/* ── CSS Layer Order ─────────────────────────────────────
+ * Explicit layer ordering — must appear before any @layer
+ * block rules. Webpack css-loader hoists @import content
+ * above inline statements, so we declare the order here
+ * (the consuming entry point) rather than relying on the
+ * declaration inside index.css.
+ * ──────────────────────────────────────────────────────── */
+@layer vendor, reset, tokens, utilities, components;
+
 /* ── Vendor CSS (loaded into @layer vendor) ─────────────
  * Third-party stylesheets wrapped in the vendor layer so
  * design-system layers can override them without !important.

@@ -110,7 +110,7 @@
     align-items: center;
     border-radius: var(--radius-sm);
     padding-inline: var(--spacing-sm);
-    padding-block: 2px;
+    padding-block: var(--spacing-xs);
     font-size: var(--font-size-xs);
     line-height: var(--font-size-xs--line-height);
     font-weight: 500;
