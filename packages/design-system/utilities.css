@@ -199,12 +199,15 @@
   .glow-sm { box-shadow: var(--glow-sm); }
   .glow    { box-shadow: var(--glow-primary); }
   .glow-lg { box-shadow: var(--glow-lg); }
+  .glow-xl { box-shadow: var(--glow-xl); }
 
   /* ── Glass (controlled by --glass-strength) ────────── */
   .glass {
     background: var(--glass-bg);
     backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
     border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
   }
 
   /* ── Z-index ────────────────────────────────────────── */
