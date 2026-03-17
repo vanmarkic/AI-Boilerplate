@@ -23,8 +23,14 @@ A full-stack monorepo (Angular 21 / FastAPI / PostgreSQL) architected to maximiz
 ## Quick Start
 
 ```bash
-# Full Docker stack (db + keycloak + api + frontend)
+# Main app (db + keycloak + api + frontend)
 make dev
+
+# TFC app (db + keycloak + tfc-api)
+make dev-tfc
+
+# Both apps together
+make dev-all
 
 # Best DX: DB + API in Docker, Angular natively (instant HMR)
 make dev-local
@@ -56,7 +62,10 @@ ai-boilerplate/
 ├── SPECS.md                         # Product specification (domain, business rules)
 ├── SPECS.template.md                # Blank template for new projects
 ├── Makefile                         # Unified commands
-├── docker-compose.yml               # db + keycloak + api + frontend
+├── infra/
+│   ├── docker-compose.yml           # shared infra (db + keycloak)
+│   ├── docker-compose.main.yml      # main app (api + frontend)
+│   └── docker-compose.tfc.yml       # tfc app (tfc-api)
 ├── package.json                     # npm workspaces root
 │
 ├── packages/
