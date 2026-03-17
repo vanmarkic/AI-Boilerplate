@@ -46,6 +46,7 @@ export interface ScenarioContent {
   issues: ScenarioIssueDef[];
   decision_templates: DecisionTemplateDef[];
   default_time_factor: number;
+  game_mode?: string;
   briefing?: string;
   objectives?: string[];
   rules?: string[];

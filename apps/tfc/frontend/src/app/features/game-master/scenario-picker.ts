@@ -4,6 +4,16 @@ import { DomainService } from '../../core/domain.service';
 import { ScenarioApiService } from '../../core/scenario-api.service';
 import type { ScenarioResponse } from '../../core/scenario-api.service';
 
+export interface ScenarioSelection {
+  scenario: ScenarioResponse;
+  gameMode: string;
+}
+
+const GAME_MODE_LABELS: Record<string, string> = {
+  classic: 'Classic',
+  simple_collaborative: 'Collaborative',
+};
+
 @Component({
   selector: 'tfc-scenario-picker',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +37,7 @@ import type { ScenarioResponse } from '../../core/scenario-api.service';
               <div class="flex items-center justify-between p-sm">
                 <div class="flex flex-col gap-xs">
                   <span class="text-sm text-muted-foreground">{{ scenario.description || 'No description' }}</span>
-                  <div class="flex gap-xs">
+                  <div class="flex gap-xs flex-wrap">
                     <ui-badge variant="secondary">
                       {{ scenario.content?.events?.length ?? 0 }} {{ domain.term('event') }}s
                     </ui-badge>
@@ -37,7 +47,17 @@ import type { ScenarioResponse } from '../../core/scenario-api.service';
                     <ui-badge variant="secondary">
                       v{{ scenario.version }}
                     </ui-badge>
+                    <ui-badge [variant]="gameModes()[scenario.id] === 'simple_collaborative' ? 'default' : 'outline'">
+                      {{ modeLabel(gameModes()[scenario.id]) }}
+                    </ui-badge>
                   </div>
+                  <select
+                    class="text-sm border rounded px-xs py-xs mt-xs w-fit"
+                    [value]="gameModes()[scenario.id]"
+                    (change)="setGameMode(scenario.id, $any($event.target).value)">
+                    <option value="classic">Classic (requires GM)</option>
+                    <option value="simple_collaborative">Collaborative (self-run)</option>
+                  </select>
                 </div>
                 <button uiButton variant="default" (click)="pick(scenario)">
                   Select
@@ -56,13 +76,14 @@ import type { ScenarioResponse } from '../../core/scenario-api.service';
   `,
 })
 export class ScenarioPickerComponent implements OnInit {
-  readonly scenarioSelected = output<ScenarioResponse>();
+  readonly scenarioSelected = output<ScenarioSelection>();
 
   protected readonly domain = inject(DomainService);
   private readonly api = inject(ScenarioApiService);
   protected readonly scenarios = signal<ScenarioResponse[]>([]);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly gameModes = signal<Record<number, string>>({});
 
   ngOnInit(): void {
     this.load();
@@ -73,6 +94,9 @@ export class ScenarioPickerComponent implements OnInit {
     this.error.set(null);
     this.api.list().subscribe({
       next: (list) => {
+        const modes: Record<number, string> = {};
+        list.forEach((s) => { modes[s.id] = s.content?.game_mode ?? 'classic'; });
+        this.gameModes.set(modes);
         this.scenarios.set(list);
         this.loading.set(false);
       },
@@ -83,7 +107,16 @@ export class ScenarioPickerComponent implements OnInit {
     });
   }
 
+  protected setGameMode(scenarioId: number, mode: string): void {
+    this.gameModes.update((m) => ({ ...m, [scenarioId]: mode }));
+  }
+
+  protected modeLabel(mode: string): string {
+    return GAME_MODE_LABELS[mode] ?? mode;
+  }
+
   protected pick(scenario: ScenarioResponse): void {
-    this.scenarioSelected.emit(scenario);
+    const gameMode = this.gameModes()[scenario.id] ?? 'classic';
+    this.scenarioSelected.emit({ scenario, gameMode });
   }
 }

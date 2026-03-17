@@ -29,7 +29,7 @@ services:
         condition: service_healthy
     volumes:
       - ../apps/tfc/backend:/app
-    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+    command: sh -c "alembic upgrade head && python seed.py && uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
 
   tfc-frontend:
     build:

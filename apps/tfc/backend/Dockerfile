@@ -10,9 +10,11 @@ COPY apps/tfc/backend/pyproject.toml ./
 COPY apps/tfc/backend/core/ ./core/
 COPY apps/tfc/backend/engine/ ./engine/
 COPY apps/tfc/backend/main.py ./
+COPY apps/tfc/backend/seed.py ./
 COPY apps/tfc/backend/alembic.ini ./
 COPY apps/tfc/backend/alembic/ ./alembic/
 COPY apps/tfc/backend/features/ ./features/
+COPY apps/tfc/backend/seeds/ ./seeds/
 
 RUN uv pip install --system --no-cache -e .
 
