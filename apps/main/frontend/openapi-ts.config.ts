@@ -1,7 +1,7 @@
 import { defineConfig } from '@hey-api/openapi-ts';
 
 export default defineConfig({
-  input: '../shared/openapi.json',
+  input: '../../../shared/openapi.json',
   output: 'src/app/shared/api/generated',
   plugins: [
     '@hey-api/typescript',
