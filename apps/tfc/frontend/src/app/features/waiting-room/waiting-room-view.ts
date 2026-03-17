@@ -35,8 +35,13 @@ const DEFAULT_ROLES = [
       <ui-card title="Waiting Room">
         <div class="flex flex-col gap-md" style="min-width: 420px; max-width: 600px;">
           <p class="text-sm text-muted-foreground">
-            Participants waiting to start exercise #{{ exerciseId() }}.
-            Assign roles before starting.
+            @if (isSimpleCollaborative()) {
+              Collaborative exercise — no facilitator needed.
+              Start when everyone is present.
+            } @else {
+              Participants waiting to start exercise #{{ exerciseId() }}.
+              Assign roles before starting.
+            }
           </p>
 
           <div class="flex flex-col gap-sm">
@@ -48,15 +53,19 @@ const DEFAULT_ROLES = [
                     <ui-badge variant="secondary">You</ui-badge>
                   }
                 </div>
-                <select
-                  class="input-base"
-                  [value]="p.role"
-                  (change)="onRoleChange(p.id, $event)"
-                >
-                  @for (role of availableRoles; track role.id) {
-                    <option [value]="role.id">{{ role.label }}</option>
-                  }
-                </select>
+                @if (isSimpleCollaborative()) {
+                  <ui-badge variant="outline">Player</ui-badge>
+                } @else {
+                  <select
+                    class="input-base"
+                    [value]="p.role"
+                    (change)="onRoleChange(p.id, $event)"
+                  >
+                    @for (role of availableRoles; track role.id) {
+                      <option [value]="role.id">{{ role.label }}</option>
+                    }
+                  </select>
+                }
               </div>
             } @empty {
               <p class="text-muted-foreground text-sm p-sm">
@@ -76,9 +85,14 @@ const DEFAULT_ROLES = [
             <button
               uiButton
               variant="default"
+              [disabled]="!canStart()"
               (click)="onStartExercise()"
             >
-              {{ isGameMaster() ? 'Start Exercise' : 'Enter Exercise' }}
+              @if (isSimpleCollaborative()) {
+                Start Exercise ({{ participants().length }})
+              } @else {
+                {{ isGameMaster() ? 'Start Exercise' : 'Enter Exercise' }}
+              }
             </button>
           </div>
         </div>
@@ -96,21 +110,36 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   protected readonly exerciseId = signal(0);
   protected readonly participantId = signal('');
   protected readonly participants = signal<ParticipantResponse[]>([]);
+  protected readonly gameMode = signal('classic');
   protected readonly availableRoles = DEFAULT_ROLES;
 
+  protected readonly isSimpleCollaborative = computed(
+    () => this.gameMode() === 'simple_collaborative',
+  );
+
   protected readonly isGameMaster = computed(() => {
+    if (this.isSimpleCollaborative()) return false;
     const me = this.participants().find(
       (p) => p.id === this.participantId(),
     );
     return me?.role === 'game-master';
   });
 
+  protected readonly canStart = computed(() => {
+    if (this.isSimpleCollaborative()) {
+      return this.participants().length > 0;
+    }
+    return this.isGameMaster();
+  });
+
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
     const eId = Number(params['exerciseId'] ?? 0);
     const pId = String(params['participantId'] ?? '');
+    const gm = String(params['gameMode'] ?? 'classic');
     this.exerciseId.set(eId);
     this.participantId.set(pId);
+    this.gameMode.set(gm);
 
     this.ws.connect(eId, 'player');
     this.sub = this.ws.messages$.subscribe((msg) => {
@@ -149,6 +178,12 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   }
 
   protected onStartExercise(): void {
+    if (this.isSimpleCollaborative()) {
+      this.router.navigate(['/player'], {
+        queryParams: { exerciseId: this.exerciseId() },
+      });
+      return;
+    }
     const me = this.participants().find(
       (p) => p.id === this.participantId(),
     );
