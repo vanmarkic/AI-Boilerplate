@@ -5,7 +5,7 @@
  * apiBaseUrl and wsBaseUrl from Railway environment variables.
  * Falls back to local dev defaults.
  */
-const runtimeEnv = (globalThis as Record<string, unknown>).__env as
+const runtimeEnv = (globalThis as Record<string, unknown>)['__env'] as
   | { apiBaseUrl?: string; wsBaseUrl?: string }
   | undefined;
 

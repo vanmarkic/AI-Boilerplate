@@ -37,6 +37,7 @@ Scenario  ──loads──▶  Exercise  ──runs──▶  Engine
 ```
 core/           # config, database, auth, middleware, DI (same pattern as main app)
 engine/         # pure-Python exercise runtime (no DB, no HTTP)
+  engine_config.py      # DecisionTemplate, ScenarioContext, EngineConfig dataclasses
   time_manager.py
   event_scheduler.py
   issue_manager.py
@@ -44,12 +45,18 @@ engine/         # pure-Python exercise runtime (no DB, no HTTP)
   exercise_engine.py
   session_store.py
   state_changes.py
+  strategies.py         # Hypothesis strategies for property tests (*_prop_test.py)
+  game_modes/           # pluggable game mode strategies
+    classic.py          #   ClassicMode — GM-driven, no scoring
+    simple_collaborative.py  # SimpleCollaborativeMode — advisor/decision-maker roles, sequential decisions, time-penalty scoring
 features/
   audit/        # audit trail (all exercise events logged)
   decision/     # decision CRUD (questions, responses, outcomes)
+  domain_config/ # DB-backed domain terminology dictionary (replaces hardcoded constants)
   exercise/     # exercise lifecycle + engine HTTP API + WebSocket
   health/       # health check
   scenario/     # scenario CRUD + scenario content loader
+  waiting_room/ # pre-exercise lobby state (WebSocket presence, ready-up)
 ```
 
 Key architectural distinction: the `engine/` directory is **not** a feature — it is a pure runtime with no database or HTTP dependencies. Features in `features/exercise/` wrap the engine with HTTP/WS endpoints and persistence.
@@ -59,7 +66,12 @@ Key architectural distinction: the `engine/` directory is **not** a feature — 
 src/app/
   core/           # environment config
   shared/         # TFC-specific shared components + services
-    components/   # clock-display, context-panel, decision-panel, phase-badge, speed-display
+    components/   # clock-display, context-panel, decision-panel, phase-badge, speed-display,
+                  # advisor-bubbles, ambient-background, domain-selector, presence-indicator,
+                  # score-bar, turn-banner
+    components-animations.css   # GSAP-driven animation classes
+    components-decision.css     # decision panel styles
+    components-exercise-layout.css  # exercise layout primitives
     *.service.ts  # engine-api, exercise-ws, scenario-api, audit-api, decision-api, domain
     exercise.store.ts  # central NgRx Signal Store for exercise state
     format-time.ts
@@ -69,6 +81,7 @@ src/app/
     join/         # Exercise join/lobby
     review/       # Post-exercise review
     scenario-builder/  # Scenario creation UI
+    waiting-room/ # Pre-exercise lobby (presence indicators, ready-up)
 ```
 
 ### Shared Package (`packages/tfc-shared/`)
@@ -104,6 +117,9 @@ make migrate-tfc          # Run TFC database migrations
 4. TFC frontend components use the same `@aspect/design-system` tokens and `@aspect/ui` components as the main app. TFC-specific component styles go in `shared/components-*.css` files.
 5. The exercise store (`shared/exercise.store.ts`) is the single source of truth for frontend exercise state. Features read from it, never from raw WebSocket messages.
 6. Scenario content (briefing, events, issues, decision templates) is loaded by `scenario_loader.py` and passed to the engine as an `EngineConfig`. Do NOT hardcode scenario data in the engine.
+7. Game modes live in `engine/game_modes/`. Each mode is a dataclass implementing the `GameMode` strategy interface. Do NOT put mode-specific logic in `exercise_engine.py`.
+8. Property tests use `engine/strategies.py` for Hypothesis data generators. When adding a new engine dataclass, add the corresponding Hypothesis strategy to `strategies.py` before writing property tests.
+9. Domain terminology is stored in the DB via `features/domain_config/`. Do NOT hardcode domain-specific terms, labels, or dictionaries in the engine or frontend constants.
 
 ## Common Pitfalls
 - Do NOT import `sqlalchemy`, `fastapi`, or `httpx` inside `engine/` — it must stay pure.
@@ -112,3 +128,6 @@ make migrate-tfc          # Run TFC database migrations
 - Do NOT put exercise-specific UI components in `packages/ui/` — they belong in `apps/tfc/frontend/src/app/shared/`.
 - Do NOT mutate engine state from outside the tick loop — use engine methods (`start`, `pause`, `complete`, `reset`, `set_speed`).
 - Do NOT skip `make test-tfc-backend` before committing engine changes — the engine has dedicated unit tests.
+- Do NOT put game-mode-specific logic in `exercise_engine.py` — add a new class to `engine/game_modes/` instead.
+- Do NOT hardcode domain labels or terminology in the frontend or engine — fetch from `features/domain_config/` API.
+- Do NOT write Hypothesis property tests without a matching strategy in `engine/strategies.py`.
