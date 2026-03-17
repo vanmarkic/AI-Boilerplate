@@ -1,0 +1,153 @@
+/* ── Hearts of Iron — Texture, Emboss & Typography ────────
+ *  Tier 2 visual extras for the tfc-hoi theme.
+ *  Scoped entirely to [data-theme="tfc-hoi"].
+ *  No image assets — all textures are inline SVG / CSS.
+ * ──────────────────────────────────────────────────────── */
+
+/* ── Serif font (Google Fonts — Crimson Pro) ──────────── */
+@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&display=swap");
+
+/* ── Typography override ─────────────────────────────── */
+@layer tokens {
+  [data-theme="tfc-hoi"] {
+    --font-sans: "Crimson Pro", "Georgia", serif;
+
+    /* Slightly larger base to suit serif at UI scale */
+    --font-size-base: 1.0625rem;
+    --font-size-base--line-height: 1.625rem;
+
+    /* Sharper, smaller radii for a rigid military feel */
+    --radius-sm: 1px;
+    --radius-md: 2px;
+    --radius-lg: 3px;
+
+    /* Heavier shadows for depth */
+    --shadow-sm: 0 1px 3px oklch(0% 0 0 / 40%);
+    --shadow-md: 0 2px 8px oklch(0% 0 0 / 50%);
+    --shadow-lg: 0 4px 16px oklch(0% 0 0 / 60%);
+
+    /* Emboss tokens (inset highlights + shadows) */
+    --emboss-inset: inset 0 1px 0 oklch(100% 0 0 / 6%),
+                    inset 0 -1px 0 oklch(0% 0 0 / 20%);
+    --emboss-border: 2px solid oklch(28% 0.03 55);
+  }
+}
+
+/* ── Surface textures & emboss effects ───────────────── */
+@layer components {
+
+  /* Paper-grain noise overlay on background surfaces.
+     Uses an inline SVG feTurbulence filter for subtle grain. */
+  [data-theme="tfc-hoi"] body {
+    background-color: var(--color-background);
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* Embossed card panels — inset highlight + shadow */
+  [data-theme="tfc-hoi"] .card,
+  [data-theme="tfc-hoi"] .panel {
+    border: var(--emboss-border);
+    box-shadow: var(--emboss-inset), var(--shadow-sm);
+  }
+
+  /* Exercise header — heavier bottom border + subtle gradient */
+  [data-theme="tfc-hoi"] .exercise-header {
+    border-bottom: 2px solid oklch(32% 0.03 55);
+    background:
+      linear-gradient(
+        180deg,
+        oklch(22% 0.025 50) 0%,
+        oklch(18% 0.025 50) 100%
+      );
+    box-shadow: var(--emboss-inset);
+  }
+
+  /* Exercise controls bar — same treatment */
+  [data-theme="tfc-hoi"] .exercise-controls {
+    border-top: 2px solid oklch(32% 0.03 55);
+    background:
+      linear-gradient(
+        0deg,
+        oklch(22% 0.025 50) 0%,
+        oklch(18% 0.025 50) 100%
+      );
+    box-shadow: var(--emboss-inset);
+  }
+
+  /* Exercise details panel */
+  [data-theme="tfc-hoi"] .exercise-details {
+    border-top: 2px solid oklch(32% 0.03 55);
+    box-shadow: var(--emboss-inset);
+  }
+
+  /* Decision panel options — embossed card style */
+  [data-theme="tfc-hoi"] .decision-panel__option {
+    border: var(--emboss-border);
+    box-shadow: var(--emboss-inset);
+  }
+
+  [data-theme="tfc-hoi"] .decision-panel__option:hover {
+    box-shadow: var(--emboss-inset), var(--glow-sm);
+  }
+
+  [data-theme="tfc-hoi"] .decision-panel__option--selected {
+    border-color: oklch(75% 0.12 80);
+    box-shadow: var(--emboss-inset), var(--glow-primary);
+  }
+
+  /* Phase badges — uppercase stencil feel */
+  [data-theme="tfc-hoi"] .exercise-phase {
+    letter-spacing: 0.1em;
+    font-weight: 700;
+    box-shadow: var(--emboss-inset);
+  }
+
+  /* Clock values — monospace stays, but bolder */
+  [data-theme="tfc-hoi"] .exercise-clock__value {
+    font-weight: 700;
+    text-shadow: 0 1px 2px oklch(0% 0 0 / 40%);
+  }
+
+  /* Clock labels — warm uppercase */
+  [data-theme="tfc-hoi"] .exercise-clock__label {
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  /* Context panel headings — gold accent underline */
+  [data-theme="tfc-hoi"] .context-panel__heading {
+    border-bottom: 1px solid oklch(75% 0.12 80 / 30%);
+    padding-bottom: var(--spacing-xs);
+  }
+
+  /* Textarea — parchment feel */
+  [data-theme="tfc-hoi"] .decision-panel__textarea {
+    border: var(--emboss-border);
+    box-shadow: var(--emboss-inset);
+  }
+
+  /* Collapsible panels */
+  [data-theme="tfc-hoi"] .collapsible-panel {
+    border: var(--emboss-border);
+    box-shadow: var(--emboss-inset), var(--shadow-sm);
+  }
+
+  /* Buttons — metallic gradient hint */
+  [data-theme="tfc-hoi"] .btn {
+    box-shadow: var(--emboss-inset), var(--shadow-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+  }
+
+  /* Data tables — thicker borders, embossed header */
+  [data-theme="tfc-hoi"] .data-table th {
+    border-bottom: 2px solid oklch(32% 0.03 55);
+    box-shadow: var(--emboss-inset);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    font-size: var(--font-size-xs);
+  }
+}
