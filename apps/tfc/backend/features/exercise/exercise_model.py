@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime
 
-from sqlalchemy import Integer, String, Text, func
+from sqlalchemy import ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
@@ -22,7 +22,9 @@ class Exercise(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     phase: Mapped[str] = mapped_column(String(50), default="setup")
     scenario_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
-    domain_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    domain_id: Mapped[int | None] = mapped_column(
+        Integer, ForeignKey("tfc_domain_configs.id"), nullable=True,
+    )
     time_factor: Mapped[float] = mapped_column(default=1.0)
     session_code: Mapped[str] = mapped_column(
         String(6), default=_generate_session_code, unique=True,
