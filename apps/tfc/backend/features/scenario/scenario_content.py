@@ -25,6 +25,7 @@ class DecisionTemplateDef(BaseModel):
     options: list[DecisionOptionDef] = []
     completion_mode: str = "first_response"
     timeout_ms: float = 0  # 0 = no timeout
+    target_roles: list[str] = []
 
 
 class ScenarioEventDef(BaseModel):
@@ -59,6 +60,13 @@ class ScenarioPhaseDef(BaseModel):
     events: list[str] = []  # event IDs in this phase
 
 
+class RoleDef(BaseModel):
+    """Definition of a participant role within a scenario."""
+    id: str
+    label: str
+    player_type: str = "advisor"  # "advisor" or "decision_maker"
+
+
 class ScenarioContent(BaseModel):
     """Top-level scenario definition validated against this schema.
 
@@ -74,3 +82,7 @@ class ScenarioContent(BaseModel):
     briefing: str = ""
     objectives: list[str] = []
     rules: list[str] = []
+    game_mode: str = "classic"
+    game_mode_config: dict = {}
+    decision_sequence: list[str] = []
+    roles: list[RoleDef] = []

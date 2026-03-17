@@ -8,6 +8,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 from engine.event_scheduler import ScheduledEvent
+from engine.game_modes.classic import ClassicMode
 from engine.issue_manager import TrackedIssue
 
 TICK_INTERVAL_S = 0.25
@@ -44,3 +45,4 @@ class EngineConfig:
     issues: list[TrackedIssue] = field(default_factory=list)
     decision_templates: list[DecisionTemplate] = field(default_factory=list)
     context: ScenarioContext = field(default_factory=ScenarioContext)
+    game_mode: ClassicMode = field(default_factory=ClassicMode)

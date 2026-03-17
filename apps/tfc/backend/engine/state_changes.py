@@ -54,5 +54,24 @@ class SpeedChange(TypedDict):
     factor: float
 
 
+class ScoreChange(TypedDict):
+    type: str          # "score_change"
+    total_score: float
+    penalty_ms: float
+    next_decision_time_ms: int
+    turn_number: int
+
+
+class RecommendationSubmitted(TypedDict):
+    type: str          # "recommendation_submitted"
+    decision_id: str
+    participant_id: str
+    option_id: str
+
+
 # Union of all change types for type-narrowing on `change["type"]`.
-StateChange = PhaseChange | EventChange | IssueChange | DecisionOpened | DecisionClosed | SpeedChange
+StateChange = (
+    PhaseChange | EventChange | IssueChange
+    | DecisionOpened | DecisionClosed | SpeedChange
+    | ScoreChange | RecommendationSubmitted
+)

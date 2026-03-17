@@ -27,14 +27,15 @@ class SpeedRequest(BaseModel):
     factor: float = Field(..., gt=0)
 
 
+class RecommendRequest(BaseModel):
+    decision_id: str
+    option_id: str
+
+
 def _get_engine(exercise_id: int):
-    """Retrieve engine or raise 404."""
     engine = session_store.get(exercise_id)
     if engine is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No active engine for exercise {exercise_id}",
-        )
+        raise HTTPException(status_code=404, detail=f"No engine for exercise {exercise_id}")
     return engine
 
 
@@ -77,19 +78,9 @@ async def _build_config(
         scenario = await scenario_service.get_scenario(exercise.scenario_id)
         if scenario.content:
             content = ScenarioContent.model_validate(scenario.content)
-            return build_engine_config(
-                exercise_id=exercise.id,
-                title=exercise.title,
-                content=content,
-            )
-    return EngineConfig(
-        exercise_id=exercise.id,
-        title=exercise.title,
-        time_factor=exercise.time_factor,
-    )
+            return build_engine_config(exercise_id=exercise.id, title=exercise.title, content=content)
+    return EngineConfig(exercise_id=exercise.id, title=exercise.title, time_factor=exercise.time_factor)
 
-
-# ── Lifecycle ────────────────────────────────────────────────────────────
 
 
 @router.post("/start", operation_id="startEngine")
@@ -141,17 +132,155 @@ async def complete_engine(exercise_id: int) -> dict:
     return await _get_engine(exercise_id).complete()
 
 
-# ── Speed ────────────────────────────────────────────────────────────────
-
 
 @router.put("/speed", operation_id="setEngineSpeed")
 async def set_engine_speed(exercise_id: int, body: SpeedRequest) -> dict:
     return _get_engine(exercise_id).set_speed(body.factor)
 
 
-# ── Snapshot ─────────────────────────────────────────────────────────────
-
 
 @router.get("/snapshot", operation_id="getEngineSnapshot")
 async def get_engine_snapshot(exercise_id: int) -> dict:
     return _get_engine(exercise_id).snapshot()
+
+
+
+def _or_404(result: dict | None, detail: str) -> dict:
+    if result is None:
+        raise HTTPException(status_code=404, detail=detail)
+    return result
+
+
+@router.post("/events/{event_id}/trigger", operation_id="triggerEvent")
+async def trigger_event(exercise_id: int, event_id: str) -> dict:
+    engine = _get_engine(exercise_id)
+    pt = engine.time_manager.play_time_ms
+    return _or_404(
+        engine.event_scheduler.force_trigger(event_id, pt),
+        f"Event {event_id} not found or not triggerable",
+    )
+
+
+@router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
+async def cancel_event(exercise_id: int, event_id: str) -> dict:
+    return _or_404(
+        _get_engine(exercise_id).event_scheduler.cancel_event(event_id),
+        f"Event {event_id} not found or not cancellable",
+    )
+
+
+@router.post("/events/{event_id}/complete", operation_id="completeEvent")
+async def complete_event(exercise_id: int, event_id: str) -> dict:
+    engine = _get_engine(exercise_id)
+    pt = engine.time_manager.play_time_ms
+    return _or_404(
+        engine.event_scheduler.complete_event(event_id, pt),
+        f"Event {event_id} not found or not completable",
+    )
+
+
+
+@router.post("/issues/{issue_id}/activate", operation_id="activateIssue")
+async def activate_issue(exercise_id: int, issue_id: str) -> dict:
+    engine = _get_engine(exercise_id)
+    pt = engine.time_manager.play_time_ms
+    return _or_404(
+        engine.issue_manager.manual_activate(issue_id, pt),
+        f"Issue {issue_id} not found or not activatable",
+    )
+
+
+@router.post("/issues/{issue_id}/mitigate", operation_id="mitigateIssue")
+async def mitigate_issue(exercise_id: int, issue_id: str) -> dict:
+    return _or_404(
+        _get_engine(exercise_id).issue_manager.mitigate(issue_id),
+        f"Issue {issue_id} not found or not mitigatable",
+    )
+
+
+@router.post("/issues/{issue_id}/resolve", operation_id="resolveIssue")
+async def resolve_issue(exercise_id: int, issue_id: str) -> dict:
+    engine = _get_engine(exercise_id)
+    pt = engine.time_manager.play_time_ms
+    return _or_404(
+        engine.issue_manager.resolve(issue_id, pt),
+        f"Issue {issue_id} not found or not resolvable",
+    )
+
+
+@router.post("/issues/{issue_id}/release", operation_id="releaseIssue")
+async def release_issue(exercise_id: int, issue_id: str) -> dict:
+    return _or_404(
+        _get_engine(exercise_id).issue_manager.release_to_players(issue_id),
+        f"Issue {issue_id} not found or not releasable",
+    )
+
+
+
+@router.get("/decisions", operation_id="getOpenDecisions")
+async def get_open_decisions(exercise_id: int) -> list[dict]:
+    engine = _get_engine(exercise_id)
+    return [
+        {"id": d.id, "title": d.title, "question_type": d.question_type,
+         "options": d.options, "target_roles": d.target_roles, "status": d.status,
+         "recommendations": dict(d.recommendations)}
+        for d in engine.decision_manager.get_open_decisions()
+    ]
+
+
+@router.post("/decisions/{decision_id}/close", operation_id="closeDecision")
+async def close_decision(exercise_id: int, decision_id: str) -> dict:
+    engine = _get_engine(exercise_id)
+    pt = engine.time_manager.play_time_ms
+    result = engine.decision_manager.close_decision(decision_id, current_pt_ms=pt)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Decision {decision_id} not found or already closed",
+        )
+    # Let game mode react (scoring, penalties)
+    extra = engine.game_mode.on_decision_closed(decision_id, 0.0, 0.0)
+    if extra:
+        await connection_manager.broadcast(
+            exercise_id, {"type": "state_changes", "changes": extra},
+        )
+    # Resume if classic mode and no other open decisions remain
+    if engine.game_mode.requires_gm():
+        if not engine.decision_manager.get_open_decisions():
+            await engine.resume()
+    return result
+
+
+@router.post("/decisions/recommend", operation_id="submitRecommendation")
+async def submit_recommendation(
+    exercise_id: int, body: RecommendRequest,
+) -> dict:
+    """Advisor submits a recommendation on an open decision."""
+    engine = _get_engine(exercise_id)
+    result = engine.decision_manager.submit_recommendation(
+        body.decision_id, participant_id="TODO", option_id=body.option_id,
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Decision {body.decision_id} not found or already closed",
+        )
+    await connection_manager.broadcast(
+        exercise_id, {"type": "state_changes", "changes": [result]},
+    )
+    return result
+
+
+
+@router.get("/context", operation_id="getEngineContext")
+async def get_engine_context(exercise_id: int) -> dict:
+    engine = _get_engine(exercise_id)
+    ctx = engine._config.context
+    return {
+        "title": ctx.title,
+        "description": ctx.description,
+        "briefing": ctx.briefing,
+        "objectives": ctx.objectives,
+        "rules": ctx.rules,
+        "default_time_factor": engine._config.time_factor,
+    }

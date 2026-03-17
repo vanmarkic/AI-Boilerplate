@@ -11,6 +11,7 @@ from engine.exercise_engine import (
     EngineConfig,
     ScenarioContext,
 )
+from engine.game_modes import create_game_mode
 from engine.issue_manager import TrackedIssue, TriggerMode
 from features.scenario.scenario_content import ScenarioContent
 
@@ -69,6 +70,7 @@ def load_decision_templates(
             ],
             completion_mode=dt.completion_mode,
             timeout_ms=dt.timeout_ms,
+            target_roles=list(dt.target_roles),
         )
         for dt in content.decision_templates
     ]
@@ -87,6 +89,10 @@ def build_engine_config(
         objectives=list(content.objectives),
         rules=list(content.rules),
     )
+    mode_config = dict(content.game_mode_config)
+    if content.decision_sequence:
+        mode_config.setdefault("decision_sequence", list(content.decision_sequence))
+    game_mode = create_game_mode(content.game_mode, mode_config)
     return EngineConfig(
         exercise_id=exercise_id,
         title=title,
@@ -95,4 +101,5 @@ def build_engine_config(
         issues=load_scenario_issues(content),
         decision_templates=load_decision_templates(content),
         context=context,
+        game_mode=game_mode,
     )
