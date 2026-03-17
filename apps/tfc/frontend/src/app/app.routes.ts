@@ -12,6 +12,13 @@ export const routes: Routes = [
       import('./features/join/join.routes').then((m) => m.JOIN_ROUTES),
   },
   {
+    path: 'waiting-room',
+    loadChildren: () =>
+      import('./features/waiting-room/waiting-room.routes').then(
+        (m) => m.WAITING_ROOM_ROUTES
+      ),
+  },
+  {
     path: 'gm',
     loadChildren: () =>
       import('./features/game-master/game-master.routes').then(
