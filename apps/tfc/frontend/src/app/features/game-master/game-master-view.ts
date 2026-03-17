@@ -1,10 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import {
-  CardComponent,
-  BadgeComponent,
-  ButtonDirective,
-  CollapsiblePanelComponent,
-} from '@aspect/ui';
+import { CardComponent, BadgeComponent, ButtonDirective, CollapsiblePanelComponent } from '@aspect/ui';
 import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { SpeedDisplayComponent } from '../../shared/speed-display.component';
@@ -14,8 +9,10 @@ import { DecisionApiService } from '../../core/decision-api.service';
 import type { DecisionDetail } from '../../core/decision-api.service';
 import { ExerciseWsService } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
+import { formatTimeMs } from '../../core/format-time';
 import { handleGmWsMessage } from './gm-ws-handler';
 import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-engine-actions';
+import { createEventActions, createIssueActions } from './gm-event-actions';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -23,10 +20,8 @@ import { Subscription } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore],
   imports: [
-    CardComponent, BadgeComponent,
-    ButtonDirective, CollapsiblePanelComponent,
-    ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent,
-    ContextPanelComponent,
+    CardComponent, BadgeComponent, ButtonDirective, CollapsiblePanelComponent,
+    ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent, ContextPanelComponent,
   ],
   template: `
     <div class="exercise-layout">
@@ -49,17 +44,23 @@ import { Subscription } from 'rxjs';
                 <span class="text-xs text-muted-foreground ml-sm">{{ event.lifecycle }}</span>
               </div>
               <div class="flex gap-xs">
-                @if (event.lifecycle === 'scheduled' || event.lifecycle === 'pending') {
-                  <button uiButton variant="outline" size="sm"
-                    (click)="triggerEvent(event.id)">Trigger</button>
+                @if (event.lifecycle === 'scheduled') {
+                  <button uiButton variant="outline" size="sm" (click)="evt.trigger(event.id)">Trigger</button>
+                  <button uiButton variant="outline" size="sm" (click)="evt.delay(event.id)">Delay</button>
+                  <button uiButton variant="destructive" size="sm" (click)="evt.skip(event.id)">Skip</button>
+                }
+                @if (event.lifecycle === 'pending') {
+                  <button uiButton variant="outline" size="sm" (click)="evt.trigger(event.id)">Trigger</button>
                 }
                 @if (event.lifecycle === 'running') {
-                  <button uiButton variant="outline" size="sm"
-                    (click)="completeEvent(event.id)">Complete</button>
+                  <button uiButton variant="outline" size="sm" (click)="evt.pause(event.id)">Pause</button>
+                  <button uiButton variant="outline" size="sm" (click)="evt.complete(event.id)">Complete</button>
+                }
+                @if (event.lifecycle === 'paused') {
+                  <button uiButton variant="outline" size="sm" (click)="evt.resume(event.id)">Resume</button>
                 }
                 @if (event.lifecycle !== 'completed' && event.lifecycle !== 'cancelled') {
-                  <button uiButton variant="destructive" size="sm"
-                    (click)="cancelEvent(event.id)">Cancel</button>
+                  <button uiButton variant="destructive" size="sm" (click)="evt.cancel(event.id)">Cancel</button>
                 }
               </div>
             </div>
@@ -76,21 +77,20 @@ import { Subscription } from 'rxjs';
                 <ui-badge [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'">
                   {{ issue.lifecycle }}
                 </ui-badge>
+                @if (getCountdown(issue.id); as cd) {
+                  <span class="text-xs text-muted-foreground ml-sm">Auto-resolve: {{ cd }}</span>
+                }
               </div>
               <div class="flex gap-xs">
                 @if (issue.lifecycle === 'inactive') {
-                  <button uiButton variant="outline" size="sm"
-                    (click)="activateIssue(issue.id)">Activate</button>
+                  <button uiButton variant="outline" size="sm" (click)="iss.activate(issue.id)">Activate</button>
                 }
                 @if (issue.lifecycle === 'active') {
-                  <button uiButton variant="outline" size="sm"
-                    (click)="mitigateIssue(issue.id)">Mitigate</button>
-                  <button uiButton variant="outline" size="sm"
-                    (click)="resolveIssue(issue.id)">Resolve</button>
+                  <button uiButton variant="outline" size="sm" (click)="iss.mitigate(issue.id)">Mitigate</button>
+                  <button uiButton variant="outline" size="sm" (click)="iss.resolve(issue.id)">Resolve</button>
                 }
                 @if (issue.lifecycle === 'mitigated') {
-                  <button uiButton variant="outline" size="sm"
-                    (click)="resolveIssue(issue.id)">Resolve</button>
+                  <button uiButton variant="outline" size="sm" (click)="iss.resolve(issue.id)">Resolve</button>
                 }
               </div>
             </div>
@@ -107,10 +107,8 @@ import { Subscription } from 'rxjs';
                 <ui-badge variant="default">open</ui-badge>
               </div>
               <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm"
-                  (click)="viewDecision(decision.id)">View</button>
-                <button uiButton variant="destructive" size="sm"
-                  (click)="closeDecision(decision.id)">Close</button>
+                <button uiButton variant="outline" size="sm" (click)="viewDecision(decision.id)">View</button>
+                <button uiButton variant="destructive" size="sm" (click)="closeDecision(decision.id)">Close</button>
               </div>
             </div>
           } @empty {
@@ -134,18 +132,12 @@ import { Subscription } from 'rxjs';
               <p class="text-muted-foreground text-sm">No responses yet.</p>
             }
           } @else {
-            <p class="text-muted-foreground text-sm">
-              Select an event, issue, or decision to view full context.
-            </p>
+            <p class="text-muted-foreground text-sm">Select a decision to view context.</p>
           }
         </ui-collapsible-panel>
-
         @if (store.context(); as ctx) {
-          <tfc-context-panel
-            [title]="ctx.title"
-            [briefing]="ctx.briefing"
-            [objectives]="ctx.objectives"
-            [rules]="ctx.rules" />
+          <tfc-context-panel [title]="ctx.title" [briefing]="ctx.briefing"
+            [objectives]="ctx.objectives" [rules]="ctx.rules" />
         }
       </div>
 
@@ -167,8 +159,7 @@ import { Subscription } from 'rxjs';
         <div class="exercise-controls__spacer"></div>
         <tfc-speed-display [value]="store.speedFactor()">
           <input type="range" min="0.5" max="10" step="0.5"
-            [value]="store.speedFactor()"
-            (input)="onSpeedChange($event)" />
+            [value]="store.speedFactor()" (input)="onSpeedChange($event)" />
         </tfc-speed-display>
       </footer>
     </div>
@@ -180,37 +171,42 @@ export class GameMasterView implements OnInit, OnDestroy {
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
-  private readonly exerciseId = signal(1); // TODO: from route param
+  private readonly exerciseId = signal(1);
   private sub: Subscription | null = null;
+  private connSub: Subscription | null = null;
+
+  protected readonly evt = createEventActions(this.api, () => this.exerciseId());
+  protected readonly iss = createIssueActions(this.api, () => this.exerciseId());
 
   ngOnInit(): void {
     const id = this.exerciseId();
     this.ws.connect(id, 'gm');
     this.sub = this.ws.messages$.subscribe((msg) => handleGmWsMessage(msg, this.store));
+    this.loadSnapshot(id);
+    this.decisionApi.getContext(id).subscribe({ next: (ctx) => this.store.setContext(ctx) });
+    this.connSub = this.ws.connected$.subscribe((c) => { if (c) this.loadSnapshot(id); });
+  }
+
+  ngOnDestroy(): void { this.ws.disconnect(); this.sub?.unsubscribe(); this.connSub?.unsubscribe(); }
+
+  private loadSnapshot(id: number): void {
     this.api.snapshot(id).subscribe({
       next: (snap) => this.store.applySnapshot(snap),
       error: () => this.store.setError('Failed to load snapshot'),
     });
-    this.decisionApi.getContext(id).subscribe({
-      next: (ctx) => this.store.setContext(ctx),
-    });
   }
 
-  ngOnDestroy(): void {
-    this.ws.disconnect();
-    this.sub?.unsubscribe();
+  protected getCountdown(issueId: string): string | null {
+    const item = this.store.issuesWithCountdown().find((i) => i.id === issueId);
+    return item && item.remaining_ms > 0 ? formatTimeMs(item.remaining_ms) : null;
   }
 
-  protected viewDecision(decisionId: string): void {
-    this.decisionApi.getDecisionDetail(Number(decisionId)).subscribe({
-      next: (detail) => this.selectedDecision.set(detail),
-    });
+  protected viewDecision(id: string): void {
+    this.decisionApi.getDecisionDetail(Number(id)).subscribe({ next: (d) => this.selectedDecision.set(d) });
   }
 
-  protected closeDecision(decisionId: string): void {
-    this.decisionApi.closeEngineDecision(this.exerciseId(), decisionId).subscribe({
-      next: () => this.store.closeDecision(decisionId),
-    });
+  protected closeDecision(id: string): void {
+    this.decisionApi.closeEngineDecision(this.exerciseId(), id).subscribe({ next: () => this.store.closeDecision(id) });
   }
 
   protected onStart(): void { startExercise(this.api, this.store, this.exerciseId()); }
@@ -219,14 +215,6 @@ export class GameMasterView implements OnInit, OnDestroy {
   protected onComplete(): void { completeExercise(this.api, this.store, this.exerciseId()); }
 
   protected onSpeedChange(event: Event): void {
-    const factor = parseFloat((event.target as HTMLInputElement).value);
-    this.api.setSpeed(this.exerciseId(), factor).subscribe();
+    this.api.setSpeed(this.exerciseId(), parseFloat((event.target as HTMLInputElement).value)).subscribe();
   }
-
-  protected triggerEvent(id: string): void { this.api.triggerEvent(this.exerciseId(), id).subscribe(); }
-  protected cancelEvent(id: string): void { this.api.cancelEvent(this.exerciseId(), id).subscribe(); }
-  protected completeEvent(id: string): void { this.api.completeEvent(this.exerciseId(), id).subscribe(); }
-  protected activateIssue(id: string): void { this.api.activateIssue(this.exerciseId(), id).subscribe(); }
-  protected mitigateIssue(id: string): void { this.api.mitigateIssue(this.exerciseId(), id).subscribe(); }
-  protected resolveIssue(id: string): void { this.api.resolveIssue(this.exerciseId(), id).subscribe(); }
 }
