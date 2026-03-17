@@ -1,0 +1,72 @@
+networks:
+  tfc-internal:
+    driver: bridge
+  coolify:
+    external: true
+
+volumes:
+  tfc-pgdata:
+
+services:
+  tfc-db:
+    image: postgres:17
+    container_name: tfc-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: tfc
+      POSTGRES_USER: tfc
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - tfc-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tfc -d tfc"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - tfc-internal
+
+  tfc-backend:
+    image: ghcr.io/vanmarkic/tfc-backend:latest
+    container_name: tfc-backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://tfc:${POSTGRES_PASSWORD}@tfc-db:5432/tfc
+      ENVIRONMENT: production
+      DEBUG: "false"
+      PORT: "8001"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+    command: >
+      sh -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8001"
+    depends_on:
+      tfc-db:
+        condition: service_healthy
+    networks:
+      - tfc-internal
+      - coolify
+    labels:
+      - caddy_0=api-tfc.46.224.43.248.sslip.io
+      - caddy_0.reverse_proxy={{upstreams 8001}}
+      - caddy_0.encode=zstd gzip
+      - caddy_0.header=-Server
+      - caddy_ingress_network=coolify
+
+  tfc-frontend:
+    image: ghcr.io/vanmarkic/tfc-frontend:latest
+    container_name: tfc-frontend
+    restart: unless-stopped
+    environment:
+      API_BASE_URL: https://api-tfc.46.224.43.248.sslip.io
+      WS_BASE_URL: wss://api-tfc.46.224.43.248.sslip.io
+    depends_on:
+      - tfc-backend
+    networks:
+      - coolify
+    labels:
+      - caddy_0=tfc.46.224.43.248.sslip.io
+      - caddy_0.encode=zstd gzip
+      - caddy_0.handle_path=/*
+      - caddy_0.handle_path.0_reverse_proxy={{upstreams 80}}
+      - caddy_0.header=-Server
+      - caddy_0.try_files={path} /index.html
+      - caddy_ingress_network=coolify
