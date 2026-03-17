@@ -1,10 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import {
-  CardComponent,
-  BadgeComponent,
-  ButtonDirective,
-  CollapsiblePanelComponent,
-} from '@aspect/ui';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
+import { CardComponent, BadgeComponent, ButtonDirective, CollapsiblePanelComponent } from '@aspect/ui';
 import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { SpeedDisplayComponent } from '../../shared/speed-display.component';
@@ -12,8 +7,11 @@ import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { EngineApiService } from '../../core/engine-api.service';
 import { DecisionApiService } from '../../core/decision-api.service';
 import type { DecisionDetail } from '../../core/decision-api.service';
+import { ExerciseApiService } from '../../core/exercise-api.service';
 import { ExerciseWsService } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
+import { ScenarioPickerComponent } from './scenario-picker';
+import type { ScenarioResponse } from '../../core/scenario-api.service';
 import { handleGmWsMessage } from './gm-ws-handler';
 import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-engine-actions';
 import { Subscription } from 'rxjs';
@@ -26,9 +24,12 @@ import { Subscription } from 'rxjs';
     CardComponent, BadgeComponent,
     ButtonDirective, CollapsiblePanelComponent,
     ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent,
-    ContextPanelComponent,
+    ContextPanelComponent, ScenarioPickerComponent,
   ],
   template: `
+    @if (!exerciseId()) {
+      <tfc-scenario-picker (scenarioSelected)="onScenarioSelected($event)" />
+    } @else {
     <div class="exercise-layout">
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || 'Exercise Control Panel' }}</span>
@@ -172,19 +173,34 @@ import { Subscription } from 'rxjs';
         </tfc-speed-display>
       </footer>
     </div>
+    }
   `,
 })
-export class GameMasterView implements OnInit, OnDestroy {
+export class GameMasterView implements OnDestroy {
   protected readonly store = inject(ExerciseStore);
   private readonly api = inject(EngineApiService);
+  private readonly exerciseApi = inject(ExerciseApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
-  private readonly exerciseId = signal(1); // TODO: from route param
+  protected readonly exerciseId = signal<number | null>(null);
   private sub: Subscription | null = null;
 
-  ngOnInit(): void {
-    const id = this.exerciseId();
+  protected onScenarioSelected(scenario: ScenarioResponse): void {
+    this.exerciseApi.create({
+      title: scenario.title,
+      scenario_id: scenario.id,
+      time_factor: scenario.content?.default_time_factor ?? 1.0,
+    }).subscribe({
+      next: (exercise) => {
+        this.exerciseId.set(exercise.id);
+        this.connectExercise(exercise.id);
+      },
+      error: () => this.store.setError('Failed to create exercise'),
+    });
+  }
+
+  private connectExercise(id: number): void {
     this.ws.connect(id, 'gm');
     this.sub = this.ws.messages$.subscribe((msg) => handleGmWsMessage(msg, this.store));
     this.api.snapshot(id).subscribe({
@@ -208,25 +224,25 @@ export class GameMasterView implements OnInit, OnDestroy {
   }
 
   protected closeDecision(decisionId: string): void {
-    this.decisionApi.closeEngineDecision(this.exerciseId(), decisionId).subscribe({
+    this.decisionApi.closeEngineDecision(this.exerciseId()!, decisionId).subscribe({
       next: () => this.store.closeDecision(decisionId),
     });
   }
 
-  protected onStart(): void { startExercise(this.api, this.store, this.exerciseId()); }
-  protected onPause(): void { pauseExercise(this.api, this.store, this.exerciseId()); }
-  protected onReset(): void { resetExercise(this.api, this.store, this.exerciseId()); }
-  protected onComplete(): void { completeExercise(this.api, this.store, this.exerciseId()); }
+  protected onStart(): void { startExercise(this.api, this.store, this.exerciseId()!); }
+  protected onPause(): void { pauseExercise(this.api, this.store, this.exerciseId()!); }
+  protected onReset(): void { resetExercise(this.api, this.store, this.exerciseId()!); }
+  protected onComplete(): void { completeExercise(this.api, this.store, this.exerciseId()!); }
 
-  protected onSpeedChange(event: Event): void {
-    const factor = parseFloat((event.target as HTMLInputElement).value);
-    this.api.setSpeed(this.exerciseId(), factor).subscribe();
+  protected onSpeedChange(e: Event): void {
+    this.api.setSpeed(this.exerciseId()!, parseFloat((e.target as HTMLInputElement).value)).subscribe();
   }
 
-  protected triggerEvent(id: string): void { this.api.triggerEvent(this.exerciseId(), id).subscribe(); }
-  protected cancelEvent(id: string): void { this.api.cancelEvent(this.exerciseId(), id).subscribe(); }
-  protected completeEvent(id: string): void { this.api.completeEvent(this.exerciseId(), id).subscribe(); }
-  protected activateIssue(id: string): void { this.api.activateIssue(this.exerciseId(), id).subscribe(); }
-  protected mitigateIssue(id: string): void { this.api.mitigateIssue(this.exerciseId(), id).subscribe(); }
-  protected resolveIssue(id: string): void { this.api.resolveIssue(this.exerciseId(), id).subscribe(); }
+  private eid(): number { return this.exerciseId()!; }
+  protected triggerEvent(id: string): void { this.api.triggerEvent(this.eid(), id).subscribe(); }
+  protected cancelEvent(id: string): void { this.api.cancelEvent(this.eid(), id).subscribe(); }
+  protected completeEvent(id: string): void { this.api.completeEvent(this.eid(), id).subscribe(); }
+  protected activateIssue(id: string): void { this.api.activateIssue(this.eid(), id).subscribe(); }
+  protected mitigateIssue(id: string): void { this.api.mitigateIssue(this.eid(), id).subscribe(); }
+  protected resolveIssue(id: string): void { this.api.resolveIssue(this.eid(), id).subscribe(); }
 }
