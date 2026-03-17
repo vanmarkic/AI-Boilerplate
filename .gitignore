@@ -39,6 +39,11 @@ Thumbs.db
 # Docker
 pgdata/
 
+# Playwright
+test-results/
+playwright-report/
+screenshots/
+
 # Coverage
 htmlcov/
 coverage/
