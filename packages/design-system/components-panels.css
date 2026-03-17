@@ -12,6 +12,14 @@
     border-radius: var(--radius-lg);
     background-color: var(--color-card);
 
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
+    }
+
     & + & {
       margin-block-start: calc(-1 * 1px);
       border-start-start-radius: 0;

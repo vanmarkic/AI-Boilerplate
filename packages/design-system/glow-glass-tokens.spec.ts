@@ -25,13 +25,13 @@ describe('glow + glass token system', () => {
     expect(tokens).toMatch(/:root\s*\{[\s\S]*--glow-color:/);
   });
 
-  for (const token of ['--glow-sm', '--glow-primary', '--glow-lg']) {
+  for (const token of ['--glow-sm', '--glow-primary', '--glow-lg', '--glow-xl']) {
     it(`declares ${token} on :root`, () => {
       expect(tokens).toContain(token);
     });
   }
 
-  for (const token of ['--glass-bg', '--glass-border', '--glass-blur']) {
+  for (const token of ['--glass-bg', '--glass-border', '--glass-blur', '--glass-shadow']) {
     it(`declares ${token} on :root`, () => {
       expect(tokens).toContain(token);
     });
@@ -104,7 +104,7 @@ describe('glow + glass token system', () => {
 
   // ── utilities.css — glow + glass classes ───────────────
 
-  for (const cls of ['.glow-sm', '.glow-lg', '.glow ']) {
+  for (const cls of ['.glow-sm', '.glow-lg', '.glow-xl', '.glow ']) {
     it(`has utility class ${cls.trim()}`, () => {
       expect(utilities).toContain(cls.trim());
     });
@@ -116,6 +116,10 @@ describe('glow + glass token system', () => {
 
   it('.glass references --glass-bg', () => {
     expect(utilities).toMatch(/\.glass\s*\{[\s\S]*?var\(--glass-bg\)/);
+  });
+
+  it('.glass references --glass-shadow', () => {
+    expect(utilities).toMatch(/\.glass\s*\{[\s\S]*?var\(--glass-shadow\)/);
   });
 
   // ── components-layout.css — landing-glow wired ────────
