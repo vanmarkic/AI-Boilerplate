@@ -15,11 +15,13 @@ describe('GameMasterView', () => {
   let httpTesting: HttpTestingController;
   const base = environment.apiBaseUrl;
   const wsMessages$ = new Subject<Record<string, unknown>>();
+  const wsConnected$ = new Subject<boolean>();
 
   const mockWs = {
     connect: vi.fn(),
     disconnect: vi.fn(),
     messages$: wsMessages$.asObservable(),
+    connected$: wsConnected$.asObservable(),
   };
 
   const stubScenario: ScenarioResponse = {
