@@ -1,12 +1,22 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { SeaBackdrop } from './sea-backdrop';
 
 @Component({
   selector: 'tfc-home-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink],
+  imports: [RouterLink, SeaBackdrop],
   styles: [`
+    :host {
+      display: block;
+      position: relative;
+      min-height: 100dvh;
+      isolation: isolate;
+    }
+
     .home-layout {
+      position: relative;
+      z-index: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -45,7 +55,8 @@ import { RouterLink } from '@angular/router';
       flex-direction: column;
       gap: var(--space-xs);
       padding: var(--space-lg);
-      background: var(--color-card);
+      background: color-mix(in oklch, var(--color-card) 85%, transparent);
+      backdrop-filter: blur(12px);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg, 0.75rem);
       text-decoration: none;
@@ -56,16 +67,16 @@ import { RouterLink } from '@angular/router';
 
     .menu-card:hover {
       border-color: var(--color-primary);
-      background: var(--color-card-hover, var(--color-accent));
+      background: color-mix(in oklch, var(--color-card) 90%, var(--color-primary) 10%);
     }
 
     .menu-card[data-primary] {
       border-color: var(--color-primary);
-      background: color-mix(in oklch, var(--color-primary) 12%, var(--color-card));
+      background: color-mix(in oklch, var(--color-primary) 12%, var(--color-card) 85%);
     }
 
     .menu-card[data-primary]:hover {
-      background: color-mix(in oklch, var(--color-primary) 20%, var(--color-card));
+      background: color-mix(in oklch, var(--color-primary) 20%, var(--color-card) 85%);
     }
 
     .card-icon {
@@ -85,6 +96,7 @@ import { RouterLink } from '@angular/router';
     }
   `],
   template: `
+    <tfc-sea-backdrop />
     <div class="home-layout">
       <div class="home-hero">
         <h1>Training Flow Control</h1>
