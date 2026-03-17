@@ -14,6 +14,6 @@ async def client() -> AsyncClient:
 class TestCanaryPing:
     async def test_ping_returns_marker(self, client: AsyncClient) -> None:
         response = await client.get("/api/canary/ping")
-        assert response.status_code == 200
+        assert response.status_code == 200  # nosec B101
         data = response.json()
-        assert data["marker"] == "canary-tier2-backend-present"
+        assert data["marker"] == "canary-tier2-backend-present"  # nosec B101
