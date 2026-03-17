@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint storybook help build build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
+.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
 
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
@@ -7,20 +7,26 @@ TFC_FE   = apps/tfc/frontend
 TFC_BE   = apps/tfc/backend
 INFRA    = infra
 
+# Compose file combinations
+DC_INFRA = docker compose -f $(INFRA)/docker-compose.yml
+DC_MAIN  = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml
+DC_TFC   = $(DC_INFRA) -f $(INFRA)/docker-compose.tfc.yml
+DC_ALL   = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml -f $(INFRA)/docker-compose.tfc.yml
+
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 # ── Main App ──────────────────────────────────────────────
 
 dev: ## Start all main services via Docker Compose (full Docker)
-	docker compose -f $(INFRA)/docker-compose.yml up --build
+	$(DC_MAIN) up --build
 
 dev-local: ## Start db+api in Docker, Angular natively — best DX, instant HMR
-	docker compose -f $(INFRA)/docker-compose.yml up -d db api
+	$(DC_MAIN) up -d db api
 	cd $(MAIN_FE) && npx ng serve
 
 dev-backend: ## Start main backend + db only (Docker)
-	docker compose -f $(INFRA)/docker-compose.yml up --build api db
+	$(DC_MAIN) up --build api db
 
 dev-frontend: ## Start main Angular dev server natively (expects backend running)
 	cd $(MAIN_FE) && npx ng serve
@@ -36,17 +42,17 @@ test-frontend: ## Run main frontend tests
 # ── TFC App ───────────────────────────────────────────────
 
 dev-tfc: ## Start TFC services via Docker Compose
-	docker compose -f $(INFRA)/docker-compose.yml up --build db keycloak tfc-api
+	$(DC_TFC) up --build
 
 dev-tfc-local: ## Start db+tfc-api in Docker, TFC Angular natively
-	docker compose -f $(INFRA)/docker-compose.yml up -d db tfc-api
+	$(DC_TFC) up -d db tfc-api
 	cd $(TFC_FE) && npx ng serve --port 4201
 
 dev-tfc-frontend: ## Start TFC Angular dev server natively (expects TFC backend running)
 	cd $(TFC_FE) && npx ng serve --port 4201
 
 dev-tfc-backend: ## Start TFC backend + db only (Docker)
-	docker compose -f $(INFRA)/docker-compose.yml up --build tfc-api db
+	$(DC_TFC) up --build tfc-api db
 
 test-tfc-backend: ## Run TFC backend tests
 	cd $(TFC_BE) && python -m pytest -v
@@ -124,17 +130,26 @@ validate: lint-arch lint test ## Validate everything: architecture + linters + t
 security-scan: ## Run security scans and save reports to security-reports/
 	bash shared/scripts/security-scan.sh
 
+dev-all: ## Start all services (main + TFC) via Docker Compose
+	$(DC_ALL) up --build
+
 build: ## Build all services for tier 3 (all features)
-	TIER=3 docker compose -f $(INFRA)/docker-compose.yml build
+	TIER=3 $(DC_ALL) build
 
-build-tier-1: ## Build for tier 1 (minimal features)
-	TIER=1 docker compose -f $(INFRA)/docker-compose.yml build --build-arg TIER=1
+build-main: ## Build main app services only
+	TIER=3 $(DC_MAIN) build
 
-build-tier-2: ## Build for tier 2
-	TIER=2 docker compose -f $(INFRA)/docker-compose.yml build --build-arg TIER=2
+build-tfc: ## Build TFC app services only
+	$(DC_TFC) build
 
-build-tier-3: ## Build for tier 3 (all features)
-	TIER=3 docker compose -f $(INFRA)/docker-compose.yml build --build-arg TIER=3
+build-tier-1: ## Build main for tier 1 (minimal features)
+	TIER=1 $(DC_MAIN) build --build-arg TIER=1
+
+build-tier-2: ## Build main for tier 2
+	TIER=2 $(DC_MAIN) build --build-arg TIER=2
+
+build-tier-3: ## Build main for tier 3 (all features)
+	TIER=3 $(DC_MAIN) build --build-arg TIER=3
 
 # ── Aider Sessions ───────────────────────────────────────────
 # Default config; override with: make aider-fill-in AIDER_CONF=.aider-codestral.conf.yml

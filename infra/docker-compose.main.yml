@@ -1,0 +1,36 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: apps/main/backend/Dockerfile
+      args:
+        TIER: ${TIER:-3}
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://dev:dev@db:5432/boilerplate
+      ENVIRONMENT: development
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: boilerplate
+      KEYCLOAK_AUDIENCE: backend-api
+      KEYCLOAK_ADMIN_CLIENT_ID: admin-api
+      KEYCLOAK_ADMIN_CLIENT_SECRET: admin-api-secret
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../apps/main/backend:/app
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: apps/main/frontend/Dockerfile
+      args:
+        TIER: ${TIER:-3}
+    ports:
+      - "4200:4200"
+    volumes:
+      - ../apps/main/frontend:/app
+      - /app/node_modules
+    command: npx ng serve --host 0.0.0.0
