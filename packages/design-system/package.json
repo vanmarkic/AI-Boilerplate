@@ -18,7 +18,9 @@
   ],
   "keywords": ["css", "design-system", "tokens", "oklch", "css-layers"],
   "scripts": {
-    "lint": "stylelint \"*.css\""
+    "lint": "stylelint \"*.css\"",
+    "test": "npx vitest run --config ../../vitest.config.ts",
+    "test:ci": "npx vitest run --config ../../vitest.config.ts"
   },
   "devDependencies": {
     "stylelint": "^16.0.0",

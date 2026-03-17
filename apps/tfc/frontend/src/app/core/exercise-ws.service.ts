@@ -27,16 +27,18 @@ export class ExerciseWsService implements OnDestroy {
   private pingTimer: ReturnType<typeof setInterval> | null = null;
   private lastExerciseId = 0;
   private lastRole: 'gm' | 'player' = 'player';
+  private lastParticipantId?: string;
 
   readonly messages$ = this._messages$.asObservable();
   readonly connected$ = this._connected$.asObservable();
 
-  connect(exerciseId: number, role: 'gm' | 'player'): void {
+  connect(exerciseId: number, role: 'gm' | 'player', participantId?: string): void {
     this.intentionalClose = false;
     this.lastExerciseId = exerciseId;
     this.lastRole = role;
+    this.lastParticipantId = participantId;
     this.reconnectAttempt = 0;
-    this.doConnect(exerciseId, role);
+    this.doConnect(exerciseId, role, participantId);
   }
 
   disconnect(): void {
@@ -54,12 +56,15 @@ export class ExerciseWsService implements OnDestroy {
     this._connected$.complete();
   }
 
-  private doConnect(exerciseId: number, role: string): void {
+  private doConnect(exerciseId: number, role: string, participantId?: string): void {
     if (this.ws) {
       this.ws.close();
       this.ws = null;
     }
-    const url = `${environment.wsBaseUrl}/api/exercises/${exerciseId}/ws?role=${role}`;
+    let url = `${environment.wsBaseUrl}/api/exercises/${exerciseId}/ws?role=${role}`;
+    if (participantId) {
+      url += `&participant_id=${encodeURIComponent(participantId)}`;
+    }
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
@@ -96,7 +101,7 @@ export class ExerciseWsService implements OnDestroy {
     ];
     this.reconnectAttempt++;
     this.reconnectTimer = setTimeout(() => {
-      this.doConnect(this.lastExerciseId, this.lastRole);
+      this.doConnect(this.lastExerciseId, this.lastRole, this.lastParticipantId);
     }, delay);
   }
 

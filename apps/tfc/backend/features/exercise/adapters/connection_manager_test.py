@@ -134,5 +134,30 @@ class TestConnectionManager:
         # Should not raise
         await mgr.broadcast(999, {"type": "test"})
 
+    def test_connect_with_participant_id(self) -> None:
+        mgr = ConnectionManager()
+        ws = _make_ws()
+        mgr.connect(1, ws, "player", participant_id="p-123")
+
+        conns = mgr.get_connections(1)
+        assert len(conns) == 1
+        assert conns[0] == (ws, "player")
+
+    def test_get_connected_participant_ids(self) -> None:
+        mgr = ConnectionManager()
+        ws1 = _make_ws("ws1")
+        ws2 = _make_ws("ws2")
+        ws3 = _make_ws("ws3")
+        mgr.connect(1, ws1, "gm")
+        mgr.connect(1, ws2, "player", participant_id="p-1")
+        mgr.connect(1, ws3, "player", participant_id="p-2")
+
+        ids = mgr.get_connected_participant_ids(1)
+        assert sorted(ids) == ["p-1", "p-2"]
+
+    def test_get_connected_participant_ids_empty(self) -> None:
+        mgr = ConnectionManager()
+        assert mgr.get_connected_participant_ids(42) == []
+
     def test_module_exports_singleton(self) -> None:
         assert isinstance(connection_manager, ConnectionManager)
