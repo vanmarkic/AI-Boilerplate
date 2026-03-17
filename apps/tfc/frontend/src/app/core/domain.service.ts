@@ -1,109 +1,95 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import type { TerminologyMap } from '@aspect/tfc-shared';
+import {
+  DomainConfigApiService,
+  type DomainConfigResponse,
+} from './domain-config-api.service';
 
-export interface DomainTerminology {
-  event: string;
-  issue: string;
-  decision: string;
-  participant: string;
-  gameMaster: string;
-  exercise: string;
-}
+const FALLBACK_TERMINOLOGY: TerminologyMap = {
+  event: 'Event',
+  issue: 'Issue',
+  player: 'Player',
+  gameMaster: 'Game Master',
+  exercise: 'Exercise',
+  scenario: 'Scenario',
+  decision: 'Decision',
+};
 
-export interface DomainConfig {
-  id: string;
-  name: string;
-  theme: string;
-  terminology: DomainTerminology;
-}
-
-const DEFAULT_DOMAIN: DomainConfig = {
-  id: 'default',
+const FALLBACK_DOMAIN: DomainConfigResponse = {
+  id: 0,
+  slug: 'default',
   name: 'Default',
-  theme: 'tfc-hoi',
-  terminology: {
-    event: 'Event',
-    issue: 'Issue',
-    decision: 'Decision',
-    participant: 'Participant',
-    gameMaster: 'Game Master',
-    exercise: 'Exercise',
+  description: '',
+  terminology: FALLBACK_TERMINOLOGY,
+  theme: {
+    colorPrimary: '#3b82f6',
+    colorSecondary: '#6366f1',
+    colorBackground: '#ffffff',
+    colorForeground: '#1e293b',
+    fontFamily: 'system-ui, sans-serif',
+    fontFamilyMono: 'ui-monospace, monospace',
+    density: 'comfortable',
   },
-};
-
-const CYBERSECURITY_DOMAIN: DomainConfig = {
-  id: 'cybersecurity',
-  name: 'Cybersecurity',
-  theme: 'tfc-cyber',
-  terminology: {
-    event: 'Incident',
-    issue: 'Threat',
-    decision: 'Response Action',
-    participant: 'Analyst',
-    gameMaster: 'Exercise Director',
-    exercise: 'Cyber Exercise',
-  },
-};
-
-const HEALTHCARE_DOMAIN: DomainConfig = {
-  id: 'healthcare',
-  name: 'Healthcare',
-  theme: 'tfc-health',
-  terminology: {
-    event: 'Clinical Event',
-    issue: 'Patient Concern',
-    decision: 'Clinical Decision',
-    participant: 'Clinician',
-    gameMaster: 'Facilitator',
-    exercise: 'Simulation',
-  },
-};
-
-const MILITARY_DOMAIN: DomainConfig = {
-  id: 'military',
-  name: 'Military',
-  theme: 'tfc-military',
-  terminology: {
-    event: 'SITREP',
-    issue: 'Operational Issue',
-    decision: 'Command Decision',
-    participant: 'Operator',
-    gameMaster: 'Exercise Controller',
-    exercise: 'Tactical Exercise',
-  },
-};
-
-const DOMAINS: Record<string, DomainConfig> = {
-  default: DEFAULT_DOMAIN,
-  cybersecurity: CYBERSECURITY_DOMAIN,
-  healthcare: HEALTHCARE_DOMAIN,
-  military: MILITARY_DOMAIN,
+  roles: [],
+  severity_levels: [],
+  created_at: '',
+  updated_at: '',
 };
 
 @Injectable({ providedIn: 'root' })
 export class DomainService {
-  readonly activeDomain = signal<DomainConfig>(DEFAULT_DOMAIN);
-  readonly availableDomains = Object.values(DOMAINS);
+  private readonly api = inject(DomainConfigApiService);
+
+  readonly activeDomain = signal<DomainConfigResponse>(FALLBACK_DOMAIN);
+  readonly availableDomains = signal<DomainConfigResponse[]>([]);
+  readonly loading = signal(false);
 
   constructor() {
-    this.applyTheme(DEFAULT_DOMAIN.theme);
+    this.loadAll();
   }
 
-  setDomain(domainId: string): void {
-    const domain = DOMAINS[domainId] ?? DEFAULT_DOMAIN;
-    this.activeDomain.set(domain);
-    this.applyTheme(domain.theme);
-  }
-
-  term(key: keyof DomainTerminology): string {
-    return this.activeDomain().terminology[key];
-  }
-
-  private applyTheme(theme: string): void {
-    const html = document.documentElement;
-    if (theme) {
-      html.setAttribute('data-theme', theme);
-    } else {
-      html.removeAttribute('data-theme');
+  async loadAll(): Promise<void> {
+    this.loading.set(true);
+    try {
+      const domains = await firstValueFrom(this.api.list());
+      this.availableDomains.set(domains);
+      const current = domains.find(
+        (d) => d.slug === this.activeDomain().slug,
+      );
+      if (current) {
+        this.activeDomain.set(current);
+      }
+    } finally {
+      this.loading.set(false);
     }
+  }
+
+  async setDomain(slugOrId: string | number): Promise<void> {
+    const cached = this.availableDomains().find(
+      (d) =>
+        (typeof slugOrId === 'number' ? d.id === slugOrId : d.slug === slugOrId),
+    );
+    if (cached) {
+      this.activeDomain.set(cached);
+      this.applyTheme(cached.slug);
+      return;
+    }
+    const fetched =
+      typeof slugOrId === 'number'
+        ? await firstValueFrom(this.api.get(slugOrId))
+        : await firstValueFrom(this.api.getBySlug(slugOrId));
+    this.activeDomain.set(fetched);
+    this.applyTheme(fetched.slug);
+  }
+
+  term(key: keyof TerminologyMap): string {
+    return this.activeDomain().terminology[key] ?? key;
+  }
+
+  private applyTheme(slug: string): void {
+    const themeAttr = `tfc-${slug}`;
+    const html = document.documentElement;
+    html.setAttribute('data-theme', themeAttr);
   }
 }
