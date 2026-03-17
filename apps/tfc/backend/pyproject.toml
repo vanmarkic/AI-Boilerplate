@@ -2,7 +2,7 @@
 name = "tfc-backend"
 version = "0.1.0"
 description = "FastAPI backend for Training Flow Control (TFC)"
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115.0",
     "uvicorn[standard]>=0.32.0",
@@ -11,8 +11,6 @@ dependencies = [
     "alembic>=1.14.0",
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
-    "PyJWT[crypto]>=2.9.0",
-    "httpx>=0.28.0",
 ]
 
 [project.optional-dependencies]
@@ -35,7 +33,7 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py311"
 line-length = 100
 
 [tool.ruff.lint]

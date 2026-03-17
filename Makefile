@@ -10,8 +10,8 @@ INFRA    = infra
 # Compose file combinations
 DC_INFRA = docker compose -f $(INFRA)/docker-compose.yml
 DC_MAIN  = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml
-DC_TFC   = $(DC_INFRA) -f $(INFRA)/docker-compose.tfc.yml
-DC_ALL   = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml -f $(INFRA)/docker-compose.tfc.yml
+DC_TFC   = docker compose -f $(INFRA)/docker-compose.tfc.yml
+DC_ALL   = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -131,10 +131,10 @@ security-scan: ## Run security scans and save reports to security-reports/
 	bash shared/scripts/security-scan.sh
 
 dev-all: ## Start all services (main + TFC) via Docker Compose
-	$(DC_ALL) up --build
+	$(DC_MAIN) up -d --build && $(DC_TFC) up --build
 
 build: ## Build all services for tier 3 (all features)
-	TIER=3 $(DC_ALL) build
+	TIER=3 $(DC_MAIN) build && $(DC_TFC) build
 
 build-main: ## Build main app services only
 	TIER=3 $(DC_MAIN) build
