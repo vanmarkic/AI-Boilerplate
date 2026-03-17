@@ -5,7 +5,7 @@
  * ──────────────────────────────────────────────────────── */
 
 /* ── Serif font (Google Fonts — Crimson Pro) ──────────── */
-@import url("https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&display=swap");
+@import "https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&display=swap";
 
 /* ── Typography override ─────────────────────────────── */
 @layer tokens {
@@ -35,7 +35,6 @@
 
 /* ── Surface textures & emboss effects ───────────────── */
 @layer components {
-
   /* Paper-grain noise overlay on background surfaces.
      Uses an inline SVG feTurbulence filter for subtle grain. */
   [data-theme="tfc-hoi"] body {
