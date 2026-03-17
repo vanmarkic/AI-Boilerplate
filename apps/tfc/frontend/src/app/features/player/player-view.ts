@@ -7,6 +7,7 @@ import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { DecisionPanelComponent } from '../../shared/decision-panel.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
+import { DomainService } from '../../core/domain.service';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
@@ -26,7 +27,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
   template: `
     <div class="exercise-layout">
       <header class="exercise-header">
-        <span class="exercise-header__title">{{ store.title() || 'Exercise Dashboard' }}</span>
+        <span class="exercise-header__title">{{ store.title() || domain.term('exercise') + ' Dashboard' }}</span>
         <div class="exercise-header__clocks">
           <tfc-clock-display label="RT" [value]="store.rtClock()" />
           <tfc-clock-display label="PT" [value]="store.ptClock()" />
@@ -35,7 +36,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
       </header>
 
       <div class="exercise-overview">
-        <ui-card title="Released Events">
+        <ui-card [title]="'Released ' + domain.term('event') + 's'">
           @for (event of visibleEvents(); track event.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <span class="text-sm font-medium">{{ event.title }}</span>
@@ -46,7 +47,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
           }
         </ui-card>
 
-        <ui-card title="Active Issues">
+        <ui-card [title]="'Active ' + domain.term('issue') + 's'">
           @for (issue of store.releasedIssues(); track issue.id) {
             <div class="flex items-center justify-between p-sm border-b"
               [class.cursor-pointer]="issue.lifecycle === 'active'"
@@ -89,7 +90,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
             [rules]="ctx.rules" />
         }
 
-        <ui-card title="Decision History">
+        <ui-card [title]="domain.term('decision') + ' History'">
           @for (decision of decisionHistory(); track decision.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <span class="text-sm font-medium">{{ decision.title }}</span>
@@ -116,7 +117,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
       <footer class="exercise-controls">
         <div class="exercise-controls__group">
           <p class="text-sm text-muted-foreground">
-            Waiting for Game Master actions...
+            Waiting for {{ domain.term('gameMaster') }} actions...
           </p>
         </div>
       </footer>
@@ -125,6 +126,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
 })
 export class PlayerView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
+  protected readonly domain = inject(DomainService);
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
