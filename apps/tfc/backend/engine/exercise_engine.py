@@ -10,6 +10,7 @@ from engine.state_changes import PhaseChange, StateChange
 from engine.engine_config import (  # noqa: F401 — re-exported
     TICK_INTERVAL_S, DecisionTemplate, EngineConfig, ScenarioContext,
 )
+from engine.game_modes.classic import ClassicMode
 from engine.time_manager import TimeManager
 from engine.event_scheduler import EventScheduler, EventLifecycle, EventType
 from engine.issue_manager import IssueManager
@@ -63,6 +64,10 @@ class ExerciseEngine:
     @property
     def decision_manager(self) -> DecisionManager:
         return self._decisions
+
+    @property
+    def game_mode(self) -> ClassicMode:
+        return self._config.game_mode
 
     async def start(self) -> dict:
         if self._phase not in {EnginePhase.SETUP, EnginePhase.PAUSED}:
@@ -174,9 +179,10 @@ class ExerciseEngine:
                 timeout_ms=timeout_ms,
                 current_pt_ms=pt,
             ))
-            self._phase = EnginePhase.PAUSED
-            self._time.pause()
-            self._stop_tick_loop()
+            if self._config.game_mode.should_pause_on_decision():
+                self._phase = EnginePhase.PAUSED
+                self._time.pause()
+                self._stop_tick_loop()
             if timeout_ms > 0:
                 self._start_timeout_monitor()
         return changes

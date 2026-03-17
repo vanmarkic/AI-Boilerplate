@@ -94,3 +94,34 @@ def monotonic_play_times(min_size: int = 1, max_size: int = 50) -> SearchStrateg
     return st.lists(
         play_times(), min_size=min_size, max_size=max_size,
     ).map(sorted)
+
+
+def scores() -> SearchStrategy[float]:
+    """Non-negative scores for decision options."""
+    return st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False)
+
+
+def penalty_factors() -> SearchStrategy[float]:
+    """Positive penalty multipliers."""
+    return st.floats(min_value=0.01, max_value=10.0, allow_nan=False, allow_infinity=False)
+
+
+def decision_sequences(min_size: int = 1, max_size: int = 10) -> SearchStrategy[list[str]]:
+    """Generate a list of unique decision template IDs."""
+    return st.lists(
+        event_ids(prefix="d"), min_size=min_size, max_size=max_size, unique=True,
+    )
+
+
+def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[dict]]:
+    """Generate lists of decision options with id, label, and score."""
+    return st.lists(
+        st.fixed_dictionaries({
+            "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
+            "label": st.just("Option"),
+            "score": scores(),
+        }),
+        min_size=min_size,
+        max_size=max_size,
+        unique_by=lambda o: o["id"],
+    )
