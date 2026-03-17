@@ -1,0 +1,29 @@
+name: Deploy TFC
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "apps/tfc/**"
+      - "packages/design-system/**"
+      - "packages/ui/**"
+      - "packages/tfc-shared/**"
+      - "infra/docker-compose.hetzner.yml"
+      - "docker-compose.hetzner.yml"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Hetzner
+        uses: appleboy/ssh-action@v1
+        with:
+          host: 46.224.43.248
+          username: root
+          key: ${{ secrets.HETZNER_SSH_KEY }}
+          script: |
+            set -e
+            cd /opt/tfc
+            git pull origin master
+            docker compose -f docker-compose.hetzner.yml up -d --build --remove-orphans
+            docker image prune -f
