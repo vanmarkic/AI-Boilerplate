@@ -5,10 +5,15 @@ import type { StorybookConfig } from '@storybook/angular';
 
 const rootDir = resolve(dirname(fileURLToPath(import.meta.url)), '../..');
 
-const maplibreCss = readFileSync(
-  resolve(rootDir, 'node_modules/maplibre-gl/dist/maplibre-gl.css'),
-  'utf-8',
-);
+let maplibreCss = '';
+try {
+  maplibreCss = readFileSync(
+    resolve(rootDir, 'node_modules/maplibre-gl/dist/maplibre-gl.css'),
+    'utf-8',
+  );
+} catch {
+  // maplibre-gl may not be installed in all environments (e.g. CI)
+}
 
 const config: StorybookConfig = {
   stories: [
