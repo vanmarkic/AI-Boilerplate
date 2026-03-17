@@ -4,6 +4,13 @@ import type { EngineSnapshot, EventSnapshot, IssueSnapshot } from './engine-api.
 import type { ActiveDecision, ScenarioContext } from './decision-api.service';
 import { formatTimeMs } from './format-time';
 
+export interface ParticipantPresence {
+  id: string;
+  display_name: string;
+  role: string;
+  connected: boolean;
+}
+
 interface ExerciseState {
   exerciseId: number | null;
   title: string;
@@ -15,6 +22,7 @@ interface ExerciseState {
   events: EventSnapshot[];
   issues: IssueSnapshot[];
   decisions: ActiveDecision[];
+  participants: ParticipantPresence[];
   context: ScenarioContext | null;
   playerRole: string;
   loading: boolean;
@@ -32,6 +40,7 @@ const initialState: ExerciseState = {
   events: [],
   issues: [],
   decisions: [],
+  participants: [],
   context: null,
   playerRole: 'player',
   loading: false,
@@ -61,6 +70,8 @@ export const ExerciseStore = signalStore(
     releasedIssues: computed(() => store.issues().filter((i) => i.released)),
     openDecisions: computed(() => store.decisions().filter((d) => d.status === 'open')),
     hasOpenDecision: computed(() => store.decisions().filter((d) => d.status === 'open').length > 0),
+    connectedParticipants: computed(() => store.participants().filter((p) => p.connected)),
+    connectedCount: computed(() => store.participants().filter((p) => p.connected).length),
     phaseBadgeVariant: computed<'default' | 'secondary' | 'destructive'>(() => {
       switch (store.phase()) {
         case 'running': return 'default';
@@ -146,6 +157,10 @@ export const ExerciseStore = signalStore(
         d.id === decisionId ? { ...d, status: 'closed' } : d,
       );
       patchState(store, { decisions });
+    },
+
+    updatePresence(participants: ParticipantPresence[]): void {
+      patchState(store, { participants });
     },
   })),
 );

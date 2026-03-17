@@ -4,6 +4,7 @@ import {
   PageHeaderComponent, CardComponent, ButtonDirective, InputComponent,
   BadgeComponent, CollapsiblePanelComponent,
 } from '@aspect/ui';
+import { DomainService } from '../../core/domain.service';
 import { ScenarioApiService } from '../../core/scenario-api.service';
 import type { DecisionTemplateDef } from '../../core/scenario-api.service';
 import { ScenarioBuilderStore } from './scenario-builder.store';
@@ -40,7 +41,7 @@ import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
         <tfc-scenario-event-editor />
         <tfc-scenario-issue-editor />
 
-        <ui-card title="Decision Templates">
+        <ui-card [title]="domain.term('decision') + ' Templates'">
           @for (dt of store.content().decision_templates; track dt.id) {
             <div class="flex flex-col gap-xs p-sm border-b">
               @if (editingDtId() === dt.id) {
@@ -131,6 +132,7 @@ import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
 })
 export class ScenarioBuilderView implements OnInit {
   protected readonly store = inject(ScenarioBuilderStore);
+  protected readonly domain = inject(DomainService);
   private readonly api = inject(ScenarioApiService);
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
   private counter = 0;
