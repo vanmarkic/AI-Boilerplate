@@ -8,6 +8,7 @@ Usage:
     from features.scenario.sample_er_scenario import ER_SCENARIO_CONTENT
     content = ScenarioContent.model_validate(ER_SCENARIO_CONTENT)
 """
+
 from __future__ import annotations
 
 # Play-time helpers (milliseconds)
@@ -35,16 +36,12 @@ ER_SCENARIO_CONTENT: dict = {
         "Players should communicate role changes to the GM immediately",
     ],
     "default_time_factor": 1.5,
-
     # ── Phases ───────────────────────────────────────────────────────────
     "phases": [
         {
             "id": "phase-alert",
             "title": "Alert & Activation",
-            "description": (
-                "Hospital receives MCI notification and activates the "
-                "emergency plan."
-            ),
+            "description": ("Hospital receives MCI notification and activates the emergency plan."),
             "duration_ms": 10 * _MIN,
             "events": ["evt-dispatch", "evt-mci-activation"],
         },
@@ -52,8 +49,7 @@ ER_SCENARIO_CONTENT: dict = {
             "id": "phase-triage",
             "title": "Triage & First Wave",
             "description": (
-                "First ambulances arrive. Triage area is set up and "
-                "patients are categorised."
+                "First ambulances arrive. Triage area is set up and patients are categorised."
             ),
             "duration_ms": 15 * _MIN,
             "events": [
@@ -88,7 +84,6 @@ ER_SCENARIO_CONTENT: dict = {
             "events": ["evt-mutual-aid", "evt-debrief"],
         },
     ],
-
     # ── Events ───────────────────────────────────────────────────────────
     "events": [
         {
@@ -237,7 +232,6 @@ ER_SCENARIO_CONTENT: dict = {
             "triggered_issues": [],
         },
     ],
-
     # ── Issues ───────────────────────────────────────────────────────────
     "issues": [
         {
@@ -309,16 +303,12 @@ ER_SCENARIO_CONTENT: dict = {
         {
             "id": "iss-public-info",
             "title": "Public Information Demand",
-            "description": (
-                "Media and families require updates. No PIO has been "
-                "designated yet."
-            ),
+            "description": ("Media and families require updates. No PIO has been designated yet."),
             "trigger_mode": "time-based",
             "trigger_time_pt_ms": 28 * _MIN,
             "auto_resolve_ms": 0,
         },
     ],
-
     # ── Decision Templates ───────────────────────────────────────────────
     "decision_templates": [
         {

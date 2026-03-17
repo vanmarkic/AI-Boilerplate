@@ -1,6 +1,10 @@
 """Tests for the Emergency Response sample scenario."""
+
 from __future__ import annotations
 
+from engine.event_scheduler import EventType
+from engine.exercise_engine import EngineConfig, ExerciseEngine
+from engine.issue_manager import TriggerMode
 from features.scenario.sample_er_scenario import ER_SCENARIO_CONTENT
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_loader import (
@@ -9,9 +13,6 @@ from features.scenario.scenario_loader import (
     load_scenario_events,
     load_scenario_issues,
 )
-from engine.event_scheduler import EventType
-from engine.exercise_engine import EngineConfig, ExerciseEngine
-from engine.issue_manager import TriggerMode
 
 
 def _content() -> ScenarioContent:
@@ -122,9 +123,7 @@ def test_er_scenario_all_issue_refs_valid() -> None:
     issue_ids = {iss.id for iss in content.issues}
     for evt in content.events:
         for ref in evt.triggered_issues:
-            assert ref in issue_ids, (
-                f"Event {evt.id} references unknown issue {ref}"
-            )
+            assert ref in issue_ids, f"Event {evt.id} references unknown issue {ref}"
 
 
 def test_er_scenario_all_dependency_refs_valid() -> None:
@@ -133,9 +132,7 @@ def test_er_scenario_all_dependency_refs_valid() -> None:
     event_ids = {evt.id for evt in content.events}
     for evt in content.events:
         for dep in evt.dependencies:
-            assert dep in event_ids, (
-                f"Event {evt.id} depends on unknown event {dep}"
-            )
+            assert dep in event_ids, f"Event {evt.id} depends on unknown event {dep}"
 
 
 def test_er_scenario_all_decision_issue_refs_valid() -> None:
@@ -143,9 +140,7 @@ def test_er_scenario_all_decision_issue_refs_valid() -> None:
     content = _content()
     issue_ids = {iss.id for iss in content.issues}
     for dt in content.decision_templates:
-        assert dt.issue_id in issue_ids, (
-            f"Decision {dt.id} references unknown issue {dt.issue_id}"
-        )
+        assert dt.issue_id in issue_ids, f"Decision {dt.id} references unknown issue {dt.issue_id}"
 
 
 def test_er_scenario_phase_event_refs_valid() -> None:
@@ -154,6 +149,4 @@ def test_er_scenario_phase_event_refs_valid() -> None:
     event_ids = {evt.id for evt in content.events}
     for phase in content.phases:
         for ref in phase.events:
-            assert ref in event_ids, (
-                f"Phase {phase.id} references unknown event {ref}"
-            )
+            assert ref in event_ids, f"Phase {phase.id} references unknown event {ref}"
