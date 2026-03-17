@@ -17,8 +17,9 @@ import { CdkTable, CdkTableModule } from '@angular/cdk/table';
 
 import { DataTableColumnComponent } from './data-table-column.component';
 import type { FilterLogic, FilterPosition } from './data-table-filter.types';
-import type { SortDirection, SortState, TableSize } from './data-table.types';
-import { type FilterRef, applyGroup, compareValues } from './data-table.utils';
+import type { SortState, TableSize } from './data-table.types';
+import { type FilterRef, applyFilterPipeline } from './data-table.utils';
+import { nextSortState, sortRows, syncColumnSortState } from './data-table.sort';
 
 @Component({
   selector: 'ui-data-table',
@@ -44,11 +45,7 @@ import { type FilterRef, applyGroup, compareValues } from './data-table.utils';
       <div class="data-table-content">
         <table cdk-table [dataSource]="displayData()" class="data-table-table">
           <ng-content />
-          <tr
-            cdk-header-row
-            *cdkHeaderRowDef="displayedColumns()"
-            class="data-table-header-row"
-          ></tr>
+          <tr cdk-header-row *cdkHeaderRowDef="displayedColumns()" class="data-table-header-row"></tr>
           <tr
             cdk-row
             *cdkRowDef="let row; columns: displayedColumns()"
@@ -60,17 +57,13 @@ import { type FilterRef, applyGroup, compareValues } from './data-table.utils';
           ></tr>
         </table>
         @if (displayData().length === 0) {
-          <div class="data-table-empty">
-            <ng-content select="[emptyState]" />
-          </div>
+          <div class="data-table-empty"><ng-content select="[emptyState]" /></div>
         }
       </div>
     </div>
   `,
 })
-export class DataTableComponent<T = Record<string, unknown>>
-  implements AfterViewInit
-{
+export class DataTableComponent<T = Record<string, unknown>> implements AfterViewInit {
   readonly dataSource = input.required<T[]>();
   readonly defaultSort = input<SortState[]>([]);
   readonly multiSort = input(false);
@@ -79,68 +72,28 @@ export class DataTableComponent<T = Record<string, unknown>>
   readonly clickableRows = input(false);
   readonly filterLogic = input<FilterLogic>('and');
   readonly masterFilterPosition = input<FilterPosition>('top');
-
   readonly sortChange = output<SortState[]>();
   readonly rowClick = output<T>();
-
   readonly activeSorts = signal<SortState[]>([]);
   readonly displayedColumns = signal<string[]>([]);
-
   private readonly filters = signal<FilterRef[]>([]);
 
-  readonly hasTopFilters = computed(() =>
-    this.filters().some((f) => f.position() === 'top'),
+  readonly hasTopFilters = computed(() => this.filters().some((f) => f.position() === 'top'));
+  readonly hasLeftFilters = computed(() => this.filters().some((f) => f.position() === 'left'));
+  readonly filteredData = computed(() =>
+    applyFilterPipeline(this.filters(), this.dataSource(), this.masterFilterPosition(), this.filterLogic()),
   );
-
-  readonly hasLeftFilters = computed(() =>
-    this.filters().some((f) => f.position() === 'left'),
-  );
-
-  readonly filteredData = computed(() => {
-    const data = this.dataSource();
-    const allFilters = this.filters();
-    if (allFilters.length === 0) return [...data];
-
-    const masterPos = this.masterFilterPosition();
-    const logic = this.filterLogic();
-    const master = allFilters.filter((f) => f.position() === masterPos);
-    const secondary = allFilters.filter((f) => f.position() !== masterPos);
-
-    const afterMaster = applyGroup(master, data, logic);
-    return applyGroup(secondary, afterMaster, logic);
-  });
-
-  readonly displayData = computed(() => {
-    const data = [...this.filteredData()];
-    const sorts = this.activeSorts();
-    if (sorts.length === 0) return data;
-
-    return data.sort((a, b) => {
-      for (const sort of sorts) {
-        const rowA = a as Record<string, unknown>;
-        const rowB = b as Record<string, unknown>;
-        const cmp = compareValues(rowA[sort.column], rowB[sort.column]);
-        if (cmp !== 0) return sort.direction === 'asc' ? cmp : -cmp;
-      }
-      return 0;
-    });
-  });
-
-  /** @deprecated Use displayData() instead. Kept for backwards compat. */
+  readonly displayData = computed(() => sortRows(this.filteredData(), this.activeSorts()));
+  /** @deprecated Use displayData() instead. */
   readonly sortedData = this.displayData;
 
   @ContentChildren(DataTableColumnComponent, { descendants: true })
   columns!: QueryList<DataTableColumnComponent>;
-
   @ViewChild(CdkTable, { static: true }) table!: CdkTable<T>;
-
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
-    effect(() => {
-      const sorts = this.activeSorts();
-      this.syncColumnSortState(sorts);
-    });
+    effect(() => { syncColumnSortState(this.columns, this.activeSorts(), this.multiSort()); });
   }
 
   registerFilter(filter: FilterRef): void {
@@ -154,62 +107,30 @@ export class DataTableComponent<T = Record<string, unknown>>
   ngAfterViewInit(): void {
     this.activeSorts.set(this.defaultSort());
     this.registerColumns();
-
-    const sub = this.columns.changes.subscribe(() => {
-      this.registerColumns();
-    });
+    const sub = this.columns.changes.subscribe(() => { this.registerColumns(); });
     this.destroyRef.onDestroy(() => sub.unsubscribe());
   }
 
   onRowClick(row: T): void {
-    if (this.clickableRows()) {
-      this.rowClick.emit(row);
-    }
+    if (this.clickableRows()) this.rowClick.emit(row);
   }
 
   toggleSort(columnDef: string): void {
-    const current = this.activeSorts();
-    const existing = current.find((s) => s.column === columnDef);
-
-    let next: SortState[];
-    if (!existing) {
-      const entry: SortState = { column: columnDef, direction: 'asc' };
-      next = this.multiSort() ? [...current, entry] : [entry];
-    } else if (existing.direction === 'asc') {
-      next = current.map((s) =>
-        s.column === columnDef ? { ...s, direction: 'desc' as SortDirection } : s,
-      );
-    } else {
-      next = current.filter((s) => s.column !== columnDef);
-    }
-
+    const next = nextSortState(this.activeSorts(), columnDef, this.multiSort());
     this.activeSorts.set(next);
     this.sortChange.emit(next);
   }
 
   private registerColumns(): void {
     const names: string[] = [];
-    const sorted = this.columns.toArray();
-
-    for (const col of sorted) {
+    for (const col of this.columns.toArray()) {
       const name = col.columnDef();
       col.column.name = name;
       names.push(name);
       this.table.addColumnDef(col.column);
       col.sortCallback = (def: string) => this.toggleSort(def);
     }
-
     this.displayedColumns.set(names);
-    this.syncColumnSortState(this.activeSorts());
+    syncColumnSortState(this.columns, this.activeSorts(), this.multiSort());
   }
-
-  private syncColumnSortState(sorts: SortState[]): void {
-    if (!this.columns) return;
-    for (const col of this.columns) {
-      const idx = sorts.findIndex((s) => s.column === col.columnDef());
-      col.activeSortDir.set(idx >= 0 ? sorts[idx].direction : null);
-      col.sortIdx.set(this.multiSort() && sorts.length > 1 ? idx : null);
-    }
-  }
-
 }
