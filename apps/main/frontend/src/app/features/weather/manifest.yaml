@@ -1,0 +1,3 @@
+name: weather
+tier: 2
+description: Third-party weather API integration demo (OpenWeatherMap)
