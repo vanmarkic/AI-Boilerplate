@@ -24,7 +24,8 @@ const config: StorybookConfig = {
   ],
   addons: ['@storybook/addon-a11y', '@storybook/addon-docs'],
   framework: '@storybook/angular',
-  previewHead: (head) => `${head}\n<style>@layer vendor { ${maplibreCss} }</style>`,
+  previewHead: (head) =>
+    `<style>@layer vendor, reset, tokens, utilities, components;</style>\n${head}\n<style>@layer vendor { ${maplibreCss} }</style>`,
   webpackFinal: async (config) => {
     if (config.resolve) {
       config.resolve.symlinks = false;
