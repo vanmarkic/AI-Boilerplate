@@ -14,6 +14,8 @@ export interface DecisionOption {
   scoreWeight: number;
 }
 
+export type PlayerType = 'advisor' | 'decision_maker';
+
 export interface DecisionConfig {
   question: string;
   questionType: QuestionType;
@@ -21,6 +23,11 @@ export interface DecisionConfig {
   targetRoles: string[];
   completionMode: CompletionMode;
   timeoutMs: PlayTimeMs | null;
+}
+
+export interface Recommendation {
+  participantId: string;
+  optionId: string;
 }
 
 export interface DecisionResponse {
@@ -36,5 +43,6 @@ export interface DecisionPoint {
   eventId: string;
   config: DecisionConfig;
   responses: DecisionResponse[];
+  recommendations: Record<string, string>;
   completed: boolean;
 }
