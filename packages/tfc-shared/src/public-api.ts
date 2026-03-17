@@ -54,8 +54,5 @@ export {
   EXERCISE_TRANSITIONS,
 } from './constants/lifecycles';
 
-export {
-  DEFAULT_DOMAIN,
-  CYBERSECURITY_DOMAIN,
-  HEALTHCARE_DOMAIN,
-} from './constants/domains';
+// Domain config presets are now served from the API (tfc_domain_configs table).
+// Import types from './types/domain' instead.
