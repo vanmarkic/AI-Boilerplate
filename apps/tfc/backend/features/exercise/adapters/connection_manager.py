@@ -18,17 +18,22 @@ class ConnectionManager:
     """Manages WebSocket connections grouped by exercise_id and role."""
 
     def __init__(self) -> None:
-        self._connections: dict[int, list[tuple[WebSocket, str]]] = {}
+        self._connections: dict[int, list[tuple[WebSocket, str, str | None]]] = {}
 
     def connect(
-        self, exercise_id: int, websocket: WebSocket, role: str
+        self,
+        exercise_id: int,
+        websocket: WebSocket,
+        role: str,
+        participant_id: str | None = None,
     ) -> None:
         """Register a new WebSocket client for an exercise."""
         if exercise_id not in self._connections:
             self._connections[exercise_id] = []
-        self._connections[exercise_id].append((websocket, role))
+        self._connections[exercise_id].append((websocket, role, participant_id))
         logger.info(
-            "WS connected: exercise=%d role=%s", exercise_id, role
+            "WS connected: exercise=%d role=%s participant=%s",
+            exercise_id, role, participant_id,
         )
 
     def disconnect(self, exercise_id: int, websocket: WebSocket) -> None:
@@ -37,7 +42,7 @@ class ConnectionManager:
         if conns is None:
             return
         self._connections[exercise_id] = [
-            (ws, r) for ws, r in conns if ws is not websocket
+            (ws, r, pid) for ws, r, pid in conns if ws is not websocket
         ]
         if not self._connections[exercise_id]:
             del self._connections[exercise_id]
@@ -52,7 +57,7 @@ class ConnectionManager:
             return
         text = json.dumps(message)
         dead: list[WebSocket] = []
-        for ws, _role in conns:
+        for ws, _role, _pid in conns:
             try:
                 await ws.send_text(text)
             except Exception:
@@ -72,7 +77,7 @@ class ConnectionManager:
             return
         text = json.dumps(message)
         dead: list[WebSocket] = []
-        for ws, ws_role in conns:
+        for ws, ws_role, _pid in conns:
             if ws_role == role:
                 try:
                     await ws.send_text(text)
@@ -89,8 +94,21 @@ class ConnectionManager:
     def get_connections(
         self, exercise_id: int
     ) -> list[tuple[WebSocket, str]]:
-        """List active connections for an exercise."""
-        return list(self._connections.get(exercise_id, []))
+        """List active connections for an exercise (ws, role)."""
+        return [
+            (ws, role)
+            for ws, role, _pid in self._connections.get(exercise_id, [])
+        ]
+
+    def get_connected_participant_ids(
+        self, exercise_id: int
+    ) -> list[str]:
+        """Return participant IDs of currently connected clients."""
+        return [
+            pid
+            for _ws, _role, pid in self._connections.get(exercise_id, [])
+            if pid is not None
+        ]
 
 
 # Global singleton
