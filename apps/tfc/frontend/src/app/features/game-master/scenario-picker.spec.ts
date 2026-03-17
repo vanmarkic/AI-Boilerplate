@@ -87,16 +87,16 @@ describe('ScenarioPickerComponent', () => {
     flushScenarios();
     const badges = fixture.nativeElement.querySelectorAll('ui-badge');
     const badgeTexts = Array.from(badges).map((b) => (b as Element).textContent?.trim());
-    expect(badgeTexts).toContain('2 events');
-    expect(badgeTexts).toContain('1 issues');
+    expect(badgeTexts).toContain('2 Events');
+    expect(badgeTexts).toContain('1 Issues');
   });
 
   it('shows 0 events/issues when content is null', () => {
     fixture.detectChanges();
     flushScenarios();
     const text = fixture.nativeElement.textContent;
-    expect(text).toContain('0 events');
-    expect(text).toContain('0 issues');
+    expect(text).toContain('0 Events');
+    expect(text).toContain('0 Issues');
   });
 
   it('shows version badge', () => {
