@@ -35,7 +35,7 @@ class PermissionResponse(ResponseBase):
     updated_at: datetime
 
 
-class FrontendPermissionsResponse(BaseModel):
+class FrontendPermissionsResponse(ResponseBase):
     """Response body for the current user's allowed frontend routes."""
 
     routes: list[str]

@@ -42,3 +42,12 @@ async def get_admin_users_service() -> "AdminUsersService":  # noqa: F821
 
     client = KeycloakAdminClient()
     return AdminUsersService(client)
+
+
+async def get_weather_service() -> "WeatherService":  # noqa: F821
+    """Wire up the WeatherService with its API client."""
+    from features.weather.weather_client import WeatherClient
+    from features.weather.weather_service import WeatherService
+
+    client = WeatherClient()
+    return WeatherService(client)

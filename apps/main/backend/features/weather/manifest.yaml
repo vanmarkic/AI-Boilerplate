@@ -1,0 +1,19 @@
+name: weather
+tier: 2
+description: Third-party weather API integration demo (OpenWeatherMap)
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [openweathermap-api]
+api_endpoints:
+  - GET /api/weather/{city}
+  - GET /api/weather/{city}/forecast
+models: []
+events_emitted: []
+events_consumed: []
+business_rules:
+  - "City name is required and must be 1-100 characters"
+  - "API key is loaded from OPENWEATHERMAP_API_KEY env var"
+  - "Temperature is returned in Celsius by default"
+  - "Forecast returns up to 5 days of data"
+  - "Responses are cached for 10 minutes to avoid rate limits"
