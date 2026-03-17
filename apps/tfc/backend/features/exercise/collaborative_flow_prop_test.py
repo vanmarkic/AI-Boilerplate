@@ -54,11 +54,17 @@ _exercise_titles = st.text(
 
 
 async def _create_collab(client: AsyncClient, title: str) -> dict:
-    resp = await client.post(
-        "/api/exercises",
-        json={"title": title, "game_mode": "simple_collaborative"},
-    )
-    # Skip this example if session_code collision occurs (DB shared across examples)
+    # DB is shared across Hypothesis examples; session_code collision raises IntegrityError
+    # via the ASGI transport (commit happens after response, outside FastAPI's exception handler).
+    # Use assume() to skip the example gracefully rather than failing.
+    try:
+        resp = await client.post(
+            "/api/exercises",
+            json={"title": title, "game_mode": "simple_collaborative"},
+        )
+    except Exception:
+        assume(False)
+        raise  # unreachable
     assume(resp.status_code == 201)
     return resp.json()
 
