@@ -73,15 +73,13 @@ const DEFAULT_ROLES = [
             >
               Leave
             </button>
-            @if (isGameMaster()) {
-              <button
-                uiButton
-                variant="default"
-                (click)="onStartExercise()"
-              >
-                Start Exercise
-              </button>
-            }
+            <button
+              uiButton
+              variant="default"
+              (click)="onStartExercise()"
+            >
+              {{ isGameMaster() ? 'Start Exercise' : 'Enter Exercise' }}
+            </button>
           </div>
         </div>
       </ui-card>
@@ -151,7 +149,12 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   }
 
   protected onStartExercise(): void {
-    this.router.navigate(['/gm'], {
+    const me = this.participants().find(
+      (p) => p.id === this.participantId(),
+    );
+    const isGm = me?.role === 'game-master';
+    const route = isGm ? '/gm' : '/player';
+    this.router.navigate([route], {
       queryParams: { exerciseId: this.exerciseId() },
     });
   }

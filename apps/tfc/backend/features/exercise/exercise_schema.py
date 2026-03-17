@@ -31,5 +31,6 @@ class ExerciseResponse(ResponseBase):
     scenario_id: int | None
     domain_id: int | None
     time_factor: float
+    session_code: str
     created_at: datetime
     updated_at: datetime

@@ -51,6 +51,17 @@ class ExerciseService:
             )
         return ExerciseResponse.model_validate(exercise)
 
+    async def get_exercise_by_code(
+        self, session_code: str,
+    ) -> ExerciseResponse:
+        exercise = await self.repository.get_by_session_code(session_code)
+        if not exercise:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Exercise not found for session code",
+            )
+        return ExerciseResponse.model_validate(exercise)
+
     async def list_exercises(
         self, phase: str | None = None,
     ) -> list[ExerciseResponse]:

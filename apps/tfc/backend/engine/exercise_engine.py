@@ -1,22 +1,19 @@
-"""Exercise engine — orchestrates TimeManager, EventScheduler, IssueManager.
-
-Runs a tick loop (250ms) when the exercise is running.
-"""
+"""Exercise engine — orchestrates TimeManager, EventScheduler, IssueManager."""
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
+import time as _time_mod
 from enum import StrEnum
 from typing import Callable, Awaitable
 
 from engine.state_changes import PhaseChange, StateChange
-
+from engine.engine_config import (  # noqa: F401 — re-exported
+    TICK_INTERVAL_S, DecisionTemplate, EngineConfig, ScenarioContext,
+)
 from engine.time_manager import TimeManager
-from engine.event_scheduler import EventScheduler, ScheduledEvent, EventLifecycle, EventType
-from engine.issue_manager import IssueManager, TrackedIssue
+from engine.event_scheduler import EventScheduler, EventLifecycle, EventType
+from engine.issue_manager import IssueManager
 from engine.decision_manager import DecisionManager
-
-TICK_INTERVAL_S = 0.25
 
 
 class EnginePhase(StrEnum):
@@ -24,38 +21,6 @@ class EnginePhase(StrEnum):
     RUNNING = "running"
     PAUSED = "paused"
     COMPLETED = "completed"
-
-
-@dataclass
-class DecisionTemplate:
-    id: str
-    title: str
-    description: str
-    issue_id: str
-    question_type: str
-    options: list[dict]
-    completion_mode: str
-    target_roles: list[str] = field(default_factory=list)
-
-
-@dataclass
-class ScenarioContext:
-    title: str = ""
-    description: str = ""
-    briefing: str = ""
-    objectives: list[str] = field(default_factory=list)
-    rules: list[str] = field(default_factory=list)
-
-
-@dataclass
-class EngineConfig:
-    exercise_id: int
-    title: str
-    time_factor: float = 1.0
-    events: list[ScheduledEvent] = field(default_factory=list)
-    issues: list[TrackedIssue] = field(default_factory=list)
-    decision_templates: list[DecisionTemplate] = field(default_factory=list)
-    context: ScenarioContext = field(default_factory=ScenarioContext)
 
 
 class ExerciseEngine:
@@ -73,9 +38,9 @@ class ExerciseEngine:
         self._issues = IssueManager()
         self._decisions = DecisionManager()
         self._tick_task: asyncio.Task | None = None  # type: ignore[type-arg]
+        self._timeout_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._on_state_change = on_state_change
 
-        # Load scenario data
         self._events.load_events(config.events)
         self._issues.load_issues(config.issues)
 
@@ -124,10 +89,12 @@ class ExerciseEngine:
         self._phase = EnginePhase.COMPLETED
         self._time.pause()
         self._stop_tick_loop()
+        self._stop_timeout_monitor()
         return self._phase_change("completed")
 
     async def reset(self) -> dict:
         self._stop_tick_loop()
+        self._stop_timeout_monitor()
         self._phase = EnginePhase.SETUP
         self._time.reset()
         self._events.load_events(self._config.events)
@@ -142,41 +109,31 @@ class ExerciseEngine:
     async def tick(self) -> list[StateChange]:
         """Advance time, check triggers, return state changes."""
         changes: list[dict] = []
-
-        # 1. Advance play time
         self._time.tick()
         pt = self._time.play_time_ms
 
-        # 2. Check event triggers and transitions
         event_changes = self._events.tick(pt)
         changes.extend(event_changes)
 
-        # 2b. Check for DECISION events that just started
         decision_changes = self._handle_decision_events(event_changes, pt)
         changes.extend(decision_changes)
 
-        # 3. Collect completed event IDs for issue triggers
         completed_events = {
-            eid
-            for eid, ev in self._events.events.items()
+            eid for eid, ev in self._events.events.items()
             if ev.lifecycle == EventLifecycle.COMPLETED
         }
 
-        # 4. Check newly completed events for issue triggers
         for change in event_changes:
             if change.get("action") == "completed":
                 event_id = change["event_id"]
                 issue_changes = self._issues.activate_by_event(event_id, pt)
                 changes.extend(issue_changes)
 
-        # 5. Check issue triggers and auto-resolve countdowns
         issue_changes = self._issues.tick(pt, completed_events)
         changes.extend(issue_changes)
 
-        # 6. Broadcast changes
         if changes and self._on_state_change:
             await self._on_state_change(changes)
-
         return changes
 
     def snapshot(self) -> dict:
@@ -203,6 +160,7 @@ class ExerciseEngine:
             if event is None or event.event_type != EventType.DECISION:
                 continue
             t = self._find_decision_template(event_id)
+            timeout_ms = t.timeout_ms if t else 0.0
             changes.append(self._decisions.open_decision(
                 id=t.id if t else event_id,
                 event_id=event_id,
@@ -213,11 +171,14 @@ class ExerciseEngine:
                 options=t.options if t else [],
                 completion_mode=t.completion_mode if t else "first_response",
                 target_roles=t.target_roles if t else [],
+                timeout_ms=timeout_ms,
                 current_pt_ms=pt,
             ))
             self._phase = EnginePhase.PAUSED
             self._time.pause()
             self._stop_tick_loop()
+            if timeout_ms > 0:
+                self._start_timeout_monitor()
         return changes
 
     def _find_decision_template(self, event_id: str) -> DecisionTemplate | None:
@@ -240,6 +201,36 @@ class ExerciseEngine:
             while True:
                 await self.tick()
                 await asyncio.sleep(TICK_INTERVAL_S)
+        except asyncio.CancelledError:
+            pass
+
+    def _start_timeout_monitor(self) -> None:
+        if self._timeout_task and not self._timeout_task.done():
+            return
+        self._timeout_task = asyncio.create_task(self._timeout_loop())
+
+    def _stop_timeout_monitor(self) -> None:
+        if self._timeout_task and not self._timeout_task.done():
+            self._timeout_task.cancel()
+            self._timeout_task = None
+
+    async def _timeout_loop(self) -> None:
+        """Monitor open decisions for wall-clock timeout expiry."""
+        try:
+            while self._decisions.get_open_decisions():
+                await asyncio.sleep(0.5)
+                now_ms = _time_mod.monotonic() * 1000
+                pt = self._time.play_time_ms
+                changes = [
+                    c for d in self._decisions.get_open_decisions()
+                    if d.timeout_ms > 0 and (now_ms - d.opened_at_rt_ms) >= d.timeout_ms
+                    for c in [self._decisions.close_decision(d.id, current_pt_ms=pt)]
+                    if c is not None
+                ]
+                if changes and self._on_state_change:
+                    await self._on_state_change(changes)
+                if changes and not self._decisions.get_open_decisions():
+                    await self.resume()
         except asyncio.CancelledError:
             pass
 

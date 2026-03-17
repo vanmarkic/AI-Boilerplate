@@ -5,6 +5,7 @@ The engine checks decision state in its tick loop.
 """
 from __future__ import annotations
 
+import time as _time_mod
 from dataclasses import dataclass, field
 
 from engine.state_changes import DecisionClosed, DecisionOpened
@@ -22,8 +23,10 @@ class ActiveDecision:
     options: list[dict]
     completion_mode: str
     target_roles: list[str]
-    status: str = "open"  # open, closed
+    timeout_ms: float = 0.0  # 0 = no timeout
+    status: str = "open"  # open, closed, timed_out
     opened_at_pt_ms: float = 0.0
+    opened_at_rt_ms: float = 0.0  # wall clock for timeout tracking
     closed_at_pt_ms: float | None = None
 
 
@@ -45,6 +48,7 @@ class DecisionManager:
         options: list[dict],
         completion_mode: str,
         target_roles: list[str],
+        timeout_ms: float = 0.0,
         current_pt_ms: float,
     ) -> DecisionOpened:
         """Register a new open decision. Returns a change dict."""
@@ -58,8 +62,10 @@ class DecisionManager:
             options=options,
             completion_mode=completion_mode,
             target_roles=target_roles,
+            timeout_ms=timeout_ms,
             status="open",
             opened_at_pt_ms=current_pt_ms,
+            opened_at_rt_ms=_time_mod.monotonic() * 1000,
         )
         self._decisions[id] = decision
         return {
@@ -69,6 +75,7 @@ class DecisionManager:
             "question_type": question_type,
             "options": options,
             "target_roles": target_roles,
+            "timeout_ms": timeout_ms,
         }
 
     def close_decision(
@@ -85,6 +92,23 @@ class DecisionManager:
             "decision_id": decision_id,
             "title": decision.title,
         }
+
+    def tick(self, current_pt_ms: float) -> list[DecisionClosed]:
+        """Check open decisions for timeout expiry. Returns changes."""
+        changes: list[DecisionClosed] = []
+        for d in self._decisions.values():
+            if d.status != "open" or d.timeout_ms <= 0:
+                continue
+            elapsed = current_pt_ms - d.opened_at_pt_ms
+            if elapsed >= d.timeout_ms:
+                d.status = "timed_out"
+                d.closed_at_pt_ms = current_pt_ms
+                changes.append({
+                    "type": "decision_closed",
+                    "decision_id": d.id,
+                    "title": d.title,
+                })
+        return changes
 
     def get_open_decisions(self) -> list[ActiveDecision]:
         """Return only decisions with status 'open'."""
@@ -103,6 +127,7 @@ class DecisionManager:
                 "options": d.options,
                 "completion_mode": d.completion_mode,
                 "target_roles": d.target_roles,
+                "timeout_ms": d.timeout_ms,
                 "status": d.status,
                 "opened_at_pt_ms": d.opened_at_pt_ms,
                 "closed_at_pt_ms": d.closed_at_pt_ms,
