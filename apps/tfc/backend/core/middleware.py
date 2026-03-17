@@ -10,7 +10,7 @@ def setup_middleware(app: FastAPI) -> None:
     """Configure all application middleware."""
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://localhost:4200"],
+        allow_origins=["http://localhost:4201"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
