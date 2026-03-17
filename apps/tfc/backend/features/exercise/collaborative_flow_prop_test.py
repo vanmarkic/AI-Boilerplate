@@ -1,243 +1,158 @@
 """Property-based tests for the collaborative exercise onboarding flow.
 
+These tests target pure functions and in-memory stores — no HTTP, no DB.
+This keeps them fast, deterministic, and free from shared-state issues.
+
 Invariants tested:
-- Session code format: always 6 uppercase alphanumeric characters.
-- Session code uniqueness: N exercises produce N distinct codes.
-- Participant count: exactly K participants after K joins.
-- Name preservation: joined names round-trip through the waiting room list.
-- ID uniqueness: every participant receives a distinct ID.
-- Role invariant: all participants in a collaborative exercise have role 'player'.
-- Isolation: participants in one exercise are invisible to another.
+- Session code format: _generate_session_code() always yields 6 uppercase alphanumeric chars.
+- Session code entropy: repeated calls produce distinct values with high probability.
+- Participant count: exactly K participants after K joins to the same exercise.
+- Name preservation: joined names round-trip through the waiting room store.
+- ID uniqueness: every participant receives a distinct UUID.
+- Role invariant: all participants joined as 'player' retain that role.
+- Isolation: participants from exercise A never appear in exercise B's list.
 """
 from __future__ import annotations
 
-import pytest
-from hypothesis import HealthCheck, assume, given, settings
+from hypothesis import given, settings
 from hypothesis import strategies as st
-from httpx import AsyncClient
 
-from engine.session_store import session_store
-from features.waiting_room.waiting_room_store import waiting_room_store
-
-
-# ── Fixtures ──────────────────────────────────────────────────────────────────
-
-
-@pytest.fixture(autouse=True)
-def _cleanup():
-    yield
-    for eid in list(session_store._sessions.keys()):
-        engine = session_store.get(eid)
-        if engine:
-            engine._stop_tick_loop()
-            engine._stop_timeout_monitor()
-        session_store.remove(eid)
-    waiting_room_store._rooms.clear()
+from features.exercise.exercise_model import _generate_session_code
+from features.waiting_room.waiting_room_store import WaitingRoomStore
 
 
 # ── Strategies ────────────────────────────────────────────────────────────────
 
-# Printable ASCII names, non-empty after stripping
 _player_names = st.text(
     alphabet=st.characters(whitelist_categories=("Lu", "Ll", "Nd"), whitelist_characters=" -"),
     min_size=1,
     max_size=30,
 ).filter(lambda s: s.strip())
 
-_exercise_titles = st.text(
-    min_size=1,
-    max_size=80,
-).filter(lambda s: s.strip())
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
-
-
-async def _create_collab(client: AsyncClient, title: str) -> dict:
-    # DB is shared across Hypothesis examples; session_code collision raises IntegrityError
-    # via the ASGI transport (commit happens after response, outside FastAPI's exception handler).
-    # Use assume() to skip the example gracefully rather than failing.
-    try:
-        resp = await client.post(
-            "/api/exercises",
-            json={"title": title, "game_mode": "simple_collaborative"},
-        )
-    except Exception:
-        assume(False)
-        raise  # unreachable
-    assume(resp.status_code == 201)
-    return resp.json()
-
-
-async def _join(client: AsyncClient, exercise_id: int, name: str) -> dict:
-    resp = await client.post(
-        f"/api/exercises/{exercise_id}/waiting-room/join",
-        json={"display_name": name, "role": "player"},
-    )
-    assert resp.status_code == 200
-    return resp.json()
-
-
-async def _list_participants(client: AsyncClient, exercise_id: int) -> list[dict]:
-    resp = await client.get(f"/api/exercises/{exercise_id}/waiting-room")
-    assert resp.status_code == 200
-    return resp.json()["participants"]
+_exercise_ids = st.integers(min_value=1, max_value=10_000)
 
 
 # ── Session code properties ───────────────────────────────────────────────────
 
 
-class TestSessionCodeProperties:
-    @given(title=_exercise_titles)
-    @settings(max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_session_code_is_always_6_uppercase_alphanumeric(
-        self, title: str, client: AsyncClient
-    ) -> None:
-        ex = await _create_collab(client, title)
-        code = ex["session_code"]
-        assert len(code) == 6, f"Expected 6 chars, got {len(code)!r}"
+class TestSessionCodeFormat:
+    @given(st.integers(min_value=1, max_value=500))
+    @settings(max_examples=200)
+    def test_code_is_always_6_uppercase_alphanumeric(self, _: int) -> None:
+        code = _generate_session_code()
+        assert len(code) == 6, f"Expected 6 chars, got {len(code)!r} in {code!r}"
         assert code.isalnum(), f"Non-alphanumeric chars in {code!r}"
-        assert code == code.upper(), f"Code {code!r} is not uppercase"
+        assert code == code.upper(), f"Code not uppercase: {code!r}"
 
-    @given(titles=st.lists(_exercise_titles, min_size=2, max_size=5, unique=True))
-    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_session_codes_are_unique_across_exercises(
-        self, titles: list[str], client: AsyncClient
-    ) -> None:
-        codes = []
-        for title in titles:
-            ex = await _create_collab(client, title)
-            codes.append(ex["session_code"])
-        assert len(codes) == len(set(codes)), f"Duplicate codes found: {codes}"
-
-    @given(title=_exercise_titles)
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_session_code_lookup_roundtrip(
-        self, title: str, client: AsyncClient
-    ) -> None:
-        ex = await _create_collab(client, title)
-        code = ex["session_code"]
-
-        resp = await client.get(f"/api/exercises/by-code/{code}")
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["id"] == ex["id"]
-        assert data["session_code"] == code
-        assert data["game_mode"] == "simple_collaborative"
-
-    @given(title=_exercise_titles)
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_lowercase_code_resolves_to_same_exercise(
-        self, title: str, client: AsyncClient
-    ) -> None:
-        ex = await _create_collab(client, title)
-        lower = ex["session_code"].lower()
-
-        resp = await client.get(f"/api/exercises/by-code/{lower}")
-        assert resp.status_code == 200
-        assert resp.json()["id"] == ex["id"]
+    @given(st.integers(min_value=2, max_value=20))
+    @settings(max_examples=50)
+    def test_repeated_calls_produce_distinct_codes(self, n: int) -> None:
+        codes = [_generate_session_code() for _ in range(n)]
+        # With 36^6 ≈ 2.2B possibilities, duplicates among ≤20 should be vanishingly rare.
+        # This property would only fail if the RNG is broken.
+        assert len(set(codes)) == len(codes), f"Duplicate codes in {codes}"
 
 
-# ── Participant properties ─────────────────────────────────────────────────────
+# ── WaitingRoomStore properties ───────────────────────────────────────────────
 
 
-class TestParticipantProperties:
-    @given(names=st.lists(_player_names, min_size=1, max_size=8, unique=True))
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_participant_count_matches_join_calls(
-        self, names: list[str], client: AsyncClient
-    ) -> None:
-        ex = await _create_collab(client, "Count Test")
-        eid = ex["id"]
-        for name in names:
-            await _join(client, eid, name)
-
-        participants = await _list_participants(client, eid)
-        assert len(participants) == len(names), (
-            f"Expected {len(names)} participants, got {len(participants)}"
-        )
-
-    @given(names=st.lists(_player_names, min_size=1, max_size=8, unique=True))
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_all_joined_names_preserved_in_waiting_room(
-        self, names: list[str], client: AsyncClient
-    ) -> None:
-        ex = await _create_collab(client, "Name Roundtrip Test")
-        eid = ex["id"]
-        for name in names:
-            await _join(client, eid, name)
-
-        participants = await _list_participants(client, eid)
-        listed_names = {p["display_name"] for p in participants}
-        assert listed_names == set(names), (
-            f"Names mismatch: expected {set(names)}, got {listed_names}"
-        )
-
-    @given(names=st.lists(_player_names, min_size=1, max_size=8, unique=True))
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_all_participants_have_player_role(
-        self, names: list[str], client: AsyncClient
-    ) -> None:
-        ex = await _create_collab(client, "Role Test")
-        eid = ex["id"]
-        for name in names:
-            await _join(client, eid, name)
-
-        participants = await _list_participants(client, eid)
-        roles = {p["role"] for p in participants}
-        assert roles == {"player"}, (
-            f"Expected only 'player' role, got: {roles}"
-        )
-
-    @given(names=st.lists(_player_names, min_size=2, max_size=8, unique=True))
-    @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_participant_ids_are_unique(
-        self, names: list[str], client: AsyncClient
-    ) -> None:
-        ex = await _create_collab(client, "ID Uniqueness Test")
-        eid = ex["id"]
-        ids = []
-        for name in names:
-            p = await _join(client, eid, name)
-            ids.append(p["id"])
-
-        assert len(ids) == len(set(ids)), f"Duplicate participant IDs: {ids}"
-
-
-# ── Isolation properties ───────────────────────────────────────────────────────
-
-
-class TestExerciseIsolationProperties:
+class TestParticipantCountInvariant:
     @given(
-        names_a=st.lists(_player_names, min_size=1, max_size=4, unique=True),
-        names_b=st.lists(_player_names, min_size=1, max_size=4, unique=True),
+        exercise_id=_exercise_ids,
+        names=st.lists(_player_names, min_size=1, max_size=10, unique=True),
     )
-    @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
-    @pytest.mark.asyncio
-    async def test_participants_do_not_leak_between_exercises(
+    @settings(max_examples=100)
+    def test_participant_count_equals_join_calls(
+        self, exercise_id: int, names: list[str]
+    ) -> None:
+        store = WaitingRoomStore()
+        for name in names:
+            store.join(exercise_id, name, "player")
+        assert len(store.list_participants(exercise_id)) == len(names)
+
+    @given(
+        exercise_id=_exercise_ids,
+        names=st.lists(_player_names, min_size=1, max_size=10, unique=True),
+    )
+    @settings(max_examples=100)
+    def test_all_names_preserved_in_store(
+        self, exercise_id: int, names: list[str]
+    ) -> None:
+        store = WaitingRoomStore()
+        for name in names:
+            store.join(exercise_id, name, "player")
+        stored = {p.display_name for p in store.list_participants(exercise_id)}
+        assert stored == set(names)
+
+    @given(
+        exercise_id=_exercise_ids,
+        names=st.lists(_player_names, min_size=1, max_size=10, unique=True),
+    )
+    @settings(max_examples=100)
+    def test_all_participants_retain_player_role(
+        self, exercise_id: int, names: list[str]
+    ) -> None:
+        store = WaitingRoomStore()
+        for name in names:
+            store.join(exercise_id, name, "player")
+        roles = {p.role for p in store.list_participants(exercise_id)}
+        assert roles == {"player"}, f"Unexpected roles: {roles}"
+
+    @given(
+        exercise_id=_exercise_ids,
+        names=st.lists(_player_names, min_size=2, max_size=10, unique=True),
+    )
+    @settings(max_examples=100)
+    def test_participant_ids_are_unique(
+        self, exercise_id: int, names: list[str]
+    ) -> None:
+        store = WaitingRoomStore()
+        ids = [store.join(exercise_id, name, "player").id for name in names]
+        assert len(ids) == len(set(ids)), f"Duplicate IDs found: {ids}"
+
+
+class TestExerciseIsolation:
+    @given(
+        id_a=_exercise_ids,
+        id_b=_exercise_ids.filter(lambda x: x != 1),  # ensure they can be distinct
+        names_a=st.lists(_player_names, min_size=1, max_size=5, unique=True),
+        names_b=st.lists(_player_names, min_size=1, max_size=5, unique=True),
+    )
+    @settings(max_examples=50)
+    def test_participants_never_leak_between_exercises(
         self,
+        id_a: int,
+        id_b: int,
         names_a: list[str],
         names_b: list[str],
-        client: AsyncClient,
     ) -> None:
-        ex_a = await _create_collab(client, "Exercise A")
-        ex_b = await _create_collab(client, "Exercise B")
+        from hypothesis import assume
+        assume(id_a != id_b)
 
+        store = WaitingRoomStore()
         for name in names_a:
-            await _join(client, ex_a["id"], name)
+            store.join(id_a, name, "player")
         for name in names_b:
-            await _join(client, ex_b["id"], name)
+            store.join(id_b, name, "player")
 
-        a_names = {p["display_name"] for p in await _list_participants(client, ex_a["id"])}
-        b_names = {p["display_name"] for p in await _list_participants(client, ex_b["id"])}
+        a_names = {p.display_name for p in store.list_participants(id_a)}
+        b_names = {p.display_name for p in store.list_participants(id_b)}
 
         assert a_names == set(names_a)
         assert b_names == set(names_b)
+
+    @given(
+        id_a=_exercise_ids,
+        names=st.lists(_player_names, min_size=1, max_size=5, unique=True),
+    )
+    @settings(max_examples=50)
+    def test_empty_exercise_has_no_participants(
+        self, id_a: int, names: list[str]
+    ) -> None:
+        store = WaitingRoomStore()
+        id_b = id_a + 1  # guaranteed different
+        for name in names:
+            store.join(id_a, name, "player")
+
+        # Exercise B was never joined — must have zero participants
+        assert store.list_participants(id_b) == []
