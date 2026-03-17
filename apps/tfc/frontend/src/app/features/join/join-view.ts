@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject, signal, OnInit } from '@angular/core';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -14,16 +14,20 @@ interface ExerciseLookup {
   id: number;
   title: string;
   session_code: string;
+  game_mode: string;
 }
 
 @Component({
   selector: 'tfc-join-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CardComponent, InputComponent, ButtonDirective],
+  imports: [FormsModule, RouterLink, CardComponent, InputComponent, ButtonDirective],
   template: `
     <div class="flex justify-center items-center min-h-screen p-lg">
-      <ui-card title="Join Exercise">
+      <ui-card [title]="selectedRole() === 'game-master' ? 'Run Exercise' : 'Join Exercise'">
         <div class="flex flex-col gap-md" style="min-width: 320px;">
+          <a routerLink="/home" class="text-sm" style="color: var(--color-muted-foreground); text-decoration: none;">
+            ← Back
+          </a>
           <ui-input
             id="session-code"
             label="Session Code"
@@ -44,18 +48,20 @@ interface ExerciseLookup {
             [(value)]="displayName"
           />
 
-          <div class="flex flex-col gap-sm">
-            <label class="text-sm font-medium">Role</label>
-            <select
-              class="input-base"
-              [value]="selectedRole()"
-              (change)="onRoleChange($event)"
-            >
-              <option value="player">Player</option>
-              <option value="observer">Observer</option>
-              <option value="game-master">Game Master</option>
-            </select>
-          </div>
+          @if (gameMode() !== 'simple_collaborative') {
+            <div class="flex flex-col gap-sm">
+              <label class="text-sm font-medium">Role</label>
+              <select
+                class="input-base"
+                [value]="selectedRole()"
+                (change)="onRoleChange($event)"
+              >
+                <option value="player">Player</option>
+                <option value="observer">Observer</option>
+                <option value="game-master">Game Master</option>
+              </select>
+            </div>
+          }
 
           @if (error()) {
             <p class="text-sm" style="color: var(--color-destructive)">{{ error() }}</p>
@@ -74,8 +80,9 @@ interface ExerciseLookup {
     </div>
   `,
 })
-export class JoinView {
+export class JoinView implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly http = inject(HttpClient);
   private readonly waitingRoomApi = inject(WaitingRoomApiService);
 
@@ -85,7 +92,16 @@ export class JoinView {
   protected readonly joining = signal(false);
   protected readonly error = signal('');
   protected readonly exerciseTitle = signal('');
+  protected readonly gameMode = signal('classic');
   private resolvedExerciseId: number | null = null;
+
+  ngOnInit(): void {
+    const role = this.route.snapshot.queryParams['role'];
+    const validRoles = ['player', 'observer', 'game-master'];
+    if (role && validRoles.includes(role)) {
+      this.selectedRole.set(role);
+    }
+  }
 
   protected canJoin(): boolean {
     return this.sessionCode().trim().length > 0
@@ -119,6 +135,10 @@ export class JoinView {
         .subscribe({
           next: (exercise) => {
             this.exerciseTitle.set(exercise.title);
+            this.gameMode.set(exercise.game_mode);
+            if (exercise.game_mode === 'simple_collaborative') {
+              this.selectedRole.set('player');
+            }
             this.joinExercise(exercise.id);
           },
           error: () => {
@@ -139,6 +159,7 @@ export class JoinView {
             queryParams: {
               exerciseId,
               participantId: participant.id,
+              gameMode: this.gameMode(),
             },
           });
         },

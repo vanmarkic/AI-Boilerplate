@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 from features.exercise.exercise_model import Exercise
 from features.exercise.exercise_repository import ExerciseRepository
 from features.exercise.exercise_schema import (
+    VALID_GAME_MODES,
     CreateExerciseRequest,
     ExerciseResponse,
     UpdateExerciseRequest,
@@ -31,6 +32,11 @@ class ExerciseService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Invalid phase: {request.phase}",
             )
+        if request.game_mode not in VALID_GAME_MODES:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid game_mode: {request.game_mode}",
+            )
         exercise = Exercise(
             title=request.title,
             description=request.description,
@@ -38,6 +44,7 @@ class ExerciseService:
             scenario_id=request.scenario_id,
             domain_id=request.domain_id,
             time_factor=request.time_factor,
+            game_mode=request.game_mode,
         )
         created = await self.repository.create(exercise)
         return ExerciseResponse.model_validate(created)
