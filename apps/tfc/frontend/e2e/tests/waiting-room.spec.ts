@@ -19,8 +19,8 @@ test.describe('Join page', () => {
     await page.goto('/join');
 
     await expect(page.getByText('Join Exercise')).toBeVisible();
-    await expect(page.locator('#session-code')).toBeVisible();
-    await expect(page.locator('#display-name')).toBeVisible();
+    await expect(page.locator('input#session-code')).toBeVisible();
+    await expect(page.locator('input#display-name')).toBeVisible();
     await expect(page.locator('select')).toBeVisible();
     await expect(page.getByRole('button', { name: 'Join' })).toBeVisible();
   });
@@ -44,8 +44,8 @@ test.describe('Join page', () => {
     await mockApi.install();
     await page.goto('/join');
 
-    await page.locator('#session-code').fill('42');
-    await page.locator('#display-name').fill('Alice');
+    await page.locator('input#session-code').fill('42');
+    await page.locator('input#display-name').fill('Alice');
     await page.getByRole('button', { name: 'Join' }).click();
 
     await expect(page).toHaveURL(/waiting-room/);
@@ -60,8 +60,8 @@ test.describe('Join page', () => {
     await mockApi.install();
     await page.goto('/join');
 
-    await page.locator('#session-code').fill('42');
-    await page.locator('#display-name').fill('Commander');
+    await page.locator('input#session-code').fill('42');
+    await page.locator('input#display-name').fill('Commander');
     await page.locator('select').selectOption('game-master');
     await page.getByRole('button', { name: 'Join' }).click();
 
@@ -75,8 +75,8 @@ test.describe('Join page', () => {
     await mockApi.install();
     await page.goto('/join');
 
-    await page.locator('#session-code').fill('42');
-    await page.locator('#display-name').fill('Watcher');
+    await page.locator('input#session-code').fill('42');
+    await page.locator('input#display-name').fill('Watcher');
     await page.locator('select').selectOption('observer');
     await page.getByRole('button', { name: 'Join' }).click();
 
@@ -101,12 +101,12 @@ test.describe('Join page', () => {
     await mockApi.install();
     await page.goto('/join');
 
-    await page.locator('#session-code').fill('abc');
-    await page.locator('#display-name').fill('Alice');
+    await page.locator('input#session-code').fill('abc');
+    await page.locator('input#display-name').fill('Alice');
     await page.getByRole('button', { name: 'Join' }).click();
 
     await expect(
-      page.getByText('Session code must be a valid exercise ID'),
+      page.getByText('Session code not found'),
     ).toBeVisible();
   });
 });
@@ -411,8 +411,8 @@ test.describe('Full join-to-leave integration', () => {
     await page.goto('/join');
 
     // Fill join form
-    await page.locator('#session-code').fill('42');
-    await page.locator('#display-name').fill('Alice');
+    await page.locator('input#session-code').fill('42');
+    await page.locator('input#display-name').fill('Alice');
     await page.getByRole('button', { name: 'Join' }).click();
 
     // Now in waiting room
@@ -431,8 +431,8 @@ test.describe('Full join-to-leave integration', () => {
     await mockApi.install();
     await page.goto('/join');
 
-    await page.locator('#session-code').fill('42');
-    await page.locator('#display-name').fill('Commander');
+    await page.locator('input#session-code').fill('42');
+    await page.locator('input#display-name').fill('Commander');
     await page.locator('select').selectOption('game-master');
     await page.getByRole('button', { name: 'Join' }).click();
 
