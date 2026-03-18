@@ -429,7 +429,7 @@
           {
             "id": "SWB29",
             "label": "Decoy Deployment",
-            "score": 3.0
+            "score": -5.0
           }
         ]
       },
@@ -460,6 +460,7 @@
         "issue_id": "iss-hostile-contact",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "forced_option_ids": ["SWB20"],
         "options": [
           {
             "id": "SWB08",
@@ -579,7 +580,7 @@
           {
             "id": "SWB28",
             "label": "Engage Target with Guns",
-            "score": 3.0
+            "score": -3.0
           }
         ]
       },
@@ -609,7 +610,7 @@
           {
             "id": "SWB24",
             "label": "Approach Target",
-            "score": 3.0
+            "score": -5.0
           }
         ]
       },

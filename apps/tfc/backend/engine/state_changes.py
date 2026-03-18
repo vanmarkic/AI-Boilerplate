@@ -47,6 +47,7 @@ class DecisionClosed(TypedDict):
     type: str          # "decision_closed"
     decision_id: str
     title: str
+    selected_option_ids: list[str]
 
 
 class SpeedChange(TypedDict):
@@ -69,9 +70,16 @@ class RecommendationSubmitted(TypedDict):
     option_id: str
 
 
+class ForcedCardApplied(TypedDict):
+    type: str          # "forced_card_applied"
+    decision_id: str
+    forced_option_id: str
+    reason: str
+
+
 # Union of all change types for type-narrowing on `change["type"]`.
 StateChange = (
     PhaseChange | EventChange | IssueChange
     | DecisionOpened | DecisionClosed | SpeedChange
-    | ScoreChange | RecommendationSubmitted
+    | ScoreChange | RecommendationSubmitted | ForcedCardApplied
 )
