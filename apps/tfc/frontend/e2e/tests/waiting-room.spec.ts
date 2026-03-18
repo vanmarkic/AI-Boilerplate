@@ -11,106 +11,6 @@ import {
   type MockParticipant,
 } from '../fixtures/base.fixture';
 
-// ── Join Page ──────────────────────────────────────────────────────────
-
-test.describe('Join page', () => {
-  test('renders join form with all fields', async ({ page, mockApi }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    await expect(page.getByText('Join Exercise')).toBeVisible();
-    await expect(page.locator('input#session-code')).toBeVisible();
-    await expect(page.locator('input#display-name')).toBeVisible();
-    await expect(page.locator('select')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Join' })).toBeVisible();
-  });
-
-  test('join button is disabled when fields are empty', async ({
-    page,
-    mockApi,
-  }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    await expect(
-      page.getByRole('button', { name: 'Join' }),
-    ).toBeDisabled();
-  });
-
-  test('join as player navigates to waiting room', async ({
-    page,
-    mockApi,
-  }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    await page.locator('input#session-code').fill('42');
-    await page.locator('input#display-name').fill('Alice');
-    await page.getByRole('button', { name: 'Join' }).click();
-
-    await expect(page).toHaveURL(/waiting-room/);
-    await expect(page).toHaveURL(/exerciseId=42/);
-    await expect(page).toHaveURL(/participantId=/);
-  });
-
-  test('join as game-master navigates to waiting room', async ({
-    page,
-    mockApi,
-  }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    await page.locator('input#session-code').fill('42');
-    await page.locator('input#display-name').fill('Commander');
-    await page.locator('select').selectOption('game-master');
-    await page.getByRole('button', { name: 'Join' }).click();
-
-    await expect(page).toHaveURL(/waiting-room/);
-  });
-
-  test('join as observer navigates to waiting room', async ({
-    page,
-    mockApi,
-  }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    await page.locator('input#session-code').fill('42');
-    await page.locator('input#display-name').fill('Watcher');
-    await page.locator('select').selectOption('observer');
-    await page.getByRole('button', { name: 'Join' }).click();
-
-    await expect(page).toHaveURL(/waiting-room/);
-  });
-
-  test('role dropdown has all three options', async ({ page, mockApi }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    const options = page.locator('select option');
-    await expect(options).toHaveCount(3);
-    await expect(options.nth(0)).toHaveText('Player');
-    await expect(options.nth(1)).toHaveText('Observer');
-    await expect(options.nth(2)).toHaveText('Game Master');
-  });
-
-  test('shows error for invalid session code', async ({
-    page,
-    mockApi,
-  }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    await page.locator('input#session-code').fill('abc');
-    await page.locator('input#display-name').fill('Alice');
-    await page.getByRole('button', { name: 'Join' }).click();
-
-    await expect(
-      page.getByText('Session code not found'),
-    ).toBeVisible();
-  });
-});
-
 // ── Waiting Room View ──────────────────────────────────────────────────
 
 test.describe('Waiting room view', () => {
@@ -366,7 +266,7 @@ test.describe('Leave flow', () => {
 
     await page.getByRole('button', { name: 'Leave' }).click();
 
-    await expect(page).toHaveURL(/\/join/);
+    await expect(page).toHaveURL(/\/home/);
   });
 
   test('leave sends DELETE request with correct participant ID', async ({
@@ -395,53 +295,8 @@ test.describe('Leave flow', () => {
     await page.goto(waitingRoomUrl(me.id));
     await page.getByRole('button', { name: 'Leave' }).click();
 
-    await page.waitForURL(/\/join/);
+    await page.waitForURL(/\/home/);
     expect(deletedId).toBe(me.id);
   });
 });
 
-// ── Full Join-to-Leave Flow ────────────────────────────────────────────
-
-test.describe('Full join-to-leave integration', () => {
-  test('join as player → see waiting room → leave', async ({
-    page,
-    mockApi,
-  }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    // Fill join form
-    await page.locator('input#session-code').fill('42');
-    await page.locator('input#display-name').fill('Alice');
-    await page.getByRole('button', { name: 'Join' }).click();
-
-    // Now in waiting room
-    await expect(page).toHaveURL(/waiting-room/);
-    await expect(page.getByText('Alice')).toBeVisible();
-
-    // Leave
-    await page.getByRole('button', { name: 'Leave' }).click();
-    await expect(page).toHaveURL(/\/join/);
-  });
-
-  test('join as game-master → see start button → start exercise', async ({
-    page,
-    mockApi,
-  }) => {
-    await mockApi.install();
-    await page.goto('/join');
-
-    await page.locator('input#session-code').fill('42');
-    await page.locator('input#display-name').fill('Commander');
-    await page.locator('select').selectOption('game-master');
-    await page.getByRole('button', { name: 'Join' }).click();
-
-    await expect(page).toHaveURL(/waiting-room/);
-    await expect(
-      page.getByRole('button', { name: 'Start Exercise' }),
-    ).toBeVisible();
-
-    await page.getByRole('button', { name: 'Start Exercise' }).click();
-    await expect(page).toHaveURL(/\/gm/);
-  });
-});

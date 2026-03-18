@@ -1,7 +1,7 @@
 """TDD tests for GET /api/exercises/joinable endpoint.
 
-Returns the single joinable exercise (phase=setup, has waiting room with
-available slots and a linked scenario with roles), or 404.
+Returns all joinable exercises (phase=setup, has waiting room with
+available slots and a linked scenario with roles) as a list.
 """
 from __future__ import annotations
 
@@ -44,11 +44,12 @@ async def _create_exercise(
     client: AsyncClient,
     scenario_id: int | None = None,
     game_mode: str = "classic",
+    title: str = "Test Exercise",
 ) -> int:
     resp = await client.post(
         "/api/exercises",
         json={
-            "title": "Test Exercise",
+            "title": title,
             "scenario_id": scenario_id,
             "game_mode": game_mode,
         },
@@ -77,11 +78,12 @@ TWO_ROLES = [
 
 class TestJoinableEndpoint:
     @pytest.mark.asyncio
-    async def test_returns_404_when_no_setup_exercises(
+    async def test_returns_empty_list_when_no_setup_exercises(
         self, client: AsyncClient,
     ) -> None:
         resp = await client.get("/api/exercises/joinable")
-        assert resp.status_code == 404
+        assert resp.status_code == 200
+        assert resp.json() == []
 
     @pytest.mark.asyncio
     async def test_returns_exercise_with_available_slots(
@@ -94,12 +96,13 @@ class TestJoinableEndpoint:
         resp = await client.get("/api/exercises/joinable")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["exercise"]["id"] == eid
-        assert len(data["participants"]) == 1
-        assert data["max_players"] == 2
+        assert len(data) == 1
+        assert data[0]["exercise"]["id"] == eid
+        assert len(data[0]["participants"]) == 1
+        assert data[0]["max_players"] == 2
 
     @pytest.mark.asyncio
-    async def test_returns_404_when_all_slots_filled(
+    async def test_returns_empty_list_when_all_slots_filled(
         self, client: AsyncClient,
     ) -> None:
         sid = await _create_scenario_with_roles(client, TWO_ROLES)
@@ -108,7 +111,8 @@ class TestJoinableEndpoint:
         await _join(client, eid, "Bob", "nav")
 
         resp = await client.get("/api/exercises/joinable")
-        assert resp.status_code == 404
+        assert resp.status_code == 200
+        assert resp.json() == []
 
     @pytest.mark.asyncio
     async def test_includes_roles_and_participants(
@@ -120,11 +124,12 @@ class TestJoinableEndpoint:
         resp = await client.get("/api/exercises/joinable")
         assert resp.status_code == 200
         data = resp.json()
-        assert len(data["roles"]) == 2
-        role_ids = {r["id"] for r in data["roles"]}
+        assert len(data) == 1
+        assert len(data[0]["roles"]) == 2
+        role_ids = {r["id"] for r in data[0]["roles"]}
         assert role_ids == {"co", "nav"}
-        assert data["participants"] == []
-        assert data["requires_gm"] is False
+        assert data[0]["participants"] == []
+        assert data[0]["requires_gm"] is False
 
     @pytest.mark.asyncio
     async def test_ignores_running_exercises(
@@ -139,7 +144,8 @@ class TestJoinableEndpoint:
         )
 
         resp = await client.get("/api/exercises/joinable")
-        assert resp.status_code == 404
+        assert resp.status_code == 200
+        assert resp.json() == []
 
     @pytest.mark.asyncio
     async def test_ignores_exercises_without_scenario(
@@ -148,7 +154,8 @@ class TestJoinableEndpoint:
         await _create_exercise(client)  # no scenario
 
         resp = await client.get("/api/exercises/joinable")
-        assert resp.status_code == 404
+        assert resp.status_code == 200
+        assert resp.json() == []
 
     @pytest.mark.asyncio
     async def test_classic_mode_includes_gm_slot(
@@ -162,5 +169,25 @@ class TestJoinableEndpoint:
         resp = await client.get("/api/exercises/joinable")
         assert resp.status_code == 200
         data = resp.json()
-        assert data["requires_gm"] is True
-        assert data["max_players"] == 3  # 2 roles + 1 GM
+        assert len(data) == 1
+        assert data[0]["requires_gm"] is True
+        assert data[0]["max_players"] == 3  # 2 roles + 1 GM
+
+    @pytest.mark.asyncio
+    async def test_returns_multiple_joinable_exercises(
+        self, client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, TWO_ROLES)
+        eid1 = await _create_exercise(
+            client, sid, "simple_collaborative", title="Exercise A",
+        )
+        eid2 = await _create_exercise(
+            client, sid, "simple_collaborative", title="Exercise B",
+        )
+
+        resp = await client.get("/api/exercises/joinable")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) == 2
+        returned_ids = {d["exercise"]["id"] for d in data}
+        assert returned_ids == {eid1, eid2}

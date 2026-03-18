@@ -70,8 +70,8 @@ export class MockApi {
   readonly codeMap = new Map<string, object>();
   /** Scenario list for GET /api/scenarios. */
   readonly scenarios: MockScenario[] = [];
-  /** Joinable exercise response (or null for 404). */
-  joinableResponse: MockJoinableResponse | null = null;
+  /** Joinable exercise responses (array, always 200). */
+  joinableResponses: MockJoinableResponse[] = [];
   /** Exercise ID → exercise payload (for GET /api/exercises/:id). */
   readonly exerciseMap = new Map<number, object>();
 
@@ -121,9 +121,9 @@ export class MockApi {
     this.scenarios.push(scenario);
   }
 
-  /** Set the joinable exercise response. */
+  /** Add a joinable exercise response. */
   seedJoinable(data: MockJoinableResponse): void {
-    this.joinableResponse = data;
+    this.joinableResponses.push(data);
   }
 
   /** Install default API route handlers. Call once per test. */
@@ -134,15 +134,11 @@ export class MockApi {
         await route.fallback();
         return;
       }
-      if (this.joinableResponse) {
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify(this.joinableResponse),
-        });
-      } else {
-        await route.fulfill({ status: 404 });
-      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(this.joinableResponses),
+      });
     });
 
     // GET /api/scenarios and GET /api/scenarios/:id
