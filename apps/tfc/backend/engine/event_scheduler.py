@@ -1,7 +1,10 @@
-"""Schedules and manages event lifecycle transitions.
+"""Schedules and manages inject (event) lifecycle transitions.
 
-Events progress through: scheduled -> pending -> running -> completed/cancelled.
-Events can have dependencies on other events and can trigger issues.
+Domain term: "inject". Code uses "event" throughout.
+Also known as: InjectScheduler, inject scheduler.
+
+Injects progress through: scheduled -> pending -> running -> completed/cancelled.
+Injects can have dependencies on other injects and can trigger defects (issues).
 """
 from __future__ import annotations
 
@@ -42,7 +45,7 @@ VALID_TRANSITIONS: dict[EventLifecycle, set[EventLifecycle]] = {
 
 @dataclass
 class ScheduledEvent:
-    """Runtime representation of an event during exercise execution."""
+    """Runtime representation of an inject (event) during exercise execution."""
     id: str
     title: str
     description: str
@@ -57,7 +60,10 @@ class ScheduledEvent:
 
 
 class EventScheduler:
-    """Manages event scheduling and lifecycle transitions."""
+    """Manages inject (event) scheduling and lifecycle transitions.
+
+    Also known as: InjectScheduler.
+    """
 
     def __init__(self) -> None:
         self._events: dict[str, ScheduledEvent] = {}
