@@ -97,12 +97,19 @@ async def test_scenario_to_engine_lifecycle(client: AsyncClient) -> None:
     assert ex_resp.status_code == 201
     exercise_id = ex_resp.json()["id"]
 
-    # 3. Start engine — should load scenario content
+    # 3. Start engine — should enter briefing phase
     start_resp = await client.post(
         f"/api/exercises/{exercise_id}/engine/start",
     )
     assert start_resp.status_code == 200
-    assert start_resp.json()["phase"] == "running"
+    assert start_resp.json()["phase"] == "briefing"
+
+    # 3b. Begin — transition briefing → running
+    begin_resp = await client.post(
+        f"/api/exercises/{exercise_id}/engine/begin",
+    )
+    assert begin_resp.status_code == 200
+    assert begin_resp.json()["phase"] == "running"
 
     # 4. Verify snapshot has loaded events and issues
     snap = await client.get(

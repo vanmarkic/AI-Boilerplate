@@ -46,10 +46,19 @@ def _issue(id: str, **kw: object) -> TrackedIssue:
 
 
 @pytest.mark.asyncio
-async def test_start_transitions_to_running() -> None:
+async def test_start_transitions_to_briefing() -> None:
     engine = ExerciseEngine(_config())
+    result = await engine.start()
+    assert engine.phase == EnginePhase.BRIEFING
+    assert result["phase"] == "briefing"
+
+
+@pytest.mark.asyncio
+async def test_begin_transitions_to_running() -> None:
+    engine = ExerciseEngine(_config())
+    await engine.start()
     with patch("engine.time_manager._now_ms", return_value=0.0):
-        result = await engine.start()
+        result = await engine.begin()
     assert engine.phase == EnginePhase.RUNNING
     assert result["phase"] == "running"
     engine._stop_tick_loop()
@@ -58,8 +67,9 @@ async def test_start_transitions_to_running() -> None:
 @pytest.mark.asyncio
 async def test_pause_resume_cycle() -> None:
     engine = ExerciseEngine(_config())
+    await engine.start()
     with patch("engine.time_manager._now_ms", return_value=0.0):
-        await engine.start()
+        await engine.begin()
         result = await engine.pause()
         assert engine.phase == EnginePhase.PAUSED
         assert result["phase"] == "paused"
@@ -71,8 +81,9 @@ async def test_pause_resume_cycle() -> None:
 @pytest.mark.asyncio
 async def test_complete_from_running() -> None:
     engine = ExerciseEngine(_config())
+    await engine.start()
     with patch("engine.time_manager._now_ms", return_value=0.0):
-        await engine.start()
+        await engine.begin()
         result = await engine.complete()
     assert engine.phase == EnginePhase.COMPLETED
     assert result["phase"] == "completed"
@@ -81,8 +92,9 @@ async def test_complete_from_running() -> None:
 @pytest.mark.asyncio
 async def test_reset_returns_to_setup() -> None:
     engine = ExerciseEngine(_config())
+    await engine.start()
     with patch("engine.time_manager._now_ms", return_value=0.0):
-        await engine.start()
+        await engine.begin()
         result = await engine.reset()
     assert engine.phase == EnginePhase.SETUP
     assert result["phase"] == "setup"
@@ -91,8 +103,9 @@ async def test_reset_returns_to_setup() -> None:
 @pytest.mark.asyncio
 async def test_cannot_start_from_completed() -> None:
     engine = ExerciseEngine(_config())
+    await engine.start()
     with patch("engine.time_manager._now_ms", return_value=0.0):
-        await engine.start()
+        await engine.begin()
         await engine.complete()
         with pytest.raises(EngineStateError):
             await engine.start()

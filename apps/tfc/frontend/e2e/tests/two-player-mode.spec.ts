@@ -5,8 +5,8 @@
  * behaviour when the all_advisors synthetic role is active.
  *
  * Invariants verified:
- * - 2 Player Mode checkbox visible only in simple_collaborative
- * - Toggling checkbox shows role selectors with Decision Maker / All Advisors
+ * - 2 Players button visible only in simple_collaborative
+ * - Clicking 2 Players button shows role selectors with Decision Maker / All Advisors
  * - Start disabled until exactly 2 participants with one of each role
  * - All-advisors player sees tabbed all-advisors-panel, NOT advisor panel
  * - All-advisors player sees all open decisions (bypasses target_roles)
@@ -196,8 +196,8 @@ function collabWaitingRoomUrl(participantId: string): string {
 //    Checkbox visible only in simple_collaborative mode.
 //    Hidden in classic mode.
 
-test.describe("Waiting room — 2 Player Mode toggle visibility @waiting-room @two-player", () => {
-  test("checkbox visible in simple_collaborative mode", async ({
+test.describe("Waiting room — 2 Players button visibility @waiting-room @two-player", () => {
+  test("2 Players button visible in simple_collaborative mode", async ({
     page,
     mockApi,
   }) => {
@@ -209,11 +209,11 @@ test.describe("Waiting room — 2 Player Mode toggle visibility @waiting-room @t
     await page.goto(collabWaitingRoomUrl(me.id));
 
     await expect(
-      page.locator("label").filter({ hasText: "2 Player Mode" }),
+      page.getByRole("button", { name: "2 Players" }),
     ).toBeVisible();
   });
 
-  test("checkbox NOT visible in classic mode", async ({ page, mockApi }) => {
+  test("2 Players button NOT visible in classic mode", async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: "Alice", role: "co" });
     mockApi.seed(EX_ID, [me], "classic");
     seedScenarioWithRoles(mockApi, "classic");
@@ -222,7 +222,7 @@ test.describe("Waiting room — 2 Player Mode toggle visibility @waiting-room @t
     await page.goto(`/waiting-room?exerciseId=${EX_ID}&participantId=${me.id}`);
 
     await expect(
-      page.locator("label").filter({ hasText: "2 Player Mode" }),
+      page.getByRole("button", { name: "2 Players" }),
     ).not.toBeVisible();
   });
 });
@@ -231,7 +231,7 @@ test.describe("Waiting room — 2 Player Mode toggle visibility @waiting-room @t
 //    Toggling checkbox shows role dropdowns with Decision Maker / All Advisors.
 //    Untoggled shows role-slot-list (no dropdowns).
 
-test.describe("Waiting room — role selector after toggle @waiting-room @two-player", () => {
+test.describe("Waiting room — role selector after 2 Players click @waiting-room @two-player", () => {
   test("toggling on shows 2-player role options", async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: "Alice", role: "co" });
     const bob = mockParticipant({ display_name: "Bob", role: "nav" });
@@ -242,7 +242,7 @@ test.describe("Waiting room — role selector after toggle @waiting-room @two-pl
     await page.goto(collabWaitingRoomUrl(alice.id));
 
     // Toggle on
-    await page.locator("label").filter({ hasText: "2 Player Mode" }).click();
+    await page.getByRole("button", { name: "2 Players" }).click();
 
     // 2-player role dropdowns visible with correct options
     const selects = page.locator("select");
@@ -253,7 +253,7 @@ test.describe("Waiting room — role selector after toggle @waiting-room @two-pl
     await expect(options.nth(1)).toHaveText("All Advisors");
   });
 
-  test("toggling off hides 2-player role dropdowns", async ({
+  test("clicking Full Team hides 2-player role dropdowns", async ({
     page,
     mockApi,
   }) => {
@@ -264,15 +264,15 @@ test.describe("Waiting room — role selector after toggle @waiting-room @two-pl
 
     await page.goto(collabWaitingRoomUrl(me.id));
 
-    // Toggle on — 2-player selects visible
-    await page.locator("label").filter({ hasText: "2 Player Mode" }).click();
+    // Select 2 Players — selects visible
+    await page.getByRole("button", { name: "2 Players" }).click();
     const firstSelect = page.locator("select").first();
     await expect(firstSelect).toBeVisible();
     const opts = firstSelect.locator("option");
     await expect(opts.nth(0)).toHaveText("Decision Maker");
 
-    // Toggle off — 2-player selects gone
-    await page.locator("label").filter({ hasText: "2 Player Mode" }).click();
+    // Switch to Full Team — selects gone
+    await page.getByRole("button", { name: "Full Team" }).click();
     // Select dropdowns should no longer be visible
     await expect(page.locator("select")).not.toBeVisible();
   });
@@ -297,7 +297,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.locator("label").filter({ hasText: "2 Player Mode" }).click();
+    await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
       page.getByRole("button", { name: /Start Exercise/ }),
@@ -318,7 +318,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.locator("label").filter({ hasText: "2 Player Mode" }).click();
+    await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
       page.getByRole("button", { name: /Start Exercise/ }),
@@ -338,7 +338,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
-    await page.locator("label").filter({ hasText: "2 Player Mode" }).click();
+    await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
       page.getByRole("button", { name: /Start Exercise/ }),
@@ -363,7 +363,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.locator("label").filter({ hasText: "2 Player Mode" }).click();
+    await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
       page.getByRole("button", { name: /Start Exercise/ }),
