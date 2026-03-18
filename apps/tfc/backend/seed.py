@@ -13,9 +13,11 @@ import json
 import logging
 from pathlib import Path
 
+from pydantic import ValidationError
 from sqlalchemy import select, func
 
 from core.database import async_session_factory
+from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_model import Scenario
 
 logger = logging.getLogger(__name__)
@@ -36,6 +38,16 @@ async def seed_scenarios() -> None:
     async with async_session_factory() as session:
         for path in seed_files:
             data = json.loads(path.read_text())
+            content_raw = data.get("content")
+            if content_raw is not None:
+                try:
+                    ScenarioContent.model_validate(content_raw)
+                except ValidationError as exc:
+                    logger.error(
+                        "Seed '%s' has invalid content — skipping: %s",
+                        path.name, exc,
+                    )
+                    continue
             title = data["title"]
 
             result = await session.execute(
