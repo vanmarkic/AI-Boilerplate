@@ -110,10 +110,17 @@ export class DecisionApiService {
   }
 
   /** Submit an advisor recommendation on an open decision */
-  submitRecommendation(exerciseId: number, decisionId: string, optionId: string, participantId: string): Observable<unknown> {
+  submitRecommendation(
+    exerciseId: number, decisionId: string, optionId: string,
+    participantId: string, roleId?: string,
+  ): Observable<unknown> {
+    const body: Record<string, string> = {
+      decision_id: decisionId, option_id: optionId, participant_id: participantId,
+    };
+    if (roleId) { body['role_id'] = roleId; }
     return this.http.post(
       `${this.base}/api/exercises/${exerciseId}/engine/decisions/recommend`,
-      { decision_id: decisionId, option_id: optionId, participant_id: participantId },
+      body,
     );
   }
 

@@ -35,6 +35,7 @@ class RecommendRequest(BaseModel):
     decision_id: str
     option_id: str
     participant_id: str = Field(..., min_length=1)
+    role_id: str | None = None
 
 
 def _get_engine(exercise_id: int):
@@ -78,13 +79,25 @@ async def _broadcast_to_roles(
 async def _build_config(
     exercise: object, scenario_service: ScenarioService,
 ) -> EngineConfig:
-    """Build EngineConfig, loading scenario content if linked."""
-    if hasattr(exercise, "scenario_id") and exercise.scenario_id is not None:
-        scenario = await scenario_service.get_scenario(exercise.scenario_id)
-        if scenario.content:
-            content = ScenarioContent.model_validate(scenario.content)
-            return build_engine_config(exercise_id=exercise.id, title=exercise.title, content=content)
-    return EngineConfig(exercise_id=exercise.id, title=exercise.title, time_factor=exercise.time_factor)
+    """Build EngineConfig, loading scenario content if linked.
+
+    Raises HTTPException if the exercise has no scenario or the scenario
+    has no content — every exercise must be backed by a valid scenario
+    with roles defined.
+    """
+    if not hasattr(exercise, "scenario_id") or exercise.scenario_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Exercise must be linked to a scenario before starting.",
+        )
+    scenario = await scenario_service.get_scenario(exercise.scenario_id)
+    if not scenario.content:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="Scenario has no content. Add events, roles, and decisions first.",
+        )
+    content = ScenarioContent.model_validate(scenario.content)
+    return build_engine_config(exercise_id=exercise.id, title=exercise.title, content=content)
 
 
 
@@ -325,7 +338,10 @@ async def submit_recommendation(
     """Advisor submits a recommendation on an open decision."""
     engine = _get_engine(exercise_id)
     result = engine.decision_manager.submit_recommendation(
-        body.decision_id, participant_id=body.participant_id, option_id=body.option_id,
+        body.decision_id,
+        participant_id=body.participant_id,
+        option_id=body.option_id,
+        role_id=body.role_id,
     )
     if result is None:
         raise HTTPException(
