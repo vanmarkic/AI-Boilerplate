@@ -1,0 +1,20 @@
+name: scenario
+tier: 1
+description: Scenario CRUD and content loading for exercise templates
+version: 0.1.0
+dependencies:
+  internal: [domain_config]
+  external: [postgresql]
+api_endpoints:
+  - POST /api/scenarios
+  - GET /api/scenarios
+  - GET /api/scenarios/{scenario_id}
+  - PUT /api/scenarios/{scenario_id}
+  - DELETE /api/scenarios/{scenario_id}
+models:
+  - Scenario
+events_emitted: []
+events_consumed: []
+business_rules:
+  - Scenario content is validated via ScenarioContent Pydantic model
+  - Scenarios can optionally link to a domain config
