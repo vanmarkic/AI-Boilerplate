@@ -72,7 +72,20 @@ async function installPlayerMocks(
     });
   });
 
-  // Mock engine decisions (must be before general /api/decisions* route)
+  // Mock decisions list (skip engine sub-paths)
+  await page.route(`**/api/decisions*`, async (route) => {
+    if (route.request().url().includes('/engine/')) {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([]),
+    });
+  });
+
+  // Mock engine decisions
   await page.route(`**/api/exercises/${exerciseId}/engine/decisions`, async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
@@ -83,15 +96,6 @@ async function installPlayerMocks(
     } else {
       await route.fallback();
     }
-  });
-
-  // Mock decisions list
-  await page.route(`**/api/decisions*`, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([]),
-    });
   });
 
   // Swallow WebSocket
@@ -107,7 +111,7 @@ test.describe('Gap 5 — Score in snapshot @player', () => {
     await page.goto(playerUrl('alice-01'));
 
     // Turn banner should show turn 3
-    await expect(page.getByText('Turn 3')).toBeVisible();
+    await expect(page.locator('tfc-turn-banner')).toContainText('Turn 3');
   });
 
   test('no score shown when snapshot has null score', async ({ page }) => {

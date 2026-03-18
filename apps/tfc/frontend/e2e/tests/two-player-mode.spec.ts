@@ -133,6 +133,13 @@ async function installPlayerMocks(
   await page.route(`**/api/exercises/${EX_ID}/engine/context`, (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ctx) }),
   );
+  await page.route('**/api/decisions*', async (route) => {
+    if (route.request().url().includes('/engine/')) {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+  });
   await page.route(`**/api/exercises/${EX_ID}/engine/decisions`, async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
@@ -143,9 +150,6 @@ async function installPlayerMocks(
       await route.fallback();
     }
   });
-  await page.route('**/api/decisions*', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-  );
   await page.route('**/ws?*', (route) => route.abort('connectionrefused'));
   await page.route('**/ws', (route) => route.abort('connectionrefused'));
 }
@@ -167,7 +171,7 @@ test.describe('Waiting room — 2 Player Mode toggle visibility @waiting-room @t
 
     await page.goto(collabWaitingRoomUrl(me.id));
 
-    await expect(page.getByText('2 Player Mode')).toBeVisible();
+    await expect(page.locator('label').filter({ hasText: '2 Player Mode' })).toBeVisible();
   });
 
   test('checkbox NOT visible in classic mode', async ({ page, mockApi }) => {
@@ -178,7 +182,7 @@ test.describe('Waiting room — 2 Player Mode toggle visibility @waiting-room @t
 
     await page.goto(`/waiting-room?exerciseId=${EX_ID}&participantId=${me.id}`);
 
-    await expect(page.getByText('2 Player Mode')).not.toBeVisible();
+    await expect(page.locator('label').filter({ hasText: '2 Player Mode' })).not.toBeVisible();
   });
 });
 
@@ -197,7 +201,7 @@ test.describe('Waiting room — role selector after toggle @waiting-room @two-pl
     await page.goto(collabWaitingRoomUrl(alice.id));
 
     // Toggle on
-    await page.getByText('2 Player Mode').click();
+    await page.locator('label').filter({ hasText: '2 Player Mode' }).click();
 
     // 2-player role dropdowns visible with correct options
     const selects = page.locator('select');
@@ -217,16 +221,16 @@ test.describe('Waiting room — role selector after toggle @waiting-room @two-pl
     await page.goto(collabWaitingRoomUrl(me.id));
 
     // Toggle on — 2-player selects visible
-    await page.getByText('2 Player Mode').click();
+    await page.locator('label').filter({ hasText: '2 Player Mode' }).click();
     const firstSelect = page.locator('select').first();
     await expect(firstSelect).toBeVisible();
     const opts = firstSelect.locator('option');
     await expect(opts.nth(0)).toHaveText('Decision Maker');
 
     // Toggle off — 2-player selects gone
-    await page.getByText('2 Player Mode').click();
-    // No select with "Decision Maker" option should be visible
-    await expect(page.getByText('Decision Maker')).not.toBeVisible();
+    await page.locator('label').filter({ hasText: '2 Player Mode' }).click();
+    // Select dropdowns should no longer be visible
+    await expect(page.locator('select')).not.toBeVisible();
   });
 });
 
@@ -243,7 +247,7 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.getByText('2 Player Mode').click();
+    await page.locator('label').filter({ hasText: '2 Player Mode' }).click();
 
     await expect(
       page.getByRole('button', { name: /Start Exercise/ }),
@@ -258,7 +262,7 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.getByText('2 Player Mode').click();
+    await page.locator('label').filter({ hasText: '2 Player Mode' }).click();
 
     await expect(
       page.getByRole('button', { name: /Start Exercise/ }),
@@ -272,7 +276,7 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
-    await page.getByText('2 Player Mode').click();
+    await page.locator('label').filter({ hasText: '2 Player Mode' }).click();
 
     await expect(
       page.getByRole('button', { name: /Start Exercise/ }),
@@ -288,7 +292,7 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.getByText('2 Player Mode').click();
+    await page.locator('label').filter({ hasText: '2 Player Mode' }).click();
 
     await expect(
       page.getByRole('button', { name: /Start Exercise/ }),
@@ -449,7 +453,7 @@ test.describe('Combined — full 2-player scenario @player @two-player', () => {
     await expect(page.locator('.exercise-header__title')).toBeVisible();
 
     // Score visible
-    await expect(page.getByText('Turn 2')).toBeVisible();
+    await expect(page.locator('tfc-turn-banner')).toContainText('Turn 2');
     await expect(page.locator('tfc-score-bar')).toBeVisible();
 
     // All-advisors panel visible with tabs
@@ -477,7 +481,7 @@ test.describe('Combined — full 2-player scenario @player @two-player', () => {
     await expect(page.locator('.exercise-header__title')).toBeVisible();
 
     // Score visible
-    await expect(page.getByText('Turn 2')).toBeVisible();
+    await expect(page.locator('tfc-turn-banner')).toContainText('Turn 2');
 
     // Decision panel visible (DM style, no [Advisor] prefix)
     await expect(page.locator('.overlay')).toBeVisible();
