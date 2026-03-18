@@ -42,7 +42,7 @@ class TestEventBusLifecycle:
 
     async def test_subscribe_before_connect_raises(self) -> None:
         bus = EventBus()
-        with pytest.raises(RuntimeError, match="not connected"):
+        with pytest.raises(RuntimeError, match="not connected"):  # noqa: PT012
             async for _ in bus.subscribe("test"):
                 break
 

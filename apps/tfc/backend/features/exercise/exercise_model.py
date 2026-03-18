@@ -11,7 +11,7 @@ from core.database import Base
 def _generate_session_code() -> str:
     """Generate a 6-character uppercase alphanumeric session code."""
     chars = string.ascii_uppercase + string.digits
-    return "".join(random.choices(chars, k=6))
+    return "".join(random.choices(chars, k=6))  # noqa: S311 — not crypto, just human-readable codes
 
 
 class Exercise(Base):

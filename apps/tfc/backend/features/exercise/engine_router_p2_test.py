@@ -45,9 +45,9 @@ def test_split_groups_same_roles() -> None:
         {"type": "decision_opened", "decision_id": "d1", "target_roles": ["player"]},
         {"type": "decision_opened", "decision_id": "d2", "target_roles": ["player"]},
     ]
-    targeted, general = _split_targeted_changes(changes)
+    targeted, _general = _split_targeted_changes(changes)
     assert len(targeted) == 1
-    roles, role_changes = targeted[0]
+    _roles, role_changes = targeted[0]
     assert len(role_changes) == 2
 
 
@@ -56,5 +56,5 @@ def test_split_different_roles_separate() -> None:
         {"type": "decision_opened", "decision_id": "d1", "target_roles": ["player"]},
         {"type": "decision_opened", "decision_id": "d2", "target_roles": ["observer"]},
     ]
-    targeted, general = _split_targeted_changes(changes)
+    targeted, _general = _split_targeted_changes(changes)
     assert len(targeted) == 2
