@@ -44,20 +44,18 @@ const GAME_MODE_LABELS: Record<string, string> = {
                     <ui-badge variant="secondary">
                       {{ scenario.content?.issues?.length ?? 0 }} {{ domain.term('issue') }}s
                     </ui-badge>
+                    @if (scenario.content?.roles; as roles) {
+                      <ui-badge variant="secondary">
+                        {{ roles.length }} roles
+                      </ui-badge>
+                    }
                     <ui-badge variant="secondary">
                       v{{ scenario.version }}
                     </ui-badge>
-                    <ui-badge [variant]="gameModes()[scenario.id] === 'simple_collaborative' ? 'default' : 'outline'">
-                      {{ modeLabel(gameModes()[scenario.id]) }}
+                    <ui-badge [variant]="scenarioGameMode(scenario) === 'simple_collaborative' ? 'default' : 'outline'">
+                      {{ modeLabel(scenarioGameMode(scenario)) }}
                     </ui-badge>
                   </div>
-                  <select
-                    class="text-sm border rounded px-xs py-xs mt-xs w-fit"
-                    [value]="gameModes()[scenario.id]"
-                    (change)="setGameMode(scenario.id, $any($event.target).value)">
-                    <option value="classic">Classic (requires GM)</option>
-                    <option value="simple_collaborative">Collaborative (self-run)</option>
-                  </select>
                 </div>
                 <button uiButton variant="default" (click)="pick(scenario)">
                   Select
@@ -83,7 +81,6 @@ export class ScenarioPickerComponent implements OnInit {
   protected readonly scenarios = signal<ScenarioResponse[]>([]);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
-  protected readonly gameModes = signal<Record<number, string>>({});
 
   ngOnInit(): void {
     this.load();
@@ -94,9 +91,6 @@ export class ScenarioPickerComponent implements OnInit {
     this.error.set(null);
     this.api.list().subscribe({
       next: (list) => {
-        const modes: Record<number, string> = {};
-        list.forEach((s) => { modes[s.id] = s.content?.game_mode ?? 'classic'; });
-        this.gameModes.set(modes);
         this.scenarios.set(list);
         this.loading.set(false);
       },
@@ -107,8 +101,8 @@ export class ScenarioPickerComponent implements OnInit {
     });
   }
 
-  protected setGameMode(scenarioId: number, mode: string): void {
-    this.gameModes.update((m) => ({ ...m, [scenarioId]: mode }));
+  protected scenarioGameMode(scenario: ScenarioResponse): string {
+    return scenario.content?.game_mode ?? 'classic';
   }
 
   protected modeLabel(mode: string): string {
@@ -116,7 +110,7 @@ export class ScenarioPickerComponent implements OnInit {
   }
 
   protected pick(scenario: ScenarioResponse): void {
-    const gameMode = this.gameModes()[scenario.id] ?? 'classic';
+    const gameMode = scenario.content?.game_mode ?? 'classic';
     this.scenarioSelected.emit({ scenario, gameMode });
   }
 }

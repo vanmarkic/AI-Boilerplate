@@ -7,7 +7,7 @@ import { CollapsiblePanelComponent } from '@aspect/ui';
   imports: [CollapsiblePanelComponent],
   host: { 'class': 'context-panel' },
   template: `
-    <ui-collapsible-panel>
+    <ui-collapsible-panel [open]="open()">
       <span panelTitle>{{ title() }}</span>
 
       @if (briefing()) {
@@ -48,4 +48,5 @@ export class ContextPanelComponent {
   readonly briefing = input<string>('');
   readonly objectives = input<string[]>([]);
   readonly rules = input<string[]>([]);
+  readonly open = input(false);
 }

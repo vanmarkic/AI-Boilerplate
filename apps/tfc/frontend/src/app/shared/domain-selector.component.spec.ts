@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DomainSelectorComponent } from './domain-selector.component';
 import { DomainService } from '../core/domain.service';
 import type { DomainConfigResponse } from '../core/domain-config-api.service';
+import { environment } from '../core/environment';
 
 const STUB_DOMAINS: DomainConfigResponse[] = [
   {
@@ -49,6 +50,7 @@ const STUB_DOMAINS: DomainConfigResponse[] = [
 describe('DomainSelectorComponent', () => {
   let fixture: ComponentFixture<DomainSelectorComponent>;
   let domainService: DomainService;
+  const base = environment.apiBaseUrl;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -62,6 +64,12 @@ describe('DomainSelectorComponent', () => {
 
     fixture = TestBed.createComponent(DomainSelectorComponent);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
   });
 
   it('renders a select element', () => {
