@@ -1,7 +1,7 @@
 name: scenario
 tier: 1
 description: Scenario CRUD and content loading for exercise templates
-version: 0.1.0
+version: 0.2.0
 dependencies:
   internal: [domain_config]
   external: [postgresql]
@@ -16,5 +16,9 @@ models:
 events_emitted: []
 events_consumed: []
 business_rules:
-  - Scenario content is validated via ScenarioContent Pydantic model
-  - Scenarios can optionally link to a domain config
+  - "A scenario must have a title"
+  - "Scenario content is validated via ScenarioContent Pydantic model"
+  - "Scenario content includes briefing, objectives, rules, events, issues, and decision templates"
+  - "Scenarios can optionally link to a domain config"
+  - "scenario_loader.py converts ScenarioContent into EngineConfig for the engine"
+  - "Seed scenarios are loaded from JSON files via the idempotent seeder"

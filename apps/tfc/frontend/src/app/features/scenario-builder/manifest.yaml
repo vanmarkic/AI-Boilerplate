@@ -1,0 +1,15 @@
+name: scenario-builder
+tier: 1
+description: Scenario creation UI with event and issue editors (placeholder — partial implementation)
+version: 0.1.0
+dependencies:
+  internal: [shared]
+  external: []
+api_endpoints: []
+models: []
+events_emitted: []
+events_consumed: []
+business_rules:
+  - "Allows creating and editing scenario content (events, issues, decision templates)"
+  - "Validates scenario content before save"
+  - "Currently a partial implementation — full CRUD is a P2 backlog item"
