@@ -6,15 +6,15 @@ import {
   NgZone,
   OnDestroy,
   viewChild,
-} from '@angular/core';
-import * as THREE from 'three';
+} from "@angular/core";
+import * as THREE from "three";
 import {
   Convergence,
   CONVERGENCE_INTERVAL,
   createConvergence,
   disposeConvergence,
   updateConvergence,
-} from './sea-convergence';
+} from "./sea-convergence";
 import {
   createGlowTexture,
   MAX_SIGNALS,
@@ -24,30 +24,33 @@ import {
   SignalType,
   SPAWN_INTERVAL,
   waveY,
-} from './sea-signals';
+} from "./sea-signals";
 
 @Component({
-  selector: 'tfc-sea-backdrop',
+  selector: "tfc-sea-backdrop",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: [`
-    :host {
-      display: block;
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
+  styles: [
+    `
+      :host {
+        display: block;
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
 
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-  `],
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    `,
+  ],
   template: `<canvas #canvas></canvas>`,
 })
 export class SeaBackdrop implements OnDestroy {
-  private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  private readonly canvasRef =
+    viewChild.required<ElementRef<HTMLCanvasElement>>("canvas");
   private renderer!: THREE.WebGLRenderer;
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
@@ -64,8 +67,11 @@ export class SeaBackdrop implements OnDestroy {
 
   private get themeColor(): THREE.Color {
     const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-primary').trim();
-    return new THREE.Color(raw.startsWith('oklch') ? 0x1ac5c5 : (raw || 0x1ac5c5));
+      .getPropertyValue("--color-primary")
+      .trim();
+    return new THREE.Color(
+      raw.startsWith("oklch") ? 0x1ac5c5 : raw || 0x1ac5c5,
+    );
   }
 
   constructor(private ngZone: NgZone) {
@@ -96,7 +102,11 @@ export class SeaBackdrop implements OnDestroy {
     const w = canvas.clientWidth || 1;
     const h = canvas.clientHeight || 1;
 
-    this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    this.renderer = new THREE.WebGLRenderer({
+      canvas,
+      alpha: true,
+      antialias: true,
+    });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.renderer.setSize(w, h, false);
 
@@ -122,7 +132,10 @@ export class SeaBackdrop implements OnDestroy {
     const geo = new THREE.PlaneGeometry(24, 14, 18, 12);
     geo.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({
-      color: primary, wireframe: true, transparent: true, opacity: 0.85,
+      color: primary,
+      wireframe: true,
+      transparent: true,
+      opacity: 0.85,
     });
     this.plane = new THREE.Mesh(geo, mat);
     this.plane.position.y = -0.3;
@@ -146,8 +159,12 @@ export class SeaBackdrop implements OnDestroy {
     light.position.set(x, waveY(x, z, t), z);
     this.scene.add(light);
     const mat = new THREE.SpriteMaterial({
-      map: this.glowTexture, color, transparent: true,
-      opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false,
+      map: this.glowTexture,
+      color,
+      transparent: true,
+      opacity: 0,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
     });
     const sprite = new THREE.Sprite(mat);
     sprite.scale.set(0.8, 0.8, 1);
@@ -174,11 +191,8 @@ export class SeaBackdrop implements OnDestroy {
         continue;
       }
 
-      const fade = life < 0.15
-        ? life / 0.15
-        : life > 0.7
-          ? (1 - life) / 0.3
-          : 1;
+      const fade =
+        life < 0.15 ? life / 0.15 : life > 0.7 ? (1 - life) / 0.3 : 1;
 
       const pulse = 1 + Math.sin(age * 4) * 0.2;
       const intensity = fade * pulse;
@@ -198,7 +212,11 @@ export class SeaBackdrop implements OnDestroy {
     if (t >= this.nextConvergence) {
       this.convergences.push(
         createConvergence(
-          this.scene, this.glowTexture, this.themeColor, this.plane.geometry, t,
+          this.scene,
+          this.glowTexture,
+          this.themeColor,
+          this.plane.geometry,
+          t,
         ),
       );
       this.nextConvergence = t + CONVERGENCE_INTERVAL + Math.random() * 2;
@@ -226,7 +244,7 @@ export class SeaBackdrop implements OnDestroy {
     this.animationId = requestAnimationFrame((t) => this.animate(t));
 
     const t = time * 0.001;
-    const positions = this.plane.geometry.attributes['position'];
+    const positions = this.plane.geometry.attributes["position"];
     const count = positions.count;
 
     for (let i = 0; i < count; i++) {

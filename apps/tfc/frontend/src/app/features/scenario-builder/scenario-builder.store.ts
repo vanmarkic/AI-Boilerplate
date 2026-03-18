@@ -1,10 +1,10 @@
-import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
+import { patchState, signalStore, withMethods, withState } from "@ngrx/signals";
 import type {
   ScenarioContent,
   ScenarioEventDef,
   ScenarioIssueDef,
   DecisionTemplateDef,
-} from '../../core/scenario-api.service';
+} from "../../core/scenario-api.service";
 
 interface ScenarioBuilderState {
   scenarioId: number | null;
@@ -21,25 +21,30 @@ const emptyContent: ScenarioContent = {
   issues: [],
   decision_templates: [],
   default_time_factor: 1.0,
-  briefing: '',
+  briefing: "",
   objectives: [],
   rules: [],
   roles: [],
-  game_mode: 'classic',
+  game_mode: "classic",
 };
 
 export const ScenarioBuilderStore = signalStore(
   withState<ScenarioBuilderState>({
     scenarioId: null,
-    title: '',
-    description: '',
+    title: "",
+    description: "",
     content: emptyContent,
     saving: false,
     error: null,
   }),
 
   withMethods((store) => ({
-    loadScenario(id: number, title: string, description: string, content: ScenarioContent | null): void {
+    loadScenario(
+      id: number,
+      title: string,
+      description: string,
+      content: ScenarioContent | null,
+    ): void {
       patchState(store, {
         scenarioId: id,
         title,
@@ -64,7 +69,10 @@ export const ScenarioBuilderStore = signalStore(
 
     addEvent(event: ScenarioEventDef): void {
       patchState(store, {
-        content: { ...store.content(), events: [...store.content().events, event] },
+        content: {
+          ...store.content(),
+          events: [...store.content().events, event],
+        },
       });
     },
 
@@ -81,16 +89,19 @@ export const ScenarioBuilderStore = signalStore(
       patchState(store, {
         content: {
           ...store.content(),
-          events: store.content().events.map((e) =>
-            e.id === eventId ? { ...e, ...updates } : e,
-          ),
+          events: store
+            .content()
+            .events.map((e) => (e.id === eventId ? { ...e, ...updates } : e)),
         },
       });
     },
 
     addIssue(issue: ScenarioIssueDef): void {
       patchState(store, {
-        content: { ...store.content(), issues: [...store.content().issues, issue] },
+        content: {
+          ...store.content(),
+          issues: [...store.content().issues, issue],
+        },
       });
     },
 
@@ -107,9 +118,9 @@ export const ScenarioBuilderStore = signalStore(
       patchState(store, {
         content: {
           ...store.content(),
-          issues: store.content().issues.map((i) =>
-            i.id === issueId ? { ...i, ...updates } : i,
-          ),
+          issues: store
+            .content()
+            .issues.map((i) => (i.id === issueId ? { ...i, ...updates } : i)),
         },
       });
     },
@@ -127,18 +138,25 @@ export const ScenarioBuilderStore = signalStore(
       patchState(store, {
         content: {
           ...store.content(),
-          decision_templates: store.content().decision_templates.filter((d) => d.id !== templateId),
+          decision_templates: store
+            .content()
+            .decision_templates.filter((d) => d.id !== templateId),
         },
       });
     },
 
-    updateDecisionTemplate(templateId: string, updates: Partial<DecisionTemplateDef>): void {
+    updateDecisionTemplate(
+      templateId: string,
+      updates: Partial<DecisionTemplateDef>,
+    ): void {
       patchState(store, {
         content: {
           ...store.content(),
-          decision_templates: store.content().decision_templates.map((d) =>
-            d.id === templateId ? { ...d, ...updates } : d,
-          ),
+          decision_templates: store
+            .content()
+            .decision_templates.map((d) =>
+              d.id === templateId ? { ...d, ...updates } : d,
+            ),
         },
       });
     },
@@ -164,8 +182,8 @@ export const ScenarioBuilderStore = signalStore(
     reset(): void {
       patchState(store, {
         scenarioId: null,
-        title: '',
-        description: '',
+        title: "",
+        description: "",
         content: emptyContent,
         saving: false,
         error: null,

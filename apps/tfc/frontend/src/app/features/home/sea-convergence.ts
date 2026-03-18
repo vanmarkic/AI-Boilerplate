@@ -1,5 +1,5 @@
-import * as THREE from 'three';
-import { waveY } from './sea-signals';
+import * as THREE from "three";
+import { waveY } from "./sea-signals";
 
 const GLOW_DURATION = 1.5;
 const EXPLODE_DURATION = 3;
@@ -19,7 +19,7 @@ export interface Convergence {
 
 /** Pick a random vertex from the plane grid. */
 function pickVertex(geo: THREE.PlaneGeometry): { x: number; z: number } {
-  const pos = geo.attributes['position'];
+  const pos = geo.attributes["position"];
   const idx = Math.floor(Math.random() * pos.count);
   return { x: pos.getX(idx), z: pos.getZ(idx) };
 }
@@ -102,10 +102,7 @@ export function updateConvergence(c: Convergence, t: number): boolean {
   return true;
 }
 
-export function disposeConvergence(
-  scene: THREE.Scene,
-  c: Convergence,
-): void {
+export function disposeConvergence(scene: THREE.Scene, c: Convergence): void {
   scene.remove(c.dot);
   (c.dot.material as THREE.SpriteMaterial).dispose();
   scene.remove(c.dotLight);

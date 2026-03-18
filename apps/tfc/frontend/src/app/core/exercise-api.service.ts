@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from './environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "./environment";
 
 export interface CreateExerciseRequest {
   title: string;
@@ -27,19 +27,24 @@ export interface ExerciseResponse {
   updated_at: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ExerciseApiService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiBaseUrl;
 
   create(request: CreateExerciseRequest): Observable<ExerciseResponse> {
-    return this.http.post<ExerciseResponse>(`${this.base}/api/exercises`, request);
+    return this.http.post<ExerciseResponse>(
+      `${this.base}/api/exercises`,
+      request,
+    );
   }
 
   list(phase?: string): Observable<ExerciseResponse[]> {
     const params: Record<string, string> = {};
-    if (phase) params['phase'] = phase;
-    return this.http.get<ExerciseResponse[]>(`${this.base}/api/exercises`, { params });
+    if (phase) params["phase"] = phase;
+    return this.http.get<ExerciseResponse[]>(`${this.base}/api/exercises`, {
+      params,
+    });
   }
 
   get(id: number): Observable<ExerciseResponse> {
