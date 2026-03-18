@@ -1,6 +1,6 @@
-import { Injectable, OnDestroy } from '@angular/core';
-import { Subject } from 'rxjs';
-import { environment } from './environment';
+import { Injectable, OnDestroy } from "@angular/core";
+import { Subject } from "rxjs";
+import { environment } from "./environment";
 
 export interface WsStateChange {
   type: string;
@@ -8,7 +8,7 @@ export interface WsStateChange {
 }
 
 export interface WsMessage {
-  type: 'state_changes' | 'snapshot' | 'waiting_room_update' | 'pong';
+  type: "state_changes" | "snapshot" | "waiting_room_update" | "pong";
   changes?: WsStateChange[];
   [key: string]: unknown;
 }
@@ -16,7 +16,7 @@ export interface WsMessage {
 const RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000];
 const PING_INTERVAL = 15000;
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ExerciseWsService implements OnDestroy {
   private ws: WebSocket | null = null;
   private readonly _messages$ = new Subject<WsMessage>();
@@ -26,13 +26,17 @@ export class ExerciseWsService implements OnDestroy {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private pingTimer: ReturnType<typeof setInterval> | null = null;
   private lastExerciseId = 0;
-  private lastRole: 'gm' | 'player' = 'player';
+  private lastRole: "gm" | "player" = "player";
   private lastParticipantId?: string;
 
   readonly messages$ = this._messages$.asObservable();
   readonly connected$ = this._connected$.asObservable();
 
-  connect(exerciseId: number, role: 'gm' | 'player', participantId?: string): void {
+  connect(
+    exerciseId: number,
+    role: "gm" | "player",
+    participantId?: string,
+  ): void {
     this.intentionalClose = false;
     this.lastExerciseId = exerciseId;
     this.lastRole = role;
@@ -56,7 +60,11 @@ export class ExerciseWsService implements OnDestroy {
     this._connected$.complete();
   }
 
-  private doConnect(exerciseId: number, role: string, participantId?: string): void {
+  private doConnect(
+    exerciseId: number,
+    role: string,
+    participantId?: string,
+  ): void {
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -96,12 +104,17 @@ export class ExerciseWsService implements OnDestroy {
   }
 
   private scheduleReconnect(): void {
-    const delay = RECONNECT_DELAYS[
-      Math.min(this.reconnectAttempt, RECONNECT_DELAYS.length - 1)
-    ];
+    const delay =
+      RECONNECT_DELAYS[
+        Math.min(this.reconnectAttempt, RECONNECT_DELAYS.length - 1)
+      ];
     this.reconnectAttempt++;
     this.reconnectTimer = setTimeout(() => {
-      this.doConnect(this.lastExerciseId, this.lastRole, this.lastParticipantId);
+      this.doConnect(
+        this.lastExerciseId,
+        this.lastRole,
+        this.lastParticipantId,
+      );
     }, delay);
   }
 
@@ -109,7 +122,7 @@ export class ExerciseWsService implements OnDestroy {
     this.stopPing();
     this.pingTimer = setInterval(() => {
       if (this.ws?.readyState === WebSocket.OPEN) {
-        this.ws.send(JSON.stringify({ type: 'ping' }));
+        this.ws.send(JSON.stringify({ type: "ping" }));
       }
     }, PING_INTERVAL);
   }

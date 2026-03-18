@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from './environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "./environment";
 
 export interface ParticipantResponse {
   id: string;
@@ -15,12 +15,16 @@ export interface WaitingRoomResponse {
   participants: ParticipantResponse[];
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class WaitingRoomApiService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiBaseUrl;
 
-  join(exerciseId: number, displayName: string, role: string): Observable<ParticipantResponse> {
+  join(
+    exerciseId: number,
+    displayName: string,
+    role: string,
+  ): Observable<ParticipantResponse> {
     return this.http.post<ParticipantResponse>(
       `${this.base}/api/exercises/${exerciseId}/waiting-room/join`,
       { display_name: displayName, role },
@@ -33,7 +37,11 @@ export class WaitingRoomApiService {
     );
   }
 
-  updateRole(exerciseId: number, participantId: string, role: string): Observable<ParticipantResponse> {
+  updateRole(
+    exerciseId: number,
+    participantId: string,
+    role: string,
+  ): Observable<ParticipantResponse> {
     return this.http.put<ParticipantResponse>(
       `${this.base}/api/exercises/${exerciseId}/waiting-room/participants/${participantId}/role`,
       { role },

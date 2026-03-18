@@ -1,9 +1,14 @@
 import {
-  ChangeDetectionStrategy, Component, input, output, signal, effect,
-} from '@angular/core';
-import { BadgeComponent, ButtonDirective } from '@aspect/ui';
-import { DecisionPanelComponent } from './decision-panel.component';
-import type { DecisionOption } from './decision-panel.component';
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  output,
+  signal,
+  effect,
+} from "@angular/core";
+import { BadgeComponent, ButtonDirective } from "@aspect/ui";
+import { DecisionPanelComponent } from "./decision-panel.component";
+import type { DecisionOption } from "./decision-panel.component";
 
 export interface AdvisorRoleTab {
   id: string;
@@ -17,19 +22,25 @@ export interface RoleRecommendation {
 }
 
 @Component({
-  selector: 'tfc-all-advisors-panel',
+  selector: "tfc-all-advisors-panel",
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [BadgeComponent, ButtonDirective, DecisionPanelComponent],
   template: `
     <div class="flex flex-col gap-md">
       <div class="flex gap-sm flex-wrap">
         @for (role of roles(); track role.id) {
-          <button uiButton
+          <button
+            uiButton
             [variant]="activeTab() === role.id ? 'default' : 'outline'"
-            (click)="activeTab.set(role.id)">
+            (click)="activeTab.set(role.id)"
+          >
             {{ role.label }}
             @if (isSubmitted(role.id)) {
-              <ui-badge variant="secondary" style="margin-left: var(--spacing-xs)">Done</ui-badge>
+              <ui-badge
+                variant="secondary"
+                style="margin-left: var(--spacing-xs)"
+                >Done</ui-badge
+              >
             }
           </button>
         }
@@ -43,7 +54,8 @@ export interface RoleRecommendation {
             [questionType]="questionType()"
             [options]="options()"
             (submitted)="onRoleSubmit(role.id, $event)"
-            (closed)="closed.emit()" />
+            (closed)="closed.emit()"
+          />
         }
         @if (activeTab() === role.id && isSubmitted(role.id)) {
           <p class="text-sm text-muted-foreground p-md">
@@ -57,13 +69,13 @@ export interface RoleRecommendation {
 export class AllAdvisorsPanelComponent {
   readonly roles = input.required<AdvisorRoleTab[]>();
   readonly decisionTitle = input.required<string>();
-  readonly decisionDescription = input<string>('');
+  readonly decisionDescription = input<string>("");
   readonly questionType = input.required<string>();
   readonly options = input<DecisionOption[]>([]);
   readonly submitted = output<RoleRecommendation>();
   readonly closed = output();
 
-  protected readonly activeTab = signal('');
+  protected readonly activeTab = signal("");
   private readonly submittedRoles = signal<Set<string>>(new Set());
 
   constructor() {

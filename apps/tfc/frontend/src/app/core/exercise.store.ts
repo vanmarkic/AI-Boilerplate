@@ -1,8 +1,18 @@
-import { computed } from '@angular/core';
-import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { EngineSnapshot, EventSnapshot, IssueSnapshot } from './engine-api.service';
-import type { ActiveDecision, ScenarioContext } from './decision-api.service';
-import { formatTimeMs } from './format-time';
+import { computed } from "@angular/core";
+import {
+  patchState,
+  signalStore,
+  withComputed,
+  withMethods,
+  withState,
+} from "@ngrx/signals";
+import type {
+  EngineSnapshot,
+  EventSnapshot,
+  IssueSnapshot,
+} from "./engine-api.service";
+import type { ActiveDecision, ScenarioContext } from "./decision-api.service";
+import { formatTimeMs } from "./format-time";
 
 export interface ParticipantPresence {
   id: string;
@@ -27,8 +37,8 @@ interface ExerciseState {
   realTimeMs: number;
   speedFactor: number;
   paused: boolean;
-  events: EventSnapshot[];   // domain: "injects"
-  issues: IssueSnapshot[];   // domain: "defects"
+  events: EventSnapshot[]; // domain: "injects"
+  issues: IssueSnapshot[]; // domain: "defects"
   decisions: ActiveDecision[];
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
@@ -42,9 +52,9 @@ interface ExerciseState {
 
 const initialState: ExerciseState = {
   exerciseId: null,
-  title: '',
-  phase: 'setup',
-  gameMode: 'classic',
+  title: "",
+  phase: "setup",
+  gameMode: "classic",
   playTimeMs: 0,
   realTimeMs: 0,
   speedFactor: 1,
@@ -54,9 +64,9 @@ const initialState: ExerciseState = {
   decisions: [],
   participants: [],
   context: null,
-  participantId: '',
-  playerRole: 'player',
-  playerType: 'advisor',
+  participantId: "",
+  playerRole: "player",
+  playerType: "advisor",
   score: null,
   loading: false,
   error: null,
@@ -68,14 +78,28 @@ export const ExerciseStore = signalStore(
   withComputed((store) => ({
     rtClock: computed(() => formatTimeMs(store.realTimeMs())),
     ptClock: computed(() => formatTimeMs(store.playTimeMs())),
-    activeEvents: computed(() => store.events().filter((e) => e.lifecycle === 'running')),    // active injects
-    scheduledEvents: computed(() => store.events().filter((e) => e.lifecycle === 'scheduled')), // scheduled injects
-    completedEvents: computed(() => store.events().filter((e) => e.lifecycle === 'completed')), // completed injects
-    activeIssues: computed(() => store.issues().filter((i) => i.lifecycle === 'active')),    // active defects
+    activeEvents: computed(() =>
+      store.events().filter((e) => e.lifecycle === "running"),
+    ), // active injects
+    scheduledEvents: computed(() =>
+      store.events().filter((e) => e.lifecycle === "scheduled"),
+    ), // scheduled injects
+    completedEvents: computed(() =>
+      store.events().filter((e) => e.lifecycle === "completed"),
+    ), // completed injects
+    activeIssues: computed(() =>
+      store.issues().filter((i) => i.lifecycle === "active"),
+    ), // active defects
     issuesWithCountdown: computed(() => {
       const pt = store.playTimeMs();
-      return store.issues()
-        .filter((i) => i.lifecycle === 'active' && i.auto_resolve_ms > 0 && i.activated_at_pt_ms !== null)
+      return store
+        .issues()
+        .filter(
+          (i) =>
+            i.lifecycle === "active" &&
+            i.auto_resolve_ms > 0 &&
+            i.activated_at_pt_ms !== null,
+        )
         .map((i) => {
           const elapsed = pt - (i.activated_at_pt_ms ?? 0);
           const remaining = Math.max(0, i.auto_resolve_ms - elapsed);
@@ -83,19 +107,33 @@ export const ExerciseStore = signalStore(
         });
     }),
     releasedIssues: computed(() => store.issues().filter((i) => i.released)),
-    openDecisions: computed(() => store.decisions().filter((d) => d.status === 'open')),
-    hasOpenDecision: computed(() => store.decisions().filter((d) => d.status === 'open').length > 0),
-    connectedParticipants: computed(() => store.participants().filter((p) => p.connected)),
-    connectedCount: computed(() => store.participants().filter((p) => p.connected).length),
-    isCollaborative: computed(() => store.gameMode() === 'simple_collaborative'),
-    isDecisionMaker: computed(() => store.playerType() === 'decision_maker'),
-    isAllAdvisors: computed(() => store.playerRole() === 'all_advisors'),
-    phaseBadgeVariant: computed<'default' | 'secondary' | 'destructive'>(() => {
+    openDecisions: computed(() =>
+      store.decisions().filter((d) => d.status === "open"),
+    ),
+    hasOpenDecision: computed(
+      () => store.decisions().filter((d) => d.status === "open").length > 0,
+    ),
+    connectedParticipants: computed(() =>
+      store.participants().filter((p) => p.connected),
+    ),
+    connectedCount: computed(
+      () => store.participants().filter((p) => p.connected).length,
+    ),
+    isCollaborative: computed(
+      () => store.gameMode() === "simple_collaborative",
+    ),
+    isDecisionMaker: computed(() => store.playerType() === "decision_maker"),
+    isAllAdvisors: computed(() => store.playerRole() === "all_advisors"),
+    phaseBadgeVariant: computed<"default" | "secondary" | "destructive">(() => {
       switch (store.phase()) {
-        case 'running': return 'default';
-        case 'paused': return 'secondary';
-        case 'completed': return 'destructive';
-        default: return 'secondary';
+        case "running":
+          return "default";
+        case "paused":
+          return "secondary";
+        case "completed":
+          return "destructive";
+        default:
+          return "secondary";
       }
     }),
   })),
@@ -116,18 +154,25 @@ export const ExerciseStore = signalStore(
         paused: snapshot.time.paused,
         events: snapshot.events,
         issues: snapshot.issues,
-        score: snapshot.score ? {
-          totalScore: snapshot.score.total_score,
-          penaltyMs: snapshot.score.penalty_ms,
-          turnNumber: snapshot.score.turn_number,
-          nextDecisionTimeMs: snapshot.score.next_decision_time_ms,
-        } : store.score(),
+        score: snapshot.score
+          ? {
+              totalScore: snapshot.score.total_score,
+              penaltyMs: snapshot.score.penalty_ms,
+              turnNumber: snapshot.score.turn_number,
+              nextDecisionTimeMs: snapshot.score.next_decision_time_ms,
+            }
+          : store.score(),
         loading: false,
         error: null,
       });
     },
 
-    applyTimeUpdate(time: { play_time_ms: number; real_time_ms: number; factor: number; paused: boolean }): void {
+    applyTimeUpdate(time: {
+      play_time_ms: number;
+      real_time_ms: number;
+      factor: number;
+      paused: boolean;
+    }): void {
       patchState(store, {
         playTimeMs: time.play_time_ms,
         realTimeMs: time.real_time_ms,
@@ -141,18 +186,20 @@ export const ExerciseStore = signalStore(
     },
 
     updateEvent(eventId: string, lifecycle: string): void {
-      const events = store.events().map((e) =>
-        e.id === eventId ? { ...e, lifecycle } : e,
-      );
+      const events = store
+        .events()
+        .map((e) => (e.id === eventId ? { ...e, lifecycle } : e));
       patchState(store, { events });
     },
 
     updateIssue(issueId: string, lifecycle: string, released?: boolean): void {
-      const issues = store.issues().map((i) =>
-        i.id === issueId
-          ? { ...i, lifecycle, released: released ?? i.released }
-          : i,
-      );
+      const issues = store
+        .issues()
+        .map((i) =>
+          i.id === issueId
+            ? { ...i, lifecycle, released: released ?? i.released }
+            : i,
+        );
       patchState(store, { issues });
     },
 
@@ -181,9 +228,9 @@ export const ExerciseStore = signalStore(
     },
 
     closeDecision(decisionId: string): void {
-      const decisions = store.decisions().map((d) =>
-        d.id === decisionId ? { ...d, status: 'closed' } : d,
-      );
+      const decisions = store
+        .decisions()
+        .map((d) => (d.id === decisionId ? { ...d, status: "closed" } : d));
       patchState(store, { decisions });
     },
 
@@ -199,7 +246,12 @@ export const ExerciseStore = signalStore(
       patchState(store, { playerType });
     },
 
-    applyScoreChange(change: { total_score: number; penalty_ms: number; next_decision_time_ms: number; turn_number: number }): void {
+    applyScoreChange(change: {
+      total_score: number;
+      penalty_ms: number;
+      next_decision_time_ms: number;
+      turn_number: number;
+    }): void {
       patchState(store, {
         score: {
           totalScore: change.total_score,
@@ -210,10 +262,20 @@ export const ExerciseStore = signalStore(
       });
     },
 
-    applyRecommendation(decisionId: string, participantId: string, optionId: string): void {
+    applyRecommendation(
+      decisionId: string,
+      participantId: string,
+      optionId: string,
+    ): void {
       const decisions = store.decisions().map((d) =>
         d.id === decisionId
-          ? { ...d, recommendations: { ...d.recommendations, [participantId]: optionId } }
+          ? {
+              ...d,
+              recommendations: {
+                ...d.recommendations,
+                [participantId]: optionId,
+              },
+            }
           : d,
       );
       patchState(store, { decisions });
