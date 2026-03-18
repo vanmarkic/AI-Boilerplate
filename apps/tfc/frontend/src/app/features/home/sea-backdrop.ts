@@ -103,7 +103,7 @@ export class SeaBackdrop implements OnDestroy {
     const bgColor = new THREE.Color(0x061218);
     this.scene = new THREE.Scene();
     this.scene.background = bgColor;
-    this.camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100);
+    this.camera = new THREE.PerspectiveCamera(27, w / h, 0.1, 100);
     this.camera.position.set(0, 1.6, 5);
     this.camera.lookAt(0, -0.4, -2);
 
