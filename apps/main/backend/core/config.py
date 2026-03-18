@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     keycloak_realm: str = "boilerplate"
     keycloak_audience: str = "backend-api"
     keycloak_admin_client_id: str = "admin-api"
-    keycloak_admin_client_secret: str = "admin-api-secret"
+    keycloak_admin_client_secret: str = "admin-api-secret"  # noqa: S105 — dev default, overridden by env
     openweathermap_api_key: str = ""
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}

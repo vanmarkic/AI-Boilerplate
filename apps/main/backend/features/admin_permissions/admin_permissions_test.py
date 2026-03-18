@@ -69,7 +69,7 @@ def _mock_cache() -> dict[str, list[PermissionRule]]:
 
 
 @pytest.fixture(autouse=True)
-def _seed_rbac_cache(_bypass_rbac: None) -> None:  # noqa: ANN001
+def _seed_rbac_cache(_bypass_rbac: None) -> None:
     """Override the global bypass fixture with real permission data."""
     import core.rbac as rbac_module
 

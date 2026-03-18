@@ -59,4 +59,4 @@ class DecisionDetailResponse(ResponseBase):
     status: str
     created_at: datetime
     closed_at: datetime | None
-    responses: list[ResponseItem] = []
+    responses: list[ResponseItem] = []  # noqa: RUF012 — Pydantic copies per instance

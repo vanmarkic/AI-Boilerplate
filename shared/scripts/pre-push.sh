@@ -43,14 +43,22 @@ fi
 echo ""
 echo "═══ pre-push: running linters ═══"
 
-echo "→ backend: ruff check"
-if ! (cd "$ROOT/backend" && ruff check .); then
-  echo "✗ Backend lint failed"
-  exit 1
-fi
+for backend in apps/main/backend apps/tfc/backend; do
+  name="$(basename "$(dirname "$backend")")/$(basename "$backend")"
+  echo "→ $name: ruff check"
+  if ! (cd "$ROOT/$backend" && ruff check .); then
+    echo "✗ $name ruff check failed"
+    exit 1
+  fi
+  echo "→ $name: ruff format --check"
+  if ! (cd "$ROOT/$backend" && ruff format --check .); then
+    echo "✗ $name ruff format failed"
+    exit 1
+  fi
+done
 
 echo "→ frontend: eslint"
-if ! (cd "$ROOT/frontend" && npx eslint "**/*.{js,ts,html,json}"); then
+if ! (cd "$ROOT/apps/main/frontend" && npx eslint "**/*.{js,ts,html,json}"); then
   echo "✗ Frontend lint failed"
   exit 1
 fi

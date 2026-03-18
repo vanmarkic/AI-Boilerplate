@@ -1,5 +1,7 @@
 """Tests for SessionStore in-memory session management."""
 
+import pytest
+
 from engine.exercise_engine import EngineConfig
 from engine.session_store import SessionStore
 
@@ -69,7 +71,7 @@ class TestDuplicateCreate:
         store.create(_config(1))
         try:
             store.create(_config(1))
-            assert False, "Expected ValueError"
+            pytest.fail("Expected ValueError")
         except ValueError:
             pass
 

@@ -27,7 +27,7 @@ class TestStartPauseResume:
         assert tm.paused is True
 
     @patch("engine.time_manager._now_ms", return_value=1000.0)
-    def test_start_unpauses(self, _mock: object) -> None:
+    def test_start_unpauses(self, _mock: object) -> None:  # noqa: PT019
         tm = TimeManager()
         tm.start()
         assert tm.paused is False
