@@ -1,4 +1,5 @@
 """Shared broadcast helpers for engine routers."""
+
 from __future__ import annotations
 
 from engine.state_changes import StateChange

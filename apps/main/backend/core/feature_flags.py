@@ -34,10 +34,12 @@ def require_feature(feature_name: str) -> Callable[..., Coroutine[Any, Any, None
 
     Usage: @router.get("/analytics", dependencies=[Depends(require_feature("analytics"))])
     """
+
     async def _check(flags: FeatureFlags = Depends(get_feature_flags)) -> None:
         if not flags.is_enabled(feature_name):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Feature '{feature_name}' is not enabled",
             )
+
     return _check

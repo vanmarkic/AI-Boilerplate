@@ -3,6 +3,7 @@
 Returns all joinable exercises (phase=setup, has waiting room with
 available slots and a linked scenario with roles) as a list.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -17,7 +18,8 @@ def _reset_waiting_room() -> None:
 
 
 async def _create_scenario_with_roles(
-    client: AsyncClient, roles: list[dict],
+    client: AsyncClient,
+    roles: list[dict],
     game_mode: str = "simple_collaborative",
 ) -> int:
     resp = await client.post(
@@ -25,10 +27,14 @@ async def _create_scenario_with_roles(
         json={
             "title": "Joinable Scenario",
             "content": {
-                "phases": [], "events": [], "issues": [],
+                "phases": [],
+                "events": [],
+                "issues": [],
                 "decision_templates": [],
                 "default_time_factor": 1.0,
-                "briefing": "Test", "objectives": [], "rules": [],
+                "briefing": "Test",
+                "objectives": [],
+                "rules": [],
                 "game_mode": game_mode,
                 "game_mode_config": {},
                 "decision_sequence": [],
@@ -59,8 +65,10 @@ async def _create_exercise(
 
 
 async def _join(
-    client: AsyncClient, exercise_id: int,
-    name: str = "Alice", role: str = "player",
+    client: AsyncClient,
+    exercise_id: int,
+    name: str = "Alice",
+    role: str = "player",
 ) -> dict:
     resp = await client.post(
         f"/api/exercises/{exercise_id}/waiting-room/join",
@@ -83,7 +91,8 @@ ADVISOR_ONLY_ROLES = [
 class TestJoinableEndpoint:
     @pytest.mark.asyncio
     async def test_returns_empty_list_when_no_setup_exercises(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         resp = await client.get("/api/exercises/joinable")
         assert resp.status_code == 200
@@ -91,7 +100,8 @@ class TestJoinableEndpoint:
 
     @pytest.mark.asyncio
     async def test_returns_exercise_with_available_slots(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         sid = await _create_scenario_with_roles(client, TWO_ROLES)
         eid = await _create_exercise(client, sid, "simple_collaborative")
@@ -107,7 +117,8 @@ class TestJoinableEndpoint:
 
     @pytest.mark.asyncio
     async def test_returns_empty_list_when_all_slots_filled(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         sid = await _create_scenario_with_roles(client, TWO_ROLES)
         eid = await _create_exercise(client, sid, "simple_collaborative")
@@ -120,10 +131,11 @@ class TestJoinableEndpoint:
 
     @pytest.mark.asyncio
     async def test_includes_roles_and_participants(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         sid = await _create_scenario_with_roles(client, TWO_ROLES)
-        eid = await _create_exercise(client, sid, "simple_collaborative")
+        _eid = await _create_exercise(client, sid, "simple_collaborative")
 
         resp = await client.get("/api/exercises/joinable")
         assert resp.status_code == 200
@@ -137,7 +149,8 @@ class TestJoinableEndpoint:
 
     @pytest.mark.asyncio
     async def test_ignores_running_exercises(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         sid = await _create_scenario_with_roles(client, TWO_ROLES)
         eid = await _create_exercise(client, sid, "simple_collaborative")
@@ -153,7 +166,8 @@ class TestJoinableEndpoint:
 
     @pytest.mark.asyncio
     async def test_ignores_exercises_without_scenario(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         await _create_exercise(client)  # no scenario
 
@@ -163,12 +177,15 @@ class TestJoinableEndpoint:
 
     @pytest.mark.asyncio
     async def test_classic_mode_includes_gm_slot(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         sid = await _create_scenario_with_roles(
-            client, TWO_ROLES, game_mode="classic",
+            client,
+            TWO_ROLES,
+            game_mode="classic",
         )
-        eid = await _create_exercise(client, sid, "classic")
+        _eid = await _create_exercise(client, sid, "classic")
 
         resp = await client.get("/api/exercises/joinable")
         assert resp.status_code == 200
@@ -179,14 +196,21 @@ class TestJoinableEndpoint:
 
     @pytest.mark.asyncio
     async def test_returns_multiple_joinable_exercises(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         sid = await _create_scenario_with_roles(client, TWO_ROLES)
         eid1 = await _create_exercise(
-            client, sid, "simple_collaborative", title="Exercise A",
+            client,
+            sid,
+            "simple_collaborative",
+            title="Exercise A",
         )
         eid2 = await _create_exercise(
-            client, sid, "simple_collaborative", title="Exercise B",
+            client,
+            sid,
+            "simple_collaborative",
+            title="Exercise B",
         )
 
         resp = await client.get("/api/exercises/joinable")
@@ -213,8 +237,11 @@ class TestScenarioContentValidationResilience:
         from features.scenario.scenario_content import ScenarioContent
 
         bad_content = {
-            "phases": [], "events": [], "issues": [],
-            "decision_templates": [], "default_time_factor": 1.0,
+            "phases": [],
+            "events": [],
+            "issues": [],
+            "decision_templates": [],
+            "default_time_factor": 1.0,
             "game_mode": "simple_collaborative",
             "roles": [{"id": "x", "label": "X", "player_type": "advisor"}],
         }

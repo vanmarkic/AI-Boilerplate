@@ -12,6 +12,7 @@ Invariants tested:
 - Role invariant: all participants joined as 'player' retain that role.
 - Isolation: participants from exercise A never appear in exercise B's list.
 """
+
 from __future__ import annotations
 
 from hypothesis import given, settings
@@ -19,7 +20,6 @@ from hypothesis import strategies as st
 
 from features.exercise.exercise_model import _generate_session_code
 from features.waiting_room.waiting_room_store import WaitingRoomStore
-
 
 # ── Strategies ────────────────────────────────────────────────────────────────
 
@@ -62,9 +62,7 @@ class TestParticipantCountInvariant:
         names=st.lists(_player_names, min_size=1, max_size=10, unique=True),
     )
     @settings(max_examples=100)
-    def test_participant_count_equals_join_calls(
-        self, exercise_id: int, names: list[str]
-    ) -> None:
+    def test_participant_count_equals_join_calls(self, exercise_id: int, names: list[str]) -> None:
         store = WaitingRoomStore()
         for name in names:
             store.join(exercise_id, name, "player")
@@ -75,9 +73,7 @@ class TestParticipantCountInvariant:
         names=st.lists(_player_names, min_size=1, max_size=10, unique=True),
     )
     @settings(max_examples=100)
-    def test_all_names_preserved_in_store(
-        self, exercise_id: int, names: list[str]
-    ) -> None:
+    def test_all_names_preserved_in_store(self, exercise_id: int, names: list[str]) -> None:
         store = WaitingRoomStore()
         for name in names:
             store.join(exercise_id, name, "player")
@@ -89,9 +85,7 @@ class TestParticipantCountInvariant:
         names=st.lists(_player_names, min_size=1, max_size=10, unique=True),
     )
     @settings(max_examples=100)
-    def test_all_participants_retain_player_role(
-        self, exercise_id: int, names: list[str]
-    ) -> None:
+    def test_all_participants_retain_player_role(self, exercise_id: int, names: list[str]) -> None:
         store = WaitingRoomStore()
         for name in names:
             store.join(exercise_id, name, "player")
@@ -103,9 +97,7 @@ class TestParticipantCountInvariant:
         names=st.lists(_player_names, min_size=2, max_size=10, unique=True),
     )
     @settings(max_examples=100)
-    def test_participant_ids_are_unique(
-        self, exercise_id: int, names: list[str]
-    ) -> None:
+    def test_participant_ids_are_unique(self, exercise_id: int, names: list[str]) -> None:
         store = WaitingRoomStore()
         ids = [store.join(exercise_id, name, "player").id for name in names]
         assert len(ids) == len(set(ids)), f"Duplicate IDs found: {ids}"
@@ -127,6 +119,7 @@ class TestExerciseIsolation:
         names_b: list[str],
     ) -> None:
         from hypothesis import assume
+
         assume(id_a != id_b)
 
         store = WaitingRoomStore()
@@ -146,9 +139,7 @@ class TestExerciseIsolation:
         names=st.lists(_player_names, min_size=1, max_size=5, unique=True),
     )
     @settings(max_examples=50)
-    def test_empty_exercise_has_no_participants(
-        self, id_a: int, names: list[str]
-    ) -> None:
+    def test_empty_exercise_has_no_participants(self, id_a: int, names: list[str]) -> None:
         store = WaitingRoomStore()
         id_b = id_a + 1  # guaranteed different
         for name in names:

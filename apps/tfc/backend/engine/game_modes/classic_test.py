@@ -1,4 +1,5 @@
 """Tests for ClassicMode — verifies default GM-driven behaviour."""
+
 from __future__ import annotations
 
 from engine.game_modes.classic import ClassicMode

@@ -11,9 +11,7 @@ class RbacRepository(CrudRepository[RolePermission]):
     def __init__(self, session: AsyncSession) -> None:
         super().__init__(session, RolePermission)
 
-    async def get_frontend_routes_for_roles(
-        self, roles: list[str]
-    ) -> list[str]:
+    async def get_frontend_routes_for_roles(self, roles: list[str]) -> list[str]:
         """Return deduplicated frontend routes for the given roles."""
         stmt = (
             select(RolePermission.frontend_route)

@@ -3,6 +3,7 @@
 Runs at Docker build time (no DB required). Exit code 1 on any failure.
 Usage: python validate_seeds.py
 """
+
 from __future__ import annotations
 
 import json

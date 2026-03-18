@@ -4,6 +4,7 @@ A GameMode defines policy hooks that the ExerciseEngine delegates to,
 allowing different exercise modes (classic GM-driven, simple_collaborative)
 to coexist without branching inside the engine.
 """
+
 from __future__ import annotations
 
 from enum import StrEnum
@@ -18,6 +19,7 @@ class GameModeName(StrEnum):
     StrEnum values ARE strings, so ``GameModeName.CLASSIC == "classic"``
     is True — JSON, Pydantic, and SQLAlchemy all work without converters.
     """
+
     CLASSIC = "classic"
     SIMPLE_COLLABORATIVE = "simple_collaborative"
 
@@ -36,6 +38,7 @@ def create_game_mode(name: str, config: dict[str, object] | None = None) -> Game
     mode = GameModeName(name)  # ValueError on unknown strings
     if mode is GameModeName.SIMPLE_COLLABORATIVE:
         from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
+
         cfg = config or {}
         return SimpleCollaborativeMode(
             decision_sequence=cfg.get("decision_sequence", []),

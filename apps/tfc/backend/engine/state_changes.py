@@ -4,10 +4,10 @@ Each TypedDict corresponds to one kind of change that the engine
 broadcasts to listeners. Using TypedDict (not dataclass) keeps them
 JSON-serialisable and compatible with the existing dict-based API.
 """
+
 from __future__ import annotations
 
 from typing import TypedDict
-
 
 # ── Snapshot shapes ──────────────────────────────────────────────
 
@@ -91,33 +91,35 @@ class PresenceEntry(TypedDict):
 
 
 class PhaseChange(TypedDict):
-    type: str          # "phase_change"
-    action: str        # started | paused | completed | reset
-    phase: str         # setup | running | paused | completed
+    type: str  # "phase_change"
+    action: str  # started | paused | completed | reset
+    phase: str  # setup | running | paused | completed
     time: TimeSnapshot
 
 
 class EventChange(TypedDict):
     """Domain term: 'inject change'. Code uses 'event_change'."""
-    type: str          # "event_change"
-    event_id: str      # domain: inject_id
-    action: str        # activated | started | completed | force_triggered | cancelled
-    lifecycle: str     # scheduled | pending | running | paused | completed | cancelled
+
+    type: str  # "event_change"
+    event_id: str  # domain: inject_id
+    action: str  # activated | started | completed | force_triggered | cancelled
+    lifecycle: str  # scheduled | pending | running | paused | completed | cancelled
     title: str
 
 
 class IssueChange(TypedDict):
     """Domain term: 'defect change'. Code uses 'issue_change'."""
-    type: str          # "issue_change"
-    issue_id: str      # domain: defect_id
-    action: str        # activated | mitigated | resolved | auto_resolve_expired
-    lifecycle: str     # inactive | active | mitigated | resolved
+
+    type: str  # "issue_change"
+    issue_id: str  # domain: defect_id
+    action: str  # activated | mitigated | resolved | auto_resolve_expired
+    lifecycle: str  # inactive | active | mitigated | resolved
     title: str
     released: bool
 
 
 class DecisionOpened(TypedDict):
-    type: str          # "decision_opened"
+    type: str  # "decision_opened"
     decision_id: str
     title: str
     question_type: str
@@ -127,19 +129,19 @@ class DecisionOpened(TypedDict):
 
 
 class DecisionClosed(TypedDict):
-    type: str          # "decision_closed"
+    type: str  # "decision_closed"
     decision_id: str
     title: str
     selected_option_ids: list[str]
 
 
 class SpeedChange(TypedDict):
-    type: str          # "speed_change"
+    type: str  # "speed_change"
     factor: float
 
 
 class ScoreChange(TypedDict):
-    type: str          # "score_change"
+    type: str  # "score_change"
     total_score: float
     penalty_ms: float
     next_decision_time_ms: int
@@ -147,14 +149,14 @@ class ScoreChange(TypedDict):
 
 
 class RecommendationSubmitted(TypedDict):
-    type: str          # "recommendation_submitted"
+    type: str  # "recommendation_submitted"
     decision_id: str
     participant_id: str
     option_id: str
 
 
 class ForcedCardApplied(TypedDict):
-    type: str          # "forced_card_applied"
+    type: str  # "forced_card_applied"
     decision_id: str
     forced_option_id: str
     reason: str
@@ -162,7 +164,13 @@ class ForcedCardApplied(TypedDict):
 
 # Union of all change types for type-narrowing on `change["type"]`.
 StateChange = (
-    PhaseChange | EventChange | IssueChange
-    | DecisionOpened | DecisionClosed | SpeedChange
-    | ScoreChange | RecommendationSubmitted | ForcedCardApplied
+    PhaseChange
+    | EventChange
+    | IssueChange
+    | DecisionOpened
+    | DecisionClosed
+    | SpeedChange
+    | ScoreChange
+    | RecommendationSubmitted
+    | ForcedCardApplied
 )

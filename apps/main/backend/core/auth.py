@@ -26,8 +26,7 @@ async def _get_signing_key() -> bytes:
         return _jwks_cache
 
     certs_url = (
-        f"{settings.keycloak_url}/realms/{settings.keycloak_realm}"
-        "/protocol/openid-connect/certs"
+        f"{settings.keycloak_url}/realms/{settings.keycloak_realm}/protocol/openid-connect/certs"
     )
     async with httpx.AsyncClient() as client:
         resp = await client.get(certs_url)

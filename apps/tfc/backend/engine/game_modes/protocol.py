@@ -4,6 +4,7 @@ Extracted to its own module so that ``engine_config.py`` can annotate
 ``game_mode: GameMode`` without importing the full ``game_modes/__init__``
 (which carries the factory and concrete imports).
 """
+
 from __future__ import annotations
 
 from typing import Protocol
@@ -19,7 +20,9 @@ class GameMode(Protocol):
         ...
 
     def on_decision_timeout(
-        self, decision_id: str, options: list[DecisionOptionSnapshot],
+        self,
+        decision_id: str,
+        options: list[DecisionOptionSnapshot],
     ) -> str | None:
         """Return option ID to auto-submit on timeout, or None."""
         ...

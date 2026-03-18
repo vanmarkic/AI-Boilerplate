@@ -1,4 +1,5 @@
 """Tests for engine entity action endpoints (P2: pause/resume/delay/skip events, session code)."""
+
 from __future__ import annotations
 
 import pytest
@@ -13,18 +14,22 @@ def _config(exercise_id: int = 1, events: list | None = None) -> EngineConfig:
     return EngineConfig(
         exercise_id=exercise_id,
         title="Test",
-        events=events or [
+        events=events
+        or [
             ScheduledEvent(
-                id="e1", title="E1", description="",
+                id="e1",
+                title="E1",
+                description="",
                 event_type=EventType.OPERATIONAL,
-                scheduled_pt_ms=0.0, duration_ms=99999.0,
+                scheduled_pt_ms=0.0,
+                duration_ms=99999.0,
             ),
         ],
     )
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -37,6 +42,7 @@ def _cleanup_sessions():
 def _start_engine(exercise_id: int = 1) -> None:
     """Create an engine with a running event for testing."""
     from unittest.mock import patch
+
     config = _config(exercise_id)
     engine = session_store.create(config)
     with patch("engine.time_manager._now_ms", return_value=0.0):
@@ -102,11 +108,17 @@ async def test_pause_non_running_event_404(client: AsyncClient) -> None:
 async def test_delay_scheduled_event(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     config = EngineConfig(
-        exercise_id=eid, title="T",
-        events=[ScheduledEvent(
-            id="e2", title="E2", description="",
-            event_type=EventType.OPERATIONAL, scheduled_pt_ms=9999.0,
-        )],
+        exercise_id=eid,
+        title="T",
+        events=[
+            ScheduledEvent(
+                id="e2",
+                title="E2",
+                description="",
+                event_type=EventType.OPERATIONAL,
+                scheduled_pt_ms=9999.0,
+            )
+        ],
     )
     session_store.create(config)
     resp = await client.post(

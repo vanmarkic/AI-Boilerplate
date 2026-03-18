@@ -3,6 +3,7 @@
 Verifies that presence_service correctly cross-references connected
 WebSocket participant IDs with waiting room participants.
 """
+
 from __future__ import annotations
 
 import json
@@ -43,7 +44,7 @@ class TestBuildPresenceList:
         store = WaitingRoomStore()
 
         p1 = store.join(1, "Alice", "player")
-        p2 = store.join(1, "Bob", "player")
+        _p2 = store.join(1, "Bob", "player")
 
         ws1 = _make_ws("ws1")
         mgr.connect(1, ws1, "player", participant_id=p1.id)
@@ -125,10 +126,8 @@ class TestBroadcastPresence:
         # GM should receive the message
         ws_gm.send_text.assert_awaited_once()
         msg = json.loads(ws_gm.send_text.call_args[0][0])
-        assert msg["type"] == "state_changes"
-        assert len(msg["changes"]) == 1
-        assert msg["changes"][0]["type"] == "presence_update"
-        assert isinstance(msg["changes"][0]["participants"], list)
+        assert msg["type"] == "presence_update"
+        assert isinstance(msg["participants"], list)
 
         # Player should NOT receive presence updates
         ws_player.send_text.assert_not_awaited()
@@ -151,7 +150,8 @@ class TestBroadcastPresence:
 
         ws_gm.send_text.assert_awaited_once()
         msg = json.loads(ws_gm.send_text.call_args[0][0])
-        assert msg["changes"][0]["participants"] == []
+        assert msg["type"] == "presence_update"
+        assert msg["participants"] == []
 
     @pytest.mark.asyncio
     async def test_no_error_when_no_connections(self) -> None:

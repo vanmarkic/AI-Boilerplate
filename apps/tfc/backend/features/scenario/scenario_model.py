@@ -14,7 +14,9 @@ class Scenario(Base):
     title: Mapped[str] = mapped_column(String(255))
     description: Mapped[str] = mapped_column(Text, default="")
     domain_id: Mapped[int | None] = mapped_column(
-        Integer, ForeignKey("tfc_domain_configs.id"), nullable=True,
+        Integer,
+        ForeignKey("tfc_domain_configs.id"),
+        nullable=True,
     )
     content: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     version: Mapped[int] = mapped_column(default=1)

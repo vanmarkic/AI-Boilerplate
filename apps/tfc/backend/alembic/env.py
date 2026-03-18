@@ -1,19 +1,19 @@
 import asyncio
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
+from alembic import context
 from core.config import settings
 from core.database import Base
+from features.audit.audit_model import AuditEntry  # noqa: F401
+from features.decision.decision_model import Decision, DecisionResponseRecord  # noqa: F401
+from features.domain_config.domain_config_model import DomainConfig  # noqa: F401
 
 # Import all models so Alembic can detect them
 from features.exercise.exercise_model import Exercise  # noqa: F401
 from features.scenario.scenario_model import Scenario  # noqa: F401
-from features.audit.audit_model import AuditEntry  # noqa: F401
-from features.decision.decision_model import Decision, DecisionResponseRecord  # noqa: F401
-from features.domain_config.domain_config_model import DomainConfig  # noqa: F401
 
 config = context.config
 

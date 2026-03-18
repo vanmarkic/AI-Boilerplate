@@ -16,14 +16,11 @@ _token_cache: dict[str, str | float] = {}
 async def _get_admin_token() -> str:
     """Obtain a service account token, using cache if not expired."""
     now = time.time()
-    if _token_cache.get("token") and now < float(
-        _token_cache.get("expires_at", 0)
-    ):
+    if _token_cache.get("token") and now < float(_token_cache.get("expires_at", 0)):
         return str(_token_cache["token"])
 
     token_url = (
-        f"{settings.keycloak_url}/realms/{settings.keycloak_realm}"
-        "/protocol/openid-connect/token"
+        f"{settings.keycloak_url}/realms/{settings.keycloak_realm}/protocol/openid-connect/token"
     )
     async with httpx.AsyncClient() as client:
         resp = await client.post(
@@ -44,9 +41,7 @@ async def _get_admin_token() -> str:
 
 def _admin_base_url() -> str:
     """Return the base URL for Keycloak Admin REST API."""
-    return (
-        f"{settings.keycloak_url}/admin/realms/{settings.keycloak_realm}"
-    )
+    return f"{settings.keycloak_url}/admin/realms/{settings.keycloak_realm}"
 
 
 class KeycloakAdminClient:
@@ -89,9 +84,7 @@ class KeycloakAdminClient:
             resp.raise_for_status()
         return int(resp.text)
 
-    async def get_user_roles(
-        self, user_id: str
-    ) -> list[dict[str, object]]:
+    async def get_user_roles(self, user_id: str) -> list[dict[str, object]]:
         """Get realm role mappings for a user."""
         async with httpx.AsyncClient() as client:
             resp = await client.get(
@@ -101,9 +94,7 @@ class KeycloakAdminClient:
             resp.raise_for_status()
         return resp.json()  # type: ignore[no-any-return]
 
-    async def assign_roles(
-        self, user_id: str, roles: list[dict[str, str]]
-    ) -> None:
+    async def assign_roles(self, user_id: str, roles: list[dict[str, str]]) -> None:
         """Assign realm roles to a user."""
         async with httpx.AsyncClient() as client:
             resp = await client.post(
@@ -113,9 +104,7 @@ class KeycloakAdminClient:
             )
             resp.raise_for_status()
 
-    async def remove_roles(
-        self, user_id: str, roles: list[dict[str, str]]
-    ) -> None:
+    async def remove_roles(self, user_id: str, roles: list[dict[str, str]]) -> None:
         """Remove realm roles from a user."""
         async with httpx.AsyncClient() as client:
             resp = await client.request(
@@ -136,9 +125,7 @@ class KeycloakAdminClient:
             resp.raise_for_status()
         return resp.json()  # type: ignore[no-any-return]
 
-    async def get_role_by_name(
-        self, name: str
-    ) -> dict[str, object]:
+    async def get_role_by_name(self, name: str) -> dict[str, object]:
         """Get a realm role by name."""
         async with httpx.AsyncClient() as client:
             resp = await client.get(
@@ -148,9 +135,7 @@ class KeycloakAdminClient:
             resp.raise_for_status()
         return resp.json()  # type: ignore[no-any-return]
 
-    async def create_realm_role(
-        self, name: str, description: str = ""
-    ) -> dict[str, object]:
+    async def create_realm_role(self, name: str, description: str = "") -> dict[str, object]:
         """Create a new realm role."""
         async with httpx.AsyncClient() as client:
             resp = await client.post(

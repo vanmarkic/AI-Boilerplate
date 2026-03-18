@@ -5,6 +5,7 @@ when the previous one closes. Advisors submit recommendations in
 real-time; the decision-maker makes the final call. Wrong answers
 shrink the time available for subsequent decisions.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -31,7 +32,9 @@ class SimpleCollaborativeMode:
         return False
 
     def on_decision_timeout(
-        self, decision_id: str, options: list[DecisionOptionSnapshot],
+        self,
+        decision_id: str,
+        options: list[DecisionOptionSnapshot],
     ) -> str | None:
         """Auto-submit the worst option (lowest score)."""
         if not options:
@@ -56,7 +59,8 @@ class SimpleCollaborativeMode:
         for fid in forced_ids:
             if fid not in selected_ids:
                 forced_opt = next(
-                    (o for o in all_options if o["id"] == fid), None,
+                    (o for o in all_options if o["id"] == fid),
+                    None,
                 )
                 if forced_opt is not None:
                     effective_options.append(forced_opt)
@@ -65,8 +69,7 @@ class SimpleCollaborativeMode:
                         "decision_id": decision_id,
                         "forced_option_id": fid,
                         "reason": (
-                            f"Mandatory card {fid} was not selected"
-                            " and has been auto-applied."
+                            f"Mandatory card {fid} was not selected and has been auto-applied."
                         ),
                     }
                     changes.append(change)
@@ -75,7 +78,8 @@ class SimpleCollaborativeMode:
         n = len(effective_options)
         selected_score = sum(o.get("score", 0) for o in effective_options)
         top_n = sorted(
-            (o.get("score", 0) for o in all_options), reverse=True,
+            (o.get("score", 0) for o in all_options),
+            reverse=True,
         )[:n]
         max_score = sum(top_n)
 

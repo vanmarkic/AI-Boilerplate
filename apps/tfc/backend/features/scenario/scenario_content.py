@@ -3,6 +3,7 @@
 These models validate scenario data authored by the GM and serve as the
 bridge between the scenario editor and the exercise engine.
 """
+
 from __future__ import annotations
 
 from pydantic import BaseModel, model_validator
@@ -12,6 +13,7 @@ from core.game_mode_constants import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
 
 class DecisionOptionDef(BaseModel):
     """A single selectable option within a decision template."""
+
     id: str
     label: str
     score: float = 0.0
@@ -19,6 +21,7 @@ class DecisionOptionDef(BaseModel):
 
 class DecisionTemplateDef(BaseModel):
     """Template for a decision that players must make during an exercise."""
+
     id: str
     title: str
     description: str = ""
@@ -33,6 +36,7 @@ class DecisionTemplateDef(BaseModel):
 
 class ScenarioEventDef(BaseModel):
     """Definition of an inject (event) within a scenario. Domain term: 'inject'."""
+
     id: str
     title: str
     description: str = ""
@@ -45,6 +49,7 @@ class ScenarioEventDef(BaseModel):
 
 class ScenarioIssueDef(BaseModel):
     """Definition of a defect (issue) within a scenario. Domain term: 'defect'."""
+
     id: str
     title: str
     description: str = ""
@@ -56,6 +61,7 @@ class ScenarioIssueDef(BaseModel):
 
 class ScenarioPhaseDef(BaseModel):
     """Definition of a phase grouping events within a scenario."""
+
     id: str
     title: str
     description: str = ""
@@ -65,6 +71,7 @@ class ScenarioPhaseDef(BaseModel):
 
 class RoleDef(BaseModel):
     """Definition of a participant role within a scenario."""
+
     id: str
     label: str
     player_type: str = "advisor"  # "advisor" or "decision_maker"
@@ -77,6 +84,7 @@ class ScenarioContent(BaseModel):
     column. The GM authors this via the scenario editor; the engine
     loader converts it into runtime objects at exercise start.
     """
+
     phases: list[ScenarioPhaseDef] = []
     events: list[ScenarioEventDef] = []
     issues: list[ScenarioIssueDef] = []
@@ -94,15 +102,12 @@ class ScenarioContent(BaseModel):
     def validate_roles(self) -> ScenarioContent:
         """Enforce that every scenario defines roles appropriate for its game mode."""
         if not self.roles:
-            raise ValueError(
-                "Scenario must define at least one role in 'roles'."
-            )
+            raise ValueError("Scenario must define at least one role in 'roles'.")
         role_ids = {r.id for r in self.roles}
         player_types = {r.player_type for r in self.roles}
         if "decision_maker" not in player_types:
             raise ValueError(
-                "Scenario must have at least one role with "
-                "player_type='decision_maker'."
+                "Scenario must have at least one role with player_type='decision_maker'."
             )
         if self.game_mode == GM_SIMPLE_COLLABORATIVE and len(self.roles) < 2:
             raise ValueError(

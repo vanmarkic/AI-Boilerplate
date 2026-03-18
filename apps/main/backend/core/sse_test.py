@@ -10,7 +10,8 @@ from core.sse import _SUBSCRIBER_QUEUE_MAX, EventBus
 class TestEventBusLifecycle:
     @patch("core.sse.asyncpg.connect", new_callable=AsyncMock)
     async def test_connect_creates_asyncpg_connection(
-        self, mock_connect: AsyncMock,
+        self,
+        mock_connect: AsyncMock,
     ) -> None:
         bus = EventBus()
         await bus.connect()
@@ -19,7 +20,8 @@ class TestEventBusLifecycle:
 
     @patch("core.sse.asyncpg.connect", new_callable=AsyncMock)
     async def test_disconnect_closes_connection_and_clears_state(
-        self, mock_connect: AsyncMock,
+        self,
+        mock_connect: AsyncMock,
     ) -> None:
         mock_conn = AsyncMock()
         mock_conn.is_closed = MagicMock(return_value=False)
@@ -48,7 +50,8 @@ class TestEventBusLifecycle:
 class TestEventBusPublish:
     @patch("core.sse.asyncpg.connect", new_callable=AsyncMock)
     async def test_publish_calls_pg_notify(
-        self, mock_connect: AsyncMock,
+        self,
+        mock_connect: AsyncMock,
     ) -> None:
         mock_conn = AsyncMock()
         mock_connect.return_value = mock_conn
@@ -64,7 +67,8 @@ class TestEventBusPublish:
 
     @patch("core.sse.asyncpg.connect", new_callable=AsyncMock)
     async def test_publish_closes_connection(
-        self, mock_connect: AsyncMock,
+        self,
+        mock_connect: AsyncMock,
     ) -> None:
         mock_conn = AsyncMock()
         mock_connect.return_value = mock_conn
@@ -78,7 +82,8 @@ class TestEventBusPublish:
 class TestEventBusSubscribe:
     @patch("core.sse.asyncpg.connect", new_callable=AsyncMock)
     async def test_subscribe_calls_listen_once_per_channel(
-        self, mock_connect: AsyncMock,
+        self,
+        mock_connect: AsyncMock,
     ) -> None:
         mock_conn = AsyncMock()
         mock_connect.return_value = mock_conn
@@ -139,7 +144,8 @@ class TestEventBusSubscribe:
 
     @patch("core.sse.asyncpg.connect", new_callable=AsyncMock)
     async def test_subscribe_yields_payloads(
-        self, mock_connect: AsyncMock,
+        self,
+        mock_connect: AsyncMock,
     ) -> None:
         mock_conn = AsyncMock()
         mock_connect.return_value = mock_conn
@@ -151,7 +157,8 @@ class TestEventBusSubscribe:
         callback = None
 
         async def capture_add_listener(
-            channel: str, cb: object,
+            channel: str,
+            cb: object,
         ) -> None:
             nonlocal callback
             callback = cb

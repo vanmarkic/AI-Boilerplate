@@ -3,13 +3,13 @@
 Uses Hypothesis to generate arbitrary sequences of joins, leaves, and role
 changes, then verifies structural invariants hold after every operation.
 """
+
 from __future__ import annotations
 
-from hypothesis import given, settings, assume
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from features.waiting_room.waiting_room_store import WaitingRoomStore
-
 
 # ── Strategies ───────────────────────────────────────────────────────────
 
@@ -62,7 +62,9 @@ class TestUniqueRoles:
     )
     @settings(max_examples=100)
     def test_is_role_taken_consistent(
-        self, roles: list[str], query_role: str,
+        self,
+        roles: list[str],
+        query_role: str,
     ) -> None:
         store = WaitingRoomStore()
         for i, role in enumerate(roles):
@@ -76,7 +78,8 @@ class TestUniqueRoles:
     )
     @settings(max_examples=50)
     def test_exclude_participant_makes_own_role_available(
-        self, roles: list[str],
+        self,
+        roles: list[str],
     ) -> None:
         store = WaitingRoomStore()
         participants = []
@@ -86,14 +89,16 @@ class TestUniqueRoles:
 
         # Each participant's role should appear free when excluding them
         for p in participants:
-            others_with_same = [
-                q for q in participants
-                if q.role == p.role and q.id != p.id
-            ]
+            others_with_same = [q for q in participants if q.role == p.role and q.id != p.id]
             if not others_with_same:
-                assert store.is_role_taken(
-                    1, p.role, exclude_participant=p.id,
-                ) is False
+                assert (
+                    store.is_role_taken(
+                        1,
+                        p.role,
+                        exclude_participant=p.id,
+                    )
+                    is False
+                )
 
 
 # ── TestJoinLeaveCount ───────────────────────────────────────────────────
@@ -105,12 +110,15 @@ class TestJoinLeaveCount:
     @given(
         join_count=st.integers(min_value=0, max_value=10),
         leave_indices=st.lists(
-            st.integers(min_value=0, max_value=9), max_size=5,
+            st.integers(min_value=0, max_value=9),
+            max_size=5,
         ),
     )
     @settings(max_examples=100)
     def test_count_equals_list_length(
-        self, join_count: int, leave_indices: list[int],
+        self,
+        join_count: int,
+        leave_indices: list[int],
     ) -> None:
         store = WaitingRoomStore()
         participants = []

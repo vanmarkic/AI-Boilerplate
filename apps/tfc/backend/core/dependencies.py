@@ -4,6 +4,7 @@ Each factory wires Session -> Repository -> Service.
 Uses lazy imports (inside function body) so features
 don't break at module import time.
 """
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 

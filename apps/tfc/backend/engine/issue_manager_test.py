@@ -1,5 +1,4 @@
 """Tests for IssueManager lifecycle and triggers."""
-import pytest
 
 from engine.issue_manager import (
     IssueLifecycle,
@@ -45,13 +44,15 @@ class TestTimeBasedActivation:
 class TestEventBasedActivation:
     def test_activate_by_event(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([
-            _issue(
-                "i1",
-                trigger_mode=TriggerMode.EVENT_BASED,
-                trigger_event_id="evt1",
-            ),
-        ])
+        mgr.load_issues(
+            [
+                _issue(
+                    "i1",
+                    trigger_mode=TriggerMode.EVENT_BASED,
+                    trigger_event_id="evt1",
+                ),
+            ]
+        )
         changes = mgr.activate_by_event("evt1", 100.0)
         assert len(changes) == 1
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
@@ -59,9 +60,11 @@ class TestEventBasedActivation:
 
     def test_activate_by_event_wrong_id_no_change(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([
-            _issue("i1", trigger_mode=TriggerMode.EVENT_BASED, trigger_event_id="evt1"),
-        ])
+        mgr.load_issues(
+            [
+                _issue("i1", trigger_mode=TriggerMode.EVENT_BASED, trigger_event_id="evt1"),
+            ]
+        )
         changes = mgr.activate_by_event("evt_other", 100.0)
         assert len(changes) == 0
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.INACTIVE

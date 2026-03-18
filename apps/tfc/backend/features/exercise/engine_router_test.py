@@ -1,9 +1,11 @@
 """HTTP API tests for engine lifecycle endpoints (start, pause, resume, etc.)."""
+
 from __future__ import annotations
+
+from unittest.mock import patch
 
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch
 
 from engine.engine_config import EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
@@ -15,21 +17,27 @@ def _config(exercise_id: int = 1) -> EngineConfig:
         exercise_id=exercise_id,
         title="Test",
         context=ScenarioContext(
-            title="Ctx", description="Desc",
-            briefing="Brief", objectives=["obj1"], rules=["rule1"],
+            title="Ctx",
+            description="Desc",
+            briefing="Brief",
+            objectives=["obj1"],
+            rules=["rule1"],
         ),
         events=[
             ScheduledEvent(
-                id="e1", title="E1", description="",
+                id="e1",
+                title="E1",
+                description="",
                 event_type=EventType.OPERATIONAL,
-                scheduled_pt_ms=0.0, duration_ms=99999.0,
+                scheduled_pt_ms=0.0,
+                duration_ms=99999.0,
             ),
         ],
     )
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -56,20 +64,26 @@ async def _create_exercise(client: AsyncClient) -> int:
 
 
 async def _create_exercise_with_scenario(client: AsyncClient) -> int:
-    sc = await client.post("/api/scenarios", json={
-        "title": "Engine Scenario",
-        "content": {
-            "game_mode": "classic",
-            "roles": [
-                {"id": "co", "label": "CO", "player_type": "decision_maker"},
-            ],
+    sc = await client.post(
+        "/api/scenarios",
+        json={
+            "title": "Engine Scenario",
+            "content": {
+                "game_mode": "classic",
+                "roles": [
+                    {"id": "co", "label": "CO", "player_type": "decision_maker"},
+                ],
+            },
         },
-    })
+    )
     assert sc.status_code == 201
-    resp = await client.post("/api/exercises", json={
-        "title": "Engine Test Ex",
-        "scenario_id": sc.json()["id"],
-    })
+    resp = await client.post(
+        "/api/exercises",
+        json={
+            "title": "Engine Test Ex",
+            "scenario_id": sc.json()["id"],
+        },
+    )
     assert resp.status_code == 201
     return resp.json()["id"]
 
@@ -143,7 +157,8 @@ async def test_set_speed(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid)
     resp = await client.put(
-        f"/api/exercises/{eid}/engine/speed", json={"factor": 2.0},
+        f"/api/exercises/{eid}/engine/speed",
+        json={"factor": 2.0},
     )
     assert resp.status_code == 200
 
@@ -153,7 +168,8 @@ async def test_set_speed_invalid_factor(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid)
     resp = await client.put(
-        f"/api/exercises/{eid}/engine/speed", json={"factor": -1},
+        f"/api/exercises/{eid}/engine/speed",
+        json={"factor": -1},
     )
     assert resp.status_code == 422
 

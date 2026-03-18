@@ -3,9 +3,10 @@
 Encapsulates the close-decision workflow: close → score → chain → resume.
 Framework-agnostic — the caller provides a broadcast callback.
 """
+
 from __future__ import annotations
 
-from typing import Callable, Awaitable
+from collections.abc import Awaitable, Callable
 
 from core.exceptions import NotFoundError
 from engine.exercise_engine import ExerciseEngine
@@ -37,7 +38,9 @@ class EngineDecisionService:
         all_options = decision.options
 
         result = engine.decision_manager.close_decision(
-            decision_id, current_pt_ms=pt, selected_option_ids=selected_option_ids,
+            decision_id,
+            current_pt_ms=pt,
+            selected_option_ids=selected_option_ids,
         )
         if result is None:
             raise NotFoundError(
@@ -50,7 +53,9 @@ class EngineDecisionService:
         forced_ids = template.forced_option_ids if template else []
 
         extra = engine.game_mode.on_decision_closed_v2(
-            decision_id, selected_options, all_options,
+            decision_id,
+            selected_options,
+            all_options,
             forced_option_ids=forced_ids or None,
         )
         if extra:
@@ -65,7 +70,8 @@ class EngineDecisionService:
                     int(next_template.timeout_ms),
                 )
                 opened = engine.decision_manager.open_decision(
-                    id=next_template.id, event_id=None,
+                    id=next_template.id,
+                    event_id=None,
                     issue_id=next_template.issue_id,
                     title=next_template.title,
                     description=next_template.description,
@@ -73,7 +79,8 @@ class EngineDecisionService:
                     options=next_template.options,
                     completion_mode=next_template.completion_mode,
                     target_roles=next_template.target_roles,
-                    timeout_ms=timeout_ms, current_pt_ms=pt,
+                    timeout_ms=timeout_ms,
+                    current_pt_ms=pt,
                 )
                 await broadcast([opened])
 

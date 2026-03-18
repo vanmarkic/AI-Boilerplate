@@ -3,14 +3,14 @@
 Used by property tests (*_prop_test.py) to generate random but valid
 ScheduledEvent, TrackedIssue, ActiveDecision, and EngineConfig instances.
 """
+
 from __future__ import annotations
 
 from hypothesis import strategies as st
 from hypothesis.strategies import SearchStrategy
 
-from engine.decision_manager import ActiveDecision
-from engine.event_scheduler import EventLifecycle, EventType, ScheduledEvent
-from engine.issue_manager import IssueLifecycle, TrackedIssue, TriggerMode
+from engine.event_scheduler import EventType, ScheduledEvent
+from engine.issue_manager import TrackedIssue, TriggerMode
 
 
 def event_ids(prefix: str = "e") -> SearchStrategy[str]:
@@ -92,7 +92,9 @@ def tracked_issues(
 def monotonic_play_times(min_size: int = 1, max_size: int = 50) -> SearchStrategy[list[float]]:
     """Generate a sorted list of non-negative play times (monotonic ticks)."""
     return st.lists(
-        play_times(), min_size=min_size, max_size=max_size,
+        play_times(),
+        min_size=min_size,
+        max_size=max_size,
     ).map(sorted)
 
 
@@ -114,18 +116,23 @@ def penalty_factors() -> SearchStrategy[float]:
 def decision_sequences(min_size: int = 1, max_size: int = 10) -> SearchStrategy[list[str]]:
     """Generate a list of unique decision template IDs."""
     return st.lists(
-        event_ids(prefix="d"), min_size=min_size, max_size=max_size, unique=True,
+        event_ids(prefix="d"),
+        min_size=min_size,
+        max_size=max_size,
+        unique=True,
     )
 
 
 def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[dict]]:
     """Generate lists of decision options with id, label, and score."""
     return st.lists(
-        st.fixed_dictionaries({
-            "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
-            "label": st.just("Option"),
-            "score": scores(),
-        }),
+        st.fixed_dictionaries(
+            {
+                "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
+                "label": st.just("Option"),
+                "score": scores(),
+            }
+        ),
         min_size=min_size,
         max_size=max_size,
         unique_by=lambda o: o["id"],
@@ -133,15 +140,18 @@ def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[di
 
 
 def signed_option_lists(
-    min_size: int = 1, max_size: int = 6,
+    min_size: int = 1,
+    max_size: int = 6,
 ) -> SearchStrategy[list[dict]]:
     """Option lists with +/0/- scores."""
     return st.lists(
-        st.fixed_dictionaries({
-            "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
-            "label": st.just("Option"),
-            "score": signed_scores(),
-        }),
+        st.fixed_dictionaries(
+            {
+                "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
+                "label": st.just("Option"),
+                "score": signed_scores(),
+            }
+        ),
         min_size=min_size,
         max_size=max_size,
         unique_by=lambda o: o["id"],

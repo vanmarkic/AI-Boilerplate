@@ -22,8 +22,11 @@ _is_sqlite = "sqlite" in TEST_DB_URL
 async def setup_db() -> AsyncGenerator[None]:
     engine = create_async_engine(
         TEST_DB_URL,
-        **({"connect_args": {"check_same_thread": False}, "poolclass": StaticPool}
-           if _is_sqlite else {}),
+        **(
+            {"connect_args": {"check_same_thread": False}, "poolclass": StaticPool}
+            if _is_sqlite
+            else {}
+        ),
     )
     session_factory = async_sessionmaker(engine, expire_on_commit=False)
 

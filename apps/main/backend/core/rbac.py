@@ -23,12 +23,14 @@ PUBLIC_PATH_PREFIXES: tuple[str, ...] = (
     "/redoc",
 )
 
-PUBLIC_EXACT_PATHS: frozenset[str] = frozenset({
-    "/api/health",
-    "/api/canary/ping",
-    "/api/users",  # registration endpoint (no auth required)
-    "/api/events",  # SSE channel listing (no auth required)
-})
+PUBLIC_EXACT_PATHS: frozenset[str] = frozenset(
+    {
+        "/api/health",
+        "/api/canary/ping",
+        "/api/users",  # registration endpoint (no auth required)
+        "/api/events",  # SSE channel listing (no auth required)
+    }
+)
 
 PUBLIC_API_PREFIXES: tuple[str, ...] = (
     "/api/events/",  # SSE subscriptions (intentionally unauthenticated)
@@ -64,9 +66,7 @@ def _match_pattern(pattern: str, path: str) -> bool:
     return _match_parts(pattern_parts, 0, path_parts, 0)
 
 
-def _match_parts(
-    pat: list[str], pi: int, path: list[str], xi: int
-) -> bool:
+def _match_parts(pat: list[str], pi: int, path: list[str], xi: int) -> bool:
     """Recursive segment matcher for route patterns."""
     while pi < len(pat) and xi < len(path):
         seg = pat[pi]

@@ -3,16 +3,14 @@
 Tests written first (TDD) — covers all store operations, edge cases,
 and data integrity guarantees.
 """
-from __future__ import annotations
 
-import pytest
+from __future__ import annotations
 
 from features.waiting_room.waiting_room_store import (
     WaitingRoomParticipant,
     WaitingRoomStore,
     waiting_room_store,
 )
-
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 

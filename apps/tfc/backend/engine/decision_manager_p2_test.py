@@ -1,4 +1,5 @@
 """Tests for P2 DecisionManager additions: timeout, tick, wall-clock tracking."""
+
 from __future__ import annotations
 
 from unittest.mock import patch

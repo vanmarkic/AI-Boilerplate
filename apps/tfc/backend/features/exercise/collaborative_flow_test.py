@@ -3,6 +3,7 @@
 Covers end-to-end: exercise creation → session code lookup → player join
 → waiting room list → engine start. No GM required at any step.
 """
+
 from __future__ import annotations
 
 import pytest
@@ -11,12 +12,11 @@ from httpx import AsyncClient
 from engine.session_store import session_store
 from features.waiting_room.waiting_room_store import waiting_room_store
 
-
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
 
 @pytest.fixture(autouse=True)
-def _cleanup():
+def _cleanup() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -42,10 +42,14 @@ async def _create_scenario(client: AsyncClient) -> int:
         json={
             "title": "Test Scenario",
             "content": {
-                "phases": [], "events": [], "issues": [],
+                "phases": [],
+                "events": [],
+                "issues": [],
                 "decision_templates": [],
                 "default_time_factor": 1.0,
-                "briefing": "Test briefing", "objectives": [], "rules": [],
+                "briefing": "Test briefing",
+                "objectives": [],
+                "rules": [],
                 "game_mode": "simple_collaborative",
                 "game_mode_config": {},
                 "decision_sequence": [],
@@ -72,7 +76,10 @@ async def _create_collab(client: AsyncClient, title: str = "Silent Wake") -> dic
 
 
 async def _join(
-    client: AsyncClient, exercise_id: int, name: str, role: str = "co",
+    client: AsyncClient,
+    exercise_id: int,
+    name: str,
+    role: str = "co",
 ) -> dict:
     resp = await client.post(
         f"/api/exercises/{exercise_id}/waiting-room/join",
@@ -184,7 +191,9 @@ class TestCollaborativePlayerJoin:
         await _join(client, eid, "Alice", "co")
         await _join(client, eid, "Bob", "ops")
 
-        participants = (await client.get(f"/api/exercises/{eid}/waiting-room")).json()["participants"]
+        participants = (await client.get(f"/api/exercises/{eid}/waiting-room")).json()[
+            "participants"
+        ]
         roles = {p["role"] for p in participants}
         assert roles == {"co", "ops"}
 
@@ -241,7 +250,9 @@ class TestCollaborativeFullFlow:
         await _join(client, eid, "Bob", "ops")
 
         # 4. Waiting room reflects all players
-        participants = (await client.get(f"/api/exercises/{eid}/waiting-room")).json()["participants"]
+        participants = (await client.get(f"/api/exercises/{eid}/waiting-room")).json()[
+            "participants"
+        ]
         assert len(participants) == 2
         assert {p["role"] for p in participants} == {"co", "ops"}
 
@@ -258,10 +269,18 @@ class TestCollaborativeFullFlow:
         await _join(client, ex_a["id"], "Alice", "co")
         await _join(client, ex_b["id"], "Bob", "co")
 
-        a_names = {p["display_name"] for p in
-                   (await client.get(f"/api/exercises/{ex_a['id']}/waiting-room")).json()["participants"]}
-        b_names = {p["display_name"] for p in
-                   (await client.get(f"/api/exercises/{ex_b['id']}/waiting-room")).json()["participants"]}
+        a_names = {
+            p["display_name"]
+            for p in (await client.get(f"/api/exercises/{ex_a['id']}/waiting-room")).json()[
+                "participants"
+            ]
+        }
+        b_names = {
+            p["display_name"]
+            for p in (await client.get(f"/api/exercises/{ex_b['id']}/waiting-room")).json()[
+                "participants"
+            ]
+        }
 
         assert a_names == {"Alice"}
         assert b_names == {"Bob"}

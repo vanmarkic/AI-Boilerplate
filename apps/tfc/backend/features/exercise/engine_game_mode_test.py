@@ -3,13 +3,13 @@
 Classic mode: pauses on decision, requires GM, no scoring.
 Collaborative mode: no auto-pause, no GM required, scoring + penalties.
 """
+
 from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
 
 from engine.session_store import session_store
-
 
 CLASSIC_SCENARIO = {
     "events": [
@@ -74,7 +74,7 @@ COLLABORATIVE_SCENARIO = {
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -85,21 +85,28 @@ def _cleanup_sessions():
 
 
 async def _setup_exercise(
-    client: AsyncClient, scenario_content: dict,
+    client: AsyncClient,
+    scenario_content: dict,
 ) -> int:
     """Create scenario + exercise + start engine, return exercise ID."""
-    sc = await client.post("/api/scenarios", json={
-        "title": "Mode Test Scenario",
-        "content": scenario_content,
-    })
+    sc = await client.post(
+        "/api/scenarios",
+        json={
+            "title": "Mode Test Scenario",
+            "content": scenario_content,
+        },
+    )
     assert sc.status_code == 201
 
     game_mode = scenario_content.get("game_mode", "classic")
-    ex = await client.post("/api/exercises", json={
-        "title": "Mode Test Ex",
-        "scenario_id": sc.json()["id"],
-        "game_mode": game_mode,
-    })
+    ex = await client.post(
+        "/api/exercises",
+        json={
+            "title": "Mode Test Ex",
+            "scenario_id": sc.json()["id"],
+            "game_mode": game_mode,
+        },
+    )
     assert ex.status_code == 201
     eid = ex.json()["id"]
 
@@ -122,6 +129,7 @@ async def test_classic_mode_pauses_on_decision(
 
     # Let the tick loop process the decision event (scheduled at t=0)
     import asyncio
+
     await asyncio.sleep(0.6)  # >2 ticks at 250ms
 
     snap = await client.get(f"/api/exercises/{eid}/engine/snapshot")
@@ -145,6 +153,7 @@ async def test_collaborative_mode_does_not_pause(
     assert engine is not None
 
     import asyncio
+
     await asyncio.sleep(0.6)
 
     snap = await client.get(f"/api/exercises/{eid}/engine/snapshot")
@@ -168,12 +177,11 @@ async def test_classic_mode_no_scoring_on_close(
     eid = await _setup_exercise(client, CLASSIC_SCENARIO)
 
     import asyncio
+
     await asyncio.sleep(0.6)
 
     mock_broadcast = AsyncMock()
-    with patch(
-        "features.exercise.engine_router.connection_manager"
-    ) as mock_mgr:
+    with patch("features.exercise.engine_router.connection_manager") as mock_mgr:
         mock_mgr.broadcast = mock_broadcast
         mock_mgr.broadcast_to_role = AsyncMock()
         resp = await client.post(

@@ -3,17 +3,17 @@
 Uses a mock on connection_manager to capture broadcast calls and verify
 that the right state changes are sent to clients after engine actions.
 """
+
 from __future__ import annotations
+
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from httpx import AsyncClient
-from unittest.mock import AsyncMock, patch
 
-from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.engine_config import DecisionTemplate, EngineConfig
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.session_store import session_store
-
 
 OPTIONS = [
     {"id": "good", "label": "Good", "score": 10},
@@ -22,7 +22,7 @@ OPTIONS = [
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -68,9 +68,7 @@ async def test_start_engine_broadcasts_via_on_state_change(
     eid = await _create_exercise(client)
 
     mock_broadcast = AsyncMock()
-    with patch(
-        "features.exercise.engine_router.connection_manager"
-    ) as mock_mgr:
+    with patch("features.exercise.engine_router.connection_manager") as mock_mgr:
         mock_mgr.broadcast = mock_broadcast
         resp = await client.post(f"/api/exercises/{eid}/engine/start")
         assert resp.status_code == 200
@@ -88,17 +86,23 @@ async def test_close_decision_broadcasts_score_change(
     """Closing a decision in collaborative mode broadcasts score changes."""
     eid = await _create_exercise(client)
     t1 = DecisionTemplate(
-        id="d1", title="D1", description="",
-        issue_id="iss-1", question_type="single_choice",
-        options=OPTIONS, completion_mode="gm_closes",
+        id="d1",
+        title="D1",
+        description="",
+        issue_id="iss-1",
+        question_type="single_choice",
+        options=OPTIONS,
+        completion_mode="gm_closes",
     )
     mode = SimpleCollaborativeMode(
         decision_sequence=["d1"],
         base_decision_time_ms=60_000,
     )
     config = EngineConfig(
-        exercise_id=eid, title="Broadcast",
-        decision_templates=[t1], game_mode=mode,
+        exercise_id=eid,
+        title="Broadcast",
+        decision_templates=[t1],
+        game_mode=mode,
     )
     engine = session_store.create(config)
     with patch("engine.time_manager._now_ms", return_value=0.0):
@@ -106,16 +110,21 @@ async def test_close_decision_broadcasts_score_change(
         engine._time._paused = False
     engine._phase = engine._phase.__class__("running")
     engine._decisions.open_decision(
-        id="d1", event_id=None, issue_id="iss-1",
-        title="D1", description="", question_type="single_choice",
-        options=OPTIONS, completion_mode="gm_closes",
-        target_roles=[], timeout_ms=0, current_pt_ms=0.0,
+        id="d1",
+        event_id=None,
+        issue_id="iss-1",
+        title="D1",
+        description="",
+        question_type="single_choice",
+        options=OPTIONS,
+        completion_mode="gm_closes",
+        target_roles=[],
+        timeout_ms=0,
+        current_pt_ms=0.0,
     )
 
     mock_broadcast = AsyncMock()
-    with patch(
-        "features.exercise.engine_router.connection_manager"
-    ) as mock_mgr:
+    with patch("features.exercise.engine_router.connection_manager") as mock_mgr:
         mock_mgr.broadcast = mock_broadcast
         mock_mgr.broadcast_to_role = AsyncMock()
         resp = await client.post(
@@ -144,15 +153,21 @@ async def test_close_decision_with_forced_card_broadcasts_forced_applied(
         {"id": "forced", "label": "Forced", "score": -5},
     ]
     t1 = DecisionTemplate(
-        id="d1", title="D1", description="",
-        issue_id="iss-1", question_type="single_choice",
-        options=forced_opts, completion_mode="gm_closes",
+        id="d1",
+        title="D1",
+        description="",
+        issue_id="iss-1",
+        question_type="single_choice",
+        options=forced_opts,
+        completion_mode="gm_closes",
         forced_option_ids=["forced"],
     )
     mode = SimpleCollaborativeMode(decision_sequence=["d1"])
     config = EngineConfig(
-        exercise_id=eid, title="Forced",
-        decision_templates=[t1], game_mode=mode,
+        exercise_id=eid,
+        title="Forced",
+        decision_templates=[t1],
+        game_mode=mode,
     )
     engine = session_store.create(config)
     with patch("engine.time_manager._now_ms", return_value=0.0):
@@ -160,16 +175,21 @@ async def test_close_decision_with_forced_card_broadcasts_forced_applied(
         engine._time._paused = False
     engine._phase = engine._phase.__class__("running")
     engine._decisions.open_decision(
-        id="d1", event_id=None, issue_id="iss-1",
-        title="D1", description="", question_type="single_choice",
-        options=forced_opts, completion_mode="gm_closes",
-        target_roles=[], timeout_ms=0, current_pt_ms=0.0,
+        id="d1",
+        event_id=None,
+        issue_id="iss-1",
+        title="D1",
+        description="",
+        question_type="single_choice",
+        options=forced_opts,
+        completion_mode="gm_closes",
+        target_roles=[],
+        timeout_ms=0,
+        current_pt_ms=0.0,
     )
 
     mock_broadcast = AsyncMock()
-    with patch(
-        "features.exercise.engine_router.connection_manager"
-    ) as mock_mgr:
+    with patch("features.exercise.engine_router.connection_manager") as mock_mgr:
         mock_mgr.broadcast = mock_broadcast
         mock_mgr.broadcast_to_role = AsyncMock()
         # Select "good" only — "forced" should be auto-applied
@@ -200,16 +220,21 @@ async def test_recommendation_broadcasts_to_all(
         engine._time._paused = False
     engine._phase = engine._phase.__class__("running")
     engine._decisions.open_decision(
-        id="d1", event_id=None, issue_id="iss-1",
-        title="D1", description="", question_type="single_choice",
-        options=OPTIONS, completion_mode="gm_closes",
-        target_roles=[], timeout_ms=0, current_pt_ms=0.0,
+        id="d1",
+        event_id=None,
+        issue_id="iss-1",
+        title="D1",
+        description="",
+        question_type="single_choice",
+        options=OPTIONS,
+        completion_mode="gm_closes",
+        target_roles=[],
+        timeout_ms=0,
+        current_pt_ms=0.0,
     )
 
     mock_broadcast = AsyncMock()
-    with patch(
-        "features.exercise.engine_router.connection_manager"
-    ) as mock_mgr:
+    with patch("features.exercise.engine_router.connection_manager") as mock_mgr:
         mock_mgr.broadcast = mock_broadcast
         resp = await client.post(
             f"/api/exercises/{eid}/engine/decisions/recommend",
@@ -224,7 +249,4 @@ async def test_recommendation_broadcasts_to_all(
     assert mock_broadcast.called
     msg = mock_broadcast.call_args[0][1]
     assert msg["type"] == "state_changes"
-    assert any(
-        c.get("type") == "recommendation_submitted"
-        for c in msg["changes"]
-    )
+    assert any(c.get("type") == "recommendation_submitted" for c in msg["changes"])

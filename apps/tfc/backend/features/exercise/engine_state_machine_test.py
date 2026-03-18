@@ -3,18 +3,20 @@
 Verifies that invalid phase transitions return error responses and valid
 transitions succeed, ensuring the API enforces the engine's state rules.
 """
+
 from __future__ import annotations
+
+from unittest.mock import patch
 
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch
 
 from engine.engine_config import EngineConfig
 from engine.session_store import session_store
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)

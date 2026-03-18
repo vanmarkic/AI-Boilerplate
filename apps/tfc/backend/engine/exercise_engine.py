@@ -2,22 +2,26 @@
 
 Domain terms: "inject" = event, "defect" = issue. See AGENTS.md terminology mapping.
 """
+
 from __future__ import annotations
 
 import asyncio
 import time as _time_mod
+from collections.abc import Awaitable, Callable
 from enum import StrEnum
-from typing import Callable, Awaitable
 
-from engine.state_changes import DecisionOpened, EngineSnapshot, PhaseChange, StateChange
-from engine.engine_config import (  # noqa: F401 — re-exported
-    TICK_INTERVAL_S, DecisionTemplate, EngineConfig, ScenarioContext,
-)
-from engine.game_modes.protocol import GameMode
-from engine.time_manager import TimeManager
-from engine.event_scheduler import EventScheduler, EventLifecycle, EventType
-from engine.issue_manager import IssueManager
 from engine.decision_manager import DecisionManager
+from engine.engine_config import (  # noqa: F401 — re-exported
+    TICK_INTERVAL_S,
+    DecisionTemplate,
+    EngineConfig,
+    ScenarioContext,
+)
+from engine.event_scheduler import EventLifecycle, EventScheduler, EventType
+from engine.game_modes.protocol import GameMode
+from engine.issue_manager import IssueManager
+from engine.state_changes import DecisionOpened, EngineSnapshot, PhaseChange, StateChange
+from engine.time_manager import TimeManager
 
 
 class EngineStateError(RuntimeError):
@@ -135,7 +139,8 @@ class ExerciseEngine:
         changes.extend(decision_changes)
 
         completed_events = {
-            eid for eid, ev in self._events.events.items()
+            eid
+            for eid, ev in self._events.events.items()
             if ev.lifecycle == EventLifecycle.COMPLETED
         }
 
@@ -166,7 +171,9 @@ class ExerciseEngine:
         )
 
     def _handle_decision_events(
-        self, event_changes: list[StateChange], pt: float,
+        self,
+        event_changes: list[StateChange],
+        pt: float,
     ) -> list[DecisionOpened]:
         changes: list[DecisionOpened] = []
         for change in event_changes:
@@ -178,19 +185,21 @@ class ExerciseEngine:
                 continue
             t = self.find_decision_template(event_id)
             timeout_ms = t.timeout_ms if t else 0.0
-            changes.append(self._decisions.open_decision(
-                id=t.id if t else event_id,
-                event_id=event_id,
-                issue_id=t.issue_id if t else None,
-                title=t.title if t else event.title,
-                description=t.description if t else event.description,
-                question_type=t.question_type if t else "free_text",
-                options=t.options if t else [],
-                completion_mode=t.completion_mode if t else "first_response",
-                target_roles=t.target_roles if t else [],
-                timeout_ms=timeout_ms,
-                current_pt_ms=pt,
-            ))
+            changes.append(
+                self._decisions.open_decision(
+                    id=t.id if t else event_id,
+                    event_id=event_id,
+                    issue_id=t.issue_id if t else None,
+                    title=t.title if t else event.title,
+                    description=t.description if t else event.description,
+                    question_type=t.question_type if t else "free_text",
+                    options=t.options if t else [],
+                    completion_mode=t.completion_mode if t else "first_response",
+                    target_roles=t.target_roles if t else [],
+                    timeout_ms=timeout_ms,
+                    current_pt_ms=pt,
+                )
+            )
             if self._config.game_mode.should_pause_on_decision():
                 self._phase = EnginePhase.PAUSED
                 self._time.pause()
@@ -247,7 +256,8 @@ class ExerciseEngine:
                         continue
                     # Auto-submit worst option via game mode
                     auto_id = self._config.game_mode.on_decision_timeout(
-                        d.id, d.options,
+                        d.id,
+                        d.options,
                     )
                     selected_ids = [auto_id] if auto_id else []
                     close_change = self._decisions.close_decision(
@@ -258,13 +268,13 @@ class ExerciseEngine:
                     if close_change:
                         all_changes.append(close_change)
                     # Apply scoring via v2
-                    selected_opts = [
-                        o for o in d.options if o["id"] in selected_ids
-                    ]
+                    selected_opts = [o for o in d.options if o["id"] in selected_ids]
                     template = self.find_decision_template(d.id)
                     forced_ids = template.forced_option_ids if template else []
                     extra = self._config.game_mode.on_decision_closed_v2(
-                        d.id, selected_opts, d.options,
+                        d.id,
+                        selected_opts,
+                        d.options,
                         forced_option_ids=forced_ids or None,
                     )
                     all_changes.extend(extra)
