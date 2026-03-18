@@ -3,9 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from core.base_schema import ResponseBase
-
-
-VALID_GAME_MODES = {"classic", "simple_collaborative"}
+from engine.game_modes import GM_CLASSIC, VALID_GAME_MODES  # noqa: F401
 
 
 class CreateExerciseRequest(BaseModel):
@@ -15,7 +13,7 @@ class CreateExerciseRequest(BaseModel):
     scenario_id: int | None = None
     domain_id: int | None = None
     time_factor: float = 1.0
-    game_mode: str = "classic"
+    game_mode: str = GM_CLASSIC
 
 
 class UpdateExerciseRequest(BaseModel):

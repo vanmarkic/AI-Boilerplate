@@ -33,6 +33,9 @@ CLASSIC_SCENARIO = {
             "completion_mode": "gm_closes",
         },
     ],
+    "roles": [
+        {"id": "co", "label": "CO", "player_type": "decision_maker"},
+    ],
     "game_mode": "classic",
 }
 
@@ -58,7 +61,11 @@ COLLABORATIVE_SCENARIO = {
             "completion_mode": "gm_closes",
         },
     ],
-    "game_mode": "simple-collaborative",
+    "roles": [
+        {"id": "co", "label": "CO", "player_type": "decision_maker"},
+        {"id": "ops", "label": "OPS", "player_type": "advisor"},
+    ],
+    "game_mode": "simple_collaborative",
     "decision_sequence": ["evt-d"],
     "game_mode_config": {
         "base_decision_time_ms": 60000,
@@ -87,9 +94,11 @@ async def _setup_exercise(
     })
     assert sc.status_code == 201
 
+    game_mode = scenario_content.get("game_mode", "classic")
     ex = await client.post("/api/exercises", json={
         "title": "Mode Test Ex",
         "scenario_id": sc.json()["id"],
+        "game_mode": game_mode,
     })
     assert ex.status_code == 201
     eid = ex.json()["id"]

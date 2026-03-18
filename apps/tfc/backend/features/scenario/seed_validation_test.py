@@ -32,6 +32,7 @@ def test_silent_wake_structure() -> None:
     data = json.loads(path.read_text())
     content = ScenarioContent.model_validate(data["content"])
     assert content.game_mode == "simple_collaborative"
+    assert len(content.roles) >= 2, "collaborative mode needs at least 2 roles"
     assert len(content.events) == 15
     assert len(content.decision_templates) == 15
     assert len(content.phases) == 5

@@ -18,9 +18,14 @@
     ],
     "roles": [
       {
-        "id": "player",
-        "label": "Crew Member",
+        "id": "co",
+        "label": "Commanding Officer",
         "player_type": "decision_maker"
+      },
+      {
+        "id": "ops",
+        "label": "Operations Officer",
+        "player_type": "advisor"
       }
     ],
     "phases": [

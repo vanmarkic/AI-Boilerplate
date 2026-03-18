@@ -7,6 +7,8 @@ from __future__ import annotations
 
 from pydantic import BaseModel, model_validator
 
+from engine.game_modes import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
+
 
 class DecisionOptionDef(BaseModel):
     """A single selectable option within a decision template."""
@@ -83,14 +85,14 @@ class ScenarioContent(BaseModel):
     briefing: str = ""
     objectives: list[str] = []
     rules: list[str] = []
-    game_mode: str = "classic"
+    game_mode: str = GM_CLASSIC
     game_mode_config: dict = {}
     decision_sequence: list[str] = []
     roles: list[RoleDef] = []
 
     @model_validator(mode="after")
     def validate_roles(self) -> ScenarioContent:
-        """Enforce that every scenario defines roles."""
+        """Enforce that every scenario defines roles appropriate for its game mode."""
         if not self.roles:
             raise ValueError(
                 "Scenario must define at least one role in 'roles'."
@@ -101,6 +103,11 @@ class ScenarioContent(BaseModel):
             raise ValueError(
                 "Scenario must have at least one role with "
                 "player_type='decision_maker'."
+            )
+        if self.game_mode == GM_SIMPLE_COLLABORATIVE and len(self.roles) < 2:
+            raise ValueError(
+                "Simple collaborative scenarios require at least 2 playable "
+                f"roles, but only {len(self.roles)} defined."
             )
         for dt in self.decision_templates:
             for rid in dt.target_roles:
