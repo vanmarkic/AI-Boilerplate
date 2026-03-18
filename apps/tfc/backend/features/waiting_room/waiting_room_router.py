@@ -8,6 +8,7 @@ When the exercise is linked to a scenario with roles, the router enforces:
 - unique role assignment (no two participants hold the same role)
 - max player capacity (derived from the number of defined roles)
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -68,7 +69,9 @@ async def join_waiting_room(
 ) -> ParticipantResponse:
     """Join the waiting room for an exercise."""
     roles = await _get_scenario_roles(
-        exercise_id, exercise_service, scenario_service,
+        exercise_id,
+        exercise_service,
+        scenario_service,
     )
     if roles is not None:
         max_players = len(roles)
@@ -84,10 +87,13 @@ async def join_waiting_room(
             )
 
     participant = waiting_room_store.join(
-        exercise_id, body.display_name, body.role,
+        exercise_id,
+        body.display_name,
+        body.role,
     )
     await connection_manager.broadcast(
-        exercise_id, _participants_payload(exercise_id),
+        exercise_id,
+        _participants_payload(exercise_id),
     )
     return ParticipantResponse(**participant.to_dict())
 
@@ -98,9 +104,7 @@ async def list_waiting_room(exercise_id: int) -> WaitingRoomResponse:
     participants = waiting_room_store.list_participants(exercise_id)
     return WaitingRoomResponse(
         exercise_id=exercise_id,
-        participants=[
-            ParticipantResponse(**p.to_dict()) for p in participants
-        ],
+        participants=[ParticipantResponse(**p.to_dict()) for p in participants],
     )
 
 
@@ -117,11 +121,15 @@ async def update_participant_role(
 ) -> ParticipantResponse:
     """Change a participant's role in the waiting room."""
     roles = await _get_scenario_roles(
-        exercise_id, exercise_service, scenario_service,
+        exercise_id,
+        exercise_service,
+        scenario_service,
     )
     if roles is not None:
         if waiting_room_store.is_role_taken(
-            exercise_id, body.role, exclude_participant=participant_id,
+            exercise_id,
+            body.role,
+            exclude_participant=participant_id,
         ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
@@ -129,7 +137,9 @@ async def update_participant_role(
             )
 
     participant = waiting_room_store.update_role(
-        exercise_id, participant_id, body.role,
+        exercise_id,
+        participant_id,
+        body.role,
     )
     if participant is None:
         raise HTTPException(
@@ -137,14 +147,16 @@ async def update_participant_role(
             detail=f"Participant {participant_id} not found",
         )
     await connection_manager.broadcast(
-        exercise_id, _participants_payload(exercise_id),
+        exercise_id,
+        _participants_payload(exercise_id),
     )
     return ParticipantResponse(**participant.to_dict())
 
 
 @router.delete("/participants/{participant_id}", status_code=204)
 async def leave_waiting_room(
-    exercise_id: int, participant_id: str,
+    exercise_id: int,
+    participant_id: str,
 ) -> None:
     """Remove a participant from the waiting room."""
     removed = waiting_room_store.leave(exercise_id, participant_id)
@@ -154,5 +166,6 @@ async def leave_waiting_room(
             detail=f"Participant {participant_id} not found",
         )
     await connection_manager.broadcast(
-        exercise_id, _participants_payload(exercise_id),
+        exercise_id,
+        _participants_payload(exercise_id),
     )

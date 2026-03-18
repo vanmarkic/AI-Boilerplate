@@ -7,9 +7,10 @@ Defects progress through: inactive -> active -> mitigated -> resolved.
 Trigger modes: time-based, inject-based (event-based), manual (GM).
 Auto-resolve countdown = time in PT before the defect resolves automatically.
 """
+
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import StrEnum
 
 from engine.state_changes import IssueChange, IssueSnapshot
@@ -39,6 +40,7 @@ VALID_TRANSITIONS: dict[IssueLifecycle, set[IssueLifecycle]] = {
 @dataclass
 class TrackedIssue:
     """Runtime representation of a defect (issue) during exercise execution."""
+
     id: str
     title: str
     description: str
@@ -104,7 +106,9 @@ class IssueManager:
         return changes
 
     def activate_by_event(
-        self, event_id: str, current_pt_ms: float,
+        self,
+        event_id: str,
+        current_pt_ms: float,
     ) -> list[IssueChange]:
         """Activate all issues triggered by a specific event."""
         changes: list[IssueChange] = []
@@ -119,7 +123,9 @@ class IssueManager:
         return changes
 
     def manual_activate(
-        self, issue_id: str, current_pt_ms: float,
+        self,
+        issue_id: str,
+        current_pt_ms: float,
     ) -> IssueChange | None:
         """GM manually activates an issue."""
         issue = self._issues.get(issue_id)
@@ -137,7 +143,9 @@ class IssueManager:
         return self._change(issue, "mitigated")
 
     def resolve(
-        self, issue_id: str, current_pt_ms: float,
+        self,
+        issue_id: str,
+        current_pt_ms: float,
     ) -> IssueChange | None:
         """Resolve an active or mitigated issue."""
         issue = self._issues.get(issue_id)
@@ -165,13 +173,11 @@ class IssueManager:
     ) -> bool:
         if issue.trigger_mode == TriggerMode.TIME_BASED:
             return (
-                issue.trigger_time_pt_ms is not None
-                and current_pt_ms >= issue.trigger_time_pt_ms
+                issue.trigger_time_pt_ms is not None and current_pt_ms >= issue.trigger_time_pt_ms
             )
         if issue.trigger_mode == TriggerMode.EVENT_BASED:
             return (
-                issue.trigger_event_id is not None
-                and issue.trigger_event_id in completed_event_ids
+                issue.trigger_event_id is not None and issue.trigger_event_id in completed_event_ids
             )
         return False  # manual triggers don't auto-activate
 

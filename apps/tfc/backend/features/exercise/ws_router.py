@@ -3,6 +3,7 @@
 Clients connect with a role (gm or player) and receive state change
 broadcasts from the exercise engine tick loop.
 """
+
 from __future__ import annotations
 
 import json

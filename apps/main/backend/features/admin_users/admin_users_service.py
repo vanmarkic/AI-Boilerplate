@@ -57,9 +57,7 @@ class AdminUsersService:
         roles_to_assign = []
         for name in role_names:
             role = await self.kc.get_role_by_name(name)
-            roles_to_assign.append(
-                {"id": str(role["id"]), "name": str(role["name"])}
-            )
+            roles_to_assign.append({"id": str(role["id"]), "name": str(role["name"])})
         await self.kc.assign_roles(user_id, roles_to_assign)
         return await self.get_user_roles(user_id)
 
@@ -75,9 +73,7 @@ class AdminUsersService:
         roles_to_remove = []
         for name in role_names:
             role = await self.kc.get_role_by_name(name)
-            roles_to_remove.append(
-                {"id": str(role["id"]), "name": str(role["name"])}
-            )
+            roles_to_remove.append({"id": str(role["id"]), "name": str(role["name"])})
         await self.kc.remove_roles(user_id, roles_to_remove)
         return await self.get_user_roles(user_id)
 
@@ -89,9 +85,7 @@ class AdminUsersService:
                 KeycloakRoleResponse(
                     id=str(r["id"]),
                     name=str(r["name"]),
-                    description=str(r.get("description", ""))
-                    if r.get("description")
-                    else None,
+                    description=str(r.get("description", "")) if r.get("description") else None,
                 )
                 for r in roles
             ]
@@ -109,14 +103,10 @@ class AdminUsersService:
         return KeycloakRoleResponse(
             id=str(role["id"]),
             name=str(role["name"]),
-            description=str(role.get("description", ""))
-            if role.get("description")
-            else None,
+            description=str(role.get("description", "")) if role.get("description") else None,
         )
 
-    async def delete_role(
-        self, name: str, current_user: CurrentUser
-    ) -> None:
+    async def delete_role(self, name: str, current_user: CurrentUser) -> None:
         """Delete a realm role. Admin only. Cannot delete protected roles."""
         self._check_is_admin(current_user)
         if name in UNDELETABLE_ROLES:
@@ -134,18 +124,13 @@ class AdminUsersService:
                 detail="Requires admin or role_manager role",
             )
 
-    def _check_protected_role_assignment(
-        self, role_names: list[str], user: CurrentUser
-    ) -> None:
+    def _check_protected_role_assignment(self, role_names: list[str], user: CurrentUser) -> None:
         """Block non-admin from assigning/removing protected roles."""
         protected = [r for r in role_names if r in PROTECTED_ROLES]
         if protected and "admin" not in user.roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "Only admin can assign/remove protected roles: "
-                    + ", ".join(protected)
-                ),
+                detail=("Only admin can assign/remove protected roles: " + ", ".join(protected)),
             )
 
     def _check_is_admin(self, user: CurrentUser) -> None:

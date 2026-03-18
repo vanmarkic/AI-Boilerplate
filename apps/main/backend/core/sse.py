@@ -109,7 +109,8 @@ class EventBus:
 
     @asynccontextmanager
     async def _register_queue(
-        self, channel: str,
+        self,
+        channel: str,
     ) -> AsyncGenerator[asyncio.Queue[str], None]:
         queue: asyncio.Queue[str] = asyncio.Queue(maxsize=_SUBSCRIBER_QUEUE_MAX)
         self._subscribers[channel].add(queue)

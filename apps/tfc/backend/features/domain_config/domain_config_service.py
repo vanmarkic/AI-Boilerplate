@@ -16,7 +16,8 @@ class DomainConfigService:
         self.repository = repository
 
     async def create(
-        self, request: CreateDomainConfigRequest,
+        self,
+        request: CreateDomainConfigRequest,
     ) -> DomainConfigResponse:
         existing = await self.repository.get_by_slug(request.slug)
         if existing:
@@ -59,7 +60,9 @@ class DomainConfigService:
         return [DomainConfigResponse.model_validate(e) for e in entities]
 
     async def update(
-        self, config_id: int, request: UpdateDomainConfigRequest,
+        self,
+        config_id: int,
+        request: UpdateDomainConfigRequest,
     ) -> DomainConfigResponse:
         entity = await self.repository.get_by_id(config_id)
         if not entity:

@@ -50,12 +50,8 @@ def weather_service(weather_client: WeatherClient) -> WeatherService:
 
 
 class TestGetCurrentWeather:
-    async def test_returns_mapped_weather(
-        self, weather_service: WeatherService
-    ) -> None:
-        weather_service.client.get_current = AsyncMock(
-            return_value=MOCK_CURRENT_RESPONSE
-        )
+    async def test_returns_mapped_weather(self, weather_service: WeatherService) -> None:
+        weather_service.client.get_current = AsyncMock(return_value=MOCK_CURRENT_RESPONSE)
         result = await weather_service.get_current_weather("London")
         assert result.city == "London"
         assert result.country == "GB"
@@ -63,9 +59,7 @@ class TestGetCurrentWeather:
         assert result.humidity == 72
         assert result.description == "scattered clouds"
 
-    async def test_propagates_api_error(
-        self, weather_service: WeatherService
-    ) -> None:
+    async def test_propagates_api_error(self, weather_service: WeatherService) -> None:
         weather_service.client.get_current = AsyncMock(
             side_effect=WeatherApiError(404, "City not found")
         )
@@ -74,21 +68,15 @@ class TestGetCurrentWeather:
 
 
 class TestGetForecast:
-    async def test_returns_mapped_forecast(
-        self, weather_service: WeatherService
-    ) -> None:
-        weather_service.client.get_forecast = AsyncMock(
-            return_value=MOCK_FORECAST_RESPONSE
-        )
+    async def test_returns_mapped_forecast(self, weather_service: WeatherService) -> None:
+        weather_service.client.get_forecast = AsyncMock(return_value=MOCK_FORECAST_RESPONSE)
         result = await weather_service.get_forecast("London")
         assert result.city == "London"
         assert len(result.days) == 2
         assert result.days[0].date == "2026-03-17"
         assert result.days[1].description == "clear sky"
 
-    async def test_deduplicates_same_day_entries(
-        self, weather_service: WeatherService
-    ) -> None:
+    async def test_deduplicates_same_day_entries(self, weather_service: WeatherService) -> None:
         data = {
             **MOCK_FORECAST_RESPONSE,
             "list": [

@@ -1,10 +1,11 @@
 """Tests for SimpleCollaborativeMode — scoring, penalties, auto-submit."""
+
 from __future__ import annotations
 
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 
 
-def _mode(**kwargs) -> SimpleCollaborativeMode:
+def _mode(**kwargs: object) -> SimpleCollaborativeMode:
     defaults = {
         "decision_sequence": ["d1", "d2", "d3"],
         "base_decision_time_ms": 300_000,

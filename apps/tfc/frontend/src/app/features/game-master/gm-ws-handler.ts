@@ -42,9 +42,6 @@ function handleStateChange(change: WsStateChange, store: StoreInstance): void {
       change["released"] as boolean,
     );
   }
-  if (change.type === "presence_update") {
-    store.updatePresence(change["participants"] as ParticipantPresence[]);
-  }
   handleDecisionChange(change, store);
 }
 
@@ -52,6 +49,9 @@ function handleStateChange(change: WsStateChange, store: StoreInstance): void {
 export function handleGmWsMessage(msg: WsMessage, store: StoreInstance): void {
   if (msg.type === "snapshot") {
     store.applySnapshot(msg as never);
+  }
+  if (msg.type === "presence_update") {
+    store.updatePresence(msg["participants"] as ParticipantPresence[]);
   }
   if (msg.type === "state_changes" && msg.changes) {
     for (const change of msg.changes) {

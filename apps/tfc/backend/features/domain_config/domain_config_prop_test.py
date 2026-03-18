@@ -8,33 +8,43 @@ Tests that for ALL valid domain config payloads:
 5. Terminology keys are always present in response
 6. List always contains every created config
 """
+
 from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
-
-from hypothesis import given, settings, assume, HealthCheck
+from hypothesis import HealthCheck, assume, given, settings
 from hypothesis import strategies as st
-
 
 # ---------------------------------------------------------------------------
 # Strategies — generate arbitrary but valid domain config payloads
 # ---------------------------------------------------------------------------
 TERMINOLOGY_KEYS = [
-    "event", "issue", "player", "gameMaster",
-    "exercise", "scenario", "decision",
+    "event",
+    "issue",
+    "player",
+    "gameMaster",
+    "exercise",
+    "scenario",
+    "decision",
 ]
 
 DENSITY_VALUES = ["compact", "comfortable", "spacious"]
 
 
 def _terminology() -> st.SearchStrategy[dict[str, str]]:
-    return st.fixed_dictionaries({
-        k: st.text(min_size=1, max_size=30, alphabet=st.characters(
-            whitelist_categories=("L", "N", "Z"),
-        ))
-        for k in TERMINOLOGY_KEYS
-    })
+    return st.fixed_dictionaries(
+        {
+            k: st.text(
+                min_size=1,
+                max_size=30,
+                alphabet=st.characters(
+                    whitelist_categories=("L", "N", "Z"),
+                ),
+            )
+            for k in TERMINOLOGY_KEYS
+        }
+    )
 
 
 def _hex_color() -> st.SearchStrategy[str]:
@@ -42,39 +52,43 @@ def _hex_color() -> st.SearchStrategy[str]:
 
 
 def _theme() -> st.SearchStrategy[dict]:
-    return st.fixed_dictionaries({
-        "colorPrimary": _hex_color(),
-        "colorSecondary": _hex_color(),
-        "colorBackground": _hex_color(),
-        "colorForeground": _hex_color(),
-        "fontFamily": st.just("system-ui, sans-serif"),
-        "fontFamilyMono": st.just("ui-monospace, monospace"),
-        "density": st.sampled_from(DENSITY_VALUES),
-    })
+    return st.fixed_dictionaries(
+        {
+            "colorPrimary": _hex_color(),
+            "colorSecondary": _hex_color(),
+            "colorBackground": _hex_color(),
+            "colorForeground": _hex_color(),
+            "fontFamily": st.just("system-ui, sans-serif"),
+            "fontFamilyMono": st.just("ui-monospace, monospace"),
+            "density": st.sampled_from(DENSITY_VALUES),
+        }
+    )
 
 
 def _role() -> st.SearchStrategy[dict]:
-    return st.fixed_dictionaries({
-        "id": st.text(min_size=1, max_size=20, alphabet="abcdefghijklmnop-"),
-        "label": st.text(min_size=1, max_size=30),
-        "description": st.text(max_size=60),
-    })
+    return st.fixed_dictionaries(
+        {
+            "id": st.text(min_size=1, max_size=20, alphabet="abcdefghijklmnop-"),
+            "label": st.text(min_size=1, max_size=30),
+            "description": st.text(max_size=60),
+        }
+    )
 
 
 def _severity_level(order: int) -> st.SearchStrategy[dict]:
-    return st.fixed_dictionaries({
-        "id": st.text(min_size=1, max_size=20, alphabet="abcdefghijklmnop"),
-        "label": st.text(min_size=1, max_size=30),
-        "color": _hex_color(),
-        "order": st.just(order),
-    })
+    return st.fixed_dictionaries(
+        {
+            "id": st.text(min_size=1, max_size=20, alphabet="abcdefghijklmnop"),
+            "label": st.text(min_size=1, max_size=30),
+            "color": _hex_color(),
+            "order": st.just(order),
+        }
+    )
 
 
 def _severity_levels() -> st.SearchStrategy[list[dict]]:
     return st.integers(min_value=1, max_value=5).flatmap(
-        lambda n: st.tuples(
-            *[_severity_level(i + 1) for i in range(n)]
-        ).map(list)
+        lambda n: st.tuples(*[_severity_level(i + 1) for i in range(n)]).map(list)
     )
 
 
@@ -98,6 +112,7 @@ def domain_config_payloads(draw: st.DrawFn) -> dict:
 # ---------------------------------------------------------------------------
 # Property tests — async, each gets a fresh database via conftest
 # ---------------------------------------------------------------------------
+
 
 class TestCreateGetRoundtrip:
     """Creating then fetching a domain config preserves all fields."""
@@ -131,7 +146,9 @@ class TestSlugUniqueness:
     @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @pytest.mark.asyncio
     async def test_duplicate_slug_rejected(
-        self, payload: dict, client: AsyncClient,
+        self,
+        payload: dict,
+        client: AsyncClient,
     ) -> None:
         first = await client.post("/api/domain-configs", json=payload)
         if first.status_code != 201:
@@ -150,7 +167,10 @@ class TestPartialUpdate:
     @settings(max_examples=40, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @pytest.mark.asyncio
     async def test_partial_update_preserves_other_fields(
-        self, payload: dict, new_name: str, client: AsyncClient,
+        self,
+        payload: dict,
+        new_name: str,
+        client: AsyncClient,
     ) -> None:
         create_resp = await client.post("/api/domain-configs", json=payload)
         if create_resp.status_code != 201:
@@ -178,7 +198,9 @@ class TestDeleteIdempotent:
     @settings(max_examples=30, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @pytest.mark.asyncio
     async def test_delete_then_404(
-        self, payload: dict, client: AsyncClient,
+        self,
+        payload: dict,
+        client: AsyncClient,
     ) -> None:
         create_resp = await client.post("/api/domain-configs", json=payload)
         if create_resp.status_code != 201:
@@ -202,7 +224,9 @@ class TestTerminologyKeysAlwaysPresent:
     @settings(max_examples=50, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @pytest.mark.asyncio
     async def test_all_keys_present(
-        self, payload: dict, client: AsyncClient,
+        self,
+        payload: dict,
+        client: AsyncClient,
     ) -> None:
         create_resp = await client.post("/api/domain-configs", json=payload)
         if create_resp.status_code != 201:
@@ -219,13 +243,18 @@ class TestListContainsAllCreated:
 
     @given(
         slugs=st.lists(
-            _slug(), min_size=1, max_size=5, unique=True,
+            _slug(),
+            min_size=1,
+            max_size=5,
+            unique=True,
         ),
     )
     @settings(max_examples=20, suppress_health_check=[HealthCheck.function_scoped_fixture])
     @pytest.mark.asyncio
     async def test_list_completeness(
-        self, slugs: list[str], client: AsyncClient,
+        self,
+        slugs: list[str],
+        client: AsyncClient,
     ) -> None:
         created_slugs: list[str] = []
         for slug in slugs:

@@ -1,9 +1,8 @@
 """Tests for DecisionManager — tracks in-flight decision points."""
+
 from __future__ import annotations
 
-import pytest
-
-from engine.decision_manager import ActiveDecision, DecisionManager
+from engine.decision_manager import DecisionManager
 
 
 def _decision_kwargs(
@@ -137,7 +136,8 @@ def test_snapshot_includes_selected_option_ids() -> None:
         {"id": "o2", "label": "No", "score": 3.0},
     ]
     mgr.open_decision(
-        current_pt_ms=0.0, **{**_decision_kwargs(), "options": opts},
+        current_pt_ms=0.0,
+        **{**_decision_kwargs(), "options": opts},
     )
     mgr.close_decision("d1", current_pt_ms=100.0, selected_option_ids=["o1"])
     snap = mgr.snapshot()

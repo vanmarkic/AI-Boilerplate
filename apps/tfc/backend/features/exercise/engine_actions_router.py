@@ -2,6 +2,7 @@
 
 Split from engine_router.py to stay under the 250-line limit.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, status
@@ -86,11 +87,14 @@ async def resume_event(exercise_id: int, event_id: str) -> EventChange:
 
 @router.post("/events/{event_id}/delay", operation_id="delayEvent")
 async def delay_event(
-    exercise_id: int, event_id: str, body: DelayRequest,
+    exercise_id: int,
+    event_id: str,
+    body: DelayRequest,
 ) -> EventChange:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.delay_event(
-            event_id, body.delay_ms,
+            event_id,
+            body.delay_ms,
         ),
         f"Event {event_id} not found or not delayable",
     )
@@ -150,11 +154,16 @@ async def release_issue(exercise_id: int, issue_id: str) -> IssueChange:
 async def get_open_decisions(exercise_id: int) -> list[dict[str, object]]:
     engine = _get_engine(exercise_id)
     return [
-        {"id": d.id, "title": d.title, "question_type": d.question_type,
-         "options": d.options, "target_roles": d.target_roles, "status": d.status}
+        {
+            "id": d.id,
+            "title": d.title,
+            "question_type": d.question_type,
+            "options": d.options,
+            "target_roles": d.target_roles,
+            "status": d.status,
+        }
         for d in engine.decision_manager.get_open_decisions()
     ]
-
 
     # close_decision endpoint has been consolidated into engine_router.py
     # to support scoring, turn chaining, and forced card enforcement.

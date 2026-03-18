@@ -8,9 +8,10 @@ can reference game mode constants without importing directly from
     features/schemas  →  core/game_mode_constants  →  engine/game_modes
     (outer ring)          (re-export shim)              (domain kernel)
 """
+
 from engine.game_modes import (  # noqa: F401
     GM_CLASSIC,
     GM_SIMPLE_COLLABORATIVE,
-    GameModeName,
     VALID_GAME_MODES,
+    GameModeName,
 )

@@ -2,6 +2,7 @@
 
 Entity-level actions (events, issues) live in engine_actions_router.py.
 """
+
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -45,7 +46,8 @@ def _get_engine(exercise_id: int) -> ExerciseEngine:
 
 
 async def _build_config(
-    exercise: object, scenario_service: ScenarioService,
+    exercise: object,
+    scenario_service: ScenarioService,
 ) -> EngineConfig:
     """Build EngineConfig from a scenario-linked exercise."""
     if not hasattr(exercise, "scenario_id") or exercise.scenario_id is None:
@@ -125,7 +127,9 @@ async def get_engine_snapshot(exercise_id: int) -> EngineSnapshot:
 
 @router.post("/decisions/{decision_id}/close", operation_id="closeDecision")
 async def close_decision(
-    exercise_id: int, decision_id: str, body: CloseDecisionRequest,
+    exercise_id: int,
+    decision_id: str,
+    body: CloseDecisionRequest,
 ) -> StateChange:
     engine = _get_engine(exercise_id)
 
@@ -134,13 +138,17 @@ async def close_decision(
 
     svc = EngineDecisionService()
     return await svc.close_decision(
-        engine, decision_id, body.selected_option_ids, broadcast=_broadcast,
+        engine,
+        decision_id,
+        body.selected_option_ids,
+        broadcast=_broadcast,
     )
 
 
 @router.post("/decisions/recommend", operation_id="submitRecommendation")
 async def submit_recommendation(
-    exercise_id: int, body: RecommendRequest,
+    exercise_id: int,
+    body: RecommendRequest,
 ) -> StateChange:
     """Advisor submits a recommendation on an open decision."""
     engine = _get_engine(exercise_id)
@@ -156,7 +164,8 @@ async def submit_recommendation(
             detail=f"Decision {body.decision_id} not found or already closed",
         )
     await connection_manager.broadcast(
-        exercise_id, {"type": "state_changes", "changes": [result]},
+        exercise_id,
+        {"type": "state_changes", "changes": [result]},
     )
     return result
 
@@ -173,8 +182,5 @@ async def get_engine_context(exercise_id: int) -> dict[str, object]:
         "objectives": ctx.objectives,
         "rules": ctx.rules,
         "default_time_factor": engine.config.time_factor,
-        "roles": [
-            {"id": r.id, "label": r.label, "player_type": r.player_type}
-            for r in ctx.roles
-        ],
+        "roles": [{"id": r.id, "label": r.label, "player_type": r.player_type} for r in ctx.roles],
     }

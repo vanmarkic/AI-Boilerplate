@@ -1,4 +1,5 @@
 """Export OpenAPI spec to shared/openapi.json."""
+
 import json
 import sys
 from pathlib import Path
@@ -12,6 +13,7 @@ def main() -> None:
 
     # Inject registered SSE channel names as an enum into the spec.
     from core.sse_router import patch_channel_enum
+
     spec = patch_channel_enum(spec)
 
     output = Path(__file__).resolve().parent.parent.parent / "shared" / "openapi.json"

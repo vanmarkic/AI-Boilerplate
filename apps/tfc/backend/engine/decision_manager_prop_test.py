@@ -1,7 +1,8 @@
 """Property tests for DecisionManager — decision lifecycle invariants."""
+
 from __future__ import annotations
 
-from hypothesis import given, settings, assume
+from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
 from engine.decision_manager import DecisionManager
@@ -35,7 +36,10 @@ class TestCloseIdempotent:
     @given(pt_open=play_times(), pt_close=play_times(), pt_extra=play_times())
     @settings(max_examples=200)
     def test_double_close_returns_none(
-        self, pt_open: float, pt_close: float, pt_extra: float,
+        self,
+        pt_open: float,
+        pt_close: float,
+        pt_extra: float,
     ) -> None:
         mgr = DecisionManager()
         _open(mgr, "d0", pt=pt_open)
@@ -60,7 +64,9 @@ class TestOpenDecisionsCount:
     )
     @settings(max_examples=200)
     def test_open_count_tracks_correctly(
-        self, n_open: int, n_close: int,
+        self,
+        n_open: int,
+        n_close: int,
     ) -> None:
         mgr = DecisionManager()
         for i in range(n_open):
@@ -83,7 +89,9 @@ class TestTimeoutExpiry:
     )
     @settings(max_examples=200)
     def test_tick_closes_expired_decisions(
-        self, timeout: float, open_pt: float,
+        self,
+        timeout: float,
+        open_pt: float,
     ) -> None:
         assume(open_pt + timeout + 1.0 < 1e8)  # avoid overflow
         mgr = DecisionManager()
@@ -102,7 +110,10 @@ class TestTimeoutExpiry:
     )
     @settings(max_examples=200)
     def test_tick_before_timeout_does_not_close(
-        self, timeout: float, open_pt: float, tick_pt: float,
+        self,
+        timeout: float,
+        open_pt: float,
+        tick_pt: float,
     ) -> None:
         assume(tick_pt < open_pt + timeout)
         mgr = DecisionManager()
@@ -135,7 +146,9 @@ class TestSnapshotCompleteness:
     )
     @settings(max_examples=100)
     def test_snapshot_includes_all(
-        self, n_decisions: int, n_close: int,
+        self,
+        n_decisions: int,
+        n_close: int,
     ) -> None:
         mgr = DecisionManager()
         for i in range(n_decisions):

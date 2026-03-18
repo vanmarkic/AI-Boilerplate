@@ -1,5 +1,4 @@
 from core.exceptions import BadRequestError, NotFoundError
-
 from features.exercise.exercise_model import Exercise
 from features.exercise.exercise_repository import ExerciseRepository
 from features.exercise.exercise_schema import (
@@ -25,7 +24,8 @@ class ExerciseService:
         self.repository = repository
 
     async def create_exercise(
-        self, request: CreateExerciseRequest,
+        self,
+        request: CreateExerciseRequest,
     ) -> ExerciseResponse:
         if request.phase not in VALID_PHASES:
             raise BadRequestError(f"Invalid phase: {request.phase}")
@@ -50,7 +50,8 @@ class ExerciseService:
         return ExerciseResponse.model_validate(exercise)
 
     async def get_exercise_by_code(
-        self, session_code: str,
+        self,
+        session_code: str,
     ) -> ExerciseResponse:
         exercise = await self.repository.get_by_session_code(session_code)
         if not exercise:
@@ -58,7 +59,8 @@ class ExerciseService:
         return ExerciseResponse.model_validate(exercise)
 
     async def list_exercises(
-        self, phase: str | None = None,
+        self,
+        phase: str | None = None,
     ) -> list[ExerciseResponse]:
         if phase:
             exercises = await self.repository.list_by_phase(phase)
@@ -67,7 +69,9 @@ class ExerciseService:
         return [ExerciseResponse.model_validate(e) for e in exercises]
 
     async def update_exercise(
-        self, exercise_id: int, request: UpdateExerciseRequest,
+        self,
+        exercise_id: int,
+        request: UpdateExerciseRequest,
     ) -> ExerciseResponse:
         exercise = await self.repository.get_by_id(exercise_id)
         if not exercise:
@@ -90,7 +94,8 @@ class ExerciseService:
 
     @staticmethod
     def _validate_phase_transition(
-        current_phase: str, new_phase: str,
+        current_phase: str,
+        new_phase: str,
     ) -> None:
         """Validate that the phase transition is allowed."""
         if new_phase not in VALID_PHASES:

@@ -1,11 +1,11 @@
 """Tests for scenario_loader — converting ScenarioContent to EngineConfig."""
+
 from __future__ import annotations
 
 from features.scenario.scenario_content import (
     DecisionOptionDef,
     DecisionTemplateDef,
     ScenarioContent,
-    ScenarioEventDef,
 )
 from features.scenario.scenario_loader import (
     build_engine_config,
@@ -62,7 +62,9 @@ def test_build_engine_config_loads_context() -> None:
     )
     # Also add a title/description via a scenario event for the title
     config = build_engine_config(
-        exercise_id=2, title="Scenario Title", content=content,
+        exercise_id=2,
+        title="Scenario Title",
+        content=content,
     )
 
     assert config.context.title == "Scenario Title"

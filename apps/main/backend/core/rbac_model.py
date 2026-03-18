@@ -15,10 +15,6 @@ class RolePermission(Base):
     role: Mapped[str] = mapped_column(String(50), index=True)
     route_pattern: Mapped[str] = mapped_column(String(255))
     method: Mapped[str] = mapped_column(String(10))
-    frontend_route: Mapped[str | None] = mapped_column(
-        String(255), nullable=True
-    )
+    frontend_route: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(
-        server_default=func.now(), onupdate=func.now()
-    )
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())

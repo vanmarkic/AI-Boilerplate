@@ -14,7 +14,8 @@ class ScenarioService:
         self.repository = repository
 
     async def create_scenario(
-        self, request: CreateScenarioRequest,
+        self,
+        request: CreateScenarioRequest,
     ) -> ScenarioResponse:
         scenario = Scenario(
             title=request.title,
@@ -36,7 +37,8 @@ class ScenarioService:
         return ScenarioResponse.model_validate(scenario)
 
     async def list_scenarios(
-        self, domain_id: int | None = None,
+        self,
+        domain_id: int | None = None,
     ) -> list[ScenarioResponse]:
         if domain_id is not None:
             scenarios = await self.repository.list_by_domain(domain_id)
@@ -45,7 +47,9 @@ class ScenarioService:
         return [ScenarioResponse.model_validate(s) for s in scenarios]
 
     async def update_scenario(
-        self, scenario_id: int, request: UpdateScenarioRequest,
+        self,
+        scenario_id: int,
+        request: UpdateScenarioRequest,
     ) -> ScenarioResponse:
         scenario = await self.repository.get_by_id(scenario_id)
         if not scenario:

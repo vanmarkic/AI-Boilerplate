@@ -69,6 +69,7 @@ def create_app() -> FastAPI:
 
     # Register the core SSE router (not a feature — always available).
     from core.sse_router import router as sse_router
+
     application.include_router(sse_router)
 
     discover_routers(application)

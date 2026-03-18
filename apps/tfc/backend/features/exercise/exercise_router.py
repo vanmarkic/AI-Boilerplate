@@ -4,13 +4,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import ValidationError
 
 from core.dependencies import get_exercise_service, get_scenario_service
+from engine.game_modes import GM_CLASSIC
 from features.exercise.exercise_schema import (
     CreateExerciseRequest,
     ExerciseResponse,
     UpdateExerciseRequest,
 )
 from features.exercise.exercise_service import ExerciseService
-from engine.game_modes import GM_CLASSIC
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_store import waiting_room_store
@@ -85,13 +85,15 @@ async def list_joinable_exercises(
             continue
 
         participants = waiting_room_store.list_participants(exercise.id)
-        results.append({
-            "exercise": exercise.model_dump(),
-            "participants": [p.to_dict() for p in participants],
-            "roles": [r.model_dump() for r in content.roles],
-            "max_players": max_players,
-            "requires_gm": requires_gm,
-        })
+        results.append(
+            {
+                "exercise": exercise.model_dump(),
+                "participants": [p.to_dict() for p in participants],
+                "roles": [r.model_dump() for r in content.roles],
+                "max_players": max_players,
+                "requires_gm": requires_gm,
+            }
+        )
 
     return results
 

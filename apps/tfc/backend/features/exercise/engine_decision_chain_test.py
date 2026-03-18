@@ -3,16 +3,17 @@
 Tests the collaborative game mode flow: close decision D1 → D2 auto-opens
 with scoring penalties applied, forced cards enforced, and timeout adjusted.
 """
+
 from __future__ import annotations
+
+from unittest.mock import patch
 
 import pytest
 from httpx import AsyncClient
-from unittest.mock import patch
 
 from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.session_store import session_store
-
 
 OPTIONS = [
     {"id": "good", "label": "Good", "score": 10},
@@ -43,7 +44,7 @@ def _chain_config(exercise_id: int, templates: list[DecisionTemplate]) -> Engine
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -87,9 +88,13 @@ async def _create_exercise(client: AsyncClient) -> int:
 
 def _template(tid: str, opts: list[dict] | None = None) -> DecisionTemplate:
     return DecisionTemplate(
-        id=tid, title=f"Decision {tid}", description="",
-        issue_id="iss-1", question_type="single_choice",
-        options=opts or OPTIONS, completion_mode="gm_closes",
+        id=tid,
+        title=f"Decision {tid}",
+        description="",
+        issue_id="iss-1",
+        question_type="single_choice",
+        options=opts or OPTIONS,
+        completion_mode="gm_closes",
     )
 
 
@@ -181,9 +186,13 @@ async def test_correct_answer_no_penalty(client: AsyncClient) -> None:
 async def test_forced_card_auto_applied(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     t1 = DecisionTemplate(
-        id="d1", title="Forced", description="",
-        issue_id="iss-1", question_type="single_choice",
-        options=FORCED_OPTIONS, completion_mode="gm_closes",
+        id="d1",
+        title="Forced",
+        description="",
+        issue_id="iss-1",
+        question_type="single_choice",
+        options=FORCED_OPTIONS,
+        completion_mode="gm_closes",
         forced_option_ids=["forced"],
     )
     _make_engine(eid, [t1])

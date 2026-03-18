@@ -2,12 +2,12 @@
 
 Tests written first (TDD) — these should fail until implementation exists.
 """
+
 from __future__ import annotations
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
-import pytest
 from starlette.testclient import TestClient
 
 from features.exercise.adapters.connection_manager import ConnectionManager
@@ -28,13 +28,13 @@ class TestWsRouterIntegration:
 
     def test_ws_connect_and_disconnect(self) -> None:
         client = self._make_app()
-        with client.websocket_connect("/api/exercises/1/ws?role=gm") as ws:
+        with client.websocket_connect("/api/exercises/1/ws?role=gm") as _ws:
             # Connection should succeed; just close it
             pass
 
     def test_ws_connect_player_role(self) -> None:
         client = self._make_app()
-        with client.websocket_connect("/api/exercises/1/ws?role=player") as ws:
+        with client.websocket_connect("/api/exercises/1/ws?role=player") as _ws:
             pass
 
     def test_ws_ping_pong(self) -> None:
@@ -42,7 +42,7 @@ class TestWsRouterIntegration:
         with client.websocket_connect("/api/exercises/1/ws?role=gm") as ws:
             ws.send_text(json.dumps({"type": "ping"}))
             # Drain any messages that arrive before the pong (e.g.
-            # state_changes from broadcast_presence on connect).
+            # presence_update from broadcast_presence on connect).
             for _ in range(10):
                 response = ws.receive_text()
                 data = json.loads(response)
@@ -53,7 +53,7 @@ class TestWsRouterIntegration:
     def test_ws_default_role_is_player(self) -> None:
         client = self._make_app()
         # No role query param — should default to player
-        with client.websocket_connect("/api/exercises/1/ws") as ws:
+        with client.websocket_connect("/api/exercises/1/ws") as _ws:
             pass
 
 
@@ -64,9 +64,7 @@ class TestConnectionManagerWiring:
         """Verify connect/disconnect lifecycle calls the manager."""
         mock_mgr = ConnectionManager()
 
-        with patch(
-            "features.exercise.ws_router.connection_manager", mock_mgr
-        ):
+        with patch("features.exercise.ws_router.connection_manager", mock_mgr):
             from fastapi import FastAPI
 
             from features.exercise.ws_router import ws_router
@@ -75,9 +73,7 @@ class TestConnectionManagerWiring:
             app.include_router(ws_router)
             client = TestClient(app)
 
-            with client.websocket_connect(
-                "/api/exercises/42/ws?role=gm"
-            ) as ws:
+            with client.websocket_connect("/api/exercises/42/ws?role=gm") as _ws:
                 conns = mock_mgr.get_connections(42)
                 assert len(conns) == 1
                 assert conns[0][1] == "gm"

@@ -1,4 +1,6 @@
 """Tests for TimeManager dual-clock logic."""
+
+from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
@@ -6,7 +8,7 @@ import pytest
 from engine.time_manager import TimeManager
 
 
-def _make_clock(start: float = 0.0):
+def _make_clock(start: float = 0.0) -> tuple[Callable[[], float], Callable[[float], None]]:
     """Return a mock _now_ms that increments by a controllable amount."""
     state = {"now": start}
 

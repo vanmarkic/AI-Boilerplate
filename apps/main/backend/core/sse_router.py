@@ -62,8 +62,7 @@ def patch_channel_enum(openapi_schema: dict) -> dict:
                     "enum": sorted(_allowed_channels.keys()),
                     "description": "Available SSE channels: "
                     + ", ".join(
-                        f"{k} ({v})" if v else k
-                        for k, v in sorted(_allowed_channels.items())
+                        f"{k} ({v})" if v else k for k, v in sorted(_allowed_channels.items())
                     ),
                 }
     return openapi_schema

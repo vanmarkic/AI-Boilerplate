@@ -3,15 +3,16 @@
 Bridges the gap between the authored scenario JSON and the engine's
 ScheduledEvent / TrackedIssue / EngineConfig dataclasses.
 """
+
 from __future__ import annotations
 
+from engine.engine_config import RoleInfo
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import (
     DecisionTemplate,
     EngineConfig,
     ScenarioContext,
 )
-from engine.engine_config import RoleInfo
 from engine.game_modes import create_game_mode
 from engine.issue_manager import TrackedIssue, TriggerMode
 from engine.state_changes import DecisionOptionSnapshot
@@ -67,8 +68,7 @@ def load_decision_templates(
             issue_id=dt.issue_id,
             question_type=dt.question_type,
             options=[
-                DecisionOptionSnapshot(id=o.id, label=o.label, score=o.score)
-                for o in dt.options
+                DecisionOptionSnapshot(id=o.id, label=o.label, score=o.score) for o in dt.options
             ],
             completion_mode=dt.completion_mode,
             timeout_ms=dt.timeout_ms,
@@ -91,10 +91,7 @@ def build_engine_config(
         briefing=content.briefing,
         objectives=list(content.objectives),
         rules=list(content.rules),
-        roles=[
-            RoleInfo(id=r.id, label=r.label, player_type=r.player_type)
-            for r in content.roles
-        ],
+        roles=[RoleInfo(id=r.id, label=r.label, player_type=r.player_type) for r in content.roles],
     )
     mode_config = dict(content.game_mode_config)
     if content.decision_sequence:

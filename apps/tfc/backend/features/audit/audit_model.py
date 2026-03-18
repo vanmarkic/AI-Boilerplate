@@ -3,9 +3,10 @@
 Every engine state change, GM action, and player response is recorded
 for after-action review and scoring.
 """
+
 from datetime import datetime
 
-from sqlalchemy import Integer, String, Text, func
+from sqlalchemy import Integer, String, func
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.orm import Mapped, mapped_column
 

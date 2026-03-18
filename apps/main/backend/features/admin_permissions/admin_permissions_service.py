@@ -17,9 +17,7 @@ class AdminPermissionsService:
     def __init__(self, repository: RbacRepository) -> None:
         self.repository = repository
 
-    async def list_permissions(
-        self, offset: int, limit: int
-    ) -> list[PermissionResponse]:
+    async def list_permissions(self, offset: int, limit: int) -> list[PermissionResponse]:
         """Return paginated list of all role-permission mappings."""
         perms = await self.repository.list(offset, limit)
         return [PermissionResponse.model_validate(p) for p in perms]
@@ -52,9 +50,7 @@ class AdminPermissionsService:
         await self.repository.session.refresh(existing)
         return PermissionResponse.model_validate(existing)
 
-    async def delete_permission(
-        self, perm_id: int, current_user: CurrentUser
-    ) -> bool:
+    async def delete_permission(self, perm_id: int, current_user: CurrentUser) -> bool:
         """Delete a role-permission mapping."""
         existing = await self.repository.get_by_id(perm_id)
         if not existing:
@@ -66,12 +62,7 @@ class AdminPermissionsService:
         """Return deduplicated frontend routes for the given roles."""
         return await self.repository.get_frontend_routes_for_roles(roles)
 
-    def _check_protected_role(
-        self, role: str, user: CurrentUser
-    ) -> None:
+    def _check_protected_role(self, role: str, user: CurrentUser) -> None:
         """Block non-admin users from modifying protected role permissions."""
         if role in PROTECTED_ROLES and "admin" not in user.roles:
-            raise ForbiddenError(
-                "Only admin can modify permissions for "
-                f"protected role '{role}'"
-            )
+            raise ForbiddenError(f"Only admin can modify permissions for protected role '{role}'")

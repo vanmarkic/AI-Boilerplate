@@ -12,7 +12,8 @@ class Decision(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     exercise_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("tfc_exercises.id"),
+        Integer,
+        ForeignKey("tfc_exercises.id"),
     )
     issue_id: Mapped[str] = mapped_column(String(255))
     title: Mapped[str] = mapped_column(String(255))
@@ -30,12 +31,14 @@ class DecisionResponseRecord(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     decision_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("tfc_decisions.id"),
+        Integer,
+        ForeignKey("tfc_decisions.id"),
     )
     participant_id: Mapped[str] = mapped_column(String(255))
     participant_name: Mapped[str] = mapped_column(String(255))
     selected_options: Mapped[list | None] = mapped_column(
-        JSON, nullable=True,
+        JSON,
+        nullable=True,
     )
     free_text: Mapped[str | None] = mapped_column(Text, nullable=True)
     score: Mapped[float | None] = mapped_column(Float, nullable=True)

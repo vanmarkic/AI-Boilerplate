@@ -1,7 +1,8 @@
 """Property tests for IssueManager lifecycle and triggers."""
+
 from __future__ import annotations
 
-from hypothesis import given, settings, assume
+from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from engine.issue_manager import (
@@ -94,7 +95,8 @@ class TestResolvedAbsorbing:
     @given(extra_ticks=monotonic_play_times(min_size=3, max_size=15))
     @settings(max_examples=100)
     def test_manually_resolved_stays_resolved(
-        self, extra_ticks: list[float],
+        self,
+        extra_ticks: list[float],
     ) -> None:
         issue = _issue(trigger_mode=TriggerMode.MANUAL)
         mgr = IssueManager()
@@ -141,7 +143,9 @@ class TestEventBasedActivation:
     """Event-triggered issues only activate when their event is completed."""
 
     @given(
-        event_id=st.text(min_size=1, max_size=5, alphabet=st.characters(whitelist_categories=("L",))),
+        event_id=st.text(
+            min_size=1, max_size=5, alphabet=st.characters(whitelist_categories=("L",))
+        ),
         wrong_ids=st.lists(
             st.text(min_size=1, max_size=5, alphabet=st.characters(whitelist_categories=("L",))),
             min_size=1,
@@ -150,7 +154,9 @@ class TestEventBasedActivation:
     )
     @settings(max_examples=100)
     def test_wrong_event_does_not_activate(
-        self, event_id: str, wrong_ids: list[str],
+        self,
+        event_id: str,
+        wrong_ids: list[str],
     ) -> None:
         issue = _issue(
             trigger_mode=TriggerMode.EVENT_BASED,
@@ -194,9 +200,7 @@ class TestSnapshotConsistency:
     @given(n=st.integers(min_value=0, max_value=15))
     @settings(max_examples=50)
     def test_snapshot_length_matches_loaded(self, n: int) -> None:
-        issues = [
-            _issue(iid=f"i{i}", trigger_mode=TriggerMode.MANUAL) for i in range(n)
-        ]
+        issues = [_issue(iid=f"i{i}", trigger_mode=TriggerMode.MANUAL) for i in range(n)]
         mgr = IssueManager()
         mgr.load_issues(issues)
         assert len(mgr.snapshot()) == n

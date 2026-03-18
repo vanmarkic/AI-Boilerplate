@@ -4,14 +4,15 @@ Revision ID: 005_update_default_terminology
 Revises: 004_add_session_code
 Create Date: 2026-03-18
 """
-from typing import Sequence, Union
+
+from collections.abc import Sequence
 
 from alembic import op
 
 revision: str = "005_update_default_terminology"
-down_revision: Union[str, None] = "004_add_session_code"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "004_add_session_code"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:

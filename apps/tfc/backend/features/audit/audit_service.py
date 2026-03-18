@@ -29,7 +29,8 @@ class AuditService:
         entry_type: str | None = None,
     ) -> list[AuditEntryResponse]:
         entries = await self.repository.list_by_exercise(
-            exercise_id, entry_type=entry_type,
+            exercise_id,
+            entry_type=entry_type,
         )
         return [AuditEntryResponse.model_validate(e) for e in entries]
 

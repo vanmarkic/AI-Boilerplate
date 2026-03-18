@@ -4,13 +4,13 @@ Validates the relationship between waiting room state, max player
 computation, and the visual state users see — using Hypothesis to
 exercise edge cases across all game modes and role combinations.
 """
+
 from __future__ import annotations
 
-from hypothesis import given, settings, assume
+from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
 from features.waiting_room.waiting_room_store import WaitingRoomStore
-
 
 # ── Strategies ───────────────────────────────────────────────────────
 
@@ -57,7 +57,10 @@ class TestJoinableSlotAvailability:
     @given(roles=role_lists, game_mode=game_modes, data=st.data())
     @settings(max_examples=50)
     def test_under_capacity_has_positive_available_slots(
-        self, roles: list[str], game_mode: str, data: st.DataObject,
+        self,
+        roles: list[str],
+        game_mode: str,
+        data: st.DataObject,
     ) -> None:
         mp = compute_max_players(roles, game_mode)
         k = data.draw(st.integers(min_value=0, max_value=mp - 1))
@@ -66,7 +69,9 @@ class TestJoinableSlotAvailability:
     @given(roles=role_lists, game_mode=game_modes)
     @settings(max_examples=50)
     def test_at_capacity_zero_available(
-        self, roles: list[str], game_mode: str,
+        self,
+        roles: list[str],
+        game_mode: str,
     ) -> None:
         mp = compute_max_players(roles, game_mode)
         assert mp - mp == 0
@@ -74,7 +79,10 @@ class TestJoinableSlotAvailability:
     @given(roles=role_lists, game_mode=game_modes, data=st.data())
     @settings(max_examples=50)
     def test_store_count_matches_available_slots(
-        self, roles: list[str], game_mode: str, data: st.DataObject,
+        self,
+        roles: list[str],
+        game_mode: str,
+        data: st.DataObject,
     ) -> None:
         """count() in the store drives whether exercise is joinable."""
         mp = compute_max_players(roles, game_mode)
@@ -93,7 +101,9 @@ class TestRoleSlotConsistency:
     @given(roles=role_lists, data=st.data())
     @settings(max_examples=50)
     def test_open_roles_equals_unassigned(
-        self, roles: list[str], data: st.DataObject,
+        self,
+        roles: list[str],
+        data: st.DataObject,
     ) -> None:
         k = data.draw(st.integers(min_value=0, max_value=len(roles)))
         store = WaitingRoomStore()
@@ -106,7 +116,9 @@ class TestRoleSlotConsistency:
     @given(roles=role_lists, data=st.data())
     @settings(max_examples=50)
     def test_leaving_reopens_their_role(
-        self, roles: list[str], data: st.DataObject,
+        self,
+        roles: list[str],
+        data: st.DataObject,
     ) -> None:
         assume(len(roles) >= 2)
         store = WaitingRoomStore()
@@ -129,7 +141,10 @@ class TestVisualStateDerivation:
     @given(roles=role_lists, game_mode=game_modes, data=st.data())
     @settings(max_examples=50)
     def test_filled_plus_open_equals_max(
-        self, roles: list[str], game_mode: str, data: st.DataObject,
+        self,
+        roles: list[str],
+        game_mode: str,
+        data: st.DataObject,
     ) -> None:
         mp = compute_max_players(roles, game_mode)
         k = data.draw(st.integers(min_value=0, max_value=mp))
@@ -140,17 +155,23 @@ class TestVisualStateDerivation:
     @given(roles=role_lists, game_mode=game_modes, data=st.data())
     @settings(max_examples=50)
     def test_can_start_iff_full(
-        self, roles: list[str], game_mode: str, data: st.DataObject,
+        self,
+        roles: list[str],
+        game_mode: str,
+        data: st.DataObject,
     ) -> None:
         mp = compute_max_players(roles, game_mode)
         k = data.draw(st.integers(min_value=0, max_value=mp))
-        can_start = (k >= mp)
+        can_start = k >= mp
         assert can_start == (k == mp)
 
     @given(roles=role_lists, game_mode=game_modes, data=st.data())
     @settings(max_examples=50)
     def test_join_form_and_leave_button_mutually_exclusive(
-        self, roles: list[str], game_mode: str, data: st.DataObject,
+        self,
+        roles: list[str],
+        game_mode: str,
+        data: st.DataObject,
     ) -> None:
         k = data.draw(st.integers(min_value=0, max_value=len(roles)))
         store = WaitingRoomStore()
@@ -169,7 +190,9 @@ class TestVisualStateDerivation:
     @given(roles=role_lists, game_mode=game_modes)
     @settings(max_examples=50)
     def test_gm_slot_visible_iff_classic(
-        self, roles: list[str], game_mode: str,
+        self,
+        roles: list[str],
+        game_mode: str,
     ) -> None:
         show_gm = game_mode == "classic"
         assert show_gm == (game_mode == "classic")

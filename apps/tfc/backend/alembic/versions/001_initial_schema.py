@@ -4,16 +4,18 @@ Revision ID: 001_initial
 Revises: None
 Create Date: 2026-03-16
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSON
 
+from alembic import op
+
 revision: str = "001_initial"
-down_revision: Union[str, None] = None
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = None
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -62,8 +64,10 @@ def upgrade() -> None:
         "tfc_decision_responses",
         sa.Column("id", sa.Integer, primary_key=True),
         sa.Column(
-            "decision_id", sa.Integer,
-            sa.ForeignKey("tfc_decisions.id"), nullable=False,
+            "decision_id",
+            sa.Integer,
+            sa.ForeignKey("tfc_decisions.id"),
+            nullable=False,
         ),
         sa.Column("participant_id", sa.String(255), nullable=False),
         sa.Column("participant_name", sa.String(255), nullable=False),
@@ -74,7 +78,8 @@ def upgrade() -> None:
     )
     op.create_index(
         "ix_tfc_decision_responses_decision_id",
-        "tfc_decision_responses", ["decision_id"],
+        "tfc_decision_responses",
+        ["decision_id"],
     )
 
     op.create_table(

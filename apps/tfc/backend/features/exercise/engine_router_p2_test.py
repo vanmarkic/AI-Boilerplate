@@ -1,4 +1,5 @@
 """Tests for P2 engine_router additions: role-targeted broadcast splitting."""
+
 from features.exercise.engine_broadcast import split_targeted_changes as _split_targeted_changes
 
 
@@ -16,7 +17,8 @@ def test_split_decision_with_target_roles() -> None:
     changes = [
         {"type": "event_change", "event_id": "e1", "action": "started"},
         {
-            "type": "decision_opened", "decision_id": "d1",
+            "type": "decision_opened",
+            "decision_id": "d1",
             "target_roles": ["player"],
         },
     ]

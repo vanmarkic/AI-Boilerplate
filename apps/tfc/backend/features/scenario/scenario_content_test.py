@@ -1,24 +1,23 @@
 """Tests for scenario content schema and loader."""
+
 import pytest
 from pydantic import ValidationError
 
+from engine.event_scheduler import EventType, ScheduledEvent
+from engine.exercise_engine import EngineConfig, ExerciseEngine
+from engine.issue_manager import TrackedIssue, TriggerMode
 from features.scenario.scenario_content import (
-    DecisionOptionDef,
     DecisionTemplateDef,
     RoleDef,
     ScenarioContent,
     ScenarioEventDef,
     ScenarioIssueDef,
-    ScenarioPhaseDef,
 )
 from features.scenario.scenario_loader import (
     build_engine_config,
     load_scenario_events,
     load_scenario_issues,
 )
-from engine.event_scheduler import EventType, ScheduledEvent
-from engine.issue_manager import TriggerMode, TrackedIssue
-from engine.exercise_engine import EngineConfig, ExerciseEngine
 
 
 def _full_content() -> dict:
@@ -114,12 +113,14 @@ def test_scenario_content_empty_rejected() -> None:
 
 
 def test_scenario_event_def_validation() -> None:
-    evt = ScenarioEventDef.model_validate({
-        "id": "e1",
-        "title": "Test",
-        "event_type": "decision",
-        "scheduled_pt_ms": 5000,
-    })
+    evt = ScenarioEventDef.model_validate(
+        {
+            "id": "e1",
+            "title": "Test",
+            "event_type": "decision",
+            "scheduled_pt_ms": 5000,
+        }
+    )
     assert evt.description == ""
     assert evt.duration_ms is None
     assert evt.dependencies == []
@@ -132,29 +133,35 @@ def test_scenario_event_def_missing_required_fields() -> None:
 
 
 def test_scenario_issue_def_trigger_modes() -> None:
-    time_issue = ScenarioIssueDef.model_validate({
-        "id": "i1",
-        "title": "Time Issue",
-        "trigger_mode": "time-based",
-        "trigger_time_pt_ms": 10_000,
-    })
+    time_issue = ScenarioIssueDef.model_validate(
+        {
+            "id": "i1",
+            "title": "Time Issue",
+            "trigger_mode": "time-based",
+            "trigger_time_pt_ms": 10_000,
+        }
+    )
     assert time_issue.trigger_mode == "time-based"
     assert time_issue.trigger_time_pt_ms == 10_000
 
-    event_issue = ScenarioIssueDef.model_validate({
-        "id": "i2",
-        "title": "Event Issue",
-        "trigger_mode": "event-based",
-        "trigger_event_id": "evt-1",
-    })
+    event_issue = ScenarioIssueDef.model_validate(
+        {
+            "id": "i2",
+            "title": "Event Issue",
+            "trigger_mode": "event-based",
+            "trigger_event_id": "evt-1",
+        }
+    )
     assert event_issue.trigger_mode == "event-based"
     assert event_issue.trigger_event_id == "evt-1"
 
-    manual_issue = ScenarioIssueDef.model_validate({
-        "id": "i3",
-        "title": "Manual Issue",
-        "trigger_mode": "manual",
-    })
+    manual_issue = ScenarioIssueDef.model_validate(
+        {
+            "id": "i3",
+            "title": "Manual Issue",
+            "trigger_mode": "manual",
+        }
+    )
     assert manual_issue.trigger_mode == "manual"
     assert manual_issue.auto_resolve_ms == 0
 
@@ -235,10 +242,12 @@ class TestRolesRequired:
             ScenarioContent(roles=[])
 
     def test_valid_roles_accepted(self) -> None:
-        sc = ScenarioContent(roles=[
-            RoleDef(id="co", label="CO", player_type="decision_maker"),
-            RoleDef(id="nav", label="Nav", player_type="advisor"),
-        ])
+        sc = ScenarioContent(
+            roles=[
+                RoleDef(id="co", label="CO", player_type="decision_maker"),
+                RoleDef(id="nav", label="Nav", player_type="advisor"),
+            ]
+        )
         assert len(sc.roles) == 2
 
 
@@ -247,14 +256,10 @@ class TestDecisionMakerRequired:
 
     def test_no_decision_maker_rejected(self) -> None:
         with pytest.raises(ValidationError, match="decision_maker"):
-            ScenarioContent(
-                roles=[RoleDef(id="nav", label="Nav", player_type="advisor")]
-            )
+            ScenarioContent(roles=[RoleDef(id="nav", label="Nav", player_type="advisor")])
 
     def test_decision_maker_present_accepted(self) -> None:
-        sc = ScenarioContent(
-            roles=[RoleDef(id="co", label="CO", player_type="decision_maker")]
-        )
+        sc = ScenarioContent(roles=[RoleDef(id="co", label="CO", player_type="decision_maker")])
         assert sc.roles[0].player_type == "decision_maker"
 
 
@@ -269,7 +274,9 @@ class TestTargetRolesExist:
                 ],
                 decision_templates=[
                     DecisionTemplateDef(
-                        id="d1", title="T", issue_id="i1",
+                        id="d1",
+                        title="T",
+                        issue_id="i1",
                         question_type="single_choice",
                         target_roles=["nonexistent"],
                     ),
@@ -284,7 +291,9 @@ class TestTargetRolesExist:
             ],
             decision_templates=[
                 DecisionTemplateDef(
-                    id="d1", title="T", issue_id="i1",
+                    id="d1",
+                    title="T",
+                    issue_id="i1",
                     question_type="single_choice",
                     target_roles=["co"],
                 ),
@@ -300,7 +309,9 @@ class TestTargetRolesExist:
             ],
             decision_templates=[
                 DecisionTemplateDef(
-                    id="d1", title="T", issue_id="i1",
+                    id="d1",
+                    title="T",
+                    issue_id="i1",
                     question_type="single_choice",
                     target_roles=[],
                 ),

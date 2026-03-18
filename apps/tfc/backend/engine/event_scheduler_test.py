@@ -1,5 +1,4 @@
 """Tests for EventScheduler lifecycle transitions."""
-import pytest
 
 from engine.event_scheduler import (
     EventLifecycle,
@@ -52,7 +51,6 @@ class TestLifecycleTransitions:
         assert sched.events["e1"].lifecycle == EventLifecycle.COMPLETED
         actions = [c["action"] for c in changes]
         assert "completed" in actions
-
 
     def test_pending_to_running_fires_only_once(self) -> None:
         """An event that becomes RUNNING should not re-emit 'started' on subsequent ticks."""
