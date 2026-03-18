@@ -13,6 +13,7 @@ from features.exercise.exercise_model import Exercise  # noqa: F401
 from features.scenario.scenario_model import Scenario  # noqa: F401
 from features.audit.audit_model import AuditEntry  # noqa: F401
 from features.decision.decision_model import Decision, DecisionResponseRecord  # noqa: F401
+from features.domain_config.domain_config_model import DomainConfig  # noqa: F401
 
 config = context.config
 
