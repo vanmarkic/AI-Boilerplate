@@ -61,7 +61,7 @@ jobs:
 
   build:
     name: Build
-    needs: test
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -82,7 +82,7 @@ jobs:
 
   e2e:
     name: E2E Tests
-    needs: test
+    needs: install
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

@@ -32,6 +32,29 @@ def test_er_scenario_validates_against_schema() -> None:
     assert content.briefing != ""
     assert len(content.objectives) == 5
     assert len(content.rules) == 3
+    assert content.game_mode == "simple_collaborative"
+    assert len(content.decision_sequence) == 5
+
+
+def test_er_scenario_has_roles() -> None:
+    content = _content()
+    assert len(content.roles) == 7
+    role_ids = {r.id for r in content.roles}
+    assert role_ids == {"co", "ops", "nav", "pwo", "aawo", "cyop", "eo"}
+
+
+def test_er_scenario_roles_have_valid_player_types() -> None:
+    content = _content()
+    valid_types = {"advisor", "decision_maker"}
+    for role in content.roles:
+        assert role.player_type in valid_types, f"Role {role.id} has invalid player_type"
+
+
+def test_er_scenario_has_exactly_one_decision_maker() -> None:
+    content = _content()
+    decision_makers = [r for r in content.roles if r.player_type == "decision_maker"]
+    assert len(decision_makers) == 1
+    assert decision_makers[0].id == "co"
 
 
 # ── Event loading ────────────────────────────────────────────────────────
