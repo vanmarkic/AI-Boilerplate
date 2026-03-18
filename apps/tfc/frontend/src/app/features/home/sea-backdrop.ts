@@ -1,71 +1,23 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   NgZone,
   OnDestroy,
-  OnInit,
   viewChild,
 } from '@angular/core';
 import * as THREE from 'three';
-
-// ── Signal types ────────────────────────────────────────────
-
-const enum SignalType { Friendly, Hostile, Neutral }
-
-const SIGNAL_COLORS: Record<SignalType, number> = {
-  [SignalType.Friendly]: 0x22d68a, // green
-  [SignalType.Hostile]:  0xe84057, // red
-  [SignalType.Neutral]:  0xd4c35c, // amber
-};
-
-const MAX_SIGNALS = 18;
-const SIGNAL_LIFESPAN = 4; // seconds
-const SPAWN_INTERVAL = 0.6; // seconds between spawns
-
-interface Signal {
-  type: SignalType;
-  x: number;
-  z: number;
-  birth: number;
-  light: THREE.PointLight;
-  sprite: THREE.Sprite;
-}
-
-// ── Glow sprite texture (procedural) ───────────────────────
-
-function createGlowTexture(): THREE.Texture {
-  const size = 64;
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d')!;
-  const gradient = ctx.createRadialGradient(
-    size / 2, size / 2, 0,
-    size / 2, size / 2, size / 2,
-  );
-  gradient.addColorStop(0, 'rgba(255,255,255,1)');
-  gradient.addColorStop(0.3, 'rgba(255,255,255,0.6)');
-  gradient.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-  const tex = new THREE.CanvasTexture(canvas);
-  tex.needsUpdate = true;
-  return tex;
-}
-
-// ── Wave function (shared between mesh + signals) ──────────
-
-function waveY(x: number, z: number, t: number): number {
-  return (
-    Math.sin(x * 0.4 + t * 0.6) * 0.8 +
-    Math.sin(z * 0.55 + t * 0.45) * 0.55 +
-    Math.sin((x + z) * 0.3 + t * 0.35) * 0.35 +
-    Math.sin(x * 0.9 - t * 0.25) * 0.2
-  );
-}
-
-// ── Component ──────────────────────────────────────────────
+import {
+  createGlowTexture,
+  MAX_SIGNALS,
+  Signal,
+  SIGNAL_COLORS,
+  SIGNAL_LIFESPAN,
+  SignalType,
+  SPAWN_INTERVAL,
+  waveY,
+} from './sea-signals';
 
 @Component({
   selector: 'tfc-sea-backdrop',
@@ -87,7 +39,7 @@ function waveY(x: number, z: number, t: number): number {
   `],
   template: `<canvas #canvas></canvas>`,
 })
-export class SeaBackdrop implements OnInit, OnDestroy {
+export class SeaBackdrop implements OnDestroy {
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
   private renderer!: THREE.WebGLRenderer;
   private scene!: THREE.Scene;
@@ -110,11 +62,11 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     return new THREE.Color(raw || 0x1ac5c5);
   }
 
-  constructor(private ngZone: NgZone) {}
-
-  ngOnInit(): void {
-    this.initScene();
-    this.ngZone.runOutsideAngular(() => this.animate(0));
+  constructor(private ngZone: NgZone) {
+    afterNextRender(() => {
+      this.initScene();
+      this.ngZone.runOutsideAngular(() => this.animate(0));
+    });
   }
 
   ngOnDestroy(): void {
@@ -132,7 +84,8 @@ export class SeaBackdrop implements OnInit, OnDestroy {
 
   private initScene(): void {
     const canvas = this.canvasRef().nativeElement;
-    const { clientWidth: w, clientHeight: h } = canvas;
+    const w = canvas.clientWidth || 1;
+    const h = canvas.clientHeight || 1;
 
     this.renderer = new THREE.WebGLRenderer({
       canvas,
@@ -166,7 +119,6 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     pointLight2.position.set(-4, 1, -2);
     this.scene.add(pointLight2);
 
-    // Sea mesh — coarse grid for chunky low-poly wireframe
     const geometry = new THREE.PlaneGeometry(24, 14, 18, 12);
     geometry.rotateX(-Math.PI / 2);
 
@@ -182,8 +134,6 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     this.scene.add(this.plane);
 
     this.scene.fog = new THREE.Fog(bgColor, 8, 16);
-
-    // Glow texture for signal sprites
     this.glowTexture = createGlowTexture();
 
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
@@ -197,16 +147,13 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     const type = types[Math.floor(Math.random() * types.length)];
     const color = SIGNAL_COLORS[type];
 
-    // Random position on the sea surface
     const x = (Math.random() - 0.5) * 14;
     const z = (Math.random() - 0.5) * 8;
 
-    // Point light for local glow on the wireframe
     const light = new THREE.PointLight(color, 0, 5);
     light.position.set(x, waveY(x, z, t), z);
     this.scene.add(light);
 
-    // Sprite billboard
     const mat = new THREE.SpriteMaterial({
       map: this.glowTexture,
       color,
@@ -224,38 +171,32 @@ export class SeaBackdrop implements OnInit, OnDestroy {
   }
 
   private updateSignals(t: number): void {
-    // Spawn new signals
     if (t >= this.nextSpawn && this.signals.length < MAX_SIGNALS) {
       this.spawnSignal(t);
       this.nextSpawn = t + SPAWN_INTERVAL + Math.random() * SPAWN_INTERVAL;
     }
 
-    // Update existing signals
     for (let i = this.signals.length - 1; i >= 0; i--) {
       const s = this.signals[i];
       const age = t - s.birth;
       const life = age / SIGNAL_LIFESPAN;
 
       if (life >= 1) {
-        // Remove dead signal
         this.scene.remove(s.light, s.sprite);
         (s.sprite.material as THREE.SpriteMaterial).dispose();
         this.signals.splice(i, 1);
         continue;
       }
 
-      // Fade envelope: quick in, hold, fade out
       const fade = life < 0.15
-        ? life / 0.15                      // fade in
+        ? life / 0.15
         : life > 0.7
-          ? (1 - life) / 0.3              // fade out
-          : 1;                             // sustain
+          ? (1 - life) / 0.3
+          : 1;
 
-      // Pulse gently during sustain
       const pulse = 1 + Math.sin(age * 4) * 0.2;
       const intensity = fade * pulse;
 
-      // Float on waves
       const y = waveY(s.x, s.z, t);
       s.light.position.set(s.x, y + 0.25, s.z);
       s.light.intensity = intensity * 3;
@@ -293,7 +234,6 @@ export class SeaBackdrop implements OnInit, OnDestroy {
     this.plane.geometry.computeVertexNormals();
 
     this.updateSignals(t);
-
     this.renderer.render(this.scene, this.camera);
   }
 }
