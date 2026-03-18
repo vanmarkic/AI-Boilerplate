@@ -119,17 +119,27 @@ class DecisionManager:
         return changes
 
     def submit_recommendation(
-        self, decision_id: str, participant_id: str, option_id: str,
+        self,
+        decision_id: str,
+        participant_id: str,
+        option_id: str,
+        role_id: str | None = None,
     ) -> RecommendationSubmitted | None:
-        """Record an advisor's recommendation. Returns a change dict or None."""
+        """Record an advisor's recommendation. Returns a change dict or None.
+
+        When *role_id* is provided the recommendation is keyed as
+        ``participant_id:role_id`` so that a single participant can submit
+        one recommendation per role (used by the all-advisors 2-player mode).
+        """
         decision = self._decisions.get(decision_id)
         if decision is None or decision.status != "open":
             return None
-        decision.recommendations[participant_id] = option_id
+        key = f"{participant_id}:{role_id}" if role_id else participant_id
+        decision.recommendations[key] = option_id
         return {
             "type": "recommendation_submitted",
             "decision_id": decision_id,
-            "participant_id": participant_id,
+            "participant_id": key,
             "option_id": option_id,
         }
 
