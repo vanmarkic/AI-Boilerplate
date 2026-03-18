@@ -5,6 +5,7 @@ from pydantic import ValidationError
 from features.scenario.scenario_content import (
     DecisionOptionDef,
     DecisionTemplateDef,
+    RoleDef,
     ScenarioContent,
     ScenarioEventDef,
     ScenarioIssueDef,
@@ -87,6 +88,10 @@ def _full_content() -> dict:
             },
         ],
         "default_time_factor": 2.0,
+        "roles": [
+            {"id": "co", "label": "Commanding Officer", "player_type": "decision_maker"},
+            {"id": "nav", "label": "Navigator", "player_type": "advisor"},
+        ],
     }
 
 
@@ -102,13 +107,10 @@ def test_scenario_content_validates_complete_json() -> None:
     assert content.default_time_factor == 2.0
 
 
-def test_scenario_content_empty_defaults() -> None:
-    content = ScenarioContent.model_validate({})
-    assert content.phases == []
-    assert content.events == []
-    assert content.issues == []
-    assert content.decision_templates == []
-    assert content.default_time_factor == 1.0
+def test_scenario_content_empty_rejected() -> None:
+    """Empty content is no longer valid — roles are required."""
+    with pytest.raises(ValidationError, match="at least one role"):
+        ScenarioContent.model_validate({})
 
 
 def test_scenario_event_def_validation() -> None:
@@ -215,3 +217,93 @@ def test_round_trip_content_to_engine() -> None:
     assert len(snap["events"]) == 2
     assert len(snap["issues"]) == 2
     assert snap["phase"] == "setup"
+
+
+# ── Role validation invariants ──────────────────────────────────────────
+
+VALID_ROLES = [
+    {"id": "co", "label": "CO", "player_type": "decision_maker"},
+    {"id": "nav", "label": "Nav", "player_type": "advisor"},
+]
+
+
+class TestRolesRequired:
+    """Every scenario must define at least one role."""
+
+    def test_empty_roles_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="at least one role"):
+            ScenarioContent(roles=[])
+
+    def test_valid_roles_accepted(self) -> None:
+        sc = ScenarioContent(roles=[
+            RoleDef(id="co", label="CO", player_type="decision_maker"),
+            RoleDef(id="nav", label="Nav", player_type="advisor"),
+        ])
+        assert len(sc.roles) == 2
+
+
+class TestDecisionMakerRequired:
+    """At least one role must have player_type='decision_maker'."""
+
+    def test_no_decision_maker_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="decision_maker"):
+            ScenarioContent(
+                roles=[RoleDef(id="nav", label="Nav", player_type="advisor")]
+            )
+
+    def test_decision_maker_present_accepted(self) -> None:
+        sc = ScenarioContent(
+            roles=[RoleDef(id="co", label="CO", player_type="decision_maker")]
+        )
+        assert sc.roles[0].player_type == "decision_maker"
+
+
+class TestTargetRolesExist:
+    """Decision template target_roles must reference defined role IDs."""
+
+    def test_unknown_target_role_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="nonexistent"):
+            ScenarioContent(
+                roles=[
+                    RoleDef(id="co", label="CO", player_type="decision_maker"),
+                ],
+                decision_templates=[
+                    DecisionTemplateDef(
+                        id="d1", title="T", issue_id="i1",
+                        question_type="single_choice",
+                        target_roles=["nonexistent"],
+                    ),
+                ],
+            )
+
+    def test_valid_target_role_accepted(self) -> None:
+        sc = ScenarioContent(
+            roles=[
+                RoleDef(id="co", label="CO", player_type="decision_maker"),
+                RoleDef(id="nav", label="Nav", player_type="advisor"),
+            ],
+            decision_templates=[
+                DecisionTemplateDef(
+                    id="d1", title="T", issue_id="i1",
+                    question_type="single_choice",
+                    target_roles=["co"],
+                ),
+            ],
+        )
+        assert sc.decision_templates[0].target_roles == ["co"]
+
+    def test_empty_target_roles_accepted(self) -> None:
+        """Untargeted decisions (target_roles=[]) are valid."""
+        sc = ScenarioContent(
+            roles=[
+                RoleDef(id="co", label="CO", player_type="decision_maker"),
+            ],
+            decision_templates=[
+                DecisionTemplateDef(
+                    id="d1", title="T", issue_id="i1",
+                    question_type="single_choice",
+                    target_roles=[],
+                ),
+            ],
+        )
+        assert sc.decision_templates[0].target_roles == []
