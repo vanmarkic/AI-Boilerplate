@@ -11,6 +11,7 @@ from engine.exercise_engine import (
     EngineConfig,
     ScenarioContext,
 )
+from engine.engine_config import RoleInfo
 from engine.game_modes import create_game_mode
 from engine.issue_manager import TrackedIssue, TriggerMode
 from features.scenario.scenario_content import ScenarioContent
@@ -89,6 +90,10 @@ def build_engine_config(
         briefing=content.briefing,
         objectives=list(content.objectives),
         rules=list(content.rules),
+        roles=[
+            RoleInfo(id=r.id, label=r.label, player_type=r.player_type)
+            for r in content.roles
+        ],
     )
     mode_config = dict(content.game_mode_config)
     if content.decision_sequence:

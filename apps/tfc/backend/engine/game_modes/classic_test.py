@@ -15,9 +15,10 @@ def test_on_decision_timeout_returns_none() -> None:
     assert mode.on_decision_timeout("d1", options) is None
 
 
-def test_on_decision_closed_returns_empty() -> None:
+def test_on_decision_closed_v2_returns_empty() -> None:
     mode = ClassicMode()
-    assert mode.on_decision_closed("d1", 1.0, 2.0) == []
+    opts = [{"id": "o1", "label": "Yes", "score": 1.0}]
+    assert mode.on_decision_closed_v2("d1", opts, opts) == []
 
 
 def test_get_next_decision_id_returns_none() -> None:
@@ -33,3 +34,8 @@ def test_get_decision_time_ms_passthrough() -> None:
 def test_requires_gm() -> None:
     mode = ClassicMode()
     assert mode.requires_gm() is True
+
+
+def test_snapshot_returns_none() -> None:
+    mode = ClassicMode()
+    assert mode.snapshot() is None
