@@ -115,6 +115,8 @@ Decision events automatically pause the engine until the GM or players resolve t
 - **Issues**: Problems triggered by events, with lifecycle `dormant → active → mitigated → resolved`.
 - **Decisions**: Questions posed to players when a `DECISION` event fires. The engine pauses until resolved.
 - **Domain Config**: Terminology and labels are stored in the database via `features/domain_config/`, not hardcoded. This lets each scenario use its own vocabulary.
+- **Three.js Sea Backdrop**: Ambient 3D ocean scene with glowing dot convergence effect, used as visual backdrop in the player view. Camera FOV set to 50mm full-frame equivalent (27°).
+- **Scenario Validation**: Scenario JSON is validated at Docker build time and seed time. The scenario builder UI also validates content before saving.
 
 ### Game Modes
 
@@ -123,9 +125,22 @@ Game modes are pluggable strategies in `engine/game_modes/` that change how deci
 | Mode | Description |
 |------|-------------|
 | `ClassicMode` | GM-driven. No scoring. Engine pauses on DECISION events for GM to resolve. |
-| `SimpleCollaborativeMode` | No GM required. Advisors submit recommendations; decision-maker makes the final call. Decisions chain sequentially. Wrong answers shrink time available for subsequent decisions. |
+| `SimpleCollaborativeMode` | No GM required. Advisors submit recommendations; decision-maker makes the final call. Per-card +/0/- scoring. Forced card enforcement. Decisions chain sequentially. Wrong answers shrink time for subsequent decisions. Supports 2-player variant. |
 
 To add a new mode, create a class in `engine/game_modes/` implementing `should_pause_on_decision()` and any scoring hooks, then wire it into `EngineConfig`.
+
+### Scoring (SimpleCollaborativeMode)
+
+- Each card (decision option) has a `score: float` — positive (good), zero (neutral), or negative (bad)
+- Selected score = sum of selected card scores
+- Max score = sum of top-N scores from all options (N = number selected)
+- Penalty: `(max_score - selected_score) * penalty_factor * 1000` ms deducted from next decision timer
+- Timer floor: effective time never drops below `min_decision_time_ms`
+- **Forced cards**: `forced_option_ids` on a decision template. If omitted by player, auto-included with penalty + `ForcedCardApplied` state change
+
+### Session Codes & Joining
+
+Exercises use 6-character unique session codes for joining. Players enter a code on the join page or browse active lobbies on the home page. Role assignment happens in the waiting room before the exercise starts.
 
 ## Development
 
