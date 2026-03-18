@@ -65,11 +65,10 @@ function joinable(overrides: Record<string, unknown> = {}) {
 // ═══════════════════════════════════════════════════════════════════════
 
 test.describe('/home — Menu state (no lobby, no picker)', () => {
-  test('shows all 4 menu cards', async ({ page, mockApi }) => {
+  test('shows all 3 menu cards', async ({ page, mockApi }) => {
     await mockApi.install();
     await page.goto('/home');
 
-    await expect(page.getByText('Join Exercise')).toBeVisible();
     await expect(page.getByText('Run Exercise')).toBeVisible();
     await expect(page.getByText('Build Scenario')).toBeVisible();
     await expect(page.getByText('Review Results')).toBeVisible();
@@ -93,7 +92,7 @@ test.describe('/home — Picker state', () => {
     await page.getByText('Run Exercise').click();
 
     await expect(page.getByText('Test Scenario')).toBeVisible();
-    await expect(page.getByText('Join Exercise')).not.toBeVisible();
+    await expect(page.getByText('Run Exercise')).not.toBeVisible();
   });
 
   test('empty scenario list shows empty message', async ({ page, mockApi }) => {
@@ -136,7 +135,7 @@ test.describe('/home — Picker state', () => {
     await page.getByText('Run Exercise').click();
     await page.getByText('Back').click();
 
-    await expect(page.getByText('Join Exercise')).toBeVisible();
+    await expect(page.getByText('Run Exercise')).toBeVisible();
   });
 });
 
@@ -360,18 +359,3 @@ test.describe('/waiting-room — without scenario (fallback)', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════════════
-// /join — Session code + collaborative mode
-// ═══════════════════════════════════════════════════════════════════════
-
-test.describe('/join — collaborative mode', () => {
-  test('hides role dropdown after resolving collaborative exercise', async ({ page, mockApi }) => {
-    mockApi.seedCode('COL001', 77, 'simple_collaborative');
-    await mockApi.install();
-    await page.goto('/join?code=COL001');
-
-    // Collaborative mode auto-hides the role selector
-    await page.locator('input#display-name').fill('Alice');
-    await expect(page.locator('select')).not.toBeVisible();
-  });
-});

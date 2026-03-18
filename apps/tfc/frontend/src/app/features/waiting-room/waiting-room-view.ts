@@ -187,8 +187,8 @@ export class WaitingRoomView implements OnInit, OnDestroy {
 
   protected onLeave(): void {
     this.api.leave(this.exerciseId(), this.participantId()).subscribe({
-      next: () => this.router.navigate(['/join']),
-      error: () => this.router.navigate(['/join']),
+      next: () => this.router.navigate(['/home']),
+      error: () => this.router.navigate(['/home']),
     });
   }
 
