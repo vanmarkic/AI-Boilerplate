@@ -1,6 +1,5 @@
-from fastapi import HTTPException, status
-
 from core.auth import CurrentUser
+from core.exceptions import ForbiddenError
 from core.keycloak_admin import KeycloakAdminClient
 from features.admin_users.admin_users_schema import (
     KeycloakRoleResponse,
@@ -120,19 +119,13 @@ class AdminUsersService:
         """Delete a realm role. Admin only. Cannot delete protected roles."""
         self._check_is_admin(current_user)
         if name in UNDELETABLE_ROLES:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Cannot delete protected role '{name}'",
-            )
+            raise ForbiddenError(f"Cannot delete protected role '{name}'")
         await self.kc.delete_realm_role(name)
 
     def _check_can_manage_roles(self, user: CurrentUser) -> None:
         """Verify user has admin or role_manager role."""
         if "admin" not in user.roles and "role_manager" not in user.roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Requires admin or role_manager role",
-            )
+            raise ForbiddenError("Requires admin or role_manager role")
 
     def _check_protected_role_assignment(
         self, role_names: list[str], user: CurrentUser
@@ -140,18 +133,12 @@ class AdminUsersService:
         """Block non-admin from assigning/removing protected roles."""
         protected = [r for r in role_names if r in PROTECTED_ROLES]
         if protected and "admin" not in user.roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=(
-                    "Only admin can assign/remove protected roles: "
-                    + ", ".join(protected)
-                ),
+            raise ForbiddenError(
+                "Only admin can assign/remove protected roles: "
+                + ", ".join(protected)
             )
 
     def _check_is_admin(self, user: CurrentUser) -> None:
         """Verify user has admin role."""
         if "admin" not in user.roles:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Only admin can perform this action",
-            )
+            raise ForbiddenError("Only admin can perform this action")

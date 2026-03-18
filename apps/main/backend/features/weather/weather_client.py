@@ -10,17 +10,16 @@ from typing import Any
 import httpx
 
 from core.config import settings
+from core.exceptions import AppError
 
 _BASE_URL = "https://api.openweathermap.org/data/2.5"
 
 
-class WeatherApiError(Exception):
+class WeatherApiError(AppError):
     """Raised when the third-party weather API returns an error."""
 
     def __init__(self, status_code: int, detail: str) -> None:
-        self.status_code = status_code
-        self.detail = detail
-        super().__init__(detail)
+        super().__init__(detail, status_code=status_code)
 
 
 class WeatherClient:
