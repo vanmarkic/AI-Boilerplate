@@ -180,7 +180,10 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   protected onStartExercise(): void {
     if (this.isSimpleCollaborative()) {
       this.router.navigate(['/player'], {
-        queryParams: { exerciseId: this.exerciseId() },
+        queryParams: {
+          exerciseId: this.exerciseId(),
+          participantId: this.participantId(),
+        },
       });
       return;
     }
@@ -190,7 +193,10 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     const isGm = me?.role === 'game-master';
     const route = isGm ? '/gm' : '/player';
     this.router.navigate([route], {
-      queryParams: { exerciseId: this.exerciseId() },
+      queryParams: {
+        exerciseId: this.exerciseId(),
+        participantId: this.participantId(),
+      },
     });
   }
 }
