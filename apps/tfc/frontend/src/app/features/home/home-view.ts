@@ -1,11 +1,26 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { SeaBackdrop } from './sea-backdrop';
+import { ScenarioPicker } from './scenario-picker';
+import { LobbyPreview, type JoinableExercise } from './lobby-preview';
+import { ExerciseApiService } from '../../core/exercise-api.service';
+import {
+  WaitingRoomApiService,
+} from '../../core/waiting-room-api.service';
+import type { ScenarioResponse } from '../../core/scenario-api.service';
+import { environment } from '../../core/environment';
 
 @Component({
   selector: 'tfc-home-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, SeaBackdrop],
+  imports: [RouterLink, SeaBackdrop, ScenarioPicker, LobbyPreview],
   styles: [`
     :host {
       display: block;
@@ -26,9 +41,7 @@ import { SeaBackdrop } from './sea-backdrop';
       gap: var(--spacing-xl);
     }
 
-    .home-hero {
-      text-align: center;
-    }
+    .home-hero { text-align: center; }
 
     .home-hero h1 {
       font-size: var(--font-size-3xl, 2rem);
@@ -86,10 +99,7 @@ import { SeaBackdrop } from './sea-backdrop';
       box-shadow: var(--glass-shadow), var(--glow-primary);
     }
 
-    .card-icon {
-      font-size: 1.5rem;
-      line-height: 1;
-    }
+    .card-icon { font-size: 1.5rem; line-height: 1; }
 
     .card-label {
       font-size: var(--font-size-sm, 0.875rem);
@@ -110,32 +120,87 @@ import { SeaBackdrop } from './sea-backdrop';
         <p>Collaborative exercise simulation platform</p>
       </div>
 
-      <nav class="home-menu" aria-label="Main menu">
-        <a class="menu-card" data-primary routerLink="/join">
-          <span class="card-icon">🎮</span>
-          <span class="card-label">Join Exercise</span>
-          <span class="card-desc">Enter a session code to join an active exercise</span>
-        </a>
+      @if (lobbyData()) {
+        <tfc-lobby-preview
+          [data]="lobbyData()!"
+          (exerciseLeft)="onLobbyLeft()"
+        />
+      } @else if (showPicker()) {
+        <tfc-scenario-picker
+          (picked)="onScenarioPicked($event)"
+          (dismissed)="showPicker.set(false)"
+        />
+      } @else {
+        <nav class="home-menu" aria-label="Main menu">
+          <a class="menu-card" data-primary routerLink="/join">
+            <span class="card-icon">🎮</span>
+            <span class="card-label">Join Exercise</span>
+            <span class="card-desc">Enter a session code to join an active exercise</span>
+          </a>
 
-        <a class="menu-card" routerLink="/join" [queryParams]="{ role: 'game-master' }">
-          <span class="card-icon">🎯</span>
-          <span class="card-label">Run Exercise</span>
-          <span class="card-desc">Facilitate and control an exercise session</span>
-        </a>
+          <a class="menu-card" (click)="showPicker.set(true)">
+            <span class="card-icon">🎯</span>
+            <span class="card-label">Run Exercise</span>
+            <span class="card-desc">Pick a scenario and start a new exercise</span>
+          </a>
 
-        <a class="menu-card" routerLink="/builder">
-          <span class="card-icon">🛠️</span>
-          <span class="card-label">Build Scenario</span>
-          <span class="card-desc">Create and edit exercise scenarios</span>
-        </a>
+          <a class="menu-card" routerLink="/builder">
+            <span class="card-icon">🛠️</span>
+            <span class="card-label">Build Scenario</span>
+            <span class="card-desc">Create and edit exercise scenarios</span>
+          </a>
 
-        <a class="menu-card" routerLink="/review">
-          <span class="card-icon">📊</span>
-          <span class="card-label">Review Results</span>
-          <span class="card-desc">Analyse past exercise outcomes and decisions</span>
-        </a>
-      </nav>
+          <a class="menu-card" routerLink="/review">
+            <span class="card-icon">📊</span>
+            <span class="card-label">Review Results</span>
+            <span class="card-desc">Analyse past exercise outcomes and decisions</span>
+          </a>
+        </nav>
+      }
     </div>
   `,
 })
-export class HomeView {}
+export class HomeView implements OnInit {
+  private readonly http = inject(HttpClient);
+  private readonly exerciseApi = inject(ExerciseApiService);
+  private readonly waitingRoomApi = inject(WaitingRoomApiService);
+
+  protected readonly lobbyData = signal<JoinableExercise | null>(null);
+  protected readonly showPicker = signal(false);
+
+  ngOnInit(): void {
+    this.checkForJoinableExercise();
+  }
+
+  protected onScenarioPicked(scenario: ScenarioResponse): void {
+    const gameMode = scenario.content?.game_mode ?? 'classic';
+    this.exerciseApi
+      .create({
+        title: scenario.title,
+        scenario_id: scenario.id,
+        game_mode: gameMode,
+      })
+      .subscribe({
+        next: () => {
+          this.showPicker.set(false);
+          this.checkForJoinableExercise();
+        },
+      });
+  }
+
+  protected onLobbyLeft(): void {
+    this.lobbyData.set(null);
+    this.checkForJoinableExercise();
+  }
+
+  private checkForJoinableExercise(): void {
+    this.http
+      .get<JoinableExercise>(
+        `${environment.apiBaseUrl}/api/exercises/joinable`,
+      )
+      .subscribe({
+        next: (data) => this.lobbyData.set(data),
+        error: () => this.lobbyData.set(null),
+      });
+  }
+}

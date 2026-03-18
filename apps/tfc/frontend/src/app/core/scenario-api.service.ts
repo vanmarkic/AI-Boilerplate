@@ -40,6 +40,12 @@ export interface DecisionTemplateDef {
   completion_mode: string;
 }
 
+export interface RoleDef {
+  id: string;
+  label: string;
+  player_type: string;
+}
+
 export interface ScenarioContent {
   phases: { id: string; title: string; description: string; duration_ms: number | null; events: string[] }[];
   events: ScenarioEventDef[];
@@ -50,6 +56,7 @@ export interface ScenarioContent {
   briefing?: string;
   objectives?: string[];
   rules?: string[];
+  roles?: RoleDef[];
 }
 
 export interface ScenarioResponse {
