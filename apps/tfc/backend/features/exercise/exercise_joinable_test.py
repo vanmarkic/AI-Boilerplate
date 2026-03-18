@@ -154,7 +154,11 @@ class TestJoinableEndpoint:
     ) -> None:
         sid = await _create_scenario_with_roles(client, TWO_ROLES)
         eid = await _create_exercise(client, sid, "simple_collaborative")
-        # Move exercise to running phase
+        # Move exercise through briefing → running
+        await client.put(
+            f"/api/exercises/{eid}",
+            json={"phase": "briefing"},
+        )
         await client.put(
             f"/api/exercises/{eid}",
             json={"phase": "running"},

@@ -98,7 +98,38 @@
   <tfc-score-bar [score]="score" />
   } @if (activeDecision(); as decision) {
   <div class="overlay">
-    @if (store.isCollaborative() && store.isAllAdvisors()) {
+    @if (store.isPracticeMode()) {
+      @if (practicePhase() === 'advising') {
+        <tfc-all-advisors-panel
+          [roles]="scenarioAdvisorRoles()"
+          [decisionTitle]="decision.title"
+          [decisionDescription]="decision.description"
+          [questionType]="decision.question_type"
+          [options]="decision.options"
+          (submitted)="onRoleRecommendationSubmitted(decision, $event)"
+          (closed)="onPracticeAdviceDone()"
+        />
+        @if (scenarioAdvisorRoles().length > 0) {
+          <div class="flex justify-end p-sm">
+            <button uiButton variant="default" (click)="onPracticeAdviceDone()">
+              Proceed to Decision
+            </button>
+          </div>
+        }
+      } @else {
+        @if (advisorRecs(decision).length > 0) {
+          <tfc-advisor-bubbles [recommendations]="advisorRecs(decision)" />
+        }
+        <tfc-decision-panel
+          [title]="decision.title"
+          [description]="decision.description"
+          [questionType]="decision.question_type"
+          [options]="decision.options"
+          (submitted)="onDecisionSubmitted(decision, $event)"
+          (closed)="store.closeDecision(decision.id)"
+        />
+      }
+    } @else if (store.isCollaborative() && store.isAllAdvisors()) {
     <tfc-all-advisors-panel
       [roles]="scenarioAdvisorRoles()"
       [decisionTitle]="decision.title"
@@ -135,9 +166,17 @@
   <footer class="exercise-controls">
     <div class="exercise-controls__group">
       <p class="text-sm text-muted-foreground">
-        @if (store.isCollaborative()) { @if (store.isAllAdvisors()) { You are
-        the All Advisors player } @else { You are the {{ roleLabel() }} } }
-        @else { Waiting for {{ domain.term('gameMaster') }} actions... }
+        @if (store.isPracticeMode()) {
+          Practice Mode — playing all roles
+        } @else if (store.isCollaborative()) {
+          @if (store.isAllAdvisors()) {
+            You are the All Advisors player
+          } @else {
+            You are the {{ roleLabel() }}
+          }
+        } @else {
+          Waiting for {{ domain.term('gameMaster') }} actions...
+        }
       </p>
     </div>
   </footer>

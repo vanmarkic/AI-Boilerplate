@@ -125,7 +125,7 @@ async def test_start_from_setup_succeeds(client: AsyncClient) -> None:
     resp = await client.post(f"/api/exercises/{eid}/engine/start")
     data = resp.json()
     assert "error" not in data
-    assert data["phase"] == "running"
+    assert data["phase"] == "briefing"
 
 
 @pytest.mark.asyncio

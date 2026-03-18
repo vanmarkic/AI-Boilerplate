@@ -221,7 +221,7 @@ class TestCollaborativeEngineStart:
         second = await client.post(f"/api/exercises/{eid}/engine/start")
         assert first.status_code == 200
         assert second.status_code == 200
-        assert second.json()["phase"] == "running"
+        assert second.json()["phase"] == "briefing"
 
     @pytest.mark.asyncio
     async def test_starting_nonexistent_exercise_returns_404(self, client: AsyncClient) -> None:
