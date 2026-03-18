@@ -1,0 +1,16 @@
+name: waiting-room
+tier: 1
+description: Pre-exercise lobby with presence indicators, role selection, and ready-up
+version: 0.2.0
+dependencies:
+  internal: [shared]
+  external: []
+api_endpoints: []
+models: []
+events_emitted: []
+events_consumed: []
+business_rules:
+  - "Participants join by entering a session code"
+  - "Role slots show available and occupied roles from the scenario"
+  - "Presence indicators show connected participants in real time"
+  - "Navigates to /player with participantId and role as query params when exercise starts"
