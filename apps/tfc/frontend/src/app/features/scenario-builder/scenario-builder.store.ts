@@ -24,6 +24,8 @@ const emptyContent: ScenarioContent = {
   briefing: '',
   objectives: [],
   rules: [],
+  roles: [],
+  game_mode: 'classic',
 };
 
 export const ScenarioBuilderStore = signalStore(
@@ -153,6 +155,10 @@ export const ScenarioBuilderStore = signalStore(
 
     setError(error: string): void {
       patchState(store, { error, saving: false });
+    },
+
+    clearError(): void {
+      patchState(store, { error: null });
     },
 
     reset(): void {
