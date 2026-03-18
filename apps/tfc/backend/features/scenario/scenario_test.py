@@ -2,40 +2,39 @@ import pytest
 from httpx import AsyncClient
 
 VALID_CONTENT = {
-    "phases": [],
-    "events": [],
     "roles": [
         {"id": "co", "label": "CO", "player_type": "decision_maker"},
     ],
 }
 
 
+async def _create(client: AsyncClient, **overrides: object) -> dict:
+    """Create a scenario with defaults, return response JSON."""
+    payload: dict = {"title": "Test Scenario", "content": VALID_CONTENT}
+    payload.update(overrides)
+    resp = await client.post("/api/scenarios", json=payload)
+    assert resp.status_code == 201
+    return resp.json()
+
+
 @pytest.mark.asyncio
 async def test_create_scenario(client: AsyncClient) -> None:
-    response = await client.post(
-        "/api/scenarios",
-        json={
-            "title": "Alpha Scenario",
-            "description": "Test scenario",
-            "content": VALID_CONTENT,
-        },
-    )
-    assert response.status_code == 201
-    data = response.json()
+    data = await _create(client, title="Alpha Scenario", description="Test scenario")
     assert data["title"] == "Alpha Scenario"
     assert data["version"] == 1
     assert data["content"]["roles"] == VALID_CONTENT["roles"]
 
 
 @pytest.mark.asyncio
-async def test_get_scenario(client: AsyncClient) -> None:
-    create_resp = await client.post(
-        "/api/scenarios",
-        json={"title": "Bravo Scenario"},
-    )
-    scenario_id = create_resp.json()["id"]
+async def test_create_scenario_without_content_rejected(client: AsyncClient) -> None:
+    resp = await client.post("/api/scenarios", json={"title": "No Content"})
+    assert resp.status_code == 422
 
-    response = await client.get(f"/api/scenarios/{scenario_id}")
+
+@pytest.mark.asyncio
+async def test_get_scenario(client: AsyncClient) -> None:
+    created = await _create(client, title="Bravo Scenario")
+    response = await client.get(f"/api/scenarios/{created['id']}")
     assert response.status_code == 200
     assert response.json()["title"] == "Bravo Scenario"
 
@@ -48,8 +47,8 @@ async def test_get_scenario_not_found(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_list_scenarios(client: AsyncClient) -> None:
-    await client.post("/api/scenarios", json={"title": "Sc 1"})
-    await client.post("/api/scenarios", json={"title": "Sc 2"})
+    await _create(client, title="Sc 1")
+    await _create(client, title="Sc 2")
 
     response = await client.get("/api/scenarios")
     assert response.status_code == 200
@@ -58,12 +57,8 @@ async def test_list_scenarios(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_list_scenarios_by_domain(client: AsyncClient) -> None:
-    await client.post(
-        "/api/scenarios", json={"title": "Domain Sc", "domain_id": 42},
-    )
-    await client.post(
-        "/api/scenarios", json={"title": "Other Sc", "domain_id": 99},
-    )
+    await _create(client, title="Domain Sc", domain_id=42)
+    await _create(client, title="Other Sc", domain_id=99)
 
     response = await client.get("/api/scenarios?domain_id=42")
     assert response.status_code == 200
@@ -72,13 +67,10 @@ async def test_list_scenarios_by_domain(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_update_scenario(client: AsyncClient) -> None:
-    create_resp = await client.post(
-        "/api/scenarios", json={"title": "Original"},
-    )
-    scenario_id = create_resp.json()["id"]
+    created = await _create(client, title="Original")
 
     response = await client.put(
-        f"/api/scenarios/{scenario_id}",
+        f"/api/scenarios/{created['id']}",
         json={"title": "Updated", "version": 2},
     )
     assert response.status_code == 200
@@ -88,13 +80,10 @@ async def test_update_scenario(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_delete_scenario(client: AsyncClient) -> None:
-    create_resp = await client.post(
-        "/api/scenarios", json={"title": "To Delete"},
-    )
-    scenario_id = create_resp.json()["id"]
+    created = await _create(client, title="To Delete")
 
-    response = await client.delete(f"/api/scenarios/{scenario_id}")
+    response = await client.delete(f"/api/scenarios/{created['id']}")
     assert response.status_code == 204
 
-    get_resp = await client.get(f"/api/scenarios/{scenario_id}")
+    get_resp = await client.get(f"/api/scenarios/{created['id']}")
     assert get_resp.status_code == 404

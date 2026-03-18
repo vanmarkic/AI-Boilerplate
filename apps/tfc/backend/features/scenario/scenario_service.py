@@ -20,7 +20,7 @@ class ScenarioService:
             title=request.title,
             description=request.description,
             domain_id=request.domain_id,
-            content=request.content,
+            content=request.content.model_dump(),
             version=request.version,
         )
         created = await self.repository.create(scenario)
