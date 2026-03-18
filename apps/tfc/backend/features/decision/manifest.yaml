@@ -1,0 +1,21 @@
+name: decision
+tier: 1
+description: Decision CRUD — questions, responses, and outcomes during exercises
+version: 0.1.0
+dependencies:
+  internal: [exercise]
+  external: [postgresql]
+api_endpoints:
+  - POST /api/decisions
+  - GET /api/decisions
+  - GET /api/decisions/{decision_id}
+  - POST /api/decisions/{decision_id}/responses
+  - POST /api/decisions/{decision_id}/close
+models:
+  - Decision
+  - DecisionResponseRecord
+events_emitted: []
+events_consumed: []
+business_rules:
+  - Decisions are linked to an exercise via exercise_id
+  - A decision can only be closed once

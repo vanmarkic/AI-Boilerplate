@@ -7,6 +7,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
+from engine.exercise_engine import ExerciseEngine
 from engine.session_store import session_store
 
 router = APIRouter(prefix="/api/exercises/{exercise_id}/engine", tags=["engine"])
@@ -16,7 +17,7 @@ class DelayRequest(BaseModel):
     delay_ms: float = Field(..., gt=0)
 
 
-def _get_engine(exercise_id: int):
+def _get_engine(exercise_id: int) -> ExerciseEngine:
     """Retrieve engine or raise 404."""
     engine = session_store.get(exercise_id)
     if engine is None:
