@@ -47,7 +47,7 @@ Scenario  ──loads──▶  Exercise  ──runs──▶  Engine
 - Backend: FastAPI (`apps/tfc/backend/`), port 8001
 - Frontend: Angular 21 (`apps/tfc/frontend/`), port 4201
 - Shared types: `@aspect/tfc-shared` (`packages/tfc-shared/`)
-- Real-time: WebSocket (`features/exercise/ws_router.py`)
+- Real-time: WebSocket (`features/exercise/ws_router.py`) — see [WebSocket protocol docs](../../docs/conventions/websocket-protocol.md)
 - Engine: pure-Python tick loop (250ms), no external dependencies
 
 ## Architecture
