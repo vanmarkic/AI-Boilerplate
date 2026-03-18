@@ -38,6 +38,9 @@ export interface DecisionTemplateDef {
   question_type: string;
   options: DecisionOptionDef[];
   completion_mode: string;
+  timeout_ms?: number;
+  target_roles?: string[];
+  forced_option_ids?: string[];
 }
 
 export interface RoleDef {
