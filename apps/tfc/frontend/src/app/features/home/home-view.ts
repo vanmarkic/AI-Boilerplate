@@ -4,111 +4,133 @@ import {
   inject,
   OnInit,
   signal,
-} from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { RouterLink } from '@angular/router';
-import { SeaBackdrop } from './sea-backdrop';
-import { ScenarioPicker } from './scenario-picker';
-import { LobbyPreview, type JoinableExercise } from './lobby-preview';
-import { ExerciseApiService } from '../../core/exercise-api.service';
-import type { ScenarioResponse } from '../../core/scenario-api.service';
-import { environment } from '../../core/environment';
+} from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { RouterLink } from "@angular/router";
+import { SeaBackdrop } from "./sea-backdrop";
+import { ScenarioPicker } from "./scenario-picker";
+import { LobbyPreview, type JoinableExercise } from "./lobby-preview";
+import { ExerciseApiService } from "../../core/exercise-api.service";
+import type { ScenarioResponse } from "../../core/scenario-api.service";
+import { environment } from "../../core/environment";
 
 @Component({
-  selector: 'tfc-home-view',
+  selector: "tfc-home-view",
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, SeaBackdrop, ScenarioPicker, LobbyPreview],
-  styles: [`
-    :host {
-      display: block;
-      position: relative;
-      min-height: 100dvh;
-      isolation: isolate;
-    }
+  styles: [
+    `
+      :host {
+        display: block;
+        position: relative;
+        min-height: 100dvh;
+        isolation: isolate;
+      }
 
-    .home-layout {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100dvh;
-      padding: var(--spacing-xl);
-      gap: var(--spacing-xl);
-    }
+      .home-layout {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100dvh;
+        padding: var(--spacing-xl);
+        gap: var(--spacing-xl);
+      }
 
-    .home-hero { text-align: center; }
+      .home-hero {
+        text-align: center;
+      }
 
-    .home-hero h1 {
-      font-size: var(--font-size-3xl, 2rem);
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      margin: 0 0 var(--spacing-xs);
-    }
+      .home-hero h1 {
+        font-size: var(--font-size-3xl, 2rem);
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        margin: 0 0 var(--spacing-xs);
+      }
 
-    .home-hero p {
-      color: var(--color-muted-foreground);
-      margin: 0;
-    }
+      .home-hero p {
+        color: var(--color-muted-foreground);
+        margin: 0;
+      }
 
-    .home-menu {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--spacing-md);
-      width: 100%;
-      max-width: 560px;
-    }
+      .home-menu {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--spacing-md);
+        width: 100%;
+        max-width: 560px;
+      }
 
-    .menu-card {
-      --glass-strength: 2.5;
-      --glow-strength: 1.5;
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-xl);
-      background: var(--glass-bg);
-      backdrop-filter: blur(var(--glass-blur));
-      -webkit-backdrop-filter: blur(var(--glass-blur));
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg, 0.75rem);
-      box-shadow: var(--glass-shadow);
-      text-decoration: none;
-      color: inherit;
-      transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-      cursor: pointer;
-    }
+      .menu-card {
+        --glass-strength: 2.5;
+        --glow-strength: 1.5;
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-sm);
+        padding: var(--spacing-xl);
+        background: var(--glass-bg);
+        backdrop-filter: blur(var(--glass-blur));
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg, 0.75rem);
+        box-shadow: var(--glass-shadow);
+        text-decoration: none;
+        color: inherit;
+        transition:
+          border-color 0.15s,
+          background 0.15s,
+          box-shadow 0.15s;
+        cursor: pointer;
+      }
 
-    .menu-card:hover {
-      border-color: var(--color-primary);
-      background: color-mix(in oklch, var(--glass-bg) 80%, var(--color-primary) 20%);
-      box-shadow: var(--glass-shadow), var(--glow-sm);
-    }
+      .menu-card:hover {
+        border-color: var(--color-primary);
+        background: color-mix(
+          in oklch,
+          var(--glass-bg) 80%,
+          var(--color-primary) 20%
+        );
+        box-shadow: var(--glass-shadow), var(--glow-sm);
+      }
 
-    .menu-card[data-primary] {
-      border-color: var(--color-primary);
-      background: color-mix(in oklch, var(--glass-bg) 85%, var(--color-primary) 15%);
-      box-shadow: var(--glass-shadow), var(--glow-sm);
-    }
+      .menu-card[data-primary] {
+        border-color: var(--color-primary);
+        background: color-mix(
+          in oklch,
+          var(--glass-bg) 85%,
+          var(--color-primary) 15%
+        );
+        box-shadow: var(--glass-shadow), var(--glow-sm);
+      }
 
-    .menu-card[data-primary]:hover {
-      background: color-mix(in oklch, var(--glass-bg) 75%, var(--color-primary) 25%);
-      box-shadow: var(--glass-shadow), var(--glow-primary);
-    }
+      .menu-card[data-primary]:hover {
+        background: color-mix(
+          in oklch,
+          var(--glass-bg) 75%,
+          var(--color-primary) 25%
+        );
+        box-shadow: var(--glass-shadow), var(--glow-primary);
+      }
 
-    .card-icon { font-size: 1.5rem; line-height: 1; }
+      .card-icon {
+        font-size: 1.5rem;
+        line-height: 1;
+      }
 
-    .card-label {
-      font-size: var(--font-size-sm, 0.875rem);
-      font-weight: 600;
-    }
+      .card-label {
+        font-size: var(--font-size-sm, 0.875rem);
+        font-weight: 600;
+      }
 
-    .card-desc {
-      font-size: var(--font-size-xs, 0.75rem);
-      color: var(--color-muted-foreground);
-      line-height: 1.4;
-    }
-  `],
+      .card-desc {
+        font-size: var(--font-size-xs, 0.75rem);
+        color: var(--color-muted-foreground);
+        line-height: 1.4;
+      }
+    `,
+  ],
   template: `
     <tfc-sea-backdrop />
     <div class="home-layout">
@@ -118,10 +140,7 @@ import { environment } from '../../core/environment';
       </div>
 
       @for (lobby of lobbyData(); track lobby.exercise.id) {
-        <tfc-lobby-preview
-          [data]="lobby"
-          (exerciseLeft)="onLobbyLeft()"
-        />
+        <tfc-lobby-preview [data]="lobby" (exerciseLeft)="onLobbyLeft()" />
       }
 
       @if (showPicker()) {
@@ -134,7 +153,9 @@ import { environment } from '../../core/environment';
           <a class="menu-card" data-primary (click)="showPicker.set(true)">
             <span class="card-icon">🎯</span>
             <span class="card-label">Run Exercise</span>
-            <span class="card-desc">Pick a scenario and start a new exercise</span>
+            <span class="card-desc"
+              >Pick a scenario and start a new exercise</span
+            >
           </a>
 
           <a class="menu-card" routerLink="/builder">
@@ -146,7 +167,9 @@ import { environment } from '../../core/environment';
           <a class="menu-card" routerLink="/review">
             <span class="card-icon">📊</span>
             <span class="card-label">Review Results</span>
-            <span class="card-desc">Analyse past exercise outcomes and decisions</span>
+            <span class="card-desc"
+              >Analyse past exercise outcomes and decisions</span
+            >
           </a>
         </nav>
       }
@@ -165,7 +188,7 @@ export class HomeView implements OnInit {
   }
 
   protected onScenarioPicked(scenario: ScenarioResponse): void {
-    const gameMode = scenario.content?.game_mode ?? 'classic';
+    const gameMode = scenario.content?.game_mode ?? "classic";
     this.exerciseApi
       .create({
         title: scenario.title,
@@ -186,9 +209,9 @@ export class HomeView implements OnInit {
 
   private checkForJoinableExercises(): void {
     this.http
-      .get<JoinableExercise[]>(
-        `${environment.apiBaseUrl}/api/exercises/joinable`,
-      )
+      .get<
+        JoinableExercise[]
+      >(`${environment.apiBaseUrl}/api/exercises/joinable`)
       .subscribe({
         next: (data) => this.lobbyData.set(data),
         error: () => this.lobbyData.set([]),
