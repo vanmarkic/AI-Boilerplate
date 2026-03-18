@@ -20,7 +20,7 @@
       {
         "id": "player",
         "label": "Crew Member",
-        "player_type": "advisor"
+        "player_type": "decision_maker"
       }
     ],
     "phases": [
