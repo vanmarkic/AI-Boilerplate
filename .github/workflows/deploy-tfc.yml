@@ -67,7 +67,8 @@ jobs:
             set -e
             echo "$GH_TOKEN" | docker login ghcr.io -u vanmarkic --password-stdin
             cd /opt/tfc
-            git pull origin master
+            git fetch origin master
+            git reset --hard origin/master
             docker compose -f docker-compose.hetzner.yml pull tfc-backend tfc-frontend
             docker compose -f docker-compose.hetzner.yml up -d --remove-orphans
             docker image prune -f
