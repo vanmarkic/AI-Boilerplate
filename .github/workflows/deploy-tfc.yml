@@ -38,21 +38,21 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/tfc/backend/Dockerfile.railway
+          file: apps/tfc/backend/Dockerfile
           push: true
           tags: ${{ env.BACKEND_IMAGE }}:latest
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max,ignore-error=true
 
       - name: Build and push frontend
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: apps/tfc/frontend/Dockerfile.railway
+          file: apps/tfc/frontend/Dockerfile
           push: true
           tags: ${{ env.FRONTEND_IMAGE }}:latest
           cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-to: type=gha,mode=max,ignore-error=true
 
       - name: Deploy to Hetzner
         uses: appleboy/ssh-action@v1
