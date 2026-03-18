@@ -8,6 +8,25 @@ Before writing any code:
 ## What TFC Is
 TFC is a domain-agnostic exercise simulation platform. A Game Master (GM) loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
 
+## Terminology Mapping (Domain ↔ Code)
+
+The exercise simulation domain uses specific terms. The codebase uses generic equivalents.
+**When the user says one, find the other.**
+
+| User/Domain says | Code uses | Key files |
+|-----------------|-----------|-----------|
+| **inject** | `Event`, `ScheduledEvent`, `EventScheduler` | `engine/event_scheduler.py`, `types/event.ts` |
+| **defect** | `Issue`, `TrackedIssue`, `IssueManager` | `engine/issue_manager.py`, `types/issue.ts` |
+| inject type | `EventType`, `event_type` | `engine/event_scheduler.py` |
+| defect lifecycle | `IssueLifecycle`, `issue.lifecycle` | `engine/issue_manager.py` |
+| inject timeline | `EventTimelineComponent` | `features/game-master/event-timeline.component.ts` |
+| triggered defects | `triggered_issues` | field on `ScheduledEvent` / `ExerciseEvent` |
+| defect trigger | `trigger_mode`, `trigger_event_id` | `TrackedIssue` fields |
+| inject scheduler | `EventScheduler` | `engine/event_scheduler.py` |
+| defect manager | `IssueManager` | `engine/issue_manager.py` |
+| inject snapshot | `EventSnapshot` | `engine-api.service.ts` |
+| defect snapshot | `IssueSnapshot` | `engine-api.service.ts` |
+
 ## Domain Model
 
 ```

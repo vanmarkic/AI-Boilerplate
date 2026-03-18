@@ -10,6 +10,7 @@ export interface TimeSnapshot {
   paused: boolean;
 }
 
+/** Inject (event) snapshot from engine. Domain term: "inject". */
 export interface EventSnapshot {
   id: string;
   title: string;
@@ -23,6 +24,7 @@ export interface EventSnapshot {
   completed_at_pt_ms: number | null;
 }
 
+/** Defect (issue) snapshot from engine. Domain term: "defect". */
 export interface IssueSnapshot {
   id: string;
   title: string;

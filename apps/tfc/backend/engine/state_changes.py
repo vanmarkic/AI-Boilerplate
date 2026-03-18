@@ -17,16 +17,18 @@ class PhaseChange(TypedDict):
 
 
 class EventChange(TypedDict):
+    """Domain term: 'inject change'. Code uses 'event_change'."""
     type: str          # "event_change"
-    event_id: str
+    event_id: str      # domain: inject_id
     action: str        # activated | started | completed | force_triggered | cancelled
     lifecycle: str     # scheduled | pending | running | paused | completed | cancelled
     title: str
 
 
 class IssueChange(TypedDict):
+    """Domain term: 'defect change'. Code uses 'issue_change'."""
     type: str          # "issue_change"
-    issue_id: str
+    issue_id: str      # domain: defect_id
     action: str        # activated | mitigated | resolved | auto_resolve_expired
     lifecycle: str     # inactive | active | mitigated | resolved
     title: str

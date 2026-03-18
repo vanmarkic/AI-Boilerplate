@@ -24,8 +24,8 @@ PRESETS = [
         "name": "Generic Training",
         "description": "Default domain for general-purpose training exercises.",
         "terminology": {
-            "event": "Event",
-            "issue": "Issue",
+            "event": "Inject",
+            "issue": "Defect",
             "player": "Player",
             "gameMaster": "Game Master",
             "exercise": "Exercise",
