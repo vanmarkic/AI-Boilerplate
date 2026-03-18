@@ -55,6 +55,9 @@ SCENARIO_CONTENT = {
     "objectives": ["Contain the breach"],
     "default_time_factor": 1.0,
     "game_mode": "classic",
+    "roles": [
+        {"id": "co", "label": "CO", "player_type": "decision_maker"},
+    ],
 }
 
 
@@ -135,25 +138,17 @@ async def test_scenario_to_engine_lifecycle(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_exercise_without_scenario_starts_empty(
+async def test_exercise_without_scenario_rejects_start(
     client: AsyncClient,
 ) -> None:
-    """Exercise with no scenario_id starts with minimal engine config."""
+    """Exercise with no scenario_id cannot be started."""
     ex_resp = await client.post("/api/exercises", json={"title": "Bare Ex"})
     exercise_id = ex_resp.json()["id"]
 
     start_resp = await client.post(
         f"/api/exercises/{exercise_id}/engine/start",
     )
-    assert start_resp.status_code == 200
-
-    snap = await client.get(
-        f"/api/exercises/{exercise_id}/engine/snapshot",
-    )
-    data = snap.json()
-    assert data["phase"] == "running"
-    assert len(data["events"]) == 0
-    assert len(data["issues"]) == 0
+    assert start_resp.status_code == 422
 
 
 @pytest.mark.asyncio

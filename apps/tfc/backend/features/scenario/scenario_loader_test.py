@@ -21,6 +21,7 @@ def _minimal_content(**overrides: object) -> ScenarioContent:
         "phases": [],
         "decision_templates": [],
         "default_time_factor": 1.0,
+        "roles": [{"id": "co", "label": "CO", "player_type": "decision_maker"}],
     }
     defaults.update(overrides)
     return ScenarioContent(**defaults)

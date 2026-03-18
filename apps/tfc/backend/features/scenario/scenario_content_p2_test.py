@@ -4,6 +4,10 @@ from features.scenario.scenario_content import (
     ScenarioContent,
 )
 
+MINIMAL_ROLES = [
+    {"id": "co", "label": "CO", "player_type": "decision_maker"},
+]
+
 
 def test_decision_template_default_timeout() -> None:
     dt = DecisionTemplateDef(
@@ -21,7 +25,7 @@ def test_decision_template_custom_timeout() -> None:
 
 
 def test_scenario_content_briefing_defaults() -> None:
-    content = ScenarioContent()
+    content = ScenarioContent(roles=MINIMAL_ROLES)
     assert content.briefing == ""
     assert content.objectives == []
     assert content.rules == []
@@ -32,6 +36,7 @@ def test_scenario_content_with_briefing() -> None:
         briefing="Emergency scenario briefing",
         objectives=["Objective 1", "Objective 2"],
         rules=["Rule A"],
+        roles=MINIMAL_ROLES,
     )
     assert content.briefing == "Emergency scenario briefing"
     assert len(content.objectives) == 2
@@ -51,6 +56,7 @@ def test_scenario_content_round_trip() -> None:
         "briefing": "Brief",
         "objectives": ["O1"],
         "rules": ["R1"],
+        "roles": MINIMAL_ROLES,
     }
     content = ScenarioContent.model_validate(data)
     assert content.decision_templates[0].timeout_ms == 3000

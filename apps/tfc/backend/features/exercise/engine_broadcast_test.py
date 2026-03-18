@@ -33,7 +33,29 @@ def _cleanup_sessions():
 
 
 async def _create_exercise(client: AsyncClient) -> int:
-    resp = await client.post("/api/exercises", json={"title": "Broadcast Ex"})
+    scenario_resp = await client.post(
+        "/api/scenarios",
+        json={
+            "title": "Broadcast Scenario",
+            "content": {
+                "game_mode": "simple_collaborative",
+                "roles": [
+                    {"id": "co", "label": "CO", "player_type": "decision_maker"},
+                    {"id": "ops", "label": "OPS", "player_type": "advisor"},
+                ],
+            },
+        },
+    )
+    assert scenario_resp.status_code == 201
+    sid = scenario_resp.json()["id"]
+    resp = await client.post(
+        "/api/exercises",
+        json={
+            "title": "Broadcast Ex",
+            "scenario_id": sid,
+            "game_mode": "simple_collaborative",
+        },
+    )
     assert resp.status_code == 201
     return resp.json()["id"]
 

@@ -55,12 +55,31 @@ async def _create_exercise(client: AsyncClient) -> int:
     return resp.json()["id"]
 
 
+async def _create_exercise_with_scenario(client: AsyncClient) -> int:
+    sc = await client.post("/api/scenarios", json={
+        "title": "Engine Scenario",
+        "content": {
+            "game_mode": "classic",
+            "roles": [
+                {"id": "co", "label": "CO", "player_type": "decision_maker"},
+            ],
+        },
+    })
+    assert sc.status_code == 201
+    resp = await client.post("/api/exercises", json={
+        "title": "Engine Test Ex",
+        "scenario_id": sc.json()["id"],
+    })
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
 # ── Start ────────────────────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
 async def test_start_engine(client: AsyncClient) -> None:
-    eid = await _create_exercise(client)
+    eid = await _create_exercise_with_scenario(client)
     resp = await client.post(f"/api/exercises/{eid}/engine/start")
     assert resp.status_code == 200
 
