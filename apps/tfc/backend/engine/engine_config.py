@@ -25,6 +25,7 @@ class DecisionTemplate:
     completion_mode: str
     target_roles: list[str] = field(default_factory=list)
     timeout_ms: float = 0.0
+    forced_option_ids: list[str] = field(default_factory=list)
 
 
 @dataclass

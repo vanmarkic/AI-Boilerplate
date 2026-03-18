@@ -227,16 +227,63 @@ class ExerciseEngine:
                 await asyncio.sleep(0.5)
                 now_ms = _time_mod.monotonic() * 1000
                 pt = self._time.play_time_ms
-                changes = [
-                    c for d in self._decisions.get_open_decisions()
-                    if d.timeout_ms > 0 and (now_ms - d.opened_at_rt_ms) >= d.timeout_ms
-                    for c in [self._decisions.close_decision(d.id, current_pt_ms=pt)]
-                    if c is not None
-                ]
-                if changes and self._on_state_change:
-                    await self._on_state_change(changes)
-                if changes and not self._decisions.get_open_decisions():
-                    await self.resume()
+                all_changes: list[dict] = []
+                for d in list(self._decisions.get_open_decisions()):
+                    if d.timeout_ms <= 0:
+                        continue
+                    if (now_ms - d.opened_at_rt_ms) < d.timeout_ms:
+                        continue
+                    # Auto-submit worst option via game mode
+                    auto_id = self._config.game_mode.on_decision_timeout(
+                        d.id, d.options,
+                    )
+                    selected_ids = [auto_id] if auto_id else []
+                    close_change = self._decisions.close_decision(
+                        d.id,
+                        current_pt_ms=pt,
+                        selected_option_ids=selected_ids,
+                    )
+                    if close_change:
+                        all_changes.append(close_change)
+                    # Apply scoring via v2
+                    selected_opts = [
+                        o for o in d.options if o["id"] in selected_ids
+                    ]
+                    template = self._find_decision_template(d.id)
+                    forced_ids = template.forced_option_ids if template else []
+                    extra = self._config.game_mode.on_decision_closed_v2(
+                        d.id, selected_opts, d.options,
+                        forced_option_ids=forced_ids or None,
+                    )
+                    all_changes.extend(extra)
+                    # Chain to next decision
+                    next_id = self._config.game_mode.get_next_decision_id(d.id)
+                    if next_id:
+                        nt = self._find_decision_template(next_id)
+                        if nt:
+                            timeout_ms = self._config.game_mode.get_decision_time_ms(
+                                int(nt.timeout_ms),
+                            )
+                            opened = self._decisions.open_decision(
+                                id=nt.id,
+                                event_id=None,
+                                issue_id=nt.issue_id,
+                                title=nt.title,
+                                description=nt.description,
+                                question_type=nt.question_type,
+                                options=nt.options,
+                                completion_mode=nt.completion_mode,
+                                target_roles=nt.target_roles,
+                                timeout_ms=timeout_ms,
+                                current_pt_ms=pt,
+                            )
+                            all_changes.append(opened)
+                if all_changes and self._on_state_change:
+                    await self._on_state_change(all_changes)
+                if not self._decisions.get_open_decisions():
+                    if self._config.game_mode.requires_gm():
+                        await self.resume()
+                    break
         except asyncio.CancelledError:
             pass
 

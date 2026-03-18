@@ -27,6 +27,10 @@ class SpeedRequest(BaseModel):
     factor: float = Field(..., gt=0)
 
 
+class CloseDecisionRequest(BaseModel):
+    selected_option_ids: list[str] = Field(default_factory=list)
+
+
 class RecommendRequest(BaseModel):
     decision_id: str
     option_id: str
@@ -229,21 +233,83 @@ async def get_open_decisions(exercise_id: int) -> list[dict]:
 
 
 @router.post("/decisions/{decision_id}/close", operation_id="closeDecision")
-async def close_decision(exercise_id: int, decision_id: str) -> dict:
+async def close_decision(
+    exercise_id: int, decision_id: str, body: CloseDecisionRequest,
+) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    result = engine.decision_manager.close_decision(decision_id, current_pt_ms=pt)
+
+    # Look up the decision to get its options before closing
+    decision = engine.decision_manager._decisions.get(decision_id)
+    if decision is None or decision.status != "open":
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Decision {decision_id} not found or already closed",
+        )
+    all_options = decision.options
+
+    result = engine.decision_manager.close_decision(
+        decision_id,
+        current_pt_ms=pt,
+        selected_option_ids=body.selected_option_ids,
+    )
     if result is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Decision {decision_id} not found or already closed",
         )
-    # Let game mode react (scoring, penalties)
-    extra = engine.game_mode.on_decision_closed(decision_id, 0.0, 0.0)
+
+    # Build selected options list from IDs
+    selected_options = [
+        o for o in all_options if o["id"] in body.selected_option_ids
+    ]
+
+    # Look up forced_option_ids from the decision template
+    template = engine._find_decision_template(decision_id)
+    forced_ids = template.forced_option_ids if template else []
+
+    # Let game mode react (scoring, penalties, forced cards)
+    extra = engine.game_mode.on_decision_closed_v2(
+        decision_id, selected_options, all_options,
+        forced_option_ids=forced_ids or None,
+    )
     if extra:
         await connection_manager.broadcast(
             exercise_id, {"type": "state_changes", "changes": extra},
         )
+
+    # Chain to next decision (gap 1 fix)
+    next_id = engine.game_mode.get_next_decision_id(decision_id)
+    if next_id:
+        next_template = engine._find_decision_template(next_id)
+        if next_template:
+            timeout_ms = engine.game_mode.get_decision_time_ms(
+                int(next_template.timeout_ms),
+            )
+            opened = engine.decision_manager.open_decision(
+                id=next_template.id,
+                event_id=None,
+                issue_id=next_template.issue_id,
+                title=next_template.title,
+                description=next_template.description,
+                question_type=next_template.question_type,
+                options=next_template.options,
+                completion_mode=next_template.completion_mode,
+                target_roles=next_template.target_roles,
+                timeout_ms=timeout_ms,
+                current_pt_ms=pt,
+            )
+            targeted, general = _split_targeted_changes([opened])
+            if general:
+                await connection_manager.broadcast(
+                    exercise_id,
+                    {"type": "state_changes", "changes": general},
+                )
+            for roles, role_changes in targeted:
+                await _broadcast_to_roles(
+                    connection_manager, exercise_id, roles, role_changes,
+                )
+
     # Resume if classic mode and no other open decisions remain
     if engine.game_mode.requires_gm():
         if not engine.decision_manager.get_open_decisions():
