@@ -3,7 +3,8 @@
 ## First Steps
 Before writing any code:
 1. Read the root `AGENTS.md` — all universal rules (250-line limit, strict types, no barrel exports, feature manifests, `make validate`) apply here.
-2. Read `backend/AGENTS.md` (coming from `apps/main/backend/AGENTS.md` conventions) and `frontend/AGENTS.md` (from `apps/main/frontend/AGENTS.md` conventions) for layer-specific rules — TFC follows the same patterns.
+2. Read `apps/main/backend/AGENTS.md` for backend conventions (FastAPI patterns, testing, SQL) and `apps/main/frontend/AGENTS.md` for frontend conventions (Angular patterns, signals, stores) — TFC follows the same patterns.
+3. Read `SPECS.md` (root) for TFC domain model, business rules, API surface, and glossary. If a feature's `manifest.yaml` exists, read it for feature-specific context.
 
 ## What TFC Is
 TFC is a domain-agnostic exercise simulation platform. A Game Master (GM) loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
@@ -154,3 +155,29 @@ make migrate-tfc          # Run TFC database migrations
 - Do NOT put game-mode-specific logic in `exercise_engine.py` — add a new class to `engine/game_modes/` instead.
 - Do NOT hardcode domain labels or terminology in the frontend or engine — fetch from `features/domain_config/` API.
 - Do NOT write Hypothesis property tests without a matching strategy in `engine/strategies.py`.
+
+## Agent Development Best Practices
+
+### Before starting any TFC task
+1. Read the feature's `manifest.yaml` for API surface, dependencies, and business rules.
+2. Read `SPECS.md` for the full domain model and glossary — use domain terms consistently.
+3. Check `docs/plans/2026-03-18-tfc-gaps-deferred-opens.md` for open gaps and deferred items before implementing related features.
+
+### Specification hygiene
+4. When adding a new feature: create `manifest.yaml` first, then code. The manifest is the contract.
+5. When changing business rules or API endpoints: update `SPECS.md` and the feature's `manifest.yaml` in the same commit as the code change. Stale specs cause agents to generate wrong code.
+6. When a gap or deferred item is resolved: update its status in the gaps doc immediately. Contradictory statuses across docs cause agents to re-fix resolved issues.
+
+### Type safety across the stack
+7. The shared package (`@aspect/tfc-shared`) defines the canonical TypeScript interfaces. The backend Pydantic schemas define the canonical Python types. These must stay aligned — if you change a field in one, update the other.
+8. Frontend `DomainConfigResponse` (in `domain-config-api.service.ts`) mirrors the backend `DomainConfigResponse` (in `domain_config_schema.py`). The shared `DomainConfig` interface is the generic version — the API response types add DB fields (`created_at`, `updated_at`).
+
+### Engine changes
+9. When adding a new `GameMode` method: update the protocol in `game_modes/__init__.py`, implement in ALL existing modes (Classic + SimpleCollaborative), and add property tests with strategies.
+10. When adding a new engine dataclass: add the Hypothesis strategy to `strategies.py` BEFORE writing property tests.
+11. When modifying scoring formulas: update the formula documentation in `docs/plans/2026-03-17-tfc-collaborative-mode-review.md` §5.
+
+### Testing expectations
+12. Engine changes require: unit tests + property tests (Hypothesis). Use existing strategies from `engine/strategies.py`.
+13. Frontend feature changes require: component spec files colocated with the component.
+14. API changes require: router tests in the feature's `*_test.py` file.
