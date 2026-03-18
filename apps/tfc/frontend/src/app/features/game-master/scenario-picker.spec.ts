@@ -4,6 +4,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { ScenarioPickerComponent } from './scenario-picker';
 import { environment } from '../../core/environment';
 import type { ScenarioResponse } from '../../core/scenario-api.service';
+import type { ScenarioSelection } from './scenario-picker';
 
 describe('ScenarioPickerComponent', () => {
   let fixture: ComponentFixture<ScenarioPickerComponent>;
@@ -57,6 +58,8 @@ describe('ScenarioPickerComponent', () => {
   });
 
   afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
     httpTesting.verify();
   });
 
@@ -119,8 +122,8 @@ describe('ScenarioPickerComponent', () => {
     fixture.detectChanges();
     flushScenarios();
 
-    let emitted: ScenarioResponse | undefined;
-    component.scenarioSelected.subscribe((s: ScenarioResponse) => (emitted = s));
+    let emitted: ScenarioSelection | undefined;
+    component.scenarioSelected.subscribe((s: ScenarioSelection) => (emitted = s));
 
     const buttons = fixture.nativeElement.querySelectorAll('button');
     const selectBtn = Array.from(buttons).find(
@@ -130,8 +133,8 @@ describe('ScenarioPickerComponent', () => {
     selectBtn.click();
 
     expect(emitted).toBeDefined();
-    expect(emitted!.id).toBe(1);
-    expect(emitted!.title).toBe('Fire Drill');
+    expect(emitted!.scenario.id).toBe(1);
+    expect(emitted!.scenario.title).toBe('Fire Drill');
   });
 
   it('shows empty state when no scenarios exist', () => {

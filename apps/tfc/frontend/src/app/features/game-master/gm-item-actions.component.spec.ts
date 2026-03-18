@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { GmItemActionsComponent } from './gm-item-actions.component';
 import type { EventSnapshot, IssueSnapshot } from '../../core/engine-api.service';
+import { environment } from '../../core/environment';
 
 describe('GmItemActionsComponent', () => {
   let fixture: ComponentFixture<GmItemActionsComponent>;
@@ -31,15 +34,24 @@ describe('GmItemActionsComponent', () => {
     },
   ];
 
+  const base = environment.apiBaseUrl;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [GmItemActionsComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(GmItemActionsComponent);
     fixture.componentRef.setInput('events', stubEvents);
     fixture.componentRef.setInput('issues', stubIssues);
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
   });
 
   it('renders event titles', () => {

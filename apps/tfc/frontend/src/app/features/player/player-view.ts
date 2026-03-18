@@ -101,7 +101,8 @@ import { handlePlayerWsMessage } from './player-ws-handler';
         @if (store.context(); as ctx) {
           <tfc-context-panel
             [title]="ctx.title" [briefing]="ctx.briefing"
-            [objectives]="ctx.objectives" [rules]="ctx.rules" />
+            [objectives]="ctx.objectives" [rules]="ctx.rules"
+            [open]="true" />
         }
 
         <ui-card [title]="domain.term('decision') + ' History'">
@@ -141,7 +142,7 @@ import { handlePlayerWsMessage } from './player-ws-handler';
         <div class="exercise-controls__group">
           <p class="text-sm text-muted-foreground">
             @if (store.isCollaborative()) {
-              {{ store.isDecisionMaker() ? 'You are the Decision Maker' : 'You are an Advisor' }}
+              You are the {{ roleLabel() }}
             } @else { Waiting for {{ domain.term('gameMaster') }} actions... }
           </p>
         </div>
@@ -158,6 +159,7 @@ export class PlayerView implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   protected readonly selectedIssueId = signal<string | null>(null);
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
+  protected readonly roleLabel = signal('Advisor');
   private readonly exerciseId = signal(1);
   private readonly participantId = signal('');
   private sub: Subscription | null = null;
@@ -191,20 +193,29 @@ export class PlayerView implements OnInit, OnDestroy {
     const id = Number(params['exerciseId'] ?? 1);
     const pId = String(params['participantId'] ?? '');
     const role = String(params['role'] ?? 'player');
+    const gameMode = String(params['gameMode'] ?? '');
     this.exerciseId.set(id);
     this.participantId.set(pId);
     this.store.setParticipantId(pId);
     this.store.setPlayerRole(role);
+    if (gameMode) {
+      this.store.setGameMode(gameMode);
+    }
     this.ws.connect(id, 'player', pId || undefined);
     this.sub = this.ws.messages$.subscribe((msg) => handlePlayerWsMessage(msg, this.store));
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
       next: (ctx) => {
         this.store.setContext(ctx);
-        // Resolve player_type from scenario roles using assigned role
+        // Derive gameMode from context roles if not set via URL
+        if (!gameMode && ctx.roles && ctx.roles.length > 0) {
+          this.store.setGameMode('simple_collaborative');
+        }
+        // Resolve player_type and label from scenario roles
         const roleInfo = ctx.roles?.find((r) => r.id === role);
         if (roleInfo) {
           this.store.setPlayerType(roleInfo.player_type);
+          this.roleLabel.set(roleInfo.label);
         }
       },
     });
