@@ -43,36 +43,23 @@ services:
         condition: service_healthy
     networks:
       - tfc-internal
-      - coolify
-    labels:
-      - caddy_0=api-tfc.46.224.43.248.sslip.io
-      - caddy_0.reverse_proxy={{upstreams 8001}}
-      - caddy_0.encode=zstd gzip
-      # CORS headers
-      - "caddy_0.header.Access-Control-Allow-Origin=https://tfc.46.224.43.248.sslip.io"
-      - "caddy_0.header.Access-Control-Allow-Methods=GET, POST, PUT, PATCH, DELETE, OPTIONS"
-      - "caddy_0.header.Access-Control-Allow-Headers=*"
-      - "caddy_0.header.Access-Control-Allow-Credentials=true"
-      - "caddy_0.header.Access-Control-Max-Age=3600"
-      - caddy_0.header=-Server
-      - caddy_ingress_network=coolify
 
   tfc-frontend:
     image: ghcr.io/vanmarkic/tfc-frontend:latest
     container_name: tfc-frontend
     restart: unless-stopped
     environment:
-      API_BASE_URL: https://api-tfc.46.224.43.248.sslip.io
-      WS_BASE_URL: wss://api-tfc.46.224.43.248.sslip.io
+      API_BASE_URL: https://tfc.46.224.43.248.sslip.io
+      WS_BASE_URL: wss://tfc.46.224.43.248.sslip.io
     depends_on:
       - tfc-backend
     networks:
       - coolify
+      - tfc-internal
     labels:
       - caddy_0=tfc.46.224.43.248.sslip.io
       - caddy_0.encode=zstd gzip
       - caddy_0.handle_path=/*
       - caddy_0.handle_path.0_reverse_proxy={{upstreams 80}}
       - caddy_0.header=-Server
-      - caddy_0.try_files={path} /index.html
       - caddy_ingress_network=coolify
