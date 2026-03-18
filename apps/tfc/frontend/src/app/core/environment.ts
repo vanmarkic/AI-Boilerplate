@@ -5,12 +5,12 @@
  * apiBaseUrl and wsBaseUrl from Railway environment variables.
  * Falls back to local dev defaults.
  */
-const runtimeEnv = (globalThis as Record<string, unknown>)['__env'] as
+const runtimeEnv = (globalThis as Record<string, unknown>)["__env"] as
   | { apiBaseUrl?: string; wsBaseUrl?: string }
   | undefined;
 
 export const environment = {
   production: !!runtimeEnv,
-  apiBaseUrl: runtimeEnv?.apiBaseUrl ?? 'http://localhost:8001',
-  wsBaseUrl: runtimeEnv?.wsBaseUrl ?? 'ws://localhost:8001',
+  apiBaseUrl: runtimeEnv?.apiBaseUrl ?? "http://localhost:8001",
+  wsBaseUrl: runtimeEnv?.wsBaseUrl ?? "ws://localhost:8001",
 };

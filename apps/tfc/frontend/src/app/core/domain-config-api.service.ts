@@ -1,13 +1,13 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from './environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "./environment";
 import type {
   TerminologyMap,
   ThemeConfig,
   DomainRole,
   SeverityLevel,
-} from '@aspect/tfc-shared';
+} from "@aspect/tfc-shared";
 
 export interface DomainConfigResponse {
   id: number;
@@ -22,7 +22,7 @@ export interface DomainConfigResponse {
   updated_at: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class DomainConfigApiService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiBaseUrl;

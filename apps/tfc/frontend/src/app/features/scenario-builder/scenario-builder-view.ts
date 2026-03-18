@@ -1,49 +1,79 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import {
-  PageHeaderComponent, CardComponent, ButtonDirective, InputComponent,
-  BadgeComponent, CollapsiblePanelComponent,
-} from '@aspect/ui';
-import { DomainService } from '../../core/domain.service';
-import { ScenarioApiService } from '../../core/scenario-api.service';
-import type { DecisionTemplateDef } from '../../core/scenario-api.service';
-import { ScenarioBuilderStore } from './scenario-builder.store';
-import { ScenarioEventEditorComponent } from './scenario-event-editor';
-import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
-import { validateScenarioContent } from './validate-scenario-content';
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import {
+  PageHeaderComponent,
+  CardComponent,
+  ButtonDirective,
+  InputComponent,
+  BadgeComponent,
+  CollapsiblePanelComponent,
+} from "@aspect/ui";
+import { DomainService } from "../../core/domain.service";
+import { ScenarioApiService } from "../../core/scenario-api.service";
+import type { DecisionTemplateDef } from "../../core/scenario-api.service";
+import { ScenarioBuilderStore } from "./scenario-builder.store";
+import { ScenarioEventEditorComponent } from "./scenario-event-editor";
+import { ScenarioIssueEditorComponent } from "./scenario-issue-editor";
+import { validateScenarioContent } from "./validate-scenario-content";
 
 @Component({
-  selector: 'tfc-scenario-builder-view',
+  selector: "tfc-scenario-builder-view",
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ScenarioBuilderStore],
   imports: [
-    FormsModule, PageHeaderComponent, CardComponent, ButtonDirective,
-    InputComponent, BadgeComponent, CollapsiblePanelComponent,
-    ScenarioEventEditorComponent, ScenarioIssueEditorComponent,
+    FormsModule,
+    PageHeaderComponent,
+    CardComponent,
+    ButtonDirective,
+    InputComponent,
+    BadgeComponent,
+    CollapsiblePanelComponent,
+    ScenarioEventEditorComponent,
+    ScenarioIssueEditorComponent,
   ],
   template: `
     <div class="flex flex-col gap-md p-lg">
       <ui-page-header title="Scenario Builder" />
 
       <div class="flex gap-md">
-        <ui-input id="scenario-title" label="Title" placeholder="Scenario title"
-          [value]="store.title()" (valueChange)="store.setTitle($event)" />
-        <ui-input id="scenario-desc" label="Description" placeholder="Description"
-          [value]="store.description()" (valueChange)="store.setDescription($event)" />
+        <ui-input
+          id="scenario-title"
+          label="Title"
+          placeholder="Scenario title"
+          [value]="store.title()"
+          (valueChange)="store.setTitle($event)"
+        />
+        <ui-input
+          id="scenario-desc"
+          label="Description"
+          placeholder="Description"
+          [value]="store.description()"
+          (valueChange)="store.setDescription($event)"
+        />
         <button uiButton variant="default" (click)="save()">
-          {{ store.scenarioId() ? 'Update' : 'Create' }}
+          {{ store.scenarioId() ? "Update" : "Create" }}
         </button>
         @if (store.scenarioId()) {
-          <button uiButton variant="outline" (click)="store.reset()">New</button>
+          <button uiButton variant="outline" (click)="store.reset()">
+            New
+          </button>
         }
       </div>
 
       @if (store.error()) {
-        <div class="p-sm border border-destructive bg-destructive/10 text-destructive text-sm rounded"
-          role="alert">
+        <div
+          class="p-sm border border-destructive bg-destructive/10 text-destructive text-sm rounded"
+          role="alert"
+        >
           <strong>Validation errors:</strong>
           <ul class="mt-xs ml-md list-disc">
-            @for (err of store.error()!.split('\\n'); track err) {
+            @for (err of store.error()!.split("\\n"); track err) {
               <li>{{ err }}</li>
             }
           </ul>
@@ -59,17 +89,32 @@ import { validateScenarioContent } from './validate-scenario-content';
             <div class="flex flex-col gap-xs p-sm border-b">
               @if (editingDtId() === dt.id) {
                 <div class="flex flex-col gap-xs">
-                  <ui-input id="edit-dt-title" label="Title"
-                    [value]="editDtTitle()" (valueChange)="editDtTitle.set($event)" />
-                  <ui-input id="edit-dt-desc" label="Description"
-                    [value]="editDtDesc()" (valueChange)="editDtDesc.set($event)" />
+                  <ui-input
+                    id="edit-dt-title"
+                    label="Title"
+                    [value]="editDtTitle()"
+                    (valueChange)="editDtTitle.set($event)"
+                  />
+                  <ui-input
+                    id="edit-dt-desc"
+                    label="Description"
+                    [value]="editDtDesc()"
+                    (valueChange)="editDtDesc.set($event)"
+                  />
                   <div class="flex gap-sm">
-                    <ui-input id="edit-dt-issue" label="Issue ID"
-                      [value]="editDtIssueId()" (valueChange)="editDtIssueId.set($event)" />
+                    <ui-input
+                      id="edit-dt-issue"
+                      label="Issue ID"
+                      [value]="editDtIssueId()"
+                      (valueChange)="editDtIssueId.set($event)"
+                    />
                     <div class="flex flex-col gap-xs" style="flex:1">
                       <label class="text-xs">Question Type</label>
-                      <select class="input-base" [value]="editDtQType()"
-                        (change)="editDtQType.set(sel($event))">
+                      <select
+                        class="input-base"
+                        [value]="editDtQType()"
+                        (change)="editDtQType.set(sel($event))"
+                      >
                         <option value="single_choice">Single Choice</option>
                         <option value="multi_choice">Multi Choice</option>
                         <option value="free_text">Free Text</option>
@@ -77,34 +122,77 @@ import { validateScenarioContent } from './validate-scenario-content';
                     </div>
                   </div>
                   <div class="flex gap-sm">
-                    <button uiButton variant="default" size="sm" (click)="saveDt(dt.id)">Save</button>
-                    <button uiButton variant="outline" size="sm" (click)="editingDtId.set(null)">Cancel</button>
+                    <button
+                      uiButton
+                      variant="default"
+                      size="sm"
+                      (click)="saveDt(dt.id)"
+                    >
+                      Save
+                    </button>
+                    <button
+                      uiButton
+                      variant="outline"
+                      size="sm"
+                      (click)="editingDtId.set(null)"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 </div>
               } @else {
                 <div class="flex items-center justify-between">
                   <div>
                     <span class="text-sm font-medium">{{ dt.title }}</span>
-                    <ui-badge variant="secondary">{{ dt.question_type }}</ui-badge>
-                    <span class="text-xs text-muted-foreground ml-sm">issue: {{ dt.issue_id }}</span>
+                    <ui-badge variant="secondary">{{
+                      dt.question_type
+                    }}</ui-badge>
+                    <span class="text-xs text-muted-foreground ml-sm"
+                      >issue: {{ dt.issue_id }}</span
+                    >
                   </div>
                   <div class="flex gap-xs">
-                    <button uiButton variant="outline" size="sm" (click)="editDt(dt)">Edit</button>
-                    <button uiButton variant="destructive" size="sm"
-                      (click)="store.removeDecisionTemplate(dt.id)">Remove</button>
+                    <button
+                      uiButton
+                      variant="outline"
+                      size="sm"
+                      (click)="editDt(dt)"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      uiButton
+                      variant="destructive"
+                      size="sm"
+                      (click)="store.removeDecisionTemplate(dt.id)"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </div>
               }
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No decision templates yet.</p>
+            <p class="text-muted-foreground text-sm p-sm">
+              No decision templates yet.
+            </p>
           }
           <div class="flex gap-sm p-sm border-t">
-            <ui-input id="dt-title" label="" placeholder="Decision title"
-              [(value)]="newDtTitle" />
-            <ui-input id="dt-issue" label="" placeholder="Issue ID"
-              [(value)]="newDtIssueId" />
-            <button uiButton variant="outline" size="sm" (click)="addDt()">Add</button>
+            <ui-input
+              id="dt-title"
+              label=""
+              placeholder="Decision title"
+              [(value)]="newDtTitle"
+            />
+            <ui-input
+              id="dt-issue"
+              label=""
+              placeholder="Issue ID"
+              [(value)]="newDtIssueId"
+            />
+            <button uiButton variant="outline" size="sm" (click)="addDt()">
+              Add
+            </button>
           </div>
         </ui-card>
 
@@ -112,15 +200,22 @@ import { validateScenarioContent } from './validate-scenario-content';
           <div class="flex flex-col gap-sm p-sm">
             <div class="flex items-center gap-sm">
               <span class="text-sm">Default Time Factor:</span>
-              <input type="number" class="input-base" style="width: var(--container-xs, 5rem)"
+              <input
+                type="number"
+                class="input-base"
+                style="width: var(--container-xs, 5rem)"
                 [value]="store.content().default_time_factor"
-                (change)="onTimeFactorChange($event)" />
+                (change)="onTimeFactorChange($event)"
+              />
             </div>
             <div class="flex flex-col gap-xs">
               <span class="text-sm">Briefing:</span>
-              <textarea class="input-base" rows="3"
+              <textarea
+                class="input-base"
+                rows="3"
                 [value]="store.content().briefing ?? ''"
-                (input)="onBriefingChange($event)"></textarea>
+                (input)="onBriefingChange($event)"
+              ></textarea>
             </div>
           </div>
         </ui-card>
@@ -130,11 +225,20 @@ import { validateScenarioContent } from './validate-scenario-content';
         <span panelTitle>Existing Scenarios</span>
         @for (s of scenarios(); track s.id) {
           <div class="flex items-center justify-between p-sm border-b">
-            <span class="text-sm font-medium cursor-pointer" (click)="loadScenario(s.id)">
+            <span
+              class="text-sm font-medium cursor-pointer"
+              (click)="loadScenario(s.id)"
+            >
               {{ s.title }}
             </span>
-            <button uiButton variant="destructive" size="sm"
-              (click)="deleteScenario(s.id)">Delete</button>
+            <button
+              uiButton
+              variant="destructive"
+              size="sm"
+              (click)="deleteScenario(s.id)"
+            >
+              Delete
+            </button>
           </div>
         } @empty {
           <p class="text-muted-foreground text-sm p-sm">No scenarios found.</p>
@@ -150,15 +254,17 @@ export class ScenarioBuilderView implements OnInit {
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
   private counter = 0;
 
-  protected readonly newDtTitle = signal('');
-  protected readonly newDtIssueId = signal('');
+  protected readonly newDtTitle = signal("");
+  protected readonly newDtIssueId = signal("");
   protected readonly editingDtId = signal<string | null>(null);
-  protected readonly editDtTitle = signal('');
-  protected readonly editDtDesc = signal('');
-  protected readonly editDtIssueId = signal('');
-  protected readonly editDtQType = signal('single_choice');
+  protected readonly editDtTitle = signal("");
+  protected readonly editDtDesc = signal("");
+  protected readonly editDtIssueId = signal("");
+  protected readonly editDtQType = signal("single_choice");
 
-  ngOnInit(): void { this.loadList(); }
+  ngOnInit(): void {
+    this.loadList();
+  }
 
   protected sel(event: Event): string {
     return (event.target as HTMLSelectElement).value;
@@ -166,13 +272,15 @@ export class ScenarioBuilderView implements OnInit {
 
   private loadList(): void {
     this.api.list().subscribe({
-      next: (list) => this.scenarios.set(list.map((s) => ({ id: s.id, title: s.title }))),
+      next: (list) =>
+        this.scenarios.set(list.map((s) => ({ id: s.id, title: s.title }))),
     });
   }
 
   protected loadScenario(id: number): void {
     this.api.get(id).subscribe({
-      next: (s) => this.store.loadScenario(s.id, s.title, s.description, s.content),
+      next: (s) =>
+        this.store.loadScenario(s.id, s.title, s.description, s.content),
     });
   }
 
@@ -181,10 +289,10 @@ export class ScenarioBuilderView implements OnInit {
     const content = this.store.content();
     const errors = validateScenarioContent(content);
     if (!this.store.title().trim()) {
-      errors.unshift('Title is required.');
+      errors.unshift("Title is required.");
     }
     if (errors.length > 0) {
-      this.store.setError(errors.join('\n'));
+      this.store.setError(errors.join("\n"));
       return;
     }
     this.store.setSaving(true);
@@ -201,7 +309,8 @@ export class ScenarioBuilderView implements OnInit {
         this.store.setSaving(false);
         this.loadList();
       },
-      error: () => this.store.setError('Save failed — server rejected the scenario.'),
+      error: () =>
+        this.store.setError("Save failed — server rejected the scenario."),
     });
   }
 
@@ -214,12 +323,16 @@ export class ScenarioBuilderView implements OnInit {
     const issueId = this.newDtIssueId().trim();
     if (!title || !issueId) return;
     this.store.addDecisionTemplate({
-      id: `dt-${++this.counter}`, title, description: '',
-      issue_id: issueId, question_type: 'single_choice',
-      options: [], completion_mode: 'first_response',
+      id: `dt-${++this.counter}`,
+      title,
+      description: "",
+      issue_id: issueId,
+      question_type: "single_choice",
+      options: [],
+      completion_mode: "first_response",
     });
-    this.newDtTitle.set('');
-    this.newDtIssueId.set('');
+    this.newDtTitle.set("");
+    this.newDtIssueId.set("");
   }
 
   protected editDt(dt: DecisionTemplateDef): void {
@@ -232,8 +345,10 @@ export class ScenarioBuilderView implements OnInit {
 
   protected saveDt(dtId: string): void {
     this.store.updateDecisionTemplate(dtId, {
-      title: this.editDtTitle(), description: this.editDtDesc(),
-      issue_id: this.editDtIssueId(), question_type: this.editDtQType(),
+      title: this.editDtTitle(),
+      description: this.editDtDesc(),
+      issue_id: this.editDtIssueId(),
+      question_type: this.editDtQType(),
     });
     this.editingDtId.set(null);
   }

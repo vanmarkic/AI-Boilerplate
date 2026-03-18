@@ -1,46 +1,93 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { CardComponent, ButtonDirective, InputComponent, BadgeComponent } from '@aspect/ui';
-import type { ScenarioIssueDef } from '../../core/scenario-api.service';
-import { ScenarioBuilderStore } from './scenario-builder.store';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import {
+  CardComponent,
+  ButtonDirective,
+  InputComponent,
+  BadgeComponent,
+} from "@aspect/ui";
+import type { ScenarioIssueDef } from "../../core/scenario-api.service";
+import { ScenarioBuilderStore } from "./scenario-builder.store";
 
 @Component({
-  selector: 'tfc-scenario-issue-editor',
+  selector: "tfc-scenario-issue-editor",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CardComponent, ButtonDirective, InputComponent, BadgeComponent],
+  imports: [
+    FormsModule,
+    CardComponent,
+    ButtonDirective,
+    InputComponent,
+    BadgeComponent,
+  ],
   template: `
     <ui-card title="Issues">
       @for (issue of store.content().issues; track issue.id) {
         <div class="flex flex-col gap-xs p-sm border-b">
           @if (editingId() === issue.id) {
             <div class="flex flex-col gap-xs">
-              <ui-input id="edit-iss-title" label="Title"
-                [value]="editTitle()" (valueChange)="editTitle.set($event)" />
-              <ui-input id="edit-iss-desc" label="Description"
-                [value]="editDesc()" (valueChange)="editDesc.set($event)" />
+              <ui-input
+                id="edit-iss-title"
+                label="Title"
+                [value]="editTitle()"
+                (valueChange)="editTitle.set($event)"
+              />
+              <ui-input
+                id="edit-iss-desc"
+                label="Description"
+                [value]="editDesc()"
+                (valueChange)="editDesc.set($event)"
+              />
               <div class="flex gap-sm">
                 <div class="flex flex-col gap-xs" style="flex:1">
                   <label class="text-xs">Trigger</label>
-                  <select class="input-base" [value]="editTrigger()"
-                    (change)="editTrigger.set(sel($event))">
+                  <select
+                    class="input-base"
+                    [value]="editTrigger()"
+                    (change)="editTrigger.set(sel($event))"
+                  >
                     <option value="manual">Manual</option>
                     <option value="time-based">Time-based</option>
                     <option value="event-based">Event-based</option>
                   </select>
                 </div>
-                <ui-input id="edit-iss-ar" label="Auto-resolve (ms)"
-                  [value]="'' + editAutoResolve()" (valueChange)="editAutoResolve.set(+$event)" />
+                <ui-input
+                  id="edit-iss-ar"
+                  label="Auto-resolve (ms)"
+                  [value]="'' + editAutoResolve()"
+                  (valueChange)="editAutoResolve.set(+$event)"
+                />
               </div>
               <div class="flex gap-sm">
-                <button uiButton variant="default" size="sm" (click)="save(issue.id)">Save</button>
-                <button uiButton variant="outline" size="sm" (click)="editingId.set(null)">Cancel</button>
+                <button
+                  uiButton
+                  variant="default"
+                  size="sm"
+                  (click)="save(issue.id)"
+                >
+                  Save
+                </button>
+                <button
+                  uiButton
+                  variant="outline"
+                  size="sm"
+                  (click)="editingId.set(null)"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           } @else {
             <div class="flex items-center justify-between">
               <div>
                 <span class="text-sm font-medium">{{ issue.title }}</span>
-                <ui-badge variant="secondary">{{ issue.trigger_mode }}</ui-badge>
+                <ui-badge variant="secondary">{{
+                  issue.trigger_mode
+                }}</ui-badge>
                 @if (issue.auto_resolve_ms > 0) {
                   <span class="text-xs text-muted-foreground ml-sm">
                     auto-resolve: {{ issue.auto_resolve_ms / 1000 }}s
@@ -48,9 +95,22 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
                 }
               </div>
               <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm" (click)="edit(issue)">Edit</button>
-                <button uiButton variant="destructive" size="sm"
-                  (click)="store.removeIssue(issue.id)">Remove</button>
+                <button
+                  uiButton
+                  variant="outline"
+                  size="sm"
+                  (click)="edit(issue)"
+                >
+                  Edit
+                </button>
+                <button
+                  uiButton
+                  variant="destructive"
+                  size="sm"
+                  (click)="store.removeIssue(issue.id)"
+                >
+                  Remove
+                </button>
               </div>
             </div>
           }
@@ -59,15 +119,24 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
         <p class="text-muted-foreground text-sm p-sm">No issues yet.</p>
       }
       <div class="flex gap-sm p-sm border-t">
-        <ui-input id="issue-title" label="" placeholder="Issue title"
-          [(value)]="newTitle" />
-        <select class="input-base" [value]="newTrigger()"
-          (change)="newTrigger.set(sel($event))">
+        <ui-input
+          id="issue-title"
+          label=""
+          placeholder="Issue title"
+          [(value)]="newTitle"
+        />
+        <select
+          class="input-base"
+          [value]="newTrigger()"
+          (change)="newTrigger.set(sel($event))"
+        >
           <option value="manual">Manual</option>
           <option value="time-based">Time-based</option>
           <option value="event-based">Event-based</option>
         </select>
-        <button uiButton variant="outline" size="sm" (click)="add()">Add</button>
+        <button uiButton variant="outline" size="sm" (click)="add()">
+          Add
+        </button>
       </div>
     </ui-card>
   `,
@@ -76,13 +145,13 @@ export class ScenarioIssueEditorComponent {
   protected readonly store = inject(ScenarioBuilderStore);
   private counter = 0;
 
-  protected readonly newTitle = signal('');
-  protected readonly newTrigger = signal('manual');
+  protected readonly newTitle = signal("");
+  protected readonly newTrigger = signal("manual");
 
   protected readonly editingId = signal<string | null>(null);
-  protected readonly editTitle = signal('');
-  protected readonly editDesc = signal('');
-  protected readonly editTrigger = signal('manual');
+  protected readonly editTitle = signal("");
+  protected readonly editDesc = signal("");
+  protected readonly editTrigger = signal("manual");
   protected readonly editAutoResolve = signal(0);
 
   protected sel(event: Event): string {
@@ -95,13 +164,13 @@ export class ScenarioIssueEditorComponent {
     this.store.addIssue({
       id: `iss-${++this.counter}`,
       title,
-      description: '',
+      description: "",
       trigger_mode: this.newTrigger(),
       trigger_time_pt_ms: null,
       trigger_event_id: null,
       auto_resolve_ms: 0,
     });
-    this.newTitle.set('');
+    this.newTitle.set("");
   }
 
   protected edit(issue: ScenarioIssueDef): void {
