@@ -162,6 +162,100 @@ test.describe("Landing page — active lobby @home @landing", () => {
   });
 });
 
+// ── Scenario → Waiting Room Navigation ──────────────────────────────
+
+test.describe(
+  "Scenario to waiting room @home @waiting-room @scenario-picker",
+  () => {
+    test("clicking a scenario creates exercise and shows lobby (waiting room)", async ({
+      page,
+      mockApi,
+    }) => {
+      mockApi.seedScenario(MOCK_SCENARIO);
+
+      // After exercise creation, the joinable endpoint must return the new exercise.
+      // Track whether POST /exercises has been called so we can switch the response.
+      let exerciseCreated = false;
+
+      await mockApi.install();
+
+      // Override the joinable route to return the lobby after creation
+      await page.route("**/api/exercises/joinable", async (route) => {
+        if (route.request().method() !== "GET") {
+          await route.fallback();
+          return;
+        }
+        if (!exerciseCreated) {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify([]),
+          });
+        } else {
+          await route.fulfill({
+            status: 200,
+            contentType: "application/json",
+            body: JSON.stringify([
+              {
+                exercise: {
+                  id: 99,
+                  title: "Hospital MCI",
+                  game_mode: "simple_collaborative",
+                  scenario_id: 1,
+                },
+                participants: [],
+                roles: MOCK_ROLES,
+                max_players: 2,
+                requires_gm: false,
+              },
+            ]),
+          });
+        }
+      });
+
+      // Override POST /exercises to flip the flag
+      await page.route("**/api/exercises", async (route) => {
+        if (route.request().method() !== "POST") {
+          await route.fallback();
+          return;
+        }
+        exerciseCreated = true;
+        await route.fulfill({
+          status: 201,
+          contentType: "application/json",
+          body: JSON.stringify({
+            id: 99,
+            title: "Hospital MCI",
+            description: "",
+            phase: "setup",
+            scenario_id: 1,
+            domain_id: null,
+            time_factor: 1.0,
+            game_mode: "simple_collaborative",
+            session_code: "ABCDEF",
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }),
+        });
+      });
+
+      await page.goto("/home");
+
+      // Step 1: Click "Run Exercise" to open the scenario picker
+      await page.getByText("Run Exercise").click();
+      await expect(page.getByText("Hospital MCI")).toBeVisible();
+
+      // Step 2: Click the scenario card
+      await page.getByText("Hospital MCI").click();
+
+      // Step 3: Lobby / waiting room should appear with role slots
+      await expect(page.getByText("0 / 2 players")).toBeVisible();
+      await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
+      await expect(page.getByText("Navigator (NAV)")).toBeVisible();
+    });
+  },
+);
+
 // ── Role Slot Display ─────────────────────────────────────────────────
 
 test.describe("Role slots @home @waiting-room", () => {
