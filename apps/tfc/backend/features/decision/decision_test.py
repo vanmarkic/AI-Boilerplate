@@ -78,8 +78,8 @@ class TestCreateDecision:
     @pytest.mark.asyncio
     async def test_rejects_invalid_question_type(self) -> None:
         svc, _ = _make_service()
-        from fastapi import HTTPException
-        with pytest.raises(HTTPException) as exc_info:
+        from core.exceptions import BadRequestError
+        with pytest.raises(BadRequestError):
             await svc.create_decision(CreateDecisionRequest(
                 title="Bad",
                 exercise_id=1,
@@ -87,7 +87,6 @@ class TestCreateDecision:
                 question_type="invalid",
                 completion_mode="first_response",
             ))
-        assert exc_info.value.status_code == 400
 
 
 class TestSubmitResponse:
@@ -110,12 +109,11 @@ class TestSubmitResponse:
     async def test_closed_decision_raises_400(self) -> None:
         svc, repo = _make_service()
         repo.get_by_id = AsyncMock(return_value=_mock_decision(status="closed"))
-        from fastapi import HTTPException
-        with pytest.raises(HTTPException) as exc_info:
+        from core.exceptions import BadRequestError
+        with pytest.raises(BadRequestError):
             await svc.submit_response(1, SubmitResponseRequest(
                 participant_id="u", participant_name="Bob",
             ))
-        assert exc_info.value.status_code == 400
 
     @pytest.mark.asyncio
     async def test_auto_close_on_first_response(self) -> None:
@@ -149,10 +147,9 @@ class TestCloseDecision:
     async def test_close_nonexistent_raises_404(self) -> None:
         svc, repo = _make_service()
         repo.get_by_id = AsyncMock(return_value=None)
-        from fastapi import HTTPException
-        with pytest.raises(HTTPException) as exc_info:
+        from core.exceptions import NotFoundError
+        with pytest.raises(NotFoundError):
             await svc.close_decision(999)
-        assert exc_info.value.status_code == 404
 
 
 class TestListDecisions:
