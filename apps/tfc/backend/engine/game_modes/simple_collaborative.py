@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from engine.state_changes import ScoreChange
+from engine.state_changes import ForcedCardApplied, ScoreChange
 
 
 @dataclass
@@ -60,6 +60,53 @@ class SimpleCollaborativeMode:
             "turn_number": self.turn_number,
         }
         return [change]
+
+    def on_decision_closed_v2(
+        self,
+        decision_id: str,
+        selected_options: list[dict],
+        all_options: list[dict],
+        forced_option_ids: list[str] | None = None,
+    ) -> list[dict]:
+        """Score using full option lists. Enforces forced cards."""
+        changes: list[dict] = []
+        forced_ids = forced_option_ids or []
+
+        # Check forced cards — auto-add if missing
+        selected_ids = {o["id"] for o in selected_options}
+        effective_options = list(selected_options)
+        for fid in forced_ids:
+            if fid not in selected_ids:
+                forced_opt = next(
+                    (o for o in all_options if o["id"] == fid), None,
+                )
+                if forced_opt is not None:
+                    effective_options.append(forced_opt)
+                    change: ForcedCardApplied = {
+                        "type": "forced_card_applied",
+                        "decision_id": decision_id,
+                        "forced_option_id": fid,
+                        "reason": (
+                            f"Mandatory card {fid} was not selected"
+                            " and has been auto-applied."
+                        ),
+                    }
+                    changes.append(change)
+
+        # Compute scores
+        n = len(effective_options)
+        selected_score = sum(o.get("score", 0) for o in effective_options)
+        top_n = sorted(
+            (o.get("score", 0) for o in all_options), reverse=True,
+        )[:n]
+        max_score = sum(top_n)
+
+        # Delegate to existing scalar scoring
+        score_changes = self.on_decision_closed(
+            decision_id, selected_score, max_score,
+        )
+        changes.extend(score_changes)
+        return changes
 
     def get_next_decision_id(self, closed_decision_id: str) -> str | None:
         """Return next decision template ID in sequence, or None if done."""

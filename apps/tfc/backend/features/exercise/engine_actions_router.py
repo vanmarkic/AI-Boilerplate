@@ -154,19 +154,8 @@ async def get_open_decisions(exercise_id: int) -> list[dict]:
     ]
 
 
-@router.post("/decisions/{decision_id}/close", operation_id="closeDecision")
-async def close_decision(exercise_id: int, decision_id: str) -> dict:
-    engine = _get_engine(exercise_id)
-    pt = engine.time_manager.play_time_ms
-    result = engine.decision_manager.close_decision(decision_id, current_pt_ms=pt)
-    if result is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Decision {decision_id} not found or already closed",
-        )
-    if not engine.decision_manager.get_open_decisions():
-        await engine.resume()
-    return result
+    # close_decision endpoint has been consolidated into engine_router.py
+    # to support scoring, turn chaining, and forced card enforcement.
 
 
 # ── Context ──────────────────────────────────────────────────────────────

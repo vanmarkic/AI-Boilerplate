@@ -21,6 +21,15 @@ class ClassicMode:
     ) -> list[dict]:
         return []
 
+    def on_decision_closed_v2(
+        self,
+        decision_id: str,
+        selected_options: list[dict],
+        all_options: list[dict],
+        forced_option_ids: list[str] | None = None,
+    ) -> list[dict]:
+        return []
+
     def get_next_decision_id(self, closed_decision_id: str) -> str | None:
         return None
 
