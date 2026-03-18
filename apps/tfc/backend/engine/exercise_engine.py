@@ -30,6 +30,7 @@ class EngineStateError(RuntimeError):
 
 class EnginePhase(StrEnum):
     SETUP = "setup"
+    BRIEFING = "briefing"
     RUNNING = "running"
     PAUSED = "paused"
     COMPLETED = "completed"
@@ -85,12 +86,19 @@ class ExerciseEngine:
         return self._config.game_mode
 
     async def start(self) -> PhaseChange:
-        if self._phase not in {EnginePhase.SETUP, EnginePhase.PAUSED}:
+        if self._phase not in {EnginePhase.SETUP}:
             raise EngineStateError(f"Cannot start from {self._phase}")
+        self._phase = EnginePhase.BRIEFING
+        return self._phase_change("started")
+
+    async def begin(self) -> PhaseChange:
+        """Transition BRIEFING → RUNNING: player has read the briefing."""
+        if self._phase != EnginePhase.BRIEFING:
+            raise EngineStateError(f"Cannot begin from {self._phase}")
         self._phase = EnginePhase.RUNNING
         self._time.start()
         self._start_tick_loop()
-        return self._phase_change("started")
+        return self._phase_change("begun")
 
     async def pause(self) -> PhaseChange:
         if self._phase != EnginePhase.RUNNING:
@@ -101,7 +109,12 @@ class ExerciseEngine:
         return self._phase_change("paused")
 
     async def resume(self) -> PhaseChange:
-        return await self.start()
+        if self._phase != EnginePhase.PAUSED:
+            raise EngineStateError(f"Cannot resume from {self._phase}")
+        self._phase = EnginePhase.RUNNING
+        self._time.start()
+        self._start_tick_loop()
+        return self._phase_change("started")
 
     async def complete(self) -> PhaseChange:
         if self._phase in {EnginePhase.COMPLETED, EnginePhase.SETUP}:

@@ -84,6 +84,8 @@ def build_engine_config(
     exercise_id: int,
     title: str,
     content: ScenarioContent,
+    *,
+    practice_mode: bool = False,
 ) -> EngineConfig:
     """Build a full EngineConfig from a validated ScenarioContent."""
     context = ScenarioContext(
@@ -98,6 +100,8 @@ def build_engine_config(
     if content.decision_sequence:
         mode_config.setdefault("decision_sequence", list(content.decision_sequence))
     game_mode = create_game_mode(content.game_mode, mode_config)
+    if practice_mode and hasattr(game_mode, "base_decision_time_ms"):
+        game_mode.base_decision_time_ms = int(game_mode.base_decision_time_ms * 1.5)
     return EngineConfig(
         exercise_id=exercise_id,
         title=title,

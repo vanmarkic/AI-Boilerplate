@@ -74,13 +74,19 @@ async def join_waiting_room(
         scenario_service,
     )
     if roles is not None:
-        max_players = len(roles)
+        exercise_obj = await exercise_service.get_exercise(exercise_id)
+        if exercise_obj.practice_mode:
+            max_players = 1
+        else:
+            max_players = len(roles)
         if waiting_room_store.count(exercise_id) >= max_players:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Waiting room is full",
             )
-        if waiting_room_store.is_role_taken(exercise_id, body.role):
+        if not exercise_obj.practice_mode and waiting_room_store.is_role_taken(
+            exercise_id, body.role
+        ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Role '{body.role}' is already taken",
