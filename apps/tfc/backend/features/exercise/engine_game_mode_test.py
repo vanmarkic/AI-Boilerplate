@@ -112,6 +112,8 @@ async def _setup_exercise(
 
     start = await client.post(f"/api/exercises/{eid}/engine/start")
     assert start.status_code == 200
+    begin = await client.post(f"/api/exercises/{eid}/engine/begin")
+    assert begin.status_code == 200
     return eid
 
 

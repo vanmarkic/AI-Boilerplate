@@ -79,10 +79,10 @@ async def test_phase_transition_valid(client: AsyncClient) -> None:
 
     response = await client.put(
         f"/api/exercises/{exercise_id}",
-        json={"phase": "running"},
+        json={"phase": "briefing"},
     )
     assert response.status_code == 200
-    assert response.json()["phase"] == "running"
+    assert response.json()["phase"] == "briefing"
 
 
 @pytest.mark.asyncio

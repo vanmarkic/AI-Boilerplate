@@ -85,11 +85,18 @@ export class PlayerView implements OnInit, OnDestroy {
 
   protected activeDecision(): ActiveDecision | undefined {
     const role = this.store.playerRole();
-    return this.store.openDecisions().find((d) => {
+    const decision = this.store.openDecisions().find((d) => {
       if (!d.target_roles || d.target_roles.length === 0) return true;
-      if (role === "all_advisors") return true;
+      if (role === "all_advisors" || role === "solo_player") return true;
       return d.target_roles.includes(role);
     });
+    if (decision && decision.id !== this.lastDecisionId) {
+      this.lastDecisionId = decision.id;
+      if (this.store.isPracticeMode()) {
+        this.practicePhase.set("advising");
+      }
+    }
+    return decision;
   }
 
   protected advisorRecs(decision: ActiveDecision) {
@@ -113,6 +120,8 @@ export class PlayerView implements OnInit, OnDestroy {
     if (gameMode) {
       this.store.setGameMode(gameMode);
     }
+    const practiceMode = params["practiceMode"] === "true";
+    this.store.setPracticeMode(practiceMode);
     this.ws.connect(id, "player", pId || undefined);
     this.sub = this.ws.messages$.subscribe((msg) =>
       handlePlayerWsMessage(msg, this.store),
@@ -180,6 +189,10 @@ export class PlayerView implements OnInit, OnDestroy {
       this.participantId(),
       rec,
     );
+  }
+
+  protected onPracticeAdviceDone(): void {
+    this.practicePhase.set("deciding");
   }
 
   protected onDecisionSubmitted(
