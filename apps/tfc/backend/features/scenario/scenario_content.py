@@ -26,6 +26,7 @@ class DecisionTemplateDef(BaseModel):
     completion_mode: str = "first_response"
     timeout_ms: float = 0  # 0 = no timeout
     target_roles: list[str] = []
+    forced_option_ids: list[str] = []
 
 
 class ScenarioEventDef(BaseModel):

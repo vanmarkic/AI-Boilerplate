@@ -91,3 +91,100 @@ def test_score_change_includes_next_decision_time() -> None:
     changes = mode.on_decision_closed("d2", selected_score=1.0, max_score=2.0)
     # second penalty = (2.0 - 1.0) * 0.1 * 1000 = 100
     assert changes[0]["next_decision_time_ms"] == 300_000 - 300
+
+
+# -- Phase 2: Option-list based scoring -----------------------------------
+
+
+_OPTS = [
+    {"id": "good", "label": "Good", "score": 10.0},
+    {"id": "ok", "label": "OK", "score": 6.0},
+    {"id": "bad", "label": "Bad", "score": -2.0},
+]
+
+
+def test_option_scoring_single_card() -> None:
+    """Selecting 1 card: score = card score, max = top-1 score."""
+    mode = _mode()
+    selected = [_OPTS[1]]  # ok, score=6
+    changes = mode.on_decision_closed_v2("d1", selected, _OPTS)
+    assert changes[0]["total_score"] == 6.0
+    # penalty = (10.0 - 6.0) * 0.1 * 1000 = 400ms
+    assert changes[0]["penalty_ms"] == 400.0
+
+
+def test_option_scoring_multiple_cards() -> None:
+    """Selecting 2 cards: score = sum, max = sum of top-2."""
+    mode = _mode()
+    selected = [_OPTS[1], _OPTS[2]]  # ok + bad = 6.0 + (-2.0) = 4.0
+    changes = mode.on_decision_closed_v2("d1", selected, _OPTS)
+    assert changes[0]["total_score"] == 4.0
+    # max for 2 cards = top-2 scores sorted desc = 10.0 + 6.0 = 16.0
+    # penalty = (16.0 - 4.0) * 0.1 * 1000 = 1200ms
+    assert abs(changes[0]["penalty_ms"] - 1200.0) < 1e-6
+
+
+def test_option_scoring_negative_score_reduces_total() -> None:
+    """A negative-score card reduces total_score."""
+    mode = _mode()
+    selected = [_OPTS[2]]  # bad, score=-2.0
+    changes = mode.on_decision_closed_v2("d1", selected, _OPTS)
+    assert changes[0]["total_score"] == -2.0
+
+
+def test_option_scoring_perfect_selection_no_penalty() -> None:
+    """Selecting the best card(s) → zero penalty."""
+    mode = _mode()
+    selected = [_OPTS[0]]  # good, score=10
+    changes = mode.on_decision_closed_v2("d1", selected, _OPTS)
+    assert changes[0]["penalty_ms"] == 0.0
+
+
+def test_option_scoring_advances_turn_and_index() -> None:
+    mode = _mode()
+    mode.on_decision_closed_v2("d1", [_OPTS[0]], _OPTS)
+    assert mode.turn_number == 1
+    assert mode.current_index == 1
+
+
+# -- Phase 3: Forced card enforcement -------------------------------------
+
+
+def test_forced_card_present_no_penalty() -> None:
+    """If player selects the forced card, no forced-card penalty applied."""
+    mode = _mode()
+    forced = ["good"]
+    selected = [_OPTS[0]]  # includes forced card
+    changes = mode.on_decision_closed_v2("d1", selected, _OPTS, forced_option_ids=forced)
+    # No ForcedCardApplied change emitted
+    assert all(c["type"] != "forced_card_applied" for c in changes)
+
+
+def test_forced_card_missing_auto_added_with_penalty() -> None:
+    """If player omits forced card, it's auto-added and penalty applied."""
+    mode = _mode()
+    forced = ["good"]
+    selected = [_OPTS[1]]  # omits forced card "good"
+    changes = mode.on_decision_closed_v2("d1", selected, _OPTS, forced_option_ids=forced)
+    forced_changes = [c for c in changes if c["type"] == "forced_card_applied"]
+    assert len(forced_changes) == 1
+    assert forced_changes[0]["forced_option_id"] == "good"
+    assert forced_changes[0]["decision_id"] == "d1"
+
+
+def test_forced_card_score_included_in_total() -> None:
+    """When forced card is auto-added, its score is included in total."""
+    mode = _mode()
+    forced = ["good"]
+    selected = [_OPTS[1]]  # ok=6.0, forced "good"=10.0 auto-added
+    changes = mode.on_decision_closed_v2("d1", selected, _OPTS, forced_option_ids=forced)
+    score_change = next(c for c in changes if c["type"] == "score_change")
+    # total = 6.0 (selected) + 10.0 (forced auto-added) = 16.0
+    assert score_change["total_score"] == 16.0
+
+
+def test_no_forced_cards_no_enforcement() -> None:
+    """No forced_option_ids → no forced card logic fires."""
+    mode = _mode()
+    changes = mode.on_decision_closed_v2("d1", [_OPTS[1]], _OPTS)
+    assert all(c["type"] != "forced_card_applied" for c in changes)

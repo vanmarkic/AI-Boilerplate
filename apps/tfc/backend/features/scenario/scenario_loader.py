@@ -71,6 +71,7 @@ def load_decision_templates(
             completion_mode=dt.completion_mode,
             timeout_ms=dt.timeout_ms,
             target_roles=list(dt.target_roles),
+            forced_option_ids=list(dt.forced_option_ids),
         )
         for dt in content.decision_templates
     ]
