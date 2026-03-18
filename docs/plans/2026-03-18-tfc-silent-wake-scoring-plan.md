@@ -1,7 +1,7 @@
 # Plan: Silent Wake Per-Card Scoring and Forced Cards
 
 **Date:** 2026-03-18
-**Status:** Active
+**Status:** Implemented — merged into `claude/tfc-silent-wake-penalties-Tymz8`
 **Scope:** Wire scoring end-to-end, multi-card +/0/- scoring, forced card enforcement
 **Depends on:** `2026-03-17-tfc-collaborative-mode-review.md` (gaps 1–4)
 
@@ -107,9 +107,14 @@ Formula: `selected_score = sum(opt["score"] for opt in selected_options)`, `max_
 
 ---
 
-## Deferred
+## Remaining Gaps (for follow-up PRs)
 
-- **Stress dimension**: separate from score, TBD once PM defines mechanics
-- **`max_selections` field**: "pick up to N cards" constraint (gap 7 from review)
-- **Score in snapshot**: reconnecting player sees score (gap 5)
-- **Player identity**: participant_id="TODO" (gap 3)
+| # | Gap | Severity | Blocker? | Notes |
+|---|---|---|---|---|
+| 3 | **Player identity hardcoded** (`participant_id="TODO"`) | High | Yes — multi-advisor | All advisors overwrite same recommendation slot |
+| 5 | **Score not in snapshot** | Medium | No | Reconnecting player loses score display |
+| 6 | **PlayerType never set from scenario** | Medium | No | Advisor/decision-maker distinction dead in UI |
+| 7 | **No `max_selections` field** | Medium | No | Cannot enforce "pick up to 2 cards" |
+| 9 | **Stress dimension not modeled** | Medium | No | PM wants stress as a running state. Mechanics TBD. Recommend: separate PR after PM defines formula. |
+| 10 | **Frontend API client needs regeneration** | Low | No | `close_decision` endpoint now requires request body (`selected_option_ids`). Run `make generate`. |
+| 11 | **`on_decision_closed` / `on_decision_closed_v2` coexistence** | Low | No | Scalar v1 used internally by v2. Consider deprecating v1 once all callers migrate. |
