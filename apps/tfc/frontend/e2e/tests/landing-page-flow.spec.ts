@@ -71,7 +71,7 @@ test.describe('Scenario picker @home @scenario-builder', () => {
 
     await expect(page.getByText('Hospital MCI')).toBeVisible();
     await expect(page.getByText('2 roles')).toBeVisible();
-    await expect(page.getByText('Collaborative')).toBeVisible();
+    await expect(page.getByText('Collaborative', { exact: true })).toBeVisible();
   });
 
   test('back button returns to main menu', async ({ page, mockApi }) => {
