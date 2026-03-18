@@ -67,6 +67,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -80,7 +82,13 @@ jobs:
           key: frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
-      - run: npm run test:ci
+      - name: Run changed tests (PR) or full suite (push)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            npm run test:changed
+          else
+            npm run test:ci
+          fi
 
   build:
     name: Build
@@ -104,11 +112,17 @@ jobs:
       - run: npm run build
 
   e2e:
-    name: E2E Tests
+    name: E2E Tests (${{ matrix.shard }})
     needs: [lint, test]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/2, 2/2]
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -123,10 +137,19 @@ jobs:
       - run: npm i
         working-directory: .
       - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - name: Run E2E (changed-only on PRs, full + sharded on push)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            GREP=$(bash shared/scripts/e2e-changed.sh origin/master main 2>/dev/null) && \
+              npx playwright test --grep "$GREP" --shard=${{ matrix.shard }} || \
+              npx playwright test --shard=${{ matrix.shard }}
+          else
+            npx playwright test --shard=${{ matrix.shard }}
+          fi
+        working-directory: apps/main/frontend
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-${{ strategy.job-index }}
           path: apps/main/frontend/playwright-report/
           retention-days: 7
