@@ -29,7 +29,7 @@ def get_revision_ids(config: Config) -> list[str]:
     return revisions
 
 
-@pytest.fixture()
+@pytest.fixture
 def alembic_config() -> Generator[Config, None, None]:
     """Provide an Alembic config and ensure the DB is at base after test."""
     config = get_alembic_config()
