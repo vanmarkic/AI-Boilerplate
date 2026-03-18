@@ -17,20 +17,10 @@ export interface Convergence {
   halo: THREE.Mesh<THREE.SphereGeometry, THREE.MeshBasicMaterial>;
 }
 
-/**
- * Pick a random interior vertex from the plane grid.
- * Interior vertices sit where 6 triangles meet.
- */
-function pickInteriorVertex(
-  geo: THREE.PlaneGeometry,
-  widthSegs: number,
-  heightSegs: number,
-): { x: number; z: number } {
-  const cols = widthSegs + 1;
-  const col = 1 + Math.floor(Math.random() * (widthSegs - 1));
-  const row = 1 + Math.floor(Math.random() * (heightSegs - 1));
-  const idx = row * cols + col;
+/** Pick a random vertex from the plane grid. */
+function pickVertex(geo: THREE.PlaneGeometry): { x: number; z: number } {
   const pos = geo.attributes['position'];
+  const idx = Math.floor(Math.random() * pos.count);
   return { x: pos.getX(idx), z: pos.getZ(idx) };
 }
 
@@ -39,11 +29,9 @@ export function createConvergence(
   glowTexture: THREE.Texture,
   themeColor: THREE.Color,
   planeGeo: THREE.PlaneGeometry,
-  widthSegs: number,
-  heightSegs: number,
   t: number,
 ): Convergence {
-  const { x, z } = pickInteriorVertex(planeGeo, widthSegs, heightSegs);
+  const { x, z } = pickVertex(planeGeo);
   const y = waveY(x, z, t);
 
   const dotMat = new THREE.SpriteMaterial({

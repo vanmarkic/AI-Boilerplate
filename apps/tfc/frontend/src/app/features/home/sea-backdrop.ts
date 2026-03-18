@@ -61,8 +61,6 @@ export class SeaBackdrop implements OnDestroy {
 
   private convergences: Convergence[] = [];
   private nextConvergence = 2;
-  private readonly widthSegs = 18;
-  private readonly heightSegs = 12;
 
   private get themeColor(): THREE.Color {
     const raw = getComputedStyle(document.documentElement)
@@ -121,7 +119,7 @@ export class SeaBackdrop implements OnDestroy {
     pl2.position.set(-4, 1, -2);
     this.scene.add(pl1, pl2);
 
-    const geo = new THREE.PlaneGeometry(24, 14, this.widthSegs, this.heightSegs);
+    const geo = new THREE.PlaneGeometry(24, 14, 18, 12);
     geo.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({
       color: primary, wireframe: true, transparent: true, opacity: 0.85,
@@ -200,8 +198,7 @@ export class SeaBackdrop implements OnDestroy {
     if (t >= this.nextConvergence) {
       this.convergences.push(
         createConvergence(
-          this.scene, this.glowTexture, this.themeColor,
-          this.plane.geometry, this.widthSegs, this.heightSegs, t,
+          this.scene, this.glowTexture, this.themeColor, this.plane.geometry, t,
         ),
       );
       this.nextConvergence = t + CONVERGENCE_INTERVAL + Math.random() * 2;
