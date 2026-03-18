@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { EventTimelineComponent } from './event-timeline.component';
 import type { EventSnapshot, IssueSnapshot } from '../../core/engine-api.service';
+import { environment } from '../../core/environment';
 
 describe('EventTimelineComponent', () => {
   let fixture: ComponentFixture<EventTimelineComponent>;
@@ -26,12 +29,21 @@ describe('EventTimelineComponent', () => {
     },
   ];
 
+  const base = environment.apiBaseUrl;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [EventTimelineComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(EventTimelineComponent);
+  });
+
+  afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
   });
 
   it('renders the timeline container', () => {
