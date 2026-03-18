@@ -1,4 +1,7 @@
-"""Exercise engine — orchestrates TimeManager, EventScheduler, IssueManager."""
+"""Exercise engine — orchestrates TimeManager, EventScheduler (injects), IssueManager (defects).
+
+Domain terms: "inject" = event, "defect" = issue. See AGENTS.md terminology mapping.
+"""
 from __future__ import annotations
 
 import asyncio
