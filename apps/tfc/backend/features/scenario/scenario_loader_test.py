@@ -79,6 +79,42 @@ def test_load_decision_templates_empty() -> None:
     assert result == []
 
 
+def test_load_decision_templates_preserves_max_selections() -> None:
+    dt = DecisionTemplateDef(
+        id="dt-max",
+        title="Pick 2",
+        description="Select up to 2",
+        issue_id="i1",
+        question_type="multi_choice",
+        options=[
+            DecisionOptionDef(id="o1", label="A", score=1.0),
+            DecisionOptionDef(id="o2", label="B", score=2.0),
+            DecisionOptionDef(id="o3", label="C", score=3.0),
+        ],
+        completion_mode="consensus",
+        max_selections=2,
+    )
+    content = _minimal_content(decision_templates=[dt])
+    result = load_decision_templates(content)
+    assert len(result) == 1
+    assert result[0].max_selections == 2
+
+
+def test_load_decision_templates_max_selections_defaults_none() -> None:
+    dt = DecisionTemplateDef(
+        id="dt-nomax",
+        title="Pick any",
+        description="No limit",
+        issue_id="i1",
+        question_type="multi_choice",
+        options=[],
+        completion_mode="first_response",
+    )
+    content = _minimal_content(decision_templates=[dt])
+    result = load_decision_templates(content)
+    assert result[0].max_selections is None
+
+
 def test_load_decision_templates_preserves_target_roles() -> None:
     dt = DecisionTemplateDef(
         id="dt2",

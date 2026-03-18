@@ -62,6 +62,7 @@ class DecisionSnapshot(TypedDict):
     completion_mode: str
     target_roles: list[str]
     timeout_ms: float
+    max_selections: int | None
     status: str
     opened_at_pt_ms: float
     closed_at_pt_ms: float | None
@@ -126,6 +127,7 @@ class DecisionOpened(TypedDict):
     options: list[DecisionOptionSnapshot]
     target_roles: list[str]
     timeout_ms: float
+    max_selections: int | None
 
 
 class DecisionClosed(TypedDict):

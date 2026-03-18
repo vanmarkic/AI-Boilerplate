@@ -350,6 +350,7 @@
         "issue_id": "iss-transit-nominal",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB01",
@@ -370,6 +371,7 @@
         "issue_id": "iss-sensor-anomaly",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB01",
@@ -390,6 +392,7 @@
         "issue_id": "iss-faulty-component",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB05",
@@ -415,6 +418,7 @@
         "issue_id": "iss-ais-spoofing",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB09",
@@ -445,6 +449,7 @@
         "issue_id": "iss-cyber-alert",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB07",
@@ -465,6 +470,7 @@
         "issue_id": "iss-hostile-contact",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "forced_option_ids": ["SWB20"],
         "options": [
           {
@@ -491,6 +497,7 @@
         "issue_id": "iss-aaw-malfunction",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB01",
@@ -516,6 +523,7 @@
         "issue_id": "iss-air-threat",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB01",
@@ -541,6 +549,7 @@
         "issue_id": "iss-under-attack",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB29",
@@ -566,6 +575,7 @@
         "issue_id": "iss-damage-first-hit",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB18",
@@ -596,6 +606,7 @@
         "issue_id": "iss-cyber-confirmed",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB10",
@@ -626,6 +637,7 @@
         "issue_id": "iss-aaw-attack-source",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB08",
@@ -651,6 +663,7 @@
         "issue_id": "iss-aaw-attack-source",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB10",
@@ -676,6 +689,7 @@
         "issue_id": "iss-damage-first-hit",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB16",
@@ -701,6 +715,7 @@
         "issue_id": "iss-transit-nominal",
         "question_type": "multi_choice",
         "completion_mode": "consensus",
+        "max_selections": 2,
         "options": [
           {
             "id": "SWB03",
