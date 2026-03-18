@@ -51,17 +51,37 @@ test.describe('Waiting room view @waiting-room', () => {
     await expect(page.getByText('You')).toBeVisible();
   });
 
-  test('shows empty state when no participants', async ({
+  test('shows role slots when no participants have claimed', async ({
     page,
     mockApi,
   }) => {
+    // Seed exercise + scenario with roles but no participants in the room
+    mockApi.seedExercise(exerciseId, 'classic', exerciseId);
+    mockApi.seedScenario({
+      id: exerciseId,
+      title: 'Test Scenario',
+      description: '',
+      domain_id: null,
+      content: {
+        roles: [
+          { id: 'player', label: 'Player', player_type: 'advisor' },
+          { id: 'observer', label: 'Observer', player_type: 'advisor' },
+        ],
+        game_mode: 'classic',
+      },
+      version: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
     await mockApi.install();
     await page.goto(waitingRoomUrl('nobody'));
 
-    await expect(page.getByText('No participants yet')).toBeVisible();
+    // Role slots visible with Claim buttons
+    await expect(page.getByText('Player')).toBeVisible();
+    await expect(page.getByText('Observer')).toBeVisible();
   });
 
-  test('displays exercise ID', async ({ page, mockApi }) => {
+  test('shows Waiting Room title', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(exerciseId, [me]);
     await mockApi.install();
@@ -69,7 +89,7 @@ test.describe('Waiting room view @waiting-room', () => {
     await page.goto(waitingRoomUrl(me.id));
 
     await expect(
-      page.getByText(`exercise #${exerciseId}`),
+      page.getByText('Waiting Room'),
     ).toBeVisible();
   });
 
@@ -100,17 +120,21 @@ test.describe('Game master controls @waiting-room @game-master', () => {
       display_name: 'Commander',
       role: 'game-master',
     });
-    mockApi.seed(exerciseId, [gm]);
+    const player = mockParticipant({
+      display_name: 'Alice',
+      role: 'player',
+    });
+    mockApi.seed(exerciseId, [gm, player]);
     await mockApi.install();
 
     await page.goto(waitingRoomUrl(gm.id));
 
     await expect(
-      page.getByRole('button', { name: 'Start Exercise' }),
+      page.getByRole('button', { name: /Start Exercise/ }),
     ).toBeVisible();
   });
 
-  test('player does NOT see "Start Exercise" button', async ({
+  test('Start Exercise button is disabled when not enough participants', async ({
     page,
     mockApi,
   }) => {
@@ -118,32 +142,15 @@ test.describe('Game master controls @waiting-room @game-master', () => {
       display_name: 'Alice',
       role: 'player',
     });
+    // Only 1 participant but exercise requires player + GM roles
     mockApi.seed(exerciseId, [player]);
     await mockApi.install();
 
     await page.goto(waitingRoomUrl(player.id));
 
     await expect(
-      page.getByRole('button', { name: 'Start Exercise' }),
-    ).not.toBeVisible();
-  });
-
-  test('observer does NOT see "Start Exercise" button', async ({
-    page,
-    mockApi,
-  }) => {
-    const obs = mockParticipant({
-      display_name: 'Watcher',
-      role: 'observer',
-    });
-    mockApi.seed(exerciseId, [obs]);
-    await mockApi.install();
-
-    await page.goto(waitingRoomUrl(obs.id));
-
-    await expect(
-      page.getByRole('button', { name: 'Start Exercise' }),
-    ).not.toBeVisible();
+      page.getByRole('button', { name: /Start Exercise/ }),
+    ).toBeDisabled();
   });
 
   test('clicking "Start Exercise" navigates to GM view', async ({
@@ -154,18 +161,23 @@ test.describe('Game master controls @waiting-room @game-master', () => {
       display_name: 'Commander',
       role: 'game-master',
     });
-    mockApi.seed(exerciseId, [gm]);
+    const player = mockParticipant({
+      display_name: 'Alice',
+      role: 'player',
+    });
+    // Need enough participants: 1 scenario role (player) + GM = 2 needed
+    mockApi.seed(exerciseId, [gm, player]);
     await mockApi.install();
 
     await page.goto(waitingRoomUrl(gm.id));
 
-    await page.getByRole('button', { name: 'Start Exercise' }).click();
+    await page.getByRole('button', { name: /Start Exercise/ }).click();
 
     await expect(page).toHaveURL(/\/gm/);
     await expect(page).toHaveURL(/exerciseId=200/);
   });
 
-  test('GM sees all participants with role dropdowns', async ({
+  test('GM sees all role slots with participant names', async ({
     page,
     mockApi,
   }) => {
@@ -189,10 +201,6 @@ test.describe('Game master controls @waiting-room @game-master', () => {
     await expect(page.getByText('Commander')).toBeVisible();
     await expect(page.getByText('Alice')).toBeVisible();
     await expect(page.getByText('Bob')).toBeVisible();
-
-    // One dropdown per participant
-    const selects = page.locator('select');
-    await expect(selects).toHaveCount(3);
   });
 });
 
@@ -205,39 +213,53 @@ test.describe('Role change @waiting-room', () => {
     return `/waiting-room?exerciseId=${exerciseId}&participantId=${participantId}`;
   }
 
-  test('changing role sends PUT request', async ({ page, mockApi }) => {
+  test('claiming a role sends PUT request', async ({ page, mockApi }) => {
     const me = mockParticipant({
       display_name: 'Alice',
       role: 'player',
     });
-    const other = mockParticipant({
-      display_name: 'Bob',
-      role: 'player',
+    // Seed exercise with 2 roles so there's an unclaimed slot
+    mockApi.seedExercise(exerciseId, 'simple_collaborative', exerciseId);
+    mockApi.seedScenario({
+      id: exerciseId,
+      title: 'Test',
+      description: '',
+      domain_id: null,
+      content: {
+        roles: [
+          { id: 'player', label: 'Player', player_type: 'advisor' },
+          { id: 'observer', label: 'Observer', player_type: 'advisor' },
+        ],
+        game_mode: 'simple_collaborative',
+      },
+      version: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     });
-    mockApi.seed(exerciseId, [me, other]);
+    mockApi.seed(exerciseId, [me]);
     await mockApi.install();
 
     let putCalled = false;
     await page.route('**/participants/*/role', async (route) => {
       if (route.request().method() === 'PUT') {
         putCalled = true;
-        const body = route.request().postDataJSON();
-        const p = { ...other, role: body.role };
         await route.fulfill({
           status: 200,
           contentType: 'application/json',
-          body: JSON.stringify(p),
+          body: JSON.stringify({ ...me, role: 'observer' }),
         });
       } else {
         await route.fallback();
       }
     });
 
-    await page.goto(waitingRoomUrl(me.id));
+    await page.goto(
+      `/waiting-room?exerciseId=${exerciseId}&participantId=${me.id}&gameMode=simple_collaborative`,
+    );
 
-    // Change Bob's role via the second dropdown
-    const selects = page.locator('select');
-    await selects.nth(1).selectOption('game-master');
+    // Click the Claim button for the unclaimed 'Observer' role slot
+    const claimButtons = page.getByRole('button', { name: 'Claim' });
+    await claimButtons.first().click();
 
     // Wait for the API call
     await page.waitForTimeout(500);
@@ -254,7 +276,7 @@ test.describe('Leave flow @waiting-room', () => {
     return `/waiting-room?exerciseId=${exerciseId}&participantId=${participantId}`;
   }
 
-  test('clicking Leave navigates to /join', async ({ page, mockApi }) => {
+  test('clicking Leave navigates to /home', async ({ page, mockApi }) => {
     const me = mockParticipant({
       display_name: 'Alice',
       role: 'player',
@@ -299,4 +321,3 @@ test.describe('Leave flow @waiting-room', () => {
     expect(deletedId).toBe(me.id);
   });
 });
-
