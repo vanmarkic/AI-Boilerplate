@@ -497,7 +497,7 @@ test.describe('Combined — full 2-player scenario @player @two-player', () => {
     // No raw composite keys
     await expect(page.getByText('all-adv-01:')).not.toBeVisible();
 
-    // Footer
-    await expect(page.getByText('You are the Decision Maker')).toBeVisible();
+    // Footer — co role resolves to "Commanding Officer" label
+    await expect(page.getByText('You are the Commanding Officer')).toBeVisible();
   });
 });
