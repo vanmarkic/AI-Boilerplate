@@ -38,6 +38,28 @@ jobs:
             packages/tfc-shared/node_modules
           key: tfc-frontend-${{ github.sha }}
 
+  lint:
+    name: Lint & Format
+    needs: install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: actions/cache/restore@v5
+        with:
+          path: |
+            node_modules
+            apps/tfc/frontend/node_modules
+            packages/design-system/node_modules
+            packages/tfc-shared/node_modules
+          key: tfc-frontend-${{ github.sha }}
+      - run: npm i
+        working-directory: .
+      - name: Prettier format check
+        run: npx prettier --check .
+
   test:
     name: Unit Tests
     needs: install
