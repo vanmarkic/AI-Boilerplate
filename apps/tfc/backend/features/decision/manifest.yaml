@@ -1,0 +1,25 @@
+name: decision
+tier: 1
+description: Decision CRUD — questions, responses, and outcomes
+version: 0.2.0
+dependencies:
+  internal: [exercise]
+  external: [postgresql]
+api_endpoints:
+  - POST /api/decisions
+  - GET /api/decisions
+  - GET /api/decisions/{id}
+  - POST /api/decisions/{id}/respond
+  - POST /api/decisions/{id}/close
+models: [Decision, DecisionResponseRecord]
+events_emitted:
+  - DecisionCreated
+  - DecisionClosed
+events_consumed: []
+business_rules:
+  - "question_type is 'single_choice' or 'multi_choice'"
+  - "In collaborative mode, advisors submit non-binding recommendations"
+  - "The decision-maker submits the binding ruling via close_decision"
+  - "Scoring: penalty_ms = (max_possible - selected_score) * penalty_factor * 1000"
+  - "Effective time: max(min_decision_time_ms, base_decision_time_ms - accumulated_penalty_ms)"
+  - "forced_option_ids causes auto-inclusion with penalty when omitted"
