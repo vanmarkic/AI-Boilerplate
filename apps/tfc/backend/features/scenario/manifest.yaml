@@ -3,19 +3,22 @@ tier: 1
 description: Scenario CRUD and content loading for exercise templates
 version: 0.2.0
 dependencies:
-  internal: []
+  internal: [domain_config]
   external: [postgresql]
 api_endpoints:
   - POST /api/scenarios
   - GET /api/scenarios
-  - GET /api/scenarios/{id}
-  - PUT /api/scenarios/{id}
-  - DELETE /api/scenarios/{id}
-models: [Scenario]
+  - GET /api/scenarios/{scenario_id}
+  - PUT /api/scenarios/{scenario_id}
+  - DELETE /api/scenarios/{scenario_id}
+models:
+  - Scenario
 events_emitted: []
 events_consumed: []
 business_rules:
   - "A scenario must have a title"
+  - "Scenario content is validated via ScenarioContent Pydantic model"
   - "Scenario content includes briefing, objectives, rules, events, issues, and decision templates"
+  - "Scenarios can optionally link to a domain config"
   - "scenario_loader.py converts ScenarioContent into EngineConfig for the engine"
   - "Seed scenarios are loaded from JSON files via the idempotent seeder"

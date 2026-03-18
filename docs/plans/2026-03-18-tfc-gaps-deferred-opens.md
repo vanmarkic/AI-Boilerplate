@@ -11,7 +11,7 @@
 | # | Gap | Blocker? | Status | Details |
 |---|---|---|---|---|
 | 7 | **No `max_selections` field** | No | Open | `DecisionTemplateDef` can't express "pick up to N cards". No server-side validation of multi-choice selection count. Zero matches in codebase. |
-| 8 | **Domain terminology hardcoded** | No | Open | Two divergent `DomainConfig` interfaces: `packages/tfc-shared/constants/domains.ts` (3 presets, `theme: ThemeConfig` object) vs `frontend/core/domain.service.ts` (4 presets, `theme: string`). Not DB-driven, not per-scenario. DB migration `003` created `tfc_domain_configs` table but it's not wired to scenario loading. Target: DB entity referenced by `scenario.domain_config_id`. |
+| 8 | **Domain terminology hardcoded** | No | Partial | DB migration `003` created `tfc_domain_configs` table. `features/domain_config/` feature exists with CRUD. Two divergent `DomainConfig` interfaces still exist in shared package vs frontend service. Not yet wired to scenario loading via `scenario.domain_config_id`. |
 | 9 | **Stress dimension not modeled** | No — waiting on PM | Deferred | Only `accumulated_penalty_ms` (time penalty) exists. PM wants stress as a running state shaped by good/bad decisions across turns. Mechanics undefined. Separate PR after PM defines formula. |
 
 ## Open PM Questions
