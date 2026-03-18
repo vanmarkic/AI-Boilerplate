@@ -11,7 +11,7 @@ import { test, expect, mockParticipant } from '../fixtures/base.fixture';
 
 // ── Collaborative waiting room ──────────────────────────────────────────
 
-test.describe('Collaborative waiting room', () => {
+test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
   const exerciseId = 500;
 
   function collabUrl(participantId: string): string {

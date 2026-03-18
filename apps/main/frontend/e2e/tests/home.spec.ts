@@ -1,6 +1,6 @@
 import { expect, test } from '../fixtures/base.fixture';
 
-test.describe('Home page', () => {
+test.describe('Home page @landing', () => {
   test('should load the application', async ({ page }) => {
     await page.goto('/');
     await expect(page).toHaveTitle(/Frontend/i);

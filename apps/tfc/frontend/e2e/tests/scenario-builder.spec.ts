@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Scenario Builder', () => {
+test.describe('Scenario Builder @scenario-builder', () => {
   test('should display the scenario builder page', async ({ page }) => {
     await page.goto('/builder');
     await expect(page.locator('body')).toContainText(/scenario builder/i);
