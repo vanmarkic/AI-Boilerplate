@@ -76,7 +76,7 @@
           },
           "configurations": {
             "coverage": {
-              "codeCoverage": true
+              "coverage": true
             }
           }
         }

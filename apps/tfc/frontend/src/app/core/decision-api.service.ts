@@ -1,7 +1,7 @@
-import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from './environment';
+import { inject, Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "./environment";
 
 export interface DecisionOption {
   id: string;
@@ -72,7 +72,7 @@ export interface ScenarioContext {
   roles: RoleInfo[];
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class DecisionApiService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiBaseUrl;
@@ -85,7 +85,10 @@ export class DecisionApiService {
   }
 
   /** Submit a response to a DB-persisted decision */
-  submitResponse(decisionId: number, submission: DecisionSubmission): Observable<DecisionResponseItem> {
+  submitResponse(
+    decisionId: number,
+    submission: DecisionSubmission,
+  ): Observable<DecisionResponseItem> {
     return this.http.post<DecisionResponseItem>(
       `${this.base}/api/decisions/${decisionId}/responses`,
       submission,
@@ -100,24 +103,35 @@ export class DecisionApiService {
   }
 
   /** List all decisions for an exercise */
-  listDecisions(exerciseId: number, status?: string): Observable<DecisionDetail[]> {
+  listDecisions(
+    exerciseId: number,
+    status?: string,
+  ): Observable<DecisionDetail[]> {
     const params: Record<string, string | number> = { exercise_id: exerciseId };
-    if (status) { params['status'] = status; }
-    return this.http.get<DecisionDetail[]>(
-      `${this.base}/api/decisions`,
-      { params },
-    );
+    if (status) {
+      params["status"] = status;
+    }
+    return this.http.get<DecisionDetail[]>(`${this.base}/api/decisions`, {
+      params,
+    });
   }
 
   /** Submit an advisor recommendation on an open decision */
   submitRecommendation(
-    exerciseId: number, decisionId: string, optionId: string,
-    participantId: string, roleId?: string,
+    exerciseId: number,
+    decisionId: string,
+    optionId: string,
+    participantId: string,
+    roleId?: string,
   ): Observable<unknown> {
     const body: Record<string, string> = {
-      decision_id: decisionId, option_id: optionId, participant_id: participantId,
+      decision_id: decisionId,
+      option_id: optionId,
+      participant_id: participantId,
     };
-    if (roleId) { body['role_id'] = roleId; }
+    if (roleId) {
+      body["role_id"] = roleId;
+    }
     return this.http.post(
       `${this.base}/api/exercises/${exerciseId}/engine/decisions/recommend`,
       body,
@@ -125,7 +139,11 @@ export class DecisionApiService {
   }
 
   /** Close a decision in the engine (GM or decision-maker action) */
-  closeEngineDecision(exerciseId: number, decisionId: string, selectedOptionIds: string[] = []): Observable<unknown> {
+  closeEngineDecision(
+    exerciseId: number,
+    decisionId: string,
+    selectedOptionIds: string[] = [],
+  ): Observable<unknown> {
     return this.http.post(
       `${this.base}/api/exercises/${exerciseId}/engine/decisions/${decisionId}/close`,
       { selected_option_ids: selectedOptionIds },

@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from './environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "./environment";
 
 export interface AuditEntry {
   id: number;
@@ -18,7 +18,7 @@ export interface AuditEntry {
   created_at: string;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class AuditApiService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiBaseUrl;
