@@ -41,7 +41,7 @@ const MOCK_SCENARIO = {
 
 // ── Landing Page Default State ────────────────────────────────────────
 
-test.describe('Landing page — no active exercise', () => {
+test.describe('Landing page — no active exercise @home @landing', () => {
   test('shows main menu when no joinable exercise', async ({
     page,
     mockApi,
@@ -58,7 +58,7 @@ test.describe('Landing page — no active exercise', () => {
 
 // ── Scenario Picker ───────────────────────────────────────────────────
 
-test.describe('Scenario picker', () => {
+test.describe('Scenario picker @home @scenario-builder', () => {
   test('"Run Exercise" opens scenario picker', async ({
     page,
     mockApi,
@@ -89,7 +89,7 @@ test.describe('Scenario picker', () => {
 
 // ── Lobby Preview ─────────────────────────────────────────────────────
 
-test.describe('Landing page — active lobby', () => {
+test.describe('Landing page — active lobby @home @landing', () => {
   test('shows lobby when joinable exercise exists', async ({
     page,
     mockApi,
@@ -170,7 +170,7 @@ test.describe('Landing page — active lobby', () => {
 
 // ── Role Slot Display ─────────────────────────────────────────────────
 
-test.describe('Role slots', () => {
+test.describe('Role slots @home @waiting-room', () => {
   test('shows open slots as "Open"', async ({ page, mockApi }) => {
     mockApi.seedJoinable({
       exercise: {
