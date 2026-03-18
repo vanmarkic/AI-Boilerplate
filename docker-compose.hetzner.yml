@@ -48,6 +48,12 @@ services:
       - caddy_0=api-tfc.46.224.43.248.sslip.io
       - caddy_0.reverse_proxy={{upstreams 8001}}
       - caddy_0.encode=zstd gzip
+      # CORS headers
+      - "caddy_0.header.Access-Control-Allow-Origin=https://tfc.46.224.43.248.sslip.io"
+      - "caddy_0.header.Access-Control-Allow-Methods=GET, POST, PUT, PATCH, DELETE, OPTIONS"
+      - "caddy_0.header.Access-Control-Allow-Headers=*"
+      - "caddy_0.header.Access-Control-Allow-Credentials=true"
+      - "caddy_0.header.Access-Control-Max-Age=3600"
       - caddy_0.header=-Server
       - caddy_ingress_network=coolify
 
