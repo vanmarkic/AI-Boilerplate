@@ -1,43 +1,43 @@
-import { Injectable, inject, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
-import type { TerminologyMap } from '@aspect/tfc-shared';
+import { Injectable, inject, signal } from "@angular/core";
+import { firstValueFrom } from "rxjs";
+import type { TerminologyMap } from "@aspect/tfc-shared";
 import {
   DomainConfigApiService,
   type DomainConfigResponse,
-} from './domain-config-api.service';
+} from "./domain-config-api.service";
 
 const FALLBACK_TERMINOLOGY: TerminologyMap = {
-  event: 'Event',
-  issue: 'Issue',
-  player: 'Player',
-  gameMaster: 'Game Master',
-  exercise: 'Exercise',
-  scenario: 'Scenario',
-  decision: 'Decision',
+  event: "Event",
+  issue: "Issue",
+  player: "Player",
+  gameMaster: "Game Master",
+  exercise: "Exercise",
+  scenario: "Scenario",
+  decision: "Decision",
 };
 
 const FALLBACK_DOMAIN: DomainConfigResponse = {
   id: 0,
-  slug: 'default',
-  name: 'Default',
-  description: '',
+  slug: "default",
+  name: "Default",
+  description: "",
   terminology: FALLBACK_TERMINOLOGY,
   theme: {
-    colorPrimary: '#3b82f6',
-    colorSecondary: '#6366f1',
-    colorBackground: '#ffffff',
-    colorForeground: '#1e293b',
-    fontFamily: 'system-ui, sans-serif',
-    fontFamilyMono: 'ui-monospace, monospace',
-    density: 'comfortable',
+    colorPrimary: "#3b82f6",
+    colorSecondary: "#6366f1",
+    colorBackground: "#ffffff",
+    colorForeground: "#1e293b",
+    fontFamily: "system-ui, sans-serif",
+    fontFamilyMono: "ui-monospace, monospace",
+    density: "comfortable",
   },
   roles: [],
   severity_levels: [],
-  created_at: '',
-  updated_at: '',
+  created_at: "",
+  updated_at: "",
 };
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class DomainService {
   private readonly api = inject(DomainConfigApiService);
 
@@ -54,9 +54,7 @@ export class DomainService {
     try {
       const domains = await firstValueFrom(this.api.list());
       this.availableDomains.set(domains);
-      const current = domains.find(
-        (d) => d.slug === this.activeDomain().slug,
-      );
+      const current = domains.find((d) => d.slug === this.activeDomain().slug);
       if (current) {
         this.activeDomain.set(current);
       }
@@ -66,9 +64,8 @@ export class DomainService {
   }
 
   async setDomain(slugOrId: string | number): Promise<void> {
-    const cached = this.availableDomains().find(
-      (d) =>
-        (typeof slugOrId === 'number' ? d.id === slugOrId : d.slug === slugOrId),
+    const cached = this.availableDomains().find((d) =>
+      typeof slugOrId === "number" ? d.id === slugOrId : d.slug === slugOrId,
     );
     if (cached) {
       this.activeDomain.set(cached);
@@ -76,7 +73,7 @@ export class DomainService {
       return;
     }
     const fetched =
-      typeof slugOrId === 'number'
+      typeof slugOrId === "number"
         ? await firstValueFrom(this.api.get(slugOrId))
         : await firstValueFrom(this.api.getBySlug(slugOrId));
     this.activeDomain.set(fetched);
@@ -90,6 +87,6 @@ export class DomainService {
   private applyTheme(slug: string): void {
     const themeAttr = `tfc-${slug}`;
     const html = document.documentElement;
-    html.setAttribute('data-theme', themeAttr);
+    html.setAttribute("data-theme", themeAttr);
   }
 }

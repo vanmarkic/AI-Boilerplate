@@ -16,7 +16,9 @@
     "paths": {
       "@aspect/ui": ["../../../packages/ui/src/public-api.ts"],
       "@aspect/tfc-shared": ["../../../packages/tfc-shared/src/public-api.ts"],
-      "@aspect/ngrx-with-resource": ["../../../packages/ngrx-with-resource/src/public-api.ts"]
+      "@aspect/ngrx-with-resource": [
+        "../../../packages/ngrx-with-resource/src/public-api.ts"
+      ]
     }
   },
   "angularCompilerOptions": {

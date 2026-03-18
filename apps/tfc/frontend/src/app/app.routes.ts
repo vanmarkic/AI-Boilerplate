@@ -1,49 +1,45 @@
-import { Routes } from '@angular/router';
+import { Routes } from "@angular/router";
 
 export const routes: Routes = [
   {
-    path: '',
-    redirectTo: 'home',
-    pathMatch: 'full',
+    path: "",
+    redirectTo: "home",
+    pathMatch: "full",
   },
   {
-    path: 'home',
+    path: "home",
     loadChildren: () =>
-      import('./features/home/home.routes').then((m) => m.HOME_ROUTES),
+      import("./features/home/home.routes").then((m) => m.HOME_ROUTES),
   },
   {
-    path: 'waiting-room',
+    path: "waiting-room",
     loadChildren: () =>
-      import('./features/waiting-room/waiting-room.routes').then(
-        (m) => m.WAITING_ROOM_ROUTES
+      import("./features/waiting-room/waiting-room.routes").then(
+        (m) => m.WAITING_ROOM_ROUTES,
       ),
   },
   {
-    path: 'gm',
+    path: "gm",
     loadChildren: () =>
-      import('./features/game-master/game-master.routes').then(
-        (m) => m.GAME_MASTER_ROUTES
+      import("./features/game-master/game-master.routes").then(
+        (m) => m.GAME_MASTER_ROUTES,
       ),
   },
   {
-    path: 'player',
+    path: "player",
     loadChildren: () =>
-      import('./features/player/player.routes').then(
-        (m) => m.PLAYER_ROUTES
+      import("./features/player/player.routes").then((m) => m.PLAYER_ROUTES),
+  },
+  {
+    path: "builder",
+    loadChildren: () =>
+      import("./features/scenario-builder/scenario-builder.routes").then(
+        (m) => m.SCENARIO_BUILDER_ROUTES,
       ),
   },
   {
-    path: 'builder',
+    path: "review",
     loadChildren: () =>
-      import('./features/scenario-builder/scenario-builder.routes').then(
-        (m) => m.SCENARIO_BUILDER_ROUTES
-      ),
-  },
-  {
-    path: 'review',
-    loadChildren: () =>
-      import('./features/review/review.routes').then(
-        (m) => m.REVIEW_ROUTES
-      ),
+      import("./features/review/review.routes").then((m) => m.REVIEW_ROUTES),
   },
 ];
