@@ -17,6 +17,7 @@ from pydantic import ValidationError
 from sqlalchemy import select, func
 
 from core.database import async_session_factory
+from features.domain_config.domain_config_model import DomainConfig  # noqa: F401
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_model import Scenario
 
