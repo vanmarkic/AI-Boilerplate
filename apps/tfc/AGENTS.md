@@ -67,7 +67,7 @@ engine/         # pure-Python exercise runtime (no DB, no HTTP)
   strategies.py         # Hypothesis strategies for property tests (*_prop_test.py)
   game_modes/           # pluggable game mode strategies
     classic.py          #   ClassicMode — GM-driven, no scoring
-    simple_collaborative.py  # SimpleCollaborativeMode — advisor/decision-maker roles, sequential decisions, time-penalty scoring
+    simple_collaborative.py  # SimpleCollaborativeMode — advisor/decision-maker roles, per-card +/0/- scoring, forced cards, 2-player variant
 features/
   audit/        # audit trail (all exercise events logged)
   decision/     # decision CRUD (questions, responses, outcomes)
@@ -115,6 +115,10 @@ Exports TypeScript types and lifecycle constants consumed by both frontend and b
 - **Events**: scheduled occurrences with lifecycle `pending → active → completed`. Types: `NARRATIVE`, `DECISION`, `INJECT`.
 - **Issues**: problems surfaced by events, with lifecycle `dormant → active → mitigated → resolved`. Can auto-resolve after a countdown.
 - **Decisions**: questions posed to players when a DECISION event fires. Engine pauses until resolved.
+- **Forced cards**: `forced_option_ids` on `DecisionTemplate`. If a player omits a forced card, it is auto-included with a penalty and a `ForcedCardApplied` state change is emitted.
+- **Per-card scoring**: Each option has a `score: float` (+/0/-). Selected score = sum of chosen cards. Penalty = `(max - selected) * factor * 1000` ms off next decision timer.
+- **2-player mode**: `SimpleCollaborativeMode` supports a 2-player variant where both players act as combined advisor/decision-maker.
+- **Scenario validation**: JSON seed files are validated at Docker build time, seed time, and in the builder UI before saving.
 
 ## Development Commands
 

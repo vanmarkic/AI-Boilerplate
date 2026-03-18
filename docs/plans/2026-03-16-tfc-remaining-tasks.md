@@ -10,21 +10,21 @@
 - [ ] GM: pause/resume individual events (not just the whole exercise)
 - [ ] GM: delay or skip scheduled events
 - [ ] Role-based decision targeting (send decisions to specific roles/participants, not broadcast)
-- [ ] Decision timeout (auto-close decisions after a configurable duration)
+- [x] Decision timeout (auto-close decisions after a configurable duration) — wired with auto-submit + worst-option selection
 - [ ] Auto-resolve countdown displayed in real time on active issues (engine timer works, frontend doesn't show it ticking)
 - [ ] Session persistence across WebSocket reconnect (currently loses state on disconnect)
-- [ ] Scenario builder: full CRUD for events, issues, decisions (currently placeholder view)
-- [ ] Join view: session code + role assignment (currently placeholder)
+- [x] Scenario builder: full CRUD for events, issues, decisions — basic builder with validation wiring
+- [x] Join view: session code + role assignment — session codes, active lobby list, waiting room role assignment
 - [ ] Review view: post-exercise timeline replay (currently placeholder)
 
 ## P3 — Nice to have
 
-- [ ] Scoring hidden during execution, revealed in review
+- [x] Scoring hidden during execution, revealed in review — per-card +/0/- scoring implemented
 - [ ] Post-exercise evaluation / AAR (After Action Review) workflow
 - [ ] Audit trail export (CSV/JSON)
 - [ ] Event timeline with parallel lanes visualization
-- [ ] Multi-domain theming beyond CSS custom properties (domain-specific terminology swaps)
-- [ ] Participant presence indicators (who's connected)
+- [x] Multi-domain theming beyond CSS custom properties (domain-specific terminology swaps) — DB-backed domain config
+- [x] Participant presence indicators (who's connected) — presence indicators in waiting room + player view
 - [ ] Chat/messaging between GM and players
 - [ ] Exercise templates (save/load scenario configurations)
 
