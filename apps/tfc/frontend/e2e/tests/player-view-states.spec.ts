@@ -166,6 +166,13 @@ async function installMocks(
   await page.route(`**/api/exercises/${EX_ID}/engine/context`, (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ctx) }),
   );
+  await page.route('**/api/decisions*', async (route) => {
+    if (route.request().url().includes('/engine/')) {
+      await route.fallback();
+      return;
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) });
+  });
   await page.route(`**/api/exercises/${EX_ID}/engine/decisions`, async (route) => {
     if (route.request().method() === 'GET') {
       await route.fulfill({
@@ -176,9 +183,6 @@ async function installMocks(
       await route.fallback();
     }
   });
-  await page.route('**/api/decisions*', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-  );
   await page.route('**/ws?*', (route) => route.abort('connectionrefused'));
   await page.route('**/ws', (route) => route.abort('connectionrefused'));
 }
@@ -230,7 +234,7 @@ test.describe('Score display — visible iff score exists @player', () => {
     await page.goto(playerUrl('p1'));
 
     await expect(page.locator('tfc-turn-banner')).toBeVisible();
-    await expect(page.getByText('Turn 3')).toBeVisible();
+    await expect(page.locator('tfc-turn-banner')).toContainText('Turn 3');
     await expect(page.locator('tfc-score-bar')).toBeVisible();
   });
 
@@ -497,7 +501,7 @@ test.describe('Combined state — all invariants hold together @player', () => {
     await expect(page.locator('tfc-phase-badge')).toContainText('running');
 
     // Score visible
-    await expect(page.getByText('Turn 3')).toBeVisible();
+    await expect(page.locator('tfc-turn-banner')).toContainText('Turn 3');
     await expect(page.locator('tfc-score-bar')).toBeVisible();
 
     // Events: running + completed visible, scheduled hidden
@@ -535,7 +539,7 @@ test.describe('Combined state — all invariants hold together @player', () => {
     await page.goto(playerUrl('co-01', 'co'));
 
     // Score visible
-    await expect(page.getByText('Turn 3')).toBeVisible();
+    await expect(page.locator('tfc-turn-banner')).toContainText('Turn 3');
 
     // Events visible
     await expect(page.getByText('NAV Report')).toBeVisible();

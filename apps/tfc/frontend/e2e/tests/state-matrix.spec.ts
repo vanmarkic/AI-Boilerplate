@@ -112,7 +112,7 @@ test.describe('/home — Picker state @home @scenario-builder', () => {
     await page.getByText('Run Exercise').click();
 
     await expect(page.getByText('2 roles')).toBeVisible();
-    await expect(page.getByText('Collaborative')).toBeVisible();
+    await expect(page.getByText('Collaborative', { exact: true })).toBeVisible();
   });
 
   test('multiple scenarios all rendered', async ({ page, mockApi }) => {
