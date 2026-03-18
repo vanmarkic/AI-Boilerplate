@@ -188,3 +188,22 @@ async def submit_recommendation(
         exercise_id, {"type": "state_changes", "changes": [result]},
     )
     return result
+
+
+@router.get("/context", operation_id="getEngineContext")
+async def get_engine_context(exercise_id: int) -> dict:
+    """Return scenario context (title, briefing, roles, etc.) for the running engine."""
+    engine = _get_engine(exercise_id)
+    ctx = engine._config.context
+    return {
+        "title": ctx.title,
+        "description": ctx.description,
+        "briefing": ctx.briefing,
+        "objectives": ctx.objectives,
+        "rules": ctx.rules,
+        "default_time_factor": engine._config.time_factor,
+        "roles": [
+            {"id": r.id, "label": r.label, "player_type": r.player_type}
+            for r in ctx.roles
+        ],
+    }
