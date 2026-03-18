@@ -30,7 +30,7 @@ class DecisionTemplateDef(BaseModel):
 
 
 class ScenarioEventDef(BaseModel):
-    """Definition of a single event within a scenario."""
+    """Definition of an inject (event) within a scenario. Domain term: 'inject'."""
     id: str
     title: str
     description: str = ""
@@ -42,7 +42,7 @@ class ScenarioEventDef(BaseModel):
 
 
 class ScenarioIssueDef(BaseModel):
-    """Definition of a single issue within a scenario."""
+    """Definition of a defect (issue) within a scenario. Domain term: 'defect'."""
     id: str
     title: str
     description: str = ""

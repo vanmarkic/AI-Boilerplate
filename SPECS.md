@@ -34,6 +34,20 @@
   - `POST /api/orders` — Place a new order
   - `GET /api/orders/:id` — Get order details
 
+## TFC Terminology Mapping (Domain ↔ Code)
+
+The TFC codebase uses generic code names for domain concepts. The table below maps **domain language** (what users and exercise facilitators say) to **code names** (what appears in source files).
+
+| Domain Term | Code Term | Description |
+|-------------|-----------|-------------|
+| **Inject** | `Event` / `ScheduledEvent` / `EventScheduler` | A scheduled occurrence in the exercise timeline. Code uses "event" throughout. |
+| **Defect** | `Issue` / `TrackedIssue` / `IssueManager` | A problem surfaced during the exercise. Code uses "issue" throughout. |
+| **Exercise** | `Exercise` / `ExerciseEngine` | A running instance of a scenario. |
+| **Scenario** | `Scenario` / `ScenarioContent` | A reusable exercise template. |
+| **Decision** | `DecisionPoint` / `DecisionManager` | A question posed to players. |
+| **Game Master (GM)** | GM | The facilitator running the exercise. |
+| **Player** | Participant | Someone responding to injects and defects. |
+
 ## Glossary
 
 <!-- Domain-specific terms the LLM should use consistently in naming. -->
