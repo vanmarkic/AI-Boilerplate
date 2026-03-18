@@ -33,9 +33,7 @@ class ExerciseService:
         if request.game_mode not in VALID_GAME_MODES:
             raise BadRequestError(f"Invalid game_mode: {request.game_mode}")
         if request.practice_mode and request.game_mode != "simple_collaborative":
-            raise BadRequestError(
-                "practice_mode requires game_mode 'simple_collaborative'"
-            )
+            raise BadRequestError("practice_mode requires game_mode 'simple_collaborative'")
         exercise = Exercise(
             title=request.title,
             description=request.description,
