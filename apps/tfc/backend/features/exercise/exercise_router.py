@@ -59,6 +59,8 @@ async def list_joinable_exercises(
     for exercise in exercises:
         if exercise.scenario_id is None:
             continue
+        if exercise.practice_mode:
+            continue
         try:
             scenario = await scenario_service.get_scenario(
                 exercise.scenario_id,

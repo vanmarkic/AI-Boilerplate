@@ -31,6 +31,10 @@ class ExerciseService:
             raise BadRequestError(f"Invalid phase: {request.phase}")
         if request.game_mode not in VALID_GAME_MODES:
             raise BadRequestError(f"Invalid game_mode: {request.game_mode}")
+        if request.practice_mode and request.game_mode != "simple_collaborative":
+            raise BadRequestError(
+                "practice_mode requires game_mode 'simple_collaborative'"
+            )
         exercise = Exercise(
             title=request.title,
             description=request.description,
@@ -39,6 +43,7 @@ class ExerciseService:
             domain_id=request.domain_id,
             time_factor=request.time_factor,
             game_mode=request.game_mode,
+            practice_mode=request.practice_mode,
         )
         created = await self.repository.create(exercise)
         return ExerciseResponse.model_validate(created)

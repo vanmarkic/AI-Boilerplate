@@ -195,6 +195,27 @@ class TestJoinableEndpoint:
         assert data[0]["max_players"] == 3  # 2 roles + 1 GM
 
     @pytest.mark.asyncio
+    async def test_excludes_practice_mode_exercises(
+        self,
+        client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, TWO_ROLES)
+        resp = await client.post(
+            "/api/exercises",
+            json={
+                "title": "Practice",
+                "scenario_id": sid,
+                "game_mode": "simple_collaborative",
+                "practice_mode": True,
+            },
+        )
+        assert resp.status_code == 201
+
+        resp = await client.get("/api/exercises/joinable")
+        assert resp.status_code == 200
+        assert resp.json() == []
+
+    @pytest.mark.asyncio
     async def test_returns_multiple_joinable_exercises(
         self,
         client: AsyncClient,

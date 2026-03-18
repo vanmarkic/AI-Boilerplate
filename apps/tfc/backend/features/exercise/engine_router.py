@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from core.dependencies import get_exercise_service, get_scenario_service
-from engine.exercise_engine import EngineConfig, EngineStateError, ExerciseEngine
+from engine.exercise_engine import EngineConfig, EnginePhase, EngineStateError, ExerciseEngine
 from engine.session_store import session_store
 from engine.state_changes import EngineSnapshot, PhaseChange, StateChange
 from features.exercise.adapters.connection_manager import connection_manager
@@ -19,6 +19,7 @@ from features.exercise.exercise_service import ExerciseService
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_loader import build_engine_config
 from features.scenario.scenario_service import ScenarioService
+from features.waiting_room.waiting_room_store import waiting_room_store
 
 router = APIRouter(prefix="/api/exercises/{exercise_id}/engine", tags=["engine"])
 
@@ -80,10 +81,27 @@ async def start_engine(
             await broadcast_changes(connection_manager, exercise_id, changes)
 
         engine = session_store.create(config, on_state_change=_on_change)
+
+    # Idempotent: if already running, return current phase without error
+    if engine.phase == EnginePhase.RUNNING:
+        return engine._phase_change("started")
+
     try:
-        return await engine.start()
+        result = await engine.start()
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+    # Notify all WS clients so lobby players auto-navigate
+    participants = waiting_room_store.list_participants(exercise_id)
+    await connection_manager.broadcast(
+        exercise_id,
+        {
+            "type": "exercise_started",
+            "exercise_id": exercise_id,
+            "participants": [p.to_dict() for p in participants],
+        },
+    )
+    return result
 
 
 @router.post("/pause", operation_id="pauseEngine")
