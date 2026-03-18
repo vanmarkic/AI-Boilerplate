@@ -15,6 +15,21 @@ def _mode(**kwargs) -> SimpleCollaborativeMode:
     return SimpleCollaborativeMode(**defaults)
 
 
+def _close_v2(
+    mode: SimpleCollaborativeMode,
+    decision_id: str,
+    selected_score: float,
+    max_score: float,
+) -> list[dict]:
+    """Helper: wrap scalar scores as v2 option lists for testing."""
+    selected = [{"id": "sel", "label": "Sel", "score": selected_score}]
+    all_opts = [
+        {"id": "sel", "label": "Sel", "score": selected_score},
+        {"id": "best", "label": "Best", "score": max_score},
+    ]
+    return mode.on_decision_closed_v2(decision_id, selected, all_opts)
+
+
 def test_should_not_pause() -> None:
     assert _mode().should_pause_on_decision() is False
 
@@ -40,18 +55,18 @@ def test_auto_submit_empty_options() -> None:
 
 def test_perfect_score_no_penalty() -> None:
     mode = _mode()
-    changes = mode.on_decision_closed("d1", selected_score=3.0, max_score=3.0)
-    assert len(changes) == 1
-    assert changes[0]["type"] == "score_change"
-    assert changes[0]["total_score"] == 3.0
-    assert changes[0]["penalty_ms"] == 0.0
-    assert changes[0]["turn_number"] == 1
+    opts = [{"id": "a", "label": "A", "score": 3.0}]
+    changes = mode.on_decision_closed_v2("d1", opts, opts)
+    sc = next(c for c in changes if c["type"] == "score_change")
+    assert sc["total_score"] == 3.0
+    assert sc["penalty_ms"] == 0.0
+    assert sc["turn_number"] == 1
     assert mode.accumulated_penalty_ms == 0.0
 
 
 def test_wrong_answer_applies_penalty() -> None:
     mode = _mode()
-    mode.on_decision_closed("d1", selected_score=1.0, max_score=3.0)
+    _close_v2(mode, "d1", selected_score=1.0, max_score=3.0)
     # penalty = (3.0 - 1.0) * 0.1 * 1000 = 200ms
     assert mode.accumulated_penalty_ms == 200.0
     assert mode.get_decision_time_ms(300_000) == 300_000 - 200
@@ -59,8 +74,8 @@ def test_wrong_answer_applies_penalty() -> None:
 
 def test_penalty_accumulates() -> None:
     mode = _mode()
-    mode.on_decision_closed("d1", selected_score=1.0, max_score=3.0)
-    mode.on_decision_closed("d2", selected_score=0.0, max_score=2.0)
+    _close_v2(mode, "d1", selected_score=1.0, max_score=3.0)
+    _close_v2(mode, "d2", selected_score=0.0, max_score=2.0)
     # penalty1 = 200, penalty2 = (2.0 - 0.0) * 0.1 * 1000 = 200
     assert mode.accumulated_penalty_ms == 400.0
     assert mode.total_score == 1.0
@@ -76,21 +91,22 @@ def test_penalty_floor() -> None:
 def test_decision_sequence_advances() -> None:
     mode = _mode()
     assert mode.get_next_decision_id("d0") == "d1"  # current_index starts at 0
-    mode.on_decision_closed("d1", 1.0, 1.0)  # advances current_index to 1
+    _close_v2(mode, "d1", 1.0, 1.0)  # advances current_index to 1
     assert mode.get_next_decision_id("d1") == "d2"
-    mode.on_decision_closed("d2", 1.0, 1.0)  # advances to 2
+    _close_v2(mode, "d2", 1.0, 1.0)  # advances to 2
     assert mode.get_next_decision_id("d2") == "d3"
-    mode.on_decision_closed("d3", 1.0, 1.0)  # advances to 3 (past end)
+    _close_v2(mode, "d3", 1.0, 1.0)  # advances to 3 (past end)
     assert mode.get_next_decision_id("d3") is None
 
 
 def test_score_change_includes_next_decision_time() -> None:
     mode = _mode()
-    mode.on_decision_closed("d1", selected_score=0.0, max_score=2.0)
+    _close_v2(mode, "d1", selected_score=0.0, max_score=2.0)
     # penalty = 200ms
-    changes = mode.on_decision_closed("d2", selected_score=1.0, max_score=2.0)
+    changes = _close_v2(mode, "d2", selected_score=1.0, max_score=2.0)
     # second penalty = (2.0 - 1.0) * 0.1 * 1000 = 100
-    assert changes[0]["next_decision_time_ms"] == 300_000 - 300
+    sc = next(c for c in changes if c["type"] == "score_change")
+    assert sc["next_decision_time_ms"] == 300_000 - 300
 
 
 # -- Phase 2: Option-list based scoring -----------------------------------
@@ -188,3 +204,27 @@ def test_no_forced_cards_no_enforcement() -> None:
     mode = _mode()
     changes = mode.on_decision_closed_v2("d1", [_OPTS[1]], _OPTS)
     assert all(c["type"] != "forced_card_applied" for c in changes)
+
+
+# -- Snapshot ----------------------------------------------------------
+
+
+def test_snapshot_initial_state() -> None:
+    """Snapshot returns zeroed score state before any decisions."""
+    mode = _mode()
+    snap = mode.snapshot()
+    assert snap is not None
+    assert snap["total_score"] == 0.0
+    assert snap["penalty_ms"] == 0.0
+    assert snap["turn_number"] == 0
+    assert snap["next_decision_time_ms"] == 300_000
+
+
+def test_snapshot_after_decisions() -> None:
+    """Snapshot reflects accumulated score after decisions close."""
+    mode = _mode()
+    mode.on_decision_closed_v2("d1", [_OPTS[0]], _OPTS)  # good=10, best=10 → 0 penalty
+    snap = mode.snapshot()
+    assert snap is not None
+    assert snap["total_score"] == 10.0
+    assert snap["turn_number"] == 1
