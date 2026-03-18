@@ -115,6 +115,12 @@ export const ExerciseStore = signalStore(
         paused: snapshot.time.paused,
         events: snapshot.events,
         issues: snapshot.issues,
+        score: snapshot.score ? {
+          totalScore: snapshot.score.total_score,
+          penaltyMs: snapshot.score.penalty_ms,
+          turnNumber: snapshot.score.turn_number,
+          nextDecisionTimeMs: snapshot.score.next_decision_time_ms,
+        } : store.score(),
         loading: false,
         error: null,
       });

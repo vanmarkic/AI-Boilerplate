@@ -4,7 +4,7 @@ Invariants tested:
 - Score monotonicity: total_score never decreases across turns.
 - Penalty monotonicity: accumulated_penalty_ms never decreases.
 - Timer floor: effective decision time >= min_decision_time_ms.
-- Turn counting: turn_number == number of on_decision_closed calls.
+- Turn counting: turn_number == number of on_decision_closed_v2 calls.
 - Sequence advancement: current_index tracks correctly, None at end.
 - Penalty formula: penalty_ms == (max - selected) * factor * 1000.
 - Perfect score: selected == max → zero penalty delta.
@@ -39,6 +39,21 @@ def _mode(
     )
 
 
+def _close_v2(
+    mode: SimpleCollaborativeMode,
+    decision_id: str,
+    selected_score: float,
+    max_score: float,
+) -> list[dict]:
+    """Helper: wrap scalar scores as v2 option lists for property tests."""
+    selected = [{"id": "sel", "label": "Sel", "score": selected_score}]
+    all_opts = [
+        {"id": "sel", "label": "Sel", "score": selected_score},
+        {"id": "best", "label": "Best", "score": max_score},
+    ]
+    return mode.on_decision_closed_v2(decision_id, selected, all_opts)
+
+
 # -- Score monotonicity ------------------------------------------------
 
 class TestScoreMonotonicity:
@@ -57,7 +72,7 @@ class TestScoreMonotonicity:
         prev_total = 0.0
         for i, sel in enumerate(selected_scores):
             max_s = sel + 1.0  # ensure max >= selected
-            mode.on_decision_closed(f"d{i}", selected_score=sel, max_score=max_s)
+            _close_v2(mode, f"d{i}", selected_score=sel, max_score=max_s)
             assert mode.total_score >= prev_total
             prev_total = mode.total_score
 
@@ -77,9 +92,7 @@ class TestPenaltyMonotonicity:
         mode = _mode(seq=[f"d{i}" for i in range(len(gaps))])
         prev_penalty = 0.0
         for i, gap in enumerate(gaps):
-            mode.on_decision_closed(
-                f"d{i}", selected_score=0.0, max_score=gap,
-            )
+            _close_v2(mode, f"d{i}", selected_score=0.0, max_score=gap)
             assert mode.accumulated_penalty_ms >= prev_penalty
             prev_penalty = mode.accumulated_penalty_ms
 
@@ -123,14 +136,14 @@ class TestTimerFloor:
 # -- Turn counting -----------------------------------------------------
 
 class TestTurnCounting:
-    """turn_number equals the number of on_decision_closed calls."""
+    """turn_number equals the number of on_decision_closed_v2 calls."""
 
     @given(n_turns=st.integers(min_value=0, max_value=30))
     @settings(max_examples=100)
     def test_turn_number_matches_close_count(self, n_turns: int) -> None:
         mode = _mode(seq=[f"d{i}" for i in range(n_turns)])
         for i in range(n_turns):
-            mode.on_decision_closed(f"d{i}", selected_score=1.0, max_score=1.0)
+            _close_v2(mode, f"d{i}", selected_score=1.0, max_score=1.0)
         assert mode.turn_number == n_turns
 
 
@@ -146,7 +159,7 @@ class TestSequenceAdvancement:
         for i, did in enumerate(seq):
             # Before closing, next should be current element
             assert mode.get_next_decision_id("prev") == did
-            mode.on_decision_closed(did, selected_score=1.0, max_score=1.0)
+            _close_v2(mode, did, selected_score=1.0, max_score=1.0)
         # After exhausting sequence, should return None
         assert mode.get_next_decision_id("last") is None
 
@@ -155,10 +168,10 @@ class TestSequenceAdvancement:
     def test_index_never_exceeds_sequence_length(self, seq: list[str]) -> None:
         mode = _mode(seq=seq)
         for did in seq:
-            mode.on_decision_closed(did, selected_score=1.0, max_score=1.0)
+            _close_v2(mode, did, selected_score=1.0, max_score=1.0)
         # Close extra times beyond sequence length
-        mode.on_decision_closed("extra1", selected_score=1.0, max_score=1.0)
-        mode.on_decision_closed("extra2", selected_score=1.0, max_score=1.0)
+        _close_v2(mode, "extra1", selected_score=1.0, max_score=1.0)
+        _close_v2(mode, "extra2", selected_score=1.0, max_score=1.0)
         assert mode.get_next_decision_id("any") is None
 
 
@@ -178,11 +191,10 @@ class TestPenaltyFormula:
     ) -> None:
         max_score = selected + gap
         mode = _mode(penalty_factor=factor)
-        changes = mode.on_decision_closed(
-            "d0", selected_score=selected, max_score=max_score,
-        )
+        changes = _close_v2(mode, "d0", selected_score=selected, max_score=max_score)
         expected_penalty = gap * factor * 1000
-        assert abs(changes[0]["penalty_ms"] - expected_penalty) < 1e-6
+        sc = next(c for c in changes if c["type"] == "score_change")
+        assert abs(sc["penalty_ms"] - expected_penalty) < 1e-6
 
     @given(selected=scores(), factor=penalty_factors())
     @settings(max_examples=200)
@@ -190,17 +202,17 @@ class TestPenaltyFormula:
         self, selected: float, factor: float,
     ) -> None:
         mode = _mode(penalty_factor=factor)
-        changes = mode.on_decision_closed(
-            "d0", selected_score=selected, max_score=selected,
-        )
-        assert changes[0]["penalty_ms"] == 0.0
+        opts = [{"id": "a", "label": "A", "score": selected}]
+        changes = mode.on_decision_closed_v2("d0", opts, opts)
+        sc = next(c for c in changes if c["type"] == "score_change")
+        assert sc["penalty_ms"] == 0.0
         assert mode.accumulated_penalty_ms == 0.0
 
 
 # -- Score change structure --------------------------------------------
 
 class TestScoreChangeStructure:
-    """on_decision_closed always returns exactly one well-formed ScoreChange."""
+    """on_decision_closed_v2 always returns at least one well-formed ScoreChange."""
 
     @given(selected=scores(), max_s=scores())
     @settings(max_examples=200)
@@ -209,12 +221,10 @@ class TestScoreChangeStructure:
     ) -> None:
         assume(max_s >= selected)
         mode = _mode()
-        changes = mode.on_decision_closed(
-            "d0", selected_score=selected, max_score=max_s,
-        )
-        assert len(changes) == 1
-        c = changes[0]
-        assert c["type"] == "score_change"
+        changes = _close_v2(mode, "d0", selected_score=selected, max_score=max_s)
+        score_changes = [c for c in changes if c["type"] == "score_change"]
+        assert len(score_changes) == 1
+        c = score_changes[0]
         assert "total_score" in c
         assert "penalty_ms" in c
         assert "next_decision_time_ms" in c
@@ -267,15 +277,14 @@ class TestMultiTurnAccumulation:
         expected_total = 0.0
         expected_penalty = 0.0
         for i, (sel, max_s) in enumerate(pairs):
-            changes = mode.on_decision_closed(
-                f"d{i}", selected_score=sel, max_score=max_s,
-            )
+            changes = _close_v2(mode, f"d{i}", selected_score=sel, max_score=max_s)
             expected_total += sel
             expected_penalty += (max_s - sel) * factor * 1000
 
             assert abs(mode.total_score - expected_total) < 1e-6
             assert abs(mode.accumulated_penalty_ms - expected_penalty) < 1e-6
-            assert changes[0]["turn_number"] == i + 1
+            sc = next(c for c in changes if c["type"] == "score_change")
+            assert sc["turn_number"] == i + 1
 
         assert mode.turn_number == len(pairs)
         assert mode.current_index == len(pairs)
@@ -372,6 +381,63 @@ class TestV2TimerFloor:
 
 
 # -- Forced card property tests -------------------------------------------
+
+# -- Snapshot consistency ------------------------------------------------
+
+class TestSnapshotConsistency:
+    """snapshot() reflects accumulated state accurately."""
+
+    @given(
+        score_pairs=st.lists(
+            st.tuples(scores(), scores()),
+            min_size=1,
+            max_size=10,
+        ),
+        factor=penalty_factors(),
+    )
+    @settings(max_examples=200)
+    def test_snapshot_total_score_equals_sum(
+        self,
+        score_pairs: list[tuple[float, float]],
+        factor: float,
+    ) -> None:
+        pairs = [(sel, sel + gap) for sel, gap in score_pairs]
+        seq = [f"d{i}" for i in range(len(pairs))]
+        mode = _mode(seq=seq, penalty_factor=factor)
+        expected_total = 0.0
+        for i, (sel, max_s) in enumerate(pairs):
+            _close_v2(mode, f"d{i}", selected_score=sel, max_score=max_s)
+            expected_total += sel
+        snap = mode.snapshot()
+        assert snap is not None
+        assert abs(snap["total_score"] - expected_total) < 1e-6
+
+    @given(n_turns=st.integers(min_value=0, max_value=20))
+    @settings(max_examples=100)
+    def test_snapshot_turn_number(self, n_turns: int) -> None:
+        mode = _mode(seq=[f"d{i}" for i in range(n_turns)])
+        for i in range(n_turns):
+            _close_v2(mode, f"d{i}", selected_score=1.0, max_score=1.0)
+        snap = mode.snapshot()
+        assert snap is not None
+        assert snap["turn_number"] == n_turns
+
+    @given(
+        gaps=st.lists(scores(), min_size=1, max_size=10),
+        factor=penalty_factors(),
+    )
+    @settings(max_examples=200)
+    def test_snapshot_penalty_matches_accumulated(
+        self, gaps: list[float], factor: float,
+    ) -> None:
+        seq = [f"d{i}" for i in range(len(gaps))]
+        mode = _mode(seq=seq, penalty_factor=factor)
+        for i, gap in enumerate(gaps):
+            _close_v2(mode, f"d{i}", selected_score=0.0, max_score=gap)
+        snap = mode.snapshot()
+        assert snap is not None
+        assert abs(snap["penalty_ms"] - mode.accumulated_penalty_ms) < 1e-6
+
 
 class TestForcedCardInvariant:
     """Forced cards always present in scoring, with correct change emitted."""

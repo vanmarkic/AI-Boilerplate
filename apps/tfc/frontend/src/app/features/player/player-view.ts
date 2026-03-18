@@ -190,13 +190,23 @@ export class PlayerView implements OnInit, OnDestroy {
     const params = this.route.snapshot.queryParams;
     const id = Number(params['exerciseId'] ?? 1);
     const pId = String(params['participantId'] ?? '');
+    const role = String(params['role'] ?? 'player');
     this.exerciseId.set(id);
     this.participantId.set(pId);
+    this.store.setParticipantId(pId);
+    this.store.setPlayerRole(role);
     this.ws.connect(id, 'player', pId || undefined);
     this.sub = this.ws.messages$.subscribe((msg) => handlePlayerWsMessage(msg, this.store));
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
-      next: (ctx) => this.store.setContext(ctx),
+      next: (ctx) => {
+        this.store.setContext(ctx);
+        // Resolve player_type from scenario roles using assigned role
+        const roleInfo = ctx.roles?.find((r) => r.id === role);
+        if (roleInfo) {
+          this.store.setPlayerType(roleInfo.player_type);
+        }
+      },
     });
     this.decisionApi.listDecisions(id, 'closed').subscribe({
       next: (decisions) => this.decisionHistory.set(decisions),
@@ -244,12 +254,17 @@ export class PlayerView implements OnInit, OnDestroy {
     decision: ActiveDecision,
     event: { selectedOptions: string[]; freeText: string },
   ): void {
+    // Persist to DB
     this.decisionApi.submitResponse(Number(decision.id), {
       participant_id: this.participantId(),
       participant_name: this.participantId(),
       selected_options: event.selectedOptions,
       free_text: event.freeText || null,
-    }).subscribe({
+    }).subscribe();
+    // Close in engine (triggers scoring + turn chaining)
+    this.decisionApi.closeEngineDecision(
+      this.exerciseId(), decision.id, event.selectedOptions,
+    ).subscribe({
       next: () => this.store.closeDecision(decision.id),
     });
   }

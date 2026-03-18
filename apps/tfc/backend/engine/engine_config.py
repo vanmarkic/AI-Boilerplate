@@ -29,12 +29,20 @@ class DecisionTemplate:
 
 
 @dataclass
+class RoleInfo:
+    id: str
+    label: str
+    player_type: str = "advisor"
+
+
+@dataclass
 class ScenarioContext:
     title: str = ""
     description: str = ""
     briefing: str = ""
     objectives: list[str] = field(default_factory=list)
     rules: list[str] = field(default_factory=list)
+    roles: list[RoleInfo] = field(default_factory=list)
 
 
 @dataclass
