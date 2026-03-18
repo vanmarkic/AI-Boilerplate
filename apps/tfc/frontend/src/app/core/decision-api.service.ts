@@ -103,10 +103,10 @@ export class DecisionApiService {
   }
 
   /** Submit an advisor recommendation on an open decision */
-  submitRecommendation(exerciseId: number, decisionId: string, optionId: string): Observable<unknown> {
+  submitRecommendation(exerciseId: number, decisionId: string, optionId: string, participantId: string): Observable<unknown> {
     return this.http.post(
       `${this.base}/api/exercises/${exerciseId}/engine/decisions/recommend`,
-      { decision_id: decisionId, option_id: optionId },
+      { decision_id: decisionId, option_id: optionId, participant_id: participantId },
     );
   }
 
