@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
+.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check
 
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
@@ -124,6 +124,21 @@ verify-tier: ## Verify tier-N build has no higher-tier leaks (usage: make verify
 	python shared/scripts/filter-features.py --tier=$(or $(TIER),1) --src=$(MAIN_FE)/src/app/features --dest=/tmp/verify-tier-fe --frontend
 	python shared/scripts/verify-tier-build.py --tier=$(or $(TIER),1) --backend-dest=/tmp/verify-tier-be --frontend-dest=/tmp/verify-tier-fe
 	@rm -rf /tmp/verify-tier-be /tmp/verify-tier-fe
+
+check: ## Run all CI-equivalent checks locally (fail-fast)
+	cd $(MAIN_BE) && ruff check . && \
+	cd $(CURDIR)/$(TFC_BE) && ruff check . && \
+	cd $(CURDIR)/$(MAIN_BE) && ruff format --check . && \
+	cd $(CURDIR)/$(TFC_BE) && ruff format --check . && \
+	cd $(CURDIR)/$(MAIN_FE) && npx eslint "**/*.{js,ts,html,json}" && \
+	cd $(CURDIR)/$(TFC_FE) && npx eslint "**/*.{js,ts,html,json}" && \
+	cd $(CURDIR)/$(MAIN_FE) && npm run lint:tsc:all && \
+	cd $(CURDIR)/$(TFC_FE) && npx tsc --noEmit -p tsconfig.app.json && \
+	cd $(CURDIR)/$(TFC_FE) && npx tsc --noEmit -p tsconfig.spec.json && \
+	cd $(CURDIR)/$(MAIN_BE) && python -m pytest -v && \
+	cd $(CURDIR)/$(TFC_BE) && python -m pytest -v && \
+	cd $(CURDIR)/$(MAIN_FE) && npx ng test --watch=false && \
+	cd $(CURDIR)/$(TFC_FE) && npx ng test --watch=false
 
 validate: lint-arch lint test ## Validate everything: architecture + linters + tests
 
