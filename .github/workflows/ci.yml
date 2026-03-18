@@ -58,9 +58,20 @@ jobs:
         working-directory: apps/main/backend
         run: |
           if [ "${{ github.event_name }}" = "pull_request" ]; then
-            python -m pytest -v --tb=short --testmon
+            python -m pytest -v --tb=short --testmon \
+              --cov=core --cov=features \
+              --cov-report=term-missing --cov-report=xml
           else
-            python -m pytest -v --tb=short
+            python -m pytest -v --tb=short \
+              --cov=core --cov=features \
+              --cov-report=term-missing --cov-report=xml
+          fi
+      - name: Coverage summary
+        if: always()
+        working-directory: apps/main/backend
+        run: |
+          if [ -f coverage.xml ]; then
+            echo "Coverage report saved to coverage.xml"
           fi
 
   test-tfc-backend:
@@ -103,6 +114,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install ruff && ruff check .
+        working-directory: apps/main/backend
+      - run: ruff format --check .
         working-directory: apps/main/backend
 
   tier1-build-smoke:
@@ -156,6 +169,66 @@ jobs:
             exit 1
           fi
           echo "OK: no tier-2 canary markers in tier-1 build"
+
+  migration-rollback-main:
+    name: Migration Rollback (main)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: boilerplate_test
+          POSTGRES_USER: dev
+          POSTGRES_PASSWORD: dev
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+asyncpg://dev:dev@localhost:5432/boilerplate_test
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e ".[dev]"
+        working-directory: apps/main/backend
+      - name: Test migration upgrade + downgrade
+        working-directory: apps/main/backend
+        run: python -m pytest tests/migration_rollback_test.py -v --tb=short
+
+  migration-rollback-tfc:
+    name: Migration Rollback (TFC)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: tfc_test
+          POSTGRES_USER: dev
+          POSTGRES_PASSWORD: dev
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd "pg_isready -U dev"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql+asyncpg://dev:dev@localhost:5433/tfc_test
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -e ".[dev]"
+        working-directory: apps/tfc/backend
+      - name: Test migration upgrade + downgrade
+        working-directory: apps/tfc/backend
+        run: python -m pytest tests/migration_rollback_test.py -v --tb=short
 
   openapi-validate:
     name: OpenAPI Validation
