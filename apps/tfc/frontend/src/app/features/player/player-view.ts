@@ -8,6 +8,9 @@ import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { AmbientBackgroundComponent } from '../../shared/ambient-background.component';
 import { TurnBannerComponent } from '../../shared/turn-banner.component';
 import { AdvisorBubblesComponent, AdvisorRecommendation } from '../../shared/advisor-bubbles.component';
+import { AllAdvisorsPanelComponent } from '../../shared/all-advisors-panel.component';
+import type { RoleRecommendation } from '../../shared/all-advisors-panel.component';
+import { submitRecommendation, submitRoleRecommendation, submitDecision } from './player-decision-handlers';
 import { ScoreBarComponent } from '../../shared/score-bar.component';
 import { DomainService } from '../../core/domain.service';
 import { EngineApiService } from '../../core/engine-api.service';
@@ -27,7 +30,7 @@ import { handlePlayerWsMessage } from './player-ws-handler';
     CardComponent, BadgeComponent,
     ClockDisplayComponent, PhaseBadgeComponent, DecisionPanelComponent, ContextPanelComponent,
     AmbientBackgroundComponent, TurnBannerComponent,
-    AdvisorBubblesComponent, ScoreBarComponent,
+    AdvisorBubblesComponent, AllAdvisorsPanelComponent, ScoreBarComponent,
   ],
   template: `
     <tfc-ambient-background />
@@ -123,7 +126,12 @@ import { handlePlayerWsMessage } from './player-ws-handler';
 
       @if (activeDecision(); as decision) {
         <div class="overlay">
-          @if (store.isCollaborative() && !store.isDecisionMaker()) {
+          @if (store.isCollaborative() && store.isAllAdvisors()) {
+            <tfc-all-advisors-panel [roles]="scenarioAdvisorRoles()" [decisionTitle]="decision.title"
+              [decisionDescription]="decision.description" [questionType]="decision.question_type"
+              [options]="decision.options" (submitted)="onRoleRecommendationSubmitted(decision, $event)"
+              (closed)="store.closeDecision(decision.id)" />
+          } @else if (store.isCollaborative() && !store.isDecisionMaker()) {
             <tfc-decision-panel [title]="'[Advisor] ' + decision.title" [description]="decision.description"
               [questionType]="decision.question_type" [options]="decision.options"
               (submitted)="onRecommendationSubmitted(decision, $event)" />
@@ -142,7 +150,8 @@ import { handlePlayerWsMessage } from './player-ws-handler';
         <div class="exercise-controls__group">
           <p class="text-sm text-muted-foreground">
             @if (store.isCollaborative()) {
-              You are the {{ roleLabel() }}
+              @if (store.isAllAdvisors()) { You are the All Advisors player }
+              @else { You are the {{ roleLabel() }} }
             } @else { Waiting for {{ domain.term('gameMaster') }} actions... }
           </p>
         </div>
@@ -175,17 +184,28 @@ export class PlayerView implements OnInit, OnDestroy {
     const role = this.store.playerRole();
     return this.store.openDecisions().find((d) => {
       if (!d.target_roles || d.target_roles.length === 0) return true;
+      if (role === 'all_advisors') return true;
       return d.target_roles.includes(role);
     });
   }
 
   protected advisorRecs(decision: ActiveDecision): AdvisorRecommendation[] {
     const recs = decision.recommendations || {};
-    return Object.entries(recs).map(([pid, oid]) => ({
-      participantId: pid,
-      participantName: pid,
-      optionId: oid,
-    }));
+    const roles = this.store.context()?.roles ?? [];
+    return Object.entries(recs).map(([key, oid]) => {
+      const colonIdx = key.indexOf(':');
+      if (colonIdx !== -1) {
+        const roleId = key.slice(colonIdx + 1);
+        const roleInfo = roles.find((r) => r.id === roleId);
+        return { participantId: key, participantName: roleInfo?.label ?? roleId, optionId: oid };
+      }
+      return { participantId: key, participantName: key, optionId: oid };
+    });
+  }
+
+  protected scenarioAdvisorRoles(): { id: string; label: string }[] {
+    const roles = this.store.context()?.roles ?? [];
+    return roles.filter((r) => r.player_type === 'advisor');
   }
 
   ngOnInit(): void {
@@ -216,6 +236,12 @@ export class PlayerView implements OnInit, OnDestroy {
         if (roleInfo) {
           this.store.setPlayerType(roleInfo.player_type);
           this.roleLabel.set(roleInfo.label);
+        } else if (role === 'all_advisors') {
+          this.store.setPlayerType('advisor');
+          this.roleLabel.set('All Advisors');
+        } else if (role === 'decision_maker') {
+          this.store.setPlayerType('decision_maker');
+          this.roleLabel.set('Decision Maker');
         }
       },
     });
@@ -251,33 +277,19 @@ export class PlayerView implements OnInit, OnDestroy {
   }
 
   protected onRecommendationSubmitted(
-    decision: ActiveDecision,
-    event: { selectedOptions: string[]; freeText: string },
+    decision: ActiveDecision, event: { selectedOptions: string[]; freeText: string },
   ): void {
-    const optionId = event.selectedOptions[0];
-    if (!optionId) return;
-    this.decisionApi.submitRecommendation(
-      this.exerciseId(), decision.id, optionId, this.participantId(),
-    ).subscribe();
+    submitRecommendation(this.decisionApi, this.exerciseId(), decision, this.participantId(), event);
+  }
+
+  protected onRoleRecommendationSubmitted(decision: ActiveDecision, rec: RoleRecommendation): void {
+    submitRoleRecommendation(this.decisionApi, this.exerciseId(), decision, this.participantId(), rec);
   }
 
   protected onDecisionSubmitted(
-    decision: ActiveDecision,
-    event: { selectedOptions: string[]; freeText: string },
+    decision: ActiveDecision, event: { selectedOptions: string[]; freeText: string },
   ): void {
-    // Persist to DB
-    this.decisionApi.submitResponse(Number(decision.id), {
-      participant_id: this.participantId(),
-      participant_name: this.participantId(),
-      selected_options: event.selectedOptions,
-      free_text: event.freeText || null,
-    }).subscribe();
-    // Close in engine (triggers scoring + turn chaining)
-    this.decisionApi.closeEngineDecision(
-      this.exerciseId(), decision.id, event.selectedOptions,
-    ).subscribe({
-      next: () => this.store.closeDecision(decision.id),
-    });
+    submitDecision(this.decisionApi, this.store, this.exerciseId(), decision, this.participantId(), event);
   }
 
 }

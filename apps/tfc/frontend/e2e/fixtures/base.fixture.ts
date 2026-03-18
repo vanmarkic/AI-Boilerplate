@@ -72,6 +72,8 @@ export class MockApi {
   readonly scenarios: MockScenario[] = [];
   /** Joinable exercise response (or null for 404). */
   joinableResponse: MockJoinableResponse | null = null;
+  /** Exercise ID → exercise payload (for GET /api/exercises/:id). */
+  readonly exerciseMap = new Map<number, object>();
 
   readonly page: Page;
   constructor(page: Page) {
@@ -80,7 +82,7 @@ export class MockApi {
 
   /** Register a session code so by-code lookup returns this exercise. */
   seedCode(code: string, exerciseId: number, gameMode = 'classic'): void {
-    this.codeMap.set(code.toUpperCase(), {
+    const exercise = {
       id: exerciseId,
       title: 'Seeded Exercise',
       description: '',
@@ -90,6 +92,25 @@ export class MockApi {
       time_factor: 1.0,
       game_mode: gameMode,
       session_code: code.toUpperCase(),
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    this.codeMap.set(code.toUpperCase(), exercise);
+    this.exerciseMap.set(exerciseId, exercise);
+  }
+
+  /** Seed exercise data for GET /api/exercises/:id. */
+  seedExercise(exerciseId: number, gameMode = 'classic', scenarioId: number | null = null): void {
+    this.exerciseMap.set(exerciseId, {
+      id: exerciseId,
+      title: 'Seeded Exercise',
+      description: '',
+      phase: 'setup',
+      scenario_id: scenarioId,
+      domain_id: null,
+      time_factor: 1.0,
+      game_mode: gameMode,
+      session_code: 'TEST',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     });
@@ -190,6 +211,36 @@ export class MockApi {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }),
+      });
+    });
+
+    // GET /api/exercises/:id — single exercise lookup
+    await this.page.route('**/api/exercises/*', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.fallback();
+        return;
+      }
+      const url = route.request().url();
+      // Skip by-code, waiting-room, and engine sub-paths
+      if (/by-code|waiting-room|engine|participants/.test(url)) {
+        await route.fallback();
+        return;
+      }
+      const m = url.match(/exercises\/(\d+)$/);
+      if (!m) {
+        await route.fallback();
+        return;
+      }
+      const id = Number(m[1]);
+      const stored = this.exerciseMap.get(id);
+      if (!stored) {
+        await route.fulfill({ status: 404 });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(stored),
       });
     });
 
