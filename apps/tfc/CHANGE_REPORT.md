@@ -6,7 +6,7 @@
 
 | Metric       | Value                    |
 |--------------|--------------------------|
-| Total commits | 65                      |
+| Total commits | 103                     |
 | Contributors | 3 (Claude, vanmarkic, Drago van Markic) |
 | Date range   | March 17–18, 2026        |
 | Categories   | Features, Fixes, Tests, Chores, Docs, Style, Merges |
@@ -89,12 +89,50 @@
 | `78f85c3` | Claude | docs(tfc): add inject/defect terminology aliases for LLM prompt alignment |
 | `5ebf865` | Claude | Change sea backdrop camera FOV to 50mm full-frame equivalent (27°) |
 | `f577bbe` | Drago van Markic | Merge pull request #122 from vanmarkic/claude/assess-terminology-rename-CEugZ |
+| `958cca7` | Claude | fix: resolve TFC gaps 3, 5, 6, 10, 11 — score snapshot, player type, participant identity |
+| `eb0c8d7` | Claude | test: add property-style Playwright tests for player view state invariants |
+| `52a49f6` | Claude | test(tfc): add HTTP API tests for decision, audit, health, and engine lifecycle routers |
+| `4bac8cc` | Claude | docs(tfc): add comprehensive change report for TFC folder |
+| `55145b0` | Claude | fix: replace TS parameter property in Playwright fixture for strip-only mode |
+| `291aa26` | Drago van Markic | Merge pull request #125 from vanmarkic/claude/tfc-change-report-TtCKv |
+| `d8cc602` | Claude | test(tfc): add behavioral and gray-box tests for engine workflows |
+| `437e358` | Claude | fix: use patch context manager instead of decorator in RBAC tests |
+| `53a2e08` | Drago van Markic | Merge pull request #124 from vanmarkic/claude/document-tfc-gaps-sdqGd |
+| `9c1817d` | Claude | test(tfc): add mutation test script for behavioral test validation |
+| `7ce32f3` | Drago van Markic | Merge pull request #126 from vanmarkic/claude/review-tfc-api-tests-u5Jpd |
+| `1d47f70` | Claude | feat(tfc): refine landing page with scenario picker, lobby preview, and role slots |
+| `ca4d8b5` | Claude | test(tfc): add state-matrix e2e + visual state property tests |
+| `708adce` | Claude | ci(tfc): run e2e and build in parallel with unit tests |
+| `3eb2a13` | Claude | Enable failure screenshots for E2E tests |
+| `2e973fb` | Drago van Markic | Merge pull request #128 from vanmarkic/claude/read-gh-runs-UAljh |
+| `343839e` | Drago van Markic | Merge pull request #127 from vanmarkic/claude/refine-landing-page-9YEwq |
+| `8719f58` | Claude | Add gh CLI repo flag rule to AGENTS.md Common Pitfalls |
+| `f571de2` | Drago van Markic | Merge pull request #129 from vanmarkic/claude/update-agents-gh-cli-rwdub |
+| `2fa4881` | Claude | fix(tfc): fix TypeScript type mismatches and DomainService test contamination |
+| `d0929c5` | Claude | feat(tfc): implement missing player view features and fix E2E tests |
+| `918f90a` | Drago van Markic | Merge pull request #130 from vanmarkic/claude/check-failing-playwright-tests-IHEsU |
+| `8ad230f` | Claude | feat(tfc): add 2-player mode to simple collaborative |
+| `6cd8b14` | Claude | test(tfc): add Playwright property tests for 2-player mode |
+| `086238d` | Claude | fix: resolve merge conflict with master's scenario-role-slot UI |
+| `b00a798` | Claude | feat(tfc): enforce roles-required invariant on scenarios |
+| `06da783` | Claude | fix: correct import paths in role-slot-list component |
+| `336ceea` | Drago van Markic | Merge pull request #131 from vanmarkic/claude/add-two-player-mode-cjI2r |
+| `03874bb` | Claude | Fix CORS on Hetzner by adding CORS headers at Caddy proxy level |
+| `e9544db` | Drago van Markic | Merge pull request #132 from vanmarkic/claude/fix-cors-hetzner-NIPjU |
+| `a1ffe0f` | Claude | feat(tfc): validate silent_wake.json at Docker build and seed time |
+| `af81faa` | Claude | feat(tfc): wire scenario content validation into builder UI save flow |
+| `cad0959` | Claude | test(tfc): add frontend tests for scenario content validation |
+| `a792f2d` | Claude | Remove Join Exercise card; show all active lobbies on home page |
+| `ebed809` | Drago van Markic | Merge pull request #133 from vanmarkic/claude/validate-silent-wake-json-4ICTb |
+| `326b53e` | Drago van Markic | Merge pull request #134 from vanmarkic/claude/review-code-clarity-QTEXY |
+| `8a4e704` | Claude | Fix favicon 404 and SSL errors by routing API through frontend nginx |
+| `166c786` | Drago van Markic | Merge pull request #135 from vanmarkic/claude/fix-favicon-ssl-errors-4Kzyj |
 
 ---
 
 ## Changes by Category
 
-### Features (25 commits)
+### Features (33 commits)
 
 - `d619e95` — Add missing frontend service to TFC docker-compose
 - `3900b40` — Add waiting room with role assignment for TFC exercises
@@ -121,8 +159,15 @@
 - `f0fa22d` — Railway deployment config + pre-deploy cleanup
 - `ce32eb2` — Playwright test updates; sea backdrop geometry and lighting
 - `3ea5d0d` — Collaborative session code tests; URL expectations
+- `1d47f70` — Refine landing page with scenario picker, lobby preview, and role slots
+- `d0929c5` — Implement missing player view features and fix E2E tests
+- `8ad230f` — Add 2-player mode to simple collaborative
+- `b00a798` — Enforce roles-required invariant on scenarios
+- `a1ffe0f` — Validate silent_wake.json at Docker build and seed time
+- `af81faa` — Wire scenario content validation into builder UI save flow
+- `a792f2d` — Remove Join Exercise card; show all active lobbies on home page
 
-### Fixes (10 commits)
+### Fixes (18 commits)
 
 - `d8109cb` — Use npm install instead of npm ci in frontend Dockerfile.railway
 - `0117e9c` — Handle session code collisions gracefully; sea backdrop geometry
@@ -135,8 +180,16 @@
 - `901790b` — Place glowing dot at mesh vertex instead of using vector lines
 - `b44aabc` — Allow glowing dot to spawn on any vertex including edges
 - `9bc22aa` — Wire participant_id through recommendation flow (gap #3)
+- `958cca7` — Resolve TFC gaps 3, 5, 6, 10, 11 — score snapshot, player type, participant identity
+- `55145b0` — Replace TS parameter property in Playwright fixture for strip-only mode
+- `437e358` — Use patch context manager instead of decorator in RBAC tests
+- `2fa4881` — Fix TypeScript type mismatches and DomainService test contamination
+- `086238d` — Resolve merge conflict with master's scenario-role-slot UI
+- `06da783` — Correct import paths in role-slot-list component
+- `03874bb` — Fix CORS on Hetzner by adding CORS headers at Caddy proxy level
+- `8a4e704` — Fix favicon 404 and SSL errors by routing API through frontend nginx
 
-### Tests (8 commits)
+### Tests (16 commits)
 
 - `7acd460` — Exhaustive tests for waiting room store and router
 - `b7514ee` — Pareto integration tests for waiting room WebSocket broadcasts
@@ -146,11 +199,20 @@
 - `52d8d5c` — Property testing for TFC engine with Hypothesis
 - `dd89aed` — Property tests for SimpleCollaborativeMode
 - `fbbed43` — TDD + property tests for domain_config feature
+- `eb0c8d7` — Property-style Playwright tests for player view state invariants
+- `52a49f6` — HTTP API tests for decision, audit, health, and engine lifecycle routers
+- `d8cc602` — Behavioral and gray-box tests for engine workflows
+- `9c1817d` — Mutation test script for behavioral test validation
+- `ca4d8b5` — State-matrix e2e + visual state property tests
+- `6cd8b14` — Playwright property tests for 2-player mode
+- `cad0959` — Frontend tests for scenario content validation
 
-### CI/Infra (2 commits)
+### CI/Infra (4 commits)
 
 - `32f4297` — Add failure screenshots to TFC Playwright CI pipeline
 - `2bf49dc` — Capture one screenshot per route in TFC Playwright CI
+- `708adce` — Run e2e and build in parallel with unit tests
+- `3eb2a13` — Enable failure screenshots for E2E tests
 
 ### Chores / Refactoring (3 commits)
 
@@ -158,16 +220,30 @@
 - `245542a` — Add uv.lock for TFC backend dependencies
 - `6e7409f` — Merge origin/master into claude/review-tfc-tasks-2IEkl
 
-### Documentation (1 commit)
+### Documentation (2 commits)
 
 - `78f85c3` — Add inject/defect terminology aliases for LLM prompt alignment
+- `8719f58` — Add gh CLI repo flag rule to AGENTS.md Common Pitfalls
+- `4bac8cc` — Add comprehensive change report for TFC folder
 
 ### Style (1 commit)
 
 - `fe82d32` — Menu card style enhancements (padding, background, box-shadow)
 
-### Merges (9 commits)
+### Merges (20 commits)
 
+- `166c786` — Merge PR #135 (favicon SSL errors fix)
+- `326b53e` — Merge PR #134 (code clarity review)
+- `ebed809` — Merge PR #133 (validate silent_wake.json)
+- `e9544db` — Merge PR #132 (CORS Hetzner fix)
+- `336ceea` — Merge PR #131 (2-player mode)
+- `918f90a` — Merge PR #130 (failing Playwright tests fix)
+- `f571de2` — Merge PR #129 (AGENTS.md gh CLI rule)
+- `2e973fb` — Merge PR #128 (GH runs)
+- `343839e` — Merge PR #127 (landing page refinement)
+- `7ce32f3` — Merge PR #126 (TFC API tests)
+- `53a2e08` — Merge PR #124 (TFC gaps documentation)
+- `291aa26` — Merge PR #125 (TFC change report)
 - `f577bbe` — Merge PR #122 (terminology rename)
 - `8dbce4c` — Merge PR #121 (gaps & blockers)
 - `495d32b` — Merge PR #119 (Three.js glowing dot effect)
@@ -187,9 +263,9 @@
 
 | Author | Commits | Role |
 |--------|---------|------|
-| Claude | 37 | AI-assisted development (features, fixes, tests) |
+| Claude | 59 | AI-assisted development (features, fixes, tests) |
 | vanmarkic | 16 | Manual development (features, collaborative flow, scenarios) |
-| Drago van Markic | 12 | PR merges and review |
+| Drago van Markic | 28 | PR merges and review |
 
 ---
 
@@ -203,5 +279,10 @@
 6. **3D Visuals** (PR #109, #119) — GSAP animations, Three.js sea backdrop, glowing dot convergence effect
 7. **Silent Wake Scenario** (PR #118) — Full scenario with phases, events, decision templates, per-card scoring
 8. **Hetzner Deployment** (PR #117) — Seed data and seeder integration
-9. **Gaps & Blockers** (PR #121) — participant_id wiring through recommendation flow
+9. **Gaps & Blockers** (PR #121, #124) — participant_id wiring, score snapshot, player type, gap documentation
 10. **Terminology Alignment** (PR #122) — Inject/defect aliases, camera FOV adjustment
+11. **Test Coverage Expansion** (PR #125, #126) — Change report, HTTP API tests, behavioral tests, mutation testing
+12. **Landing Page & Lobby** (PR #127) — Scenario picker, lobby preview, role slots, active lobbies on home
+13. **2-Player Mode** (PR #131) — Simple collaborative 2-player variant, roles-required invariant, role-slot UI
+14. **Scenario Validation** (PR #133) — Build-time + seed-time JSON validation, builder UI validation wiring
+15. **Infra Hardening** (PR #132, #135) — CORS fix on Hetzner, favicon/SSL fix via nginx proxy
