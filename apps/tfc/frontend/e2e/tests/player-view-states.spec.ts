@@ -245,20 +245,20 @@ test.describe('Score display — visible iff score exists', () => {
 //    Classic (any role)            → "Waiting for ... actions..."
 
 test.describe('Footer status — game mode × player type', () => {
-  test('collaborative + decision_maker role → "Decision Maker"', async ({ page }) => {
+  test('collaborative + decision_maker role → role label', async ({ page }) => {
     await installMocks(page, snapshot());
     await page.goto(playerUrl('co-01', 'co'));
 
-    await expect(page.getByText('You are the Decision Maker')).toBeVisible();
-    await expect(page.getByText('You are an Advisor')).not.toBeVisible();
+    await expect(page.getByText('You are the Commanding Officer')).toBeVisible();
+    await expect(page.getByText('You are the Navigator')).not.toBeVisible();
   });
 
-  test('collaborative + advisor role → "Advisor"', async ({ page }) => {
+  test('collaborative + advisor role → role label', async ({ page }) => {
     await installMocks(page, snapshot());
     await page.goto(playerUrl('nav-01', 'nav'));
 
-    await expect(page.getByText('You are an Advisor')).toBeVisible();
-    await expect(page.getByText('You are the Decision Maker')).not.toBeVisible();
+    await expect(page.getByText('You are the Navigator')).toBeVisible();
+    await expect(page.getByText('You are the Commanding Officer')).not.toBeVisible();
   });
 
   test('classic mode → "Waiting for ... actions"', async ({ page }) => {
@@ -513,8 +513,8 @@ test.describe('Combined state — all invariants hold together', () => {
     // Advisor does NOT see bubbles
     await expect(page.locator('tfc-advisor-bubbles')).not.toBeVisible();
 
-    // Footer: advisor
-    await expect(page.getByText('You are an Advisor')).toBeVisible();
+    // Footer: role label for advisor (Navigator)
+    await expect(page.getByText('You are the Navigator')).toBeVisible();
 
     // Context visible
     await expect(page.getByText('You are aboard the USS Sentinel.')).toBeVisible();
@@ -546,8 +546,8 @@ test.describe('Combined state — all invariants hold together', () => {
     await expect(page.locator('tfc-advisor-bubbles')).toBeVisible();
     await expect(page.locator('.advisor-bubble__count')).toContainText('2');
 
-    // Footer: decision maker
-    await expect(page.getByText('You are the Decision Maker')).toBeVisible();
+    // Footer: role label for decision maker (Commanding Officer)
+    await expect(page.getByText('You are the Commanding Officer')).toBeVisible();
   });
 
   test('paused with no score, no events, no issues, no decisions', async ({ page }) => {

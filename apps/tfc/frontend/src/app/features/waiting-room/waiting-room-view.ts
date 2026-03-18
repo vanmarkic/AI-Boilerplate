@@ -118,15 +118,19 @@ const DEFAULT_ROLES: RoleDef[] = [
                       <ui-badge variant="secondary">You</ui-badge>
                     }
                   </div>
-                  <select
-                    class="input-base"
-                    [value]="p.role"
-                    (change)="onRoleChange(p.id, $event)"
-                  >
-                    @for (role of fallbackRoles; track role.id) {
-                      <option [value]="role.id">{{ role.label }}</option>
-                    }
-                  </select>
+                  @if (isSimpleCollaborative()) {
+                    <ui-badge variant="default">Player</ui-badge>
+                  } @else {
+                    <select
+                      class="input-base"
+                      [value]="p.role"
+                      (change)="onRoleChange(p.id, $event)"
+                    >
+                      @for (role of fallbackRoles; track role.id) {
+                        <option [value]="role.id">{{ role.label }}</option>
+                      }
+                    </select>
+                  }
                 </div>
               } @empty {
                 <p class="text-muted-foreground text-sm p-sm">
