@@ -69,15 +69,15 @@ Identified during review, ordered by severity:
 |---|---|---|---|---|
 | 1 | **Turn chaining not wired** | `engine_router.py`, `exercise_engine.py` | **RESOLVED** | `close_decision` now calls `get_next_decision_id()` and opens next decision. Timeout loop also chains. |
 | 2 | **Timeout auto-submit not wired** | `exercise_engine.py:_timeout_loop()` | **RESOLVED** | Timeout calls `on_decision_timeout()` → selects worst option → applies scoring → chains. |
-| 3 | **Player identity hardcoded** | `engine_router.py` has `participant_id="TODO"` | **OPEN** | All advisors still overwrite same recommendation slot. |
+| 3 | **Player identity hardcoded** | `engine_router.py` has `participant_id="TODO"` | **RESOLVED** | Waiting room passes `role` query param + `participantId`. Backend validates `participant_id` is non-empty. |
 | 4 | **Dummy scores on close** | `engine_router.py` | **RESOLVED** | `CloseDecisionRequest` accepts `selected_option_ids`. Real scores computed from options and passed to `on_decision_closed_v2()`. |
 
 ### Medium severity
 
 | # | Gap | Location | Status | Resolution |
 |---|---|---|---|---|
-| 5 | **Score not in snapshot** | `exercise_engine.snapshot()` | **OPEN** | Reconnecting player still loses score display. |
-| 6 | **PlayerType never set from scenario** | Frontend store `setPlayerType()` never called | **OPEN** | Advisor/decision-maker distinction dead in UI. |
+| 5 | **Score not in snapshot** | `exercise_engine.snapshot()` | **RESOLVED** | `GameMode.snapshot()` returns score data. `ExerciseEngine.snapshot()` includes `"score"` key. Frontend reads from snapshot on reconnect. |
+| 6 | **PlayerType never set from scenario** | Frontend store `setPlayerType()` never called | **RESOLVED** | `ScenarioContext` carries `roles: list[RoleInfo]`. Player view resolves `player_type` from context roles. |
 | 7 | **No `max_selections` field** | `DecisionTemplateDef` | **OPEN** | Cannot express "pick up to 2 cards" constraint. |
 | 8 | **Domain terminology hardcoded** | `tfc-shared/constants/domains.ts`, `domain.service.ts` | **OPEN** | See §4.1 |
 
