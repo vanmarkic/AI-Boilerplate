@@ -35,7 +35,7 @@ services:
       ENVIRONMENT: production
       DEBUG: "false"
       PORT: "8001"
-      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://tfc.46.224.43.248.sslip.io}
     command: >
       sh -c "alembic upgrade head && python seed.py && uvicorn main:app --host 0.0.0.0 --port 8001"
     depends_on:
