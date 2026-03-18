@@ -212,7 +212,7 @@ class TestCollaborativeEngineStart:
         assert resp.status_code == 200
 
     @pytest.mark.asyncio
-    async def test_start_twice_returns_conflict(self, client: AsyncClient) -> None:
+    async def test_start_twice_is_idempotent(self, client: AsyncClient) -> None:
         ex = await _create_collab(client)
         eid = ex["id"]
         await _join(client, eid, "Alice", "co")
@@ -220,7 +220,8 @@ class TestCollaborativeEngineStart:
         first = await client.post(f"/api/exercises/{eid}/engine/start")
         second = await client.post(f"/api/exercises/{eid}/engine/start")
         assert first.status_code == 200
-        assert second.status_code == 409
+        assert second.status_code == 200
+        assert second.json()["phase"] == "running"
 
     @pytest.mark.asyncio
     async def test_starting_nonexistent_exercise_returns_404(self, client: AsyncClient) -> None:

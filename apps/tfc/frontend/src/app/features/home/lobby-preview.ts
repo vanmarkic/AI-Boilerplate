@@ -199,6 +199,9 @@ export class LobbyPreview implements OnInit, OnDestroy {
         const updated = msg["participants"] as ParticipantResponse[];
         if (updated) this.participants.set(updated);
       }
+      if (msg.type === "exercise_started") {
+        this.navigateToExercise();
+      }
     });
   }
 
@@ -251,18 +254,20 @@ export class LobbyPreview implements OnInit, OnDestroy {
   }
 
   protected onStart(): void {
+    this.engineApi.start(this.data().exercise.id).subscribe({
+      next: () => this.navigateToExercise(),
+    });
+  }
+
+  private navigateToExercise(): void {
     const eId = this.data().exercise.id;
     const pId = this.myParticipantId();
+    if (!pId) return;
     const me = this.participants().find((p) => p.id === pId);
     const isGm = me?.role === "game-master";
-
-    this.engineApi.start(eId).subscribe({
-      next: () => {
-        const route = isGm ? "/gm" : "/player";
-        this.router.navigate([route], {
-          queryParams: { exerciseId: eId, participantId: pId },
-        });
-      },
+    const route = isGm ? "/gm" : "/player";
+    this.router.navigate([route], {
+      queryParams: { exerciseId: eId, participantId: pId },
     });
   }
 }

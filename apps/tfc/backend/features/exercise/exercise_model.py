@@ -2,7 +2,7 @@ import random
 import string
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Integer, String, Text, func
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base
@@ -29,6 +29,7 @@ class Exercise(Base):
     )
     time_factor: Mapped[float] = mapped_column(default=1.0)
     game_mode: Mapped[str] = mapped_column(String(50), default="classic")
+    practice_mode: Mapped[bool] = mapped_column(Boolean, default=False)
     session_code: Mapped[str] = mapped_column(
         String(6),
         default=_generate_session_code,
