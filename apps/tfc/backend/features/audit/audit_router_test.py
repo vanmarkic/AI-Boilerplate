@@ -24,7 +24,7 @@ async def audit_service(setup_db: None) -> AuditService:
     session_gen = app.dependency_overrides[get_session]()
     session: AsyncSession = await session_gen.__anext__()
     repo = AuditRepository(session)
-    yield AuditService(repo)
+    return AuditService(repo)
     # session cleanup handled by setup_db fixture
 
 

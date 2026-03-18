@@ -50,5 +50,10 @@ target-version = "py312"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "N", "UP", "ANN"]
-ignore = []
+select = ["E", "F", "I", "N", "UP", "ANN", "ASYNC", "S", "PT", "T20", "RUF"]
+ignore = [
+    "S101",   # assert used in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"alembic/**" = ["ANN"]
