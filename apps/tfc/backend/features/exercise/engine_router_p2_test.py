@@ -1,5 +1,5 @@
 """Tests for P2 engine_router additions: role-targeted broadcast splitting."""
-from features.exercise.engine_router import _split_targeted_changes
+from features.exercise.engine_broadcast import split_targeted_changes as _split_targeted_changes
 
 
 def test_split_no_targeted_changes() -> None:

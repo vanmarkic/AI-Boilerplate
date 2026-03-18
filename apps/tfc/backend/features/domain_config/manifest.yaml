@@ -1,0 +1,21 @@
+name: domain_config
+tier: 1
+description: DB-backed domain terminology and theme configuration
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [postgresql]
+api_endpoints:
+  - POST /api/domain-configs
+  - GET /api/domain-configs
+  - GET /api/domain-configs/by-slug/{slug}
+  - GET /api/domain-configs/{config_id}
+  - PUT /api/domain-configs/{config_id}
+  - DELETE /api/domain-configs/{config_id}
+models:
+  - DomainConfig
+events_emitted: []
+events_consumed: []
+business_rules:
+  - Slugs must be unique
+  - Terminology dictionary drives all user-facing domain labels
