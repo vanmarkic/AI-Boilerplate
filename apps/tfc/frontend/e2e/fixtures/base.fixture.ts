@@ -13,6 +13,35 @@ export interface MockParticipant {
   joined_at: string;
 }
 
+export interface MockRole {
+  id: string;
+  label: string;
+  player_type: string;
+}
+
+export interface MockScenario {
+  id: number;
+  title: string;
+  description: string;
+  domain_id: number | null;
+  content: {
+    roles?: MockRole[];
+    game_mode?: string;
+    [key: string]: unknown;
+  } | null;
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MockJoinableResponse {
+  exercise: Record<string, unknown>;
+  participants: MockParticipant[];
+  roles: MockRole[];
+  max_players: number;
+  requires_gm: boolean;
+}
+
 let participantCounter = 0;
 
 /** Build a mock participant object. */
@@ -39,6 +68,10 @@ export class MockApi {
   readonly rooms = new Map<number, MockParticipant[]>();
   /** Session code → exercise lookup payload. */
   readonly codeMap = new Map<string, object>();
+  /** Scenario list for GET /api/scenarios. */
+  readonly scenarios: MockScenario[] = [];
+  /** Joinable exercise response (or null for 404). */
+  joinableResponse: MockJoinableResponse | null = null;
 
   readonly page: Page;
   constructor(page: Page) {
@@ -62,17 +95,85 @@ export class MockApi {
     });
   }
 
+  /** Seed a scenario for GET /api/scenarios. */
+  seedScenario(scenario: MockScenario): void {
+    this.scenarios.push(scenario);
+  }
+
+  /** Set the joinable exercise response. */
+  seedJoinable(data: MockJoinableResponse): void {
+    this.joinableResponse = data;
+  }
+
   /** Install default API route handlers. Call once per test. */
   async install(): Promise<void> {
+    // GET /api/exercises/joinable
+    await this.page.route('**/api/exercises/joinable', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.fallback();
+        return;
+      }
+      if (this.joinableResponse) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(this.joinableResponse),
+        });
+      } else {
+        await route.fulfill({ status: 404 });
+      }
+    });
+
+    // GET /api/scenarios and GET /api/scenarios/:id
+    await this.page.route('**/api/scenarios', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.fallback();
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(this.scenarios),
+      });
+    });
+
+    await this.page.route('**/api/scenarios/*', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.fallback();
+        return;
+      }
+      const url = route.request().url();
+      const m = url.match(/scenarios\/(\d+)/);
+      const id = m ? Number(m[1]) : 0;
+      const s = this.scenarios.find((x) => x.id === id);
+      if (!s) {
+        await route.fulfill({ status: 404 });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(s),
+      });
+    });
+
     // POST /api/exercises — create exercise
     await this.page.route('**/api/exercises', async (route) => {
+      if (route.request().method() === 'GET') {
+        // GET /api/exercises/:id fallthrough handled below
+        await route.fallback();
+        return;
+      }
       if (route.request().method() !== 'POST') {
         await route.fallback();
         return;
       }
       const body = route.request().postDataJSON();
       const id = Math.floor(Math.random() * 9000) + 1000;
-      const sessionCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+      const sessionCode = Math.random()
+        .toString(36)
+        .slice(2, 8)
+        .toUpperCase();
       await route.fulfill({
         status: 201,
         contentType: 'application/json',
@@ -81,7 +182,7 @@ export class MockApi {
           title: body.title ?? 'Test Exercise',
           description: body.description ?? '',
           phase: 'setup',
-          scenario_id: null,
+          scenario_id: body.scenario_id ?? null,
           domain_id: null,
           time_factor: 1.0,
           game_mode: body.game_mode ?? 'classic',

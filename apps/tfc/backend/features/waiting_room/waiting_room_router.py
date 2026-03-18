@@ -3,12 +3,20 @@
 Allows participants to join, leave, and change roles before an exercise
 starts. Mutations broadcast updates via the existing WebSocket connection
 manager so all connected clients see changes in real time.
+
+When the exercise is linked to a scenario with roles, the router enforces:
+- unique role assignment (no two participants hold the same role)
+- max player capacity (derived from the number of defined roles)
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 
+from core.dependencies import get_exercise_service, get_scenario_service
 from features.exercise.adapters.connection_manager import connection_manager
+from features.exercise.exercise_service import ExerciseService
+from features.scenario.scenario_content import ScenarioContent
+from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_schema import (
     JoinRequest,
     ParticipantResponse,
@@ -33,11 +41,48 @@ def _participants_payload(exercise_id: int) -> dict:
     }
 
 
+async def _get_scenario_roles(
+    exercise_id: int,
+    exercise_service: ExerciseService,
+    scenario_service: ScenarioService,
+) -> list[dict] | None:
+    """Return scenario roles for the exercise, or None if no scenario."""
+    exercise = await exercise_service.get_exercise(exercise_id)
+    if exercise.scenario_id is None:
+        return None
+    scenario = await scenario_service.get_scenario(exercise.scenario_id)
+    if scenario.content is None:
+        return None
+    content = ScenarioContent.model_validate(scenario.content)
+    if not content.roles:
+        return None
+    return [r.model_dump() for r in content.roles]
+
+
 @router.post("/join", response_model=ParticipantResponse)
 async def join_waiting_room(
-    exercise_id: int, body: JoinRequest,
+    exercise_id: int,
+    body: JoinRequest,
+    exercise_service: ExerciseService = Depends(get_exercise_service),
+    scenario_service: ScenarioService = Depends(get_scenario_service),
 ) -> ParticipantResponse:
     """Join the waiting room for an exercise."""
+    roles = await _get_scenario_roles(
+        exercise_id, exercise_service, scenario_service,
+    )
+    if roles is not None:
+        max_players = len(roles)
+        if waiting_room_store.count(exercise_id) >= max_players:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Waiting room is full",
+            )
+        if waiting_room_store.is_role_taken(exercise_id, body.role):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Role '{body.role}' is already taken",
+            )
+
     participant = waiting_room_store.join(
         exercise_id, body.display_name, body.role,
     )
@@ -67,8 +112,22 @@ async def update_participant_role(
     exercise_id: int,
     participant_id: str,
     body: UpdateRoleRequest,
+    exercise_service: ExerciseService = Depends(get_exercise_service),
+    scenario_service: ScenarioService = Depends(get_scenario_service),
 ) -> ParticipantResponse:
     """Change a participant's role in the waiting room."""
+    roles = await _get_scenario_roles(
+        exercise_id, exercise_service, scenario_service,
+    )
+    if roles is not None:
+        if waiting_room_store.is_role_taken(
+            exercise_id, body.role, exclude_participant=participant_id,
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"Role '{body.role}' is already taken",
+            )
+
     participant = waiting_room_store.update_role(
         exercise_id, participant_id, body.role,
     )

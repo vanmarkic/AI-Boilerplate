@@ -472,3 +472,159 @@ class TestFullFlow:
             f"/api/exercises/{eid2}/waiting-room",
         )
         assert listing2.json()["participants"][0]["role"] == "observer"
+
+
+# ── Helpers for scenario-linked exercises ────────────────────────────
+
+
+async def _create_scenario_with_roles(
+    client: AsyncClient, roles: list[dict],
+    game_mode: str = "simple_collaborative",
+) -> int:
+    """Create a scenario with roles and return its ID."""
+    resp = await client.post(
+        "/api/scenarios",
+        json={
+            "title": "Test Scenario",
+            "content": {
+                "phases": [],
+                "events": [],
+                "issues": [],
+                "decision_templates": [],
+                "default_time_factor": 1.0,
+                "briefing": "Test",
+                "objectives": [],
+                "rules": [],
+                "game_mode": game_mode,
+                "game_mode_config": {},
+                "decision_sequence": [],
+                "roles": roles,
+            },
+        },
+    )
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
+async def _create_exercise_with_scenario(
+    client: AsyncClient, scenario_id: int,
+    game_mode: str = "simple_collaborative",
+) -> int:
+    """Create an exercise linked to a scenario and return its ID."""
+    resp = await client.post(
+        "/api/exercises",
+        json={
+            "title": "Test Exercise",
+            "scenario_id": scenario_id,
+            "game_mode": game_mode,
+        },
+    )
+    assert resp.status_code == 201
+    return resp.json()["id"]
+
+
+_TWO_ROLES = [
+    {"id": "co", "label": "CO", "player_type": "decision_maker"},
+    {"id": "nav", "label": "NAV", "player_type": "advisor"},
+]
+
+
+# ── Unique Role Enforcement ──────────────────────────────────────────
+
+
+class TestUniqueRoleEnforcement:
+    @pytest.mark.asyncio
+    async def test_join_with_taken_role_returns_409(
+        self, client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
+        eid = await _create_exercise_with_scenario(client, sid)
+        await _join(client, eid, "Alice", "co")
+        resp = await client.post(
+            f"/api/exercises/{eid}/waiting-room/join",
+            json={"display_name": "Bob", "role": "co"},
+        )
+        assert resp.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_update_role_to_taken_role_returns_409(
+        self, client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
+        eid = await _create_exercise_with_scenario(client, sid)
+        await _join(client, eid, "Alice", "co")
+        p2 = await _join(client, eid, "Bob", "nav")
+        resp = await client.put(
+            f"/api/exercises/{eid}/waiting-room/participants/{p2['id']}/role",
+            json={"role": "co"},
+        )
+        assert resp.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_update_role_to_own_current_role_succeeds(
+        self, client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
+        eid = await _create_exercise_with_scenario(client, sid)
+        p = await _join(client, eid, "Alice", "co")
+        resp = await client.put(
+            f"/api/exercises/{eid}/waiting-room/participants/{p['id']}/role",
+            json={"role": "co"},
+        )
+        assert resp.status_code == 200
+
+    @pytest.mark.asyncio
+    async def test_join_with_available_role_succeeds(
+        self, client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
+        eid = await _create_exercise_with_scenario(client, sid)
+        await _join(client, eid, "Alice", "co")
+        p2 = await _join(client, eid, "Bob", "nav")
+        assert p2["role"] == "nav"
+
+    @pytest.mark.asyncio
+    async def test_exercise_without_scenario_allows_duplicate_roles(
+        self, client: AsyncClient,
+    ) -> None:
+        eid = await _create_exercise(client)
+        await _join(client, eid, "Alice", "player")
+        p2 = await _join(client, eid, "Bob", "player")
+        assert p2["role"] == "player"
+
+
+# ── Max Players Enforcement ──────────────────────────────────────────
+
+
+class TestMaxPlayersEnforcement:
+    @pytest.mark.asyncio
+    async def test_join_when_full_returns_409(
+        self, client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
+        eid = await _create_exercise_with_scenario(client, sid)
+        await _join(client, eid, "Alice", "co")
+        await _join(client, eid, "Bob", "nav")
+        resp = await client.post(
+            f"/api/exercises/{eid}/waiting-room/join",
+            json={"display_name": "Carol", "role": "player"},
+        )
+        assert resp.status_code == 409
+
+    @pytest.mark.asyncio
+    async def test_join_when_slots_available_succeeds(
+        self, client: AsyncClient,
+    ) -> None:
+        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
+        eid = await _create_exercise_with_scenario(client, sid)
+        p = await _join(client, eid, "Alice", "co")
+        assert p["display_name"] == "Alice"
+
+    @pytest.mark.asyncio
+    async def test_exercise_without_scenario_has_no_limit(
+        self, client: AsyncClient,
+    ) -> None:
+        eid = await _create_exercise(client)
+        for i in range(10):
+            p = await _join(client, eid, f"Player{i}", "player")
+            assert p["display_name"] == f"Player{i}"
