@@ -8,27 +8,30 @@ import {
   OnInit,
   output,
   signal,
-} from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+} from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { Router } from "@angular/router";
 import {
   BadgeComponent,
   ButtonDirective,
   CardComponent,
   InputComponent,
-} from '@aspect/ui';
-import { ExerciseWsService } from '../../core/exercise-ws.service';
+} from "@aspect/ui";
+import { ExerciseWsService } from "../../core/exercise-ws.service";
 import {
   WaitingRoomApiService,
   type ParticipantResponse,
-} from '../../core/waiting-room-api.service';
-import { EngineApiService } from '../../core/engine-api.service';
-import type { RoleDef } from '../../core/scenario-api.service';
-import { Subscription } from 'rxjs';
+} from "../../core/waiting-room-api.service";
+import { EngineApiService } from "../../core/engine-api.service";
+import type { RoleDef } from "../../core/scenario-api.service";
+import { Subscription } from "rxjs";
 
 export interface JoinableExercise {
   exercise: {
-    id: number; title: string; game_mode: string; scenario_id: number | null;
+    id: number;
+    title: string;
+    game_mode: string;
+    scenario_id: number | null;
   };
   participants: ParticipantResponse[];
   roles: RoleDef[];
@@ -37,10 +40,16 @@ export interface JoinableExercise {
 }
 
 @Component({
-  selector: 'tfc-lobby-preview',
+  selector: "tfc-lobby-preview",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule, CardComponent, BadgeComponent, ButtonDirective, InputComponent],
-  styleUrl: './lobby-preview.css',
+  imports: [
+    FormsModule,
+    CardComponent,
+    BadgeComponent,
+    ButtonDirective,
+    InputComponent,
+  ],
+  styleUrl: "./lobby-preview.css",
   template: `
     <ui-card [title]="data().exercise.title">
       <div class="flex flex-col gap-md">
@@ -58,7 +67,9 @@ export interface JoinableExercise {
             @let holder = holderOf(role.id);
             <div
               class="role-slot"
-              [attr.data-taken]="holder && holder.id !== myParticipantId() ? '' : null"
+              [attr.data-taken]="
+                holder && holder.id !== myParticipantId() ? '' : null
+              "
               [attr.data-mine]="holder?.id === myParticipantId() ? '' : null"
               [attr.data-available]="!holder && myParticipantId() ? '' : null"
               (click)="onClaimRole(role.id)"
@@ -66,12 +77,21 @@ export interface JoinableExercise {
               <div>
                 <span class="role-label">{{ role.label }}</span>
                 <span class="role-type">
-                  {{ role.player_type === 'decision_maker' ? 'Decision Maker' : 'Advisor' }}
+                  {{
+                    role.player_type === "decision_maker"
+                      ? "Decision Maker"
+                      : "Advisor"
+                  }}
                 </span>
               </div>
               @if (holder) {
-                <ui-badge [variant]="holder.id === myParticipantId() ? 'default' : 'outline'">
-                  {{ holder.display_name }}{{ holder.id === myParticipantId() ? ' (You)' : '' }}
+                <ui-badge
+                  [variant]="
+                    holder.id === myParticipantId() ? 'default' : 'outline'
+                  "
+                >
+                  {{ holder.display_name
+                  }}{{ holder.id === myParticipantId() ? " (You)" : "" }}
                 </ui-badge>
               } @else {
                 <span class="text-sm text-muted-foreground">Open</span>
@@ -80,10 +100,12 @@ export interface JoinableExercise {
           }
 
           @if (data().requires_gm) {
-            @let gmHolder = holderOf('game-master');
+            @let gmHolder = holderOf("game-master");
             <div
               class="role-slot"
-              [attr.data-taken]="gmHolder && gmHolder.id !== myParticipantId() ? '' : null"
+              [attr.data-taken]="
+                gmHolder && gmHolder.id !== myParticipantId() ? '' : null
+              "
               [attr.data-mine]="gmHolder?.id === myParticipantId() ? '' : null"
               [attr.data-available]="!gmHolder && myParticipantId() ? '' : null"
               (click)="onClaimRole('game-master')"
@@ -93,8 +115,13 @@ export interface JoinableExercise {
                 <span class="role-type">Facilitator</span>
               </div>
               @if (gmHolder) {
-                <ui-badge [variant]="gmHolder.id === myParticipantId() ? 'default' : 'outline'">
-                  {{ gmHolder.display_name }}{{ gmHolder.id === myParticipantId() ? ' (You)' : '' }}
+                <ui-badge
+                  [variant]="
+                    gmHolder.id === myParticipantId() ? 'default' : 'outline'
+                  "
+                >
+                  {{ gmHolder.display_name
+                  }}{{ gmHolder.id === myParticipantId() ? " (You)" : "" }}
                 </ui-badge>
               } @else {
                 <span class="text-sm text-muted-foreground">Open</span>
@@ -113,22 +140,28 @@ export interface JoinableExercise {
               style="flex: 1;"
             />
             <button
-              uiButton variant="default"
+              uiButton
+              variant="default"
               [disabled]="!displayName().trim() || joining()"
               (click)="onJoin()"
             >
-              {{ joining() ? 'Joining...' : 'Join' }}
+              {{ joining() ? "Joining..." : "Join" }}
             </button>
           </div>
         } @else {
           <div class="flex gap-sm justify-between">
-            <button uiButton variant="outline" (click)="onLeave()">Leave</button>
+            <button uiButton variant="outline" (click)="onLeave()">
+              Leave
+            </button>
             <button
-              uiButton variant="default"
+              uiButton
+              variant="default"
               [disabled]="!allRolesFilled()"
               (click)="onStart()"
             >
-              Start Exercise ({{ participants().length }}/{{ data().max_players }})
+              Start Exercise ({{ participants().length }}/{{
+                data().max_players
+              }})
             </button>
           </div>
         }
@@ -147,8 +180,8 @@ export class LobbyPreview implements OnInit, OnDestroy {
   readonly exerciseLeft = output<void>();
 
   protected readonly participants = signal<ParticipantResponse[]>([]);
-  protected readonly myParticipantId = signal('');
-  protected readonly displayName = signal('');
+  protected readonly myParticipantId = signal("");
+  protected readonly displayName = signal("");
   protected readonly joining = signal(false);
 
   protected readonly allRolesFilled = computed(() => {
@@ -160,10 +193,10 @@ export class LobbyPreview implements OnInit, OnDestroy {
     this.participants.set(this.data().participants);
     const eId = this.data().exercise.id;
 
-    this.ws.connect(eId, 'player');
+    this.ws.connect(eId, "player");
     this.sub = this.ws.messages$.subscribe((msg) => {
-      if (msg.type === 'waiting_room_update') {
-        const updated = msg['participants'] as ParticipantResponse[];
+      if (msg.type === "waiting_room_update") {
+        const updated = msg["participants"] as ParticipantResponse[];
         if (updated) this.participants.set(updated);
       }
     });
@@ -184,15 +217,13 @@ export class LobbyPreview implements OnInit, OnDestroy {
     this.joining.set(true);
 
     // Join with default "player" role, user will pick a role slot after
-    this.api
-      .join(this.data().exercise.id, name, 'player')
-      .subscribe({
-        next: (p) => {
-          this.myParticipantId.set(p.id);
-          this.joining.set(false);
-        },
-        error: () => this.joining.set(false),
-      });
+    this.api.join(this.data().exercise.id, name, "player").subscribe({
+      next: (p) => {
+        this.myParticipantId.set(p.id);
+        this.joining.set(false);
+      },
+      error: () => this.joining.set(false),
+    });
   }
 
   protected onClaimRole(roleId: string): void {
@@ -201,9 +232,7 @@ export class LobbyPreview implements OnInit, OnDestroy {
     const current = this.participants().find((p) => p.id === pId);
     if (current?.role === roleId) return;
 
-    this.api
-      .updateRole(this.data().exercise.id, pId, roleId)
-      .subscribe();
+    this.api.updateRole(this.data().exercise.id, pId, roleId).subscribe();
   }
 
   protected onLeave(): void {
@@ -211,11 +240,11 @@ export class LobbyPreview implements OnInit, OnDestroy {
     if (!pId) return;
     this.api.leave(this.data().exercise.id, pId).subscribe({
       next: () => {
-        this.myParticipantId.set('');
+        this.myParticipantId.set("");
         this.exerciseLeft.emit();
       },
       error: () => {
-        this.myParticipantId.set('');
+        this.myParticipantId.set("");
         this.exerciseLeft.emit();
       },
     });
@@ -225,11 +254,11 @@ export class LobbyPreview implements OnInit, OnDestroy {
     const eId = this.data().exercise.id;
     const pId = this.myParticipantId();
     const me = this.participants().find((p) => p.id === pId);
-    const isGm = me?.role === 'game-master';
+    const isGm = me?.role === "game-master";
 
     this.engineApi.start(eId).subscribe({
       next: () => {
-        const route = isGm ? '/gm' : '/player';
+        const route = isGm ? "/gm" : "/player";
         this.router.navigate([route], {
           queryParams: { exerciseId: eId, participantId: pId },
         });

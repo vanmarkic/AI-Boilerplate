@@ -9,27 +9,27 @@ import {
   expect,
   mockParticipant,
   type MockParticipant,
-} from '../fixtures/base.fixture';
+} from "../fixtures/base.fixture";
 
 const MOCK_ROLES = [
-  { id: 'co', label: 'Commanding Officer (CO)', player_type: 'decision_maker' },
-  { id: 'nav', label: 'Navigator (NAV)', player_type: 'advisor' },
+  { id: "co", label: "Commanding Officer (CO)", player_type: "decision_maker" },
+  { id: "nav", label: "Navigator (NAV)", player_type: "advisor" },
 ];
 
 const MOCK_SCENARIO = {
   id: 1,
-  title: 'Hospital MCI',
-  description: 'Mass casualty incident scenario',
+  title: "Hospital MCI",
+  description: "Mass casualty incident scenario",
   domain_id: null,
   content: {
     roles: MOCK_ROLES,
-    game_mode: 'simple_collaborative',
+    game_mode: "simple_collaborative",
     phases: [],
     events: [],
     issues: [],
     decision_templates: [],
     default_time_factor: 1.0,
-    briefing: 'Test',
+    briefing: "Test",
     objectives: [],
     rules: [],
     decision_sequence: [],
@@ -41,64 +41,63 @@ const MOCK_SCENARIO = {
 
 // ── Landing Page Default State ────────────────────────────────────────
 
-test.describe('Landing page — no active exercise @home @landing', () => {
-  test('shows main menu when no joinable exercise', async ({
+test.describe("Landing page — no active exercise @home @landing", () => {
+  test("shows main menu when no joinable exercise", async ({
     page,
     mockApi,
   }) => {
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    await expect(page.getByText('Training Flow Control')).toBeVisible();
-    await expect(page.getByText('Run Exercise')).toBeVisible();
-    await expect(page.getByText('Build Scenario')).toBeVisible();
-    await expect(page.getByText('Review Results')).toBeVisible();
+    await expect(page.getByText("Training Flow Control")).toBeVisible();
+    await expect(page.getByText("Run Exercise")).toBeVisible();
+    await expect(page.getByText("Build Scenario")).toBeVisible();
+    await expect(page.getByText("Review Results")).toBeVisible();
   });
 });
 
 // ── Scenario Picker ───────────────────────────────────────────────────
 
-test.describe('Scenario picker @home @scenario-builder', () => {
-  test('"Run Exercise" opens scenario picker', async ({
-    page,
-    mockApi,
-  }) => {
+test.describe("Scenario picker @home @scenario-builder", () => {
+  test('"Run Exercise" opens scenario picker', async ({ page, mockApi }) => {
     mockApi.seedScenario(MOCK_SCENARIO);
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    await page.getByText('Run Exercise').click();
+    await page.getByText("Run Exercise").click();
 
-    await expect(page.getByText('Hospital MCI')).toBeVisible();
-    await expect(page.getByText('2 roles')).toBeVisible();
-    await expect(page.getByText('Collaborative', { exact: true })).toBeVisible();
+    await expect(page.getByText("Hospital MCI")).toBeVisible();
+    await expect(page.getByText("2 roles")).toBeVisible();
+    await expect(
+      page.getByText("Collaborative", { exact: true }),
+    ).toBeVisible();
   });
 
-  test('back button returns to main menu', async ({ page, mockApi }) => {
+  test("back button returns to main menu", async ({ page, mockApi }) => {
     mockApi.seedScenario(MOCK_SCENARIO);
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    await page.getByText('Run Exercise').click();
-    await expect(page.getByText('Hospital MCI')).toBeVisible();
+    await page.getByText("Run Exercise").click();
+    await expect(page.getByText("Hospital MCI")).toBeVisible();
 
-    await page.getByText('Back').click();
-    await expect(page.getByText('Run Exercise')).toBeVisible();
+    await page.getByText("Back").click();
+    await expect(page.getByText("Run Exercise")).toBeVisible();
   });
 });
 
 // ── Lobby Preview ─────────────────────────────────────────────────────
 
-test.describe('Landing page — active lobby @home @landing', () => {
-  test('shows lobby when joinable exercise exists', async ({
+test.describe("Landing page — active lobby @home @landing", () => {
+  test("shows lobby when joinable exercise exists", async ({
     page,
     mockApi,
   }) => {
     mockApi.seedJoinable({
       exercise: {
         id: 42,
-        title: 'Hospital MCI',
-        game_mode: 'simple_collaborative',
+        title: "Hospital MCI",
+        game_mode: "simple_collaborative",
         scenario_id: 1,
       },
       participants: [],
@@ -107,23 +106,23 @@ test.describe('Landing page — active lobby @home @landing', () => {
       requires_gm: false,
     });
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    await expect(page.getByText('Hospital MCI')).toBeVisible();
-    await expect(page.getByText('0 / 2 players')).toBeVisible();
-    await expect(page.getByText('Commanding Officer (CO)')).toBeVisible();
-    await expect(page.getByText('Navigator (NAV)')).toBeVisible();
+    await expect(page.getByText("Hospital MCI")).toBeVisible();
+    await expect(page.getByText("0 / 2 players")).toBeVisible();
+    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
+    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
   });
 
-  test('shows name input and join button when not joined', async ({
+  test("shows name input and join button when not joined", async ({
     page,
     mockApi,
   }) => {
     mockApi.seedJoinable({
       exercise: {
         id: 42,
-        title: 'Hospital MCI',
-        game_mode: 'simple_collaborative',
+        title: "Hospital MCI",
+        game_mode: "simple_collaborative",
         scenario_id: 1,
       },
       participants: [],
@@ -132,27 +131,22 @@ test.describe('Landing page — active lobby @home @landing', () => {
       requires_gm: false,
     });
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    await expect(page.locator('input#lobby-name')).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Join' }),
-    ).toBeVisible();
+    await expect(page.locator("input#lobby-name")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Join" })).toBeVisible();
   });
 
-  test('shows existing participants in lobby', async ({
-    page,
-    mockApi,
-  }) => {
+  test("shows existing participants in lobby", async ({ page, mockApi }) => {
     const alice = mockParticipant({
-      display_name: 'Alice',
-      role: 'co',
+      display_name: "Alice",
+      role: "co",
     });
     mockApi.seedJoinable({
       exercise: {
         id: 42,
-        title: 'Hospital MCI',
-        game_mode: 'simple_collaborative',
+        title: "Hospital MCI",
+        game_mode: "simple_collaborative",
         scenario_id: 1,
       },
       participants: [alice],
@@ -161,22 +155,22 @@ test.describe('Landing page — active lobby @home @landing', () => {
       requires_gm: false,
     });
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    await expect(page.getByText('Alice')).toBeVisible();
-    await expect(page.getByText('1 / 2 players')).toBeVisible();
+    await expect(page.getByText("Alice")).toBeVisible();
+    await expect(page.getByText("1 / 2 players")).toBeVisible();
   });
 });
 
 // ── Role Slot Display ─────────────────────────────────────────────────
 
-test.describe('Role slots @home @waiting-room', () => {
+test.describe("Role slots @home @waiting-room", () => {
   test('shows open slots as "Open"', async ({ page, mockApi }) => {
     mockApi.seedJoinable({
       exercise: {
         id: 42,
-        title: 'Test Exercise',
-        game_mode: 'simple_collaborative',
+        title: "Test Exercise",
+        game_mode: "simple_collaborative",
         scenario_id: 1,
       },
       participants: [],
@@ -185,21 +179,18 @@ test.describe('Role slots @home @waiting-room', () => {
       requires_gm: false,
     });
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    const openSlots = page.getByText('Open');
+    const openSlots = page.getByText("Open");
     await expect(openSlots.first()).toBeVisible();
   });
 
-  test('shows GM slot when requires_gm is true', async ({
-    page,
-    mockApi,
-  }) => {
+  test("shows GM slot when requires_gm is true", async ({ page, mockApi }) => {
     mockApi.seedJoinable({
       exercise: {
         id: 42,
-        title: 'Classic Exercise',
-        game_mode: 'classic',
+        title: "Classic Exercise",
+        game_mode: "classic",
         scenario_id: 1,
       },
       participants: [],
@@ -208,10 +199,8 @@ test.describe('Role slots @home @waiting-room', () => {
       requires_gm: true,
     });
     await mockApi.install();
-    await page.goto('/home');
+    await page.goto("/home");
 
-    await expect(
-      page.getByText('Game Master (Trainer)'),
-    ).toBeVisible();
+    await expect(page.getByText("Game Master (Trainer)")).toBeVisible();
   });
 });

@@ -1,7 +1,7 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from './environment';
+import { Injectable, inject } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { environment } from "./environment";
 
 export interface ScenarioEventDef {
   id: string;
@@ -50,7 +50,13 @@ export interface RoleDef {
 }
 
 export interface ScenarioContent {
-  phases: { id: string; title: string; description: string; duration_ms: number | null; events: string[] }[];
+  phases: {
+    id: string;
+    title: string;
+    description: string;
+    duration_ms: number | null;
+    events: string[];
+  }[];
   events: ScenarioEventDef[];
   issues: ScenarioIssueDef[];
   decision_templates: DecisionTemplateDef[];
@@ -80,7 +86,7 @@ export interface CreateScenarioRequest {
   content?: ScenarioContent | null;
 }
 
-@Injectable({ providedIn: 'root' })
+@Injectable({ providedIn: "root" })
 export class ScenarioApiService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.apiBaseUrl;
@@ -94,11 +100,20 @@ export class ScenarioApiService {
   }
 
   create(request: CreateScenarioRequest): Observable<ScenarioResponse> {
-    return this.http.post<ScenarioResponse>(`${this.base}/api/scenarios`, request);
+    return this.http.post<ScenarioResponse>(
+      `${this.base}/api/scenarios`,
+      request,
+    );
   }
 
-  update(id: number, request: Partial<CreateScenarioRequest>): Observable<ScenarioResponse> {
-    return this.http.put<ScenarioResponse>(`${this.base}/api/scenarios/${id}`, request);
+  update(
+    id: number,
+    request: Partial<CreateScenarioRequest>,
+  ): Observable<ScenarioResponse> {
+    return this.http.put<ScenarioResponse>(
+      `${this.base}/api/scenarios/${id}`,
+      request,
+    );
   }
 
   delete(id: number): Observable<void> {
