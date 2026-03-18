@@ -9,9 +9,10 @@
   /* ── A. Turn Transition Banner ──────────────────────── */
 
   .turn-banner {
+    --banner-height: 7.5rem;
     position: relative;
     overflow: hidden;
-    height: 120px;
+    height: var(--banner-height);
     margin: 0 calc(-1 * var(--spacing-lg));
     perspective: 600px;
   }
@@ -33,7 +34,7 @@
 
   .turn-banner__layer--land {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(var(--spacing-sm));
   }
 
   .turn-banner__layer--ship {
@@ -41,11 +42,11 @@
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(calc(-1 * var(--spacing-md)));
   }
 
   .turn-banner__layer--ship svg {
-    width: 120px;
+    width: var(--banner-height);
     height: auto;
     color: var(--color-foreground);
   }
@@ -90,12 +91,12 @@
   @keyframes card-submit {
     0% { transform: scale(1); opacity: 1; }
     40% { transform: scale(1.05); opacity: 1; }
-    100% { transform: scale(0.95) translateY(-10px); opacity: 0; }
+    100% { transform: scale(0.95) translateY(calc(-1 * var(--spacing-sm))); opacity: 0; }
   }
 
   /* Timer bar — GSAP controls scaleX */
   .decision-timer {
-    height: 3px;
+    height: var(--radius-sm);
     border-radius: var(--radius-full);
     background: var(--color-success);
     transform-origin: left;
@@ -176,7 +177,7 @@
     bottom: 0;
     left: 0;
     width: 200%;
-    height: 80px;
+    height: var(--spacing-2xl);
     color: var(--color-primary);
     animation: wave-drift 20s linear infinite;
   }
@@ -210,32 +211,34 @@
     border: 1px solid var(--color-border);
     font-size: var(--font-size-xs);
     opacity: 0;
-    transform: scale(0.8) translateY(8px);
+    transform: scale(0.8) translateY(var(--spacing-sm));
   }
 
   .advisor-bubble__avatar {
-    width: 20px;
-    height: 20px;
+    --avatar-size: 1.25rem;
+    width: var(--avatar-size);
+    height: var(--avatar-size);
     border-radius: var(--radius-full);
     background: var(--color-primary);
     color: var(--color-primary-foreground);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: var(--font-size-xs);
     font-weight: 700;
   }
 
   .advisor-bubble__count {
+    --count-size: 1.125rem;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 18px;
-    height: 18px;
+    min-width: var(--count-size);
+    height: var(--count-size);
     border-radius: var(--radius-full);
     background: var(--color-primary);
     color: var(--color-primary-foreground);
-    font-size: 10px;
+    font-size: var(--font-size-xs);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
