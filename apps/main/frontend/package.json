@@ -16,6 +16,7 @@
     "lint:spelling": "cspell --quiet \"**/*\"",
     "lint:all": "npm run lint:tsc:all && npm run lint && npm run lint:style && npm run lint:spelling",
     "test:ci": "ng test --watch=false",
+    "test:changed": "vitest run --changed origin/master",
     "test:coverage": "ng test --watch=false --code-coverage",
     "ci:all": "npm run lint:all && npm run test:ci",
     "e2e": "playwright test",
