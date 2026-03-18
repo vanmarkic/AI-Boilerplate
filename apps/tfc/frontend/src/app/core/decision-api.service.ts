@@ -57,12 +57,19 @@ export interface DecisionDetail {
   responses: DecisionResponseItem[];
 }
 
+export interface RoleInfo {
+  id: string;
+  label: string;
+  player_type: string;
+}
+
 export interface ScenarioContext {
   title: string;
   description: string;
   briefing: string;
   objectives: string[];
   rules: string[];
+  roles: RoleInfo[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -110,11 +117,11 @@ export class DecisionApiService {
     );
   }
 
-  /** Close a decision in the engine (GM action) */
-  closeEngineDecision(exerciseId: number, decisionId: string): Observable<unknown> {
+  /** Close a decision in the engine (GM or decision-maker action) */
+  closeEngineDecision(exerciseId: number, decisionId: string, selectedOptionIds: string[] = []): Observable<unknown> {
     return this.http.post(
       `${this.base}/api/exercises/${exerciseId}/engine/decisions/${decisionId}/close`,
-      {},
+      { selected_option_ids: selectedOptionIds },
     );
   }
 

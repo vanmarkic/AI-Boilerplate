@@ -35,6 +35,13 @@ export interface IssueSnapshot {
   released: boolean;
 }
 
+export interface ScoreSnapshot {
+  total_score: number;
+  penalty_ms: number;
+  turn_number: number;
+  next_decision_time_ms: number;
+}
+
 export interface EngineSnapshot {
   exercise_id: number;
   title: string;
@@ -42,6 +49,7 @@ export interface EngineSnapshot {
   time: TimeSnapshot;
   events: EventSnapshot[];
   issues: IssueSnapshot[];
+  score: ScoreSnapshot | null;
 }
 
 export interface PhaseChange {

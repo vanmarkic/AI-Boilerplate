@@ -24,12 +24,6 @@ class GameMode(Protocol):
         """Return option ID to auto-submit on timeout, or None."""
         ...
 
-    def on_decision_closed(
-        self, decision_id: str, selected_score: float, max_score: float,
-    ) -> list[dict]:
-        """Return extra state-change dicts to broadcast after a decision closes."""
-        ...
-
     def on_decision_closed_v2(
         self,
         decision_id: str,
@@ -38,6 +32,10 @@ class GameMode(Protocol):
         forced_option_ids: list[str] | None = None,
     ) -> list[dict]:
         """Score from full option lists. Enforces forced cards."""
+        ...
+
+    def snapshot(self) -> dict | None:
+        """Return current scoring state for client sync, or None."""
         ...
 
     def get_next_decision_id(self, closed_decision_id: str) -> str | None:
