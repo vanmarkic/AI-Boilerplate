@@ -14,6 +14,7 @@ class CreateExerciseRequest(BaseModel):
     domain_id: int | None = None
     time_factor: float = 1.0
     game_mode: str = GM_CLASSIC
+    practice_mode: bool = False
 
 
 class UpdateExerciseRequest(BaseModel):
@@ -24,6 +25,7 @@ class UpdateExerciseRequest(BaseModel):
     domain_id: int | None = None
     time_factor: float | None = None
     game_mode: str | None = None
+    practice_mode: bool | None = None
 
 
 class ExerciseResponse(ResponseBase):
@@ -35,6 +37,7 @@ class ExerciseResponse(ResponseBase):
     domain_id: int | None
     time_factor: float
     game_mode: str
+    practice_mode: bool
     session_code: str
     created_at: datetime
     updated_at: datetime

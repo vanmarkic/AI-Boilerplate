@@ -91,11 +91,12 @@ async def test_complete_from_completed_returns_error(client: AsyncClient) -> Non
 
 
 @pytest.mark.asyncio
-async def test_start_from_running_returns_error(client: AsyncClient) -> None:
+async def test_start_from_running_is_idempotent(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "running")
     resp = await client.post(f"/api/exercises/{eid}/engine/start")
-    assert resp.status_code == 409
+    assert resp.status_code == 200
+    assert resp.json()["phase"] == "running"
 
 
 @pytest.mark.asyncio
