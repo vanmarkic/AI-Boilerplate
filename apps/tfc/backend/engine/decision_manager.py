@@ -29,6 +29,7 @@ class ActiveDecision:
     opened_at_rt_ms: float = 0.0  # wall clock for timeout tracking
     closed_at_pt_ms: float | None = None
     recommendations: dict[str, str] = field(default_factory=dict)
+    selected_option_ids: list[str] = field(default_factory=list)
 
 
 class DecisionManager:
@@ -80,7 +81,11 @@ class DecisionManager:
         }
 
     def close_decision(
-        self, decision_id: str, *, current_pt_ms: float,
+        self,
+        decision_id: str,
+        *,
+        current_pt_ms: float,
+        selected_option_ids: list[str] | None = None,
     ) -> DecisionClosed | None:
         """Close a decision. Returns a change dict or None."""
         decision = self._decisions.get(decision_id)
@@ -88,10 +93,12 @@ class DecisionManager:
             return None
         decision.status = "closed"
         decision.closed_at_pt_ms = current_pt_ms
+        decision.selected_option_ids = selected_option_ids or []
         return {
             "type": "decision_closed",
             "decision_id": decision_id,
             "title": decision.title,
+            "selected_option_ids": decision.selected_option_ids,
         }
 
     def tick(self, current_pt_ms: float) -> list[DecisionClosed]:
@@ -148,6 +155,7 @@ class DecisionManager:
                 "opened_at_pt_ms": d.opened_at_pt_ms,
                 "closed_at_pt_ms": d.closed_at_pt_ms,
                 "recommendations": dict(d.recommendations),
+                "selected_option_ids": list(d.selected_option_ids),
             }
             for d in self._decisions.values()
         ]

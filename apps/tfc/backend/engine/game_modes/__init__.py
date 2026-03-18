@@ -30,6 +30,16 @@ class GameMode(Protocol):
         """Return extra state-change dicts to broadcast after a decision closes."""
         ...
 
+    def on_decision_closed_v2(
+        self,
+        decision_id: str,
+        selected_options: list[dict],
+        all_options: list[dict],
+        forced_option_ids: list[str] | None = None,
+    ) -> list[dict]:
+        """Score from full option lists. Enforces forced cards."""
+        ...
+
     def get_next_decision_id(self, closed_decision_id: str) -> str | None:
         """Return the next decision template ID in sequence, or None."""
         ...

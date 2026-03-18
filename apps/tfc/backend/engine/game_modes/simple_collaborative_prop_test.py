@@ -12,16 +12,16 @@ Invariants tested:
 """
 from __future__ import annotations
 
-from hypothesis import given, settings, assume
+from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.strategies import (
     decision_sequences,
-    durations,
     option_lists,
     penalty_factors,
     scores,
+    signed_option_lists,
 )
 
 
@@ -280,3 +280,145 @@ class TestMultiTurnAccumulation:
         assert mode.turn_number == len(pairs)
         assert mode.current_index == len(pairs)
         assert mode.get_next_decision_id("done") is None
+
+
+# -- V2 option-list scoring -----------------------------------------------
+
+class TestV2ScoringFormula:
+    """on_decision_closed_v2 computes correct selected/max scores."""
+
+    @given(
+        all_opts=signed_option_lists(min_size=2, max_size=6),
+        n_selected=st.integers(min_value=1, max_value=3),
+        factor=penalty_factors(),
+    )
+    @settings(max_examples=200)
+    def test_penalty_is_nonneg(
+        self,
+        all_opts: list[dict],
+        n_selected: int,
+        factor: float,
+    ) -> None:
+        assume(n_selected <= len(all_opts))
+        mode = _mode(penalty_factor=factor)
+        selected = all_opts[:n_selected]
+        changes = mode.on_decision_closed_v2("d0", selected, all_opts)
+        score_change = next(c for c in changes if c["type"] == "score_change")
+        assert score_change["penalty_ms"] >= 0.0
+
+    @given(
+        all_opts=signed_option_lists(min_size=2, max_size=6),
+        factor=penalty_factors(),
+    )
+    @settings(max_examples=200)
+    def test_best_selection_zero_penalty(
+        self,
+        all_opts: list[dict],
+        factor: float,
+    ) -> None:
+        """Selecting the single best option → zero penalty."""
+        mode = _mode(penalty_factor=factor)
+        best = max(all_opts, key=lambda o: o["score"])
+        changes = mode.on_decision_closed_v2("d0", [best], all_opts)
+        score_change = next(c for c in changes if c["type"] == "score_change")
+        assert score_change["penalty_ms"] == 0.0
+
+    @given(
+        all_opts=signed_option_lists(min_size=2, max_size=6),
+        n_selected=st.integers(min_value=1, max_value=3),
+    )
+    @settings(max_examples=200)
+    def test_total_score_equals_sum(
+        self,
+        all_opts: list[dict],
+        n_selected: int,
+    ) -> None:
+        assume(n_selected <= len(all_opts))
+        mode = _mode()
+        selected = all_opts[:n_selected]
+        changes = mode.on_decision_closed_v2("d0", selected, all_opts)
+        score_change = next(c for c in changes if c["type"] == "score_change")
+        expected = sum(o["score"] for o in selected)
+        assert abs(score_change["total_score"] - expected) < 1e-6
+
+    @given(all_opts=signed_option_lists(min_size=1, max_size=6))
+    @settings(max_examples=100)
+    def test_advances_turn(self, all_opts: list[dict]) -> None:
+        mode = _mode()
+        mode.on_decision_closed_v2("d0", [all_opts[0]], all_opts)
+        assert mode.turn_number == 1
+
+
+class TestV2TimerFloor:
+    """Timer floor still holds with v2 scoring."""
+
+    @given(
+        all_opts=signed_option_lists(min_size=2, max_size=6),
+        n_selected=st.integers(min_value=1, max_value=3),
+        factor=penalty_factors(),
+    )
+    @settings(max_examples=200)
+    def test_decision_time_at_least_minimum(
+        self,
+        all_opts: list[dict],
+        n_selected: int,
+        factor: float,
+    ) -> None:
+        assume(n_selected <= len(all_opts))
+        mode = _mode(penalty_factor=factor)
+        mode.on_decision_closed_v2("d0", all_opts[:n_selected], all_opts)
+        effective = mode.get_decision_time_ms(300_000)
+        assert effective >= mode.min_decision_time_ms
+
+
+# -- Forced card property tests -------------------------------------------
+
+class TestForcedCardInvariant:
+    """Forced cards always present in scoring, with correct change emitted."""
+
+    @given(
+        all_opts=signed_option_lists(min_size=3, max_size=6),
+    )
+    @settings(max_examples=200)
+    def test_forced_card_always_scored(
+        self, all_opts: list[dict],
+    ) -> None:
+        """If a forced card is NOT in selection, ForcedCardApplied is emitted."""
+        assume(len(all_opts) >= 2)
+        forced_id = all_opts[0]["id"]
+        selected = [all_opts[1]]  # deliberately exclude forced
+        mode = _mode()
+        changes = mode.on_decision_closed_v2(
+            "d0", selected, all_opts, forced_option_ids=[forced_id],
+        )
+        forced = [c for c in changes if c["type"] == "forced_card_applied"]
+        assert len(forced) == 1
+        assert forced[0]["forced_option_id"] == forced_id
+
+    @given(
+        all_opts=signed_option_lists(min_size=2, max_size=6),
+    )
+    @settings(max_examples=200)
+    def test_forced_card_present_no_extra_change(
+        self, all_opts: list[dict],
+    ) -> None:
+        """If forced card IS in selection, no ForcedCardApplied emitted."""
+        forced_id = all_opts[0]["id"]
+        selected = [all_opts[0]]  # includes forced
+        mode = _mode()
+        changes = mode.on_decision_closed_v2(
+            "d0", selected, all_opts, forced_option_ids=[forced_id],
+        )
+        forced = [c for c in changes if c["type"] == "forced_card_applied"]
+        assert len(forced) == 0
+
+    @given(all_opts=signed_option_lists(min_size=2, max_size=6))
+    @settings(max_examples=100)
+    def test_no_forced_ids_no_forced_change(
+        self, all_opts: list[dict],
+    ) -> None:
+        """No forced_option_ids → no ForcedCardApplied."""
+        mode = _mode()
+        changes = mode.on_decision_closed_v2("d0", [all_opts[0]], all_opts)
+        forced = [c for c in changes if c["type"] == "forced_card_applied"]
+        assert len(forced) == 0
