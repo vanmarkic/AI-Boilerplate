@@ -1,13 +1,14 @@
 name: audit
 tier: 1
-description: Immutable audit trail for all exercise events
+description: Immutable audit trail for all exercise events — logs all state changes
 version: 0.1.0
 dependencies:
   internal: [exercise]
   external: [postgresql]
 api_endpoints:
-  - GET /api/audit
-models: [AuditEntry]
+  - GET /api/audit/{exercise_id}
+models:
+  - AuditEntry
 events_emitted: []
 events_consumed:
   - StateChange

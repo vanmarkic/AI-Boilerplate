@@ -1,6 +1,6 @@
 name: health
 tier: 1
-description: Health check endpoint for readiness/liveness probes
+description: Health check endpoint for readiness/liveness probes and monitoring
 version: 0.1.0
 dependencies:
   internal: []

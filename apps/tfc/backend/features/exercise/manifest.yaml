@@ -3,16 +3,16 @@ tier: 1
 description: Exercise lifecycle management, engine HTTP/WS API, and real-time state broadcast
 version: 0.3.0
 dependencies:
-  internal: [scenario, waiting_room, decision]
+  internal: [scenario, domain_config, waiting_room, decision]
   external: [postgresql]
 api_endpoints:
   - POST /api/exercises
   - GET /api/exercises
   - GET /api/exercises/joinable
-  - GET /api/exercises/by-code/{code}
-  - GET /api/exercises/{id}
-  - PUT /api/exercises/{id}
-  - DELETE /api/exercises/{id}
+  - GET /api/exercises/by-code/{session_code}
+  - GET /api/exercises/{exercise_id}
+  - PUT /api/exercises/{exercise_id}
+  - DELETE /api/exercises/{exercise_id}
   - POST /api/exercises/{exercise_id}/engine/start
   - POST /api/exercises/{exercise_id}/engine/pause
   - POST /api/exercises/{exercise_id}/engine/resume
@@ -36,7 +36,8 @@ api_endpoints:
   - POST /api/exercises/{exercise_id}/engine/issues/{issue_id}/resolve
   - POST /api/exercises/{exercise_id}/engine/issues/{issue_id}/release
   - WS /api/exercises/{exercise_id}/ws
-models: [Exercise]
+models:
+  - Exercise
 events_emitted:
   - ExerciseCreated
   - EngineStarted
@@ -46,10 +47,13 @@ events_emitted:
   - StateChange
 events_consumed: []
 business_rules:
-  - "Exercise phases: setup → running → paused → completed"
+  - "Engine is a pure-Python tick loop; HTTP/WS layer wraps it"
+  - "Exercise phases: setup -> running -> paused -> completed"
   - "Session codes are unique 6-character alphanumeric strings"
   - "Engine tick loop runs at 250ms interval"
+  - "Exercise must be linked to a scenario before starting"
   - "DECISION events auto-pause the engine until resolved"
+  - "Single WebSocket endpoint for all real-time communication"
   - "WebSocket broadcasts all state changes to connected participants"
   - "close_decision triggers turn chaining in collaborative mode"
   - "Timeout auto-submits the worst option and chains to next turn"

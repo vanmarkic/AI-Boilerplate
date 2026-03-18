@@ -112,7 +112,7 @@ import { validateScenarioContent } from './validate-scenario-content';
           <div class="flex flex-col gap-sm p-sm">
             <div class="flex items-center gap-sm">
               <span class="text-sm">Default Time Factor:</span>
-              <input type="number" class="input-base" style="width: 80px"
+              <input type="number" class="input-base" style="width: var(--container-xs, 5rem)"
                 [value]="store.content().default_time_factor"
                 (change)="onTimeFactorChange($event)" />
             </div>
