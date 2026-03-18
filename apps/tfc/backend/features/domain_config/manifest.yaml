@@ -1,6 +1,6 @@
 name: domain_config
 tier: 1
-description: DB-backed domain terminology and theme configuration
+description: DB-backed domain terminology, theming, and role definitions
 version: 0.1.0
 dependencies:
   internal: []
@@ -8,8 +8,8 @@ dependencies:
 api_endpoints:
   - POST /api/domain-configs
   - GET /api/domain-configs
-  - GET /api/domain-configs/by-slug/{slug}
   - GET /api/domain-configs/{config_id}
+  - GET /api/domain-configs/by-slug/{slug}
   - PUT /api/domain-configs/{config_id}
   - DELETE /api/domain-configs/{config_id}
 models:
@@ -17,5 +17,8 @@ models:
 events_emitted: []
 events_consumed: []
 business_rules:
-  - Slugs must be unique
-  - Terminology dictionary drives all user-facing domain labels
+  - "Each config has a unique slug (e.g., default, military, cybersecurity)"
+  - "Terminology maps generic code terms to domain-specific labels"
+  - "Theme includes colors, fonts, and density setting"
+  - "Seeded with 4 presets via Alembic migration 002"
+  - "Extensible via API without redeploy"

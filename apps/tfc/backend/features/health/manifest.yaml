@@ -1,6 +1,6 @@
 name: health
 tier: 1
-description: Health check endpoint for load balancers and monitoring
+description: Health check endpoint for readiness/liveness probes and monitoring
 version: 0.1.0
 dependencies:
   internal: []
@@ -10,4 +10,7 @@ api_endpoints:
 models: []
 events_emitted: []
 events_consumed: []
-business_rules: []
+business_rules:
+  - "Always returns status 'ok' and the application version"
+  - "No authentication required"
+  - "Must respond in < 100ms"

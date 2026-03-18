@@ -1,6 +1,6 @@
 name: audit
 tier: 1
-description: Audit trail for exercise events — logs all state changes
+description: Immutable audit trail for all exercise events — logs all state changes
 version: 0.1.0
 dependencies:
   internal: [exercise]
@@ -10,7 +10,9 @@ api_endpoints:
 models:
   - AuditEntry
 events_emitted: []
-events_consumed: []
+events_consumed:
+  - StateChange
 business_rules:
-  - Every engine state change is logged as an audit entry
-  - Audit log is read-only after creation
+  - "All engine state changes are logged with timestamp, exercise ID, and event type"
+  - "Audit entries are append-only — no updates or deletes"
+  - "Filterable by exercise_id query parameter"
