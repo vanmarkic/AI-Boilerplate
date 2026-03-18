@@ -99,7 +99,7 @@ test.describe('Collaborative waiting room', () => {
     ).toBeVisible();
   });
 
-  test('shows Player badge instead of role dropdown', async ({
+  test('shows fallback role dropdown when no scenario roles loaded', async ({
     page,
     mockApi,
   }) => {
@@ -109,9 +109,8 @@ test.describe('Collaborative waiting room', () => {
 
     await page.goto(collabUrl(me.id));
 
-    // Badge visible, dropdown not present
-    await expect(page.getByText('Player')).toBeVisible();
-    await expect(page.locator('select')).not.toBeVisible();
+    // Fallback: role dropdown visible (no scenario roles loaded)
+    await expect(page.locator('select')).toBeVisible();
   });
 
   test('Start button shows participant count and is visible to any player', async ({
@@ -171,7 +170,7 @@ test.describe('Collaborative waiting room', () => {
     await expect(page).not.toHaveURL(/\/gm/);
   });
 
-  test('all participants shown as Player (no role dropdowns)', async ({
+  test('all participants shown with names', async ({
     page,
     mockApi,
   }) => {
@@ -188,9 +187,6 @@ test.describe('Collaborative waiting room', () => {
     await expect(page.getByText('Alice')).toBeVisible();
     await expect(page.getByText('Bob')).toBeVisible();
     await expect(page.getByText('Charlie')).toBeVisible();
-
-    // No role dropdowns in collaborative mode
-    await expect(page.locator('select')).not.toBeVisible();
   });
 });
 

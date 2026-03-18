@@ -89,6 +89,7 @@ export const ExerciseStore = signalStore(
     connectedCount: computed(() => store.participants().filter((p) => p.connected).length),
     isCollaborative: computed(() => store.gameMode() === 'simple_collaborative'),
     isDecisionMaker: computed(() => store.playerType() === 'decision_maker'),
+    isAllAdvisors: computed(() => store.playerRole() === 'all_advisors'),
     phaseBadgeVariant: computed<'default' | 'secondary' | 'destructive'>(() => {
       switch (store.phase()) {
         case 'running': return 'default';
