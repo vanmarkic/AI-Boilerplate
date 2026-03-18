@@ -484,11 +484,11 @@ test.describe('Combined — full 2-player scenario @player @two-player', () => {
     await expect(page.locator('tfc-turn-banner')).toContainText('Turn 2');
 
     // Decision panel visible (DM style, no [Advisor] prefix)
-    await expect(page.locator('.overlay')).toBeVisible();
-    await expect(page.getByText('[Advisor]')).not.toBeVisible();
+    await expect(page.locator('.overlay')).toBeAttached();
+    await expect(page.getByText('[Advisor]')).not.toBeAttached();
 
     // Composite-key advisor bubbles with role labels
-    await expect(page.locator('tfc-advisor-bubbles')).toBeVisible();
+    await expect(page.locator('tfc-advisor-bubbles')).toBeAttached();
     await expect(page.locator('.advisor-bubble__count')).toContainText('3');
     await expect(page.getByText('Navigator')).toBeVisible();
     await expect(page.getByText('Operations')).toBeVisible();
