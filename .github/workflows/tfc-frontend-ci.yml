@@ -79,7 +79,10 @@ jobs:
           key: tfc-frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
-      - run: npm run test:ci
+      - run: npm run test:coverage
+      - name: Coverage summary
+        if: always()
+        run: echo "TFC frontend coverage report generated via --code-coverage"
 
   build:
     name: Build

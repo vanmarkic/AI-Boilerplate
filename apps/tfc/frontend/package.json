@@ -9,6 +9,7 @@
     "build": "ng build",
     "test": "ng test",
     "test:ci": "ng test --watch=false",
+    "test:coverage": "ng test --watch=false --code-coverage",
     "e2e": "playwright test",
     "e2e:changed": "bash ../../../shared/scripts/e2e-changed.sh origin/master tfc && npx playwright test --grep \"$(bash ../../../shared/scripts/e2e-changed.sh origin/master tfc)\" || npx playwright test",
     "e2e:tag": "playwright test --grep",
