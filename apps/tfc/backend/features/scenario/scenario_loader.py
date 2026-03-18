@@ -14,6 +14,7 @@ from engine.exercise_engine import (
 from engine.engine_config import RoleInfo
 from engine.game_modes import create_game_mode
 from engine.issue_manager import TrackedIssue, TriggerMode
+from engine.state_changes import DecisionOptionSnapshot
 from features.scenario.scenario_content import ScenarioContent
 
 
@@ -66,7 +67,7 @@ def load_decision_templates(
             issue_id=dt.issue_id,
             question_type=dt.question_type,
             options=[
-                {"id": o.id, "label": o.label, "score": o.score}
+                DecisionOptionSnapshot(id=o.id, label=o.label, score=o.score)
                 for o in dt.options
             ],
             completion_mode=dt.completion_mode,

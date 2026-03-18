@@ -8,7 +8,7 @@ from __future__ import annotations
 import time as _time_mod
 from dataclasses import dataclass, field
 
-from engine.state_changes import DecisionClosed, DecisionOpened, RecommendationSubmitted
+from engine.state_changes import DecisionClosed, DecisionOpened, DecisionOptionSnapshot, DecisionSnapshot, RecommendationSubmitted
 
 
 @dataclass
@@ -20,7 +20,7 @@ class ActiveDecision:
     title: str
     description: str
     question_type: str
-    options: list[dict]
+    options: list[DecisionOptionSnapshot]
     completion_mode: str
     target_roles: list[str]
     timeout_ms: float = 0.0  # 0 = no timeout
@@ -47,7 +47,7 @@ class DecisionManager:
         title: str,
         description: str,
         question_type: str,
-        options: list[dict],
+        options: list[DecisionOptionSnapshot],
         completion_mode: str,
         target_roles: list[str],
         timeout_ms: float = 0.0,
@@ -143,30 +143,34 @@ class DecisionManager:
             "option_id": option_id,
         }
 
+    def get_decision(self, decision_id: str) -> ActiveDecision | None:
+        """Look up a decision by ID, regardless of status."""
+        return self._decisions.get(decision_id)
+
     def get_open_decisions(self) -> list[ActiveDecision]:
         """Return only decisions with status 'open'."""
         return [d for d in self._decisions.values() if d.status == "open"]
 
-    def snapshot(self) -> list[dict]:
+    def snapshot(self) -> list[DecisionSnapshot]:
         """Return all decisions as serializable dicts."""
         return [
-            {
-                "id": d.id,
-                "event_id": d.event_id,
-                "issue_id": d.issue_id,
-                "title": d.title,
-                "description": d.description,
-                "question_type": d.question_type,
-                "options": d.options,
-                "completion_mode": d.completion_mode,
-                "target_roles": d.target_roles,
-                "timeout_ms": d.timeout_ms,
-                "status": d.status,
-                "opened_at_pt_ms": d.opened_at_pt_ms,
-                "closed_at_pt_ms": d.closed_at_pt_ms,
-                "recommendations": dict(d.recommendations),
-                "selected_option_ids": list(d.selected_option_ids),
-            }
+            DecisionSnapshot(
+                id=d.id,
+                event_id=d.event_id,
+                issue_id=d.issue_id,
+                title=d.title,
+                description=d.description,
+                question_type=d.question_type,
+                options=d.options,
+                completion_mode=d.completion_mode,
+                target_roles=d.target_roles,
+                timeout_ms=d.timeout_ms,
+                status=d.status,
+                opened_at_pt_ms=d.opened_at_pt_ms,
+                closed_at_pt_ms=d.closed_at_pt_ms,
+                recommendations=dict(d.recommendations),
+                selected_option_ids=list(d.selected_option_ids),
+            )
             for d in self._decisions.values()
         ]
 

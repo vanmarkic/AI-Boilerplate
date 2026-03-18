@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from core.exceptions import BadRequestError, NotFoundError
 
 from features.exercise.exercise_model import Exercise
 from features.exercise.exercise_repository import ExerciseRepository
@@ -28,15 +28,9 @@ class ExerciseService:
         self, request: CreateExerciseRequest,
     ) -> ExerciseResponse:
         if request.phase not in VALID_PHASES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid phase: {request.phase}",
-            )
+            raise BadRequestError(f"Invalid phase: {request.phase}")
         if request.game_mode not in VALID_GAME_MODES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid game_mode: {request.game_mode}",
-            )
+            raise BadRequestError(f"Invalid game_mode: {request.game_mode}")
         exercise = Exercise(
             title=request.title,
             description=request.description,
@@ -52,10 +46,7 @@ class ExerciseService:
     async def get_exercise(self, exercise_id: int) -> ExerciseResponse:
         exercise = await self.repository.get_by_id(exercise_id)
         if not exercise:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Exercise not found",
-            )
+            raise NotFoundError("Exercise not found")
         return ExerciseResponse.model_validate(exercise)
 
     async def get_exercise_by_code(
@@ -63,10 +54,7 @@ class ExerciseService:
     ) -> ExerciseResponse:
         exercise = await self.repository.get_by_session_code(session_code)
         if not exercise:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Exercise not found for session code",
-            )
+            raise NotFoundError("Exercise not found for session code")
         return ExerciseResponse.model_validate(exercise)
 
     async def list_exercises(
@@ -83,10 +71,7 @@ class ExerciseService:
     ) -> ExerciseResponse:
         exercise = await self.repository.get_by_id(exercise_id)
         if not exercise:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Exercise not found",
-            )
+            raise NotFoundError("Exercise not found")
 
         if request.phase is not None:
             self._validate_phase_transition(exercise.phase, request.phase)
@@ -101,10 +86,7 @@ class ExerciseService:
     async def delete_exercise(self, exercise_id: int) -> None:
         deleted = await self.repository.delete(exercise_id)
         if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Exercise not found",
-            )
+            raise NotFoundError("Exercise not found")
 
     @staticmethod
     def _validate_phase_transition(
@@ -112,16 +94,9 @@ class ExerciseService:
     ) -> None:
         """Validate that the phase transition is allowed."""
         if new_phase not in VALID_PHASES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid phase: {new_phase}",
-            )
+            raise BadRequestError(f"Invalid phase: {new_phase}")
         allowed = PHASE_TRANSITIONS.get(current_phase, set())
         if new_phase != current_phase and new_phase not in allowed:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=(
-                    f"Cannot transition from '{current_phase}' "
-                    f"to '{new_phase}'"
-                ),
+            raise BadRequestError(
+                f"Cannot transition from '{current_phase}' to '{new_phase}'",
             )

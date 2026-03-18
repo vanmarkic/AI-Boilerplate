@@ -7,9 +7,9 @@ to coexist without branching inside the engine.
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Protocol
 
 from engine.game_modes.classic import ClassicMode
+from engine.game_modes.protocol import GameMode  # noqa: F401 — re-exported
 
 
 class GameModeName(StrEnum):
@@ -28,47 +28,7 @@ GM_SIMPLE_COLLABORATIVE = GameModeName.SIMPLE_COLLABORATIVE
 VALID_GAME_MODES: frozenset[str] = frozenset(GameModeName)
 
 
-class GameMode(Protocol):
-    """Policy interface consumed by ExerciseEngine."""
-
-    def should_pause_on_decision(self) -> bool:
-        """Return True if the engine should pause when a decision opens."""
-        ...
-
-    def on_decision_timeout(
-        self, decision_id: str, options: list[dict],
-    ) -> str | None:
-        """Return option ID to auto-submit on timeout, or None."""
-        ...
-
-    def on_decision_closed_v2(
-        self,
-        decision_id: str,
-        selected_options: list[dict],
-        all_options: list[dict],
-        forced_option_ids: list[str] | None = None,
-    ) -> list[dict]:
-        """Score from full option lists. Enforces forced cards."""
-        ...
-
-    def snapshot(self) -> dict | None:
-        """Return current scoring state for client sync, or None."""
-        ...
-
-    def get_next_decision_id(self, closed_decision_id: str) -> str | None:
-        """Return the next decision template ID in sequence, or None."""
-        ...
-
-    def get_decision_time_ms(self, base_time_ms: int) -> int:
-        """Return the effective decision timer duration in ms."""
-        ...
-
-    def requires_gm(self) -> bool:
-        """Return True if the mode requires a Game Master to drive."""
-        ...
-
-
-def create_game_mode(name: str, config: dict | None = None) -> GameMode:
+def create_game_mode(name: str, config: dict[str, object] | None = None) -> GameMode:
     """Factory: create a GameMode by name.
 
     Raises ValueError for unknown game modes — fail fast, not silently.

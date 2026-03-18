@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from engine.state_changes import ForcedCardApplied, ScoreChange
+from engine.state_changes import DecisionOptionSnapshot, ForcedCardApplied, ScoreChange, StateChange
 
 
 @dataclass
@@ -31,7 +31,7 @@ class SimpleCollaborativeMode:
         return False
 
     def on_decision_timeout(
-        self, decision_id: str, options: list[dict],
+        self, decision_id: str, options: list[DecisionOptionSnapshot],
     ) -> str | None:
         """Auto-submit the worst option (lowest score)."""
         if not options:
@@ -42,12 +42,12 @@ class SimpleCollaborativeMode:
     def on_decision_closed_v2(
         self,
         decision_id: str,
-        selected_options: list[dict],
-        all_options: list[dict],
+        selected_options: list[DecisionOptionSnapshot],
+        all_options: list[DecisionOptionSnapshot],
         forced_option_ids: list[str] | None = None,
-    ) -> list[dict]:
+    ) -> list[StateChange]:
         """Score using full option lists. Enforces forced cards."""
-        changes: list[dict] = []
+        changes: list[StateChange] = []
         forced_ids = forced_option_ids or []
 
         # Check forced cards — auto-add if missing
@@ -99,7 +99,7 @@ class SimpleCollaborativeMode:
         changes.append(score_change)
         return changes
 
-    def snapshot(self) -> dict | None:
+    def snapshot(self) -> dict[str, object] | None:
         """Return current scoring state for client sync."""
         return {
             "total_score": self.total_score,
