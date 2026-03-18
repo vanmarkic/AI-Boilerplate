@@ -1,5 +1,4 @@
-from fastapi import HTTPException, status
-
+from core.exceptions import NotFoundError
 from features.scenario.scenario_model import Scenario
 from features.scenario.scenario_repository import ScenarioRepository
 from features.scenario.scenario_schema import (
@@ -29,10 +28,7 @@ class ScenarioService:
     async def get_scenario(self, scenario_id: int) -> ScenarioResponse:
         scenario = await self.repository.get_by_id(scenario_id)
         if not scenario:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Scenario not found",
-            )
+            raise NotFoundError("Scenario not found")
         return ScenarioResponse.model_validate(scenario)
 
     async def list_scenarios(
@@ -49,10 +45,7 @@ class ScenarioService:
     ) -> ScenarioResponse:
         scenario = await self.repository.get_by_id(scenario_id)
         if not scenario:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Scenario not found",
-            )
+            raise NotFoundError("Scenario not found")
 
         update_data = request.model_dump(exclude_unset=True)
         for field, value in update_data.items():
@@ -64,7 +57,4 @@ class ScenarioService:
     async def delete_scenario(self, scenario_id: int) -> None:
         deleted = await self.repository.delete(scenario_id)
         if not deleted:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Scenario not found",
-            )
+            raise NotFoundError("Scenario not found")
