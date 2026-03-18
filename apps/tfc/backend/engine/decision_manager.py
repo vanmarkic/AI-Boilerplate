@@ -32,6 +32,7 @@ class ActiveDecision:
     completion_mode: str
     target_roles: list[str]
     timeout_ms: float = 0.0  # 0 = no timeout
+    max_selections: int | None = None  # None = unlimited
     status: str = "open"  # open, closed, timed_out
     opened_at_pt_ms: float = 0.0
     opened_at_rt_ms: float = 0.0  # wall clock for timeout tracking
@@ -59,6 +60,7 @@ class DecisionManager:
         completion_mode: str,
         target_roles: list[str],
         timeout_ms: float = 0.0,
+        max_selections: int | None = None,
         current_pt_ms: float,
     ) -> DecisionOpened:
         """Register a new open decision. Returns a change dict."""
@@ -73,6 +75,7 @@ class DecisionManager:
             completion_mode=completion_mode,
             target_roles=target_roles,
             timeout_ms=timeout_ms,
+            max_selections=max_selections,
             status="open",
             opened_at_pt_ms=current_pt_ms,
             opened_at_rt_ms=_time_mod.monotonic() * 1000,
@@ -86,6 +89,7 @@ class DecisionManager:
             "options": options,
             "target_roles": target_roles,
             "timeout_ms": timeout_ms,
+            "max_selections": max_selections,
         }
 
     def close_decision(
@@ -175,6 +179,7 @@ class DecisionManager:
                 completion_mode=d.completion_mode,
                 target_roles=d.target_roles,
                 timeout_ms=d.timeout_ms,
+                max_selections=d.max_selections,
                 status=d.status,
                 opened_at_pt_ms=d.opened_at_pt_ms,
                 closed_at_pt_ms=d.closed_at_pt_ms,

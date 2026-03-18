@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 
-from core.exceptions import NotFoundError
+from core.exceptions import BadRequestError, NotFoundError
 from engine.exercise_engine import ExerciseEngine
 from engine.state_changes import DecisionClosed, StateChange
 
@@ -37,6 +37,16 @@ class EngineDecisionService:
             )
         all_options = decision.options
 
+        # Validate max_selections before mutating state
+        template = engine.find_decision_template(decision_id)
+        if template and template.max_selections is not None:
+            if len(selected_option_ids) > template.max_selections:
+                raise BadRequestError(
+                    f"Decision {decision_id} allows at most "
+                    f"{template.max_selections} selections, "
+                    f"got {len(selected_option_ids)}",
+                )
+
         result = engine.decision_manager.close_decision(
             decision_id,
             current_pt_ms=pt,
@@ -49,7 +59,6 @@ class EngineDecisionService:
 
         # Score via game mode strategy
         selected_options = [o for o in all_options if o["id"] in selected_option_ids]
-        template = engine.find_decision_template(decision_id)
         forced_ids = template.forced_option_ids if template else []
 
         extra = engine.game_mode.on_decision_closed_v2(
@@ -80,6 +89,7 @@ class EngineDecisionService:
                     completion_mode=next_template.completion_mode,
                     target_roles=next_template.target_roles,
                     timeout_ms=timeout_ms,
+                    max_selections=next_template.max_selections,
                     current_pt_ms=pt,
                 )
                 await broadcast([opened])
