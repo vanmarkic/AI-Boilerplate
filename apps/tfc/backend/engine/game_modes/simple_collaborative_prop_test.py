@@ -10,6 +10,7 @@ Invariants tested:
 - Perfect score: selected == max → zero penalty delta.
 - Auto-submit: timeout always picks the min-score option.
 """
+
 from __future__ import annotations
 
 from hypothesis import assume, given, settings
@@ -56,17 +57,21 @@ def _close_v2(
 
 # -- Score monotonicity ------------------------------------------------
 
+
 class TestScoreMonotonicity:
     """total_score can only increase or stay the same."""
 
     @given(
         selected_scores=st.lists(
-            scores(), min_size=2, max_size=20,
+            scores(),
+            min_size=2,
+            max_size=20,
         ),
     )
     @settings(max_examples=200)
     def test_total_score_never_decreases(
-        self, selected_scores: list[float],
+        self,
+        selected_scores: list[float],
     ) -> None:
         mode = _mode(seq=[f"d{i}" for i in range(len(selected_scores))])
         prev_total = 0.0
@@ -79,12 +84,15 @@ class TestScoreMonotonicity:
 
 # -- Penalty monotonicity ----------------------------------------------
 
+
 class TestPenaltyMonotonicity:
     """accumulated_penalty_ms can only increase or stay the same."""
 
     @given(
         gaps=st.lists(
-            scores(), min_size=2, max_size=20,
+            scores(),
+            min_size=2,
+            max_size=20,
         ),
     )
     @settings(max_examples=200)
@@ -99,6 +107,7 @@ class TestPenaltyMonotonicity:
 
 # -- Timer floor -------------------------------------------------------
 
+
 class TestTimerFloor:
     """Effective decision time never drops below min_decision_time_ms."""
 
@@ -106,13 +115,18 @@ class TestTimerFloor:
         base_time=st.integers(min_value=10_000, max_value=600_000),
         min_time=st.integers(min_value=1_000, max_value=60_000),
         penalty=st.floats(
-            min_value=0.0, max_value=1e9,
-            allow_nan=False, allow_infinity=False,
+            min_value=0.0,
+            max_value=1e9,
+            allow_nan=False,
+            allow_infinity=False,
         ),
     )
     @settings(max_examples=300)
     def test_decision_time_at_least_minimum(
-        self, base_time: int, min_time: int, penalty: float,
+        self,
+        base_time: int,
+        min_time: int,
+        penalty: float,
     ) -> None:
         assume(min_time <= base_time)
         mode = _mode(base_time=base_time, min_time=min_time)
@@ -126,7 +140,9 @@ class TestTimerFloor:
     )
     @settings(max_examples=100)
     def test_zero_penalty_gives_base_time(
-        self, base_time: int, min_time: int,
+        self,
+        base_time: int,
+        min_time: int,
     ) -> None:
         assume(min_time <= base_time)
         mode = _mode(base_time=base_time, min_time=min_time)
@@ -134,6 +150,7 @@ class TestTimerFloor:
 
 
 # -- Turn counting -----------------------------------------------------
+
 
 class TestTurnCounting:
     """turn_number equals the number of on_decision_closed_v2 calls."""
@@ -148,6 +165,7 @@ class TestTurnCounting:
 
 
 # -- Sequence advancement ----------------------------------------------
+
 
 class TestSequenceAdvancement:
     """current_index tracks through decision_sequence correctly."""
@@ -177,6 +195,7 @@ class TestSequenceAdvancement:
 
 # -- Penalty formula correctness ---------------------------------------
 
+
 class TestPenaltyFormula:
     """penalty_ms == (max_score - selected_score) * penalty_factor * 1000."""
 
@@ -187,7 +206,10 @@ class TestPenaltyFormula:
     )
     @settings(max_examples=300)
     def test_penalty_matches_formula(
-        self, selected: float, gap: float, factor: float,
+        self,
+        selected: float,
+        gap: float,
+        factor: float,
     ) -> None:
         max_score = selected + gap
         mode = _mode(penalty_factor=factor)
@@ -199,7 +221,9 @@ class TestPenaltyFormula:
     @given(selected=scores(), factor=penalty_factors())
     @settings(max_examples=200)
     def test_perfect_score_zero_penalty(
-        self, selected: float, factor: float,
+        self,
+        selected: float,
+        factor: float,
     ) -> None:
         mode = _mode(penalty_factor=factor)
         opts = [{"id": "a", "label": "A", "score": selected}]
@@ -211,13 +235,16 @@ class TestPenaltyFormula:
 
 # -- Score change structure --------------------------------------------
 
+
 class TestScoreChangeStructure:
     """on_decision_closed_v2 always returns at least one well-formed ScoreChange."""
 
     @given(selected=scores(), max_s=scores())
     @settings(max_examples=200)
     def test_returns_single_score_change(
-        self, selected: float, max_s: float,
+        self,
+        selected: float,
+        max_s: float,
     ) -> None:
         assume(max_s >= selected)
         mode = _mode()
@@ -232,6 +259,7 @@ class TestScoreChangeStructure:
 
 
 # -- Auto-submit picks worst ------------------------------------------
+
 
 class TestAutoSubmitPicksWorst:
     """on_decision_timeout always returns the lowest-scoring option."""
@@ -251,6 +279,7 @@ class TestAutoSubmitPicksWorst:
 
 
 # -- Cumulative multi-turn integration ---------------------------------
+
 
 class TestMultiTurnAccumulation:
     """Verify state consistency across a full sequence of turns."""
@@ -292,6 +321,7 @@ class TestMultiTurnAccumulation:
 
 
 # -- V2 option-list scoring -----------------------------------------------
+
 
 class TestV2ScoringFormula:
     """on_decision_closed_v2 computes correct selected/max scores."""
@@ -384,6 +414,7 @@ class TestV2TimerFloor:
 
 # -- Snapshot consistency ------------------------------------------------
 
+
 class TestSnapshotConsistency:
     """snapshot() reflects accumulated state accurately."""
 
@@ -428,7 +459,9 @@ class TestSnapshotConsistency:
     )
     @settings(max_examples=200)
     def test_snapshot_penalty_matches_accumulated(
-        self, gaps: list[float], factor: float,
+        self,
+        gaps: list[float],
+        factor: float,
     ) -> None:
         seq = [f"d{i}" for i in range(len(gaps))]
         mode = _mode(seq=seq, penalty_factor=factor)
@@ -447,7 +480,8 @@ class TestForcedCardInvariant:
     )
     @settings(max_examples=200)
     def test_forced_card_always_scored(
-        self, all_opts: list[dict],
+        self,
+        all_opts: list[dict],
     ) -> None:
         """If a forced card is NOT in selection, ForcedCardApplied is emitted."""
         assume(len(all_opts) >= 2)
@@ -455,7 +489,10 @@ class TestForcedCardInvariant:
         selected = [all_opts[1]]  # deliberately exclude forced
         mode = _mode()
         changes = mode.on_decision_closed_v2(
-            "d0", selected, all_opts, forced_option_ids=[forced_id],
+            "d0",
+            selected,
+            all_opts,
+            forced_option_ids=[forced_id],
         )
         forced = [c for c in changes if c["type"] == "forced_card_applied"]
         assert len(forced) == 1
@@ -466,14 +503,18 @@ class TestForcedCardInvariant:
     )
     @settings(max_examples=200)
     def test_forced_card_present_no_extra_change(
-        self, all_opts: list[dict],
+        self,
+        all_opts: list[dict],
     ) -> None:
         """If forced card IS in selection, no ForcedCardApplied emitted."""
         forced_id = all_opts[0]["id"]
         selected = [all_opts[0]]  # includes forced
         mode = _mode()
         changes = mode.on_decision_closed_v2(
-            "d0", selected, all_opts, forced_option_ids=[forced_id],
+            "d0",
+            selected,
+            all_opts,
+            forced_option_ids=[forced_id],
         )
         forced = [c for c in changes if c["type"] == "forced_card_applied"]
         assert len(forced) == 0
@@ -481,7 +522,8 @@ class TestForcedCardInvariant:
     @given(all_opts=signed_option_lists(min_size=2, max_size=6))
     @settings(max_examples=100)
     def test_no_forced_ids_no_forced_change(
-        self, all_opts: list[dict],
+        self,
+        all_opts: list[dict],
     ) -> None:
         """No forced_option_ids → no ForcedCardApplied."""
         mode = _mode()

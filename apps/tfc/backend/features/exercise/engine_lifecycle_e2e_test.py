@@ -3,13 +3,13 @@
 Tests the full lifecycle of loading a scenario with events, issues, and
 decision templates into an engine via the REST API.
 """
+
 from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
 
 from engine.session_store import session_store
-
 
 SCENARIO_CONTENT = {
     "phases": [],
@@ -62,7 +62,7 @@ SCENARIO_CONTENT = {
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -76,18 +76,24 @@ def _cleanup_sessions():
 async def test_scenario_to_engine_lifecycle(client: AsyncClient) -> None:
     """Full flow: scenario → exercise → engine start → snapshot → complete."""
     # 1. Create scenario with full content
-    sc_resp = await client.post("/api/scenarios", json={
-        "title": "Cyber Incident",
-        "content": SCENARIO_CONTENT,
-    })
+    sc_resp = await client.post(
+        "/api/scenarios",
+        json={
+            "title": "Cyber Incident",
+            "content": SCENARIO_CONTENT,
+        },
+    )
     assert sc_resp.status_code == 201
     scenario_id = sc_resp.json()["id"]
 
     # 2. Create exercise linked to scenario
-    ex_resp = await client.post("/api/exercises", json={
-        "title": "Live Exercise",
-        "scenario_id": scenario_id,
-    })
+    ex_resp = await client.post(
+        "/api/exercises",
+        json={
+            "title": "Live Exercise",
+            "scenario_id": scenario_id,
+        },
+    )
     assert ex_resp.status_code == 201
     exercise_id = ex_resp.json()["id"]
 
@@ -154,16 +160,22 @@ async def test_exercise_without_scenario_rejects_start(
 @pytest.mark.asyncio
 async def test_reset_reloads_initial_state(client: AsyncClient) -> None:
     """After reset, engine returns to setup with original events."""
-    sc_resp = await client.post("/api/scenarios", json={
-        "title": "Reset Scenario",
-        "content": SCENARIO_CONTENT,
-    })
+    sc_resp = await client.post(
+        "/api/scenarios",
+        json={
+            "title": "Reset Scenario",
+            "content": SCENARIO_CONTENT,
+        },
+    )
     scenario_id = sc_resp.json()["id"]
 
-    ex_resp = await client.post("/api/exercises", json={
-        "title": "Reset Ex",
-        "scenario_id": scenario_id,
-    })
+    ex_resp = await client.post(
+        "/api/exercises",
+        json={
+            "title": "Reset Ex",
+            "scenario_id": scenario_id,
+        },
+    )
     exercise_id = ex_resp.json()["id"]
 
     await client.post(f"/api/exercises/{exercise_id}/engine/start")

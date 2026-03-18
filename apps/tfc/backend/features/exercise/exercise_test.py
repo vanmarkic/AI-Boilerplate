@@ -56,7 +56,8 @@ async def test_list_exercises_by_phase(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_update_exercise(client: AsyncClient) -> None:
     create_resp = await client.post(
-        "/api/exercises", json={"title": "Original"},
+        "/api/exercises",
+        json={"title": "Original"},
     )
     exercise_id = create_resp.json()["id"]
 
@@ -71,7 +72,8 @@ async def test_update_exercise(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_phase_transition_valid(client: AsyncClient) -> None:
     create_resp = await client.post(
-        "/api/exercises", json={"title": "Phase Test"},
+        "/api/exercises",
+        json={"title": "Phase Test"},
     )
     exercise_id = create_resp.json()["id"]
 
@@ -86,7 +88,8 @@ async def test_phase_transition_valid(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_phase_transition_invalid(client: AsyncClient) -> None:
     create_resp = await client.post(
-        "/api/exercises", json={"title": "Phase Test"},
+        "/api/exercises",
+        json={"title": "Phase Test"},
     )
     exercise_id = create_resp.json()["id"]
 
@@ -100,7 +103,8 @@ async def test_phase_transition_invalid(client: AsyncClient) -> None:
 @pytest.mark.asyncio
 async def test_delete_exercise(client: AsyncClient) -> None:
     create_resp = await client.post(
-        "/api/exercises", json={"title": "To Delete"},
+        "/api/exercises",
+        json={"title": "To Delete"},
     )
     exercise_id = create_resp.json()["id"]
 

@@ -4,16 +4,18 @@ Revision ID: 002_domain_configs
 Revises: 001_initial
 Create Date: 2026-03-17
 """
-from typing import Sequence, Union
 
-from alembic import op
+from collections.abc import Sequence
+
 import sqlalchemy as sa
 from sqlalchemy.dialects.postgresql import JSON
 
+from alembic import op
+
 revision: str = "002_domain_configs"
-down_revision: Union[str, None] = "001_initial"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = "001_initial"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 # ---------------------------------------------------------------------------
 # Seed data — matches the 4 hardcoded presets being replaced
@@ -75,9 +77,21 @@ PRESETS = [
             "density": "compact",
         },
         "roles": [
-            {"id": "soc-analyst", "label": "SOC Analyst", "description": "Security operations center analyst"},
-            {"id": "incident-commander", "label": "Incident Commander", "description": "Leads incident response"},
-            {"id": "forensic-analyst", "label": "Forensic Analyst", "description": "Digital forensics specialist"},
+            {
+                "id": "soc-analyst",
+                "label": "SOC Analyst",
+                "description": "Security operations center analyst",
+            },
+            {
+                "id": "incident-commander",
+                "label": "Incident Commander",
+                "description": "Leads incident response",
+            },
+            {
+                "id": "forensic-analyst",
+                "label": "Forensic Analyst",
+                "description": "Digital forensics specialist",
+            },
             {"id": "observer", "label": "Observer", "description": "Read-only observer"},
         ],
         "severity_levels": [
@@ -113,7 +127,11 @@ PRESETS = [
         "roles": [
             {"id": "clinician", "label": "Clinician", "description": "Medical practitioner"},
             {"id": "nurse", "label": "Nurse", "description": "Nursing staff"},
-            {"id": "specialist", "label": "Specialist", "description": "Medical specialist consultant"},
+            {
+                "id": "specialist",
+                "label": "Specialist",
+                "description": "Medical specialist consultant",
+            },
             {"id": "observer", "label": "Observer", "description": "Read-only observer"},
         ],
         "severity_levels": [
@@ -174,8 +192,10 @@ def upgrade() -> None:
         sa.Column("severity_levels", JSON, nullable=False),
         sa.Column("created_at", sa.DateTime, server_default=sa.func.now()),
         sa.Column(
-            "updated_at", sa.DateTime,
-            server_default=sa.func.now(), onupdate=sa.func.now(),
+            "updated_at",
+            sa.DateTime,
+            server_default=sa.func.now(),
+            onupdate=sa.func.now(),
         ),
     )
 
@@ -183,21 +203,29 @@ def upgrade() -> None:
 
     op.create_foreign_key(
         "fk_tfc_scenarios_domain_config",
-        "tfc_scenarios", "tfc_domain_configs",
-        ["domain_id"], ["id"],
+        "tfc_scenarios",
+        "tfc_domain_configs",
+        ["domain_id"],
+        ["id"],
     )
     op.create_foreign_key(
         "fk_tfc_exercises_domain_config",
-        "tfc_exercises", "tfc_domain_configs",
-        ["domain_id"], ["id"],
+        "tfc_exercises",
+        "tfc_domain_configs",
+        ["domain_id"],
+        ["id"],
     )
 
 
 def downgrade() -> None:
     op.drop_constraint(
-        "fk_tfc_exercises_domain_config", "tfc_exercises", type_="foreignkey",
+        "fk_tfc_exercises_domain_config",
+        "tfc_exercises",
+        type_="foreignkey",
     )
     op.drop_constraint(
-        "fk_tfc_scenarios_domain_config", "tfc_scenarios", type_="foreignkey",
+        "fk_tfc_scenarios_domain_config",
+        "tfc_scenarios",
+        type_="foreignkey",
     )
     op.drop_table("tfc_domain_configs")

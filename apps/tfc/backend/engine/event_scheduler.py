@@ -6,6 +6,7 @@ Also known as: InjectScheduler, inject scheduler.
 Injects progress through: scheduled -> pending -> running -> completed/cancelled.
 Injects can have dependencies on other injects and can trigger defects (issues).
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -46,6 +47,7 @@ VALID_TRANSITIONS: dict[EventLifecycle, set[EventLifecycle]] = {
 @dataclass
 class ScheduledEvent:
     """Runtime representation of an inject (event) during exercise execution."""
+
     id: str
     title: str
     description: str
@@ -150,7 +152,9 @@ class EventScheduler:
         return self._change(event, "paused")
 
     def resume_event(
-        self, event_id: str, current_pt_ms: float,
+        self,
+        event_id: str,
+        current_pt_ms: float,
     ) -> EventChange | None:
         """GM resumes a paused event. Adjusts started_at to preserve elapsed."""
         event = self._events.get(event_id)
@@ -160,7 +164,9 @@ class EventScheduler:
         return self._change(event, "resumed")
 
     def delay_event(
-        self, event_id: str, delay_ms: float,
+        self,
+        event_id: str,
+        delay_ms: float,
     ) -> EventChange | None:
         """GM delays a scheduled event by adding to its scheduled time."""
         event = self._events.get(event_id)
@@ -187,7 +193,9 @@ class EventScheduler:
         return event.triggered_issues
 
     def _should_activate(
-        self, event: ScheduledEvent, current_pt_ms: float,
+        self,
+        event: ScheduledEvent,
+        current_pt_ms: float,
     ) -> bool:
         """Check if event should transition from scheduled to pending."""
         if current_pt_ms < event.scheduled_pt_ms:

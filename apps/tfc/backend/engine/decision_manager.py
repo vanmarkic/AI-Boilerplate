@@ -3,17 +3,25 @@
 Passive tracker — does not control the engine directly.
 The engine checks decision state in its tick loop.
 """
+
 from __future__ import annotations
 
 import time as _time_mod
 from dataclasses import dataclass, field
 
-from engine.state_changes import DecisionClosed, DecisionOpened, DecisionOptionSnapshot, DecisionSnapshot, RecommendationSubmitted
+from engine.state_changes import (
+    DecisionClosed,
+    DecisionOpened,
+    DecisionOptionSnapshot,
+    DecisionSnapshot,
+    RecommendationSubmitted,
+)
 
 
 @dataclass
 class ActiveDecision:
     """Runtime representation of a decision point."""
+
     id: str
     event_id: str | None
     issue_id: str | None
@@ -111,11 +119,13 @@ class DecisionManager:
             if elapsed >= d.timeout_ms:
                 d.status = "timed_out"
                 d.closed_at_pt_ms = current_pt_ms
-                changes.append({
-                    "type": "decision_closed",
-                    "decision_id": d.id,
-                    "title": d.title,
-                })
+                changes.append(
+                    {
+                        "type": "decision_closed",
+                        "decision_id": d.id,
+                        "title": d.title,
+                    }
+                )
         return changes
 
     def submit_recommendation(

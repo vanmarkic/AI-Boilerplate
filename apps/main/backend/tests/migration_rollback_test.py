@@ -7,9 +7,10 @@ ensuring every migration's downgrade() path works without errors.
 from collections.abc import Generator
 
 import pytest
-from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
+
+from alembic import command
 
 
 def get_alembic_config() -> Config:

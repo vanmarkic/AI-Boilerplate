@@ -14,7 +14,8 @@ class _FakeResponse(BaseModel):
 class TestBroadcastStaticChannel:
     @patch("core.broadcast.event_bus.publish", new_callable=AsyncMock)
     async def test_publishes_pydantic_model_as_dict(
-        self, mock_publish: AsyncMock,
+        self,
+        mock_publish: AsyncMock,
     ) -> None:
         @broadcast("comments")
         async def create() -> _FakeResponse:
@@ -26,7 +27,8 @@ class TestBroadcastStaticChannel:
 
     @patch("core.broadcast.event_bus.publish", new_callable=AsyncMock)
     async def test_publishes_dict_directly(
-        self, mock_publish: AsyncMock,
+        self,
+        mock_publish: AsyncMock,
     ) -> None:
         @broadcast("events")
         async def action() -> dict:
@@ -38,7 +40,8 @@ class TestBroadcastStaticChannel:
 
     @patch("core.broadcast.event_bus.publish", new_callable=AsyncMock)
     async def test_passes_through_return_value(
-        self, mock_publish: AsyncMock,
+        self,
+        mock_publish: AsyncMock,
     ) -> None:
         expected = _FakeResponse(id=5, text="kept")
 
@@ -52,7 +55,8 @@ class TestBroadcastStaticChannel:
 
     @patch("core.broadcast.event_bus.publish", new_callable=AsyncMock)
     async def test_swallows_publish_errors(
-        self, mock_publish: AsyncMock,
+        self,
+        mock_publish: AsyncMock,
     ) -> None:
         mock_publish.side_effect = RuntimeError("pg down")
 
@@ -66,7 +70,8 @@ class TestBroadcastStaticChannel:
 
     @patch("core.broadcast.event_bus.publish", new_callable=AsyncMock)
     async def test_wraps_non_dict_non_model_in_data_key(
-        self, mock_publish: AsyncMock,
+        self,
+        mock_publish: AsyncMock,
     ) -> None:
         @broadcast("ch")
         async def create() -> str:
@@ -80,7 +85,8 @@ class TestBroadcastStaticChannel:
 class TestBroadcastDynamicChannel:
     @patch("core.broadcast.event_bus.publish", new_callable=AsyncMock)
     async def test_dynamic_channel_from_kwarg(
-        self, mock_publish: AsyncMock,
+        self,
+        mock_publish: AsyncMock,
     ) -> None:
         @broadcast(channel_kwarg="room_id", prefix="room")
         async def send(room_id: int) -> dict:
@@ -92,7 +98,8 @@ class TestBroadcastDynamicChannel:
 
     @patch("core.broadcast.event_bus.publish", new_callable=AsyncMock)
     async def test_missing_kwarg_skips_publish(
-        self, mock_publish: AsyncMock,
+        self,
+        mock_publish: AsyncMock,
     ) -> None:
         @broadcast(channel_kwarg="room_id", prefix="room")
         async def send() -> dict:
@@ -107,6 +114,7 @@ class TestBroadcastDynamicChannel:
 class TestBroadcastValidation:
     def test_raises_if_no_channel_or_kwarg(self) -> None:
         with pytest.raises(ValueError, match="Provide either"):
+
             @broadcast()
             async def noop() -> None:
                 pass

@@ -3,6 +3,7 @@
 Defines DecisionTemplate, ScenarioContext, and EngineConfig — the
 data structures passed to ExerciseEngine at construction time.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field

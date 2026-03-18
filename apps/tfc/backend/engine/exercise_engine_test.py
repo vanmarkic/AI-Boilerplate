@@ -1,4 +1,5 @@
 """Tests for ExerciseEngine orchestration."""
+
 from unittest.mock import patch
 
 import pytest
@@ -24,15 +25,21 @@ def _config(
 
 def _event(id: str, scheduled_pt_ms: float = 0.0, **kw: object) -> ScheduledEvent:
     return ScheduledEvent(
-        id=id, title=f"E-{id}", description="", event_type=EventType.OPERATIONAL,
-        scheduled_pt_ms=scheduled_pt_ms, **kw,
+        id=id,
+        title=f"E-{id}",
+        description="",
+        event_type=EventType.OPERATIONAL,
+        scheduled_pt_ms=scheduled_pt_ms,
+        **kw,
     )
 
 
 def _issue(id: str, **kw: object) -> TrackedIssue:
     mode = kw.pop("trigger_mode", TriggerMode.MANUAL)
     return TrackedIssue(
-        id=id, title=f"I-{id}", description="",
+        id=id,
+        title=f"I-{id}",
+        description="",
         trigger_mode=mode,
         **kw,
     )
@@ -108,7 +115,9 @@ async def test_tick_processes_events() -> None:
 async def test_event_completion_triggers_linked_issues() -> None:
     evt = _event("e1", scheduled_pt_ms=0.0, duration_ms=50.0, triggered_issues=["i1"])
     iss = _issue(
-        "i1", trigger_mode=TriggerMode.EVENT_BASED, trigger_event_id="e1",
+        "i1",
+        trigger_mode=TriggerMode.EVENT_BASED,
+        trigger_event_id="e1",
     )
     engine = ExerciseEngine(_config(events=[evt], issues=[iss]))
     # Start and advance past duration so event completes
@@ -145,12 +154,17 @@ def test_snapshot_returns_full_state() -> None:
 
 
 def _decision_event(
-    id: str, scheduled_pt_ms: float = 0.0, **kw: object,
+    id: str,
+    scheduled_pt_ms: float = 0.0,
+    **kw: object,
 ) -> ScheduledEvent:
     return ScheduledEvent(
-        id=id, title=f"DE-{id}", description="Decision event",
+        id=id,
+        title=f"DE-{id}",
+        description="Decision event",
         event_type=EventType.DECISION,
-        scheduled_pt_ms=scheduled_pt_ms, **kw,
+        scheduled_pt_ms=scheduled_pt_ms,
+        **kw,
     )
 
 
@@ -193,7 +207,7 @@ async def test_close_decision_resumes_engine() -> None:
     assert change["type"] == "decision_closed"
     # Engine can now resume
     with patch("engine.time_manager._now_ms", return_value=200.0):
-        result = await engine.resume()
+        _result = await engine.resume()
     assert engine.phase == EnginePhase.RUNNING
     engine._stop_tick_loop()
 

@@ -38,14 +38,16 @@ async def client(test_app: FastAPI) -> AsyncClient:
 
 class TestListChannels:
     async def test_returns_empty_when_no_channels(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         response = await client.get("/api/events")
         assert response.status_code == 200
         assert response.json() == {}
 
     async def test_returns_registered_channels(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         register_channel("comments", description="New comments")
         register_channel("orders", description="Order updates")
@@ -59,14 +61,17 @@ class TestListChannels:
 
 class TestSubscribeEndpoint:
     async def test_unknown_channel_returns_404(
-        self, client: AsyncClient,
+        self,
+        client: AsyncClient,
     ) -> None:
         response = await client.get("/api/events/nonexistent")
         assert response.status_code == 404
 
     @patch("core.sse_router.event_bus")
     async def test_registered_channel_streams_sse(
-        self, mock_bus: AsyncMock, client: AsyncClient,
+        self,
+        mock_bus: AsyncMock,
+        client: AsyncClient,
     ) -> None:
         register_channel("comments")
 

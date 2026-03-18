@@ -1,7 +1,9 @@
 """Unit tests for DecisionService."""
-import pytest
+
 from datetime import datetime
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from features.decision.decision_schema import (
     CreateDecisionRequest,
@@ -62,15 +64,17 @@ class TestCreateDecision:
     async def test_creates_and_returns(self) -> None:
         svc, repo = _make_service()
         repo.create = AsyncMock(return_value=_mock_decision())
-        result = await svc.create_decision(CreateDecisionRequest(
-            title="Test",
-            description="desc",
-            exercise_id=42,
-            issue_id="issue-1",
-            question_type="single_choice",
-            options=[{"id": "a", "label": "Isolate", "score": 10}],
-            completion_mode="first_response",
-        ))
+        result = await svc.create_decision(
+            CreateDecisionRequest(
+                title="Test",
+                description="desc",
+                exercise_id=42,
+                issue_id="issue-1",
+                question_type="single_choice",
+                options=[{"id": "a", "label": "Isolate", "score": 10}],
+                completion_mode="first_response",
+            )
+        )
         assert result.title == "Test Decision"
         assert result.status == "open"
         repo.create.assert_awaited_once()
@@ -79,14 +83,17 @@ class TestCreateDecision:
     async def test_rejects_invalid_question_type(self) -> None:
         svc, _ = _make_service()
         from core.exceptions import BadRequestError
+
         with pytest.raises(BadRequestError):
-            await svc.create_decision(CreateDecisionRequest(
-                title="Bad",
-                exercise_id=1,
-                issue_id="x",
-                question_type="invalid",
-                completion_mode="first_response",
-            ))
+            await svc.create_decision(
+                CreateDecisionRequest(
+                    title="Bad",
+                    exercise_id=1,
+                    issue_id="x",
+                    question_type="invalid",
+                    completion_mode="first_response",
+                )
+            )
 
 
 class TestSubmitResponse:
@@ -98,11 +105,14 @@ class TestSubmitResponse:
         repo.add_response = AsyncMock(return_value=_mock_response(score=10.0))
         repo.update = AsyncMock()
 
-        result = await svc.submit_response(1, SubmitResponseRequest(
-            participant_id="user-1",
-            participant_name="Alice",
-            selected_options=["a"],
-        ))
+        result = await svc.submit_response(
+            1,
+            SubmitResponseRequest(
+                participant_id="user-1",
+                participant_name="Alice",
+                selected_options=["a"],
+            ),
+        )
         assert result.score == 10.0
 
     @pytest.mark.asyncio
@@ -110,10 +120,15 @@ class TestSubmitResponse:
         svc, repo = _make_service()
         repo.get_by_id = AsyncMock(return_value=_mock_decision(status="closed"))
         from core.exceptions import BadRequestError
+
         with pytest.raises(BadRequestError):
-            await svc.submit_response(1, SubmitResponseRequest(
-                participant_id="u", participant_name="Bob",
-            ))
+            await svc.submit_response(
+                1,
+                SubmitResponseRequest(
+                    participant_id="u",
+                    participant_name="Bob",
+                ),
+            )
 
     @pytest.mark.asyncio
     async def test_auto_close_on_first_response(self) -> None:
@@ -123,9 +138,14 @@ class TestSubmitResponse:
         repo.add_response = AsyncMock(return_value=_mock_response())
         repo.update = AsyncMock()
 
-        await svc.submit_response(1, SubmitResponseRequest(
-            participant_id="u", participant_name="Bob", selected_options=["a"],
-        ))
+        await svc.submit_response(
+            1,
+            SubmitResponseRequest(
+                participant_id="u",
+                participant_name="Bob",
+                selected_options=["a"],
+            ),
+        )
         assert decision.status == "closed"
         repo.update.assert_awaited_once()
 
@@ -148,6 +168,7 @@ class TestCloseDecision:
         svc, repo = _make_service()
         repo.get_by_id = AsyncMock(return_value=None)
         from core.exceptions import NotFoundError
+
         with pytest.raises(NotFoundError):
             await svc.close_decision(999)
 

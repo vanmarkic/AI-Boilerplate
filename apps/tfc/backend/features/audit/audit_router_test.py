@@ -1,9 +1,9 @@
 """HTTP API tests for audit router endpoints."""
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from features.audit.audit_model import AuditEntry
 from features.audit.audit_repository import AuditRepository
 from features.audit.audit_schema import CreateAuditEntry
 from features.audit.audit_service import AuditService
@@ -34,11 +34,13 @@ async def _log_entry(
     entry_type: str = "phase_change",
     action: str = "started",
 ) -> None:
-    await service.log(CreateAuditEntry(
-        exercise_id=exercise_id,
-        entry_type=entry_type,
-        action=action,
-    ))
+    await service.log(
+        CreateAuditEntry(
+            exercise_id=exercise_id,
+            entry_type=entry_type,
+            action=action,
+        )
+    )
 
 
 @pytest.mark.asyncio
@@ -51,7 +53,8 @@ async def test_get_audit_log_empty(client: AsyncClient) -> None:
 
 @pytest.mark.asyncio
 async def test_get_audit_log_returns_entries(
-    client: AsyncClient, audit_service: AuditService,
+    client: AsyncClient,
+    audit_service: AuditService,
 ) -> None:
     eid = await _create_exercise(client)
     await _log_entry(audit_service, eid, "phase_change", "started")
@@ -65,7 +68,8 @@ async def test_get_audit_log_returns_entries(
 
 @pytest.mark.asyncio
 async def test_get_audit_log_filter_by_entry_type(
-    client: AsyncClient, audit_service: AuditService,
+    client: AsyncClient,
+    audit_service: AuditService,
 ) -> None:
     eid = await _create_exercise(client)
     await _log_entry(audit_service, eid, "phase_change", "started")

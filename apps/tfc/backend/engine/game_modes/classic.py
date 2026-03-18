@@ -1,4 +1,5 @@
 """Classic game mode — GM-driven, pause-on-decision, no scoring."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -14,7 +15,9 @@ class ClassicMode:
         return True
 
     def on_decision_timeout(
-        self, decision_id: str, options: list[DecisionOptionSnapshot],
+        self,
+        decision_id: str,
+        options: list[DecisionOptionSnapshot],
     ) -> str | None:
         return None
 

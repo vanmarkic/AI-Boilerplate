@@ -47,30 +47,18 @@ class TestMatchPattern:
 
 _ADMIN_USER = CurrentUser(id="admin-1", email="admin@test.dev", roles=["admin"])
 _USER = CurrentUser(id="user-1", email="user@test.dev", roles=["user"])
-_MANAGER = CurrentUser(
-    id="mgr-1", email="manager@test.dev", roles=["role_manager"]
-)
+_MANAGER = CurrentUser(id="mgr-1", email="manager@test.dev", roles=["role_manager"])
 
 
 def _mock_cache() -> dict[str, list[PermissionRule]]:
     return {
         "admin": [PermissionRule(route_pattern="/api/**", method="*")],
         "role_manager": [
-            PermissionRule(
-                route_pattern="/api/admin/permissions", method="GET"
-            ),
-            PermissionRule(
-                route_pattern="/api/admin/permissions", method="POST"
-            ),
-            PermissionRule(
-                route_pattern="/api/admin/permissions/*", method="PUT"
-            ),
-            PermissionRule(
-                route_pattern="/api/admin/permissions/*", method="DELETE"
-            ),
-            PermissionRule(
-                route_pattern="/api/admin/permissions/reload", method="POST"
-            ),
+            PermissionRule(route_pattern="/api/admin/permissions", method="GET"),
+            PermissionRule(route_pattern="/api/admin/permissions", method="POST"),
+            PermissionRule(route_pattern="/api/admin/permissions/*", method="PUT"),
+            PermissionRule(route_pattern="/api/admin/permissions/*", method="DELETE"),
+            PermissionRule(route_pattern="/api/admin/permissions/reload", method="POST"),
             PermissionRule(route_pattern="/api/me/*", method="GET"),
         ],
         "user": [
@@ -92,15 +80,11 @@ def _seed_rbac_cache(_bypass_rbac: None) -> None:  # noqa: ANN001
 
 
 class TestRBACMiddleware:
-    async def test_public_health_allowed_without_token(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_public_health_allowed_without_token(self, client: AsyncClient) -> None:
         resp = await client.get("/api/health")
         assert resp.status_code != 401
 
-    async def test_returns_401_for_missing_token(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_returns_401_for_missing_token(self, client: AsyncClient) -> None:
         with patch(
             "core.auth.parse_jwt_roles",
             new_callable=AsyncMock,
@@ -109,9 +93,7 @@ class TestRBACMiddleware:
             resp = await client.get("/api/admin/permissions")
             assert resp.status_code == 401
 
-    async def test_admin_can_access_any_route(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_admin_can_access_any_route(self, client: AsyncClient) -> None:
         with patch(
             "core.auth.parse_jwt_roles",
             new_callable=AsyncMock,
@@ -124,9 +106,7 @@ class TestRBACMiddleware:
             # Should pass RBAC (may still need valid dependency)
             assert resp.status_code != 403
 
-    async def test_user_cannot_access_admin_routes(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_user_cannot_access_admin_routes(self, client: AsyncClient) -> None:
         with patch(
             "core.auth.parse_jwt_roles",
             new_callable=AsyncMock,

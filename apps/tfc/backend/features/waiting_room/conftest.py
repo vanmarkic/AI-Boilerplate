@@ -1,4 +1,5 @@
 """Test fixtures for waiting room feature tests."""
+
 from __future__ import annotations
 
 import pytest

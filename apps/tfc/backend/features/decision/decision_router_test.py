@@ -1,4 +1,5 @@
 """HTTP API tests for decision router endpoints."""
+
 import pytest
 from httpx import AsyncClient
 
@@ -10,7 +11,8 @@ async def _create_exercise(client: AsyncClient) -> int:
 
 
 async def _create_decision(
-    client: AsyncClient, **overrides: object,
+    client: AsyncClient,
+    **overrides: object,
 ) -> dict:
     if "exercise_id" not in overrides:
         overrides["exercise_id"] = await _create_exercise(client)
@@ -47,13 +49,16 @@ async def test_create_decision_invalid_question_type(
     client: AsyncClient,
 ) -> None:
     eid = await _create_exercise(client)
-    resp = await client.post("/api/decisions", json={
-        "title": "Bad",
-        "exercise_id": eid,
-        "issue_id": "x",
-        "question_type": "invalid_type",
-        "completion_mode": "first_response",
-    })
+    resp = await client.post(
+        "/api/decisions",
+        json={
+            "title": "Bad",
+            "exercise_id": eid,
+            "issue_id": "x",
+            "question_type": "invalid_type",
+            "completion_mode": "first_response",
+        },
+    )
     assert resp.status_code == 400
 
 
@@ -84,8 +89,7 @@ async def test_list_decisions_filter_by_status(
     d = await _create_decision(client, exercise_id=eid)
     await client.post(f"/api/decisions/{d['id']}/close")
 
-    await _create_decision(client, exercise_id=eid, title="Still Open",
-                           completion_mode="gm_closes")
+    await _create_decision(client, exercise_id=eid, title="Still Open", completion_mode="gm_closes")
 
     resp = await client.get(f"/api/decisions?exercise_id={eid}&status=open")
     assert resp.status_code == 200
@@ -113,7 +117,9 @@ async def test_get_decision_not_found(client: AsyncClient) -> None:
 async def test_submit_response(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     d = await _create_decision(
-        client, exercise_id=eid, completion_mode="gm_closes",
+        client,
+        exercise_id=eid,
+        completion_mode="gm_closes",
     )
     resp = await client.post(
         f"/api/decisions/{d['id']}/responses",
@@ -151,7 +157,9 @@ async def test_submit_response_closed_decision(
 async def test_close_decision(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     d = await _create_decision(
-        client, exercise_id=eid, completion_mode="gm_closes",
+        client,
+        exercise_id=eid,
+        completion_mode="gm_closes",
     )
     resp = await client.post(f"/api/decisions/{d['id']}/close")
     assert resp.status_code == 200

@@ -6,6 +6,7 @@ if a scenario with the same title does not already exist.
 Runs as a standalone script before the app server starts:
     python seed.py
 """
+
 from __future__ import annotations
 
 import asyncio
@@ -46,7 +47,8 @@ async def seed_scenarios() -> None:
                 except ValidationError as exc:
                     logger.error(
                         "Seed '%s' has invalid content — skipping: %s",
-                        path.name, exc,
+                        path.name,
+                        exc,
                     )
                     continue
             title = data["title"]

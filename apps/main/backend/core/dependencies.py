@@ -5,6 +5,7 @@ Uses lazy imports (inside function body) so tier-excluded features
 don't break at module import time. New factories are auto-appended
 by scaffold-feature.sh — no need to edit this file manually.
 """
+
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 

@@ -1,4 +1,5 @@
 """Tests for P2 scenario content additions: timeout_ms, briefing, objectives, rules."""
+
 from features.scenario.scenario_content import (
     DecisionTemplateDef,
     ScenarioContent,
@@ -11,14 +12,20 @@ MINIMAL_ROLES = [
 
 def test_decision_template_default_timeout() -> None:
     dt = DecisionTemplateDef(
-        id="dt1", title="T", issue_id="i1", question_type="single_choice",
+        id="dt1",
+        title="T",
+        issue_id="i1",
+        question_type="single_choice",
     )
     assert dt.timeout_ms == 0
 
 
 def test_decision_template_custom_timeout() -> None:
     dt = DecisionTemplateDef(
-        id="dt1", title="T", issue_id="i1", question_type="single_choice",
+        id="dt1",
+        title="T",
+        issue_id="i1",
+        question_type="single_choice",
         timeout_ms=5000.0,
     )
     assert dt.timeout_ms == 5000.0
@@ -49,8 +56,11 @@ def test_scenario_content_round_trip() -> None:
         "issues": [],
         "decision_templates": [
             {
-                "id": "dt1", "title": "D1", "issue_id": "i1",
-                "question_type": "free_text", "timeout_ms": 3000,
+                "id": "dt1",
+                "title": "D1",
+                "issue_id": "i1",
+                "question_type": "free_text",
+                "timeout_ms": 3000,
             },
         ],
         "briefing": "Brief",

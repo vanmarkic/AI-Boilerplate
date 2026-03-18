@@ -1,4 +1,5 @@
 """Tests that all seed JSON files pass ScenarioContent validation."""
+
 from __future__ import annotations
 
 import json

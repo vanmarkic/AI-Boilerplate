@@ -1,4 +1,5 @@
 """Tests for SessionStore in-memory session management."""
+
 from engine.exercise_engine import EngineConfig
 from engine.session_store import SessionStore
 
