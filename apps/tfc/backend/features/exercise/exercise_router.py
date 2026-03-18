@@ -41,13 +41,14 @@ async def list_exercises(
 
 @router.get(
     "/joinable",
-    operation_id="getJoinableExercise",
+    operation_id="listJoinableExercises",
 )
-async def get_joinable_exercise(
+async def list_joinable_exercises(
     service: ExerciseService = Depends(get_exercise_service),
     scenario_service: ScenarioService = Depends(get_scenario_service),
-) -> dict:
-    """Return the first joinable exercise with available slots, or 404."""
+) -> list[dict]:
+    """Return all joinable exercises with available slots."""
+    results: list[dict] = []
     exercises = await service.list_exercises(phase="setup")
     for exercise in exercises:
         if exercise.scenario_id is None:
@@ -71,18 +72,15 @@ async def get_joinable_exercise(
             continue
 
         participants = waiting_room_store.list_participants(exercise.id)
-        return {
+        results.append({
             "exercise": exercise.model_dump(),
             "participants": [p.to_dict() for p in participants],
             "roles": [r.model_dump() for r in content.roles],
             "max_players": max_players,
             "requires_gm": requires_gm,
-        }
+        })
 
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="No joinable exercise found",
-    )
+    return results
 
 
 @router.get(
