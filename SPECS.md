@@ -54,7 +54,9 @@ DomainConfig ──referenced-by──▶ Scenario
 - **Rules:**
   - A scenario must have a title and at least one event.
   - Scenario content includes: briefing, objectives, rules, events, issues, decision templates.
+  - Scenario must define at least one role with `player_type='decision_maker'`.
   - Scenarios are loaded by `scenario_loader.py` and converted to `EngineConfig`.
+  - Seed script (`seed.py`) upserts scenarios by title — existing scenarios are updated with current seed content on restart.
 - **API:**
   - `POST /api/scenarios` — Create scenario
   - `GET /api/scenarios` — List scenarios
