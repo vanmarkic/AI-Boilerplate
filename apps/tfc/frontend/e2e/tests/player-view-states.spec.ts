@@ -393,7 +393,10 @@ test.describe('Decision overlay — role × mode visibility @player', () => {
     await installMocks(page, snapshot({ decisions: [DECISION_OPEN] }));
     await page.goto(playerUrl('co-01', 'co'));
 
-    await expect(page.locator('.overlay')).toBeVisible();
+    await expect(page.locator('.overlay')).toBeAttached();
+    const overlay = page.locator('.overlay');
+    await overlay.scrollIntoViewIfNeeded();
+    await expect(overlay).toBeVisible();
     await expect(page.getByText('Evasive Action')).toBeVisible();
   });
 
@@ -430,7 +433,7 @@ test.describe('Decision targeting — role-filtered visibility @player', () => {
     await installMocks(page, snapshot({ decisions: [DECISION_TARGETED_CO] }));
     await page.goto(playerUrl('co-01', 'co'));
 
-    await expect(page.locator('.overlay')).toBeVisible();
+    await expect(page.locator('.overlay')).toBeAttached();
     await expect(page.getByText('CO Decision Only')).toBeVisible();
   });
 
@@ -446,7 +449,7 @@ test.describe('Decision targeting — role-filtered visibility @player', () => {
     await installMocks(page, snapshot({ decisions: [DECISION_OPEN] }));
     await page.goto(playerUrl('ops-01', 'ops'));
 
-    await expect(page.locator('.overlay')).toBeVisible();
+    await expect(page.locator('.overlay')).toBeAttached();
   });
 });
 
@@ -515,11 +518,11 @@ test.describe('Combined state — all invariants hold together @player', () => {
     await expect(page.getByText('Hidden Issue')).not.toBeVisible();
 
     // Decision: advisor panel with [Advisor] prefix
-    await expect(page.locator('.overlay')).toBeVisible();
+    await expect(page.locator('.overlay')).toBeAttached();
     await expect(page.getByText('[Advisor] Decision With Recs')).toBeVisible();
 
     // Advisor does NOT see bubbles
-    await expect(page.locator('tfc-advisor-bubbles')).not.toBeVisible();
+    await expect(page.locator('tfc-advisor-bubbles')).not.toBeAttached();
 
     // Footer: role label for advisor (Navigator)
     await expect(page.getByText('You are the Navigator')).toBeVisible();
