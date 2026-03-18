@@ -134,18 +134,18 @@
   }
 
   .exercise-phase[data-phase="setup"] {
-    background: oklch(0.75 0.08 250);
-    color: oklch(0.25 0.08 250);
+    background: var(--color-info);
+    color: var(--color-info-foreground);
   }
 
   .exercise-phase[data-phase="running"] {
-    background: oklch(0.75 0.15 145);
-    color: oklch(0.25 0.15 145);
+    background: var(--color-success);
+    color: var(--color-success-foreground);
   }
 
   .exercise-phase[data-phase="paused"] {
-    background: oklch(0.80 0.12 80);
-    color: oklch(0.30 0.12 80);
+    background: var(--color-warning);
+    color: var(--color-warning-foreground);
   }
 
   .exercise-phase[data-phase="completed"] {

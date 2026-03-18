@@ -1,0 +1,19 @@
+name: waiting_room
+tier: 1
+description: Pre-exercise lobby — participant presence, role assignment, ready-up
+version: 0.1.0
+dependencies:
+  internal: [exercise, scenario]
+  external: []
+api_endpoints:
+  - POST /api/exercises/{exercise_id}/waiting-room/join
+  - GET /api/exercises/{exercise_id}/waiting-room
+  - PUT /api/exercises/{exercise_id}/waiting-room/participants/{participant_id}/role
+  - DELETE /api/exercises/{exercise_id}/waiting-room/participants/{participant_id}
+models: []
+events_emitted:
+  - waiting_room_update
+events_consumed: []
+business_rules:
+  - Uses in-memory store (not persisted to DB)
+  - Broadcasts participant updates via exercise WebSocket

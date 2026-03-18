@@ -40,62 +40,7 @@ export interface JoinableExercise {
   selector: 'tfc-lobby-preview',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [FormsModule, CardComponent, BadgeComponent, ButtonDirective, InputComponent],
-  styles: [`
-    :host { display: block; width: 100%; max-width: 560px; }
-
-    .role-slots {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-xs);
-    }
-
-    .role-slot {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--spacing-sm) var(--spacing-md);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-md, 0.5rem);
-      font-size: var(--font-size-sm, 0.875rem);
-      transition: border-color 0.15s, background 0.15s;
-    }
-
-    .role-slot[data-available] {
-      cursor: pointer;
-    }
-
-    .role-slot[data-available]:hover {
-      border-color: var(--color-primary);
-      background: color-mix(in oklch, var(--glass-bg) 85%, var(--color-primary) 15%);
-    }
-
-    .role-slot[data-taken] {
-      background: color-mix(in oklch, var(--glass-bg) 90%, var(--color-muted-foreground) 10%);
-    }
-
-    .role-slot[data-mine] {
-      border-color: var(--color-primary);
-      background: color-mix(in oklch, var(--glass-bg) 80%, var(--color-primary) 20%);
-    }
-
-    .role-label { font-weight: 500; }
-    .role-type {
-      font-size: var(--font-size-xs, 0.75rem);
-      color: var(--color-muted-foreground);
-    }
-
-    .join-form {
-      display: flex;
-      gap: var(--spacing-sm);
-      align-items: flex-end;
-    }
-
-    .lobby-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-  `],
+  styleUrl: './lobby-preview.css',
   template: `
     <ui-card [title]="data().exercise.title">
       <div class="flex flex-col gap-md">

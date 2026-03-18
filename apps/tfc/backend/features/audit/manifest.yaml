@@ -1,0 +1,16 @@
+name: audit
+tier: 1
+description: Audit trail for exercise events — logs all state changes
+version: 0.1.0
+dependencies:
+  internal: [exercise]
+  external: [postgresql]
+api_endpoints:
+  - GET /api/audit/{exercise_id}
+models:
+  - AuditEntry
+events_emitted: []
+events_consumed: []
+business_rules:
+  - Every engine state change is logged as an audit entry
+  - Audit log is read-only after creation
