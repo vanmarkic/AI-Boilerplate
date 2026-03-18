@@ -183,7 +183,7 @@ async function installMocks(
 //    Header elements (title, clocks, phase badge) must ALWAYS be visible
 //    regardless of game mode, player type, phase, or score state.
 
-test.describe('Header — always visible', () => {
+test.describe('Header — always visible @player', () => {
   const cases = [
     { name: 'running, no score', snap: snapshot() },
     { name: 'paused, with score', snap: snapshot({ phase: 'paused', score: SCORE_TURN_3, time: TIME_PAUSED }) },
@@ -212,7 +212,7 @@ test.describe('Header — always visible', () => {
 //    Turn banner + score bar visible iff score is non-null.
 //    When visible, turn number matches.
 
-test.describe('Score display — visible iff score exists', () => {
+test.describe('Score display — visible iff score exists @player', () => {
   test('no turn banner or score bar when score is null', async ({ page }) => {
     await installMocks(page, snapshot({ score: null }));
     await page.goto(playerUrl('p1'));
@@ -244,7 +244,7 @@ test.describe('Score display — visible iff score exists', () => {
 //    Collaborative + advisor       → "You are an Advisor"
 //    Classic (any role)            → "Waiting for ... actions..."
 
-test.describe('Footer status — game mode × player type', () => {
+test.describe('Footer status — game mode × player type @player', () => {
   test('collaborative + decision_maker role → role label', async ({ page }) => {
     await installMocks(page, snapshot());
     await page.goto(playerUrl('co-01', 'co'));
@@ -278,7 +278,7 @@ test.describe('Footer status — game mode × player type', () => {
 //    Always visible. Shows only running + completed events.
 //    Scheduled events are hidden. Empty state shown when none.
 
-test.describe('Events card — visibility by lifecycle', () => {
+test.describe('Events card — visibility by lifecycle @player', () => {
   test('shows running and completed events, hides scheduled', async ({ page }) => {
     await installMocks(page, snapshot({
       events: [EVENT_RUNNING, EVENT_COMPLETED, EVENT_SCHEDULED],
@@ -309,7 +309,7 @@ test.describe('Events card — visibility by lifecycle', () => {
 //    Always visible. Shows only released issues.
 //    Unreleased issues are hidden. Active issues get destructive badge.
 
-test.describe('Issues card — released only, badge variants', () => {
+test.describe('Issues card — released only, badge variants @player', () => {
   test('shows released issues, hides unreleased', async ({ page }) => {
     await installMocks(page, snapshot({
       issues: [ISSUE_ACTIVE_RELEASED, ISSUE_ACTIVE_UNRELEASED],
@@ -341,7 +341,7 @@ test.describe('Issues card — released only, badge variants', () => {
 // ── 6. CONTEXT PANEL INVARIANTS ───────────────────────────────────────
 //    Visible iff context loaded. Shows briefing, objectives, rules.
 
-test.describe('Context panel — visible when context loaded', () => {
+test.describe('Context panel — visible when context loaded @player', () => {
   test('shows briefing and objectives when context has them', async ({ page }) => {
     await installMocks(page, snapshot());
     await page.goto(playerUrl('p1'));
@@ -373,7 +373,7 @@ test.describe('Context panel — visible when context loaded', () => {
 //    Open decision + collaborative + decision_maker → DM panel (no prefix) + advisor bubbles
 //    Open decision + classic → DM-style panel
 
-test.describe('Decision overlay — role × mode visibility', () => {
+test.describe('Decision overlay — role × mode visibility @player', () => {
   test('no overlay when no open decision', async ({ page }) => {
     await installMocks(page, snapshot({ decisions: [] }));
     await page.goto(playerUrl('co-01', 'co'));
@@ -417,7 +417,7 @@ test.describe('Decision overlay — role × mode visibility', () => {
 // ── 8. DECISION TARGETING ─────────────────────────────────────────────
 //    Decisions with target_roles only shown to matching roles.
 
-test.describe('Decision targeting — role-filtered visibility', () => {
+test.describe('Decision targeting — role-filtered visibility @player', () => {
   test('targeted decision visible to matching role', async ({ page }) => {
     await installMocks(page, snapshot({ decisions: [DECISION_TARGETED_CO] }));
     await page.goto(playerUrl('co-01', 'co'));
@@ -446,7 +446,7 @@ test.describe('Decision targeting — role-filtered visibility', () => {
 //    Visible only for decision-maker when recommendations exist.
 //    Count badge matches number of recommendations.
 
-test.describe('Advisor bubbles — DM sees recs, advisor does not', () => {
+test.describe('Advisor bubbles — DM sees recs, advisor does not @player', () => {
   test('decision-maker sees advisor bubbles when recs exist', async ({ page }) => {
     await installMocks(page, snapshot({ decisions: [DECISION_WITH_RECS] }));
     await page.goto(playerUrl('co-01', 'co'));
@@ -477,7 +477,7 @@ test.describe('Advisor bubbles — DM sees recs, advisor does not', () => {
 //    Full cross-product: score + events + issues + decision + role
 //    All invariants must hold simultaneously.
 
-test.describe('Combined state — all invariants hold together', () => {
+test.describe('Combined state — all invariants hold together @player', () => {
   test('advisor with score, events, issues, and open decision', async ({ page }) => {
     await installMocks(page, snapshot({
       phase: 'running',

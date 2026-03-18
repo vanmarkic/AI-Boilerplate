@@ -134,7 +134,7 @@ function collabWaitingRoomUrl(participantId: string): string {
 //    Checkbox visible only in simple_collaborative mode.
 //    Hidden in classic mode.
 
-test.describe('Waiting room — 2 Player Mode toggle visibility', () => {
+test.describe('Waiting room — 2 Player Mode toggle visibility @waiting-room @two-player', () => {
   test('checkbox visible in simple_collaborative mode', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(EX_ID, [me]);
@@ -162,7 +162,7 @@ test.describe('Waiting room — 2 Player Mode toggle visibility', () => {
 //    Toggling checkbox shows role dropdowns with Decision Maker / All Advisors.
 //    Untoggled shows Player badge (no dropdowns).
 
-test.describe('Waiting room — role selector after toggle', () => {
+test.describe('Waiting room — role selector after toggle @waiting-room @two-player', () => {
   test('toggling on shows 2-player role options', async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'player' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'player' });
@@ -210,7 +210,7 @@ test.describe('Waiting room — role selector after toggle', () => {
 //    In 2-player mode, start requires exactly 2 participants
 //    with one decision_maker and one all_advisors.
 
-test.describe('Waiting room — 2-player start constraints', () => {
+test.describe('Waiting room — 2-player start constraints @waiting-room @two-player', () => {
   test('start disabled when both have same role', async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'decision_maker' });
@@ -276,7 +276,7 @@ test.describe('Waiting room — 2-player start constraints', () => {
 //    If scenario has no roles (broken scenario), show error message
 //    and disable start button.
 
-test.describe('Waiting room — missing roles error state', () => {
+test.describe('Waiting room — missing roles error state @waiting-room @two-player', () => {
   test('shows error message when no scenario roles loaded', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(EX_ID, [me]);
@@ -307,7 +307,7 @@ test.describe('Waiting room — missing roles error state', () => {
 //    all_advisors role sees tfc-all-advisors-panel, NOT tfc-decision-panel with [Advisor] prefix.
 //    Tabs correspond to scenario advisor roles.
 
-test.describe('Player view — all-advisors panel', () => {
+test.describe('Player view — all-advisors panel @player @two-player', () => {
   test('all-advisors player sees tabbed panel', async ({ page }) => {
     await installPlayerMocks(page, snapshot({ decisions: [DECISION_OPEN] }));
     await page.goto(playerUrl('all-adv-01', 'all_advisors'));
@@ -339,7 +339,7 @@ test.describe('Player view — all-advisors panel', () => {
 // ── 5. PLAYER VIEW — ALL-ADVISORS BYPASSES TARGET ROLES ────────────
 //    all_advisors sees all decisions, even those targeted at specific roles.
 
-test.describe('Player view — all-advisors decision targeting', () => {
+test.describe('Player view — all-advisors decision targeting @player @two-player', () => {
   test('all-advisors sees targeted CO decision', async ({ page }) => {
     await installPlayerMocks(page, snapshot({ decisions: [DECISION_TARGETED_CO] }));
     await page.goto(playerUrl('all-adv-01', 'all_advisors'));
@@ -360,7 +360,7 @@ test.describe('Player view — all-advisors decision targeting', () => {
 //    Decision-maker sees role labels (not raw keys) when recs use composite keys.
 //    Count badge matches number of per-role recommendations.
 
-test.describe('Player view — composite-key advisor bubbles', () => {
+test.describe('Player view — composite-key advisor bubbles @player @two-player', () => {
   test('decision-maker sees role labels from composite keys', async ({ page }) => {
     await installPlayerMocks(page, snapshot({ decisions: [DECISION_WITH_COMPOSITE_RECS] }));
     await page.goto(playerUrl('co-01', 'co'));
@@ -389,7 +389,7 @@ test.describe('Player view — composite-key advisor bubbles', () => {
 //    all_advisors → "You are the All Advisors player"
 //    decision_maker (synthetic) → "You are the Decision Maker"
 
-test.describe('Player view — footer text for 2-player roles', () => {
+test.describe('Player view — footer text for 2-player roles @player @two-player', () => {
   test('all-advisors player sees correct footer text', async ({ page }) => {
     await installPlayerMocks(page, snapshot());
     await page.goto(playerUrl('all-adv-01', 'all_advisors'));
@@ -411,7 +411,7 @@ test.describe('Player view — footer text for 2-player roles', () => {
 // ── 8. COMBINED — FULL 2-PLAYER STATE ───────────────────────────────
 //    All invariants hold simultaneously in a realistic 2-player scenario.
 
-test.describe('Combined — full 2-player scenario', () => {
+test.describe('Combined — full 2-player scenario @player @two-player', () => {
   test('all-advisors player: score + decision + tabbed panel', async ({ page }) => {
     await installPlayerMocks(page, snapshot({
       score: SCORE,

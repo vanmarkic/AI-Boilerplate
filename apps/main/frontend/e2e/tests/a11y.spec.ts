@@ -7,7 +7,7 @@ function getCriticalViolations(results: AxeResults) {
   );
 }
 
-test.describe('Accessibility', () => {
+test.describe('Accessibility @a11y', () => {
   test('home page should have no critical a11y violations', async ({ page, makeAxe }) => {
     await page.goto('/');
     await page.locator('h1').waitFor();

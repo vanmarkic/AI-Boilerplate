@@ -102,11 +102,17 @@ jobs:
       - run: npm run build
 
   e2e:
-    name: E2E Tests
+    name: E2E Tests (${{ matrix.shard }})
     needs: [type-check, test]
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1/4, 2/4, 3/4, 4/4]
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
@@ -121,22 +127,31 @@ jobs:
       - run: npm i
         working-directory: .
       - run: npx playwright install --with-deps chromium
-      - run: npm run e2e
+      - name: Run E2E (changed-only on PRs, full + sharded on push)
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            GREP=$(bash shared/scripts/e2e-changed.sh origin/master tfc 2>/dev/null) && \
+              npx playwright test --grep "$GREP" --shard=${{ matrix.shard }} || \
+              npx playwright test --shard=${{ matrix.shard }}
+          else
+            npx playwright test --shard=${{ matrix.shard }}
+          fi
+        working-directory: apps/tfc/frontend
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: tfc-playwright-report
+          name: tfc-playwright-report-${{ strategy.job-index }}
           path: apps/tfc/frontend/playwright-report/
           retention-days: 7
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: tfc-route-screenshots
+          name: tfc-route-screenshots-${{ strategy.job-index }}
           path: apps/tfc/frontend/screenshots/
           retention-days: 7
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: tfc-e2e-failure-screenshots
+          name: tfc-e2e-failure-screenshots-${{ strategy.job-index }}
           path: apps/tfc/frontend/test-results/
           retention-days: 7
