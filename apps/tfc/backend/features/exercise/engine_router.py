@@ -350,4 +350,8 @@ async def get_engine_context(exercise_id: int) -> dict:
         "objectives": ctx.objectives,
         "rules": ctx.rules,
         "default_time_factor": engine._config.time_factor,
+        "roles": [
+            {"id": r.id, "label": r.label, "player_type": r.player_type}
+            for r in ctx.roles
+        ],
     }
