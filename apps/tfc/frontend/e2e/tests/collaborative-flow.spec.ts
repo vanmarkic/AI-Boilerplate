@@ -2,7 +2,6 @@
  * Playwright e2e tests for the simple_collaborative exercise flow.
  *
  * Covers:
- * - Join page: session code pre-fill from query param, role selector hidden
  * - Collaborative waiting room: player badge, Start button visible to all
  * - Start navigates to /player (not /gm)
  * - Full onboarding: join → waiting room → start as player
@@ -20,7 +19,7 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
 
   test('shows collaborative mode message', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
+    mockApi.seed(exerciseId, [me], 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -30,18 +29,20 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
     ).toBeVisible();
   });
 
-  test('shows fallback role dropdown when no scenario roles loaded', async ({
+  test('shows error when no scenario roles loaded', async ({
     page,
     mockApi,
   }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
+    // Only seed participants, explicitly set exercise with no scenario
+    mockApi.rooms.set(exerciseId, [me]);
+    mockApi.seedExercise(exerciseId, 'simple_collaborative', null);
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
 
-    // Fallback: role dropdown visible (no scenario roles loaded)
-    await expect(page.locator('select')).toBeVisible();
+    // No roles → error message shown
+    await expect(page.getByText('Scenario has no roles defined')).toBeVisible();
   });
 
   test('Start button shows participant count and is visible to any player', async ({
@@ -50,7 +51,7 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
   }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'player' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'player' });
-    mockApi.seed(exerciseId, [alice, bob]);
+    mockApi.seed(exerciseId, [alice, bob], 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabUrl(alice.id));
@@ -60,12 +61,13 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
     ).toBeVisible();
   });
 
-  test('Start button is enabled with at least one participant', async ({
+  test('Start button is enabled when all role slots are filled', async ({
     page,
     mockApi,
   }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
+    // 1 participant, 1 derived role (player) → all slots filled
+    mockApi.seed(exerciseId, [me], 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -80,7 +82,7 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
     mockApi,
   }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
+    mockApi.seed(exerciseId, [me], 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -92,7 +94,7 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
 
   test('does NOT navigate to /gm on start', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
+    mockApi.seed(exerciseId, [me], 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -106,11 +108,11 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
     mockApi,
   }) => {
     const players = [
-      mockParticipant({ display_name: 'Alice', role: 'player' }),
-      mockParticipant({ display_name: 'Bob', role: 'player' }),
-      mockParticipant({ display_name: 'Charlie', role: 'player' }),
+      mockParticipant({ display_name: 'Alice', role: 'co' }),
+      mockParticipant({ display_name: 'Bob', role: 'nav' }),
+      mockParticipant({ display_name: 'Charlie', role: 'ops' }),
     ];
-    mockApi.seed(exerciseId, players);
+    mockApi.seed(exerciseId, players, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabUrl(players[0].id));
@@ -120,4 +122,3 @@ test.describe('Collaborative waiting room @waiting-room @collaborative', () => {
     await expect(page.getByText('Charlie')).toBeVisible();
   });
 });
-
