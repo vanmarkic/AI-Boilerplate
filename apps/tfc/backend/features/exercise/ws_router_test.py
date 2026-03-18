@@ -41,8 +41,13 @@ class TestWsRouterIntegration:
         client = self._make_app()
         with client.websocket_connect("/api/exercises/1/ws?role=gm") as ws:
             ws.send_text(json.dumps({"type": "ping"}))
-            response = ws.receive_text()
-            data = json.loads(response)
+            # Drain any messages that arrive before the pong (e.g.
+            # state_changes from broadcast_presence on connect).
+            for _ in range(10):
+                response = ws.receive_text()
+                data = json.loads(response)
+                if data["type"] == "pong":
+                    break
             assert data["type"] == "pong"
 
     def test_ws_default_role_is_player(self) -> None:
