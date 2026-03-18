@@ -40,7 +40,10 @@ export class MockApi {
   /** Session code → exercise lookup payload. */
   readonly codeMap = new Map<string, object>();
 
-  constructor(private readonly page: Page) {}
+  readonly page: Page;
+  constructor(page: Page) {
+    this.page = page;
+  }
 
   /** Register a session code so by-code lookup returns this exercise. */
   seedCode(code: string, exerciseId: number, gameMode = 'classic'): void {
