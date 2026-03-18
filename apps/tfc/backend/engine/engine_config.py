@@ -42,8 +42,8 @@ class EngineConfig:
     exercise_id: int
     title: str
     time_factor: float = 1.0
-    events: list[ScheduledEvent] = field(default_factory=list)
-    issues: list[TrackedIssue] = field(default_factory=list)
+    events: list[ScheduledEvent] = field(default_factory=list)  # domain: "injects"
+    issues: list[TrackedIssue] = field(default_factory=list)  # domain: "defects"
     decision_templates: list[DecisionTemplate] = field(default_factory=list)
     context: ScenarioContext = field(default_factory=ScenarioContext)
     game_mode: ClassicMode = field(default_factory=ClassicMode)

@@ -27,8 +27,8 @@ interface ExerciseState {
   realTimeMs: number;
   speedFactor: number;
   paused: boolean;
-  events: EventSnapshot[];
-  issues: IssueSnapshot[];
+  events: EventSnapshot[];   // domain: "injects"
+  issues: IssueSnapshot[];   // domain: "defects"
   decisions: ActiveDecision[];
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
@@ -66,10 +66,10 @@ export const ExerciseStore = signalStore(
   withComputed((store) => ({
     rtClock: computed(() => formatTimeMs(store.realTimeMs())),
     ptClock: computed(() => formatTimeMs(store.playTimeMs())),
-    activeEvents: computed(() => store.events().filter((e) => e.lifecycle === 'running')),
-    scheduledEvents: computed(() => store.events().filter((e) => e.lifecycle === 'scheduled')),
-    completedEvents: computed(() => store.events().filter((e) => e.lifecycle === 'completed')),
-    activeIssues: computed(() => store.issues().filter((i) => i.lifecycle === 'active')),
+    activeEvents: computed(() => store.events().filter((e) => e.lifecycle === 'running')),    // active injects
+    scheduledEvents: computed(() => store.events().filter((e) => e.lifecycle === 'scheduled')), // scheduled injects
+    completedEvents: computed(() => store.events().filter((e) => e.lifecycle === 'completed')), // completed injects
+    activeIssues: computed(() => store.issues().filter((i) => i.lifecycle === 'active')),    // active defects
     issuesWithCountdown: computed(() => {
       const pt = store.playTimeMs();
       return store.issues()
