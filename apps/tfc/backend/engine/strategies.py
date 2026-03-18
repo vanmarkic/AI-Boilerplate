@@ -101,6 +101,11 @@ def scores() -> SearchStrategy[float]:
     return st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False)
 
 
+def signed_scores() -> SearchStrategy[float]:
+    """Scores that can be positive, zero, or negative."""
+    return st.floats(min_value=-50.0, max_value=100.0, allow_nan=False, allow_infinity=False)
+
+
 def penalty_factors() -> SearchStrategy[float]:
     """Positive penalty multipliers."""
     return st.floats(min_value=0.01, max_value=10.0, allow_nan=False, allow_infinity=False)
@@ -120,6 +125,22 @@ def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[di
             "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
             "label": st.just("Option"),
             "score": scores(),
+        }),
+        min_size=min_size,
+        max_size=max_size,
+        unique_by=lambda o: o["id"],
+    )
+
+
+def signed_option_lists(
+    min_size: int = 1, max_size: int = 6,
+) -> SearchStrategy[list[dict]]:
+    """Option lists with +/0/- scores."""
+    return st.lists(
+        st.fixed_dictionaries({
+            "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
+            "label": st.just("Option"),
+            "score": signed_scores(),
         }),
         min_size=min_size,
         max_size=max_size,
