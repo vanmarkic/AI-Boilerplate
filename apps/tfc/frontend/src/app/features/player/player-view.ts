@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CardComponent, BadgeComponent } from '@aspect/ui';
 import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
@@ -154,9 +155,11 @@ export class PlayerView implements OnInit, OnDestroy {
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
+  private readonly route = inject(ActivatedRoute);
   protected readonly selectedIssueId = signal<string | null>(null);
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
-  private readonly exerciseId = signal(1); // TODO: from route param
+  private readonly exerciseId = signal(1);
+  private readonly participantId = signal('');
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
 
@@ -184,8 +187,12 @@ export class PlayerView implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const id = this.exerciseId();
-    this.ws.connect(id, 'player');
+    const params = this.route.snapshot.queryParams;
+    const id = Number(params['exerciseId'] ?? 1);
+    const pId = String(params['participantId'] ?? '');
+    this.exerciseId.set(id);
+    this.participantId.set(pId);
+    this.ws.connect(id, 'player', pId || undefined);
     this.sub = this.ws.messages$.subscribe((msg) => handlePlayerWsMessage(msg, this.store));
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
@@ -229,7 +236,7 @@ export class PlayerView implements OnInit, OnDestroy {
     const optionId = event.selectedOptions[0];
     if (!optionId) return;
     this.decisionApi.submitRecommendation(
-      this.exerciseId(), decision.id, optionId,
+      this.exerciseId(), decision.id, optionId, this.participantId(),
     ).subscribe();
   }
 
@@ -238,8 +245,8 @@ export class PlayerView implements OnInit, OnDestroy {
     event: { selectedOptions: string[]; freeText: string },
   ): void {
     this.decisionApi.submitResponse(Number(decision.id), {
-      participant_id: 'current-user',
-      participant_name: 'Player',
+      participant_id: this.participantId(),
+      participant_name: this.participantId(),
       selected_options: event.selectedOptions,
       free_text: event.freeText || null,
     }).subscribe({

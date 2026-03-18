@@ -32,6 +32,7 @@ interface ExerciseState {
   decisions: ActiveDecision[];
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
+  participantId: string;
   playerRole: string;
   playerType: string;
   score: ScoreState | null;
@@ -53,6 +54,7 @@ const initialState: ExerciseState = {
   decisions: [],
   participants: [],
   context: null,
+  participantId: '',
   playerRole: 'player',
   playerType: 'advisor',
   score: null,
@@ -161,6 +163,10 @@ export const ExerciseStore = signalStore(
 
     setContext(ctx: ScenarioContext): void {
       patchState(store, { context: ctx });
+    },
+
+    setParticipantId(id: string): void {
+      patchState(store, { participantId: id });
     },
 
     setPlayerRole(role: string): void {
