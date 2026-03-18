@@ -52,6 +52,8 @@ async function installPlayerMocks(
   snapshot = baseSnapshot,
   context = contextWithRoles,
 ): Promise<void> {
+  const decisions = (snapshot as Record<string, unknown>)['decisions'] ?? [];
+
   // Mock engine snapshot
   await page.route(`**/api/exercises/${exerciseId}/engine/snapshot`, async (route) => {
     await route.fulfill({
@@ -70,8 +72,12 @@ async function installPlayerMocks(
     });
   });
 
-  // Mock decisions list
+  // Mock decisions list (skip engine sub-paths)
   await page.route(`**/api/decisions*`, async (route) => {
+    if (route.request().url().includes('/engine/')) {
+      await route.fallback();
+      return;
+    }
     await route.fulfill({
       status: 200,
       contentType: 'application/json',
@@ -85,7 +91,7 @@ async function installPlayerMocks(
       await route.fulfill({
         status: 200,
         contentType: 'application/json',
-        body: JSON.stringify([]),
+        body: JSON.stringify(decisions),
       });
     } else {
       await route.fallback();
@@ -105,7 +111,7 @@ test.describe('Gap 5 — Score in snapshot @player', () => {
     await page.goto(playerUrl('alice-01'));
 
     // Turn banner should show turn 3
-    await expect(page.getByText('Turn 3')).toBeVisible();
+    await expect(page.locator('tfc-turn-banner')).toContainText('Turn 3');
   });
 
   test('no score shown when snapshot has null score', async ({ page }) => {
@@ -140,7 +146,7 @@ test.describe('Gap 6 — PlayerType from scenario roles @player', () => {
 test.describe('Gap 3 — Participant identity @player @waiting-room', () => {
   test('waiting room passes participantId and role to player view', async ({ page, mockApi }) => {
     const alice = mockParticipant({ id: 'alice-99', display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [alice]);
+    mockApi.seed(exerciseId, [alice], 'simple_collaborative');
     await mockApi.install();
 
     // Mock engine endpoints for player view
