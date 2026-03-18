@@ -36,7 +36,7 @@ MOCK_FORECAST_RESPONSE: dict = {
 }
 
 
-@pytest.fixture()
+@pytest.fixture
 def weather_client() -> WeatherClient:
     with patch.object(WeatherClient, "__init__", lambda self: None):
         client = WeatherClient()
@@ -44,7 +44,7 @@ def weather_client() -> WeatherClient:
         return client
 
 
-@pytest.fixture()
+@pytest.fixture
 def weather_service(weather_client: WeatherClient) -> WeatherService:
     return WeatherService(client=weather_client)
 

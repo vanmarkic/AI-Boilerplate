@@ -113,10 +113,17 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install ruff && ruff check .
+      - run: pip install ruff
+      # Main backend
+      - run: ruff check .
         working-directory: apps/main/backend
       - run: ruff format --check .
         working-directory: apps/main/backend
+      # TFC backend
+      - run: ruff check .
+        working-directory: apps/tfc/backend
+      - run: ruff format --check .
+        working-directory: apps/tfc/backend
 
   tier1-build-smoke:
     name: Tier-1 Build Smoke

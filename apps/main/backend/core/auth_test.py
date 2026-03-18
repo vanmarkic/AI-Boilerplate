@@ -34,7 +34,7 @@ def _make_token(
     return jwt.encode(payload, _private_key, algorithm="RS256")
 
 
-@pytest.fixture()
+@pytest.fixture
 def _mock_jwks() -> object:
     """Patch the JWKS fetcher to return our test public key."""
     with patch("core.auth._get_signing_key") as mock:

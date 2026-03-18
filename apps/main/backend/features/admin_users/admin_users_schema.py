@@ -23,7 +23,7 @@ class KeycloakUserResponse(ResponseBase):
     username: str
     email: str | None = None
     enabled: bool
-    roles: list[str] = []
+    roles: list[str] = []  # noqa: RUF012 — Pydantic copies per instance
 
 
 class KeycloakUserListResponse(BaseModel):

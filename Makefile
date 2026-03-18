@@ -132,7 +132,8 @@ storybook: ## Start Storybook dev server
 	cd $(MAIN_FE) && npx storybook dev -p 6006
 
 lint: ## Run all linters
-	cd $(MAIN_BE) && ruff check .
+	cd $(MAIN_BE) && ruff check . && ruff format --check .
+	cd $(TFC_BE) && ruff check . && ruff format --check .
 	cd $(MAIN_FE) && npx eslint "**/*.{js,ts,html,json}"
 
 verify-tier: ## Verify tier-N build has no higher-tier leaks (usage: make verify-tier TIER=1)

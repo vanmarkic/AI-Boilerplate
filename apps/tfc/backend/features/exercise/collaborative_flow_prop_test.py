@@ -38,7 +38,7 @@ _exercise_ids = st.integers(min_value=1, max_value=10_000)
 class TestSessionCodeFormat:
     @given(st.integers(min_value=1, max_value=500))
     @settings(max_examples=200)
-    def test_code_is_always_6_uppercase_alphanumeric(self, _: int) -> None:
+    def test_code_is_always_6_uppercase_alphanumeric(self, _: int) -> None:  # noqa: PT019
         code = _generate_session_code()
         assert len(code) == 6, f"Expected 6 chars, got {len(code)!r} in {code!r}"
         assert code.isalnum(), f"Non-alphanumeric chars in {code!r}"
