@@ -75,6 +75,10 @@ TWO_ROLES = [
     {"id": "nav", "label": "NAV", "player_type": "advisor"},
 ]
 
+ADVISOR_ONLY_ROLES = [
+    {"id": "nav", "label": "NAV", "player_type": "advisor"},
+]
+
 
 class TestJoinableEndpoint:
     @pytest.mark.asyncio
@@ -191,3 +195,28 @@ class TestJoinableEndpoint:
         assert len(data) == 2
         returned_ids = {d["exercise"]["id"] for d in data}
         assert returned_ids == {eid1, eid2}
+
+
+class TestScenarioContentValidationResilience:
+    """Regression: uncaught ValidationError in joinable endpoint.
+
+    When ScenarioContent.model_validate() raises (e.g. stale seed data
+    missing a decision_maker role), the endpoint must skip the bad
+    scenario instead of returning 500.
+    """
+
+    def test_model_validate_rejects_advisor_only_roles(self) -> None:
+        """Confirm the validator catches the exact condition that caused
+        the production 500."""
+        from pydantic import ValidationError
+
+        from features.scenario.scenario_content import ScenarioContent
+
+        bad_content = {
+            "phases": [], "events": [], "issues": [],
+            "decision_templates": [], "default_time_factor": 1.0,
+            "game_mode": "simple_collaborative",
+            "roles": [{"id": "x", "label": "X", "player_type": "advisor"}],
+        }
+        with pytest.raises(ValidationError, match="decision_maker"):
+            ScenarioContent.model_validate(bad_content)

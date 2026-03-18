@@ -14,7 +14,7 @@ import logging
 from pathlib import Path
 
 from pydantic import ValidationError
-from sqlalchemy import select, func
+from sqlalchemy import select
 
 from core.database import async_session_factory
 from features.domain_config.domain_config_model import DomainConfig  # noqa: F401
@@ -52,12 +52,14 @@ async def seed_scenarios() -> None:
             title = data["title"]
 
             result = await session.execute(
-                select(func.count()).select_from(Scenario).where(
-                    Scenario.title == title,
-                ),
+                select(Scenario).where(Scenario.title == title),
             )
-            if result.scalar_one() > 0:
-                logger.info("Scenario '%s' already exists — skipping.", title)
+            existing = result.scalar_one_or_none()
+            if existing is not None:
+                existing.description = data.get("description", "")
+                existing.content = data.get("content")
+                await session.commit()
+                logger.info("Updated scenario '%s' from %s", title, path.name)
                 continue
 
             scenario = Scenario(

@@ -1,4 +1,7 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
+from pydantic import ValidationError
 
 from core.dependencies import get_exercise_service, get_scenario_service
 from features.exercise.exercise_schema import (
@@ -10,6 +13,8 @@ from features.exercise.exercise_service import ExerciseService
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_store import waiting_room_store
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/exercises", tags=["exercises"])
 
@@ -61,7 +66,14 @@ async def list_joinable_exercises(
             continue
         if scenario.content is None:
             continue
-        content = ScenarioContent.model_validate(scenario.content)
+        try:
+            content = ScenarioContent.model_validate(scenario.content)
+        except ValidationError:
+            logger.warning(
+                "Scenario %d has invalid content — skipping from joinable list",
+                exercise.scenario_id,
+            )
+            continue
         if not content.roles:
             continue
 
