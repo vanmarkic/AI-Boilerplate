@@ -9,6 +9,7 @@ from pydantic import BaseModel, Field
 
 from engine.exercise_engine import ExerciseEngine
 from engine.session_store import session_store
+from engine.state_changes import EventChange, IssueChange, StateChange
 
 router = APIRouter(prefix="/api/exercises/{exercise_id}/engine", tags=["engine"])
 
@@ -28,7 +29,7 @@ def _get_engine(exercise_id: int) -> ExerciseEngine:
     return engine
 
 
-def _or_404(result: dict | None, detail: str) -> dict:
+def _or_404[T: StateChange](result: T | None, detail: str) -> T:
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
     return result
@@ -38,7 +39,7 @@ def _or_404(result: dict | None, detail: str) -> dict:
 
 
 @router.post("/events/{event_id}/trigger", operation_id="triggerEvent")
-async def trigger_event(exercise_id: int, event_id: str) -> dict:
+async def trigger_event(exercise_id: int, event_id: str) -> EventChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -48,7 +49,7 @@ async def trigger_event(exercise_id: int, event_id: str) -> dict:
 
 
 @router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
-async def cancel_event(exercise_id: int, event_id: str) -> dict:
+async def cancel_event(exercise_id: int, event_id: str) -> EventChange:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.cancel_event(event_id),
         f"Event {event_id} not found or not cancellable",
@@ -56,7 +57,7 @@ async def cancel_event(exercise_id: int, event_id: str) -> dict:
 
 
 @router.post("/events/{event_id}/complete", operation_id="completeEvent")
-async def complete_event(exercise_id: int, event_id: str) -> dict:
+async def complete_event(exercise_id: int, event_id: str) -> EventChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -66,7 +67,7 @@ async def complete_event(exercise_id: int, event_id: str) -> dict:
 
 
 @router.post("/events/{event_id}/pause", operation_id="pauseEvent")
-async def pause_event(exercise_id: int, event_id: str) -> dict:
+async def pause_event(exercise_id: int, event_id: str) -> EventChange:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.pause_event(event_id),
         f"Event {event_id} not found or not pausable",
@@ -74,7 +75,7 @@ async def pause_event(exercise_id: int, event_id: str) -> dict:
 
 
 @router.post("/events/{event_id}/resume", operation_id="resumeEvent")
-async def resume_event(exercise_id: int, event_id: str) -> dict:
+async def resume_event(exercise_id: int, event_id: str) -> EventChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -86,7 +87,7 @@ async def resume_event(exercise_id: int, event_id: str) -> dict:
 @router.post("/events/{event_id}/delay", operation_id="delayEvent")
 async def delay_event(
     exercise_id: int, event_id: str, body: DelayRequest,
-) -> dict:
+) -> EventChange:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.delay_event(
             event_id, body.delay_ms,
@@ -96,7 +97,7 @@ async def delay_event(
 
 
 @router.post("/events/{event_id}/skip", operation_id="skipEvent")
-async def skip_event(exercise_id: int, event_id: str) -> dict:
+async def skip_event(exercise_id: int, event_id: str) -> EventChange:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.skip_event(event_id),
         f"Event {event_id} not found or not skippable",
@@ -107,7 +108,7 @@ async def skip_event(exercise_id: int, event_id: str) -> dict:
 
 
 @router.post("/issues/{issue_id}/activate", operation_id="activateIssue")
-async def activate_issue(exercise_id: int, issue_id: str) -> dict:
+async def activate_issue(exercise_id: int, issue_id: str) -> IssueChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -117,7 +118,7 @@ async def activate_issue(exercise_id: int, issue_id: str) -> dict:
 
 
 @router.post("/issues/{issue_id}/mitigate", operation_id="mitigateIssue")
-async def mitigate_issue(exercise_id: int, issue_id: str) -> dict:
+async def mitigate_issue(exercise_id: int, issue_id: str) -> IssueChange:
     return _or_404(
         _get_engine(exercise_id).issue_manager.mitigate(issue_id),
         f"Issue {issue_id} not found or not mitigatable",
@@ -125,7 +126,7 @@ async def mitigate_issue(exercise_id: int, issue_id: str) -> dict:
 
 
 @router.post("/issues/{issue_id}/resolve", operation_id="resolveIssue")
-async def resolve_issue(exercise_id: int, issue_id: str) -> dict:
+async def resolve_issue(exercise_id: int, issue_id: str) -> IssueChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -135,7 +136,7 @@ async def resolve_issue(exercise_id: int, issue_id: str) -> dict:
 
 
 @router.post("/issues/{issue_id}/release", operation_id="releaseIssue")
-async def release_issue(exercise_id: int, issue_id: str) -> dict:
+async def release_issue(exercise_id: int, issue_id: str) -> IssueChange:
     return _or_404(
         _get_engine(exercise_id).issue_manager.release_to_players(issue_id),
         f"Issue {issue_id} not found or not releasable",
@@ -146,7 +147,7 @@ async def release_issue(exercise_id: int, issue_id: str) -> dict:
 
 
 @router.get("/decisions", operation_id="getOpenDecisions")
-async def get_open_decisions(exercise_id: int) -> list[dict]:
+async def get_open_decisions(exercise_id: int) -> list[dict[str, object]]:
     engine = _get_engine(exercise_id)
     return [
         {"id": d.id, "title": d.title, "question_type": d.question_type,
@@ -163,14 +164,14 @@ async def get_open_decisions(exercise_id: int) -> list[dict]:
 
 
 @router.get("/context", operation_id="getEngineContext")
-async def get_engine_context(exercise_id: int) -> dict:
+async def get_engine_context(exercise_id: int) -> dict[str, object]:
     engine = _get_engine(exercise_id)
-    ctx = engine._config.context
+    ctx = engine.config.context
     return {
         "title": ctx.title,
         "description": ctx.description,
         "briefing": ctx.briefing,
         "objectives": ctx.objectives,
         "rules": ctx.rules,
-        "default_time_factor": engine._config.time_factor,
+        "default_time_factor": engine.config.time_factor,
     }

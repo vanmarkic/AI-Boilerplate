@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any
 
 from fastapi import WebSocket
 
@@ -49,7 +48,7 @@ class ConnectionManager:
         logger.info("WS disconnected: exercise=%d", exercise_id)
 
     async def broadcast(
-        self, exercise_id: int, message: dict[str, Any]
+        self, exercise_id: int, message: dict[str, object]
     ) -> None:
         """Send a JSON message to all clients of an exercise."""
         conns = self._connections.get(exercise_id)
@@ -69,7 +68,7 @@ class ConnectionManager:
             self.disconnect(exercise_id, ws)
 
     async def broadcast_to_role(
-        self, exercise_id: int, role: str, message: dict[str, Any]
+        self, exercise_id: int, role: str, message: dict[str, object]
     ) -> None:
         """Send a JSON message only to clients with a specific role."""
         conns = self._connections.get(exercise_id)

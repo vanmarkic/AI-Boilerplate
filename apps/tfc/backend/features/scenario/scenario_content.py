@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from pydantic import BaseModel, model_validator
 
-from engine.game_modes import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
+from core.game_mode_constants import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
 
 
 class DecisionOptionDef(BaseModel):
@@ -86,7 +86,7 @@ class ScenarioContent(BaseModel):
     objectives: list[str] = []
     rules: list[str] = []
     game_mode: str = GM_CLASSIC
-    game_mode_config: dict = {}
+    game_mode_config: dict[str, object] = {}
     decision_sequence: list[str] = []
     roles: list[RoleDef] = []
 

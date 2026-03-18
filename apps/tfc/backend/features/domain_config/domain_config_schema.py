@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 from pydantic import BaseModel
 
@@ -63,9 +62,9 @@ class DomainConfigResponse(ResponseBase):
     slug: str
     name: str
     description: str
-    terminology: dict[str, Any]
-    theme: dict[str, Any]
-    roles: list[dict[str, Any]]
-    severity_levels: list[dict[str, Any]]
+    terminology: TerminologyPayload
+    theme: ThemePayload
+    roles: list[RolePayload]
+    severity_levels: list[SeverityLevelPayload]
     created_at: datetime
     updated_at: datetime

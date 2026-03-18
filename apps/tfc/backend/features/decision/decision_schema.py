@@ -3,6 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from core.base_schema import ResponseBase
+from features.scenario.scenario_content import DecisionOptionDef
 
 
 class CreateDecisionRequest(BaseModel):
@@ -11,7 +12,7 @@ class CreateDecisionRequest(BaseModel):
     exercise_id: int
     issue_id: str
     question_type: str
-    options: list[dict] = []
+    options: list[DecisionOptionDef] = []
     completion_mode: str
 
 
@@ -38,7 +39,7 @@ class DecisionResponse(ResponseBase):
     title: str
     description: str
     question_type: str
-    options: list[dict] | None
+    options: list[DecisionOptionDef] | None
     completion_mode: str
     status: str
     created_at: datetime
@@ -53,7 +54,7 @@ class DecisionDetailResponse(ResponseBase):
     title: str
     description: str
     question_type: str
-    options: list[dict] | None
+    options: list[DecisionOptionDef] | None
     completion_mode: str
     status: str
     created_at: datetime

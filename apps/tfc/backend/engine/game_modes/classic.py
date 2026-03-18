@@ -3,6 +3,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from engine.state_changes import DecisionOptionSnapshot, StateChange
+
 
 @dataclass
 class ClassicMode:
@@ -12,20 +14,20 @@ class ClassicMode:
         return True
 
     def on_decision_timeout(
-        self, decision_id: str, options: list[dict],
+        self, decision_id: str, options: list[DecisionOptionSnapshot],
     ) -> str | None:
         return None
 
     def on_decision_closed_v2(
         self,
         decision_id: str,
-        selected_options: list[dict],
-        all_options: list[dict],
+        selected_options: list[DecisionOptionSnapshot],
+        all_options: list[DecisionOptionSnapshot],
         forced_option_ids: list[str] | None = None,
-    ) -> list[dict]:
+    ) -> list[StateChange]:
         return []
 
-    def snapshot(self) -> dict | None:
+    def snapshot(self) -> dict[str, object] | None:
         """Classic mode has no scoring state."""
         return None
 

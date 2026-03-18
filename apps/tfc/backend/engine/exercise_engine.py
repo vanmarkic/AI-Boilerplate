@@ -9,15 +9,19 @@ import time as _time_mod
 from enum import StrEnum
 from typing import Callable, Awaitable
 
-from engine.state_changes import PhaseChange, StateChange
+from engine.state_changes import DecisionOpened, EngineSnapshot, PhaseChange, StateChange
 from engine.engine_config import (  # noqa: F401 — re-exported
     TICK_INTERVAL_S, DecisionTemplate, EngineConfig, ScenarioContext,
 )
-from engine.game_modes.classic import ClassicMode
+from engine.game_modes.protocol import GameMode
 from engine.time_manager import TimeManager
 from engine.event_scheduler import EventScheduler, EventLifecycle, EventType
 from engine.issue_manager import IssueManager
 from engine.decision_manager import DecisionManager
+
+
+class EngineStateError(RuntimeError):
+    """Raised when an engine lifecycle method is called in an invalid phase."""
 
 
 class EnginePhase(StrEnum):
@@ -33,7 +37,7 @@ class ExerciseEngine:
     def __init__(
         self,
         config: EngineConfig,
-        on_state_change: Callable[[list[dict]], Awaitable[None]] | None = None,
+        on_state_change: Callable[[list[StateChange]], Awaitable[None]] | None = None,
     ) -> None:
         self._config = config
         self._phase = EnginePhase.SETUP
@@ -69,38 +73,42 @@ class ExerciseEngine:
         return self._decisions
 
     @property
-    def game_mode(self) -> ClassicMode:
+    def config(self) -> EngineConfig:
+        return self._config
+
+    @property
+    def game_mode(self) -> GameMode:
         return self._config.game_mode
 
-    async def start(self) -> dict:
+    async def start(self) -> PhaseChange:
         if self._phase not in {EnginePhase.SETUP, EnginePhase.PAUSED}:
-            return {"error": f"Cannot start from {self._phase}"}
+            raise EngineStateError(f"Cannot start from {self._phase}")
         self._phase = EnginePhase.RUNNING
         self._time.start()
         self._start_tick_loop()
         return self._phase_change("started")
 
-    async def pause(self) -> dict:
+    async def pause(self) -> PhaseChange:
         if self._phase != EnginePhase.RUNNING:
-            return {"error": f"Cannot pause from {self._phase}"}
+            raise EngineStateError(f"Cannot pause from {self._phase}")
         self._phase = EnginePhase.PAUSED
         self._time.pause()
         self._stop_tick_loop()
         return self._phase_change("paused")
 
-    async def resume(self) -> dict:
+    async def resume(self) -> PhaseChange:
         return await self.start()
 
-    async def complete(self) -> dict:
+    async def complete(self) -> PhaseChange:
         if self._phase in {EnginePhase.COMPLETED, EnginePhase.SETUP}:
-            return {"error": f"Cannot complete from {self._phase}"}
+            raise EngineStateError(f"Cannot complete from {self._phase}")
         self._phase = EnginePhase.COMPLETED
         self._time.pause()
         self._stop_tick_loop()
         self._stop_timeout_monitor()
         return self._phase_change("completed")
 
-    async def reset(self) -> dict:
+    async def reset(self) -> PhaseChange:
         self._stop_tick_loop()
         self._stop_timeout_monitor()
         self._phase = EnginePhase.SETUP
@@ -116,7 +124,7 @@ class ExerciseEngine:
 
     async def tick(self) -> list[StateChange]:
         """Advance time, check triggers, return state changes."""
-        changes: list[dict] = []
+        changes: list[StateChange] = []
         self._time.tick()
         pt = self._time.play_time_ms
 
@@ -144,23 +152,23 @@ class ExerciseEngine:
             await self._on_state_change(changes)
         return changes
 
-    def snapshot(self) -> dict:
+    def snapshot(self) -> EngineSnapshot:
         """Full state snapshot for client sync."""
-        return {
-            "exercise_id": self._config.exercise_id,
-            "title": self._config.title,
-            "phase": self._phase.value,
-            "time": self._time.snapshot(),
-            "events": self._events.snapshot(),
-            "issues": self._issues.snapshot(),
-            "decisions": self._decisions.snapshot(),
-            "score": self._config.game_mode.snapshot(),
-        }
+        return EngineSnapshot(
+            exercise_id=self._config.exercise_id,
+            title=self._config.title,
+            phase=self._phase.value,
+            time=self._time.snapshot(),
+            events=self._events.snapshot(),
+            issues=self._issues.snapshot(),
+            decisions=self._decisions.snapshot(),
+            score=self._config.game_mode.snapshot(),
+        )
 
     def _handle_decision_events(
-        self, event_changes: list[dict], pt: float,
-    ) -> list[dict]:
-        changes: list[dict] = []
+        self, event_changes: list[StateChange], pt: float,
+    ) -> list[DecisionOpened]:
+        changes: list[DecisionOpened] = []
         for change in event_changes:
             if change.get("action") != "started":
                 continue
@@ -168,7 +176,7 @@ class ExerciseEngine:
             event = self._events.events.get(event_id)
             if event is None or event.event_type != EventType.DECISION:
                 continue
-            t = self._find_decision_template(event_id)
+            t = self.find_decision_template(event_id)
             timeout_ms = t.timeout_ms if t else 0.0
             changes.append(self._decisions.open_decision(
                 id=t.id if t else event_id,
@@ -191,7 +199,7 @@ class ExerciseEngine:
                 self._start_timeout_monitor()
         return changes
 
-    def _find_decision_template(self, event_id: str) -> DecisionTemplate | None:
+    def find_decision_template(self, event_id: str) -> DecisionTemplate | None:
         for dt in self._config.decision_templates:
             if dt.id == event_id:
                 return dt
@@ -231,7 +239,7 @@ class ExerciseEngine:
                 await asyncio.sleep(0.5)
                 now_ms = _time_mod.monotonic() * 1000
                 pt = self._time.play_time_ms
-                all_changes: list[dict] = []
+                all_changes: list[StateChange] = []
                 for d in list(self._decisions.get_open_decisions()):
                     if d.timeout_ms <= 0:
                         continue
@@ -253,7 +261,7 @@ class ExerciseEngine:
                     selected_opts = [
                         o for o in d.options if o["id"] in selected_ids
                     ]
-                    template = self._find_decision_template(d.id)
+                    template = self.find_decision_template(d.id)
                     forced_ids = template.forced_option_ids if template else []
                     extra = self._config.game_mode.on_decision_closed_v2(
                         d.id, selected_opts, d.options,
@@ -263,7 +271,7 @@ class ExerciseEngine:
                     # Chain to next decision
                     next_id = self._config.game_mode.get_next_decision_id(d.id)
                     if next_id:
-                        nt = self._find_decision_template(next_id)
+                        nt = self.find_decision_template(next_id)
                         if nt:
                             timeout_ms = self._config.game_mode.get_decision_time_ms(
                                 int(nt.timeout_ms),
