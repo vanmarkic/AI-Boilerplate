@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from engine.event_scheduler import EventType, ScheduledEvent
-from engine.exercise_engine import EngineConfig, EnginePhase, ExerciseEngine
+from engine.exercise_engine import EngineConfig, EnginePhase, EngineStateError, ExerciseEngine
 from engine.issue_manager import TrackedIssue, TriggerMode
 
 
@@ -87,8 +87,8 @@ async def test_cannot_start_from_completed() -> None:
     with patch("engine.time_manager._now_ms", return_value=0.0):
         await engine.start()
         await engine.complete()
-        result = await engine.start()
-    assert "error" in result
+        with pytest.raises(EngineStateError):
+            await engine.start()
 
 
 @pytest.mark.asyncio

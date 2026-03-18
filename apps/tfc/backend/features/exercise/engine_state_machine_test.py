@@ -47,8 +47,7 @@ async def test_pause_from_paused_returns_error(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "paused")
     resp = await client.post(f"/api/exercises/{eid}/engine/pause")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 @pytest.mark.asyncio
@@ -56,8 +55,7 @@ async def test_pause_from_setup_returns_error(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "setup")
     resp = await client.post(f"/api/exercises/{eid}/engine/pause")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 @pytest.mark.asyncio
@@ -65,8 +63,7 @@ async def test_pause_from_completed_returns_error(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "completed")
     resp = await client.post(f"/api/exercises/{eid}/engine/pause")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 # ── Complete from invalid states ─────────────────────────────────────────
@@ -77,8 +74,7 @@ async def test_complete_from_setup_returns_error(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "setup")
     resp = await client.post(f"/api/exercises/{eid}/engine/complete")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 @pytest.mark.asyncio
@@ -86,8 +82,7 @@ async def test_complete_from_completed_returns_error(client: AsyncClient) -> Non
     eid = await _create_exercise(client)
     _create_engine(eid, "completed")
     resp = await client.post(f"/api/exercises/{eid}/engine/complete")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 # ── Start/Resume from invalid states ────────────────────────────────────
@@ -98,8 +93,7 @@ async def test_start_from_running_returns_error(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "running")
     resp = await client.post(f"/api/exercises/{eid}/engine/start")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 @pytest.mark.asyncio
@@ -107,8 +101,7 @@ async def test_start_from_completed_returns_error(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "completed")
     resp = await client.post(f"/api/exercises/{eid}/engine/start")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 @pytest.mark.asyncio
@@ -116,8 +109,7 @@ async def test_resume_from_completed_returns_error(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _create_engine(eid, "completed")
     resp = await client.post(f"/api/exercises/{eid}/engine/resume")
-    assert resp.status_code == 200
-    assert "error" in resp.json()
+    assert resp.status_code == 409
 
 
 # ── Valid transitions produce phase changes ──────────────────────────────

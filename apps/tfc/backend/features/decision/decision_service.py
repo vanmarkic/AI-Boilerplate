@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import HTTPException, status
+from core.exceptions import BadRequestError, NotFoundError
 
 from features.decision.decision_model import Decision, DecisionResponseRecord
 from features.decision.decision_repository import DecisionRepository
@@ -26,14 +26,12 @@ class DecisionService:
         self, request: CreateDecisionRequest,
     ) -> DecisionResponse:
         if request.question_type not in VALID_QUESTION_TYPES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid question_type: {request.question_type}",
+            raise BadRequestError(
+                f"Invalid question_type: {request.question_type}",
             )
         if request.completion_mode not in VALID_COMPLETION_MODES:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Invalid completion_mode: {request.completion_mode}",
+            raise BadRequestError(
+                f"Invalid completion_mode: {request.completion_mode}",
             )
         decision = Decision(
             exercise_id=request.exercise_id,
@@ -41,7 +39,7 @@ class DecisionService:
             title=request.title,
             description=request.description,
             question_type=request.question_type,
-            options=request.options or None,
+            options=[o.model_dump() for o in request.options] if request.options else None,
             completion_mode=request.completion_mode,
             status="open",
         )
@@ -53,10 +51,7 @@ class DecisionService:
     ) -> DecisionDetailResponse:
         decision = await self.repository.get_by_id(decision_id)
         if not decision:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Decision not found",
-            )
+            raise NotFoundError("Decision not found")
         responses = await self.repository.get_responses(decision_id)
         return DecisionDetailResponse(
             id=decision.id,
@@ -99,15 +94,9 @@ class DecisionService:
     ) -> ResponseItem:
         decision = await self.repository.get_by_id(decision_id)
         if not decision:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Decision not found",
-            )
+            raise NotFoundError("Decision not found")
         if decision.status != "open":
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Decision is closed",
-            )
+            raise BadRequestError("Decision is closed")
         score = self._calculate_score(decision, request)
         record = DecisionResponseRecord(
             participant_id=request.participant_id,
@@ -126,10 +115,7 @@ class DecisionService:
     ) -> DecisionResponse:
         decision = await self.repository.get_by_id(decision_id)
         if not decision:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Decision not found",
-            )
+            raise NotFoundError("Decision not found")
         await self._close(decision)
         count = await self.repository.count_responses(decision_id)
         return self._to_response(decision, count)

@@ -301,6 +301,8 @@ class TestWsBroadcastLive:
         with sync_client.websocket_connect(
             f"/api/exercises/{eid}/ws?role=gm",
         ) as ws:
+            ws.receive_text()  # drain presence broadcast from connect
+
             # Join via REST — should broadcast to the WS client
             join_resp = sync_client.post(
                 f"/api/exercises/{eid}/waiting-room/join",
@@ -356,6 +358,8 @@ class TestWsBroadcastLive:
         with sync_client.websocket_connect(
             f"/api/exercises/{eid}/ws?role=gm",
         ) as ws:
+            ws.receive_text()  # drain presence broadcast from connect
+
             join_resp = sync_client.post(
                 f"/api/exercises/{eid}/waiting-room/join",
                 json={"display_name": "Alice", "role": "player"},
@@ -385,6 +389,10 @@ class TestWsBroadcastLive:
         ) as ws_gm, sync_client.websocket_connect(
             f"/api/exercises/{eid}/ws?role=player",
         ) as ws_player:
+            # GM receives presence broadcasts on each connect (own + player)
+            ws_gm.receive_text()
+            ws_gm.receive_text()
+
             sync_client.post(
                 f"/api/exercises/{eid}/waiting-room/join",
                 json={"display_name": "Alice", "role": "player"},
