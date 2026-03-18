@@ -10,6 +10,7 @@ from features.exercise.exercise_schema import (
     UpdateExerciseRequest,
 )
 from features.exercise.exercise_service import ExerciseService
+from engine.game_modes import GM_CLASSIC
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_store import waiting_room_store
@@ -77,7 +78,7 @@ async def list_joinable_exercises(
         if not content.roles:
             continue
 
-        requires_gm = content.game_mode == "classic"
+        requires_gm = content.game_mode == GM_CLASSIC
         max_players = len(content.roles) + (1 if requires_gm else 0)
         current = waiting_room_store.count(exercise.id)
         if current >= max_players:

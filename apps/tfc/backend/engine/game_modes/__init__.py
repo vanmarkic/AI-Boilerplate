@@ -1,14 +1,31 @@
 """GameMode protocol and factory.
 
 A GameMode defines policy hooks that the ExerciseEngine delegates to,
-allowing different exercise modes (classic GM-driven, simple-collaborative)
+allowing different exercise modes (classic GM-driven, simple_collaborative)
 to coexist without branching inside the engine.
 """
 from __future__ import annotations
 
+from enum import StrEnum
 from typing import Protocol
 
 from engine.game_modes.classic import ClassicMode
+
+
+class GameModeName(StrEnum):
+    """Single source of truth for game mode identifiers.
+
+    StrEnum values ARE strings, so ``GameModeName.CLASSIC == "classic"``
+    is True — JSON, Pydantic, and SQLAlchemy all work without converters.
+    """
+    CLASSIC = "classic"
+    SIMPLE_COLLABORATIVE = "simple_collaborative"
+
+
+# Back-compat aliases — import these when you only need the string value
+GM_CLASSIC = GameModeName.CLASSIC
+GM_SIMPLE_COLLABORATIVE = GameModeName.SIMPLE_COLLABORATIVE
+VALID_GAME_MODES: frozenset[str] = frozenset(GameModeName)
 
 
 class GameMode(Protocol):
@@ -52,8 +69,12 @@ class GameMode(Protocol):
 
 
 def create_game_mode(name: str, config: dict | None = None) -> GameMode:
-    """Factory: create a GameMode by name."""
-    if name == "simple-collaborative":
+    """Factory: create a GameMode by name.
+
+    Raises ValueError for unknown game modes — fail fast, not silently.
+    """
+    mode = GameModeName(name)  # ValueError on unknown strings
+    if mode is GameModeName.SIMPLE_COLLABORATIVE:
         from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
         cfg = config or {}
         return SimpleCollaborativeMode(

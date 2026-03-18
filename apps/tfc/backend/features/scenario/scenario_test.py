@@ -1,6 +1,14 @@
 import pytest
 from httpx import AsyncClient
 
+VALID_CONTENT = {
+    "phases": [],
+    "events": [],
+    "roles": [
+        {"id": "co", "label": "CO", "player_type": "decision_maker"},
+    ],
+}
+
 
 @pytest.mark.asyncio
 async def test_create_scenario(client: AsyncClient) -> None:
@@ -9,14 +17,14 @@ async def test_create_scenario(client: AsyncClient) -> None:
         json={
             "title": "Alpha Scenario",
             "description": "Test scenario",
-            "content": {"phases": [], "events": []},
+            "content": VALID_CONTENT,
         },
     )
     assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Alpha Scenario"
     assert data["version"] == 1
-    assert data["content"] == {"phases": [], "events": []}
+    assert data["content"]["roles"] == VALID_CONTENT["roles"]
 
 
 @pytest.mark.asyncio

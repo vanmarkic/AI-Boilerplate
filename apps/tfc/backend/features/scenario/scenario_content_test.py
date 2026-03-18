@@ -307,3 +307,55 @@ class TestTargetRolesExist:
             ],
         )
         assert sc.decision_templates[0].target_roles == []
+
+
+class TestCollaborativeRoleMinimum:
+    """Simple collaborative mode requires at least 2 playable roles."""
+
+    def test_single_role_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="at least 2 playable roles"):
+            ScenarioContent(
+                game_mode="simple_collaborative",
+                roles=[RoleDef(id="co", label="CO", player_type="decision_maker")],
+            )
+
+    def test_two_roles_accepted(self) -> None:
+        sc = ScenarioContent(
+            game_mode="simple_collaborative",
+            roles=[
+                RoleDef(id="co", label="CO", player_type="decision_maker"),
+                RoleDef(id="ops", label="OPS", player_type="advisor"),
+            ],
+        )
+        assert len(sc.roles) == 2
+
+    def test_three_roles_accepted(self) -> None:
+        sc = ScenarioContent(
+            game_mode="simple_collaborative",
+            roles=[
+                RoleDef(id="co", label="CO", player_type="decision_maker"),
+                RoleDef(id="ops", label="OPS", player_type="advisor"),
+                RoleDef(id="nav", label="NAV", player_type="advisor"),
+            ],
+        )
+        assert len(sc.roles) == 3
+
+    def test_four_roles_accepted(self) -> None:
+        sc = ScenarioContent(
+            game_mode="simple_collaborative",
+            roles=[
+                RoleDef(id="co", label="CO", player_type="decision_maker"),
+                RoleDef(id="ops", label="OPS", player_type="advisor"),
+                RoleDef(id="nav", label="NAV", player_type="advisor"),
+                RoleDef(id="pwo", label="PWO", player_type="advisor"),
+            ],
+        )
+        assert len(sc.roles) == 4
+
+    def test_classic_mode_single_role_still_valid(self) -> None:
+        """Classic mode only needs 1 role (+ GM filled separately)."""
+        sc = ScenarioContent(
+            game_mode="classic",
+            roles=[RoleDef(id="co", label="CO", player_type="decision_maker")],
+        )
+        assert len(sc.roles) == 1
