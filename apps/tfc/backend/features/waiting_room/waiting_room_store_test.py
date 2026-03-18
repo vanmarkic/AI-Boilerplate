@@ -286,6 +286,77 @@ class TestClear:
         assert len(store.list_participants(2)) == 1
 
 
+# ── Count ────────────────────────────────────────────────────────────────
+
+
+class TestCount:
+    def test_count_empty_exercise_returns_zero(self) -> None:
+        store = _fresh_store()
+        assert store.count(1) == 0
+
+    def test_count_returns_participant_count(self) -> None:
+        store = _fresh_store()
+        store.join(1, "Alice", "co")
+        store.join(1, "Bob", "nav")
+        store.join(1, "Carol", "pwo")
+        assert store.count(1) == 3
+
+    def test_count_after_leave_decrements(self) -> None:
+        store = _fresh_store()
+        p = store.join(1, "Alice", "co")
+        store.join(1, "Bob", "nav")
+        store.leave(1, p.id)
+        assert store.count(1) == 1
+
+    def test_count_separate_exercises(self) -> None:
+        store = _fresh_store()
+        store.join(1, "Alice", "co")
+        store.join(2, "Bob", "nav")
+        store.join(2, "Carol", "pwo")
+        assert store.count(1) == 1
+        assert store.count(2) == 2
+
+
+# ── Is Role Taken ────────────────────────────────────────────────────────
+
+
+class TestIsRoleTaken:
+    def test_returns_false_when_no_participants(self) -> None:
+        store = _fresh_store()
+        assert store.is_role_taken(1, "co") is False
+
+    def test_returns_true_when_role_assigned(self) -> None:
+        store = _fresh_store()
+        store.join(1, "Alice", "co")
+        assert store.is_role_taken(1, "co") is True
+
+    def test_returns_false_for_different_role(self) -> None:
+        store = _fresh_store()
+        store.join(1, "Alice", "co")
+        assert store.is_role_taken(1, "nav") is False
+
+    def test_returns_false_after_participant_leaves(self) -> None:
+        store = _fresh_store()
+        p = store.join(1, "Alice", "co")
+        store.leave(1, p.id)
+        assert store.is_role_taken(1, "co") is False
+
+    def test_ignores_specified_participant(self) -> None:
+        store = _fresh_store()
+        p = store.join(1, "Alice", "co")
+        assert store.is_role_taken(1, "co", exclude_participant=p.id) is False
+
+    def test_detects_role_from_other_participant(self) -> None:
+        store = _fresh_store()
+        p1 = store.join(1, "Alice", "co")
+        store.join(1, "Bob", "co")
+        assert store.is_role_taken(1, "co", exclude_participant=p1.id) is True
+
+    def test_returns_false_for_unknown_exercise(self) -> None:
+        store = _fresh_store()
+        assert store.is_role_taken(999, "co") is False
+
+
 # ── Module Singleton ─────────────────────────────────────────────────────
 
 
