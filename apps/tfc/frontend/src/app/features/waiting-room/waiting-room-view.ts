@@ -23,18 +23,18 @@ import {
   WaitingRoomApiService,
   type ParticipantResponse,
 } from '../../core/waiting-room-api.service';
+import { RoleSlotListComponent } from '../../shared/role-slot-list.component';
 import { Subscription } from 'rxjs';
 
-const DEFAULT_ROLES: RoleDef[] = [
-  { id: 'player', label: 'Player', player_type: 'advisor' },
-  { id: 'observer', label: 'Observer', player_type: 'advisor' },
-  { id: 'game-master', label: 'Game Master', player_type: 'decision_maker' },
+const TWO_PLAYER_ROLES = [
+  { id: 'decision_maker', label: 'Decision Maker' },
+  { id: 'all_advisors', label: 'All Advisors' },
 ];
 
 @Component({
   selector: 'tfc-waiting-room-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardComponent, BadgeComponent, ButtonDirective],
+  imports: [CardComponent, BadgeComponent, ButtonDirective, RoleSlotListComponent],
   template: `
     <div class="flex justify-center items-center min-h-screen p-lg">
       <ui-card title="Waiting Room">
@@ -42,73 +42,26 @@ const DEFAULT_ROLES: RoleDef[] = [
           <p class="text-sm text-muted-foreground">
             @if (isSimpleCollaborative()) {
               Collaborative exercise — no facilitator needed.
-              Pick a role and start when all slots are filled.
+              @if (twoPlayerMode()) {
+                2 Player Mode: assign Decision Maker and All Advisors roles.
+              } @else {
+                Pick a role and start when all slots are filled.
+              }
             } @else {
               Assign roles before starting.
             }
           </p>
 
-          @if (scenarioRoles().length) {
-            <div class="flex flex-col gap-sm">
-              @for (role of scenarioRoles(); track role.id) {
-                @let holder = holderOf(role.id);
-                <div class="flex items-center justify-between p-sm border-b gap-md">
-                  <div class="flex items-center gap-sm">
-                    <span class="text-sm font-medium">{{ role.label }}</span>
-                    <span class="text-xs text-muted-foreground">
-                      {{ role.player_type === 'decision_maker' ? 'Decision Maker' : 'Advisor' }}
-                    </span>
-                  </div>
-                  @if (holder) {
-                    <div class="flex items-center gap-sm">
-                      <span class="text-sm">{{ holder.display_name }}</span>
-                      @if (holder.id === participantId()) {
-                        <ui-badge variant="secondary">You</ui-badge>
-                      }
-                    </div>
-                  } @else if (participantId()) {
-                    <button
-                      uiButton variant="outline"
-                      style="font-size: var(--font-size-xs); padding: var(--spacing-xs) var(--spacing-sm);"
-                      (click)="onClaimRole(role.id)"
-                    >
-                      Claim
-                    </button>
-                  } @else {
-                    <span class="text-sm text-muted-foreground">Open</span>
-                  }
-                </div>
-              }
+          @if (isSimpleCollaborative()) {
+            <label class="flex items-center gap-sm text-sm">
+              <input type="checkbox"
+                [checked]="twoPlayerMode()"
+                (change)="onToggleTwoPlayer()" />
+              2 Player Mode
+            </label>
+          }
 
-              @if (requiresGm()) {
-                @let gmHolder = holderOf('game-master');
-                <div class="flex items-center justify-between p-sm border-b gap-md">
-                  <div class="flex items-center gap-sm">
-                    <span class="text-sm font-medium">Game Master (Trainer)</span>
-                    <span class="text-xs text-muted-foreground">Facilitator</span>
-                  </div>
-                  @if (gmHolder) {
-                    <div class="flex items-center gap-sm">
-                      <span class="text-sm">{{ gmHolder.display_name }}</span>
-                      @if (gmHolder.id === participantId()) {
-                        <ui-badge variant="secondary">You</ui-badge>
-                      }
-                    </div>
-                  } @else if (participantId()) {
-                    <button
-                      uiButton variant="outline"
-                      style="font-size: var(--font-size-xs); padding: var(--spacing-xs) var(--spacing-sm);"
-                      (click)="onClaimRole('game-master')"
-                    >
-                      Claim
-                    </button>
-                  } @else {
-                    <span class="text-sm text-muted-foreground">Open</span>
-                  }
-                </div>
-              }
-            </div>
-          } @else {
+          @if (twoPlayerMode()) {
             <div class="flex flex-col gap-sm">
               @for (p of participants(); track p.id) {
                 <div class="flex items-center justify-between p-sm border-b gap-md">
@@ -118,35 +71,34 @@ const DEFAULT_ROLES: RoleDef[] = [
                       <ui-badge variant="secondary">You</ui-badge>
                     }
                   </div>
-                  @if (isSimpleCollaborative()) {
-                    <ui-badge variant="default">Player</ui-badge>
-                  } @else {
-                    <select
-                      class="input-base"
-                      [value]="p.role"
-                      (change)="onRoleChange(p.id, $event)"
-                    >
-                      @for (role of fallbackRoles; track role.id) {
-                        <option [value]="role.id">{{ role.label }}</option>
-                      }
-                    </select>
-                  }
+                  <select class="input-base" [value]="p.role" (change)="onRoleChange(p.id, $event)">
+                    @for (role of twoPlayerRoles; track role.id) {
+                      <option [value]="role.id">{{ role.label }}</option>
+                    }
+                  </select>
                 </div>
               } @empty {
-                <p class="text-muted-foreground text-sm p-sm">
-                  No participants yet.
-                </p>
+                <p class="text-muted-foreground text-sm p-sm">No participants yet.</p>
               }
             </div>
+          } @else if (scenarioRoles().length) {
+            <tfc-role-slot-list
+              [roles]="scenarioRoles()"
+              [participants]="participants()"
+              [currentParticipantId]="participantId()"
+              [showGmSlot]="requiresGm()"
+              (claimed)="onClaimRole($event)" />
+          } @else {
+            <p class="text-sm text-destructive p-sm">
+              Scenario has no roles defined. The exercise cannot start until
+              the scenario is updated with at least one decision-maker and
+              one advisor role.
+            </p>
           }
 
           <div class="flex gap-sm justify-end">
             <button uiButton variant="outline" (click)="onLeave()">Leave</button>
-            <button
-              uiButton variant="default"
-              [disabled]="!canStart()"
-              (click)="onStartExercise()"
-            >
+            <button uiButton variant="default" [disabled]="!canStart()" (click)="onStartExercise()">
               Start Exercise ({{ participants().length }})
             </button>
           </div>
@@ -168,9 +120,10 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   protected readonly participantId = signal('');
   protected readonly participants = signal<ParticipantResponse[]>([]);
   protected readonly gameMode = signal('classic');
+  protected readonly twoPlayerMode = signal(false);
   protected readonly scenarioRoles = signal<RoleDef[]>([]);
   protected readonly requiresGm = signal(false);
-  protected readonly fallbackRoles = DEFAULT_ROLES;
+  protected readonly twoPlayerRoles = TWO_PLAYER_ROLES;
 
   protected readonly isSimpleCollaborative = computed(
     () => this.gameMode() === 'simple_collaborative',
@@ -178,16 +131,15 @@ export class WaitingRoomView implements OnInit, OnDestroy {
 
   protected readonly canStart = computed(() => {
     const roles = this.scenarioRoles();
-    if (roles.length) {
-      const requiredCount = roles.length + (this.requiresGm() ? 1 : 0);
-      return this.participants().length >= requiredCount;
+    if (!roles.length) return false;
+    if (this.twoPlayerMode()) {
+      const pRoles = this.participants().map((p) => p.role);
+      return this.participants().length === 2
+        && pRoles.includes('decision_maker')
+        && pRoles.includes('all_advisors');
     }
-    if (this.isSimpleCollaborative()) {
-      return this.participants().length > 0;
-    }
-    return this.participants().some(
-      (p) => p.id === this.participantId() && p.role === 'game-master',
-    );
+    const requiredCount = roles.length + (this.requiresGm() ? 1 : 0);
+    return this.participants().length >= requiredCount;
   });
 
   ngOnInit(): void {
@@ -198,7 +150,6 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     this.exerciseId.set(eId);
     this.participantId.set(pId);
     this.gameMode.set(gm);
-
     this.ws.connect(eId, 'player');
     this.sub = this.ws.messages$.subscribe((msg) => {
       if (msg.type === 'waiting_room_update') {
@@ -206,11 +157,9 @@ export class WaitingRoomView implements OnInit, OnDestroy {
         if (updated) this.participants.set(updated);
       }
     });
-
     this.api.listParticipants(eId).subscribe({
       next: (res) => this.participants.set(res.participants),
     });
-
     this.loadScenarioRoles(eId);
   }
 
@@ -219,14 +168,16 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
+  protected onToggleTwoPlayer(): void {
+    this.twoPlayerMode.set(!this.twoPlayerMode());
+  }
+
   protected holderOf(roleId: string): ParticipantResponse | undefined {
     return this.participants().find((p) => p.role === roleId);
   }
 
   protected onClaimRole(roleId: string): void {
-    this.api
-      .updateRole(this.exerciseId(), this.participantId(), roleId)
-      .subscribe();
+    this.api.updateRole(this.exerciseId(), this.participantId(), roleId).subscribe();
   }
 
   protected onRoleChange(targetId: string, event: Event): void {
@@ -235,37 +186,24 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   }
 
   protected onLeave(): void {
-    this.api
-      .leave(this.exerciseId(), this.participantId())
-      .subscribe({
-        next: () => this.router.navigate(['/join']),
-        error: () => this.router.navigate(['/join']),
-      });
+    this.api.leave(this.exerciseId(), this.participantId()).subscribe({
+      next: () => this.router.navigate(['/join']),
+      error: () => this.router.navigate(['/join']),
+    });
   }
 
   protected onStartExercise(): void {
-    const me = this.participants().find(
-      (p) => p.id === this.participantId(),
-    );
+    const me = this.participants().find((p) => p.id === this.participantId());
     const role = me?.role ?? 'player';
     if (this.isSimpleCollaborative()) {
       this.router.navigate(['/player'], {
-        queryParams: {
-          exerciseId: this.exerciseId(),
-          participantId: this.participantId(),
-          role,
-        },
+        queryParams: { exerciseId: this.exerciseId(), participantId: this.participantId(), role },
       });
       return;
     }
     const isGm = role === 'game-master';
-    const route = isGm ? '/gm' : '/player';
-    this.router.navigate([route], {
-      queryParams: {
-        exerciseId: this.exerciseId(),
-        participantId: this.participantId(),
-        role,
-      },
+    this.router.navigate([isGm ? '/gm' : '/player'], {
+      queryParams: { exerciseId: this.exerciseId(), participantId: this.participantId(), role },
     });
   }
 
@@ -276,10 +214,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
         this.requiresGm.set(exercise.game_mode === 'classic');
         if (exercise.scenario_id) {
           this.scenarioApi.get(exercise.scenario_id).subscribe({
-            next: (scenario) => {
-              const roles = scenario.content?.roles ?? [];
-              this.scenarioRoles.set(roles);
-            },
+            next: (scenario) => this.scenarioRoles.set(scenario.content?.roles ?? []),
           });
         }
       },
