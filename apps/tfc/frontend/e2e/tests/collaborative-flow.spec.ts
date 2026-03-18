@@ -80,6 +80,44 @@ test.describe('Join page — collaborative session code', () => {
 
 // ── Collaborative waiting room ──────────────────────────────────────────
 
+const COLLAB_ROLES = [
+  { id: 'co', label: 'Commanding Officer', player_type: 'decision_maker' },
+  { id: 'nav', label: 'Navigator', player_type: 'advisor' },
+];
+
+const COLLAB_SCENARIO = {
+  id: 1,
+  title: 'Collab Scenario',
+  description: '',
+  domain_id: null,
+  content: {
+    roles: COLLAB_ROLES,
+    game_mode: 'simple_collaborative',
+    phases: [], events: [], issues: [],
+    decision_templates: [], default_time_factor: 1.0,
+  },
+  version: 1,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
+function seedCollabExercise(mockApi: import('../fixtures/base.fixture').MockApi, exerciseId: number): void {
+  mockApi.seedExercise(exerciseId, {
+    id: exerciseId,
+    title: 'Collab Scenario',
+    description: '',
+    phase: 'setup',
+    scenario_id: 1,
+    domain_id: null,
+    time_factor: 1.0,
+    game_mode: 'simple_collaborative',
+    session_code: 'COLLAB',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+  mockApi.seedScenario(COLLAB_SCENARIO);
+}
+
 test.describe('Collaborative waiting room', () => {
   const exerciseId = 500;
 
@@ -90,6 +128,7 @@ test.describe('Collaborative waiting room', () => {
   test('shows collaborative mode message', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(exerciseId, [me]);
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -99,18 +138,20 @@ test.describe('Collaborative waiting room', () => {
     ).toBeVisible();
   });
 
-  test('shows Player badge instead of role dropdown', async ({
+  test('shows scenario roles instead of role dropdown', async ({
     page,
     mockApi,
   }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(exerciseId, [me]);
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
 
-    // Badge visible, dropdown not present
-    await expect(page.getByText('Player')).toBeVisible();
+    // Scenario roles visible, no role dropdown selects
+    await expect(page.getByText('Commanding Officer')).toBeVisible();
+    await expect(page.getByText('Navigator')).toBeVisible();
     await expect(page.locator('select')).not.toBeVisible();
   });
 
@@ -121,6 +162,7 @@ test.describe('Collaborative waiting room', () => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'player' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'player' });
     mockApi.seed(exerciseId, [alice, bob]);
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     await page.goto(collabUrl(alice.id));
@@ -136,6 +178,7 @@ test.describe('Collaborative waiting room', () => {
   }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(exerciseId, [me]);
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -151,6 +194,7 @@ test.describe('Collaborative waiting room', () => {
   }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(exerciseId, [me]);
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -163,6 +207,7 @@ test.describe('Collaborative waiting room', () => {
   test('does NOT navigate to /gm on start', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(exerciseId, [me]);
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
@@ -171,25 +216,24 @@ test.describe('Collaborative waiting room', () => {
     await expect(page).not.toHaveURL(/\/gm/);
   });
 
-  test('all participants shown as Player (no role dropdowns)', async ({
+  test('all participants shown with scenario roles (no role dropdowns)', async ({
     page,
     mockApi,
   }) => {
     const players = [
-      mockParticipant({ display_name: 'Alice', role: 'player' }),
-      mockParticipant({ display_name: 'Bob', role: 'player' }),
-      mockParticipant({ display_name: 'Charlie', role: 'player' }),
+      mockParticipant({ display_name: 'Alice', role: 'co' }),
+      mockParticipant({ display_name: 'Bob', role: 'nav' }),
     ];
     mockApi.seed(exerciseId, players);
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     await page.goto(collabUrl(players[0].id));
 
     await expect(page.getByText('Alice')).toBeVisible();
     await expect(page.getByText('Bob')).toBeVisible();
-    await expect(page.getByText('Charlie')).toBeVisible();
 
-    // No role dropdowns in collaborative mode
+    // No role dropdowns in collaborative mode — roles come from scenario
     await expect(page.locator('select')).not.toBeVisible();
   });
 });
@@ -203,6 +247,7 @@ test.describe('Full collaborative onboarding', () => {
   }) => {
     const exerciseId = 600;
     mockApi.seedCode('SILENT', exerciseId, 'simple_collaborative');
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     // 1. Land on join with code in query param
@@ -231,10 +276,11 @@ test.describe('Full collaborative onboarding', () => {
     mockApi,
   }) => {
     const exerciseId = 700;
-    const alice = mockParticipant({ display_name: 'Alice', role: 'player' });
-    const bob = mockParticipant({ display_name: 'Bob', role: 'player' });
+    const alice = mockParticipant({ display_name: 'Alice', role: 'co' });
+    const bob = mockParticipant({ display_name: 'Bob', role: 'nav' });
     mockApi.seed(exerciseId, [alice, bob]);
     mockApi.seedCode('MULTI1', exerciseId, 'simple_collaborative');
+    seedCollabExercise(mockApi, exerciseId);
     await mockApi.install();
 
     // Alice's waiting room view

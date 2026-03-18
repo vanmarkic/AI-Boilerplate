@@ -114,7 +114,7 @@ export class ScenarioPicker implements OnInit {
   ngOnInit(): void {
     this.scenarioApi.list().subscribe({
       next: (list) => {
-        this.scenarios.set(list);
+        this.scenarios.set(list.filter((s) => (s.content?.roles?.length ?? 0) > 0));
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

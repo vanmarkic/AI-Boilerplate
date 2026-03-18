@@ -25,12 +25,6 @@ import {
 } from '../../core/waiting-room-api.service';
 import { Subscription } from 'rxjs';
 
-const DEFAULT_ROLES: RoleDef[] = [
-  { id: 'player', label: 'Player', player_type: 'advisor' },
-  { id: 'observer', label: 'Observer', player_type: 'advisor' },
-  { id: 'game-master', label: 'Game Master', player_type: 'decision_maker' },
-];
-
 @Component({
   selector: 'tfc-waiting-room-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,35 +103,9 @@ const DEFAULT_ROLES: RoleDef[] = [
               }
             </div>
           } @else {
-            <div class="flex flex-col gap-sm">
-              @for (p of participants(); track p.id) {
-                <div class="flex items-center justify-between p-sm border-b gap-md">
-                  <div class="flex items-center gap-sm">
-                    <span class="text-sm font-medium">{{ p.display_name }}</span>
-                    @if (p.id === participantId()) {
-                      <ui-badge variant="secondary">You</ui-badge>
-                    }
-                  </div>
-                  @if (isSimpleCollaborative()) {
-                    <ui-badge variant="default">Player</ui-badge>
-                  } @else {
-                    <select
-                      class="input-base"
-                      [value]="p.role"
-                      (change)="onRoleChange(p.id, $event)"
-                    >
-                      @for (role of fallbackRoles; track role.id) {
-                        <option [value]="role.id">{{ role.label }}</option>
-                      }
-                    </select>
-                  }
-                </div>
-              } @empty {
-                <p class="text-muted-foreground text-sm p-sm">
-                  No participants yet.
-                </p>
-              }
-            </div>
+            <p class="text-muted-foreground text-sm p-sm">
+              Loading roles…
+            </p>
           }
 
           <div class="flex gap-sm justify-end">
@@ -170,8 +138,6 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   protected readonly gameMode = signal('classic');
   protected readonly scenarioRoles = signal<RoleDef[]>([]);
   protected readonly requiresGm = signal(false);
-  protected readonly fallbackRoles = DEFAULT_ROLES;
-
   protected readonly isSimpleCollaborative = computed(
     () => this.gameMode() === 'simple_collaborative',
   );
@@ -227,11 +193,6 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     this.api
       .updateRole(this.exerciseId(), this.participantId(), roleId)
       .subscribe();
-  }
-
-  protected onRoleChange(targetId: string, event: Event): void {
-    const role = (event.target as HTMLSelectElement).value;
-    this.api.updateRole(this.exerciseId(), targetId, role).subscribe();
   }
 
   protected onLeave(): void {

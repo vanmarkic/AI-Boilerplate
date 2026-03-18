@@ -29,6 +29,10 @@ describe('ScenarioPickerComponent', () => {
         ],
         decision_templates: [],
         default_time_factor: 2.0,
+        roles: [
+          { id: 'ic', label: 'Incident Commander', player_type: 'decision_maker' },
+          { id: 'ff', label: 'Firefighter', player_type: 'advisor' },
+        ],
       },
       version: 3,
       created_at: '2026-03-17T00:00:00Z',
@@ -70,19 +74,21 @@ describe('ScenarioPickerComponent', () => {
     fixture.detectChanges();
   }
 
-  it('fetches scenarios on init', () => {
+  it('fetches scenarios on init and filters out those without roles', () => {
     fixture.detectChanges(); // triggers ngOnInit
     flushScenarios();
+    // Only Fire Drill has roles; Flood Response (content: null) is filtered out
     const cards = fixture.nativeElement.querySelectorAll('ui-card');
-    expect(cards.length).toBe(2);
+    expect(cards.length).toBe(1);
   });
 
-  it('displays scenario titles', () => {
+  it('displays scenario titles for valid scenarios', () => {
     fixture.detectChanges();
     flushScenarios();
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Fire Drill');
-    expect(text).toContain('Flood Response');
+    // Flood Response has no roles → filtered out
+    expect(text).not.toContain('Flood Response');
   });
 
   it('shows event and issue counts from content', () => {
@@ -94,12 +100,12 @@ describe('ScenarioPickerComponent', () => {
     expect(badgeTexts).toContain('1 Issues');
   });
 
-  it('shows 0 events/issues when content is null', () => {
+  it('filters out scenarios with null content (no roles)', () => {
     fixture.detectChanges();
     flushScenarios();
     const text = fixture.nativeElement.textContent;
-    expect(text).toContain('0 Events');
-    expect(text).toContain('0 Issues');
+    // Flood Response has content: null → filtered out
+    expect(text).not.toContain('Flood Response');
   });
 
   it('shows version badge', () => {
@@ -107,15 +113,13 @@ describe('ScenarioPickerComponent', () => {
     flushScenarios();
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('v3');
-    expect(text).toContain('v1');
   });
 
-  it('shows description or fallback text', () => {
+  it('shows description text', () => {
     fixture.detectChanges();
     flushScenarios();
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Basic fire scenario');
-    expect(text).toContain('No description');
   });
 
   it('emits scenarioSelected when Select button is clicked', () => {

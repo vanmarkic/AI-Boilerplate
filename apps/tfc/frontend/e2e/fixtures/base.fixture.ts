@@ -70,6 +70,8 @@ export class MockApi {
   readonly codeMap = new Map<string, object>();
   /** Scenario list for GET /api/scenarios. */
   readonly scenarios: MockScenario[] = [];
+  /** Exercise by ID for GET /api/exercises/:id. */
+  readonly exercises = new Map<number, Record<string, unknown>>();
   /** Joinable exercise response (or null for 404). */
   joinableResponse: MockJoinableResponse | null = null;
 
@@ -98,6 +100,11 @@ export class MockApi {
   /** Seed a scenario for GET /api/scenarios. */
   seedScenario(scenario: MockScenario): void {
     this.scenarios.push(scenario);
+  }
+
+  /** Seed an exercise for GET /api/exercises/:id. */
+  seedExercise(id: number, data: Record<string, unknown>): void {
+    this.exercises.set(id, data);
   }
 
   /** Set the joinable exercise response. */
@@ -202,6 +209,32 @@ export class MockApi {
       const url = route.request().url();
       const code = url.split('/by-code/')[1]?.toUpperCase() ?? '';
       const stored = this.codeMap.get(code);
+      if (!stored) {
+        await route.fulfill({ status: 404 });
+        return;
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(stored),
+      });
+    });
+
+    // GET /api/exercises/:id
+    await this.page.route('**/api/exercises/*', async (route) => {
+      if (route.request().method() !== 'GET') {
+        await route.fallback();
+        return;
+      }
+      const url = route.request().url();
+      // Skip sub-paths like /exercises/joinable, /exercises/by-code/
+      if (url.includes('/joinable') || url.includes('/by-code/') || url.includes('/engine/')) {
+        await route.fallback();
+        return;
+      }
+      const m = url.match(/exercises\/(\d+)/);
+      const id = m ? Number(m[1]) : 0;
+      const stored = this.exercises.get(id);
       if (!stored) {
         await route.fulfill({ status: 404 });
         return;

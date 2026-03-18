@@ -91,7 +91,7 @@ export class ScenarioPickerComponent implements OnInit {
     this.error.set(null);
     this.api.list().subscribe({
       next: (list) => {
-        this.scenarios.set(list);
+        this.scenarios.set(list.filter((s) => (s.content?.roles?.length ?? 0) > 0));
         this.loading.set(false);
       },
       error: () => {
