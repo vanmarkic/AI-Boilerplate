@@ -1,0 +1,55 @@
+name: exercise
+tier: 1
+description: Exercise lifecycle management, engine HTTP/WS API, and real-time state broadcast
+version: 0.3.0
+dependencies:
+  internal: [scenario, waiting_room, decision]
+  external: [postgresql]
+api_endpoints:
+  - POST /api/exercises
+  - GET /api/exercises
+  - GET /api/exercises/joinable
+  - GET /api/exercises/by-code/{code}
+  - GET /api/exercises/{id}
+  - PUT /api/exercises/{id}
+  - DELETE /api/exercises/{id}
+  - POST /api/exercises/{exercise_id}/engine/start
+  - POST /api/exercises/{exercise_id}/engine/pause
+  - POST /api/exercises/{exercise_id}/engine/resume
+  - POST /api/exercises/{exercise_id}/engine/reset
+  - POST /api/exercises/{exercise_id}/engine/complete
+  - PUT /api/exercises/{exercise_id}/engine/speed
+  - GET /api/exercises/{exercise_id}/engine/snapshot
+  - GET /api/exercises/{exercise_id}/engine/context
+  - GET /api/exercises/{exercise_id}/engine/decisions
+  - POST /api/exercises/{exercise_id}/engine/decisions/{decision_id}/close
+  - POST /api/exercises/{exercise_id}/engine/decisions/recommend
+  - POST /api/exercises/{exercise_id}/engine/events/{event_id}/trigger
+  - POST /api/exercises/{exercise_id}/engine/events/{event_id}/cancel
+  - POST /api/exercises/{exercise_id}/engine/events/{event_id}/complete
+  - POST /api/exercises/{exercise_id}/engine/events/{event_id}/pause
+  - POST /api/exercises/{exercise_id}/engine/events/{event_id}/resume
+  - POST /api/exercises/{exercise_id}/engine/events/{event_id}/delay
+  - POST /api/exercises/{exercise_id}/engine/events/{event_id}/skip
+  - POST /api/exercises/{exercise_id}/engine/issues/{issue_id}/activate
+  - POST /api/exercises/{exercise_id}/engine/issues/{issue_id}/mitigate
+  - POST /api/exercises/{exercise_id}/engine/issues/{issue_id}/resolve
+  - POST /api/exercises/{exercise_id}/engine/issues/{issue_id}/release
+  - WS /api/exercises/{exercise_id}/ws
+models: [Exercise]
+events_emitted:
+  - ExerciseCreated
+  - EngineStarted
+  - EnginePaused
+  - EngineResumed
+  - EngineCompleted
+  - StateChange
+events_consumed: []
+business_rules:
+  - "Exercise phases: setup → running → paused → completed"
+  - "Session codes are unique 6-character alphanumeric strings"
+  - "Engine tick loop runs at 250ms interval"
+  - "DECISION events auto-pause the engine until resolved"
+  - "WebSocket broadcasts all state changes to connected participants"
+  - "close_decision triggers turn chaining in collaborative mode"
+  - "Timeout auto-submits the worst option and chains to next turn"

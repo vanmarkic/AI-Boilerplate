@@ -1,0 +1,18 @@
+name: game-master
+tier: 1
+description: GM view — engine controls, event timeline, issue management, decision observation
+version: 0.3.0
+dependencies:
+  internal: [shared]
+  external: []
+api_endpoints: []
+models: []
+events_emitted: []
+events_consumed: []
+business_rules:
+  - "GM can start, pause, resume, reset, and complete the exercise"
+  - "GM can trigger, cancel, complete, pause, resume, delay, and skip events"
+  - "GM can activate, mitigate, resolve, and release issues"
+  - "GM observes decisions and can close them (in classic mode)"
+  - "GM selects a scenario before starting the exercise"
+  - "Event timeline shows all events with lifecycle status"

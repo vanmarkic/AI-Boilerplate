@@ -1,0 +1,25 @@
+name: waiting_room
+tier: 1
+description: Pre-exercise lobby with role assignment and presence tracking
+version: 0.2.0
+dependencies:
+  internal: [exercise, scenario]
+  external: []
+api_endpoints:
+  - POST /api/exercises/{exercise_id}/waiting-room/join
+  - GET /api/exercises/{exercise_id}/waiting-room
+  - PUT /api/exercises/{exercise_id}/waiting-room/participants/{participant_id}/role
+  - DELETE /api/exercises/{exercise_id}/waiting-room/participants/{participant_id}
+models: []
+events_emitted:
+  - ParticipantJoined
+  - ParticipantLeft
+  - RoleChanged
+events_consumed: []
+business_rules:
+  - "Players join via session code"
+  - "Role assignment is first-come-first-served from scenario-defined roles"
+  - "No two participants may hold the same role"
+  - "Max player capacity derived from number of defined roles"
+  - "WebSocket broadcasts presence changes to all waiting room participants"
+  - "State is in-memory (waiting_room_store), not persisted to DB"
