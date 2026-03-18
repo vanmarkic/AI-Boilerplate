@@ -87,7 +87,7 @@ export const ExerciseStore = signalStore(
     hasOpenDecision: computed(() => store.decisions().filter((d) => d.status === 'open').length > 0),
     connectedParticipants: computed(() => store.participants().filter((p) => p.connected)),
     connectedCount: computed(() => store.participants().filter((p) => p.connected).length),
-    isCollaborative: computed(() => store.gameMode() === 'simple-collaborative'),
+    isCollaborative: computed(() => store.gameMode() === 'simple_collaborative'),
     isDecisionMaker: computed(() => store.playerType() === 'decision_maker'),
     phaseBadgeVariant: computed<'default' | 'secondary' | 'destructive'>(() => {
       switch (store.phase()) {

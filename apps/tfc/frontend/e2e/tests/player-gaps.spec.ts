@@ -120,18 +120,18 @@ test.describe('Gap 5 — Score in snapshot', () => {
 // ── Gap 6: PlayerType from scenario roles ─────────────────────────────
 
 test.describe('Gap 6 — PlayerType from scenario roles', () => {
-  test('decision-maker sees "You are the Decision Maker" footer', async ({ page }) => {
+  test('decision-maker sees role label in footer', async ({ page }) => {
     await installPlayerMocks(page, baseSnapshot, contextWithRoles);
     await page.goto(playerUrl('co-01', 'co'));
 
-    await expect(page.getByText('You are the Decision Maker')).toBeVisible();
+    await expect(page.getByText('You are the Commanding Officer')).toBeVisible();
   });
 
-  test('advisor sees "You are an Advisor" footer', async ({ page }) => {
+  test('advisor sees role label in footer', async ({ page }) => {
     await installPlayerMocks(page, baseSnapshot, contextWithRoles);
     await page.goto(playerUrl('nav-01', 'nav'));
 
-    await expect(page.getByText('You are an Advisor')).toBeVisible();
+    await expect(page.getByText('You are the Navigator')).toBeVisible();
   });
 });
 
