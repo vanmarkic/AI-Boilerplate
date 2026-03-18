@@ -61,15 +61,13 @@ export class SeaBackdrop implements OnDestroy {
 
   private convergences: Convergence[] = [];
   private nextConvergence = 2;
+  private readonly widthSegs = 18;
+  private readonly heightSegs = 12;
 
   private get themeColor(): THREE.Color {
     const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue('--color-primary')
-      .trim();
-    if (raw.startsWith('oklch')) {
-      return new THREE.Color(0x1ac5c5);
-    }
-    return new THREE.Color(raw || 0x1ac5c5);
+      .getPropertyValue('--color-primary').trim();
+    return new THREE.Color(raw.startsWith('oklch') ? 0x1ac5c5 : (raw || 0x1ac5c5));
   }
 
   constructor(private ngZone: NgZone) {
@@ -123,7 +121,7 @@ export class SeaBackdrop implements OnDestroy {
     pl2.position.set(-4, 1, -2);
     this.scene.add(pl1, pl2);
 
-    const geo = new THREE.PlaneGeometry(24, 14, 18, 12);
+    const geo = new THREE.PlaneGeometry(24, 14, this.widthSegs, this.heightSegs);
     geo.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({
       color: primary, wireframe: true, transparent: true, opacity: 0.85,
@@ -201,7 +199,10 @@ export class SeaBackdrop implements OnDestroy {
   private updateConvergences(t: number): void {
     if (t >= this.nextConvergence) {
       this.convergences.push(
-        createConvergence(this.scene, this.glowTexture, this.themeColor, t),
+        createConvergence(
+          this.scene, this.glowTexture, this.themeColor,
+          this.plane.geometry, this.widthSegs, this.heightSegs, t,
+        ),
       );
       this.nextConvergence = t + CONVERGENCE_INTERVAL + Math.random() * 2;
     }
