@@ -178,24 +178,27 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   }
 
   protected onStartExercise(): void {
+    const me = this.participants().find(
+      (p) => p.id === this.participantId(),
+    );
+    const role = me?.role ?? 'player';
     if (this.isSimpleCollaborative()) {
       this.router.navigate(['/player'], {
         queryParams: {
           exerciseId: this.exerciseId(),
           participantId: this.participantId(),
+          role,
         },
       });
       return;
     }
-    const me = this.participants().find(
-      (p) => p.id === this.participantId(),
-    );
-    const isGm = me?.role === 'game-master';
+    const isGm = role === 'game-master';
     const route = isGm ? '/gm' : '/player';
     this.router.navigate([route], {
       queryParams: {
         exerciseId: this.exerciseId(),
         participantId: this.participantId(),
+        role,
       },
     });
   }

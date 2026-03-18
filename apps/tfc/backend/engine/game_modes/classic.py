@@ -16,11 +16,6 @@ class ClassicMode:
     ) -> str | None:
         return None
 
-    def on_decision_closed(
-        self, decision_id: str, selected_score: float, max_score: float,
-    ) -> list[dict]:
-        return []
-
     def on_decision_closed_v2(
         self,
         decision_id: str,
@@ -29,6 +24,10 @@ class ClassicMode:
         forced_option_ids: list[str] | None = None,
     ) -> list[dict]:
         return []
+
+    def snapshot(self) -> dict | None:
+        """Classic mode has no scoring state."""
+        return None
 
     def get_next_decision_id(self, closed_decision_id: str) -> str | None:
         return None

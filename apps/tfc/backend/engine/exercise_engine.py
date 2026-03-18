@@ -154,6 +154,7 @@ class ExerciseEngine:
             "events": self._events.snapshot(),
             "issues": self._issues.snapshot(),
             "decisions": self._decisions.snapshot(),
+            "score": self._config.game_mode.snapshot(),
         }
 
     def _handle_decision_events(

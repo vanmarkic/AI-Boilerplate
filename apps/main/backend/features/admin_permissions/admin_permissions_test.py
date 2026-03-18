@@ -109,28 +109,34 @@ class TestRBACMiddleware:
             resp = await client.get("/api/admin/permissions")
             assert resp.status_code == 401
 
-    @patch("core.auth.parse_jwt_roles", new_callable=AsyncMock)
     async def test_admin_can_access_any_route(
-        self, mock_roles: AsyncMock, client: AsyncClient
+        self, client: AsyncClient
     ) -> None:
-        mock_roles.return_value = ["admin"]
-        resp = await client.get(
-            "/api/admin/permissions",
-            headers={"Authorization": "Bearer fake"},
-        )
-        # Should pass RBAC (may still need valid dependency)
-        assert resp.status_code != 403
+        with patch(
+            "core.auth.parse_jwt_roles",
+            new_callable=AsyncMock,
+            return_value=["admin"],
+        ):
+            resp = await client.get(
+                "/api/admin/permissions",
+                headers={"Authorization": "Bearer fake"},
+            )
+            # Should pass RBAC (may still need valid dependency)
+            assert resp.status_code != 403
 
-    @patch("core.auth.parse_jwt_roles", new_callable=AsyncMock)
     async def test_user_cannot_access_admin_routes(
-        self, mock_roles: AsyncMock, client: AsyncClient
+        self, client: AsyncClient
     ) -> None:
-        mock_roles.return_value = ["user"]
-        resp = await client.get(
-            "/api/admin/permissions",
-            headers={"Authorization": "Bearer fake"},
-        )
-        assert resp.status_code == 403
+        with patch(
+            "core.auth.parse_jwt_roles",
+            new_callable=AsyncMock,
+            return_value=["user"],
+        ):
+            resp = await client.get(
+                "/api/admin/permissions",
+                headers={"Authorization": "Bearer fake"},
+            )
+            assert resp.status_code == 403
 
 
 class TestProtectedRoles:
