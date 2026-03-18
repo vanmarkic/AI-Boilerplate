@@ -8,11 +8,12 @@ from features.exercise.exercise_schema import (
     UpdateExerciseRequest,
 )
 
-VALID_PHASES = {"setup", "running", "paused", "completed"}
+VALID_PHASES = {"setup", "briefing", "running", "paused", "completed"}
 
 # Allowed phase transitions: current -> set of valid next phases
 PHASE_TRANSITIONS: dict[str, set[str]] = {
-    "setup": {"running"},
+    "setup": {"briefing"},
+    "briefing": {"running", "setup"},
     "running": {"paused", "completed"},
     "paused": {"running", "completed"},
     "completed": set(),

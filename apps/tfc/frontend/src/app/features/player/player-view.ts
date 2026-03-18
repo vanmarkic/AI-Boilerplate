@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from "@angular/core";
+import { ButtonDirective } from "@aspect/ui";
 import { ActivatedRoute } from "@angular/router";
 import { CardComponent, BadgeComponent } from "@aspect/ui";
 import { ClockDisplayComponent } from "../../shared/clock-display.component";
@@ -55,6 +56,7 @@ import { handlePlayerWsMessage } from "./player-ws-handler";
     AdvisorBubblesComponent,
     AllAdvisorsPanelComponent,
     ScoreBarComponent,
+    ButtonDirective,
   ],
   templateUrl: "./player-view.html",
 })
@@ -68,8 +70,10 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly selectedIssueId = signal<string | null>(null);
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
   protected readonly roleLabel = signal("Advisor");
+  protected readonly practicePhase = signal<"advising" | "deciding">("advising");
   private readonly exerciseId = signal(1);
   private readonly participantId = signal("");
+  private lastDecisionId = "";
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
 
