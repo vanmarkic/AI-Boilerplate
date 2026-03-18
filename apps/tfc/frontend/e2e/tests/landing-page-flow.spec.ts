@@ -50,7 +50,6 @@ test.describe('Landing page — no active exercise', () => {
     await page.goto('/home');
 
     await expect(page.getByText('Training Flow Control')).toBeVisible();
-    await expect(page.getByText('Join Exercise')).toBeVisible();
     await expect(page.getByText('Run Exercise')).toBeVisible();
     await expect(page.getByText('Build Scenario')).toBeVisible();
     await expect(page.getByText('Review Results')).toBeVisible();
@@ -84,7 +83,7 @@ test.describe('Scenario picker', () => {
     await expect(page.getByText('Hospital MCI')).toBeVisible();
 
     await page.getByText('Back').click();
-    await expect(page.getByText('Join Exercise')).toBeVisible();
+    await expect(page.getByText('Run Exercise')).toBeVisible();
   });
 });
 
