@@ -33,8 +33,10 @@ export interface ThemeConfig {
 }
 
 export interface DomainConfig {
-  id: string;
+  id: number;
+  slug: string;
   name: string;
+  description: string;
   terminology: TerminologyMap;
   theme: ThemeConfig;
   roles: DomainRole[];

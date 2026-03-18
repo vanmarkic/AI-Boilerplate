@@ -1,7 +1,7 @@
 import type { WritableSignal } from '@angular/core';
 import type { AdvisorRecommendation } from '../../shared/advisor-bubbles.component';
 import { DecisionApiService } from '../../core/decision-api.service';
-import type { ActiveDecision } from '../../core/decision-api.service';
+import type { ActiveDecision, ScenarioContext } from '../../core/decision-api.service';
 import { ExerciseStore } from '../../core/exercise.store';
 import type { RoleRecommendation } from '../../shared/all-advisors-panel.component';
 
@@ -75,7 +75,7 @@ export function submitDecision(
 }
 
 export function resolvePlayerRole(
-  ctx: { roles?: { id: string; label: string; player_type: string }[] },
+  ctx: ScenarioContext,
   role: string,
   gameMode: string,
   store: InstanceType<typeof ExerciseStore>,
