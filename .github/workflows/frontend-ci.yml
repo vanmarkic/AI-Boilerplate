@@ -81,6 +81,9 @@ jobs:
       - run: npm i
         working-directory: .
       - run: npm run lint:all
+      - name: Prettier format check
+        run: npx prettier --check .
+        working-directory: apps/main/frontend
 
   test:
     name: Unit Tests
@@ -108,8 +111,11 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             npm run test:changed
           else
-            npm run test:ci
+            npm run test:coverage
           fi
+      - name: Coverage summary
+        if: always()
+        run: echo "Frontend coverage report generated via --code-coverage"
 
   build:
     name: Build
