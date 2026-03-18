@@ -91,6 +91,22 @@ class WaitingRoomStore:
                 return p
         return None
 
+    def count(self, exercise_id: int) -> int:
+        """Return the number of participants in a waiting room."""
+        return len(self._rooms.get(exercise_id, []))
+
+    def is_role_taken(
+        self,
+        exercise_id: int,
+        role: str,
+        exclude_participant: str | None = None,
+    ) -> bool:
+        """Check whether a role is already held by another participant."""
+        for p in self._rooms.get(exercise_id, []):
+            if p.role == role and p.id != exclude_participant:
+                return True
+        return False
+
     def clear(self, exercise_id: int) -> None:
         """Remove all participants from a waiting room."""
         self._rooms.pop(exercise_id, None)
