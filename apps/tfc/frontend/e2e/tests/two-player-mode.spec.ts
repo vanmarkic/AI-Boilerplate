@@ -272,6 +272,37 @@ test.describe('Waiting room — 2-player start constraints', () => {
   });
 });
 
+// ── 3b. WAITING ROOM — ERROR STATE WHEN NO ROLES ────────────────────
+//    If scenario has no roles (broken scenario), show error message
+//    and disable start button.
+
+test.describe('Waiting room — missing roles error state', () => {
+  test('shows error message when no scenario roles loaded', async ({ page, mockApi }) => {
+    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
+    mockApi.seed(EX_ID, [me]);
+    // No seedExercise → loadScenarioRoles 404 → scenarioRoles stays empty
+    await mockApi.install();
+
+    await page.goto(collabWaitingRoomUrl(me.id));
+
+    await expect(
+      page.getByText('Scenario has no roles defined'),
+    ).toBeVisible();
+  });
+
+  test('start button disabled when no roles loaded', async ({ page, mockApi }) => {
+    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
+    mockApi.seed(EX_ID, [me]);
+    await mockApi.install();
+
+    await page.goto(collabWaitingRoomUrl(me.id));
+
+    await expect(
+      page.getByRole('button', { name: /Start Exercise/ }),
+    ).toBeDisabled();
+  });
+});
+
 // ── 4. PLAYER VIEW — ALL-ADVISORS PANEL VISIBILITY ─────────────────
 //    all_advisors role sees tfc-all-advisors-panel, NOT tfc-decision-panel with [Advisor] prefix.
 //    Tabs correspond to scenario advisor roles.

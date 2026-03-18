@@ -5,7 +5,7 @@ bridge between the scenario editor and the exercise engine.
 """
 from __future__ import annotations
 
-from pydantic import BaseModel
+from pydantic import BaseModel, model_validator
 
 
 class DecisionOptionDef(BaseModel):
@@ -87,3 +87,26 @@ class ScenarioContent(BaseModel):
     game_mode_config: dict = {}
     decision_sequence: list[str] = []
     roles: list[RoleDef] = []
+
+    @model_validator(mode="after")
+    def validate_roles(self) -> ScenarioContent:
+        """Enforce that every scenario defines roles."""
+        if not self.roles:
+            raise ValueError(
+                "Scenario must define at least one role in 'roles'."
+            )
+        role_ids = {r.id for r in self.roles}
+        player_types = {r.player_type for r in self.roles}
+        if "decision_maker" not in player_types:
+            raise ValueError(
+                "Scenario must have at least one role with "
+                "player_type='decision_maker'."
+            )
+        for dt in self.decision_templates:
+            for rid in dt.target_roles:
+                if rid not in role_ids:
+                    raise ValueError(
+                        f"Decision template '{dt.id}' targets unknown "
+                        f"role '{rid}'. Defined roles: {sorted(role_ids)}."
+                    )
+        return self
