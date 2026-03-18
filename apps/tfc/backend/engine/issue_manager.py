@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from engine.state_changes import IssueChange
+from engine.state_changes import IssueChange, IssueSnapshot
 
 
 class IssueLifecycle(StrEnum):
@@ -75,7 +75,7 @@ class IssueManager:
         self,
         current_pt_ms: float,
         completed_event_ids: set[str],
-    ) -> list[dict]:
+    ) -> list[IssueChange]:
         """Check all issues for activation and auto-resolve expiry.
 
         Args:
@@ -85,7 +85,7 @@ class IssueManager:
         Returns:
             List of state change dicts for broadcasting.
         """
-        changes: list[dict] = []
+        changes: list[IssueChange] = []
 
         for issue in self._issues.values():
             if issue.lifecycle == IssueLifecycle.INACTIVE:
@@ -105,9 +105,9 @@ class IssueManager:
 
     def activate_by_event(
         self, event_id: str, current_pt_ms: float,
-    ) -> list[dict]:
+    ) -> list[IssueChange]:
         """Activate all issues triggered by a specific event."""
-        changes: list[dict] = []
+        changes: list[IssueChange] = []
         for issue in self._issues.values():
             if (
                 issue.lifecycle == IssueLifecycle.INACTIVE
@@ -120,7 +120,7 @@ class IssueManager:
 
     def manual_activate(
         self, issue_id: str, current_pt_ms: float,
-    ) -> dict | None:
+    ) -> IssueChange | None:
         """GM manually activates an issue."""
         issue = self._issues.get(issue_id)
         if not issue or issue.lifecycle != IssueLifecycle.INACTIVE:
@@ -128,7 +128,7 @@ class IssueManager:
         self._activate(issue, current_pt_ms)
         return self._change(issue, "manual_activated")
 
-    def mitigate(self, issue_id: str) -> dict | None:
+    def mitigate(self, issue_id: str) -> IssueChange | None:
         """Transition issue to mitigated state."""
         issue = self._issues.get(issue_id)
         if not issue or issue.lifecycle != IssueLifecycle.ACTIVE:
@@ -138,7 +138,7 @@ class IssueManager:
 
     def resolve(
         self, issue_id: str, current_pt_ms: float,
-    ) -> dict | None:
+    ) -> IssueChange | None:
         """Resolve an active or mitigated issue."""
         issue = self._issues.get(issue_id)
         if not issue:
@@ -149,7 +149,7 @@ class IssueManager:
         issue.resolved_at_pt_ms = current_pt_ms
         return self._change(issue, "resolved")
 
-    def release_to_players(self, issue_id: str) -> dict | None:
+    def release_to_players(self, issue_id: str) -> IssueChange | None:
         """Mark an issue as visible to players."""
         issue = self._issues.get(issue_id)
         if not issue or issue.lifecycle == IssueLifecycle.INACTIVE:
@@ -199,18 +199,18 @@ class IssueManager:
             "released": issue.released_to_players,
         }
 
-    def snapshot(self) -> list[dict]:
+    def snapshot(self) -> list[IssueSnapshot]:
         return [
-            {
-                "id": i.id,
-                "title": i.title,
-                "description": i.description,
-                "trigger_mode": i.trigger_mode.value,
-                "auto_resolve_ms": i.auto_resolve_ms,
-                "lifecycle": i.lifecycle.value,
-                "activated_at_pt_ms": i.activated_at_pt_ms,
-                "resolved_at_pt_ms": i.resolved_at_pt_ms,
-                "released": i.released_to_players,
-            }
+            IssueSnapshot(
+                id=i.id,
+                title=i.title,
+                description=i.description,
+                trigger_mode=i.trigger_mode.value,
+                auto_resolve_ms=i.auto_resolve_ms,
+                lifecycle=i.lifecycle.value,
+                activated_at_pt_ms=i.activated_at_pt_ms,
+                resolved_at_pt_ms=i.resolved_at_pt_ms,
+                released=i.released_to_players,
+            )
             for i in self._issues.values()
         ]

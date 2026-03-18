@@ -115,7 +115,7 @@
                     0 0 20px oklch(75% 0.12 80 / calc(0.15 * var(--glow-strength)));
   }
 
-  /* ── Naval Operations IV: deep radar / sonar aesthetic ─ */
+  /* ── Operations IV: deep radar / sonar aesthetic ──────── */
   [data-theme="tfc-noi4"] {
     --color-background: oklch(7% 0.03 225);
     --color-card: oklch(11% 0.03 225);

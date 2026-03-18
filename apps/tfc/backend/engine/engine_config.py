@@ -9,7 +9,9 @@ from dataclasses import dataclass, field
 
 from engine.event_scheduler import ScheduledEvent
 from engine.game_modes.classic import ClassicMode
+from engine.game_modes.protocol import GameMode
 from engine.issue_manager import TrackedIssue
+from engine.state_changes import DecisionOptionSnapshot
 
 TICK_INTERVAL_S = 0.25
 
@@ -21,7 +23,7 @@ class DecisionTemplate:
     description: str
     issue_id: str
     question_type: str
-    options: list[dict]
+    options: list[DecisionOptionSnapshot]
     completion_mode: str
     target_roles: list[str] = field(default_factory=list)
     timeout_ms: float = 0.0
@@ -54,4 +56,4 @@ class EngineConfig:
     issues: list[TrackedIssue] = field(default_factory=list)  # domain: "defects"
     decision_templates: list[DecisionTemplate] = field(default_factory=list)
     context: ScenarioContext = field(default_factory=ScenarioContext)
-    game_mode: ClassicMode = field(default_factory=ClassicMode)
+    game_mode: GameMode = field(default_factory=ClassicMode)

@@ -11,7 +11,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from engine.state_changes import EventChange
+from engine.state_changes import EventChange, EventSnapshot
 
 
 class EventLifecycle(StrEnum):
@@ -79,12 +79,12 @@ class EventScheduler:
     def clear(self) -> None:
         self._events.clear()
 
-    def tick(self, current_pt_ms: float) -> list[dict]:
+    def tick(self, current_pt_ms: float) -> list[EventChange]:
         """Check all events and apply lifecycle transitions.
 
         Returns a list of state change dicts for broadcasting.
         """
-        changes: list[dict] = []
+        changes: list[EventChange] = []
 
         for event in self._events.values():
             if event.lifecycle == EventLifecycle.SCHEDULED:
@@ -110,7 +110,7 @@ class EventScheduler:
 
         return changes
 
-    def force_trigger(self, event_id: str, current_pt_ms: float) -> dict | None:
+    def force_trigger(self, event_id: str, current_pt_ms: float) -> EventChange | None:
         """GM manually triggers an event regardless of schedule."""
         event = self._events.get(event_id)
         if not event:
@@ -122,7 +122,7 @@ class EventScheduler:
         event.started_at_pt_ms = current_pt_ms
         return self._change(event, "force_triggered")
 
-    def cancel_event(self, event_id: str) -> dict | None:
+    def cancel_event(self, event_id: str) -> EventChange | None:
         """GM cancels an event."""
         event = self._events.get(event_id)
         if not event:
@@ -132,7 +132,7 @@ class EventScheduler:
         self._transition(event, EventLifecycle.CANCELLED)
         return self._change(event, "cancelled")
 
-    def complete_event(self, event_id: str, current_pt_ms: float) -> dict | None:
+    def complete_event(self, event_id: str, current_pt_ms: float) -> EventChange | None:
         """GM manually completes a running event."""
         event = self._events.get(event_id)
         if not event or event.lifecycle != EventLifecycle.RUNNING:
@@ -141,7 +141,7 @@ class EventScheduler:
         event.completed_at_pt_ms = current_pt_ms
         return self._change(event, "completed")
 
-    def pause_event(self, event_id: str) -> dict | None:
+    def pause_event(self, event_id: str) -> EventChange | None:
         """GM pauses a running event. Preserves elapsed time."""
         event = self._events.get(event_id)
         if not event or event.lifecycle != EventLifecycle.RUNNING:
@@ -151,7 +151,7 @@ class EventScheduler:
 
     def resume_event(
         self, event_id: str, current_pt_ms: float,
-    ) -> dict | None:
+    ) -> EventChange | None:
         """GM resumes a paused event. Adjusts started_at to preserve elapsed."""
         event = self._events.get(event_id)
         if not event or event.lifecycle != EventLifecycle.PAUSED:
@@ -161,7 +161,7 @@ class EventScheduler:
 
     def delay_event(
         self, event_id: str, delay_ms: float,
-    ) -> dict | None:
+    ) -> EventChange | None:
         """GM delays a scheduled event by adding to its scheduled time."""
         event = self._events.get(event_id)
         if not event or event.lifecycle != EventLifecycle.SCHEDULED:
@@ -169,7 +169,7 @@ class EventScheduler:
         event.scheduled_pt_ms += delay_ms
         return self._change(event, "delayed")
 
-    def skip_event(self, event_id: str) -> dict | None:
+    def skip_event(self, event_id: str) -> EventChange | None:
         """GM skips (cancels) a scheduled/pending event."""
         event = self._events.get(event_id)
         if not event:
@@ -216,21 +216,21 @@ class EventScheduler:
             "title": event.title,
         }
 
-    def snapshot(self) -> list[dict]:
+    def snapshot(self) -> list[EventSnapshot]:
         """Return all events as serializable dicts."""
         return [
-            {
-                "id": e.id,
-                "title": e.title,
-                "description": e.description,
-                "event_type": e.event_type.value,
-                "scheduled_pt_ms": e.scheduled_pt_ms,
-                "duration_ms": e.duration_ms,
-                "dependencies": e.dependencies,
-                "triggered_issues": e.triggered_issues,
-                "lifecycle": e.lifecycle.value,
-                "started_at_pt_ms": e.started_at_pt_ms,
-                "completed_at_pt_ms": e.completed_at_pt_ms,
-            }
+            EventSnapshot(
+                id=e.id,
+                title=e.title,
+                description=e.description,
+                event_type=e.event_type.value,
+                scheduled_pt_ms=e.scheduled_pt_ms,
+                duration_ms=e.duration_ms,
+                dependencies=e.dependencies,
+                triggered_issues=e.triggered_issues,
+                lifecycle=e.lifecycle.value,
+                started_at_pt_ms=e.started_at_pt_ms,
+                completed_at_pt_ms=e.completed_at_pt_ms,
+            )
             for e in self._events.values()
         ]

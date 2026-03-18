@@ -3,7 +3,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from core.base_schema import ResponseBase
-from engine.game_modes import GM_CLASSIC, VALID_GAME_MODES  # noqa: F401
+from core.game_mode_constants import GM_CLASSIC, VALID_GAME_MODES  # noqa: F401
 
 
 class CreateExerciseRequest(BaseModel):

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Any
 
 from pydantic import BaseModel
 
@@ -28,7 +27,7 @@ class ScenarioResponse(ResponseBase):
     title: str
     description: str
     domain_id: int | None
-    content: dict[str, Any] | None
+    content: ScenarioContent | None
     version: int
     created_at: datetime
     updated_at: datetime

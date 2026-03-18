@@ -6,14 +6,95 @@ JSON-serialisable and compatible with the existing dict-based API.
 """
 from __future__ import annotations
 
-from typing import Any, TypedDict
+from typing import TypedDict
+
+
+# ── Snapshot shapes ──────────────────────────────────────────────
+
+
+class TimeSnapshot(TypedDict):
+    play_time_ms: float
+    real_time_ms: float
+    factor: float
+    paused: bool
+
+
+class EventSnapshot(TypedDict):
+    id: str
+    title: str
+    description: str
+    event_type: str
+    scheduled_pt_ms: float
+    duration_ms: float | None
+    dependencies: list[str]
+    triggered_issues: list[str]
+    lifecycle: str
+    started_at_pt_ms: float | None
+    completed_at_pt_ms: float | None
+
+
+class IssueSnapshot(TypedDict):
+    id: str
+    title: str
+    description: str
+    trigger_mode: str
+    auto_resolve_ms: float
+    lifecycle: str
+    activated_at_pt_ms: float | None
+    resolved_at_pt_ms: float | None
+    released: bool
+
+
+class DecisionOptionSnapshot(TypedDict):
+    id: str
+    label: str
+    score: float
+
+
+class DecisionSnapshot(TypedDict):
+    id: str
+    event_id: str | None
+    issue_id: str | None
+    title: str
+    description: str
+    question_type: str
+    options: list[DecisionOptionSnapshot]
+    completion_mode: str
+    target_roles: list[str]
+    timeout_ms: float
+    status: str
+    opened_at_pt_ms: float
+    closed_at_pt_ms: float | None
+    recommendations: dict[str, str]
+    selected_option_ids: list[str]
+
+
+class EngineSnapshot(TypedDict):
+    exercise_id: int
+    title: str
+    phase: str
+    time: TimeSnapshot
+    events: list[EventSnapshot]
+    issues: list[IssueSnapshot]
+    decisions: list[DecisionSnapshot]
+    score: dict[str, object] | None
+
+
+class PresenceEntry(TypedDict):
+    id: str
+    display_name: str
+    role: str | None
+    connected: bool
+
+
+# ── State changes ────────────────────────────────────────────────
 
 
 class PhaseChange(TypedDict):
     type: str          # "phase_change"
     action: str        # started | paused | completed | reset
     phase: str         # setup | running | paused | completed
-    time: dict[str, Any]
+    time: TimeSnapshot
 
 
 class EventChange(TypedDict):
@@ -40,7 +121,7 @@ class DecisionOpened(TypedDict):
     decision_id: str
     title: str
     question_type: str
-    options: list[dict[str, Any]]
+    options: list[DecisionOptionSnapshot]
     target_roles: list[str]
     timeout_ms: float
 
