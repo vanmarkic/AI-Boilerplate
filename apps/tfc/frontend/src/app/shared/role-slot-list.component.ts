@@ -2,8 +2,8 @@ import {
   ChangeDetectionStrategy, Component, input, output,
 } from '@angular/core';
 import { BadgeComponent, ButtonDirective } from '@aspect/ui';
-import type { RoleDef } from '../../core/scenario-api.service';
-import type { ParticipantResponse } from '../../core/waiting-room-api.service';
+import type { RoleDef } from '../core/scenario-api.service';
+import type { ParticipantResponse } from '../core/waiting-room-api.service';
 
 @Component({
   selector: 'tfc-role-slot-list',
