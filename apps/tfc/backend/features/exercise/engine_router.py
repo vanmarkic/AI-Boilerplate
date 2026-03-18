@@ -34,6 +34,7 @@ class CloseDecisionRequest(BaseModel):
 class RecommendRequest(BaseModel):
     decision_id: str
     option_id: str
+    participant_id: str = Field(..., min_length=1)
 
 
 def _get_engine(exercise_id: int):
@@ -324,7 +325,7 @@ async def submit_recommendation(
     """Advisor submits a recommendation on an open decision."""
     engine = _get_engine(exercise_id)
     result = engine.decision_manager.submit_recommendation(
-        body.decision_id, participant_id="TODO", option_id=body.option_id,
+        body.decision_id, participant_id=body.participant_id, option_id=body.option_id,
     )
     if result is None:
         raise HTTPException(
