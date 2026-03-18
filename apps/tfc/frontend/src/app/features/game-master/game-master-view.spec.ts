@@ -49,6 +49,8 @@ describe('GameMasterView', () => {
     scenario_id: 10,
     domain_id: null,
     time_factor: 2.5,
+    game_mode: 'classic',
+    session_code: 'TEST99',
     created_at: '2026-03-17T00:00:00Z',
     updated_at: '2026-03-17T00:00:00Z',
   };
@@ -71,6 +73,8 @@ describe('GameMasterView', () => {
   });
 
   afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
     httpTesting.verify();
   });
 
@@ -105,7 +109,7 @@ describe('GameMasterView', () => {
     fixture.detectChanges();
 
     // Simulate scenario selection
-    component['onScenarioSelected'](stubScenario);
+    component['onScenarioSelected']({ scenario: stubScenario, gameMode: 'classic' });
 
     // Flush exercise creation
     const createReq = httpTesting.expectOne(`${base}/api/exercises`);
@@ -124,6 +128,7 @@ describe('GameMasterView', () => {
       time: { play_time_ms: 0, real_time_ms: 0, factor: 2.5, paused: true },
       events: [],
       issues: [],
+      score: null,
     });
 
     // Flush context request
@@ -147,7 +152,7 @@ describe('GameMasterView', () => {
     listReq.flush([]);
     fixture.detectChanges();
 
-    component['onScenarioSelected'](stubScenario);
+    component['onScenarioSelected']({ scenario: stubScenario, gameMode: 'classic' });
 
     const createReq = httpTesting.expectOne(`${base}/api/exercises`);
     createReq.flush(stubExercise);
@@ -160,7 +165,7 @@ describe('GameMasterView', () => {
     snapReq.flush({
       exercise_id: 99, title: '', phase: 'setup',
       time: { play_time_ms: 0, real_time_ms: 0, factor: 1, paused: true },
-      events: [], issues: [],
+      events: [], issues: [], score: null,
     });
     const ctxReq = httpTesting.expectOne(
       (r) => r.url === `${base}/api/exercises/99/engine/context`,
@@ -187,7 +192,7 @@ describe('GameMasterView', () => {
       ...stubScenario,
       content: { ...stubScenario.content!, default_time_factor: 5.0 },
     };
-    component['onScenarioSelected'](scenarioWithFactor);
+    component['onScenarioSelected']({ scenario: scenarioWithFactor, gameMode: 'classic' });
 
     const createReq = httpTesting.expectOne(`${base}/api/exercises`);
     expect(createReq.request.body.time_factor).toBe(5.0);
@@ -197,7 +202,7 @@ describe('GameMasterView', () => {
     httpTesting.expectOne(`${base}/api/exercises/99/engine/snapshot`).flush({
       exercise_id: 99, title: '', phase: 'setup',
       time: { play_time_ms: 0, real_time_ms: 0, factor: 5.0, paused: true },
-      events: [], issues: [],
+      events: [], issues: [], score: null,
     });
     httpTesting.expectOne(
       (r) => r.url === `${base}/api/exercises/99/engine/context`,
@@ -211,7 +216,7 @@ describe('GameMasterView', () => {
     fixture.detectChanges();
 
     const noContent: ScenarioResponse = { ...stubScenario, content: null };
-    component['onScenarioSelected'](noContent);
+    component['onScenarioSelected']({ scenario: noContent, gameMode: 'classic' });
 
     const createReq = httpTesting.expectOne(`${base}/api/exercises`);
     expect(createReq.request.body.time_factor).toBe(1.0);
@@ -220,7 +225,7 @@ describe('GameMasterView', () => {
     httpTesting.expectOne(`${base}/api/exercises/99/engine/snapshot`).flush({
       exercise_id: 99, title: '', phase: 'setup',
       time: { play_time_ms: 0, real_time_ms: 0, factor: 1.0, paused: true },
-      events: [], issues: [],
+      events: [], issues: [], score: null,
     });
     httpTesting.expectOne(
       (r) => r.url === `${base}/api/exercises/99/engine/context`,

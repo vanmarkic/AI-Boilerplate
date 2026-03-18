@@ -18,6 +18,8 @@ describe('EngineApiService', () => {
   });
 
   afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
     httpTesting.verify();
   });
 

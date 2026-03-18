@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { PresenceIndicatorComponent } from './presence-indicator.component';
 import type { ParticipantPresence } from '../core/exercise.store';
+import { environment } from '../core/environment';
 
 describe('PresenceIndicatorComponent', () => {
   let fixture: ComponentFixture<PresenceIndicatorComponent>;
@@ -11,12 +14,21 @@ describe('PresenceIndicatorComponent', () => {
     { id: 'p3', display_name: 'Charlie', role: 'player', connected: true },
   ];
 
+  const base = environment.apiBaseUrl;
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [PresenceIndicatorComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
     }).compileComponents();
 
     fixture = TestBed.createComponent(PresenceIndicatorComponent);
+  });
+
+  afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
   });
 
   it('shows empty message when no participants', () => {
