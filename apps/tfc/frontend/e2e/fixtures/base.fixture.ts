@@ -58,6 +58,27 @@ export function mockParticipant(
   };
 }
 
+/** Derive scenario roles from participant roles. */
+function deriveRoles(participants: MockParticipant[]): MockRole[] {
+  const seen = new Set<string>();
+  const roles: MockRole[] = [];
+  for (const p of participants) {
+    if (p.role === 'game-master' || seen.has(p.role)) continue;
+    seen.add(p.role);
+    const isDecisionMaker =
+      p.role === 'decision_maker' || p.role === 'co';
+    roles.push({
+      id: p.role,
+      label: p.role
+        .split(/[_-]/)
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' '),
+      player_type: isDecisionMaker ? 'decision_maker' : 'advisor',
+    });
+  }
+  return roles;
+}
+
 type Fixtures = {
   /** Intercept all waiting-room API calls with configurable responses. */
   mockApi: MockApi;
@@ -217,8 +238,8 @@ export class MockApi {
         return;
       }
       const url = route.request().url();
-      // Skip by-code, waiting-room, and engine sub-paths
-      if (/by-code|waiting-room|engine|participants/.test(url)) {
+      // Skip by-code, waiting-room, engine, joinable, and participants sub-paths
+      if (/by-code|waiting-room|engine|participants|joinable/.test(url)) {
         await route.fallback();
         return;
       }
@@ -339,9 +360,34 @@ export class MockApi {
     );
   }
 
-  /** Seed the room with participants before navigating. */
-  seed(exerciseId: number, participants: MockParticipant[]): void {
+  /**
+   * Seed the room with participants before navigating.
+   * Also auto-registers exercise + scenario data (with roles derived from
+   * participants) unless the exercise was already explicitly seeded.
+   */
+  seed(
+    exerciseId: number,
+    participants: MockParticipant[],
+    gameMode = 'classic',
+  ): void {
     this.rooms.set(exerciseId, [...participants]);
+    if (!this.exerciseMap.has(exerciseId)) {
+      const roles = deriveRoles(participants);
+      const scenarioId = exerciseId;
+      this.seedExercise(exerciseId, gameMode, scenarioId);
+      if (!this.scenarios.find((s) => s.id === scenarioId)) {
+        this.seedScenario({
+          id: scenarioId,
+          title: 'Test Scenario',
+          description: '',
+          domain_id: null,
+          content: { roles, game_mode: gameMode },
+          version: 1,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      }
+    }
   }
 
   private addParticipant(exerciseId: number, p: MockParticipant): void {

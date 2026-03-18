@@ -159,22 +159,26 @@ async function installMocks(
   snap: ReturnType<typeof snapshot>,
   ctx = CONTEXT,
 ): Promise<void> {
+  const decisions = snap.decisions ?? [];
   await page.route(`**/api/exercises/${EX_ID}/engine/snapshot`, (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(snap) }),
   );
   await page.route(`**/api/exercises/${EX_ID}/engine/context`, (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ctx) }),
   );
-  await page.route('**/api/decisions*', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-  );
   await page.route(`**/api/exercises/${EX_ID}/engine/decisions`, async (route) => {
     if (route.request().method() === 'GET') {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify(decisions),
+      });
     } else {
       await route.fallback();
     }
   });
+  await page.route('**/api/decisions*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+  );
   await page.route('**/ws?*', (route) => route.abort('connectionrefused'));
   await page.route('**/ws', (route) => route.abort('connectionrefused'));
 }
