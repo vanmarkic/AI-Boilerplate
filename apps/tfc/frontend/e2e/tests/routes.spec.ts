@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('TFC Routes', () => {
+test.describe('TFC Routes @smoke @routes', () => {
   test('builder route loads', async ({ page }) => {
     await page.goto('/builder');
     await expect(page.locator('body')).not.toBeEmpty();
