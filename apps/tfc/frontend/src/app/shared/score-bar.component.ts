@@ -1,8 +1,13 @@
 import {
-  ChangeDetectionStrategy, Component, input, inject,
-  ElementRef, OnChanges, AfterViewInit,
-} from '@angular/core';
-import { AnimationService } from '../core/animation.service';
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  inject,
+  ElementRef,
+  OnChanges,
+  AfterViewInit,
+} from "@angular/core";
+import { AnimationService } from "../core/animation.service";
 
 export interface ScoreState {
   totalScore: number;
@@ -12,11 +17,14 @@ export interface ScoreState {
 }
 
 @Component({
-  selector: 'tfc-score-bar',
+  selector: "tfc-score-bar",
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="score-bar">
-      <div class="score-bar__vignette" [class.score-bar__vignette--active]="penaltyActive"></div>
+      <div
+        class="score-bar__vignette"
+        [class.score-bar__vignette--active]="penaltyActive"
+      ></div>
       <span class="text-sm font-medium">Turn {{ score()?.turnNumber }}</span>
       <span class="score-bar__value">{{ displayScore }}</span>
       @if (score()?.nextDecisionTimeMs; as ms) {
@@ -56,8 +64,14 @@ export class ScoreBarComponent implements AfterViewInit, OnChanges {
 
     if (s.penaltyMs && s.penaltyMs > 0) {
       this.penaltyActive = true;
-      this.anim.shake(this.el.nativeElement.querySelector('.score-bar'), 2, 0.3);
-      setTimeout(() => { this.penaltyActive = false; }, 800);
+      this.anim.shake(
+        this.el.nativeElement.querySelector(".score-bar"),
+        2,
+        0.3,
+      );
+      setTimeout(() => {
+        this.penaltyActive = false;
+      }, 800);
     }
   }
 }

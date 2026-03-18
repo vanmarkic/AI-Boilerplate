@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 @Component({
-  selector: 'tfc-clock-display',
+  selector: "tfc-clock-display",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { 'class': 'exercise-clock' },
+  host: { class: "exercise-clock" },
   template: `
     <span class="exercise-clock__label">{{ label() }}</span>
     <span class="exercise-clock__value">{{ value() }}</span>

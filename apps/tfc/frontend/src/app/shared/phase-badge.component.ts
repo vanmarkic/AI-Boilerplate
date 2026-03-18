@@ -1,11 +1,11 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from "@angular/core";
 
 @Component({
-  selector: 'tfc-phase-badge',
+  selector: "tfc-phase-badge",
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    'class': 'exercise-phase',
-    '[attr.data-phase]': 'phase()',
+    class: "exercise-phase",
+    "[attr.data-phase]": "phase()",
   },
   template: `{{ phase() }}`,
 })
