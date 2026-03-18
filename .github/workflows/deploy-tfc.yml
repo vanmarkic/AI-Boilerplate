@@ -71,5 +71,9 @@ jobs:
             git fetch origin master
             git reset --hard origin/master
             docker compose -f docker-compose.hetzner.yml pull tfc-backend tfc-frontend
-            docker compose -f docker-compose.hetzner.yml up -d --remove-orphans
+            docker compose -f docker-compose.hetzner.yml up -d --remove-orphans || {
+              echo "=== tfc-backend logs ==="
+              docker compose -f docker-compose.hetzner.yml logs --tail 50 tfc-backend
+              exit 1
+            }
             docker image prune -f
