@@ -99,7 +99,7 @@ async function installPlayerMocks(
 
 // ── Gap 5: Score in snapshot ──────────────────────────────────────────
 
-test.describe('Gap 5 — Score in snapshot', () => {
+test.describe('Gap 5 — Score in snapshot @player', () => {
   test('displays score from snapshot on load', async ({ page }) => {
     await installPlayerMocks(page, snapshotWithScore);
     await page.goto(playerUrl('alice-01'));
@@ -119,7 +119,7 @@ test.describe('Gap 5 — Score in snapshot', () => {
 
 // ── Gap 6: PlayerType from scenario roles ─────────────────────────────
 
-test.describe('Gap 6 — PlayerType from scenario roles', () => {
+test.describe('Gap 6 — PlayerType from scenario roles @player', () => {
   test('decision-maker sees role label in footer', async ({ page }) => {
     await installPlayerMocks(page, baseSnapshot, contextWithRoles);
     await page.goto(playerUrl('co-01', 'co'));
@@ -137,7 +137,7 @@ test.describe('Gap 6 — PlayerType from scenario roles', () => {
 
 // ── Gap 3: Participant identity ───────────────────────────────────────
 
-test.describe('Gap 3 — Participant identity', () => {
+test.describe('Gap 3 — Participant identity @player @waiting-room', () => {
   test('waiting room passes participantId and role to player view', async ({ page, mockApi }) => {
     const alice = mockParticipant({ id: 'alice-99', display_name: 'Alice', role: 'player' });
     mockApi.seed(exerciseId, [alice]);

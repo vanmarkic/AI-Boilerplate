@@ -64,7 +64,7 @@ function joinable(overrides: Record<string, unknown> = {}) {
 // /home — Three mutually exclusive visual states
 // ═══════════════════════════════════════════════════════════════════════
 
-test.describe('/home — Menu state (no lobby, no picker)', () => {
+test.describe('/home — Menu state (no lobby, no picker) @home', () => {
   test('shows all 3 menu cards', async ({ page, mockApi }) => {
     await mockApi.install();
     await page.goto('/home');
@@ -83,7 +83,7 @@ test.describe('/home — Menu state (no lobby, no picker)', () => {
   });
 });
 
-test.describe('/home — Picker state', () => {
+test.describe('/home — Picker state @home @scenario-builder', () => {
   test('clicking "Run Exercise" shows picker, hides menu', async ({ page, mockApi }) => {
     mockApi.seedScenario(SCENARIO);
     await mockApi.install();
@@ -143,7 +143,7 @@ test.describe('/home — Picker state', () => {
 // /home — Lobby state: participant fill-level × game mode × join status
 // ═══════════════════════════════════════════════════════════════════════
 
-test.describe('/home — Lobby: empty, collaborative, not joined', () => {
+test.describe('/home — Lobby: empty, collaborative, not joined @home @waiting-room', () => {
   test('shows role slots as Open, name input, Join button', async ({ page, mockApi }) => {
     mockApi.seedJoinable(joinable());
     await mockApi.install();
@@ -168,7 +168,7 @@ test.describe('/home — Lobby: empty, collaborative, not joined', () => {
   });
 });
 
-test.describe('/home — Lobby: empty, classic, not joined', () => {
+test.describe('/home — Lobby: empty, classic, not joined @home @waiting-room', () => {
   test('shows GM slot + role slots, all Open', async ({ page, mockApi }) => {
     mockApi.seedJoinable(joinable({ game_mode: 'classic' }));
     await mockApi.install();
@@ -181,7 +181,7 @@ test.describe('/home — Lobby: empty, classic, not joined', () => {
   });
 });
 
-test.describe('/home — Lobby: partial fill (1/2)', () => {
+test.describe('/home — Lobby: partial fill (1/2) @home @waiting-room', () => {
   test('shows 1 participant badge, 1 Open slot, correct counter', async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'co' });
     mockApi.seedJoinable(joinable({ participants: [alice] }));
@@ -194,7 +194,7 @@ test.describe('/home — Lobby: partial fill (1/2)', () => {
   });
 });
 
-test.describe('/home — Lobby: full (2/2)', () => {
+test.describe('/home — Lobby: full (2/2) @home @waiting-room', () => {
   test('shows all participants, no Open slots, correct counter', async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'co' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'nav' });
@@ -209,7 +209,7 @@ test.describe('/home — Lobby: full (2/2)', () => {
   });
 });
 
-test.describe('/home — Lobby: start button logic', () => {
+test.describe('/home — Lobby: start button logic @home @waiting-room', () => {
   test('not joined → no start button visible (join form shown instead)', async ({ page, mockApi }) => {
     mockApi.seedJoinable(joinable());
     await mockApi.install();
@@ -226,7 +226,7 @@ test.describe('/home — Lobby: start button logic', () => {
 // /home — Lobby: 3-role scenario to test larger slot grids
 // ═══════════════════════════════════════════════════════════════════════
 
-test.describe('/home — Lobby: 3-role scenario', () => {
+test.describe('/home — Lobby: 3-role scenario @home @waiting-room', () => {
   test('shows 3 role slots for a 3-role scenario', async ({ page, mockApi }) => {
     mockApi.seedJoinable(joinable({
       roles: THREE_ROLES,
@@ -246,7 +246,7 @@ test.describe('/home — Lobby: 3-role scenario', () => {
 // /waiting-room — Scenario roles vs fallback
 // ═══════════════════════════════════════════════════════════════════════
 
-test.describe('/waiting-room — with scenario roles', () => {
+test.describe('/waiting-room — with scenario roles @waiting-room', () => {
   const exerciseId = 500;
 
   function wrUrl(pid: string) {
@@ -328,7 +328,7 @@ test.describe('/waiting-room — with scenario roles', () => {
   });
 });
 
-test.describe('/waiting-room — without scenario (fallback)', () => {
+test.describe('/waiting-room — without scenario (fallback) @waiting-room', () => {
   const exerciseId = 600;
 
   test('shows generic role dropdown', async ({ page, mockApi }) => {
