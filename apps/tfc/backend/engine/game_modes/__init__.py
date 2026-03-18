@@ -10,7 +10,7 @@ from __future__ import annotations
 from enum import StrEnum
 
 from engine.game_modes.classic import ClassicMode
-from engine.game_modes.protocol import GameMode  # noqa: F401 — re-exported
+from engine.game_modes.protocol import GameMode
 
 
 class GameModeName(StrEnum):

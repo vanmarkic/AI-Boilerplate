@@ -6,4 +6,4 @@ import pytest
 @pytest.fixture(autouse=True)
 async def setup_db() -> None:
     """No-op: engine tests don't need a database."""
-    yield  # type: ignore[misc]
+    return  # type: ignore[misc]
