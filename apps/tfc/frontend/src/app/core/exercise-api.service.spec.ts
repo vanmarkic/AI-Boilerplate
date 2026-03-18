@@ -18,6 +18,8 @@ describe('ExerciseApiService', () => {
     scenario_id: 10,
     domain_id: null,
     time_factor: 1.0,
+    game_mode: 'classic',
+    session_code: 'TEST01',
     created_at: '2026-03-17T00:00:00Z',
     updated_at: '2026-03-17T00:00:00Z',
   };
@@ -31,6 +33,8 @@ describe('ExerciseApiService', () => {
   });
 
   afterEach(() => {
+    // Flush domain-configs request fired by DomainService constructor
+    httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
     httpTesting.verify();
   });
 

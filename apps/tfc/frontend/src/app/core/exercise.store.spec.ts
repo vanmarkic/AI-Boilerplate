@@ -31,6 +31,7 @@ describe('ExerciseStore', () => {
             resolved_at_pt_ms: null, released: false,
           },
         ],
+        score: null,
       });
       const countdown = store.issuesWithCountdown();
       expect(countdown.length).toBe(1);
@@ -53,6 +54,7 @@ describe('ExerciseStore', () => {
             resolved_at_pt_ms: null, released: false,
           },
         ],
+        score: null,
       });
       const countdown = store.issuesWithCountdown();
       expect(countdown[0].remaining_ms).toBe(0);
@@ -73,6 +75,7 @@ describe('ExerciseStore', () => {
             resolved_at_pt_ms: null, released: false,
           },
         ],
+        score: null,
       });
       expect(store.issuesWithCountdown().length).toBe(0);
     });
@@ -92,6 +95,7 @@ describe('ExerciseStore', () => {
             resolved_at_pt_ms: null, released: false,
           },
         ],
+        score: null,
       });
       expect(store.issuesWithCountdown().length).toBe(0);
     });
