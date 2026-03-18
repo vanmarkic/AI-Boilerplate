@@ -138,6 +138,7 @@ test.describe('Waiting room — 2 Player Mode toggle visibility', () => {
   test('checkbox visible in simple_collaborative mode', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(EX_ID, [me]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
@@ -148,6 +149,7 @@ test.describe('Waiting room — 2 Player Mode toggle visibility', () => {
   test('checkbox NOT visible in classic mode', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(EX_ID, [me]);
+    mockApi.seedExercise(EX_ID, 'classic');
     await mockApi.install();
 
     await page.goto(`/waiting-room?exerciseId=${EX_ID}&participantId=${me.id}`);
@@ -161,44 +163,46 @@ test.describe('Waiting room — 2 Player Mode toggle visibility', () => {
 //    Untoggled shows Player badge (no dropdowns).
 
 test.describe('Waiting room — role selector after toggle', () => {
-  test('toggling on shows role dropdowns instead of Player badge', async ({ page, mockApi }) => {
+  test('toggling on shows 2-player role options', async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'player' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'player' });
     mockApi.seed(EX_ID, [alice, bob]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
 
-    // Initially: badges, no dropdowns
-    await expect(page.locator('select')).not.toBeVisible();
-
     // Toggle on
     await page.getByText('2 Player Mode').click();
 
-    // Now: role dropdowns visible
+    // 2-player role dropdowns visible with correct options
     const selects = page.locator('select');
     await expect(selects.first()).toBeVisible();
-
-    // Options should be Decision Maker and All Advisors
     const options = selects.first().locator('option');
     await expect(options).toHaveCount(2);
     await expect(options.nth(0)).toHaveText('Decision Maker');
     await expect(options.nth(1)).toHaveText('All Advisors');
   });
 
-  test('toggling off restores Player badges', async ({ page, mockApi }) => {
+  test('toggling off hides 2-player role dropdowns', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
     mockApi.seed(EX_ID, [me]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
 
-    // Toggle on then off
+    // Toggle on — 2-player selects visible
     await page.getByText('2 Player Mode').click();
-    await expect(page.locator('select')).toBeVisible();
+    const firstSelect = page.locator('select').first();
+    await expect(firstSelect).toBeVisible();
+    const opts = firstSelect.locator('option');
+    await expect(opts.nth(0)).toHaveText('Decision Maker');
 
+    // Toggle off — 2-player selects gone
     await page.getByText('2 Player Mode').click();
-    await expect(page.locator('select')).not.toBeVisible();
+    // No select with "Decision Maker" option should be visible
+    await expect(page.getByText('Decision Maker')).not.toBeVisible();
   });
 });
 
@@ -211,6 +215,7 @@ test.describe('Waiting room — 2-player start constraints', () => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'decision_maker' });
     mockApi.seed(EX_ID, [alice, bob]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
@@ -225,6 +230,7 @@ test.describe('Waiting room — 2-player start constraints', () => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'all_advisors' });
     mockApi.seed(EX_ID, [alice, bob]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
@@ -238,6 +244,7 @@ test.describe('Waiting room — 2-player start constraints', () => {
   test('start disabled with only one participant in 2-player mode', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
     mockApi.seed(EX_ID, [me]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
@@ -253,6 +260,7 @@ test.describe('Waiting room — 2-player start constraints', () => {
     const bob = mockParticipant({ display_name: 'Bob', role: 'all_advisors' });
     const charlie = mockParticipant({ display_name: 'Charlie', role: 'all_advisors' });
     mockApi.seed(EX_ID, [alice, bob, charlie]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
