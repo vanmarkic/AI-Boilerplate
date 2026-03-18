@@ -13,7 +13,7 @@ import {
 
 // ── Waiting Room View ──────────────────────────────────────────────────
 
-test.describe('Waiting room view', () => {
+test.describe('Waiting room view @waiting-room', () => {
   const exerciseId = 100;
 
   function waitingRoomUrl(participantId: string): string {
@@ -88,7 +88,7 @@ test.describe('Waiting room view', () => {
 
 // ── Game Master Controls ───────────────────────────────────────────────
 
-test.describe('Game master controls', () => {
+test.describe('Game master controls @waiting-room @game-master', () => {
   const exerciseId = 200;
 
   function waitingRoomUrl(participantId: string): string {
@@ -198,7 +198,7 @@ test.describe('Game master controls', () => {
 
 // ── Role Change ────────────────────────────────────────────────────────
 
-test.describe('Role change', () => {
+test.describe('Role change @waiting-room', () => {
   const exerciseId = 300;
 
   function waitingRoomUrl(participantId: string): string {
@@ -247,7 +247,7 @@ test.describe('Role change', () => {
 
 // ── Leave Flow ─────────────────────────────────────────────────────────
 
-test.describe('Leave flow', () => {
+test.describe('Leave flow @waiting-room', () => {
   const exerciseId = 400;
 
   function waitingRoomUrl(participantId: string): string {
