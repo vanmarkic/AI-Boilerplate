@@ -1,8 +1,13 @@
 import {
-  ChangeDetectionStrategy, Component, input, inject,
-  AfterViewInit, ElementRef, OnChanges,
-} from '@angular/core';
-import { AnimationService } from '../core/animation.service';
+  ChangeDetectionStrategy,
+  Component,
+  input,
+  inject,
+  AfterViewInit,
+  ElementRef,
+  OnChanges,
+} from "@angular/core";
+import { AnimationService } from "../core/animation.service";
 
 export interface AdvisorRecommendation {
   participantId: string;
@@ -11,19 +16,23 @@ export interface AdvisorRecommendation {
 }
 
 @Component({
-  selector: 'tfc-advisor-bubbles',
+  selector: "tfc-advisor-bubbles",
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex flex-wrap gap-xs">
       @for (rec of recommendations(); track rec.participantId) {
         <div class="advisor-bubble">
-          <span class="advisor-bubble__avatar">{{ initial(rec.participantName) }}</span>
+          <span class="advisor-bubble__avatar">{{
+            initial(rec.participantName)
+          }}</span>
           <span class="text-muted-foreground">{{ rec.participantName }}</span>
         </div>
       }
       @if (recommendations().length > 0) {
-        <span class="advisor-bubble__count"
-          [class.advisor-bubble__count--bounce]="bouncing">
+        <span
+          class="advisor-bubble__count"
+          [class.advisor-bubble__count--bounce]="bouncing"
+        >
           {{ recommendations().length }}
         </span>
       }
@@ -53,15 +62,20 @@ export class AdvisorBubblesComponent implements AfterViewInit, OnChanges {
     if (count > this.prevCount) {
       this.animateBubbles();
       this.bouncing = true;
-      setTimeout(() => { this.bouncing = false; }, 250);
+      setTimeout(() => {
+        this.bouncing = false;
+      }, 250);
     }
     this.prevCount = count;
   }
 
   private animateBubbles(): void {
-    const bubbles = this.el.nativeElement.querySelectorAll('.advisor-bubble');
+    const bubbles = this.el.nativeElement.querySelectorAll(".advisor-bubble");
     this.anim.staggerIn(bubbles, {
-      y: 8, scale: 0.8, duration: 0.35, stagger: 0.06,
+      y: 8,
+      scale: 0.8,
+      duration: 0.35,
+      stagger: 0.06,
     });
   }
 }

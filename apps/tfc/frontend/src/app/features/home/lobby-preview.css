@@ -1,4 +1,8 @@
-:host { display: block; width: 100%; max-width: 560px; }
+:host {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+}
 
 .role-slots {
   display: flex;
@@ -14,7 +18,9 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md, 0.5rem);
   font-size: var(--font-size-sm, 0.875rem);
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .role-slot[data-available] {
@@ -23,19 +29,33 @@
 
 .role-slot[data-available]:hover {
   border-color: var(--color-primary);
-  background: color-mix(in oklch, var(--glass-bg) 85%, var(--color-primary) 15%);
+  background: color-mix(
+    in oklch,
+    var(--glass-bg) 85%,
+    var(--color-primary) 15%
+  );
 }
 
 .role-slot[data-taken] {
-  background: color-mix(in oklch, var(--glass-bg) 90%, var(--color-muted-foreground) 10%);
+  background: color-mix(
+    in oklch,
+    var(--glass-bg) 90%,
+    var(--color-muted-foreground) 10%
+  );
 }
 
 .role-slot[data-mine] {
   border-color: var(--color-primary);
-  background: color-mix(in oklch, var(--glass-bg) 80%, var(--color-primary) 20%);
+  background: color-mix(
+    in oklch,
+    var(--glass-bg) 80%,
+    var(--color-primary) 20%
+  );
 }
 
-.role-label { font-weight: 500; }
+.role-label {
+  font-weight: 500;
+}
 .role-type {
   font-size: var(--font-size-xs, 0.75rem);
   color: var(--color-muted-foreground);

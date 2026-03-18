@@ -1,7 +1,10 @@
-import type { EngineApiService } from '../../core/engine-api.service';
+import type { EngineApiService } from "../../core/engine-api.service";
 
 /** GM event/issue control functions — extracted to reduce view size. */
-export function createEventActions(api: EngineApiService, exerciseId: () => number) {
+export function createEventActions(
+  api: EngineApiService,
+  exerciseId: () => number,
+) {
   return {
     trigger: (id: string) => api.triggerEvent(exerciseId(), id).subscribe(),
     cancel: (id: string) => api.cancelEvent(exerciseId(), id).subscribe(),
@@ -13,7 +16,10 @@ export function createEventActions(api: EngineApiService, exerciseId: () => numb
   };
 }
 
-export function createIssueActions(api: EngineApiService, exerciseId: () => number) {
+export function createIssueActions(
+  api: EngineApiService,
+  exerciseId: () => number,
+) {
   return {
     activate: (id: string) => api.activateIssue(exerciseId(), id).subscribe(),
     mitigate: (id: string) => api.mitigateIssue(exerciseId(), id).subscribe(),
