@@ -207,6 +207,16 @@ Add strategy functions for any new dataclass fields or config parameters your mo
 
 Add a JSON seed file in `backend/seeds/` that exercises the new mode end-to-end. Ensure it passes `seed_validation_test.py`.
 
+## Migration Testing
+Every Alembic migration must have a working `downgrade()` function. The CI pipeline runs migration rollback tests (`tests/migration_rollback_test.py`) that:
+1. Upgrade to head, then downgrade step-by-step back to base.
+2. Upgrade and immediately downgrade each individual revision.
+
+When adding a new migration:
+- Always implement `downgrade()` -- never leave it as `pass`.
+- Run `python -m pytest tests/migration_rollback_test.py -v` locally against a real PostgreSQL instance before pushing.
+- Data migrations (INSERT/UPDATE) must have a corresponding reverse operation in `downgrade()`.
+
 ## Common Pitfalls
 - Do NOT import `sqlalchemy`, `fastapi`, or `httpx` inside `engine/` — it must stay pure.
 - Do NOT create a second WebSocket endpoint — extend `ws_router.py` if needed.
