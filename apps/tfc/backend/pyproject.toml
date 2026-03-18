@@ -28,7 +28,7 @@ packages = ["core", "features"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
-testpaths = ["features", "core", "engine"]
+testpaths = ["features", "core", "engine", "tests"]
 python_files = ["*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
