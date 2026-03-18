@@ -9,6 +9,13 @@ import {
 } from '@angular/core';
 import * as THREE from 'three';
 import {
+  Convergence,
+  CONVERGENCE_INTERVAL,
+  createConvergence,
+  disposeConvergence,
+  updateConvergence,
+} from './sea-convergence';
+import {
   createGlowTexture,
   MAX_SIGNALS,
   Signal,
@@ -52,6 +59,9 @@ export class SeaBackdrop implements OnDestroy {
   private nextSpawn = 0;
   private glowTexture!: THREE.Texture;
 
+  private convergences: Convergence[] = [];
+  private nextConvergence = 2;
+
   private get themeColor(): THREE.Color {
     const raw = getComputedStyle(document.documentElement)
       .getPropertyValue('--color-primary')
@@ -80,6 +90,9 @@ export class SeaBackdrop implements OnDestroy {
       this.scene.remove(s.light, s.sprite);
       s.sprite.material.dispose();
     }
+    for (const c of this.convergences) {
+      disposeConvergence(this.scene, c);
+    }
   }
 
   private initScene(): void {
@@ -87,55 +100,40 @@ export class SeaBackdrop implements OnDestroy {
     const w = canvas.clientWidth || 1;
     const h = canvas.clientHeight || 1;
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-    });
+    this.renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.renderer.setSize(w, h, false);
 
     const bgColor = new THREE.Color(0x061218);
     this.scene = new THREE.Scene();
     this.scene.background = bgColor;
-
     this.camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 100);
     this.camera.position.set(0, 1.6, 5);
     this.camera.lookAt(0, -0.4, -2);
 
-    const ambient = new THREE.AmbientLight(0xffffff, 0.5);
-    this.scene.add(ambient);
-
-    const directional = new THREE.DirectionalLight(0xffffff, 0.8);
-    directional.position.set(-3, 5, 4);
-    this.scene.add(directional);
+    this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
+    dir.position.set(-3, 5, 4);
+    this.scene.add(dir);
 
     const primary = this.themeColor;
-    const pointLight = new THREE.PointLight(primary, 2.5, 20);
-    pointLight.position.set(0, 2, 3);
-    this.scene.add(pointLight);
+    const pl1 = new THREE.PointLight(primary, 2.5, 20);
+    pl1.position.set(0, 2, 3);
+    const pl2 = new THREE.PointLight(primary, 1.5, 15);
+    pl2.position.set(-4, 1, -2);
+    this.scene.add(pl1, pl2);
 
-    const pointLight2 = new THREE.PointLight(primary, 1.5, 15);
-    pointLight2.position.set(-4, 1, -2);
-    this.scene.add(pointLight2);
-
-    const geometry = new THREE.PlaneGeometry(24, 14, 18, 12);
-    geometry.rotateX(-Math.PI / 2);
-
-    const material = new THREE.MeshBasicMaterial({
-      color: primary,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.85,
+    const geo = new THREE.PlaneGeometry(24, 14, 18, 12);
+    geo.rotateX(-Math.PI / 2);
+    const mat = new THREE.MeshBasicMaterial({
+      color: primary, wireframe: true, transparent: true, opacity: 0.85,
     });
-
-    this.plane = new THREE.Mesh(geometry, material);
+    this.plane = new THREE.Mesh(geo, mat);
     this.plane.position.y = -0.3;
     this.scene.add(this.plane);
 
     this.scene.fog = new THREE.Fog(bgColor, 8, 16);
     this.glowTexture = createGlowTexture();
-
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
     this.resizeObserver.observe(canvas);
   }
@@ -146,27 +144,19 @@ export class SeaBackdrop implements OnDestroy {
     const types = [SignalType.Friendly, SignalType.Hostile, SignalType.Neutral];
     const type = types[Math.floor(Math.random() * types.length)];
     const color = SIGNAL_COLORS[type];
-
     const x = (Math.random() - 0.5) * 14;
     const z = (Math.random() - 0.5) * 8;
-
     const light = new THREE.PointLight(color, 0, 5);
     light.position.set(x, waveY(x, z, t), z);
     this.scene.add(light);
-
     const mat = new THREE.SpriteMaterial({
-      map: this.glowTexture,
-      color,
-      transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
+      map: this.glowTexture, color, transparent: true,
+      opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false,
     });
     const sprite = new THREE.Sprite(mat);
     sprite.scale.set(0.8, 0.8, 1);
     sprite.position.copy(light.position);
     this.scene.add(sprite);
-
     this.signals.push({ type, x, z, birth: t, light, sprite });
   }
 
@@ -206,6 +196,23 @@ export class SeaBackdrop implements OnDestroy {
     }
   }
 
+  // ── Convergences ─────────────────────────────────────────
+
+  private updateConvergences(t: number): void {
+    if (t >= this.nextConvergence) {
+      this.convergences.push(
+        createConvergence(this.scene, this.glowTexture, this.themeColor, t),
+      );
+      this.nextConvergence = t + CONVERGENCE_INTERVAL + Math.random() * 2;
+    }
+    for (let i = this.convergences.length - 1; i >= 0; i--) {
+      if (!updateConvergence(this.convergences[i], t)) {
+        disposeConvergence(this.scene, this.convergences[i]);
+        this.convergences.splice(i, 1);
+      }
+    }
+  }
+
   // ── Core loop ──────────────────────────────────────────
 
   private handleResize(): void {
@@ -234,6 +241,7 @@ export class SeaBackdrop implements OnDestroy {
     this.plane.geometry.computeVertexNormals();
 
     this.updateSignals(t);
+    this.updateConvergences(t);
     this.renderer.render(this.scene, this.camera);
   }
 }
