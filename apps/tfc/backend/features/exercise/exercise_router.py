@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, status
 
 from core.dependencies import get_exercise_service, get_scenario_service
+from core.exceptions import NotFoundError
 from features.exercise.exercise_schema import (
     CreateExerciseRequest,
     ExerciseResponse,
@@ -57,7 +58,7 @@ async def list_joinable_exercises(
             scenario = await scenario_service.get_scenario(
                 exercise.scenario_id,
             )
-        except HTTPException:
+        except NotFoundError:
             continue
         if scenario.content is None:
             continue
