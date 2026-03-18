@@ -10,6 +10,7 @@ import type { DecisionTemplateDef } from '../../core/scenario-api.service';
 import { ScenarioBuilderStore } from './scenario-builder.store';
 import { ScenarioEventEditorComponent } from './scenario-event-editor';
 import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
+import { validateScenarioContent } from './validate-scenario-content';
 
 @Component({
   selector: 'tfc-scenario-builder-view',
@@ -36,6 +37,18 @@ import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
           <button uiButton variant="outline" (click)="store.reset()">New</button>
         }
       </div>
+
+      @if (store.error()) {
+        <div class="p-sm border border-destructive bg-destructive/10 text-destructive text-sm rounded"
+          role="alert">
+          <strong>Validation errors:</strong>
+          <ul class="mt-xs ml-md list-disc">
+            @for (err of store.error()!.split('\\n'); track err) {
+              <li>{{ err }}</li>
+            }
+          </ul>
+        </div>
+      }
 
       <div class="grid grid-cols-2 gap-md">
         <tfc-scenario-event-editor />
@@ -164,11 +177,21 @@ export class ScenarioBuilderView implements OnInit {
   }
 
   protected save(): void {
+    this.store.clearError();
+    const content = this.store.content();
+    const errors = validateScenarioContent(content);
+    if (!this.store.title().trim()) {
+      errors.unshift('Title is required.');
+    }
+    if (errors.length > 0) {
+      this.store.setError(errors.join('\n'));
+      return;
+    }
     this.store.setSaving(true);
     const payload = {
       title: this.store.title(),
       description: this.store.description(),
-      content: this.store.content(),
+      content,
     };
     const id = this.store.scenarioId();
     const req = id ? this.api.update(id, payload) : this.api.create(payload);
@@ -178,7 +201,7 @@ export class ScenarioBuilderView implements OnInit {
         this.store.setSaving(false);
         this.loadList();
       },
-      error: () => this.store.setError('Save failed'),
+      error: () => this.store.setError('Save failed — server rejected the scenario.'),
     });
   }
 
