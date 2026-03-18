@@ -18,6 +18,31 @@ import type { Page } from '@playwright/test';
 
 const EX_ID = 1100;
 
+const SCENARIO_ROLES = [
+  { id: 'co', label: 'Commanding Officer', player_type: 'decision_maker' as const },
+  { id: 'nav', label: 'Navigator', player_type: 'advisor' as const },
+  { id: 'ops', label: 'Operations', player_type: 'advisor' as const },
+  { id: 'cyops', label: 'CyOps', player_type: 'advisor' as const },
+];
+
+function seedScenarioWithRoles(mockApi: import('../fixtures/base.fixture').MockApi, gameMode: string): void {
+  if (!mockApi.exerciseMap.has(EX_ID)) {
+    mockApi.seedExercise(EX_ID, gameMode, EX_ID);
+  }
+  if (!mockApi.scenarios.find((s) => s.id === EX_ID)) {
+    mockApi.seedScenario({
+      id: EX_ID,
+      title: 'Test Scenario',
+      description: '',
+      domain_id: null,
+      content: { roles: SCENARIO_ROLES, game_mode: gameMode },
+      version: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+  }
+}
+
 // ── State building blocks ─────────────────────────────────────────────
 
 const TIME = { play_time_ms: 120_000, real_time_ms: 120_000, factor: 1, paused: false };
@@ -35,12 +60,7 @@ const CONTEXT = {
   briefing: 'You are aboard the USS Sentinel.',
   objectives: ['Defend the ship'],
   rules: ['Time is critical'],
-  roles: [
-    { id: 'co', label: 'Commanding Officer', player_type: 'decision_maker' },
-    { id: 'nav', label: 'Navigator', player_type: 'advisor' },
-    { id: 'ops', label: 'Operations', player_type: 'advisor' },
-    { id: 'cyops', label: 'CyOps', player_type: 'advisor' },
-  ],
+  roles: SCENARIO_ROLES,
 };
 
 const DECISION_OPEN = {
@@ -106,22 +126,26 @@ async function installPlayerMocks(
   snap: ReturnType<typeof snapshot>,
   ctx = CONTEXT,
 ): Promise<void> {
+  const decisions = snap.decisions ?? [];
   await page.route(`**/api/exercises/${EX_ID}/engine/snapshot`, (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(snap) }),
   );
   await page.route(`**/api/exercises/${EX_ID}/engine/context`, (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(ctx) }),
   );
-  await page.route('**/api/decisions*', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
-  );
   await page.route(`**/api/exercises/${EX_ID}/engine/decisions`, async (route) => {
     if (route.request().method() === 'GET') {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: '[]' });
+      await route.fulfill({
+        status: 200, contentType: 'application/json',
+        body: JSON.stringify(decisions),
+      });
     } else {
       await route.fallback();
     }
   });
+  await page.route('**/api/decisions*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify([]) }),
+  );
   await page.route('**/ws?*', (route) => route.abort('connectionrefused'));
   await page.route('**/ws', (route) => route.abort('connectionrefused'));
 }
@@ -136,9 +160,9 @@ function collabWaitingRoomUrl(participantId: string): string {
 
 test.describe('Waiting room — 2 Player Mode toggle visibility @waiting-room @two-player', () => {
   test('checkbox visible in simple_collaborative mode', async ({ page, mockApi }) => {
-    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(EX_ID, [me]);
-    mockApi.seedExercise(EX_ID, 'simple_collaborative');
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(EX_ID, [me], 'simple_collaborative');
+    seedScenarioWithRoles(mockApi, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
@@ -147,9 +171,9 @@ test.describe('Waiting room — 2 Player Mode toggle visibility @waiting-room @t
   });
 
   test('checkbox NOT visible in classic mode', async ({ page, mockApi }) => {
-    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(EX_ID, [me]);
-    mockApi.seedExercise(EX_ID, 'classic');
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(EX_ID, [me], 'classic');
+    seedScenarioWithRoles(mockApi, 'classic');
     await mockApi.install();
 
     await page.goto(`/waiting-room?exerciseId=${EX_ID}&participantId=${me.id}`);
@@ -160,14 +184,14 @@ test.describe('Waiting room — 2 Player Mode toggle visibility @waiting-room @t
 
 // ── 2. WAITING ROOM — ROLE SELECTOR ACTIVATION ─────────────────────
 //    Toggling checkbox shows role dropdowns with Decision Maker / All Advisors.
-//    Untoggled shows Player badge (no dropdowns).
+//    Untoggled shows role-slot-list (no dropdowns).
 
 test.describe('Waiting room — role selector after toggle @waiting-room @two-player', () => {
   test('toggling on shows 2-player role options', async ({ page, mockApi }) => {
-    const alice = mockParticipant({ display_name: 'Alice', role: 'player' });
-    const bob = mockParticipant({ display_name: 'Bob', role: 'player' });
-    mockApi.seed(EX_ID, [alice, bob]);
-    mockApi.seedExercise(EX_ID, 'simple_collaborative');
+    const alice = mockParticipant({ display_name: 'Alice', role: 'co' });
+    const bob = mockParticipant({ display_name: 'Bob', role: 'nav' });
+    mockApi.seed(EX_ID, [alice, bob], 'simple_collaborative');
+    seedScenarioWithRoles(mockApi, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
@@ -185,9 +209,9 @@ test.describe('Waiting room — role selector after toggle @waiting-room @two-pl
   });
 
   test('toggling off hides 2-player role dropdowns', async ({ page, mockApi }) => {
-    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(EX_ID, [me]);
-    mockApi.seedExercise(EX_ID, 'simple_collaborative');
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(EX_ID, [me], 'simple_collaborative');
+    seedScenarioWithRoles(mockApi, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
@@ -214,8 +238,8 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
   test('start disabled when both have same role', async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'decision_maker' });
-    mockApi.seed(EX_ID, [alice, bob]);
-    mockApi.seedExercise(EX_ID, 'simple_collaborative');
+    mockApi.seed(EX_ID, [alice, bob], 'simple_collaborative');
+    seedScenarioWithRoles(mockApi, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
@@ -229,8 +253,8 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
   test('start enabled with one decision_maker and one all_advisors', async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'all_advisors' });
-    mockApi.seed(EX_ID, [alice, bob]);
-    mockApi.seedExercise(EX_ID, 'simple_collaborative');
+    mockApi.seed(EX_ID, [alice, bob], 'simple_collaborative');
+    seedScenarioWithRoles(mockApi, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
@@ -243,8 +267,8 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
 
   test('start disabled with only one participant in 2-player mode', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
-    mockApi.seed(EX_ID, [me]);
-    mockApi.seedExercise(EX_ID, 'simple_collaborative');
+    mockApi.seed(EX_ID, [me], 'simple_collaborative');
+    seedScenarioWithRoles(mockApi, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
@@ -259,8 +283,8 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
     const alice = mockParticipant({ display_name: 'Alice', role: 'decision_maker' });
     const bob = mockParticipant({ display_name: 'Bob', role: 'all_advisors' });
     const charlie = mockParticipant({ display_name: 'Charlie', role: 'all_advisors' });
-    mockApi.seed(EX_ID, [alice, bob, charlie]);
-    mockApi.seedExercise(EX_ID, 'simple_collaborative');
+    mockApi.seed(EX_ID, [alice, bob, charlie], 'simple_collaborative');
+    seedScenarioWithRoles(mockApi, 'simple_collaborative');
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(alice.id));
@@ -279,8 +303,9 @@ test.describe('Waiting room — 2-player start constraints @waiting-room @two-pl
 test.describe('Waiting room — missing roles error state @waiting-room @two-player', () => {
   test('shows error message when no scenario roles loaded', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(EX_ID, [me]);
-    // No seedExercise → loadScenarioRoles 404 → scenarioRoles stays empty
+    // Only seed participants, explicitly set exercise with no scenario
+    mockApi.rooms.set(EX_ID, [me]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative', null);
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));
@@ -292,7 +317,8 @@ test.describe('Waiting room — missing roles error state @waiting-room @two-pla
 
   test('start button disabled when no roles loaded', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(EX_ID, [me]);
+    mockApi.rooms.set(EX_ID, [me]);
+    mockApi.seedExercise(EX_ID, 'simple_collaborative', null);
     await mockApi.install();
 
     await page.goto(collabWaitingRoomUrl(me.id));

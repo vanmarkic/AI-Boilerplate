@@ -253,43 +253,16 @@ test.describe('/waiting-room — with scenario roles @waiting-room', () => {
     return `/waiting-room?exerciseId=${exerciseId}&participantId=${pid}`;
   }
 
-  function mockExerciseAndScenario(page: import('@playwright/test').Page, scenarioId: number | null, gameMode: string) {
-    return Promise.all([
-      page.route(`**/api/exercises/${exerciseId}`, async (route) => {
-        if (route.request().method() !== 'GET') { await route.fallback(); return; }
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            id: exerciseId, title: 'WR Exercise',
-            description: '', phase: 'setup',
-            scenario_id: scenarioId, domain_id: null,
-            time_factor: 1.0, game_mode: gameMode,
-            session_code: 'TEST01',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          }),
-        });
-      }),
-      page.route(`**/api/scenarios/${scenarioId}`, async (route) => {
-        if (route.request().method() !== 'GET') { await route.fallback(); return; }
-        await route.fulfill({
-          status: 200,
-          contentType: 'application/json',
-          body: JSON.stringify({
-            ...SCENARIO,
-            id: scenarioId,
-            content: { ...SCENARIO.content, game_mode: gameMode },
-          }),
-        });
-      }),
-    ]);
-  }
-
   test('scenario roles shown as claimable slots', async ({ page, mockApi }) => {
-    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
-    await mockExerciseAndScenario(page, 1, 'simple_collaborative');
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(exerciseId, [me], 'simple_collaborative');
+    // Override with specific scenario roles
+    mockApi.seedExercise(exerciseId, 'simple_collaborative', 1);
+    mockApi.seedScenario({
+      ...SCENARIO,
+      id: 1,
+      content: { ...SCENARIO.content, game_mode: 'simple_collaborative' },
+    });
     await mockApi.install();
     await page.goto(wrUrl(me.id));
 
@@ -298,9 +271,14 @@ test.describe('/waiting-room — with scenario roles @waiting-room', () => {
   });
 
   test('collaborative mode shows collaborative message', async ({ page, mockApi }) => {
-    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
-    await mockExerciseAndScenario(page, 1, 'simple_collaborative');
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(exerciseId, [me], 'simple_collaborative');
+    mockApi.seedExercise(exerciseId, 'simple_collaborative', 1);
+    mockApi.seedScenario({
+      ...SCENARIO,
+      id: 1,
+      content: { ...SCENARIO.content, game_mode: 'simple_collaborative' },
+    });
     await mockApi.install();
     await page.goto(wrUrl(me.id));
 
@@ -308,9 +286,14 @@ test.describe('/waiting-room — with scenario roles @waiting-room', () => {
   });
 
   test('classic mode shows assign roles message', async ({ page, mockApi }) => {
-    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
-    await mockExerciseAndScenario(page, 1, 'classic');
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(exerciseId, [me], 'classic');
+    mockApi.seedExercise(exerciseId, 'classic', 1);
+    mockApi.seedScenario({
+      ...SCENARIO,
+      id: 1,
+      content: { ...SCENARIO.content, game_mode: 'classic' },
+    });
     await mockApi.install();
     await page.goto(wrUrl(me.id));
 
@@ -318,9 +301,14 @@ test.describe('/waiting-room — with scenario roles @waiting-room', () => {
   });
 
   test('classic mode shows GM slot', async ({ page, mockApi }) => {
-    const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
-    await mockExerciseAndScenario(page, 1, 'classic');
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(exerciseId, [me], 'classic');
+    mockApi.seedExercise(exerciseId, 'classic', 1);
+    mockApi.seedScenario({
+      ...SCENARIO,
+      id: 1,
+      content: { ...SCENARIO.content, game_mode: 'classic' },
+    });
     await mockApi.install();
     await page.goto(wrUrl(me.id));
 
@@ -331,31 +319,35 @@ test.describe('/waiting-room — with scenario roles @waiting-room', () => {
 test.describe('/waiting-room — without scenario (fallback) @waiting-room', () => {
   const exerciseId = 600;
 
-  test('shows generic role dropdown', async ({ page, mockApi }) => {
+  test('shows error message when no scenario roles defined', async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: 'Alice', role: 'player' });
-    mockApi.seed(exerciseId, [me]);
-    await page.route(`**/api/exercises/${exerciseId}`, async (route) => {
-      if (route.request().method() !== 'GET') { await route.fallback(); return; }
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          id: exerciseId, title: 'No-Scenario Exercise',
-          description: '', phase: 'setup',
-          scenario_id: null, domain_id: null,
-          time_factor: 1.0, game_mode: 'classic',
-          session_code: 'NOSCD1',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        }),
-      });
-    });
+    mockApi.rooms.set(exerciseId, [me]);
+    mockApi.seedExercise(exerciseId, 'classic', null);
     await mockApi.install();
     await page.goto(`/waiting-room?exerciseId=${exerciseId}&participantId=${me.id}`);
 
-    // Fallback: generic dropdown with Player/Observer/Game Master
-    const selects = page.locator('select');
-    await expect(selects.first()).toBeVisible();
+    // No scenario → error state
+    await expect(page.getByText('Scenario has no roles defined')).toBeVisible();
   });
 });
 
+// ═══════════════════════════════════════════════════════════════════════
+// /join — collaborative mode
+// ═══════════════════════════════════════════════════════════════════════
+
+test.describe('/join — collaborative mode', () => {
+  const exerciseId = 700;
+
+  test('joining collaborative exercise shows waiting room', async ({ page, mockApi }) => {
+    const me = mockParticipant({ display_name: 'Alice', role: 'co' });
+    mockApi.seed(exerciseId, [me], 'simple_collaborative');
+    await mockApi.install();
+
+    await page.goto(
+      `/waiting-room?exerciseId=${exerciseId}&participantId=${me.id}&gameMode=simple_collaborative`,
+    );
+
+    await expect(page.getByText('Collaborative exercise')).toBeVisible();
+    await expect(page.getByText('Alice')).toBeVisible();
+  });
+});
