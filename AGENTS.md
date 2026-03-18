@@ -68,6 +68,7 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - Do NOT use `app-` prefix for UI component selectors — use `ui-` prefix (e.g., `ui-button`, `ui-card`). Button directive selector is `uiButton`.
 - Do NOT add app-specific or domain-specific components to `packages/ui/`. The shared UI library is for generic building blocks only. If a component is only meaningful within a single app (e.g., an exercise-specific panel), it belongs in that app's `features/` folder.
 - Do NOT edit generated API client files in `frontend/src/app/shared/api/generated/` — run `make generate` instead.
+- When using gh CLI, always pass `-R vanmarkic/AI-Boilerplate` explicitly.
 
 ## Meta
 - See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
