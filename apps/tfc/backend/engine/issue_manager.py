@@ -1,8 +1,11 @@
-"""Manages issue lifecycle with activation triggers and auto-resolve countdowns.
+"""Manages defect (issue) lifecycle with activation triggers and auto-resolve countdowns.
 
-Issues progress through: inactive -> active -> mitigated -> resolved.
-Trigger modes: time-based, event-based, manual (GM).
-Auto-resolve countdown = time in PT before the issue resolves automatically.
+Domain term: "defect". Code uses "issue" throughout.
+Also known as: DefectManager, defect manager.
+
+Defects progress through: inactive -> active -> mitigated -> resolved.
+Trigger modes: time-based, inject-based (event-based), manual (GM).
+Auto-resolve countdown = time in PT before the defect resolves automatically.
 """
 from __future__ import annotations
 
@@ -35,7 +38,7 @@ VALID_TRANSITIONS: dict[IssueLifecycle, set[IssueLifecycle]] = {
 
 @dataclass
 class TrackedIssue:
-    """Runtime representation of an issue during exercise execution."""
+    """Runtime representation of a defect (issue) during exercise execution."""
     id: str
     title: str
     description: str
@@ -50,7 +53,10 @@ class TrackedIssue:
 
 
 class IssueManager:
-    """Manages issue activation, auto-resolve countdowns, and lifecycle."""
+    """Manages defect (issue) activation, auto-resolve countdowns, and lifecycle.
+
+    Also known as: DefectManager.
+    """
 
     def __init__(self) -> None:
         self._issues: dict[str, TrackedIssue] = {}
