@@ -8,11 +8,12 @@ dependencies:
 api_endpoints:
   - POST /api/domain-configs
   - GET /api/domain-configs
-  - GET /api/domain-configs/{id}
+  - GET /api/domain-configs/{config_id}
   - GET /api/domain-configs/by-slug/{slug}
-  - PUT /api/domain-configs/{id}
-  - DELETE /api/domain-configs/{id}
-models: [DomainConfig]
+  - PUT /api/domain-configs/{config_id}
+  - DELETE /api/domain-configs/{config_id}
+models:
+  - DomainConfig
 events_emitted: []
 events_consumed: []
 business_rules:

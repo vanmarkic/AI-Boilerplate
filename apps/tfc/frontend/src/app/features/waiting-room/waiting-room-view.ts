@@ -38,7 +38,7 @@ const TWO_PLAYER_ROLES = [
   template: `
     <div class="flex justify-center items-center min-h-screen p-lg">
       <ui-card title="Waiting Room">
-        <div class="flex flex-col gap-md" style="min-width: 420px; max-width: 600px;">
+        <div class="flex flex-col gap-md" style="min-width: var(--container-md); max-width: var(--container-2xl);">
           <p class="text-sm text-muted-foreground">
             @if (isSimpleCollaborative()) {
               Collaborative exercise — no facilitator needed.
