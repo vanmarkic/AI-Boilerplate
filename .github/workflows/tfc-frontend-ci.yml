@@ -113,3 +113,9 @@ jobs:
           name: tfc-route-screenshots
           path: apps/tfc/frontend/screenshots/
           retention-days: 7
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: tfc-e2e-failure-screenshots
+          path: apps/tfc/frontend/test-results/
+          retention-days: 7
