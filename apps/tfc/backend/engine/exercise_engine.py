@@ -197,6 +197,7 @@ class ExerciseEngine:
                     completion_mode=t.completion_mode if t else "first_response",
                     target_roles=t.target_roles if t else [],
                     timeout_ms=timeout_ms,
+                    max_selections=t.max_selections if t else None,
                     current_pt_ms=pt,
                 )
             )
@@ -297,6 +298,7 @@ class ExerciseEngine:
                                 completion_mode=nt.completion_mode,
                                 target_roles=nt.target_roles,
                                 timeout_ms=timeout_ms,
+                                max_selections=nt.max_selections,
                                 current_pt_ms=pt,
                             )
                             all_changes.append(opened)

@@ -29,6 +29,7 @@ class DecisionTemplate:
     target_roles: list[str] = field(default_factory=list)
     timeout_ms: float = 0.0
     forced_option_ids: list[str] = field(default_factory=list)
+    max_selections: int | None = None  # None = unlimited
 
 
 @dataclass

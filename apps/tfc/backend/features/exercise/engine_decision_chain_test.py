@@ -209,6 +209,75 @@ async def test_forced_card_auto_applied(client: AsyncClient) -> None:
     assert engine.game_mode.total_score == 5.0
 
 
+# ── max_selections validation ────────────────────────────────────────────
+
+
+@pytest.mark.asyncio
+async def test_close_exceeding_max_selections_returns_400(
+    client: AsyncClient,
+) -> None:
+    eid = await _create_exercise(client)
+    t1 = DecisionTemplate(
+        id="d1",
+        title="Limited",
+        description="",
+        issue_id="iss-1",
+        question_type="multi_choice",
+        options=OPTIONS,
+        completion_mode="gm_closes",
+        max_selections=1,
+    )
+    _make_engine(eid, [t1])
+    _open_first_decision(eid, t1)
+
+    resp = await client.post(
+        f"/api/exercises/{eid}/engine/decisions/d1/close",
+        json={"selected_option_ids": ["good", "bad"]},
+    )
+    assert resp.status_code == 400
+
+
+@pytest.mark.asyncio
+async def test_close_within_max_selections_succeeds(
+    client: AsyncClient,
+) -> None:
+    eid = await _create_exercise(client)
+    t1 = DecisionTemplate(
+        id="d1",
+        title="Limited",
+        description="",
+        issue_id="iss-1",
+        question_type="multi_choice",
+        options=OPTIONS,
+        completion_mode="gm_closes",
+        max_selections=2,
+    )
+    _make_engine(eid, [t1])
+    _open_first_decision(eid, t1)
+
+    resp = await client.post(
+        f"/api/exercises/{eid}/engine/decisions/d1/close",
+        json={"selected_option_ids": ["good", "bad"]},
+    )
+    assert resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_close_with_no_max_selections_allows_all(
+    client: AsyncClient,
+) -> None:
+    eid = await _create_exercise(client)
+    t1 = _template("d1")  # max_selections=None by default
+    _make_engine(eid, [t1])
+    _open_first_decision(eid, t1)
+
+    resp = await client.post(
+        f"/api/exercises/{eid}/engine/decisions/d1/close",
+        json={"selected_option_ids": ["good", "bad"]},
+    )
+    assert resp.status_code == 200
+
+
 # ── Close nonexistent / already-closed ───────────────────────────────────
 
 

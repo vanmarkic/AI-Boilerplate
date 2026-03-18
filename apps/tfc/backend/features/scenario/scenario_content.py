@@ -32,6 +32,7 @@ class DecisionTemplateDef(BaseModel):
     timeout_ms: float = 0  # 0 = no timeout
     target_roles: list[str] = []
     forced_option_ids: list[str] = []
+    max_selections: int | None = None  # None = unlimited
 
 
 class ScenarioEventDef(BaseModel):
