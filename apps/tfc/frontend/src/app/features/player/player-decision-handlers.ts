@@ -114,5 +114,8 @@ export function resolvePlayerRole(
   } else if (role === "decision_maker") {
     store.setPlayerType("decision_maker");
     roleLabel.set("Decision Maker");
+  } else if (role === "solo_player") {
+    store.setPlayerType("decision_maker");
+    roleLabel.set("Solo Player");
   }
 }

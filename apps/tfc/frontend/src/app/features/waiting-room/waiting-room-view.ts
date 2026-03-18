@@ -27,6 +27,8 @@ const TWO_PLAYER_ROLES = [
   { id: "all_advisors", label: "All Advisors" },
 ];
 
+type PlayerCountMode = "full" | "two_player" | "practice";
+
 @Component({
   selector: "tfc-waiting-room-view",
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,7 +48,9 @@ const TWO_PLAYER_ROLES = [
           <p class="text-sm text-muted-foreground">
             @if (isSimpleCollaborative()) {
               Collaborative exercise — no facilitator needed.
-              @if (twoPlayerMode()) {
+              @if (practiceMode()) {
+                Practice mode: you'll handle all roles solo.
+              } @else if (twoPlayerMode()) {
                 2 Player Mode: assign Decision Maker and All Advisors roles.
               } @else {
                 Pick a role and start when all slots are filled.
@@ -57,17 +61,53 @@ const TWO_PLAYER_ROLES = [
           </p>
 
           @if (isSimpleCollaborative()) {
-            <label class="flex items-center gap-sm text-sm">
-              <input
-                type="checkbox"
-                [checked]="twoPlayerMode()"
-                (change)="onToggleTwoPlayer()"
-              />
-              2 Player Mode
-            </label>
+            <div class="flex gap-sm items-center">
+              <span class="text-sm font-medium">Players:</span>
+              <div class="flex gap-xs">
+                <button
+                  uiButton
+                  [variant]="playerCountMode() === 'full' ? 'default' : 'outline'"
+                  size="sm"
+                  (click)="onPlayerCountMode('full')"
+                >
+                  Full Team
+                </button>
+                <button
+                  uiButton
+                  [variant]="playerCountMode() === 'two_player' ? 'default' : 'outline'"
+                  size="sm"
+                  (click)="onPlayerCountMode('two_player')"
+                >
+                  2 Players
+                </button>
+                <button
+                  uiButton
+                  [variant]="playerCountMode() === 'practice' ? 'default' : 'outline'"
+                  size="sm"
+                  (click)="onPlayerCountMode('practice')"
+                >
+                  Practice (Solo)
+                </button>
+              </div>
+            </div>
           }
 
-          @if (twoPlayerMode()) {
+          @if (practiceMode()) {
+            <div class="flex flex-col gap-sm">
+              <p class="text-sm text-muted-foreground p-sm">
+                Practice mode — you'll play all roles.
+              </p>
+              @if (participants().length) {
+                <div class="flex items-center justify-between p-sm border-b gap-md">
+                  <div class="flex items-center gap-sm">
+                    <span class="text-sm font-medium">{{ participants()[0].display_name }}</span>
+                    <ui-badge variant="secondary">You</ui-badge>
+                  </div>
+                  <span class="text-sm text-muted-foreground">All Roles</span>
+                </div>
+              }
+            </div>
+          } @else if (twoPlayerMode()) {
             <div class="flex flex-col gap-sm">
               @for (p of participants(); track p.id) {
                 <div
@@ -144,7 +184,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   protected readonly participantId = signal("");
   protected readonly participants = signal<ParticipantResponse[]>([]);
   protected readonly gameMode = signal("classic");
-  protected readonly twoPlayerMode = signal(false);
+  protected readonly playerCountMode = signal<PlayerCountMode>("full");
   protected readonly scenarioRoles = signal<RoleDef[]>([]);
   protected readonly requiresGm = signal(false);
   protected readonly twoPlayerRoles = TWO_PLAYER_ROLES;
@@ -153,9 +193,20 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     () => this.gameMode() === "simple_collaborative",
   );
 
+  protected readonly twoPlayerMode = computed(
+    () => this.playerCountMode() === "two_player",
+  );
+
+  protected readonly practiceMode = computed(
+    () => this.playerCountMode() === "practice",
+  );
+
   protected readonly canStart = computed(() => {
     const roles = this.scenarioRoles();
     if (!roles.length) return false;
+    if (this.practiceMode()) {
+      return this.participants().length === 1;
+    }
     if (this.twoPlayerMode()) {
       const pRoles = this.participants().map((p) => p.role);
       return (
@@ -194,8 +245,8 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
   }
 
-  protected onToggleTwoPlayer(): void {
-    this.twoPlayerMode.set(!this.twoPlayerMode());
+  protected onPlayerCountMode(mode: PlayerCountMode): void {
+    this.playerCountMode.set(mode);
   }
 
   protected holderOf(roleId: string): ParticipantResponse | undefined {
@@ -229,6 +280,8 @@ export class WaitingRoomView implements OnInit, OnDestroy {
           exerciseId: this.exerciseId(),
           participantId: this.participantId(),
           role,
+          gameMode: "simple_collaborative",
+          practiceMode: this.practiceMode(),
         },
       });
       return;

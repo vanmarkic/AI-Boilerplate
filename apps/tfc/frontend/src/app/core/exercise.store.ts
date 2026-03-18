@@ -33,6 +33,7 @@ interface ExerciseState {
   title: string;
   phase: string;
   gameMode: string;
+  practiceMode: boolean;
   playTimeMs: number;
   realTimeMs: number;
   speedFactor: number;
@@ -55,6 +56,7 @@ const initialState: ExerciseState = {
   title: "",
   phase: "setup",
   gameMode: "classic",
+  practiceMode: false,
   playTimeMs: 0,
   realTimeMs: 0,
   speedFactor: 1,
@@ -124,6 +126,7 @@ export const ExerciseStore = signalStore(
     ),
     isDecisionMaker: computed(() => store.playerType() === "decision_maker"),
     isAllAdvisors: computed(() => store.playerRole() === "all_advisors"),
+    isPracticeMode: computed(() => store.practiceMode()),
     phaseBadgeVariant: computed<"default" | "secondary" | "destructive">(() => {
       switch (store.phase()) {
         case "running":
@@ -240,6 +243,10 @@ export const ExerciseStore = signalStore(
 
     setGameMode(mode: string): void {
       patchState(store, { gameMode: mode });
+    },
+
+    setPracticeMode(practice: boolean): void {
+      patchState(store, { practiceMode: practice });
     },
 
     setPlayerType(playerType: string): void {

@@ -63,7 +63,13 @@ async def _build_config(
             detail="Scenario has no content. Add events, roles, and decisions first.",
         )
     content = ScenarioContent.model_validate(scenario.content)
-    return build_engine_config(exercise_id=exercise.id, title=exercise.title, content=content)
+    practice = getattr(exercise, "practice_mode", False)
+    return build_engine_config(
+        exercise_id=exercise.id,
+        title=exercise.title,
+        content=content,
+        practice_mode=practice,
+    )
 
 
 @router.post("/start", operation_id="startEngine")
@@ -82,8 +88,8 @@ async def start_engine(
 
         engine = session_store.create(config, on_state_change=_on_change)
 
-    # Idempotent: if already running, return current phase without error
-    if engine.phase == EnginePhase.RUNNING:
+    # Idempotent: if already in briefing or running, return current phase
+    if engine.phase in {EnginePhase.BRIEFING, EnginePhase.RUNNING}:
         return engine._phase_change("started")
 
     try:
@@ -102,6 +108,15 @@ async def start_engine(
         },
     )
     return result
+
+
+@router.post("/begin", operation_id="beginEngine")
+async def begin_engine(exercise_id: int) -> PhaseChange:
+    """Transition BRIEFING → RUNNING after the player has read the briefing."""
+    try:
+        return await _get_engine(exercise_id).begin()
+    except EngineStateError as exc:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
 
 
 @router.post("/pause", operation_id="pauseEngine")
