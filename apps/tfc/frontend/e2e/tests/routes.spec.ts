@@ -1,12 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('TFC Routes', () => {
-  test('join route loads', async ({ page }) => {
-    await page.goto('/join');
-    await expect(page.locator('body')).not.toBeEmpty();
-    await page.screenshot({ path: 'screenshots/join.png', fullPage: true });
-  });
-
   test('builder route loads', async ({ page }) => {
     await page.goto('/builder');
     await expect(page.locator('body')).not.toBeEmpty();

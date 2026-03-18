@@ -11,9 +11,6 @@ import { SeaBackdrop } from './sea-backdrop';
 import { ScenarioPicker } from './scenario-picker';
 import { LobbyPreview, type JoinableExercise } from './lobby-preview';
 import { ExerciseApiService } from '../../core/exercise-api.service';
-import {
-  WaitingRoomApiService,
-} from '../../core/waiting-room-api.service';
 import type { ScenarioResponse } from '../../core/scenario-api.service';
 import { environment } from '../../core/environment';
 
@@ -120,25 +117,21 @@ import { environment } from '../../core/environment';
         <p>Collaborative exercise simulation platform</p>
       </div>
 
-      @if (lobbyData()) {
+      @for (lobby of lobbyData(); track lobby.exercise.id) {
         <tfc-lobby-preview
-          [data]="lobbyData()!"
+          [data]="lobby"
           (exerciseLeft)="onLobbyLeft()"
         />
-      } @else if (showPicker()) {
+      }
+
+      @if (showPicker()) {
         <tfc-scenario-picker
           (picked)="onScenarioPicked($event)"
           (dismissed)="showPicker.set(false)"
         />
-      } @else {
+      } @else if (lobbyData().length === 0) {
         <nav class="home-menu" aria-label="Main menu">
-          <a class="menu-card" data-primary routerLink="/join">
-            <span class="card-icon">🎮</span>
-            <span class="card-label">Join Exercise</span>
-            <span class="card-desc">Enter a session code to join an active exercise</span>
-          </a>
-
-          <a class="menu-card" (click)="showPicker.set(true)">
+          <a class="menu-card" data-primary (click)="showPicker.set(true)">
             <span class="card-icon">🎯</span>
             <span class="card-label">Run Exercise</span>
             <span class="card-desc">Pick a scenario and start a new exercise</span>
@@ -163,13 +156,12 @@ import { environment } from '../../core/environment';
 export class HomeView implements OnInit {
   private readonly http = inject(HttpClient);
   private readonly exerciseApi = inject(ExerciseApiService);
-  private readonly waitingRoomApi = inject(WaitingRoomApiService);
 
-  protected readonly lobbyData = signal<JoinableExercise | null>(null);
+  protected readonly lobbyData = signal<JoinableExercise[]>([]);
   protected readonly showPicker = signal(false);
 
   ngOnInit(): void {
-    this.checkForJoinableExercise();
+    this.checkForJoinableExercises();
   }
 
   protected onScenarioPicked(scenario: ScenarioResponse): void {
@@ -183,24 +175,23 @@ export class HomeView implements OnInit {
       .subscribe({
         next: () => {
           this.showPicker.set(false);
-          this.checkForJoinableExercise();
+          this.checkForJoinableExercises();
         },
       });
   }
 
   protected onLobbyLeft(): void {
-    this.lobbyData.set(null);
-    this.checkForJoinableExercise();
+    this.checkForJoinableExercises();
   }
 
-  private checkForJoinableExercise(): void {
+  private checkForJoinableExercises(): void {
     this.http
-      .get<JoinableExercise>(
+      .get<JoinableExercise[]>(
         `${environment.apiBaseUrl}/api/exercises/joinable`,
       )
       .subscribe({
         next: (data) => this.lobbyData.set(data),
-        error: () => this.lobbyData.set(null),
+        error: () => this.lobbyData.set([]),
       });
   }
 }
