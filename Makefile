@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
+.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan
 
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
@@ -38,6 +38,14 @@ test-backend: ## Run main backend tests
 
 test-frontend: ## Run main frontend tests
 	cd $(MAIN_FE) && npx ng test --watch=false
+
+test-changed: test-changed-backend test-changed-frontend ## Run tests only for changed code and dependents
+
+test-changed-backend: ## Run backend tests affected by changes (via testmon)
+	cd $(MAIN_BE) && python -m pytest -v --testmon
+
+test-changed-frontend: ## Run frontend tests for changed files and their dependents
+	cd $(MAIN_FE) && npx vitest run --changed origin/master
 
 # ── TFC App ───────────────────────────────────────────────
 

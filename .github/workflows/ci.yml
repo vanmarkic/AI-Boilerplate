@@ -45,10 +45,23 @@ jobs:
           python-version: '3.12'
       - run: pip install -e ".[dev]"
         working-directory: apps/main/backend
+      - name: Restore testmon cache
+        if: github.event_name == 'pull_request'
+        uses: actions/cache@v5
+        with:
+          path: apps/main/backend/.testmondata
+          key: testmon-${{ runner.os }}-${{ hashFiles('apps/main/backend/pyproject.toml') }}
+          restore-keys: testmon-${{ runner.os }}-
       - run: alembic upgrade head
         working-directory: apps/main/backend
-      - run: python -m pytest -v --tb=short
+      - name: Run changed tests (PR) or full suite (push)
         working-directory: apps/main/backend
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            python -m pytest -v --tb=short --testmon
+          else
+            python -m pytest -v --tb=short
+          fi
 
   lint-backend:
     name: Backend Lint
