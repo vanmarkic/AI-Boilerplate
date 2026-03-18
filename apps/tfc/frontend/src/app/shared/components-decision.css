@@ -37,7 +37,7 @@
 
   .decision-panel__textarea {
     width: 100%;
-    min-height: 80px;
+    min-height: calc(var(--spacing-xl) * 2.5);
     padding: var(--spacing-sm);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -49,8 +49,8 @@
   }
 
   .decision-panel__textarea:focus {
-    outline: 2px solid var(--color-ring);
-    outline-offset: 2px;
+    outline: var(--radius-sm) solid var(--color-ring);
+    outline-offset: var(--radius-sm);
   }
 
   /* ── Context Panel ────────────────────────────────────── */

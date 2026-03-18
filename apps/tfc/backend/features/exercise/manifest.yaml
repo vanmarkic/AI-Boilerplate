@@ -1,0 +1,37 @@
+name: exercise
+tier: 1
+description: Exercise lifecycle, engine HTTP/WS API, and real-time state sync
+version: 0.1.0
+dependencies:
+  internal: [scenario, domain_config, waiting_room]
+  external: [postgresql]
+api_endpoints:
+  - POST /api/exercises
+  - GET /api/exercises
+  - GET /api/exercises/joinable
+  - GET /api/exercises/by-code/{session_code}
+  - GET /api/exercises/{exercise_id}
+  - PUT /api/exercises/{exercise_id}
+  - DELETE /api/exercises/{exercise_id}
+  - POST /api/exercises/{exercise_id}/engine/start
+  - POST /api/exercises/{exercise_id}/engine/pause
+  - POST /api/exercises/{exercise_id}/engine/resume
+  - POST /api/exercises/{exercise_id}/engine/reset
+  - POST /api/exercises/{exercise_id}/engine/complete
+  - PUT /api/exercises/{exercise_id}/engine/speed
+  - GET /api/exercises/{exercise_id}/engine/snapshot
+  - POST /api/exercises/{exercise_id}/engine/decisions/{decision_id}/close
+  - POST /api/exercises/{exercise_id}/engine/decisions/recommend
+  - GET /api/exercises/{exercise_id}/engine/decisions
+  - GET /api/exercises/{exercise_id}/engine/context
+  - WS /api/exercises/{exercise_id}/ws
+models:
+  - Exercise
+events_emitted:
+  - state_changes
+  - phase_change
+events_consumed: []
+business_rules:
+  - Engine is a pure-Python tick loop; HTTP/WS layer wraps it
+  - Single WebSocket endpoint for all real-time communication
+  - Exercise must be linked to a scenario before starting

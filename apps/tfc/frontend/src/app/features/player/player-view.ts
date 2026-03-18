@@ -7,10 +7,13 @@ import { DecisionPanelComponent } from '../../shared/decision-panel.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { AmbientBackgroundComponent } from '../../shared/ambient-background.component';
 import { TurnBannerComponent } from '../../shared/turn-banner.component';
-import { AdvisorBubblesComponent, AdvisorRecommendation } from '../../shared/advisor-bubbles.component';
+import { AdvisorBubblesComponent } from '../../shared/advisor-bubbles.component';
 import { AllAdvisorsPanelComponent } from '../../shared/all-advisors-panel.component';
 import type { RoleRecommendation } from '../../shared/all-advisors-panel.component';
-import { submitRecommendation, submitRoleRecommendation, submitDecision } from './player-decision-handlers';
+import {
+  buildAdvisorRecs, getScenarioAdvisorRoles, resolvePlayerRole,
+  submitRecommendation, submitRoleRecommendation, submitDecision,
+} from './player-decision-handlers';
 import { ScoreBarComponent } from '../../shared/score-bar.component';
 import { DomainService } from '../../core/domain.service';
 import { EngineApiService } from '../../core/engine-api.service';
@@ -32,132 +35,7 @@ import { handlePlayerWsMessage } from './player-ws-handler';
     AmbientBackgroundComponent, TurnBannerComponent,
     AdvisorBubblesComponent, AllAdvisorsPanelComponent, ScoreBarComponent,
   ],
-  template: `
-    <tfc-ambient-background />
-
-    <div class="exercise-layout">
-      <header class="exercise-header">
-        <span class="exercise-header__title">{{ store.title() || domain.term('exercise') + ' Dashboard' }}</span>
-        <div class="exercise-header__clocks">
-          <tfc-clock-display label="RT" [value]="store.rtClock()" />
-          <tfc-clock-display label="PT" [value]="store.ptClock()" />
-          <tfc-phase-badge [phase]="store.phase()" />
-        </div>
-      </header>
-
-      @if (store.score(); as score) {
-        <tfc-turn-banner
-          [label]="'Turn ' + score.turnNumber"
-          [turnNumber]="score.turnNumber" />
-      }
-
-      <div class="exercise-overview">
-        <ui-card [title]="'Released ' + domain.term('event') + 's'">
-          @for (event of visibleEvents(); track event.id) {
-            <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm font-medium">{{ event.title }}</span>
-              <ui-badge variant="secondary">{{ event.lifecycle }}</ui-badge>
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No events released yet.</p>
-          }
-        </ui-card>
-
-        <ui-card [title]="'Active ' + domain.term('issue') + 's'">
-          @for (issue of store.releasedIssues(); track issue.id) {
-            <div class="flex items-center justify-between p-sm border-b"
-              [class.cursor-pointer]="issue.lifecycle === 'active'"
-              (click)="selectIssue(issue.id)">
-              <span class="text-sm font-medium">{{ issue.title }}</span>
-              <ui-badge [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'">
-                {{ issue.lifecycle }}
-              </ui-badge>
-              @if (getIssueCountdown(issue.id); as cd) {
-                <span class="text-xs text-muted-foreground ml-sm">Auto-resolve: {{ cd }}</span>
-              }
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No issues assigned yet.</p>
-          }
-        </ui-card>
-      </div>
-
-      <div class="exercise-details">
-        @if (selectedIssueId()) {
-          <ui-card title="Issue Details">
-            @for (issue of store.releasedIssues(); track issue.id) {
-              @if (issue.id === selectedIssueId()) {
-                <p class="text-sm">{{ issue.description }}</p>
-                <div class="flex gap-sm mt-md">
-                  <ui-badge variant="secondary">{{ issue.trigger_mode }}</ui-badge>
-                  <ui-badge variant="secondary">{{ issue.lifecycle }}</ui-badge>
-                </div>
-              }
-            }
-          </ui-card>
-        } @else {
-          <p class="text-muted-foreground text-sm p-sm">
-            Select an issue to view details and submit a decision.
-          </p>
-        }
-
-        @if (store.context(); as ctx) {
-          <tfc-context-panel
-            [title]="ctx.title" [briefing]="ctx.briefing"
-            [objectives]="ctx.objectives" [rules]="ctx.rules"
-            [open]="true" />
-        }
-
-        <ui-card [title]="domain.term('decision') + ' History'">
-          @for (decision of decisionHistory(); track decision.id) {
-            <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm font-medium">{{ decision.title }}</span>
-              <ui-badge variant="secondary">{{ decision.status }}</ui-badge>
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No past decisions.</p>
-          }
-        </ui-card>
-      </div>
-
-      @if (store.score(); as score) {
-        <tfc-score-bar [score]="score" />
-      }
-
-      @if (activeDecision(); as decision) {
-        <div class="overlay">
-          @if (store.isCollaborative() && store.isAllAdvisors()) {
-            <tfc-all-advisors-panel [roles]="scenarioAdvisorRoles()" [decisionTitle]="decision.title"
-              [decisionDescription]="decision.description" [questionType]="decision.question_type"
-              [options]="decision.options" (submitted)="onRoleRecommendationSubmitted(decision, $event)"
-              (closed)="store.closeDecision(decision.id)" />
-          } @else if (store.isCollaborative() && !store.isDecisionMaker()) {
-            <tfc-decision-panel [title]="'[Advisor] ' + decision.title" [description]="decision.description"
-              [questionType]="decision.question_type" [options]="decision.options"
-              (submitted)="onRecommendationSubmitted(decision, $event)" />
-          } @else {
-            @if (store.isCollaborative() && advisorRecs(decision).length > 0) {
-              <tfc-advisor-bubbles [recommendations]="advisorRecs(decision)" />
-            }
-            <tfc-decision-panel [title]="decision.title" [description]="decision.description"
-              [questionType]="decision.question_type" [options]="decision.options"
-              (submitted)="onDecisionSubmitted(decision, $event)" (closed)="store.closeDecision(decision.id)" />
-          }
-        </div>
-      }
-
-      <footer class="exercise-controls">
-        <div class="exercise-controls__group">
-          <p class="text-sm text-muted-foreground">
-            @if (store.isCollaborative()) {
-              @if (store.isAllAdvisors()) { You are the All Advisors player }
-              @else { You are the {{ roleLabel() }} }
-            } @else { Waiting for {{ domain.term('gameMaster') }} actions... }
-          </p>
-        </div>
-      </footer>
-    </div>
-  `,
+  templateUrl: './player-view.html',
 })
 export class PlayerView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
@@ -189,23 +67,12 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   }
 
-  protected advisorRecs(decision: ActiveDecision): AdvisorRecommendation[] {
-    const recs = decision.recommendations || {};
-    const roles = this.store.context()?.roles ?? [];
-    return Object.entries(recs).map(([key, oid]) => {
-      const colonIdx = key.indexOf(':');
-      if (colonIdx !== -1) {
-        const roleId = key.slice(colonIdx + 1);
-        const roleInfo = roles.find((r) => r.id === roleId);
-        return { participantId: key, participantName: roleInfo?.label ?? roleId, optionId: oid };
-      }
-      return { participantId: key, participantName: key, optionId: oid };
-    });
+  protected advisorRecs(decision: ActiveDecision) {
+    return buildAdvisorRecs(decision, this.store.context()?.roles ?? []);
   }
 
-  protected scenarioAdvisorRoles(): { id: string; label: string }[] {
-    const roles = this.store.context()?.roles ?? [];
-    return roles.filter((r) => r.player_type === 'advisor');
+  protected scenarioAdvisorRoles() {
+    return getScenarioAdvisorRoles(this.store.context()?.roles ?? []);
   }
 
   ngOnInit(): void {
@@ -225,25 +92,7 @@ export class PlayerView implements OnInit, OnDestroy {
     this.sub = this.ws.messages$.subscribe((msg) => handlePlayerWsMessage(msg, this.store));
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
-      next: (ctx) => {
-        this.store.setContext(ctx);
-        // Derive gameMode from context roles if not set via URL
-        if (!gameMode && ctx.roles && ctx.roles.length > 0) {
-          this.store.setGameMode('simple_collaborative');
-        }
-        // Resolve player_type and label from scenario roles
-        const roleInfo = ctx.roles?.find((r) => r.id === role);
-        if (roleInfo) {
-          this.store.setPlayerType(roleInfo.player_type);
-          this.roleLabel.set(roleInfo.label);
-        } else if (role === 'all_advisors') {
-          this.store.setPlayerType('advisor');
-          this.roleLabel.set('All Advisors');
-        } else if (role === 'decision_maker') {
-          this.store.setPlayerType('decision_maker');
-          this.roleLabel.set('Decision Maker');
-        }
-      },
+      next: (ctx) => resolvePlayerRole(ctx, role, gameMode, this.store, this.roleLabel),
     });
     this.decisionApi.listDecisions(id, 'closed').subscribe({
       next: (decisions) => this.decisionHistory.set(decisions),

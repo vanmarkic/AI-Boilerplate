@@ -38,7 +38,7 @@ import { formatTimeMs } from '../../core/format-time';
             </span>
             <div class="flex items-center gap-xs" style="margin-left: auto">
               <span class="text-xs text-muted-foreground">Speed:</span>
-              <select class="input-base" style="width: 80px"
+              <select class="input-base" style="width: var(--container-xs, 5rem)"
                 [value]="playbackSpeed()" (change)="onSpeedChange($event)">
                 <option value="0.5">0.5x</option>
                 <option value="1">1x</option>
@@ -47,9 +47,9 @@ import { formatTimeMs } from '../../core/format-time';
               </select>
             </div>
           </div>
-          <div style="width: 100%; height: 4px; background: var(--color-muted); border-radius: 2px; position: relative;">
+          <div style="width: 100%; height: var(--radius-md); background: var(--color-muted); border-radius: var(--radius-sm); position: relative;">
             <div
-              style="height: 100%; border-radius: 2px; transition: width 0.2s;"
+              style="height: 100%; border-radius: var(--radius-sm); transition: width 0.2s;"
               [style.width.%]="progressPercent()"
               [style.background]="'var(--color-primary)'"
             ></div>
