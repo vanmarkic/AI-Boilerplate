@@ -83,13 +83,22 @@ class DecisionManager:
         self._decisions[id] = decision
         return {
             "type": "decision_opened",
+            "id": id,
             "decision_id": id,
+            "event_id": event_id,
+            "issue_id": issue_id,
             "title": title,
+            "description": description,
             "question_type": question_type,
             "options": options,
+            "completion_mode": completion_mode,
             "target_roles": target_roles,
             "timeout_ms": timeout_ms,
             "max_selections": max_selections,
+            "status": "open",
+            "opened_at_pt_ms": current_pt_ms,
+            "closed_at_pt_ms": None,
+            "recommendations": {},
         }
 
     def close_decision(
