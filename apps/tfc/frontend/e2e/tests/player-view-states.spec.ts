@@ -272,10 +272,9 @@ test.describe("Header — always visible @player", () => {
       await page.goto(playerUrl("p1"));
 
       // Title
-      await expect(page.locator(".exercise-header__title")).toBeVisible();
-      // RT and PT clocks
+      await expect(page.locator(".player-header__title")).toBeVisible();
+      // RT clock
       await expect(page.getByText("RT")).toBeVisible();
-      await expect(page.getByText("PT")).toBeVisible();
       // Phase badge
       await expect(page.locator("tfc-phase-badge")).toBeVisible();
       await expect(page.locator("tfc-phase-badge")).toContainText(snap.phase);
@@ -366,7 +365,7 @@ test.describe("Footer status — game mode × player type @player", () => {
     // The store defaults to gameMode 'classic' → not collaborative
     // We need to verify that when the snapshot doesn't indicate collaborative mode,
     // the footer shows the classic message
-    await expect(page.locator(".exercise-controls")).toBeVisible();
+    await expect(page.locator(".player-footer")).toBeVisible();
   });
 });
 
@@ -395,14 +394,14 @@ test.describe("Events card — visibility by lifecycle @player", () => {
     await installMocks(page, snapshot({ events: [EVENT_SCHEDULED] }));
     await page.goto(playerUrl("p1"));
 
-    await expect(page.getByText("No events released yet.")).toBeVisible();
+    await expect(page.getByText("No Events intercepted.")).toBeVisible();
   });
 
   test("shows empty state with no events at all", async ({ page }) => {
     await installMocks(page, snapshot({ events: [] }));
     await page.goto(playerUrl("p1"));
 
-    await expect(page.getByText("No events released yet.")).toBeVisible();
+    await expect(page.getByText("No Events intercepted.")).toBeVisible();
   });
 });
 
@@ -441,7 +440,7 @@ test.describe("Issues card — released only, badge variants @player", () => {
     await installMocks(page, snapshot({ issues: [ISSUE_ACTIVE_UNRELEASED] }));
     await page.goto(playerUrl("p1"));
 
-    await expect(page.getByText("No issues assigned yet.")).toBeVisible();
+    await expect(page.getByText("No Issues detected. Systems nominal.")).toBeVisible();
   });
 });
 
@@ -489,15 +488,15 @@ test.describe("Decision overlay — role × mode visibility @player", () => {
     await installMocks(page, snapshot({ decisions: [] }));
     await page.goto(playerUrl("co-01", "co"));
 
-    await expect(page.locator(".overlay")).not.toBeVisible();
+    await expect(page.locator("tfc-decision-panel")).not.toBeVisible();
   });
 
   test("overlay visible when open decision exists", async ({ page }) => {
     await installMocks(page, snapshot({ decisions: [DECISION_OPEN] }));
     await page.goto(playerUrl("co-01", "co"));
 
-    // Overlay is rendered below the fold; check it's in the DOM
-    await expect(page.locator(".overlay")).toBeAttached();
+    // Decision panel is rendered; check it's in the DOM
+    await expect(page.locator("tfc-decision-panel")).toBeAttached();
     // Decision title should be findable via text
     await expect(page.getByText("Evasive Action")).toBeAttached();
   });
@@ -535,7 +534,7 @@ test.describe("Decision targeting — role-filtered visibility @player", () => {
     await installMocks(page, snapshot({ decisions: [DECISION_TARGETED_CO] }));
     await page.goto(playerUrl("co-01", "co"));
 
-    await expect(page.locator(".overlay")).toBeAttached();
+    await expect(page.locator("tfc-decision-panel")).toBeAttached();
     await expect(page.getByText("CO Decision Only")).toBeVisible();
   });
 
@@ -543,7 +542,7 @@ test.describe("Decision targeting — role-filtered visibility @player", () => {
     await installMocks(page, snapshot({ decisions: [DECISION_TARGETED_CO] }));
     await page.goto(playerUrl("nav-01", "nav"));
 
-    await expect(page.locator(".overlay")).not.toBeVisible();
+    await expect(page.locator("tfc-decision-panel")).not.toBeVisible();
   });
 
   test("untargeted decision visible to all roles", async ({ page }) => {
@@ -551,7 +550,7 @@ test.describe("Decision targeting — role-filtered visibility @player", () => {
     await installMocks(page, snapshot({ decisions: [DECISION_OPEN] }));
     await page.goto(playerUrl("ops-01", "ops"));
 
-    await expect(page.locator(".overlay")).toBeAttached();
+    await expect(page.locator("tfc-decision-panel")).toBeAttached();
   });
 });
 
@@ -615,7 +614,7 @@ test.describe("Combined state — all invariants hold together @player", () => {
     await page.goto(playerUrl("nav-01", "nav"));
 
     // Header always visible
-    await expect(page.locator(".exercise-header__title")).toBeVisible();
+    await expect(page.locator(".player-header__title")).toBeVisible();
     await expect(page.locator("tfc-phase-badge")).toContainText("running");
 
     // Score visible
@@ -633,7 +632,7 @@ test.describe("Combined state — all invariants hold together @player", () => {
     await expect(page.getByText("Hidden Issue")).not.toBeVisible();
 
     // Decision: advisor panel with [Advisor] prefix
-    await expect(page.locator(".overlay")).toBeAttached();
+    await expect(page.locator("tfc-decision-panel")).toBeAttached();
     await expect(page.getByText("[Advisor] Decision With Recs")).toBeVisible();
 
     // Advisor does NOT see bubbles
@@ -673,7 +672,7 @@ test.describe("Combined state — all invariants hold together @player", () => {
     await expect(page.getByText("Radar Failure")).toBeVisible();
 
     // Decision: DM panel (no [Advisor] prefix) + advisor bubbles
-    await expect(page.locator(".overlay")).toBeVisible();
+    await expect(page.locator("tfc-decision-panel")).toBeVisible();
     await expect(page.getByText("[Advisor]")).not.toBeVisible();
     await expect(page.getByText("Decision With Recs")).toBeVisible();
     await expect(page.locator("tfc-advisor-bubbles")).toBeVisible();
@@ -709,15 +708,15 @@ test.describe("Combined state — all invariants hold together @player", () => {
     await expect(page.locator("tfc-score-bar")).not.toBeVisible();
 
     // Empty states
-    await expect(page.getByText("No events released yet.")).toBeVisible();
-    await expect(page.getByText("No issues assigned yet.")).toBeVisible();
+    await expect(page.getByText("No Events intercepted.")).toBeVisible();
+    await expect(page.getByText("No Issues detected. Systems nominal.")).toBeVisible();
 
     // No decision overlay
-    await expect(page.locator(".overlay")).not.toBeVisible();
+    await expect(page.locator("tfc-decision-panel")).not.toBeVisible();
 
     // Issue details placeholder
     await expect(
-      page.getByText("Select an issue to view details"),
+      page.getByText("Select a threat vector to inspect."),
     ).toBeVisible();
   });
 });

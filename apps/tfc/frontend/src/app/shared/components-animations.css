@@ -178,6 +178,19 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .score-bar__countdown {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: var(--font-size-base);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-foreground);
+  }
+
+  .score-bar__countdown--urgent {
+    color: var(--color-destructive);
+    animation: countdown-blink 1s step-end infinite;
+  }
+
   /* ── E. Ambient Background ──────────────────────────── */
 
   .ambient-bg {

@@ -8,18 +8,16 @@ import {
   ElementRef,
   AfterViewInit,
 } from "@angular/core";
-import { DialogPanelComponent, ButtonComponent } from "@aspect/ui";
+import { CardComponent, ButtonComponent } from "@aspect/ui";
 import { AnimationService } from "../core/animation.service";
 import type { DecisionOption } from "../core/decision-api.service";
 
 @Component({
   selector: "tfc-decision-panel",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DialogPanelComponent, ButtonComponent],
+  imports: [CardComponent, ButtonComponent],
   template: `
-    <ui-dialog-panel (closed)="closed.emit()">
-      <span dialogTitle>{{ title() }}</span>
-
+    <ui-card [title]="title()">
       @if (description()) {
         <p class="decision-panel__description">{{ description() }}</p>
       }
@@ -71,9 +69,9 @@ import type { DecisionOption } from "../core/decision-api.service";
         }
       </div>
 
-      <ng-container dialogFooter>
+      <div class="decision-panel__actions">
         <ui-button variant="outline" (clicked)="closed.emit()"
-          >Cancel</ui-button
+          >Skip</ui-button
         >
         <ui-button
           variant="default"
@@ -81,8 +79,8 @@ import type { DecisionOption } from "../core/decision-api.service";
           [disabled]="!canSubmit()"
           >Submit</ui-button
         >
-      </ng-container>
-    </ui-dialog-panel>
+      </div>
+    </ui-card>
   `,
 })
 export class DecisionPanelComponent implements AfterViewInit {

@@ -259,7 +259,7 @@ test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wak
 
     // The first decision is evt-t1 (event-based, free_text — no template match)
     // In practice mode it shows the all-advisors panel first
-    await expect(page.locator(".overlay")).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator("tfc-all-advisors-panel")).toBeVisible({ timeout: 10_000 });
   });
 
   test("Turn 1 — close event decision via advisor submit → Proceed → Submit", async ({
@@ -267,14 +267,14 @@ test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wak
   }) => {
     await page.goto(playerUrl());
     await dismissViteErrors(page);
-    await expect(page.locator(".overlay")).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator("tfc-all-advisors-panel")).toBeVisible({ timeout: 10_000 });
 
     // Practice mode Phase 1: all-advisors panel with Operations Officer tab
     // The advisor dialog is open with a free_text textarea — submit it first
-    const textarea = page.locator(".overlay textarea");
+    const textarea = page.locator("tfc-all-advisors-panel textarea");
     await expect(textarea).toBeVisible({ timeout: 5_000 });
     await textarea.fill("Acknowledged. Continue transit.");
-    await page.locator(".overlay").getByRole("button", { name: "Submit" }).first().click();
+    await page.locator("tfc-all-advisors-panel").getByRole("button", { name: "Submit" }).first().click();
 
     // After advisor submission, "Proceed to Decision" should be clickable
     const proceedBtn = page.getByRole("button", { name: "Proceed to Decision" });
@@ -282,14 +282,14 @@ test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wak
     await proceedBtn.click();
 
     // Phase 2: decision panel for the decision-maker — another free_text
-    const phase2Textarea = page.locator(".overlay textarea");
+    const phase2Textarea = page.locator("tfc-decision-panel textarea");
     await expect(phase2Textarea).toBeVisible({ timeout: 5_000 });
     await phase2Textarea.fill("Continue transit. All stations nominal.");
 
     // Submit the decision
-    await page.locator(".overlay").getByRole("button", { name: "Submit" }).click();
+    await page.locator("tfc-decision-panel").getByRole("button", { name: "Submit" }).click();
 
-    // Verify closure via API (overlay stays because next decision chains instantly)
+    // Verify closure via API (decision panel stays because next decision chains instantly)
     await waitForDecisionClosed(exerciseId, "evt-t1");
   });
 
@@ -316,20 +316,20 @@ test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wak
       await page.goto(playerUrl());
       await dismissViteErrors(page);
 
-      // Wait for overlay with decision
-      const overlay = page.locator(".overlay");
-      await expect(overlay).toBeVisible({ timeout: 10_000 });
+      // Wait for all-advisors panel with decision
+      const advisorPanel = page.locator("tfc-all-advisors-panel");
+      await expect(advisorPanel).toBeVisible({ timeout: 10_000 });
 
       // Practice mode Phase 1: advisor dialog is open
       // Submit a recommendation using the top-scoring option
-      const advisorCheckbox = overlay.locator('input[type="checkbox"]').first();
+      const advisorCheckbox = advisorPanel.locator('input[type="checkbox"]').first();
       await expect(advisorCheckbox).toBeVisible({ timeout: 5_000 });
       const advisorPicks = topOptions(tpl);
       for (const pickId of advisorPicks.slice(0, 1)) {
         const opt = tpl.options.find((o) => o.id === pickId)!;
-        await overlay.getByText(opt.label).first().click();
+        await advisorPanel.getByText(opt.label).first().click();
       }
-      await overlay.getByRole("button", { name: "Submit" }).first().click();
+      await advisorPanel.getByRole("button", { name: "Submit" }).first().click();
 
       // Click "Proceed to Decision" to move to Phase 2
       const proceedBtn = page.getByRole("button", {
@@ -339,6 +339,7 @@ test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wak
       await proceedBtn.click();
 
       // Phase 2: decision panel for the decision-maker
+      const decisionPanel = page.locator("tfc-decision-panel");
       await expect(page.getByText(tpl.title)).toBeVisible({ timeout: 5_000 });
 
       // Verify all options are rendered
@@ -350,15 +351,15 @@ test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wak
       const picks = topOptions(tpl);
       for (const pickId of picks) {
         const opt = tpl.options.find((o) => o.id === pickId)!;
-        await overlay.getByText(opt.label).click();
+        await decisionPanel.getByText(opt.label).click();
       }
 
       // Submit
-      const submitBtn = overlay.getByRole("button", { name: "Submit" });
+      const submitBtn = decisionPanel.getByRole("button", { name: "Submit" });
       await expect(submitBtn).toBeEnabled();
       await submitBtn.click();
 
-      // Verify closure via API (overlay stays because next decision chains instantly)
+      // Verify closure via API (decision panel stays because next decision chains instantly)
       await waitForDecisionClosed(exerciseId, decId);
     });
   }
@@ -380,8 +381,9 @@ test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wak
     await page.goto(playerUrl());
     await dismissViteErrors(page);
 
-    // No active decision → no overlay
-    await expect(page.locator(".overlay")).not.toBeVisible({ timeout: 5_000 });
+    // No active decision → no decision panel
+    await expect(page.locator("tfc-decision-panel")).not.toBeVisible({ timeout: 5_000 });
+    await expect(page.locator("tfc-all-advisors-panel")).not.toBeVisible({ timeout: 5_000 });
 
     // Practice mode footer still visible
     await expect(

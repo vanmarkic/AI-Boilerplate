@@ -95,6 +95,17 @@ export const ExerciseStore = signalStore(
     activeIssues: computed(() =>
       store.issues().filter((i) => i.lifecycle === "active"),
     ), // active defects
+    /** Remaining ms on the active decision timer (null if no open decision with timeout). */
+    decisionCountdownMs: computed(() => {
+      const decision = store
+        .decisions()
+        .find((d) => d.status === "open" && d.timeout_ms > 0);
+      if (!decision) return null;
+      const factor = store.speedFactor() || 1;
+      const openedAtRt = decision.opened_at_pt_ms / factor;
+      const elapsed = store.realTimeMs() - openedAtRt;
+      return Math.max(0, decision.timeout_ms - elapsed);
+    }),
     issuesWithCountdown: computed(() => {
       const pt = store.playTimeMs();
       return store
