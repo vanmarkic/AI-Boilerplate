@@ -66,6 +66,19 @@ The engine opens one decision at a time (per `decision_sequence`). The current t
 
 If no active decision exists (between turns or before the exercise starts), the card grid is empty and the turn banner shows "Waiting for next turn..."
 
+### Blue Card Rules
+
+The CO can play up to 2 blue cards per turn (normally different cards).
+
+Each blue card (decision option) has a `role` field:
+
+- **COMMON cards** (`role: null`) — available to all roles. Any team member can recommend them. Examples: SWB01 (Continue Mission), SWB03 (Internal Sync), SWB07 (Start Investigation), SWB20 (General Quarters).
+- **Role-specific cards** (`role: "pwo"`, `role: "eo"`, etc.) — tied to a specific officer's domain. Only that role can recommend them. Examples: SWB18 (Damage Control Focus, PWO), SWB15 (Repair Component, EO).
+
+The `DecisionOption` interface already has a `role: string | null` field. When rendering options on a role card:
+- **Advisor cards**: show COMMON options + options matching that role's ID
+- **CO card**: show ALL options (CO makes the final decision seeing the full picture)
+
 ### Combined Role Cards
 
 Each role defined in the scenario gets one card. A card contains:
@@ -73,7 +86,7 @@ Each role defined in the scenario gets one card. A card contains:
 1. **Role ID + label** (e.g., "NAV — Navigator")
 2. **Badge** indicating card state (see badge state machine below)
 3. **Intel section** — the role-specific event description from `event.role_descriptions[roleId]`, if present. If no role-specific intel exists for this turn, show "No role-specific intel this turn."
-4. **Decision section** (only if the role is in the decision's `target_roles`) — the decision question, options (checkboxes/radio/textarea), and a submit button.
+4. **Decision section** (only if the role is in the decision's `target_roles`) — the decision question, filtered options (COMMON + role-matching), and a submit button.
 
 ### Card Badge State Machine
 
