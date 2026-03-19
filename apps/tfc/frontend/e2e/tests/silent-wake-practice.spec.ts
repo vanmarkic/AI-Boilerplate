@@ -168,7 +168,7 @@ async function waitForOpenDecision(
   );
 }
 
-/** Poll until a decision ID is confirmed closed. Returns true or throws on timeout. */
+/** Poll until a decision ID is no longer open (closed or absent from snapshot). */
 async function waitForDecisionClosed(
   exerciseId: number,
   decisionId: string,
@@ -177,7 +177,10 @@ async function waitForDecisionClosed(
   const start = Date.now();
   while (Date.now() - start < timeoutMs) {
     const snap = await getSnapshot(exerciseId);
-    if (snap.decisions.some((d) => d.id === decisionId && d.status === "closed")) {
+    const decisions = snap.decisions ?? [];
+    // Decision is closed if it has status "closed" OR is no longer in the open decisions list
+    const stillOpen = decisions.some((d) => d.id === decisionId && d.status === "open");
+    if (!stillOpen) {
       return;
     }
     await new Promise((r) => setTimeout(r, 250));

@@ -164,6 +164,13 @@ async function installPlayerMocks(
   );
   await page.route("**/ws?*", (route) => route.abort("connectionrefused"));
   await page.route("**/ws", (route) => route.abort("connectionrefused"));
+  await page.route("**/api/domain-configs", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([]),
+    }),
+  );
 }
 
 function collabWaitingRoomUrl(participantId: string): string {
