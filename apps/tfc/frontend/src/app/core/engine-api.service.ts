@@ -113,6 +113,13 @@ export class EngineApiService {
     );
   }
 
+  stop(exerciseId: number): Observable<{ stopped: boolean }> {
+    return this.http.post<{ stopped: boolean }>(
+      `${this.base}/api/exercises/${exerciseId}/engine/stop`,
+      {},
+    );
+  }
+
   setSpeed(exerciseId: number, factor: number): Observable<SpeedChange> {
     return this.http.put<SpeedChange>(
       `${this.base}/api/exercises/${exerciseId}/engine/speed`,

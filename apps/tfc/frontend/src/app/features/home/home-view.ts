@@ -6,13 +6,16 @@ import {
   signal,
 } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { RouterLink } from "@angular/router";
+import { Router, RouterLink } from "@angular/router";
 import { SeaBackdrop } from "./sea-backdrop";
 import { ScenarioPicker } from "./scenario-picker";
 import { LobbyPreview, type JoinableExercise } from "./lobby-preview";
 import { ExerciseApiService } from "../../core/exercise-api.service";
+import { EngineApiService } from "../../core/engine-api.service";
+import { WaitingRoomApiService } from "../../core/waiting-room-api.service";
 import type { ScenarioResponse } from "../../core/scenario-api.service";
 import { environment } from "../../core/environment";
+import { switchMap } from "rxjs";
 
 @Component({
   selector: "tfc-home-view",
@@ -129,6 +132,32 @@ import { environment } from "../../core/environment";
         color: var(--color-muted-foreground);
         line-height: 1.4;
       }
+
+      .picker-grid {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-md);
+        max-width: 560px;
+        width: 100%;
+      }
+
+      .back-link {
+        font-size: var(--font-size-sm, 0.875rem);
+        color: var(--color-muted-foreground);
+        cursor: pointer;
+      }
+
+      .mode-heading {
+        font-size: var(--font-size-md, 1rem);
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .mode-options {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--spacing-md);
+      }
     `,
   ],
   template: `
@@ -143,12 +172,34 @@ import { environment } from "../../core/environment";
         <tfc-lobby-preview [data]="lobby" (exerciseLeft)="onLobbyLeft()" />
       }
 
-      @if (showPicker()) {
+      @if (pendingScenario()) {
+        <div class="picker-grid">
+          <span class="back-link" (click)="pendingScenario.set(null)">&larr; Back</span>
+          <p class="mode-heading">How do you want to play?</p>
+          <div class="mode-options">
+            <div class="menu-card" (click)="createMultiplayer('full')">
+              <span class="card-icon">👥</span>
+              <span class="card-label">Full Team</span>
+              <span class="card-desc">All roles filled by different players</span>
+            </div>
+            <div class="menu-card" (click)="createMultiplayer('two_player')">
+              <span class="card-icon">👤👤</span>
+              <span class="card-label">2 Players</span>
+              <span class="card-desc">One decides, one advises all roles</span>
+            </div>
+            <div class="menu-card" data-primary (click)="createPractice()">
+              <span class="card-icon">🎯</span>
+              <span class="card-label">Practice (Solo)</span>
+              <span class="card-desc">Play all roles yourself — start immediately</span>
+            </div>
+          </div>
+        </div>
+      } @else if (showPicker()) {
         <tfc-scenario-picker
           (picked)="onScenarioPicked($event)"
           (dismissed)="showPicker.set(false)"
         />
-      } @else if (lobbyData().length === 0) {
+      } @else {
         <nav class="home-menu" aria-label="Main menu">
           <a class="menu-card" data-primary (click)="showPicker.set(true)">
             <span class="card-icon">🎯</span>
@@ -178,10 +229,14 @@ import { environment } from "../../core/environment";
 })
 export class HomeView implements OnInit {
   private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
   private readonly exerciseApi = inject(ExerciseApiService);
+  private readonly engineApi = inject(EngineApiService);
+  private readonly waitingRoomApi = inject(WaitingRoomApiService);
 
   protected readonly lobbyData = signal<JoinableExercise[]>([]);
   protected readonly showPicker = signal(false);
+  protected readonly pendingScenario = signal<ScenarioResponse | null>(null);
 
   ngOnInit(): void {
     this.checkForJoinableExercises();
@@ -189,11 +244,76 @@ export class HomeView implements OnInit {
 
   protected onScenarioPicked(scenario: ScenarioResponse): void {
     const gameMode = scenario.content?.game_mode ?? "classic";
+    if (gameMode === "simple_collaborative") {
+      this.showPicker.set(false);
+      this.pendingScenario.set(scenario);
+      return;
+    }
+    this.createAndShowLobby(scenario, false);
+  }
+
+  protected createMultiplayer(playerCountMode: "full" | "two_player"): void {
+    const scenario = this.pendingScenario();
+    if (!scenario) return;
+    this.pendingScenario.set(null);
+    this.createAndShowLobby(scenario, false);
+  }
+
+  protected createPractice(): void {
+    const scenario = this.pendingScenario();
+    if (!scenario) return;
+    this.pendingScenario.set(null);
+    const gameMode = scenario.content?.game_mode ?? "simple_collaborative";
+
     this.exerciseApi
       .create({
         title: scenario.title,
         scenario_id: scenario.id,
         game_mode: gameMode,
+        practice_mode: true,
+      })
+      .pipe(
+        switchMap((exercise) =>
+          this.waitingRoomApi
+            .join(exercise.id, "Player", "all_roles")
+            .pipe(
+              switchMap((participant) =>
+                this.engineApi.start(exercise.id).pipe(
+                  switchMap(() => {
+                    this.router.navigate(["/player"], {
+                      queryParams: {
+                        exerciseId: exercise.id,
+                        participantId: participant.id,
+                        role: "all_roles",
+                        gameMode: "simple_collaborative",
+                        practiceMode: true,
+                      },
+                    });
+                    return [];
+                  }),
+                ),
+              ),
+            ),
+        ),
+      )
+      .subscribe();
+  }
+
+  protected onLobbyLeft(): void {
+    this.checkForJoinableExercises();
+  }
+
+  private createAndShowLobby(
+    scenario: ScenarioResponse,
+    practiceMode: boolean,
+  ): void {
+    const gameMode = scenario.content?.game_mode ?? "classic";
+    this.exerciseApi
+      .create({
+        title: scenario.title,
+        scenario_id: scenario.id,
+        game_mode: gameMode,
+        practice_mode: practiceMode,
       })
       .subscribe({
         next: () => {
@@ -201,10 +321,6 @@ export class HomeView implements OnInit {
           this.checkForJoinableExercises();
         },
       });
-  }
-
-  protected onLobbyLeft(): void {
-    this.checkForJoinableExercises();
   }
 
   private checkForJoinableExercises(): void {

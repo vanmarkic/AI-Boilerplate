@@ -9,7 +9,7 @@ import {
   signal,
 } from "@angular/core";
 import { ButtonDirective } from "@aspect/ui";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { CardComponent, BadgeComponent } from "@aspect/ui";
 import { ClockDisplayComponent } from "../../shared/clock-display.component";
 import { PhaseBadgeComponent } from "../../shared/phase-badge.component";
@@ -70,6 +70,7 @@ export class PlayerView implements OnInit, OnDestroy {
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
+  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly selectedIssueId = signal<string | null>(null);
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
@@ -130,7 +131,7 @@ export class PlayerView implements OnInit, OnDestroy {
     this.store.setPracticeMode(practiceMode);
     this.ws.connect(id, "player", pId || undefined);
     this.sub = this.ws.messages$.subscribe((msg) =>
-      handlePlayerWsMessage(msg, this.store),
+      handlePlayerWsMessage(msg, this.store, () => this.onExerciseStopped()),
     );
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
@@ -167,6 +168,17 @@ export class PlayerView implements OnInit, OnDestroy {
         this.beginningExercise.set(false);
       },
     });
+  }
+
+  protected onStop(): void {
+    this.api.stop(this.exerciseId()).subscribe({
+      next: () => this.onExerciseStopped(),
+    });
+  }
+
+  private onExerciseStopped(): void {
+    this.ws.disconnect();
+    this.router.navigate(["/"]);
   }
 
   ngOnDestroy(): void {

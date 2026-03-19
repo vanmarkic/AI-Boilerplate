@@ -89,6 +89,21 @@ class ConnectionManager:
         for ws in dead:
             self.disconnect(exercise_id, ws)
 
+    async def close_all(self, exercise_id: int) -> int:
+        """Close all WebSocket connections for an exercise and remove them.
+
+        Returns the number of connections closed.
+        """
+        conns = self._connections.pop(exercise_id, [])
+        closed = 0
+        for ws, _role, _pid in conns:
+            try:
+                await ws.close()
+                closed += 1
+            except Exception:
+                logger.warning("Failed to close WS for exercise=%d", exercise_id)
+        return closed
+
     def get_connections(self, exercise_id: int) -> list[tuple[WebSocket, str]]:
         """List active connections for an exercise (ws, role)."""
         return [(ws, role) for ws, role, _pid in self._connections.get(exercise_id, [])]

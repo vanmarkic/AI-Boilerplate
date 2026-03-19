@@ -46,7 +46,15 @@ function handleStateChange(change: WsStateChange, store: StoreInstance): void {
 }
 
 /** Handle a full WS message for the GM view */
-export function handleGmWsMessage(msg: WsMessage, store: StoreInstance): void {
+export function handleGmWsMessage(
+  msg: WsMessage,
+  store: StoreInstance,
+  onStopped?: () => void,
+): void {
+  if (msg.type === "exercise_stopped") {
+    onStopped?.();
+    return;
+  }
   if (msg.type === "snapshot") {
     store.applySnapshot(msg as never);
   }

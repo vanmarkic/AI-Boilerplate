@@ -7,7 +7,7 @@
  *
  * Invariants verified:
  * - Header (clocks, phase badge, title) always visible regardless of state
- * - Turn banner + score bar visible iff score is non-null
+ * - Turn banner + score bar visible iff score is non-null and phase is not "briefing"
  * - Footer text matches game mode × player type
  * - Decision overlay visible iff there is an open decision matching role
  * - Advisor panel shown iff collaborative + advisor role
@@ -284,12 +284,27 @@ test.describe("Header — always visible @player", () => {
 });
 
 // ── 2. SCORE DISPLAY INVARIANTS ───────────────────────────────────────
-//    Turn banner + score bar visible iff score is non-null.
-//    When visible, turn number matches.
+//    Turn banner + score bar visible iff score is non-null AND phase is
+//    not "briefing". During briefing turn_number is 0, which should not
+//    be displayed as "Turn 0".
 
-test.describe("Score display — visible iff score exists @player", () => {
+test.describe("Score display — visible iff score exists and not briefing @player", () => {
   test("no turn banner or score bar when score is null", async ({ page }) => {
     await installMocks(page, snapshot({ score: null }));
+    await page.goto(playerUrl("p1"));
+
+    await expect(page.locator("tfc-turn-banner")).not.toBeVisible();
+    await expect(page.locator("tfc-score-bar")).not.toBeVisible();
+  });
+
+  test("no turn banner or score bar during briefing phase", async ({ page }) => {
+    const SCORE_TURN_0 = {
+      total_score: 0,
+      penalty_ms: 0,
+      turn_number: 0,
+      next_decision_time_ms: 300_000,
+    };
+    await installMocks(page, snapshot({ phase: "briefing", score: SCORE_TURN_0 }));
     await page.goto(playerUrl("p1"));
 
     await expect(page.locator("tfc-turn-banner")).not.toBeVisible();

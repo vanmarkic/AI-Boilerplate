@@ -16,6 +16,7 @@ from features.exercise.adapters.connection_manager import connection_manager
 from features.exercise.engine_broadcast import broadcast_changes
 from features.exercise.engine_decision_service import EngineDecisionService
 from features.exercise.exercise_service import ExerciseService
+from features.exercise.exercise_session_service import ExerciseSessionService
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_loader import build_engine_config
 from features.scenario.scenario_service import ScenarioService
@@ -141,10 +142,22 @@ async def reset_engine(exercise_id: int) -> PhaseChange:
 
 @router.post("/complete", operation_id="completeEngine")
 async def complete_engine(exercise_id: int) -> PhaseChange:
+    engine = _get_engine(exercise_id)
     try:
-        return await _get_engine(exercise_id).complete()
+        result = await engine.complete()
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    svc = ExerciseSessionService(session_store, connection_manager, waiting_room_store)
+    await svc.stop(exercise_id, reason="completed")
+    return result
+
+
+@router.post("/stop", operation_id="stopEngine")
+async def stop_engine(exercise_id: int) -> dict[str, bool]:
+    """Force-stop an exercise: complete engine, close all WS, flush waiting room."""
+    svc = ExerciseSessionService(session_store, connection_manager, waiting_room_store)
+    await svc.stop(exercise_id, reason="stopped_by_gm")
+    return {"stopped": True}
 
 
 @router.put("/speed", operation_id="setEngineSpeed")
