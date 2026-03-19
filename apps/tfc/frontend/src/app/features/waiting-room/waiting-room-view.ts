@@ -230,8 +230,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     this.ws.connect(eId, "player");
     this.sub = this.ws.messages$.subscribe((msg) => {
       if (msg.type === "waiting_room_update") {
-        const updated = msg.participants as ParticipantResponse[];
-        if (updated) this.participants.set(updated);
+        if (msg.participants) this.participants.set(msg.participants);
       }
     });
     this.api.listParticipants(eId).subscribe({
@@ -260,8 +259,9 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   }
 
   protected onRoleChange(targetId: string, event: Event): void {
-    const role = (event.target as HTMLSelectElement).value;
-    this.api.updateRole(this.exerciseId(), targetId, role).subscribe();
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    this.api.updateRole(this.exerciseId(), targetId, target.value).subscribe();
   }
 
   protected onLeave(): void {

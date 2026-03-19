@@ -9,7 +9,7 @@ type StoreInstance = InstanceType<typeof ExerciseStore>;
 /** Apply a phase+time response from an engine action to the store */
 function applyPhaseResponse(store: StoreInstance, response: PhaseChange): void {
   store.applyPhaseChange(response.phase);
-  store.applyTimeUpdate(response.time as never);
+  store.applyTimeUpdate(response.time);
 }
 
 export function startExercise(

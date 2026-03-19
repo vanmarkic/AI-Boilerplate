@@ -1,9 +1,10 @@
 import { Injectable, OnDestroy } from "@angular/core";
 import { Subject } from "rxjs";
 import { environment } from "./environment";
-import type { TimeSnapshot } from "./engine-api.service";
+import type { EngineSnapshot, TimeSnapshot } from "./engine-api.service";
 import type { DecisionOption, ActiveDecision } from "./decision-api.service";
 import type { ParticipantPresence } from "./exercise.store";
+import type { ParticipantResponse } from "./waiting-room-api.service";
 
 // ── Discriminated union for WS state changes ─────────────────
 
@@ -103,9 +104,8 @@ export interface WsStateChangesMessage {
   changes: WsStateChange[];
 }
 
-export interface WsSnapshotMessage {
+export interface WsSnapshotMessage extends EngineSnapshot {
   type: "snapshot";
-  [key: string]: unknown;
 }
 
 export interface WsPresenceMessage {
@@ -121,7 +121,7 @@ export interface WsExerciseStartedMessage {
 
 export interface WsWaitingRoomUpdate {
   type: "waiting_room_update";
-  participants: unknown[];
+  participants: ParticipantResponse[];
 }
 
 export interface WsSimpleMessage {
@@ -203,9 +203,9 @@ export class ExerciseWsService implements OnDestroy {
       this.startPing();
     };
 
-    this.ws.onmessage = (event: MessageEvent) => {
+    this.ws.onmessage = (event: MessageEvent<string>) => {
       try {
-        const data = JSON.parse(event.data as string) as WsMessage;
+        const data: WsMessage = JSON.parse(event.data);
         this.reconnectAttempt = 0;
         this._messages$.next(data);
       } catch {

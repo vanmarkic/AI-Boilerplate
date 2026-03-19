@@ -26,7 +26,8 @@ export class DomainSelectorComponent {
   protected readonly domain = inject(DomainService);
 
   protected onDomainChange(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
-    this.domain.setDomain(id);
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    this.domain.setDomain(target.value);
   }
 }
