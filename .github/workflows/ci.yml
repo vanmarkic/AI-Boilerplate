@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install pyyaml
@@ -40,7 +40,7 @@ jobs:
       DATABASE_URL: postgresql+asyncpg://dev:dev@localhost:5432/boilerplate_test
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -e ".[dev]"
@@ -95,7 +95,7 @@ jobs:
       DATABASE_URL: postgresql+asyncpg://dev:dev@localhost:5432/tfc_test
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -e ".[dev]"
@@ -110,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install ruff
@@ -130,7 +130,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - uses: actions/setup-node@v6
@@ -198,7 +198,7 @@ jobs:
       DATABASE_URL: postgresql+asyncpg://dev:dev@localhost:5432/boilerplate_test
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -e ".[dev]"
@@ -228,7 +228,7 @@ jobs:
       DATABASE_URL: postgresql+asyncpg://dev:dev@localhost:5433/tfc_test
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
       - run: pip install -e ".[dev]"
