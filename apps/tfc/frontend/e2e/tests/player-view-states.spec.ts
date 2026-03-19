@@ -245,6 +245,14 @@ async function installMocks(
   );
   await page.route("**/ws?*", (route) => route.abort("connectionrefused"));
   await page.route("**/ws", (route) => route.abort("connectionrefused"));
+  // Mock domain config to ensure consistent fallback terminology
+  await page.route("**/api/domain-configs", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([]),
+    }),
+  );
 }
 
 // ── 1. HEADER INVARIANTS ──────────────────────────────────────────────
