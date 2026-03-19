@@ -70,6 +70,16 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - Do NOT edit generated API client files in `frontend/src/app/shared/api/generated/` — run `make generate` instead.
 - When using gh CLI, always pass `-R vanmarkic/AI-Boilerplate` explicitly.
 
+## LLM Context Scoping
+- TFC and main app share NO backend/frontend code — they are independent apps.
+- Use `make context-<scope>` to focus the LLM on what matters:
+  - `context-tfc` / `context-main` — full app (frontend + backend)
+  - `context-tfc-fe` / `context-main-fe` — frontend only (pure GUI work)
+  - `context-tfc-be` / `context-main-be` — backend only
+  - `context-all` — full monorepo
+- Shared packages (`packages/`) are always visible regardless of context scope.
+- `.claudeignore` is gitignored — each developer sets their own scope.
+
 ## Meta
 - See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
 - Do NOT edit `CLAUDE.md` — it is a read-only entry point that loads this file into Claude Code's context.
