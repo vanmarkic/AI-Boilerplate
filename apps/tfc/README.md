@@ -63,9 +63,14 @@ apps/tfc/
 │   │   └── waiting_room/             #   Pre-exercise lobby (presence, ready-up)
 │   └── main.py                       # App factory with auto-discovery
 │
+├── codegen/
+│   ├── generate-types.py             # Python TypedDicts → TypeScript interfaces
+│   └── check-freshness.sh            # CI: fail if generated types are stale
+│
 ├── frontend/
 │   └── src/app/
-│       ├── core/                     # Environment config
+│       ├── core/                     # Services, store, environment config
+│       │   └── generated/            #   Codegen output (DO NOT EDIT)
 │       ├── shared/                   # TFC shared components, services, store
 │       │   ├── components/           #   Clock, context panel, decision panel, phase badge,
 │       │   │                         #   advisor bubbles, ambient background, domain selector,
@@ -150,6 +155,17 @@ The `engine/` directory is intentionally isolated — no database, no HTTP, no F
 cd apps/tfc/backend
 python -m pytest engine/ -v
 ```
+
+### Type Codegen
+
+Backend Python TypedDicts in `engine/state_changes.py` are the single source of truth for engine state types. A codegen script generates the TypeScript equivalents:
+
+```bash
+cd apps/tfc/frontend
+npm run generate:types    # Regenerate core/generated/state-changes.types.ts
+```
+
+Run this after modifying any TypedDict in `state_changes.py`. The CI freshness check (`codegen/check-freshness.sh`) will fail if the generated file is stale.
 
 ### Frontend Development
 

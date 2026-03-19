@@ -80,10 +80,20 @@ features/
 
 Key architectural distinction: the `engine/` directory is **not** a feature — it is a pure runtime with no database or HTTP dependencies. Features in `features/exercise/` wrap the engine with HTTP/WS endpoints and persistence.
 
+### Codegen (`apps/tfc/codegen/`)
+```
+generate-types.py    # Reads Python TypedDicts → emits TypeScript interfaces
+check-freshness.sh   # CI check: fail if generated TS is stale vs Python source
+```
+
+Run `npm run generate:types` (from `apps/tfc/frontend/`) after changing `backend/engine/state_changes.py`. The generated output lands in `frontend/src/app/core/generated/state-changes.types.ts`. Do NOT hand-edit generated files.
+
 ### Frontend (`apps/tfc/frontend/`)
 ```
 src/app/
-  core/           # environment config
+  core/           # services, store, environment config
+    generated/    # codegen output (state-changes.types.ts) — DO NOT EDIT
+    ws-state-handler.ts  # shared WS state-change → store logic
   shared/         # TFC-specific shared components + services
     components/   # clock-display, context-panel, decision-panel, phase-badge, speed-display,
                   # advisor-bubbles, ambient-background, domain-selector, presence-indicator,
@@ -215,7 +225,8 @@ When adding a new migration:
 ## Common Pitfalls
 - Do NOT import `sqlalchemy`, `fastapi`, or `httpx` inside `engine/` — it must stay pure.
 - Do NOT create a second WebSocket endpoint — extend `ws_router.py` if needed.
-- Do NOT duplicate types — domain-config types live in `domain-config-api.service.ts`.
+- Do NOT duplicate types — engine types are generated from Python, domain-config types live in `domain-config-api.service.ts`.
+- Do NOT hand-edit files in `core/generated/` — run `npm run generate:types` instead.
 - Do NOT put exercise-specific UI components in `packages/ui/` — they belong in `apps/tfc/frontend/src/app/shared/`.
 - Do NOT mutate engine state from outside the tick loop — use engine methods (`start`, `pause`, `complete`, `reset`, `set_speed`).
 - Do NOT skip `make test-tfc-backend` before committing engine changes — the engine has dedicated unit tests.
@@ -236,15 +247,17 @@ When adding a new migration:
 6. When a gap or deferred item is resolved: update its status in the gaps doc immediately. Contradictory statuses across docs cause agents to re-fix resolved issues.
 
 ### Type safety across the stack
-7. The backend Pydantic schemas are the canonical source for types. Frontend types in `domain-config-api.service.ts` must stay aligned — if you change a field in one, update the other.
-8. Frontend `DomainConfigResponse` (in `domain-config-api.service.ts`) mirrors the backend `DomainConfigResponse` (in `domain_config_schema.py`).
+7. **Backend Python types are the single source of truth.** Engine state changes and snapshots (`backend/engine/state_changes.py`) are codegen'd to TypeScript via `apps/tfc/codegen/generate-types.py`. When you change a TypedDict, run `npm run generate:types` from `apps/tfc/frontend/`. Never hand-write frontend types that duplicate backend TypedDicts.
+8. Frontend `DomainConfigResponse` (in `domain-config-api.service.ts`) mirrors the backend `DomainConfigResponse` (in `domain_config_schema.py`). These 4 types (`TerminologyMap`, `ThemeConfig`, `DomainRole`, `SeverityLevel`) are the only hand-maintained cross-stack types — everything else is generated.
+9. ESLint enforces `no-unsafe-type-assertion` (no `as X` casts) and bans `TSIndexSignature` (no `[key: string]: unknown`). Both generated and hand-written code must pass these rules.
 
 ### Engine changes
-9. When adding a new `GameMode` method: update the protocol in `game_modes/__init__.py`, implement in ALL existing modes (Classic + SimpleCollaborative), and add property tests with strategies.
-10. When adding a new engine dataclass: add the Hypothesis strategy to `strategies.py` BEFORE writing property tests.
-11. When modifying scoring formulas: update the formula documentation in `docs/plans/2026-03-17-tfc-collaborative-mode-review.md` §5.
+10. When adding a new `GameMode` method: update the protocol in `game_modes/__init__.py`, implement in ALL existing modes (Classic + SimpleCollaborative), and add property tests with strategies.
+11. When adding a new engine dataclass: add the Hypothesis strategy to `strategies.py` BEFORE writing property tests.
+12. When modifying scoring formulas: update the formula documentation in `docs/plans/2026-03-17-tfc-collaborative-mode-review.md` §5.
+13. When adding or changing a TypedDict in `state_changes.py`: run `npm run generate:types` and commit the regenerated `.ts` file in the same commit.
 
 ### Testing expectations
-12. Engine changes require: unit tests + property tests (Hypothesis). Use existing strategies from `engine/strategies.py`.
-13. Frontend feature changes require: component spec files colocated with the component.
-14. API changes require: router tests in the feature's `*_test.py` file.
+14. Engine changes require: unit tests + property tests (Hypothesis). Use existing strategies from `engine/strategies.py`.
+15. Frontend feature changes require: component spec files colocated with the component.
+16. API changes require: router tests in the feature's `*_test.py` file.
