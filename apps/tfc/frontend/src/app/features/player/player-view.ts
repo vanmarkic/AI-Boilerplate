@@ -132,11 +132,12 @@ export class PlayerView implements OnInit, OnDestroy {
     return buildRoleCards(roles, event, decision, this.submittedRoles(), showDecisionMaker);
   });
 
+  private _lastDecisionId: string | null = null;
   private readonly resetSubmittedRolesEffect = effect(() => {
-    const decision = this.activeDecisions()[0];
-    const _id = decision?.id ?? null;
-    // Reset submitted state whenever the active decision changes
-    if (_id) {
+    const id = this.activeDecisions()[0]?.id ?? null;
+    // Only reset when the decision ID actually changes (not on every WS push)
+    if (id && id !== this._lastDecisionId) {
+      this._lastDecisionId = id;
       this.submittedRoles.set(new Set());
     }
   });
