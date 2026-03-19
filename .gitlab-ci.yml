@@ -293,3 +293,49 @@ security-trivy-fs:
   script:
     - trivy fs --severity HIGH,CRITICAL --exit-code 1 .
   allow_failure: true
+
+sonarqube:
+  stage: security
+  tags: ["docker", "linux"]
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_OPTIONS: ""
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+    GIT_SUBMODULE_STRATEGY: "recursive"
+  id_tokens:
+    ID_TOKEN:
+      aud: "vault"
+  cache:
+    key: sonar-${CI_COMMIT_REF_SLUG}
+    paths:
+      - .sonar/cache
+  script:
+    - git config --global --add safe.directory "$CI_PROJECT_DIR"
+    - if $(git rev-parse --is-shallow-repository); then git fetch --unshallow ; fi
+    - |-
+      # get sonar credentials from Vault
+      if [ -z ${SONAR_TOKEN+x} ] ; then
+        if command -v wget ; then
+          wget -O /tmp/vault.zip "$VAULT_BINARY_URL"
+        elif command -v curl ; then
+          curl -o /tmp/vault.zip "$VAULT_BINARY_URL"
+        else
+          echo "Error: no wget or curl available to get vault credentials." ; exit 1
+        fi
+        if command -v unzip ; then
+          unzip /tmp/vault.zip -d /tmp
+        elif command -v jar ; then
+          (cd /tmp ; jar xvf /tmp/vault.zip)
+        else
+          echo "Error: unable to decompress vault for credentials." ; exit 1
+        fi
+        chmod +x /tmp/vault
+        VAULT_TOKEN="$(/tmp/vault write -field=token auth/jwt/login role=ci-commons jwt="$ID_TOKEN")" ; export VAULT_TOKEN
+        SONAR_TOKEN="$(/tmp/vault kv get -field=token secrets/open-Digital-Factory/sonarqube/scanner)" ; export SONAR_TOKEN
+        unset VAULT_TOKEN
+      fi
+    - sonar-scanner -Dsonar.login="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true $SONAR_OPTIONS
+  allow_failure: true
