@@ -63,5 +63,11 @@ export function handleStateChange(
         change.option_id,
       );
       break;
+    case "speed_change":
+      store.setSpeedFactor(change.factor);
+      break;
+    case "forced_card_applied":
+      // No UI action needed — forced cards are reflected in the decision's options
+      break;
   }
 }
