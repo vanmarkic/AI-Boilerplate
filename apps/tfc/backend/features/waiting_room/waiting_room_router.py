@@ -84,8 +84,10 @@ async def join_waiting_room(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Waiting room is full",
             )
-        if not exercise_obj.practice_mode and waiting_room_store.is_role_taken(
-            exercise_id, body.role
+        if (
+            not exercise_obj.practice_mode
+            and body.role != "player"
+            and waiting_room_store.is_role_taken(exercise_id, body.role)
         ):
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,

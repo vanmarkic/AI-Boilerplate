@@ -605,6 +605,19 @@ class TestUniqueRoleEnforcement:
         assert resp.status_code == 200
 
     @pytest.mark.asyncio
+    async def test_join_with_player_placeholder_allows_duplicates(
+        self,
+        client: AsyncClient,
+    ) -> None:
+        """Multiple participants can join with the generic 'player' role."""
+        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
+        eid = await _create_exercise_with_scenario(client, sid)
+        p1 = await _join(client, eid, "Alice", "player")
+        p2 = await _join(client, eid, "Bob", "player")
+        assert p1["role"] == "player"
+        assert p2["role"] == "player"
+
+    @pytest.mark.asyncio
     async def test_join_with_available_role_succeeds(
         self,
         client: AsyncClient,

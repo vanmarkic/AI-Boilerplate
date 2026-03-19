@@ -389,7 +389,7 @@ test.describe("/join — collaborative mode", () => {
     await mockApi.install();
 
     await page.goto(
-      `/waiting-room?exerciseId=${exerciseId}&participantId=${me.id}&gameMode=simple_collaborative`,
+      `/waiting-room?exerciseId=${exerciseId}&participantId=${me.id}`,
     );
 
     await expect(page.getByText("Collaborative exercise")).toBeVisible();

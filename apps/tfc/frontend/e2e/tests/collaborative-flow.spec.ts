@@ -14,7 +14,7 @@ test.describe("Collaborative waiting room @waiting-room @collaborative", () => {
   const exerciseId = 500;
 
   function collabUrl(participantId: string): string {
-    return `/waiting-room?exerciseId=${exerciseId}&participantId=${participantId}&gameMode=simple_collaborative`;
+    return `/waiting-room?exerciseId=${exerciseId}&participantId=${participantId}`;
   }
 
   test("shows collaborative mode message", async ({ page, mockApi }) => {

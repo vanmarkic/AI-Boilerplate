@@ -250,7 +250,7 @@ test.describe("Role change @waiting-room", () => {
     });
 
     await page.goto(
-      `/waiting-room?exerciseId=${exerciseId}&participantId=${me.id}&gameMode=simple_collaborative`,
+      `/waiting-room?exerciseId=${exerciseId}&participantId=${me.id}`,
     );
 
     // Click the Claim button for the unclaimed 'Observer' role slot

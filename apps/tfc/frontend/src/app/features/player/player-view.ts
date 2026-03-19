@@ -34,6 +34,7 @@ import { DomainService } from "../../core/domain.service";
 import { EngineApiService } from "../../core/engine-api.service";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
 import { ExerciseStore } from "../../core/exercise.store";
+import { TickService } from "../../core/tick.service";
 import { formatTimeMs } from "../../core/format-time";
 import { DecisionApiService } from "../../core/decision-api.service";
 import type {
@@ -46,7 +47,7 @@ import { handlePlayerWsMessage } from "./player-ws-handler";
 @Component({
   selector: "tfc-player-view",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ExerciseStore],
+  providers: [ExerciseStore, TickService],
   imports: [
     CardComponent,
     BadgeComponent,
@@ -79,6 +80,7 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly beginningExercise = signal(false);
   private readonly exerciseId = signal(1);
   private readonly participantId = signal("");
+  private readonly tick = inject(TickService);
   private snapshotLoaded = false;
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
@@ -151,6 +153,7 @@ export class PlayerView implements OnInit, OnDestroy {
     this.connSub = this.ws.connected$.subscribe((connected) => {
       if (connected && this.snapshotLoaded) this.loadSnapshot(id);
     });
+    this.tick.start(this.store);
   }
 
   private loadSnapshot(exerciseId: number): void {
@@ -189,6 +192,7 @@ export class PlayerView implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.tick.stop();
     this.ws.disconnect();
     this.sub?.unsubscribe();
     this.connSub?.unsubscribe();

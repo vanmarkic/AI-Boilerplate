@@ -136,7 +136,7 @@ describe("GameMasterView", () => {
       createReq.flush(stubExercise);
 
       expect(router.navigate).toHaveBeenCalledWith(["/waiting-room"], {
-        queryParams: { exerciseId: 99, gameMode: "classic" },
+        queryParams: { exerciseId: 99 },
       });
     });
 
