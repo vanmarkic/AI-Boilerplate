@@ -21,7 +21,6 @@ export interface RoleCardSubmission {
 
 @Component({
   selector: "tfc-role-card",
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UpperCasePipe, BadgeComponent, ButtonDirective],
   template: `
@@ -153,18 +152,18 @@ export class RoleCardComponent {
     return decision.options.find((o) => o.id === optionId)?.label ?? optionId;
   });
 
-  isSelected(optionId: string): boolean {
+  protected isSelected(optionId: string): boolean {
     return this.selectedOptions().includes(optionId);
   }
 
-  canSubmit(): boolean {
+  protected canSubmit(): boolean {
     if (this.questionType() === "free_text") {
       return this.freeText().trim().length > 0;
     }
     return this.selectedOptions().length > 0;
   }
 
-  toggleOption(option: DecisionOption): void {
+  protected toggleOption(option: DecisionOption): void {
     if (this.questionType() === "single_choice") {
       this.selectedOptions.set([option.id]);
     } else {
@@ -177,12 +176,12 @@ export class RoleCardComponent {
     }
   }
 
-  onTextInput(event: Event): void {
+  protected onTextInput(event: Event): void {
     const textarea = event.target as HTMLTextAreaElement;
     this.freeText.set(textarea.value);
   }
 
-  onSubmit(): void {
+  protected onSubmit(): void {
     this.submitted.emit({
       roleId: this.card().roleId,
       selectedOptions: this.selectedOptions(),
