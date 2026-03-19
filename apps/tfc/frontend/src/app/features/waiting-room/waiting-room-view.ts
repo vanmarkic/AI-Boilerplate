@@ -230,7 +230,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     this.ws.connect(eId, "player");
     this.sub = this.ws.messages$.subscribe((msg) => {
       if (msg.type === "waiting_room_update") {
-        const updated = msg["participants"] as ParticipantResponse[];
+        const updated = msg.participants as ParticipantResponse[];
         if (updated) this.participants.set(updated);
       }
     });

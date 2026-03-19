@@ -1,48 +1,67 @@
-import type { WsMessage, WsStateChange } from "../../core/exercise-ws.service";
+import type {
+  WsMessage,
+  WsStateChange,
+  WsDecisionOpened,
+} from "../../core/exercise-ws.service";
 import type { ActiveDecision } from "../../core/decision-api.service";
 import type { ExerciseStore } from "../../core/exercise.store";
-import type { ParticipantPresence } from "../../core/exercise.store";
 
 type StoreInstance = InstanceType<typeof ExerciseStore>;
 
-/** Handle decision_opened and decision_closed WS state changes */
-function handleDecisionChange(
+function toActiveDecision(c: WsDecisionOpened): ActiveDecision {
+  return {
+    id: c.id,
+    event_id: c.event_id,
+    issue_id: c.issue_id,
+    title: c.title,
+    description: c.description,
+    question_type: c.question_type,
+    options: c.options,
+    completion_mode: c.completion_mode,
+    target_roles: c.target_roles,
+    timeout_ms: c.timeout_ms,
+    status: "open",
+    opened_at_pt_ms: c.opened_at_pt_ms,
+    closed_at_pt_ms: null,
+    recommendations: c.recommendations ?? {},
+  };
+}
+
+function handleStateChange(
   change: WsStateChange,
   store: StoreInstance,
 ): void {
-  if (change.type === "decision_opened") {
-    store.applyDecisions([
-      ...store.openDecisions(),
-      change as unknown as ActiveDecision,
-    ]);
+  switch (change.type) {
+    case "phase_change":
+      store.applyPhaseChange(change.phase);
+      store.applyTimeUpdate(change.time);
+      break;
+    case "event_change":
+      store.updateEvent(change.event_id, change.lifecycle);
+      break;
+    case "issue_change":
+      store.updateIssue(change.issue_id, change.lifecycle, change.released);
+      break;
+    case "decision_opened":
+      store.applyDecisions([
+        ...store.openDecisions(),
+        toActiveDecision(change),
+      ]);
+      break;
+    case "decision_closed":
+      store.closeDecision(change.decision_id);
+      break;
+    case "score_change":
+      store.applyScoreChange(change);
+      break;
+    case "recommendation_submitted":
+      store.applyRecommendation(
+        change.decision_id,
+        change.participant_id,
+        change.option_id,
+      );
+      break;
   }
-  if (change.type === "decision_closed") {
-    store.closeDecision(change["decision_id"] as string);
-  }
-}
-
-/** Process a single state change from WS */
-function handleStateChange(change: WsStateChange, store: StoreInstance): void {
-  if (change.type === "phase_change") {
-    store.applyPhaseChange(change["phase"] as string);
-    if (change["time"]) {
-      store.applyTimeUpdate(change["time"] as never);
-    }
-  }
-  if (change.type === "event_change") {
-    store.updateEvent(
-      change["event_id"] as string,
-      change["lifecycle"] as string,
-    );
-  }
-  if (change.type === "issue_change") {
-    store.updateIssue(
-      change["issue_id"] as string,
-      change["lifecycle"] as string,
-      change["released"] as boolean,
-    );
-  }
-  handleDecisionChange(change, store);
 }
 
 /** Handle a full WS message for the GM view */
@@ -51,19 +70,20 @@ export function handleGmWsMessage(
   store: StoreInstance,
   onStopped?: () => void,
 ): void {
-  if (msg.type === "exercise_stopped") {
-    onStopped?.();
-    return;
-  }
-  if (msg.type === "snapshot") {
-    store.applySnapshot(msg as never);
-  }
-  if (msg.type === "presence_update") {
-    store.updatePresence(msg["participants"] as ParticipantPresence[]);
-  }
-  if (msg.type === "state_changes" && msg.changes) {
-    for (const change of msg.changes) {
-      handleStateChange(change, store);
-    }
+  switch (msg.type) {
+    case "exercise_stopped":
+      onStopped?.();
+      break;
+    case "snapshot":
+      store.applySnapshot(msg as never);
+      break;
+    case "presence_update":
+      store.updatePresence(msg.participants);
+      break;
+    case "state_changes":
+      for (const change of msg.changes) {
+        handleStateChange(change, store);
+      }
+      break;
   }
 }
