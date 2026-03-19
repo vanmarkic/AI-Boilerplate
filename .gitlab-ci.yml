@@ -239,8 +239,6 @@ include:
   - template: Security/Dependency-Scanning.gitlab-ci.yml
   # Container Scanning – scans Docker images for OS-level vulnerabilities
   - template: Security/Container-Scanning.gitlab-ci.yml
-  # License Scanning – reports dependency licenses for compliance review
-  - template: Security/License-Scanning.gitlab-ci.yml
 
 # Override template defaults to run in the security stage instead of test.
 sast:
@@ -250,9 +248,6 @@ secret_detection:
   stage: security
 
 dependency_scanning:
-  stage: security
-
-license_scanning:
   stage: security
 
 container_scanning:
