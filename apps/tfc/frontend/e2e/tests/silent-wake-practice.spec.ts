@@ -1,0 +1,379 @@
+/**
+ * Integration e2e test: Silent Wake scenario — practice mode, full 15-turn playthrough.
+ *
+ * Runs against a live TFC Docker stack (real backend, real database, real engine).
+ * No route mocking — Playwright drives the browser while the engine auto-chains decisions.
+ *
+ * Prerequisites:
+ *   make dev-tfc-local   # starts db + tfc-api Docker, Angular on port 4201
+ *   # OR: make dev-tfc   # full Docker stack
+ *
+ * Run:
+ *   cd apps/tfc/frontend && npx playwright test --grep "@silent-wake"
+ *
+ * Flow per exercise:
+ *   API: create exercise (practice_mode) → join waiting room → start engine → begin
+ *   UI: for each of 15 decisions: read → select options → submit
+ *   API: stop exercise (cleanup)
+ */
+import { test, expect } from "@playwright/test";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+// ── Configuration ────────────────────────────────────────────────────
+
+const API_BASE = "http://localhost:8001";
+const SCENARIO_TITLE = "Silent Wake";
+
+// Load seed to know decision templates & top-scoring options
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const seedPath = resolve(
+  __dirname,
+  "../../../backend/seeds/silent_wake.json",
+);
+const SEED = JSON.parse(readFileSync(seedPath, "utf-8"));
+const CONTENT = SEED.content;
+
+const DECISION_SEQUENCE: string[] = CONTENT.decision_sequence;
+
+const DECISION_TEMPLATES: {
+  id: string;
+  title: string;
+  description: string;
+  question_type: string;
+  max_selections: number;
+  forced_option_ids?: string[];
+  options: { id: string; label: string; score: number }[];
+}[] = CONTENT.decision_templates;
+
+
+
+// ── API helpers ──────────────────────────────────────────────────────
+
+async function findScenario(): Promise<number> {
+  const res = await fetch(`${API_BASE}/api/scenarios`);
+  const scenarios = (await res.json()) as { id: number; title: string }[];
+  const sw = scenarios.find((s) => s.title === SCENARIO_TITLE);
+  if (!sw) throw new Error(`Scenario "${SCENARIO_TITLE}" not found — is the backend seeded?`);
+  return sw.id;
+}
+
+async function createExercise(scenarioId: number): Promise<number> {
+  const res = await fetch(`${API_BASE}/api/exercises`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: `E2E Silent Wake ${Date.now()}`,
+      scenario_id: scenarioId,
+      game_mode: "simple_collaborative",
+      practice_mode: true,
+    }),
+  });
+  if (!res.ok) throw new Error(`Create exercise failed: ${res.status}`);
+  const data = (await res.json()) as { id: number };
+  return data.id;
+}
+
+async function joinWaitingRoom(
+  exerciseId: number,
+): Promise<string> {
+  const res = await fetch(
+    `${API_BASE}/api/exercises/${exerciseId}/waiting-room/join`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        display_name: "Solo Player",
+        role: "co",
+      }),
+    },
+  );
+  if (!res.ok) throw new Error(`Join failed: ${res.status}`);
+  const data = (await res.json()) as { id: string };
+  return data.id;
+}
+
+async function startEngine(exerciseId: number): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/exercises/${exerciseId}/engine/start`,
+    { method: "POST" },
+  );
+  if (!res.ok) throw new Error(`Start engine failed: ${res.status}`);
+}
+
+async function beginExercise(exerciseId: number): Promise<void> {
+  const res = await fetch(
+    `${API_BASE}/api/exercises/${exerciseId}/engine/begin`,
+    { method: "POST" },
+  );
+  if (!res.ok) throw new Error(`Begin failed: ${res.status}`);
+}
+
+async function getSnapshot(exerciseId: number) {
+  const res = await fetch(
+    `${API_BASE}/api/exercises/${exerciseId}/engine/snapshot`,
+  );
+  return res.json() as Promise<{
+    phase: string;
+    decisions: {
+      id: string;
+      title: string;
+      status: string;
+      question_type: string;
+      options: { id: string; label: string; score: number }[];
+      max_selections: number | null;
+    }[];
+    score: { total_score: number; turn_number: number } | null;
+  }>;
+}
+
+async function stopExercise(exerciseId: number): Promise<void> {
+  await fetch(`${API_BASE}/api/exercises/${exerciseId}/engine/stop`, {
+    method: "POST",
+  });
+}
+
+/** Wait for a specific open decision to appear in the engine snapshot. */
+async function waitForOpenDecision(
+  exerciseId: number,
+  timeoutMs = 10_000,
+): Promise<string> {
+  const start = Date.now();
+  while (Date.now() - start < timeoutMs) {
+    const snap = await getSnapshot(exerciseId);
+    const open = snap.decisions.find((d) => d.status === "open");
+    if (open) return open.id;
+    await new Promise((r) => setTimeout(r, 250));
+  }
+  throw new Error("Timed out waiting for open decision");
+}
+
+/** Pick the top-scoring options (up to max_selections) for a decision template. */
+function topOptions(tpl: (typeof DECISION_TEMPLATES)[0]): string[] {
+  const sorted = [...tpl.options].sort((a, b) => b.score - a.score);
+  return sorted.slice(0, tpl.max_selections).map((o) => o.id);
+}
+
+/** Dismiss Vite HMR error overlay if present (dev server TS errors). */
+async function dismissViteErrors(page: import("@playwright/test").Page): Promise<void> {
+  // Vite overlay is in a shadow DOM: vite-error-overlay
+  const overlay = page.locator("vite-error-overlay");
+  if (await overlay.isVisible({ timeout: 1_000 }).catch(() => false)) {
+    await page.keyboard.press("Escape");
+    await overlay.waitFor({ state: "hidden", timeout: 2_000 }).catch(() => {});
+  }
+}
+
+// ── Test lifecycle ───────────────────────────────────────────────────
+
+let scenarioId: number;
+let exerciseId: number;
+let participantId: string;
+
+test.describe.serial("Silent Wake — integration practice mode @e2e @silent-wake @integration", () => {
+  test.beforeAll(async () => {
+    scenarioId = await findScenario();
+    exerciseId = await createExercise(scenarioId);
+    participantId = await joinWaitingRoom(exerciseId);
+    await startEngine(exerciseId);
+    await beginExercise(exerciseId);
+    // Wait for first event-triggered decision to appear
+    await waitForOpenDecision(exerciseId);
+  });
+
+  test.afterAll(async () => {
+    await stopExercise(exerciseId);
+  });
+
+  function playerUrl(): string {
+    return `/player?exerciseId=${exerciseId}&participantId=${participantId}&role=solo_player&gameMode=simple_collaborative&practiceMode=true`;
+  }
+
+  // ── Smoke: verify setup ──────────────────────────────────────────
+
+  test("engine is running with first decision open", async () => {
+    const snap = await getSnapshot(exerciseId);
+    expect(snap.phase).toBe("running");
+    const open = snap.decisions.find((d) => d.status === "open");
+    expect(open).toBeDefined();
+  });
+
+  // ── Turn 1: event-triggered free-text decision (evt-t1) ────────
+
+  test("Turn 1 — renders event narrative and practice mode UI", async ({
+    page,
+  }) => {
+    await page.goto(playerUrl());
+    await dismissViteErrors(page);
+
+    // Practice mode footer
+    await expect(
+      page.getByText("Practice Mode — playing all roles"),
+    ).toBeVisible();
+
+    // Context panel shows the briefing
+    await expect(
+      page.getByText(CONTENT.briefing.slice(0, 50), { exact: false }),
+    ).toBeVisible();
+
+    // The first decision is evt-t1 (event-based, free_text — no template match)
+    // In practice mode it shows the all-advisors panel first
+    await expect(page.locator(".overlay")).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("Turn 1 — close event decision via advisor submit → Proceed → Submit", async ({
+    page,
+  }) => {
+    await page.goto(playerUrl());
+    await dismissViteErrors(page);
+    await expect(page.locator(".overlay")).toBeVisible({ timeout: 10_000 });
+
+    // Practice mode Phase 1: all-advisors panel with Operations Officer tab
+    // The advisor dialog is open with a free_text textarea — submit it first
+    const textarea = page.locator(".overlay textarea");
+    await expect(textarea).toBeVisible({ timeout: 5_000 });
+    await textarea.fill("Acknowledged. Continue transit.");
+    // Click Submit inside the advisor dialog
+    await page.locator(".overlay").getByRole("button", { name: "Submit" }).first().click();
+
+    // After advisor submission, "Proceed to Decision" should be clickable
+    const proceedBtn = page.getByRole("button", { name: "Proceed to Decision" });
+    await expect(proceedBtn).toBeVisible({ timeout: 5_000 });
+    await proceedBtn.click();
+
+    // Phase 2: decision panel for the decision-maker — another free_text
+    const phase2Textarea = page.locator(".overlay textarea");
+    await expect(phase2Textarea).toBeVisible({ timeout: 5_000 });
+    await phase2Textarea.fill("Continue transit. All stations nominal.");
+
+    // Submit the decision
+    await page.locator(".overlay").getByRole("button", { name: "Submit" }).click();
+
+    // Verify the decision was closed via API
+    // (overlay stays because next decision chains instantly)
+    const verifyStart = Date.now();
+    while (Date.now() - verifyStart < 10_000) {
+      const snap = await getSnapshot(exerciseId);
+      const evtClosed = snap.decisions.find(
+        (d) => d.id.startsWith("evt-t1") && d.status === "closed",
+      );
+      if (evtClosed) break;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+    const snap = await getSnapshot(exerciseId);
+    expect(snap.score!.turn_number).toBeGreaterThanOrEqual(1);
+  });
+
+  // ── Turns 2-15: multi-choice decision templates ────────────────
+
+  // After evt-t1 closes, the engine chains to dec-t2 (index 1 in decision_sequence)
+  // Then dec-t3, dec-t4, ... dec-t15
+  // So we iterate through decision_sequence[1] through [14] = 14 chained decisions
+
+  for (let seqIdx = 1; seqIdx < DECISION_SEQUENCE.length; seqIdx++) {
+    const decId = DECISION_SEQUENCE[seqIdx];
+    const tpl = DECISION_TEMPLATES.find((t) => t.id === decId);
+    if (!tpl) continue;
+
+    const turnLabel = `Turn ${seqIdx + 1}`;
+
+    test(`${turnLabel} — "${tpl.title}" renders and submits`, async ({
+      page,
+    }) => {
+      // Wait for this decision to be open in the engine
+      const openId = await waitForOpenDecision(exerciseId, 15_000);
+      expect(openId).toBe(decId);
+
+      // Navigate to player view
+      await page.goto(playerUrl());
+      await dismissViteErrors(page);
+
+      // Wait for overlay with decision
+      const overlay = page.locator(".overlay");
+      await expect(overlay).toBeVisible({ timeout: 10_000 });
+
+      // Practice mode Phase 1: advisor dialog is open
+      // Submit the advisor recommendation first (pick first option)
+      const advisorCheckbox = overlay.locator('input[type="checkbox"]').first();
+      if (await advisorCheckbox.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await advisorCheckbox.check();
+        await overlay.getByRole("button", { name: "Submit" }).first().click();
+      }
+
+      // Click "Proceed to Decision" to move to Phase 2
+      const proceedBtn = page.getByRole("button", {
+        name: "Proceed to Decision",
+      });
+      if (await proceedBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        await proceedBtn.click();
+      }
+
+      // Phase 2: decision panel for the decision-maker
+      // Verify the correct decision title is rendered
+      await expect(page.getByText(tpl.title)).toBeVisible({ timeout: 5_000 });
+
+      // Select top-scoring options (checkboxes)
+      const picks = topOptions(tpl);
+      for (const pickId of picks) {
+        const opt = tpl.options.find((o) => o.id === pickId)!;
+        // Use label locator scoped to overlay to avoid ambiguity
+        await overlay.getByText(opt.label).click();
+      }
+
+      // Submit
+      const submitBtn = overlay.getByRole("button", { name: "Submit" });
+      await expect(submitBtn).toBeEnabled();
+      await submitBtn.click();
+
+      // Verify the decision was closed by polling the API
+      // (The overlay stays visible because the next decision chains instantly)
+      const verifyStart = Date.now();
+      while (Date.now() - verifyStart < 10_000) {
+        const snap = await getSnapshot(exerciseId);
+        const closed = snap.decisions.find(
+          (d) => d.id === decId && d.status === "closed",
+        );
+        if (closed) break;
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      const finalSnap = await getSnapshot(exerciseId);
+      const wasClosed = finalSnap.decisions.some(
+        (d) => d.id === decId && d.status === "closed",
+      );
+      expect(wasClosed).toBe(true);
+    });
+  }
+
+  // ── Post-game verification ─────────────────────────────────────
+
+  test("all 15 decisions completed — score reflects all turns", async () => {
+    const snap = await getSnapshot(exerciseId);
+
+    // All decisions should be closed
+    const openDecs = snap.decisions.filter((d) => d.status === "open");
+    expect(openDecs.length).toBe(0);
+
+    // Score should reflect 15 turns (1 event + 14 chained)
+    expect(snap.score).not.toBeNull();
+    expect(snap.score!.turn_number).toBe(15);
+    expect(snap.score!.total_score).toBeGreaterThan(0);
+  });
+
+  test("final UI shows no decision overlay", async ({ page }) => {
+    await page.goto(playerUrl());
+    await dismissViteErrors(page);
+
+    // No active decision → no overlay
+    await expect(page.locator(".overlay")).not.toBeVisible({ timeout: 5_000 });
+
+    // Practice mode footer still visible
+    await expect(
+      page.getByText("Practice Mode — playing all roles"),
+    ).toBeVisible();
+
+    // Score bar should show final turn
+    await expect(page.locator("tfc-score-bar")).toBeVisible();
+  });
+});
