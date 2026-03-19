@@ -10,11 +10,7 @@ import {
 } from "@angular/core";
 import { DialogPanelComponent, ButtonComponent } from "@aspect/ui";
 import { AnimationService } from "../core/animation.service";
-
-export interface DecisionOption {
-  id: string;
-  label: string;
-}
+import type { DecisionOption } from "../core/decision-api.service";
 
 @Component({
   selector: "tfc-decision-panel",

@@ -19,6 +19,7 @@ function makeEvent(overrides: Partial<EventSnapshot> = {}): EventSnapshot {
     scheduled_pt_ms: 0,
     duration_ms: 30_000,
     dependencies: [],
+    triggered_issues: [],
     lifecycle: "scheduled",
     started_at_pt_ms: null,
     completed_at_pt_ms: null,

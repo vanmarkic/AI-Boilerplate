@@ -3,40 +3,23 @@ import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { environment } from "./environment";
 
-export interface TimeSnapshot {
-  play_time_ms: number;
-  real_time_ms: number;
-  factor: number;
-  paused: boolean;
-}
+export type {
+  TimeSnapshot,
+  EventSnapshot,
+  IssueSnapshot,
+  EngineSnapshot,
+  PhaseChange,
+  SpeedChange,
+  DecisionSnapshot,
+} from "./generated/state-changes.types";
 
-/** Inject (event) snapshot from engine. Domain term: "inject". */
-export interface EventSnapshot {
-  id: string;
-  title: string;
-  description: string;
-  event_type: string;
-  scheduled_pt_ms: number;
-  duration_ms: number | null;
-  dependencies: string[];
-  lifecycle: string;
-  started_at_pt_ms: number | null;
-  completed_at_pt_ms: number | null;
-}
+import type {
+  EngineSnapshot,
+  PhaseChange,
+  SpeedChange,
+} from "./generated/state-changes.types";
 
-/** Defect (issue) snapshot from engine. Domain term: "defect". */
-export interface IssueSnapshot {
-  id: string;
-  title: string;
-  description: string;
-  trigger_mode: string;
-  auto_resolve_ms: number;
-  lifecycle: string;
-  activated_at_pt_ms: number | null;
-  resolved_at_pt_ms: number | null;
-  released: boolean;
-}
-
+/** Frontend-only type for the score fields within EngineSnapshot.score */
 export interface ScoreSnapshot {
   total_score: number;
   penalty_ms: number;
@@ -44,27 +27,11 @@ export interface ScoreSnapshot {
   next_decision_time_ms: number;
 }
 
-export interface EngineSnapshot {
-  exercise_id: number;
-  title: string;
-  phase: string;
-  time: TimeSnapshot;
-  events: EventSnapshot[];
-  issues: IssueSnapshot[];
+/** EngineSnapshot with typed score for frontend consumption */
+export type SnapshotWithScore = Omit<EngineSnapshot, "score" | "decisions"> & {
   score: ScoreSnapshot | null;
-}
-
-export interface PhaseChange {
-  type: "phase_change";
-  action: string;
-  phase: string;
-  time: TimeSnapshot;
-}
-
-export interface SpeedChange {
-  type: "speed_change";
-  factor: number;
-}
+  decisions?: EngineSnapshot["decisions"];
+};
 
 @Injectable({ providedIn: "root" })
 export class EngineApiService {
@@ -127,8 +94,8 @@ export class EngineApiService {
     );
   }
 
-  snapshot(exerciseId: number): Observable<EngineSnapshot> {
-    return this.http.get<EngineSnapshot>(
+  snapshot(exerciseId: number): Observable<SnapshotWithScore> {
+    return this.http.get<SnapshotWithScore>(
       `${this.base}/api/exercises/${exerciseId}/engine/snapshot`,
     );
   }
