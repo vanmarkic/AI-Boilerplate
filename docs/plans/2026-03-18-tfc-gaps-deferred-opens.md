@@ -1,7 +1,7 @@
 # TFC — Gaps, Deferred Items & Open PM Questions
 
 **Date:** 2026-03-18
-**Status:** Active — gaps 3, 5, 6, 10, 11 resolved in this PR
+**Status:** Active — gaps 3, 5, 6, 7, 8, 10, 11 resolved. Only gap 9 (stress dimension) remains open (waiting on PM).
 **Source:** `2026-03-17-tfc-collaborative-mode-review.md` §4, `2026-03-18-tfc-silent-wake-scoring-plan.md` §Remaining Gaps
 
 ---
@@ -10,8 +10,8 @@
 
 | # | Gap | Blocker? | Status | Details |
 |---|---|---|---|---|
-| 7 | **No `max_selections` field** | No | Open | `DecisionTemplateDef` can't express "pick up to N cards". No server-side validation of multi-choice selection count. Zero matches in codebase. |
-| 8 | **Domain terminology hardcoded** | No | Partial | DB migration `003` created `tfc_domain_configs` table. `features/domain_config/` feature exists with CRUD. Two divergent `DomainConfig` interfaces still exist in shared package vs frontend service. Not yet wired to scenario loading via `scenario.domain_config_id`. |
+| 7 | **No `max_selections` field** | No | Resolved | `max_selections: number | null` added to `ActiveDecision`, `DecisionOpened` (codegen), and backend `DecisionTemplate`. |
+| 8 | **Domain terminology hardcoded** | No | Resolved | `@aspect/tfc-shared` deleted. Domain config fully DB-backed via `features/domain_config/`. Types in `domain-config-api.service.ts` mirror backend. |
 | 9 | **Stress dimension not modeled** | No — waiting on PM | Deferred | Only `accumulated_penalty_ms` (time penalty) exists. PM wants stress as a running state shaped by good/bad decisions across turns. Mechanics undefined. Separate PR after PM defines formula. |
 
 ## Open PM Questions

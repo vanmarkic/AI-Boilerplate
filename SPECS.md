@@ -44,7 +44,7 @@ DomainConfig ──referenced-by──▶ Scenario
 - **Exercise** 1:1 **Engine** — each running exercise has one engine instance.
 - **Engine** contains: TimeManager, EventScheduler, IssueManager, DecisionManager, GameMode.
 - **Scenario** N:1 **DomainConfig** — a scenario references a domain config for terminology/theming.
-- **DecisionTemplate** 1:N **DecisionOptionDef** — each decision template has multiple selectable options.
+- **DecisionTemplate** 1:N **DecisionOption** — each decision template has multiple selectable options.
 
 ## Features & Business Rules
 

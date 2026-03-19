@@ -78,8 +78,8 @@ Identified during review, ordered by severity:
 |---|---|---|---|---|
 | 5 | **Score not in snapshot** | `exercise_engine.snapshot()` | **RESOLVED** | `GameMode.snapshot()` returns score data. `ExerciseEngine.snapshot()` includes `"score"` key. Frontend `applySnapshot()` reads score on reconnect (PR #118). |
 | 6 | **PlayerType never set from scenario** | Frontend store `setPlayerType()` never called | **RESOLVED** | `ScenarioContext` carries `roles: list[RoleInfo]`. Player view resolves `player_type` from context roles and calls `store.setPlayerType()` (PR #121). |
-| 7 | **No `max_selections` field** | `DecisionTemplateDef` | **OPEN** | Cannot express "pick up to 2 cards" constraint. |
-| 8 | **Domain terminology hardcoded** | `tfc-shared/constants/domains.ts`, `domain.service.ts` | **OPEN** | See §4.1 |
+| 7 | **No `max_selections` field** | `DecisionTemplateDef` | **RESOLVED** | `max_selections: number | null` added to `ActiveDecision`, `DecisionOpened` (codegen), and backend `DecisionTemplate`. |
+| 8 | **Domain terminology hardcoded** | ~~`tfc-shared/constants/domains.ts`~~ (deleted), `domain.service.ts` | **RESOLVED** | Moved to DB via `features/domain_config/`. `@aspect/tfc-shared` deleted. See §4.1. |
 
 ### New gaps identified during 2026-03-18 implementation
 
@@ -93,13 +93,11 @@ Identified during review, ordered by severity:
 
 `DomainConfig` (terminology, theme, roles, severity levels) is currently hardcoded as compile-time constants in two places:
 
-- **Shared package:** `packages/tfc-shared/src/constants/domains.ts` — 3 presets (default, cybersecurity, healthcare)
-- **Frontend service:** `apps/tfc/frontend/src/app/core/domain.service.ts` — 4 presets (default, cybersecurity, healthcare, military) with a different `DomainConfig` interface
+- ~~**Shared package:** `packages/tfc-shared/src/constants/domains.ts`~~ — **DELETED** (`@aspect/tfc-shared` removed)
+- **Backend feature:** `apps/tfc/backend/features/domain_config/` — DB-backed domain terminology (CRUD API, schema validation, property tests)
+- **Frontend service:** `apps/tfc/frontend/src/app/core/domain-config-api.service.ts` — types mirror backend `DomainConfigResponse`
 
-Problems:
-1. **Duplicated and divergent.** The two `DomainConfig` interfaces don't match (shared has `theme: ThemeConfig` object, frontend has `theme: string`). The preset lists differ (shared has no military, frontend has no `scenario` term).
-2. **Not scenario-bound.** A scenario author cannot pick or customize terminology — it's a frontend-only toggle with no persistence.
-3. **Not extensible.** Adding a new domain (e.g., naval, emergency management) requires code changes and a redeploy.
+**Status: RESOLVED.** Domain terminology now lives in the database via `features/domain_config/`. Types (`TerminologyMap`, `ThemeConfig`, `DomainRole`, `SeverityLevel`) are hand-maintained in `domain-config-api.service.ts` — these are the only hand-maintained cross-stack types (everything else is codegen'd).
 
 Target state:
 - `DomainConfig` becomes a DB entity, seeded with current presets.
