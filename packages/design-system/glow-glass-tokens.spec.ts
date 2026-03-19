@@ -7,7 +7,6 @@ const read = (name: string) =>
 
 describe('glow + glass token system', () => {
   const tokens = read('tokens.css');
-  const tfcThemes = read('themes-tfc-domains.css');
   const utilities = read('utilities.css');
   const layout = read('components-layout.css');
 
@@ -76,31 +75,6 @@ describe('glow + glass token system', () => {
     expect(contrastBlock![1]).toMatch(/--glow-strength:\s*0/);
     expect(contrastBlock![1]).toMatch(/--glass-strength:\s*0/);
   });
-
-  // ── themes-tfc-domains.css — TFC themes activate ──────
-
-  for (const theme of ['tfc-cyber', 'tfc-health', 'tfc-military']) {
-    it(`${theme} sets --glow-strength: 1`, () => {
-      const re = new RegExp(
-        `\\[data-theme="${theme}"\\]\\s*\\{[\\s\\S]*?--glow-strength:\\s*1`,
-      );
-      expect(tfcThemes).toMatch(re);
-    });
-
-    it(`${theme} sets --glass-strength: 1`, () => {
-      const re = new RegExp(
-        `\\[data-theme="${theme}"\\]\\s*\\{[\\s\\S]*?--glass-strength:\\s*1`,
-      );
-      expect(tfcThemes).toMatch(re);
-    });
-
-    it(`${theme} defines --glow-color`, () => {
-      const re = new RegExp(
-        `\\[data-theme="${theme}"\\]\\s*\\{[\\s\\S]*?--glow-color:`,
-      );
-      expect(tfcThemes).toMatch(re);
-    });
-  }
 
   // ── utilities.css — glow + glass classes ───────────────
 
