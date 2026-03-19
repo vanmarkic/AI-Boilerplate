@@ -13,18 +13,22 @@ import type { ParticipantResponse } from "../core/waiting-room-api.service";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [BadgeComponent, ButtonDirective],
   template: `
-    <div class="flex flex-col gap-sm">
+    <div class="crew-stations">
       @for (role of roles(); track role.id) {
         @let holder = holderOf(role.id);
-        <div class="flex items-center justify-between p-sm border-b gap-md">
-          <div class="flex items-center gap-sm">
-            <span class="text-sm font-medium">{{ role.label }}</span>
-            <span class="text-xs text-muted-foreground">
-              {{
-                role.player_type === "decision_maker"
-                  ? "Decision Maker"
-                  : "Advisor"
-              }}
+        <div
+          class="crew-station"
+          [attr.data-filled]="holder ? '' : null"
+          [attr.data-self]="holder?.id === currentParticipantId() ? '' : null"
+        >
+          <div class="crew-station__info">
+            <span
+              class="crew-station__light"
+              [attr.data-active]="holder ? '' : null"
+            ></span>
+            <span class="crew-station__role">{{ role.label }}</span>
+            <span class="crew-station__type">
+              {{ role.player_type === "decision_maker" ? "CMD" : "ADV" }}
             </span>
           </div>
           @if (holder) {
@@ -38,7 +42,7 @@ import type { ParticipantResponse } from "../core/waiting-room-api.service";
             <button
               uiButton
               variant="outline"
-              style="font-size: var(--font-size-xs); padding: var(--spacing-xs) var(--spacing-sm);"
+              size="sm"
               (click)="claimed.emit(role.id)"
             >
               Claim
@@ -50,10 +54,18 @@ import type { ParticipantResponse } from "../core/waiting-room-api.service";
       }
       @if (showGmSlot()) {
         @let gmHolder = holderOf("game-master");
-        <div class="flex items-center justify-between p-sm border-b gap-md">
-          <div class="flex items-center gap-sm">
-            <span class="text-sm font-medium">Game Master (Trainer)</span>
-            <span class="text-xs text-muted-foreground">Facilitator</span>
+        <div
+          class="crew-station"
+          [attr.data-filled]="gmHolder ? '' : null"
+          [attr.data-self]="gmHolder?.id === currentParticipantId() ? '' : null"
+        >
+          <div class="crew-station__info">
+            <span
+              class="crew-station__light"
+              [attr.data-active]="gmHolder ? '' : null"
+            ></span>
+            <span class="crew-station__role">Game Master (Trainer)</span>
+            <span class="crew-station__type">GM</span>
           </div>
           @if (gmHolder) {
             <div class="flex items-center gap-sm">
@@ -66,7 +78,7 @@ import type { ParticipantResponse } from "../core/waiting-room-api.service";
             <button
               uiButton
               variant="outline"
-              style="font-size: var(--font-size-xs); padding: var(--spacing-xs) var(--spacing-sm);"
+              size="sm"
               (click)="claimed.emit('game-master')"
             >
               Claim
