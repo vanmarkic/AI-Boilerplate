@@ -35,7 +35,6 @@ jobs:
             node_modules
             apps/tfc/frontend/node_modules
             packages/design-system/node_modules
-            packages/tfc-shared/node_modules
           key: tfc-frontend-${{ github.sha }}
 
   type-check:
@@ -53,7 +52,6 @@ jobs:
             node_modules
             apps/tfc/frontend/node_modules
             packages/design-system/node_modules
-            packages/tfc-shared/node_modules
           key: tfc-frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -74,7 +72,6 @@ jobs:
             node_modules
             apps/tfc/frontend/node_modules
             packages/design-system/node_modules
-            packages/tfc-shared/node_modules
           key: tfc-frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -96,7 +93,6 @@ jobs:
             node_modules
             apps/tfc/frontend/node_modules
             packages/design-system/node_modules
-            packages/tfc-shared/node_modules
           key: tfc-frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -120,7 +116,6 @@ jobs:
             node_modules
             apps/tfc/frontend/node_modules
             packages/design-system/node_modules
-            packages/tfc-shared/node_modules
           key: tfc-frontend-${{ github.sha }}
       - run: npm i
         working-directory: .
@@ -147,7 +142,6 @@ jobs:
             node_modules
             apps/tfc/frontend/node_modules
             packages/design-system/node_modules
-            packages/tfc-shared/node_modules
           key: tfc-frontend-${{ github.sha }}
       - run: npm i
         working-directory: .

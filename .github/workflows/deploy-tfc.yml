@@ -8,7 +8,6 @@ on:
       - "apps/tfc/**"
       - "packages/design-system/**"
       - "packages/ui/**"
-      - "packages/tfc-shared/**"
       - "docker-compose.hetzner.yml"
 
 env:
