@@ -1,8 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/angular";
-import {
-  DecisionPanelComponent,
-  type DecisionOption,
-} from "./decision-panel.component";
+import { DecisionPanelComponent } from "./decision-panel.component";
+import type { DecisionOption } from "../core/decision-api.service";
 
 interface DecisionPanelArgs {
   title: string;

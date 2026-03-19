@@ -1,14 +1,14 @@
+import type { WsMessage } from "../../core/exercise-ws.service";
 import type {
-  WsMessage,
-  WsStateChange,
-  WsDecisionOpened,
-} from "../../core/exercise-ws.service";
+  StateChange,
+  DecisionOpened,
+} from "../../core/generated/state-changes.types";
 import type { ActiveDecision } from "../../core/decision-api.service";
 import type { ExerciseStore } from "../../core/exercise.store";
 
 type StoreInstance = InstanceType<typeof ExerciseStore>;
 
-function toActiveDecision(c: WsDecisionOpened): ActiveDecision {
+function toActiveDecision(c: DecisionOpened): ActiveDecision {
   return {
     id: c.id,
     event_id: c.event_id,
@@ -20,6 +20,7 @@ function toActiveDecision(c: WsDecisionOpened): ActiveDecision {
     completion_mode: c.completion_mode,
     target_roles: c.target_roles,
     timeout_ms: c.timeout_ms,
+    max_selections: c.max_selections,
     status: "open",
     opened_at_pt_ms: c.opened_at_pt_ms,
     closed_at_pt_ms: null,
@@ -28,7 +29,7 @@ function toActiveDecision(c: WsDecisionOpened): ActiveDecision {
 }
 
 function handleStateChange(
-  change: WsStateChange,
+  change: StateChange,
   store: StoreInstance,
 ): void {
   switch (change.type) {
