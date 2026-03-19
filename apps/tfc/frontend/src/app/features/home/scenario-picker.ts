@@ -15,94 +15,33 @@ import {
   selector: "tfc-scenario-picker",
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [],
-  styles: [
-    `
-      :host {
-        display: block;
-      }
-
-      .picker-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: var(--spacing-md);
-        max-width: 560px;
-        width: 100%;
-      }
-
-      .scenario-card {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-xs);
-        padding: var(--spacing-lg);
-        background: var(--glass-bg);
-        backdrop-filter: blur(var(--glass-blur));
-        -webkit-backdrop-filter: blur(var(--glass-blur));
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-lg, 0.75rem);
-        cursor: pointer;
-        transition:
-          border-color 0.15s,
-          background 0.15s;
-      }
-
-      .scenario-card:hover {
-        border-color: var(--color-primary);
-        background: color-mix(
-          in oklch,
-          var(--glass-bg) 80%,
-          var(--color-primary) 20%
-        );
-      }
-
-      .scenario-title {
-        font-size: var(--font-size-md, 1rem);
-        font-weight: 600;
-      }
-
-      .scenario-desc {
-        font-size: var(--font-size-xs, 0.75rem);
-        color: var(--color-muted-foreground);
-        line-height: 1.4;
-      }
-
-      .scenario-meta {
-        display: flex;
-        gap: var(--spacing-sm);
-        font-size: var(--font-size-xs, 0.75rem);
-        color: var(--color-muted-foreground);
-      }
-
-      .back-link {
-        font-size: var(--font-size-sm, 0.875rem);
-        color: var(--color-muted-foreground);
-        text-decoration: none;
-        cursor: pointer;
-        margin-bottom: var(--spacing-sm);
-      }
-    `,
-  ],
   template: `
-    <div class="picker-grid">
-      <span class="back-link" (click)="dismissed.emit()">&larr; Back</span>
+    <div class="dossier-grid">
+      <span class="back-link" (click)="dismissed.emit()">Back</span>
 
       @if (loading()) {
         <p class="text-sm text-muted-foreground">Loading scenarios...</p>
       }
 
       @for (s of scenarios(); track s.id) {
-        <div class="scenario-card" (click)="picked.emit(s)">
-          <span class="scenario-title">{{ s.title }}</span>
+        <div class="dossier-card" (click)="picked.emit(s)">
+          <span class="dossier-card__classification">Mission Briefing</span>
+          <span class="dossier-card__title">{{ s.title }}</span>
           @if (s.description) {
-            <span class="scenario-desc">{{ s.description }}</span>
+            <span class="dossier-card__desc">{{ s.description }}</span>
           }
-          <div class="scenario-meta">
+          <div class="dossier-card__meta">
             @if (s.content?.roles; as roles) {
-              <span>{{ roles.length }} roles</span>
+              <span class="dossier-card__meta-item">
+                <span class="dossier-card__meta-dot"></span>
+                {{ roles.length }} stations
+              </span>
             }
             @if (s.content?.game_mode; as gm) {
-              <span>{{
-                gm === "simple_collaborative" ? "Collaborative" : "Classic"
-              }}</span>
+              <span class="dossier-card__meta-item">
+                <span class="dossier-card__meta-dot"></span>
+                {{ gm === "simple_collaborative" ? "Collaborative" : "Classic" }}
+              </span>
             }
           </div>
         </div>
