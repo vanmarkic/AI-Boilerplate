@@ -40,8 +40,10 @@ def alembic_config() -> Generator[Config, None, None]:
     """Provide an Alembic config and ensure the DB is at base after test."""
     config = get_alembic_config()
     command.downgrade(config, "base")
-    yield config
-    command.downgrade(config, "base")
+    try:
+        yield config
+    finally:
+        command.downgrade(config, "base")
 
 
 def test_upgrade_to_head(alembic_config: Config) -> None:
