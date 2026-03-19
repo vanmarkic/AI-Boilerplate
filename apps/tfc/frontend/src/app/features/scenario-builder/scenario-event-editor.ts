@@ -69,6 +69,12 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                   (valueChange)="editDur.set($event ? +$event : null)"
                 />
               </div>
+              <ui-input
+                id="edit-evt-roles"
+                label="Target Roles (comma-separated, empty = all)"
+                [value]="editTargetRoles()"
+                (valueChange)="editTargetRoles.set($event)"
+              />
               <div class="flex gap-sm">
                 <button
                   uiButton
@@ -164,6 +170,7 @@ export class ScenarioEventEditorComponent {
   protected readonly editType = signal("operational");
   protected readonly editPt = signal(0);
   protected readonly editDur = signal<number | null>(null);
+  protected readonly editTargetRoles = signal("");
 
   protected sel(event: Event): string {
     const target = event.target;
@@ -184,6 +191,8 @@ export class ScenarioEventEditorComponent {
       duration_ms: null,
       dependencies: [],
       triggered_issues: [],
+      target_roles: [],
+      role_descriptions: {},
     });
     this.newTitle.set("");
     this.newTime.set("");
@@ -196,15 +205,23 @@ export class ScenarioEventEditorComponent {
     this.editType.set(event.event_type);
     this.editPt.set(event.scheduled_pt_ms);
     this.editDur.set(event.duration_ms);
+    this.editTargetRoles.set((event.target_roles ?? []).join(", "));
   }
 
   protected save(eventId: string): void {
+    const rolesStr = this.editTargetRoles().trim();
+    const target_roles = rolesStr
+      ? rolesStr.split(",").map((r: string) => r.trim()).filter(Boolean)
+      : [];
+    const existing = this.store.content().events.find((e: ScenarioEventDef) => e.id === eventId);
     this.store.updateEvent(eventId, {
       title: this.editTitle(),
       description: this.editDesc(),
       event_type: this.editType(),
       scheduled_pt_ms: this.editPt(),
       duration_ms: this.editDur(),
+      target_roles,
+      role_descriptions: existing?.role_descriptions ?? {},
     });
     this.editingId.set(null);
   }

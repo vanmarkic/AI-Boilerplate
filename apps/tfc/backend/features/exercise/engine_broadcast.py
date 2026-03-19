@@ -14,7 +14,7 @@ def split_targeted_changes(
     by_roles: dict[tuple[str, ...], list[StateChange]] = {}
     for change in changes:
         target_roles = change.get("target_roles", [])
-        if change.get("type") == "decision_opened" and target_roles:
+        if change.get("type") in ("decision_opened", "event_change") and target_roles:
             key = tuple(sorted(target_roles))
             by_roles.setdefault(key, []).append(change)
         else:

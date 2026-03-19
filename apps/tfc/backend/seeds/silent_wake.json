@@ -114,7 +114,16 @@
         "scheduled_pt_ms": 0,
         "triggered_issues": [
           "iss-transit-nominal"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "ops": "Transit proceeding as planned. Estimated time to patrol sector unchanged. No updated intelligence from MTC. No declared maritime safety broadcasts affecting corridor. EMCON: Navigation radar only.",
+          "nav": "Course and speed steady at 15 kts. No deviation from planned route. Commercial traffic density within expected levels. ETA to patrol area: 5 hours. Visibility ~12 nm.",
+          "eo": "Radar performance nominal. Surface and air picture stable. No sensor anomalies observed. Communications functioning within expected parameters.",
+          "cyop": "Network traffic baseline unchanged. No alerts. Routine monitoring only.",
+          "aawo": "Air picture normal. No contacts of concern.",
+          "pwo": "Surface picture normal. No contacts of concern."
+        }
       },
       {
         "id": "evt-t2",
@@ -124,7 +133,12 @@
         "scheduled_pt_ms": 300000,
         "triggered_issues": [
           "iss-sensor-anomaly"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "nav": "Minor speed discrepancy between GPS SOG and STW. One AIS contact bearing 035, range 18 nm with no corresponding radar echo.",
+          "pwo": "No ESM emissions from bearing 035."
+        }
       },
       {
         "id": "evt-t3",
@@ -134,7 +148,12 @@
         "scheduled_pt_ms": 600000,
         "triggered_issues": [
           "iss-faulty-component"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "eo": "Possible faulty component identified. Resolution: Restart (5 min ETBOL).",
+          "nav": "Increase in AIS contacts within sector. Commercial traffic density higher than expected baseline. Majority of contacts remain beyond visual range."
+        }
       },
       {
         "id": "evt-t4",
@@ -144,7 +163,12 @@
         "scheduled_pt_ms": 900000,
         "triggered_issues": [
           "iss-ais-spoofing"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "nav": "New AIS contact bearing 041 at 11 nm. No vessel visible at this position.",
+          "eo": "Component is back online."
+        }
       },
       {
         "id": "evt-t5",
@@ -155,7 +179,12 @@
         "triggered_issues": [
           "iss-comms-degraded",
           "iss-cyber-alert"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "Anomaly detected in IBMS.",
+          "eo": "SATCOM experiencing reduced bandwidth and intermittent connectivity. Observed throughput below allocated 512 kbps baseline. HF performance degraded. Signal clarity is inconsistent. Communication with MTC is not possible with UHF due to distance."
+        }
       },
       {
         "id": "evt-t6",
@@ -165,7 +194,13 @@
         "scheduled_pt_ms": 1500000,
         "triggered_issues": [
           "iss-hostile-contact"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "Analysis indicates anomalous data flow originating from WECDIS towards the INS. Effects are not yet fully determined.",
+          "nav": "New AIS contact bearing 052, range 12 nm. Visual silhouette indicates warship profile.",
+          "pwo": "ESM detects non-commercial radar emissions at bearing 052. Emission profile not consistent with merchant vessels."
+        }
       },
       {
         "id": "evt-t7",
@@ -175,7 +210,11 @@
         "scheduled_pt_ms": 1800000,
         "triggered_issues": [
           "iss-aaw-malfunction"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "aawo": "Air surveillance radar online. Multiple tracks are flickering like last time."
+        }
       },
       {
         "id": "evt-t8",
@@ -185,7 +224,12 @@
         "scheduled_pt_ms": 2100000,
         "triggered_issues": [
           "iss-air-threat"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "aawo": "Report via MTC (C2 system): Hostile aircraft approaching area (ETA: 15 min).",
+          "eo": "Reboot could fix the AAW issue (1 min ETBOL)."
+        }
       },
       {
         "id": "evt-t9",
@@ -195,7 +239,13 @@
         "scheduled_pt_ms": 2400000,
         "triggered_issues": [
           "iss-under-attack"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "nav": "3 incoming missiles visually detected.",
+          "eo": "AAW radar is back online.",
+          "pwo": "Target is out of gun range."
+        }
       },
       {
         "id": "evt-t10",
@@ -205,7 +255,13 @@
         "scheduled_pt_ms": 2700000,
         "triggered_issues": [
           "iss-damage-first-hit"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "eo": "FWD CIWS: non-operational (ETBOL: 2 hours). Missiles launcher: non-operational (ETBOL: 5 hours). 1 HF antenna was disabled (unable to repair).",
+          "pwo": "Target now in gun range.",
+          "nav": "Missiles (counterattack) missed the target. No evidence of hostile manoeuvre to evade."
+        }
       },
       {
         "id": "evt-t11",
@@ -216,7 +272,12 @@
         "triggered_issues": [
           "iss-cyber-confirmed",
           "iss-surface-tracking-degraded"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "Analysis indicates a cyber-attack vector resulting in feeding all systems with wrong speed value. Option 1: Disconnect WECDIS and restart INS (ETBOL: 1 min) \u2014 WECDIS not available. Option 2: Restore WECDIS and restart INS (ETBOL 30 min) \u2014 WECDIS available.",
+          "pwo": "Target within the effective gun range. Surface tracking radar is unable to achieve a stable lock. Manual targeting reduces effective engagement envelope (reduced gun effective range)."
+        }
       },
       {
         "id": "evt-t12",
@@ -226,7 +287,14 @@
         "scheduled_pt_ms": 3300000,
         "triggered_issues": [
           "iss-aaw-attack-source"
-        ]
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "Malicious activity confirmed originating from AAW radar processing module toward surface tracking radar. Can affect tracking capability. Originated by the 'faulty' AAW radar component.",
+          "aawo": "Report via MTC (C2 system): Hostile aircraft approaching area (ETA: 10 min).",
+          "pwo": "Target is still out of effective gun range with manual tracking. 10 min to be in range.",
+          "eo": "INS functioning correctly. Speed inputs verified across systems."
+        }
       },
       {
         "id": "evt-t13",
@@ -234,7 +302,12 @@
         "description": "CyOp: AAW attack resolution \u2014 Option 1: Restore from backup (30 min). Option 2: Isolate AAW radar (<1 min, AAW unavailable, surface tracking restored immediately).\nAAWO: Hostile aircraft \u2014 ETA 8 min.\nSurface threat must be neutralised before incoming air threat.",
         "event_type": "decision",
         "scheduled_pt_ms": 3600000,
-        "triggered_issues": []
+        "triggered_issues": [],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "AAW originated attack resolution options: Option 1: Restore AAW radar from backup (ETBOL: 30 min). Full recovery by replacing the component from storage and flashing clean firmware. Option 2: Isolate AAW radar: ETBOL < 1 min. AAW radar unavailable while isolated. Surface tracking stability restored immediately.",
+          "aawo": "Report via MTC (C2 system): Hostile aircraft approaching area (ETA: 8 min)."
+        }
       },
       {
         "id": "evt-t14",
@@ -242,7 +315,12 @@
         "description": "NAV: Gun engagement achieved effective impact on hostile vessel. Target exhibiting loss of maneuverability.\nPWO: No further ESM emissions from hostile unit. Surface threat assessed as neutralised.\nAir threat unresolved. AAW radar reconnection restores organic air picture.",
         "event_type": "decision",
         "scheduled_pt_ms": 3900000,
-        "triggered_issues": []
+        "triggered_issues": [],
+        "target_roles": [],
+        "role_descriptions": {
+          "nav": "Gun engagement achieved effective impact on hostile vessel. Target exhibiting loss of manoeuvrability.",
+          "pwo": "No further ESM emissions detected from hostile unit. Surface threat assessed as neutralised."
+        }
       },
       {
         "id": "evt-t15",
@@ -250,7 +328,9 @@
         "description": "FACILITATOR: Hostile aircraft intercepted by friendly forces. Immediate threat neutralised.\nThis concludes the wargame. 15 turns of escalating pressure \u2014 from ambiguous sensor anomalies through confirmed cyber attack and live combat \u2014 under degraded conditions and real-time constraints. Debrief to follow.",
         "event_type": "decision",
         "scheduled_pt_ms": 4200000,
-        "triggered_issues": []
+        "triggered_issues": [],
+        "target_roles": [],
+        "role_descriptions": {}
       }
     ],
     "issues": [

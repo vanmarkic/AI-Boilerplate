@@ -103,11 +103,22 @@ export class PlayerView implements OnInit, OnDestroy {
     }
   });
 
-  protected visibleEvents() {
+  protected readonly visibleEvents = computed(() => {
+    const role = this.store.playerRole();
     return this.store
       .events()
-      .filter((e) => e.lifecycle === "running" || e.lifecycle === "completed");
-  }
+      .filter((e) => {
+        if (e.lifecycle !== "running" && e.lifecycle !== "completed") return false;
+        const targetRoles = e.target_roles ?? [];
+        if (targetRoles.length === 0) return true;
+        if (role === "all_advisors" || role === "solo_player") return true;
+        return targetRoles.includes(role);
+      })
+      .map((e) => ({
+        ...e,
+        resolvedDescription: (e.role_descriptions ?? {})[role] ?? e.description,
+      }));
+  });
 
   protected advisorRecs(decision: ActiveDecision) {
     return buildAdvisorRecs(decision, this.store.context()?.roles ?? []);

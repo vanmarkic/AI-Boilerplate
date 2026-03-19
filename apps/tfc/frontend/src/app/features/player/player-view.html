@@ -28,8 +28,8 @@
           }}</span>
           <div class="event-tile__body">
             <div class="event-tile__title">{{ event.title }}</div>
-            @if (event.description) {
-            <div class="event-tile__desc">{{ event.description }}</div>
+            @if (event.resolvedDescription) {
+            <div class="event-tile__desc">{{ event.resolvedDescription }}</div>
             }
             <div class="event-tile__meta">
               <ui-badge variant="secondary">{{ event.lifecycle }}</ui-badge>

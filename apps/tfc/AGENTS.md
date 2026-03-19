@@ -4,7 +4,7 @@
 Before writing any code:
 1. Read the root `AGENTS.md` — all universal rules (250-line limit, strict types, no barrel exports, feature manifests, `make validate`) apply here.
 2. Read `apps/main/backend/AGENTS.md` for backend conventions (FastAPI patterns, testing, SQL) and `apps/main/frontend/AGENTS.md` for frontend conventions (Angular patterns, signals, stores) — TFC follows the same patterns.
-3. Read `SPECS.md` (root) for TFC domain model, business rules, API surface, and glossary. If a feature's `manifest.yaml` exists, read it for feature-specific context.
+3. Read `apps/tfc/SPECS.md` for TFC domain model, business rules, API surface, and glossary. If a feature's `manifest.yaml` exists, read it for feature-specific context.
 
 ## What TFC Is
 TFC is a domain-agnostic exercise simulation platform. A Game Master (GM) loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
@@ -24,6 +24,7 @@ The exercise simulation domain uses specific terms. The codebase uses generic eq
 | triggered defects | `triggered_issues` | field on `ScheduledEvent` / `ExerciseEvent` |
 | defect trigger | `trigger_mode`, `trigger_event_id` | `TrackedIssue` fields |
 | inject scheduler | `EventScheduler` | `engine/event_scheduler.py` |
+| role-targeted inject | Event with `target_roles` + `role_descriptions` | `engine/event_scheduler.py`, `engine/state_changes.py` |
 | defect manager | `IssueManager` | `engine/issue_manager.py` |
 | inject snapshot | `EventSnapshot` | `engine-api.service.ts` |
 | defect snapshot | `IssueSnapshot` | `engine-api.service.ts` |
@@ -117,7 +118,7 @@ src/app/
 - **Tick loop**: 250ms interval. Each tick advances play time, checks event triggers, transitions issue lifecycles, and broadcasts state changes via WebSocket.
 - **Play time vs real time**: `TimeManager` supports a speed factor (e.g., 2× = 2 minutes of play time per 1 real minute).
 - **Engine phases**: `setup → running → paused → completed`. Decision events auto-pause the engine.
-- **Events**: scheduled occurrences with lifecycle `pending → active → completed`. Types: `NARRATIVE`, `DECISION`, `INJECT`.
+- **Events**: scheduled occurrences with lifecycle `pending → active → completed`. Types: `NARRATIVE`, `DECISION`, `INJECT`. Events support `target_roles` (role visibility filter, empty = all) and `role_descriptions` (per-role text override). Role-targeted events are broadcast only to matching roles + GMs.
 - **Issues**: problems surfaced by events, with lifecycle `dormant → active → mitigated → resolved`. Can auto-resolve after a countdown.
 - **Decisions**: questions posed to players when a DECISION event fires. Engine pauses until resolved.
 - **Forced cards**: `forced_option_ids` on `DecisionTemplate`. If a player omits a forced card, it is auto-included with a penalty and a `ForcedCardApplied` state change is emitted.
@@ -238,12 +239,12 @@ When adding a new migration:
 
 ### Before starting any TFC task
 1. Read the feature's `manifest.yaml` for API surface, dependencies, and business rules.
-2. Read `SPECS.md` for the full domain model and glossary — use domain terms consistently.
+2. Read `apps/tfc/SPECS.md` for the full domain model and glossary — use domain terms consistently.
 3. Check `docs/plans/2026-03-18-tfc-gaps-deferred-opens.md` for open gaps and deferred items before implementing related features.
 
 ### Specification hygiene
 4. When adding a new feature: create `manifest.yaml` first, then code. The manifest is the contract.
-5. When changing business rules or API endpoints: update `SPECS.md` and the feature's `manifest.yaml` in the same commit as the code change. Stale specs cause agents to generate wrong code.
+5. When changing business rules or API endpoints: update `apps/tfc/SPECS.md` and the feature's `manifest.yaml` in the same commit as the code change. Stale specs cause agents to generate wrong code.
 6. When a gap or deferred item is resolved: update its status in the gaps doc immediately. Contradictory statuses across docs cause agents to re-fix resolved issues.
 
 ### Type safety across the stack
