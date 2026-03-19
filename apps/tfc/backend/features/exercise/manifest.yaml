@@ -14,10 +14,12 @@ api_endpoints:
   - PUT /api/exercises/{exercise_id}
   - DELETE /api/exercises/{exercise_id}
   - POST /api/exercises/{exercise_id}/engine/start
+  - POST /api/exercises/{exercise_id}/engine/begin
   - POST /api/exercises/{exercise_id}/engine/pause
   - POST /api/exercises/{exercise_id}/engine/resume
   - POST /api/exercises/{exercise_id}/engine/reset
   - POST /api/exercises/{exercise_id}/engine/complete
+  - POST /api/exercises/{exercise_id}/engine/stop
   - PUT /api/exercises/{exercise_id}/engine/speed
   - GET /api/exercises/{exercise_id}/engine/snapshot
   - GET /api/exercises/{exercise_id}/engine/context

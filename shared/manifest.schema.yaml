@@ -2,7 +2,7 @@
 # Schema for feature manifest.yaml files.
 # Every feature folder (backend/features/*, frontend/src/app/features/*) must
 # include a manifest.yaml that conforms to this schema.
-# Validated by: make lint-arch (TODO: add manifest validation to lint-architecture.py)
+# Validated by: make lint-arch (api_endpoints checked against router decorators)
 
 required_fields:
   name:

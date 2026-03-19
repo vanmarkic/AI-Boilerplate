@@ -8,9 +8,14 @@ Enforces the dependency flow:
 
 Also enforces tier boundaries:
   A feature with tier=N must not import from a feature with tier>N.
+
+And validates manifest endpoint sync:
+  api_endpoints in manifest.yaml must match actual router decorators.
 """
 import ast
 from pathlib import Path
+
+from python_layer_lint.manifest_sync import check_manifest_endpoints
 
 try:
     import yaml
@@ -131,4 +136,10 @@ def lint_features_dir(features_dir: Path, layer_rules: dict[str, set[str]] | Non
     for py_file in features_dir.rglob("*.py"):
         all_violations.extend(check_imports(py_file, layer_rules))
         all_violations.extend(check_tier_boundaries(py_file, features_dir))
+
+    # Validate manifest api_endpoints match actual router decorators
+    for feature_dir in sorted(features_dir.iterdir()):
+        if feature_dir.is_dir() and not feature_dir.name.startswith("_"):
+            all_violations.extend(check_manifest_endpoints(feature_dir))
+
     return all_violations
