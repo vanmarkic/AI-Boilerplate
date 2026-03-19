@@ -4,13 +4,19 @@ Runs upgrade to head, then downgrades step-by-step back to base,
 ensuring every migration's downgrade() path works without errors.
 """
 
-from collections.abc import Generator
+from collections.abc import AsyncGenerator, Generator
 
 import pytest
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 
 from alembic import command
+
+
+@pytest.fixture(autouse=True)
+async def setup_db() -> AsyncGenerator[None]:
+    """Override the autouse setup_db — migration tests manage their own schema."""
+    yield
 
 
 def get_alembic_config() -> Config:
