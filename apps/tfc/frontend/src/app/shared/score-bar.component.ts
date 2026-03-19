@@ -25,11 +25,17 @@ export interface ScoreState {
         class="score-bar__vignette"
         [class.score-bar__vignette--active]="penaltyActive"
       ></div>
-      <span class="text-sm font-medium">Turn {{ score()?.turnNumber }}</span>
+      <span class="text-xs text-primary uppercase tracking-wide font-semibold"
+        >Turn {{ score()?.turnNumber }}</span
+      >
+      <span class="text-xs text-muted-foreground uppercase tracking-wide"
+        >Score</span
+      >
       <span class="score-bar__value">{{ displayScore }}</span>
+      <span class="flex-1"></span>
       @if (score()?.nextDecisionTimeMs; as ms) {
-        <span class="text-sm text-muted-foreground">
-          Next: {{ ms / 1000 }}s
+        <span class="text-xs text-muted-foreground">
+          Next in {{ ms / 1000 }}s
         </span>
       }
     </div>

@@ -316,9 +316,10 @@ export class HomeView implements OnInit {
         practice_mode: practiceMode,
       })
       .subscribe({
-        next: () => {
-          this.showPicker.set(false);
-          this.checkForJoinableExercises();
+        next: (exercise) => {
+          this.router.navigate(["/waiting-room"], {
+            queryParams: { exerciseId: exercise.id, gameMode },
+          });
         },
       });
   }

@@ -11,6 +11,7 @@ INFRA    = infra
 DC_INFRA = docker compose -f $(INFRA)/docker-compose.yml
 DC_MAIN  = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml
 DC_TFC   = docker compose -f $(INFRA)/docker-compose.tfc.yml
+DC_TFC_DEV = docker compose -f $(INFRA)/docker-compose.tfc.dev.yml
 DC_ALL   = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml
 
 help: ## Show this help
@@ -58,8 +59,11 @@ e2e-tag: ## Run E2E tests matching a tag (usage: make e2e-tag TAG=@player APP=tf
 
 # ── TFC App ───────────────────────────────────────────────
 
-dev-tfc: ## Start TFC services via Docker Compose
+dev-tfc: ## Start TFC services via Docker Compose (production build)
 	$(DC_TFC) up --build
+
+dev-tfc-dev: ## Start TFC dev stack (hot-reload frontend + backend, all in Docker)
+	$(DC_TFC_DEV) up --build
 
 dev-tfc-local: ## Start db+tfc-api in Docker, TFC Angular natively
 	$(DC_TFC) up -d db tfc-api

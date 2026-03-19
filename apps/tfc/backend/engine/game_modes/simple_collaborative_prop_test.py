@@ -4,7 +4,7 @@ Invariants tested:
 - Score monotonicity: total_score never decreases across turns.
 - Penalty monotonicity: accumulated_penalty_ms never decreases.
 - Timer floor: effective decision time >= min_decision_time_ms.
-- Turn counting: turn_number == number of on_decision_closed_v2 calls.
+- Turn counting: turn_number == 1 + number of on_decision_closed_v2 calls.
 - Sequence advancement: current_index tracks correctly, None at end.
 - Penalty formula: penalty_ms == (max - selected) * factor * 1000.
 - Perfect score: selected == max → zero penalty delta.
@@ -153,7 +153,7 @@ class TestTimerFloor:
 
 
 class TestTurnCounting:
-    """turn_number equals the number of on_decision_closed_v2 calls."""
+    """turn_number equals 1 + the number of on_decision_closed_v2 calls."""
 
     @given(n_turns=st.integers(min_value=0, max_value=30))
     @settings(max_examples=100)
@@ -161,7 +161,7 @@ class TestTurnCounting:
         mode = _mode(seq=[f"d{i}" for i in range(n_turns)])
         for i in range(n_turns):
             _close_v2(mode, f"d{i}", selected_score=1.0, max_score=1.0)
-        assert mode.turn_number == n_turns
+        assert mode.turn_number == n_turns + 1
 
 
 # -- Sequence advancement ----------------------------------------------
@@ -313,9 +313,9 @@ class TestMultiTurnAccumulation:
             assert abs(mode.total_score - expected_total) < 1e-6
             assert abs(mode.accumulated_penalty_ms - expected_penalty) < 1e-6
             sc = next(c for c in changes if c["type"] == "score_change")
-            assert sc["turn_number"] == i + 1
+            assert sc["turn_number"] == i + 2
 
-        assert mode.turn_number == len(pairs)
+        assert mode.turn_number == len(pairs) + 1
         assert mode.current_index == len(pairs)
         assert mode.get_next_decision_id("done") is None
 
@@ -385,7 +385,7 @@ class TestV2ScoringFormula:
     def test_advances_turn(self, all_opts: list[dict]) -> None:
         mode = _mode()
         mode.on_decision_closed_v2("d0", [all_opts[0]], all_opts)
-        assert mode.turn_number == 1
+        assert mode.turn_number == 2
 
 
 class TestV2TimerFloor:
@@ -451,7 +451,7 @@ class TestSnapshotConsistency:
             _close_v2(mode, f"d{i}", selected_score=1.0, max_score=1.0)
         snap = mode.snapshot()
         assert snap is not None
-        assert snap["turn_number"] == n_turns
+        assert snap["turn_number"] == n_turns + 1
 
     @given(
         gaps=st.lists(scores(), min_size=1, max_size=10),

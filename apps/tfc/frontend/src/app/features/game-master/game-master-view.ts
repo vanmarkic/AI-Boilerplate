@@ -2,10 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   OnDestroy,
+  OnInit,
   inject,
   signal,
 } from "@angular/core";
-import { Router } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import {
   BadgeComponent,
   ButtonDirective,
@@ -35,7 +36,9 @@ import {
   stopExercise,
 } from "./gm-engine-actions";
 import { EventTimelineComponent } from "./event-timeline.component";
+import { ExerciseListComponent } from "./exercise-list.component";
 import { GmItemActionsComponent } from "./gm-item-actions.component";
+import type { ExerciseResponse } from "../../core/exercise-api.service";
 import { Subscription } from "rxjs";
 
 @Component({
@@ -54,11 +57,17 @@ import { Subscription } from "rxjs";
     DomainSelectorComponent,
     PresenceIndicatorComponent,
     EventTimelineComponent,
+    ExerciseListComponent,
     GmItemActionsComponent,
   ],
   template: `
     @if (!exerciseId()) {
-      <tfc-scenario-picker (scenarioSelected)="onScenarioSelected($event)" />
+      <div class="flex flex-col gap-lg p-lg">
+        <tfc-exercise-list
+          (exerciseSelected)="onExerciseSelected($event)"
+        />
+        <tfc-scenario-picker (scenarioSelected)="onScenarioSelected($event)" />
+      </div>
     } @else {
       <div class="exercise-layout">
         <header class="exercise-header">
@@ -69,7 +78,6 @@ import { Subscription } from "rxjs";
           <tfc-presence-indicator [participants]="store.participants()" />
           <div class="exercise-header__clocks">
             <tfc-clock-display label="RT" [value]="store.rtClock()" />
-            <tfc-clock-display label="PT" [value]="store.ptClock()" />
             <tfc-speed-display [value]="store.speedFactor()" />
             <tfc-phase-badge [phase]="store.phase()" />
           </div>
@@ -202,7 +210,7 @@ import { Subscription } from "rxjs";
     }
   `,
 })
-export class GameMasterView implements OnDestroy {
+export class GameMasterView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
   protected readonly domain = inject(DomainService);
   private readonly api = inject(EngineApiService);
@@ -210,10 +218,33 @@ export class GameMasterView implements OnDestroy {
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
   protected readonly exerciseId = signal<number | null>(null);
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
+
+  ngOnInit(): void {
+    const params = this.route.snapshot.queryParams;
+    const eId = Number(params["exerciseId"] ?? 0);
+    if (eId) {
+      this.exerciseId.set(eId);
+      this.connectExercise(eId);
+    }
+  }
+
+  protected onExerciseSelected(exercise: ExerciseResponse): void {
+    if (exercise.domain_id != null) {
+      const domainMap: Record<number, string> = {
+        1: "cybersecurity",
+        2: "healthcare",
+        3: "military",
+      };
+      this.domain.setDomain(domainMap[exercise.domain_id] ?? "default");
+    }
+    this.exerciseId.set(exercise.id);
+    this.connectExercise(exercise.id);
+  }
 
   protected onScenarioSelected({
     scenario,
@@ -236,14 +267,9 @@ export class GameMasterView implements OnDestroy {
       })
       .subscribe({
         next: (ex) => {
-          if (gameMode === "simple_collaborative") {
-            this.router.navigate(["/join"], {
-              queryParams: { code: ex.session_code },
-            });
-          } else {
-            this.exerciseId.set(ex.id);
-            this.connectExercise(ex.id);
-          }
+          this.router.navigate(["/waiting-room"], {
+            queryParams: { exerciseId: ex.id, gameMode },
+          });
         },
         error: () => this.store.setError("Failed to create exercise"),
       });

@@ -52,4 +52,8 @@ export class ExerciseApiService {
   get(id: number): Observable<ExerciseResponse> {
     return this.http.get<ExerciseResponse>(`${this.base}/api/exercises/${id}`);
   }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.base}/api/exercises/${id}`);
+  }
 }

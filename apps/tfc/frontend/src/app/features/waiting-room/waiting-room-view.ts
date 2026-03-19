@@ -8,7 +8,13 @@ import {
   computed,
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import { CardComponent, BadgeComponent, ButtonDirective } from "@aspect/ui";
+import {
+  CardComponent,
+  BadgeComponent,
+  ButtonDirective,
+  InputComponent,
+} from "@aspect/ui";
+import { FormsModule } from "@angular/forms";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
 import { ExerciseApiService } from "../../core/exercise-api.service";
 import {
@@ -33,9 +39,11 @@ type PlayerCountMode = "full" | "two_player" | "practice";
   selector: "tfc-waiting-room-view",
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    FormsModule,
     CardComponent,
     BadgeComponent,
     ButtonDirective,
+    InputComponent,
     RoleSlotListComponent,
   ],
   template: `
@@ -45,6 +53,31 @@ type PlayerCountMode = "full" | "two_player" | "practice";
           class="flex flex-col gap-md"
           style="min-width: var(--container-md); max-width: var(--container-2xl);"
         >
+          @if (!participantId()) {
+            <div class="flex flex-col gap-sm">
+              <p class="text-sm text-muted-foreground">
+                Enter your name to join this exercise.
+              </p>
+              <div class="flex gap-sm items-end">
+                <ui-input
+                  id="wr-name"
+                  label="Your Name"
+                  placeholder="Enter your name"
+                  [(value)]="displayName"
+                  style="flex: 1;"
+                />
+                <button
+                  uiButton
+                  variant="default"
+                  [disabled]="!displayName().trim() || joining()"
+                  (click)="onJoin()"
+                >
+                  {{ joining() ? "Joining..." : "Join" }}
+                </button>
+              </div>
+            </div>
+          }
+
           <p class="text-sm text-muted-foreground">
             @if (isSimpleCollaborative()) {
               Collaborative exercise — no facilitator needed.
@@ -187,6 +220,8 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   protected readonly playerCountMode = signal<PlayerCountMode>("full");
   protected readonly scenarioRoles = signal<RoleDef[]>([]);
   protected readonly requiresGm = signal(false);
+  protected readonly displayName = signal("");
+  protected readonly joining = signal(false);
   protected readonly twoPlayerRoles = TWO_PLAYER_ROLES;
 
   protected readonly isSimpleCollaborative = computed(
@@ -246,6 +281,19 @@ export class WaitingRoomView implements OnInit, OnDestroy {
 
   protected onPlayerCountMode(mode: PlayerCountMode): void {
     this.playerCountMode.set(mode);
+  }
+
+  protected onJoin(): void {
+    const name = this.displayName().trim();
+    if (!name) return;
+    this.joining.set(true);
+    this.api.join(this.exerciseId(), name, "player").subscribe({
+      next: (p) => {
+        this.participantId.set(p.id);
+        this.joining.set(false);
+      },
+      error: () => this.joining.set(false),
+    });
   }
 
   protected holderOf(roleId: string): ParticipantResponse | undefined {

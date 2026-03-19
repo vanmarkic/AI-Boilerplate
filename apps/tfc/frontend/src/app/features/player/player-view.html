@@ -1,13 +1,12 @@
 <tfc-ambient-background />
 
-<div class="exercise-layout">
-  <header class="exercise-header">
-    <span class="exercise-header__title"
+<div class="player-layout">
+  <header class="player-header">
+    <span class="player-header__title"
       >{{ store.title() || domain.term('exercise') + ' Dashboard' }}</span
     >
-    <div class="exercise-header__clocks">
+    <div class="player-header__clocks">
       <tfc-clock-display label="RT" [value]="store.rtClock()" />
-      <tfc-clock-display label="PT" [value]="store.ptClock()" />
       <tfc-phase-badge [phase]="store.phase()" />
     </div>
   </header>
@@ -19,58 +18,82 @@
   />
   }
 
-  <div class="exercise-overview">
-    <ui-card [title]="'Released ' + domain.term('event') + 's'">
-      @for (event of visibleEvents(); track event.id) {
-      <div class="flex items-center justify-between p-sm border-b">
-        <span class="text-sm font-medium">{{ event.title }}</span>
-        <ui-badge variant="secondary">{{ event.lifecycle }}</ui-badge>
-      </div>
-      } @empty {
-      <p class="text-muted-foreground text-sm p-sm">No events released yet.</p>
-      }
-    </ui-card>
-
-    <ui-card [title]="'Active ' + domain.term('issue') + 's'">
-      @for (issue of store.releasedIssues(); track issue.id) {
-      <div
-        class="flex items-center justify-between p-sm border-b"
-        [class.cursor-pointer]="issue.lifecycle === 'active'"
-        (click)="selectIssue(issue.id)"
-      >
-        <span class="text-sm font-medium">{{ issue.title }}</span>
-        <ui-badge
-          [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'"
-        >
-          {{ issue.lifecycle }}
-        </ui-badge>
-        @if (getIssueCountdown(issue.id); as cd) {
-        <span class="text-xs text-muted-foreground ml-sm"
-          >Auto-resolve: {{ cd }}</span
-        >
+  <main class="player-main">
+    <div class="player-main__columns">
+      <ui-card [title]="'Released ' + domain.term('event') + 's'">
+        @for (event of visibleEvents(); track event.id) {
+        <div class="event-tile">
+          <span class="event-tile__icon">{{
+            eventTypeInitial(event.event_type)
+          }}</span>
+          <div class="event-tile__body">
+            <div class="event-tile__title">{{ event.title }}</div>
+            @if (event.description) {
+            <div class="event-tile__desc">{{ event.description }}</div>
+            }
+            <div class="event-tile__meta">
+              <ui-badge variant="secondary">{{ event.lifecycle }}</ui-badge>
+              <ui-badge variant="secondary">{{ event.event_type }}</ui-badge>
+            </div>
+          </div>
+        </div>
+        } @empty {
+        <div class="empty-state">
+          <span class="empty-state__icon">&#x1f4e8;</span>
+          <span class="empty-state__text"
+            >No {{ domain.term('event') }}s released yet.</span
+          >
+        </div>
         }
-      </div>
-      } @empty {
-      <p class="text-muted-foreground text-sm p-sm">No issues assigned yet.</p>
-      }
-    </ui-card>
-  </div>
+      </ui-card>
 
-  <div class="exercise-details">
+      <ui-card [title]="'Active ' + domain.term('issue') + 's'">
+        @for (issue of store.releasedIssues(); track issue.id) {
+        <div
+          class="issue-tile"
+          [attr.data-lifecycle]="issue.lifecycle"
+          (click)="selectIssue(issue.id)"
+        >
+          <div class="issue-tile__body">
+            <div class="issue-tile__title">{{ issue.title }}</div>
+            @if (issue.description) {
+            <div class="issue-tile__desc">{{ issue.description }}</div>
+            }
+          </div>
+          <ui-badge
+            [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'"
+          >
+            {{ issue.lifecycle }}
+          </ui-badge>
+          @if (getIssueCountdown(issue.id); as cd) {
+          <span class="issue-tile__countdown">{{ cd }}</span>
+          }
+        </div>
+        } @empty {
+        <div class="empty-state">
+          <span class="empty-state__icon">&#x2705;</span>
+          <span class="empty-state__text"
+            >No {{ domain.term('issue') }}s assigned yet.</span
+          >
+        </div>
+        }
+      </ui-card>
+    </div>
+
     @if (selectedIssueId()) {
-    <ui-card title="Issue Details">
+    <div class="issue-detail">
       @for (issue of store.releasedIssues(); track issue.id) { @if (issue.id ===
       selectedIssueId()) {
       <p class="text-sm">{{ issue.description }}</p>
-      <div class="flex gap-sm mt-md">
+      <div class="issue-detail__badges">
         <ui-badge variant="secondary">{{ issue.trigger_mode }}</ui-badge>
         <ui-badge variant="secondary">{{ issue.lifecycle }}</ui-badge>
       </div>
       } }
-    </ui-card>
+    </div>
     } @else {
-    <p class="text-muted-foreground text-sm p-sm">
-      Select an issue to view details and submit a decision.
+    <p class="text-muted-foreground text-sm">
+      Select an {{ domain.term('issue') }} to view details.
     </p>
     } @if (store.context(); as ctx) {
     <tfc-context-panel
@@ -89,15 +112,18 @@
         <ui-badge variant="secondary">{{ decision.status }}</ui-badge>
       </div>
       } @empty {
-      <p class="text-muted-foreground text-sm p-sm">No past decisions.</p>
+      <div class="empty-state">
+        <span class="empty-state__icon">&#x1f4dc;</span>
+        <span class="empty-state__text">No past decisions.</span>
+      </div>
       }
     </ui-card>
-  </div>
+  </main>
 
   @if (store.phase() !== 'briefing' && store.score(); as score) {
   <tfc-score-bar [score]="score" />
   } @if (activeDecision(); as decision) {
-  <div class="overlay">
+  <div>
     @if (store.isPracticeMode()) {
       @if (practicePhase() === 'advising') {
         <tfc-all-advisors-panel
@@ -174,8 +200,8 @@
     />
   }
 
-  <footer class="exercise-controls">
-    <div class="exercise-controls__group">
+  <footer class="player-footer">
+    <div class="player-footer__group">
       <p class="text-sm text-muted-foreground">
         @if (store.isPracticeMode()) {
           Practice Mode — playing all roles
