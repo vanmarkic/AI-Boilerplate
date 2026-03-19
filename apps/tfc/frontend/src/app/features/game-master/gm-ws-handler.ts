@@ -75,7 +75,7 @@ export function handleGmWsMessage(
       onStopped?.();
       break;
     case "snapshot":
-      store.applySnapshot(msg as never);
+      store.applySnapshot(msg);
       break;
     case "presence_update":
       store.updatePresence(msg.participants);

@@ -99,7 +99,7 @@ export function computeTimelineItems(
   const rawEvents = events.map((e) => eventToItem(e, playTimeMs));
   const rawIssues = issues
     .map((i) => issueToItem(i, playTimeMs))
-    .filter(Boolean) as TimelineItem[];
+    .filter((item): item is TimelineItem => item !== null);
   return {
     eventItems: assignLanes(rawEvents),
     issueItems: assignLanes(rawIssues),

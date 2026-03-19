@@ -267,7 +267,9 @@ export class ScenarioBuilderView implements OnInit {
   }
 
   protected sel(event: Event): string {
-    return (event.target as HTMLSelectElement).value;
+    const target = event.target;
+    if (target instanceof HTMLSelectElement) return target.value;
+    return "";
   }
 
   private loadList(): void {
@@ -354,11 +356,16 @@ export class ScenarioBuilderView implements OnInit {
   }
 
   protected onTimeFactorChange(event: Event): void {
-    const val = parseFloat((event.target as HTMLInputElement).value);
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const val = parseFloat(target.value);
     if (val > 0) this.store.setTimeFactor(val);
   }
 
   protected onBriefingChange(event: Event): void {
-    this.store.setBriefing((event.target as HTMLTextAreaElement).value);
+    const target = event.target;
+    if (target instanceof HTMLTextAreaElement) {
+      this.store.setBriefing(target.value);
+    }
   }
 }

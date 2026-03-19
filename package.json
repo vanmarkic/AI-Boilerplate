@@ -10,6 +10,9 @@
   "devDependencies": {
     "@angular/compiler": "^21.2.3",
     "@angular/compiler-cli": "^21.2.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.1",
+    "@typescript-eslint/parser": "^8.57.1",
+    "eslint": "^10.0.3",
     "jsdom": "^28.0.0",
     "pmtiles": "^4.4.0",
     "typescript": "~5.9.2",

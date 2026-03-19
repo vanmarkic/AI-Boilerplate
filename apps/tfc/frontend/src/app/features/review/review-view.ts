@@ -264,7 +264,9 @@ export class ReviewView implements OnInit, OnDestroy {
   }
 
   protected onSpeedChange(event: Event): void {
-    const speed = parseFloat((event.target as HTMLSelectElement).value);
+    const target = event.target;
+    if (!(target instanceof HTMLSelectElement)) return;
+    const speed = parseFloat(target.value);
     this.playbackSpeed.set(speed);
     if (this.playing()) {
       this.stopPlayback();

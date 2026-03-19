@@ -308,11 +308,10 @@ export class GameMasterView implements OnDestroy {
     this.router.navigate(["/"]);
   }
   protected onSpeedChange(e: Event): void {
+    const target = e.target;
+    if (!(target instanceof HTMLInputElement)) return;
     this.api
-      .setSpeed(
-        this.exerciseId()!,
-        parseFloat((e.target as HTMLInputElement).value),
-      )
+      .setSpeed(this.exerciseId()!, parseFloat(target.value))
       .subscribe();
   }
 
