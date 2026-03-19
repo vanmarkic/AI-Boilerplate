@@ -1,7 +1,7 @@
 # TFC Compliance Audit Report
 
 **Date:** 2026-03-18
-**Scope:** `apps/tfc/`, `packages/tfc-shared/`
+**Scope:** `apps/tfc/`
 **Rules checked:** Root `AGENTS.md` universal rules + `apps/tfc/AGENTS.md` TFC-specific rules
 
 ---
@@ -17,7 +17,7 @@
 | U9 | Every feature has `manifest.yaml` | FAIL | 7 features missing |
 | T1 | Engine purity (no SQLAlchemy/FastAPI) | PASS | 0 |
 | T2 | Single WebSocket endpoint | PASS | 0 |
-| T3 | Shared types in `tfc-shared` | PASS | 0 |
+| T3 | ~~Shared types in `tfc-shared`~~ (deleted) | N/A | — |
 | T4 | Design-system tokens (no hardcoded values) | FAIL | ~35 occurrences |
 | T5 | Exercise store is single source of truth | PASS | 0 |
 | T7 | No game-mode logic in `exercise_engine.py` | PASS | 0 |

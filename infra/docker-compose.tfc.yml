@@ -41,7 +41,6 @@ services:
       - ../apps/tfc/frontend:/app/apps/tfc/frontend
       - ../packages/design-system:/app/packages/design-system
       - ../packages/ui:/app/packages/ui
-      - ../packages/tfc-shared:/app/packages/tfc-shared
       - /app/apps/tfc/frontend/node_modules
     command: npx ng serve --host 0.0.0.0
 
