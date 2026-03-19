@@ -121,13 +121,22 @@ class IssueChange(TypedDict):
 
 class DecisionOpened(TypedDict):
     type: str  # "decision_opened"
+    id: str
     decision_id: str
+    event_id: str | None
+    issue_id: str | None
     title: str
+    description: str
     question_type: str
     options: list[DecisionOptionSnapshot]
+    completion_mode: str
     target_roles: list[str]
     timeout_ms: float
     max_selections: int | None
+    status: str
+    opened_at_pt_ms: float
+    closed_at_pt_ms: float | None
+    recommendations: dict[str, str]
 
 
 class DecisionClosed(TypedDict):
