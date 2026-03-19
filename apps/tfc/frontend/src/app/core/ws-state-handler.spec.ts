@@ -22,7 +22,7 @@ describe("ws-state-handler", () => {
         title: "Fix the bug?",
         description: "Choose wisely",
         question_type: "single_choice",
-        options: [{ id: "o1", label: "Yes", score: 10 }],
+        options: [{ id: "o1", label: "Yes", score: 10, role: null }],
         completion_mode: "first_response",
         target_roles: ["advisor"],
         timeout_ms: 30000,

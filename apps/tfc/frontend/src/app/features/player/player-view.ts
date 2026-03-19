@@ -10,22 +10,13 @@ import {
 } from "@angular/core";
 import { ButtonDirective } from "@aspect/ui";
 import { ActivatedRoute, Router } from "@angular/router";
-import { CardComponent, BadgeComponent } from "@aspect/ui";
 import { ClockDisplayComponent } from "../../shared/clock-display.component";
 import { PhaseBadgeComponent } from "../../shared/phase-badge.component";
-import { DecisionPanelComponent } from "../../shared/decision-panel.component";
-import { ContextPanelComponent } from "../../shared/context-panel.component";
 import { AmbientBackgroundComponent } from "../../shared/ambient-background.component";
 import { BriefingOverlayComponent } from "../../shared/briefing-overlay.component";
 import { TurnBannerComponent } from "../../shared/turn-banner.component";
-import { AdvisorBubblesComponent } from "../../shared/advisor-bubbles.component";
-import { AllAdvisorsPanelComponent } from "../../shared/all-advisors-panel.component";
-import type { RoleRecommendation } from "../../shared/all-advisors-panel.component";
 import {
-  buildAdvisorRecs,
-  getScenarioAdvisorRoles,
   resolvePlayerRole,
-  submitRecommendation,
   submitRoleRecommendation,
   submitDecision,
 } from "./player-decision-handlers";
@@ -35,33 +26,26 @@ import { EngineApiService } from "../../core/engine-api.service";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
 import { ExerciseStore } from "../../core/exercise.store";
 import { TickService } from "../../core/tick.service";
-import { formatTimeMs } from "../../core/format-time";
 import { DecisionApiService } from "../../core/decision-api.service";
-import type {
-  ActiveDecision,
-  DecisionDetail,
-} from "../../core/decision-api.service";
 import { Subscription } from "rxjs";
 import { handlePlayerWsMessage } from "./player-ws-handler";
+import { RoleCardComponent } from "./role-card.component";
+import type { RoleCardSubmission } from "./role-card.component";
+import { buildRoleCards } from "./role-card.types";
 
 @Component({
   selector: "tfc-player-view",
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore, TickService],
   imports: [
-    CardComponent,
-    BadgeComponent,
     ClockDisplayComponent,
     PhaseBadgeComponent,
-    DecisionPanelComponent,
-    ContextPanelComponent,
     AmbientBackgroundComponent,
     BriefingOverlayComponent,
     TurnBannerComponent,
-    AdvisorBubblesComponent,
-    AllAdvisorsPanelComponent,
     ScoreBarComponent,
     ButtonDirective,
+    RoleCardComponent,
   ],
   templateUrl: "./player-view.html",
 })
@@ -73,10 +57,7 @@ export class PlayerView implements OnInit, OnDestroy {
   private readonly ws = inject(ExerciseWsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  protected readonly selectedIssueId = signal<string | null>(null);
-  protected readonly decisionHistory = signal<DecisionDetail[]>([]);
   protected readonly roleLabel = signal("Advisor");
-  protected readonly practicePhase = signal<"advising" | "deciding">("advising");
   protected readonly beginningExercise = signal(false);
   private readonly exerciseId = signal(1);
   private readonly participantId = signal("");
@@ -94,51 +75,43 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   });
 
-  private readonly resetPracticePhaseEffect = effect(() => {
-    const decision = this.activeDecisions()[0];
-    const id = decision?.id ?? null;
-    // When the active decision changes in practice mode, reset to advising phase
-    if (id && this.store.isPracticeMode()) {
-      this.practicePhase.set("advising");
-    }
-  });
-
   protected readonly isMultiRole = computed(() => {
     const role = this.store.playerRole();
     return role === "all_advisors" || role === "solo_player" || role === "all_roles";
   });
 
-  protected readonly visibleEvents = computed(() => {
-    const role = this.store.playerRole();
-    return this.store
-      .events()
-      .filter((e) => {
-        if (e.lifecycle !== "running" && e.lifecycle !== "completed") return false;
-        const targetRoles = e.target_roles ?? [];
-        if (targetRoles.length === 0) return true;
-        if (this.isMultiRole()) return true;
-        return targetRoles.includes(role);
-      })
-      .map((e) => {
-        const rd = e.role_descriptions ?? {};
-        const roleCards = this.isMultiRole()
-          ? Object.entries(rd).map(([roleId, desc]) => ({ roleId, desc }))
-          : [];
-        return {
-          ...e,
-          resolvedDescription: this.isMultiRole() ? e.description : (rd[role] ?? e.description),
-          roleCards,
-        };
-      });
+  protected readonly submittedRoles = signal<Set<string>>(new Set());
+
+  protected readonly currentTurnEvent = computed(() => {
+    const decisions = this.activeDecisions();
+    if (decisions.length === 0) return null;
+    const decision = decisions[0];
+    if (!decision.event_id) return null;
+    return this.store.events().find((e) => e.id === decision.event_id) ?? null;
   });
 
-  protected advisorRecs(decision: ActiveDecision) {
-    return buildAdvisorRecs(decision, this.store.context()?.roles ?? []);
-  }
+  protected readonly roleCards = computed(() => {
+    const allRoles = this.store.context()?.roles ?? [];
+    const event = this.currentTurnEvent();
+    const decision = this.activeDecisions()[0] ?? null;
+    const role = this.store.playerRole();
+    const multiRole = this.isMultiRole();
+    const showDecisionMaker =
+      role === "all_roles" || role === "solo_player" || this.store.isPracticeMode();
+    // Single-role players see only their own role card
+    const roles = multiRole ? allRoles : allRoles.filter((r) => r.id === role);
+    return buildRoleCards(roles, event, decision, this.submittedRoles(), showDecisionMaker);
+  });
 
-  protected scenarioAdvisorRoles() {
-    return getScenarioAdvisorRoles(this.store.context()?.roles ?? []);
-  }
+  private _lastDecisionId: string | null = null;
+  private readonly resetSubmittedRolesEffect = effect(() => {
+    const id = this.activeDecisions()[0]?.id ?? null;
+    // Only reset when the decision ID actually changes (not on every WS push)
+    if (id && id !== this._lastDecisionId) {
+      this._lastDecisionId = id;
+      this.submittedRoles.set(new Set());
+    }
+  });
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
@@ -167,10 +140,6 @@ export class PlayerView implements OnInit, OnDestroy {
     });
     this.decisionApi.getEngineDecisions(id).subscribe({
       next: (decisions) => this.store.applyDecisions(decisions),
-      error: () => {},
-    });
-    this.decisionApi.listDecisions(id, "closed").subscribe({
-      next: (decisions) => this.decisionHistory.set(decisions),
       error: () => {},
     });
     this.connSub = this.ws.connected$.subscribe((connected) => {
@@ -221,58 +190,32 @@ export class PlayerView implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
     this.connSub?.unsubscribe();
   }
-  protected getIssueCountdown(issueId: string): string | null {
-    const item = this.store.issuesWithCountdown().find((i) => i.id === issueId);
-    if (!item || item.remaining_ms <= 0) return null;
-    return formatTimeMs(item.remaining_ms);
-  }
-
-  protected selectIssue(issueId: string): void {
-    this.selectedIssueId.set(issueId);
-  }
-  protected eventTypeInitial(type: string): string {
-    return type ? type[0].toUpperCase() : '?';
-  }
-  protected onRecommendationSubmitted(
-    decision: ActiveDecision,
-    event: { selectedOptions: string[]; freeText: string },
-  ): void {
-    submitRecommendation(
-      this.decisionApi,
-      this.exerciseId(),
-      decision,
-      this.participantId(),
-      event,
+  protected onRoleCardSubmitted(submission: RoleCardSubmission): void {
+    const decision = this.activeDecisions()[0];
+    if (!decision) return;
+    const role = this.store.context()?.roles?.find(
+      (r) => r.id === submission.roleId,
     );
-  }
-  protected onRoleRecommendationSubmitted(
-    decision: ActiveDecision,
-    rec: RoleRecommendation,
-  ): void {
-    submitRoleRecommendation(
-      this.decisionApi,
-      this.exerciseId(),
-      decision,
-      this.participantId(),
-      rec,
-    );
-  }
-
-  protected onPracticeAdviceDone(): void {
-    this.practicePhase.set("deciding");
-  }
-
-  protected onDecisionSubmitted(
-    decision: ActiveDecision,
-    event: { selectedOptions: string[]; freeText: string },
-  ): void {
-    submitDecision(
-      this.decisionApi,
-      this.store,
-      this.exerciseId(),
-      decision,
-      this.participantId(),
-      event,
-    );
+    if (role?.player_type === "decision_maker") {
+      submitDecision(
+        this.decisionApi,
+        this.store,
+        this.exerciseId(),
+        decision,
+        this.participantId(),
+        submission,
+      );
+    } else {
+      submitRoleRecommendation(
+        this.decisionApi,
+        this.exerciseId(),
+        decision,
+        this.participantId(),
+        { roleId: submission.roleId, selectedOptions: submission.selectedOptions, freeText: submission.freeText },
+      );
+    }
+    const updated = new Set(this.submittedRoles());
+    updated.add(submission.roleId);
+    this.submittedRoles.set(updated);
   }
 }

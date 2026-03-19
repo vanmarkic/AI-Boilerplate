@@ -33,6 +33,8 @@ describe("ScenarioPickerComponent", () => {
             duration_ms: null,
             dependencies: [],
             triggered_issues: [],
+            target_roles: [],
+            role_descriptions: {},
           },
           {
             id: "e2",
@@ -43,6 +45,8 @@ describe("ScenarioPickerComponent", () => {
             duration_ms: null,
             dependencies: [],
             triggered_issues: [],
+            target_roles: [],
+            role_descriptions: {},
           },
         ],
         issues: [

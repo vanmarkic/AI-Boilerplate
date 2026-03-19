@@ -27,6 +27,8 @@ describe("EventTimelineComponent", () => {
       lifecycle: "running",
       started_at_pt_ms: 0,
       completed_at_pt_ms: null,
+      target_roles: [],
+      role_descriptions: {},
     },
     {
       id: "e2",
@@ -40,6 +42,8 @@ describe("EventTimelineComponent", () => {
       lifecycle: "scheduled",
       started_at_pt_ms: null,
       completed_at_pt_ms: null,
+      target_roles: [],
+      role_descriptions: {},
     },
   ];
 

@@ -18,175 +18,33 @@
   />
   }
 
-  <main class="player-main">
-    <div class="player-main__columns">
-      <ui-card [title]="'Released ' + domain.term('event') + 's'">
-        @for (event of visibleEvents(); track event.id) {
-        <div class="event-tile">
-          <span class="event-tile__icon">{{
-            eventTypeInitial(event.event_type)
-          }}</span>
-          <div class="event-tile__body">
-            <div class="event-tile__title">{{ event.title }}</div>
-            @if (event.resolvedDescription) {
-            <div class="event-tile__desc">{{ event.resolvedDescription }}</div>
-            }
-            <div class="event-tile__meta">
-              <ui-badge variant="secondary">{{ event.lifecycle }}</ui-badge>
-              <ui-badge variant="secondary">{{ event.event_type }}</ui-badge>
-            </div>
-          </div>
-        </div>
-        } @empty {
-        <div class="empty-state">
-          <span class="empty-state__icon">[--]</span>
-          <span class="empty-state__text"
-            >No {{ domain.term('event') }}s intercepted.</span
-          >
-        </div>
+  <main class="player-main player-main--board">
+    @if (currentTurnEvent(); as event) {
+      <div class="board-turn-banner">
+        @if (store.score(); as score) {
+          <div class="board-turn-banner__turn">TURN {{ score.turnNumber }}</div>
         }
-      </ui-card>
-
-      <ui-card [title]="'Active ' + domain.term('issue') + 's'">
-        @for (issue of store.releasedIssues(); track issue.id) {
-        <div
-          class="issue-tile"
-          [attr.data-lifecycle]="issue.lifecycle"
-          (click)="selectIssue(issue.id)"
-        >
-          <div class="issue-tile__body">
-            <div class="issue-tile__title">{{ issue.title }}</div>
-            @if (issue.description) {
-            <div class="issue-tile__desc">{{ issue.description }}</div>
-            }
-          </div>
-          <ui-badge
-            [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'"
-          >
-            {{ issue.lifecycle }}
-          </ui-badge>
-          @if (getIssueCountdown(issue.id); as cd) {
-          <span class="issue-tile__countdown">{{ cd }}</span>
-          }
-        </div>
-        } @empty {
-        <div class="empty-state">
-          <span class="empty-state__icon">[OK]</span>
-          <span class="empty-state__text"
-            >No {{ domain.term('issue') }}s detected. Systems nominal.</span
-          >
-        </div>
-        }
-      </ui-card>
-    </div>
-
-    @if (selectedIssueId()) {
-    <div class="issue-detail">
-      @for (issue of store.releasedIssues(); track issue.id) { @if (issue.id ===
-      selectedIssueId()) {
-      <p class="text-sm">{{ issue.description }}</p>
-      <div class="issue-detail__badges">
-        <ui-badge variant="secondary">{{ issue.trigger_mode }}</ui-badge>
-        <ui-badge variant="secondary">{{ issue.lifecycle }}</ui-badge>
+        <div class="board-turn-banner__title">{{ event.title }}</div>
+        <div class="board-turn-banner__desc">{{ event.description }}</div>
       </div>
-      } }
-    </div>
     } @else {
-    <p class="empty-state__text text-muted-foreground">
-      Select a threat vector to inspect.
-    </p>
-    } @if (store.context(); as ctx) {
-    <tfc-context-panel
-      [title]="ctx.title"
-      [briefing]="ctx.briefing"
-      [objectives]="ctx.objectives"
-      [rules]="ctx.rules"
-      [open]="true"
-    />
+      <div class="board-turn-banner">
+        <div class="board-turn-banner__title">Waiting for next turn...</div>
+      </div>
     }
 
-    <ui-card [title]="domain.term('decision') + ' History'">
-      @for (decision of decisionHistory(); track decision.id) {
-      <div class="flex items-center justify-between p-sm border-b">
-        <span class="text-sm font-medium">{{ decision.title }}</span>
-        <ui-badge variant="secondary">{{ decision.status }}</ui-badge>
-      </div>
-      } @empty {
-      <div class="empty-state">
-        <span class="empty-state__icon">[...]</span>
-        <span class="empty-state__text">No decisions logged.</span>
-      </div>
+    <div class="board-grid">
+      @for (card of roleCards(); track card.roleId) {
+        <tfc-role-card
+          [card]="card"
+          (submitted)="onRoleCardSubmitted($event)"
+        />
       }
-    </ui-card>
+    </div>
   </main>
 
   @if (store.phase() !== 'briefing' && store.score(); as score) {
   <tfc-score-bar [score]="score" [countdownMs]="store.decisionCountdownMs()" />
-  } @if (activeDecisions()[0]; as decision) {
-  <div>
-    @if (store.isPracticeMode()) {
-      @if (practicePhase() === 'advising') {
-        <tfc-all-advisors-panel
-          [roles]="scenarioAdvisorRoles()"
-          [decisionTitle]="decision.title"
-          [decisionDescription]="decision.description"
-          [questionType]="decision.question_type"
-          [options]="decision.options"
-          (submitted)="onRoleRecommendationSubmitted(decision, $event)"
-          (closed)="onPracticeAdviceDone()"
-        />
-        @if (scenarioAdvisorRoles().length > 0) {
-          <div class="flex justify-end p-sm">
-            <button uiButton variant="default" (click)="onPracticeAdviceDone()">
-              Proceed to Decision
-            </button>
-          </div>
-        }
-      } @else {
-        @if (advisorRecs(decision).length > 0) {
-          <tfc-advisor-bubbles [recommendations]="advisorRecs(decision)" />
-        }
-        <tfc-decision-panel
-          [title]="decision.title"
-          [description]="decision.description"
-          [questionType]="decision.question_type"
-          [options]="decision.options"
-          (submitted)="onDecisionSubmitted(decision, $event)"
-          (closed)="store.closeDecision(decision.id)"
-        />
-      }
-    } @else if (store.isCollaborative() && store.isAllAdvisors()) {
-    <tfc-all-advisors-panel
-      [roles]="scenarioAdvisorRoles()"
-      [decisionTitle]="decision.title"
-      [decisionDescription]="decision.description"
-      [questionType]="decision.question_type"
-      [options]="decision.options"
-      (submitted)="onRoleRecommendationSubmitted(decision, $event)"
-      (closed)="store.closeDecision(decision.id)"
-    />
-    } @else if (store.isCollaborative() && !store.isDecisionMaker()) {
-    <tfc-decision-panel
-      [title]="'[Advisor] ' + decision.title"
-      [description]="decision.description"
-      [questionType]="decision.question_type"
-      [options]="decision.options"
-      (submitted)="onRecommendationSubmitted(decision, $event)"
-    />
-    } @else { @if (store.isCollaborative() && advisorRecs(decision).length > 0)
-    {
-    <tfc-advisor-bubbles [recommendations]="advisorRecs(decision)" />
-    }
-    <tfc-decision-panel
-      [title]="decision.title"
-      [description]="decision.description"
-      [questionType]="decision.question_type"
-      [options]="decision.options"
-      (submitted)="onDecisionSubmitted(decision, $event)"
-      (closed)="store.closeDecision(decision.id)"
-    />
-    }
-  </div>
   }
 
   @if (store.phase() === 'briefing' && store.context(); as ctx) {
