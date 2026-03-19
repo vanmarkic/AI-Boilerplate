@@ -2,6 +2,8 @@
 
 > **Superseded (client):** References to `@hey-api/client-fetch`, `firstValueFrom()`, and CLI-based generation in this plan are outdated. The project now uses `@hey-api/client-angular` (bundled in `@hey-api/openapi-ts ^0.93.0`) with `frontend/openapi-ts.config.ts`. Generated functions return Promises — no `firstValueFrom()` needed.
 
+> **Superseded (file-length limit):** References to "250 lines" in this plan are outdated. The limit was raised to **350 lines** (500 for test files) based on research showing scattered small files degrade large-LLM performance ("Lost in the Middle", Context Rot). 350 lines (~4,900 tokens) still fits comfortably in a 32K local-model context.
+
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Build a full-stack monorepo boilerplate (Angular 18+ / FastAPI / PostgreSQL) optimized for small local LLM coding agents (7B-14B).

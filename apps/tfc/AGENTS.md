@@ -2,7 +2,7 @@
 
 ## First Steps
 Before writing any code:
-1. Read the root `AGENTS.md` — all universal rules (250-line limit, strict types, no barrel exports, feature manifests, `make validate`) apply here.
+1. Read the root `AGENTS.md` — all universal rules (350-line limit, strict types, no barrel exports, feature manifests, `make validate`) apply here.
 2. Read `apps/main/backend/AGENTS.md` for backend conventions (FastAPI patterns, testing, SQL) and `apps/main/frontend/AGENTS.md` for frontend conventions (Angular patterns, signals, stores) — TFC follows the same patterns.
 3. Read `apps/tfc/SPECS.md` for TFC domain model, business rules, API surface, and glossary. If a feature's `manifest.yaml` exists, read it for feature-specific context.
 

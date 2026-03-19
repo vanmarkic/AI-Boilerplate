@@ -21,7 +21,7 @@ This file describes HOW to write code (conventions, architecture, constraints).
 Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 
 ## Universal Rules
-1. Maximum 250 lines per file. Split if exceeded.
+1. Maximum 350 lines per file (500 for test files). Split if exceeded.
 2. No barrel exports (index.ts re-exports). Use direct imports.
 3. Every feature is a flat folder under `features/`.
 4. API contract is code-first: define Pydantic models + FastAPI routers, then run `make generate` to extract the spec and regenerate the TypeScript client.
