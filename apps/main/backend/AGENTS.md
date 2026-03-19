@@ -14,7 +14,7 @@ Pragmatic DDD with feature-sliced modules. Each feature is a flat folder under `
 ## File Naming
 7. Feature files use underscores: `user_model.py`, `user_service.py`.
 8. Each feature folder has: model, schema, repository, service, router, test, manifest.yaml.
-9. Maximum 250 lines per file.
+9. Maximum 350 lines per file (500 for test files).
 
 ## FastAPI Conventions
 10. Routers are auto-discovered from `features/*/` by `main.py`. No manual registration needed.
