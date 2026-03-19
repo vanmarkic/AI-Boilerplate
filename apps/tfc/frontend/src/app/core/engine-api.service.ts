@@ -78,6 +78,13 @@ export class EngineApiService {
     );
   }
 
+  begin(exerciseId: number): Observable<PhaseChange> {
+    return this.http.post<PhaseChange>(
+      `${this.base}/api/exercises/${exerciseId}/engine/begin`,
+      {},
+    );
+  }
+
   pause(exerciseId: number): Observable<PhaseChange> {
     return this.http.post<PhaseChange>(
       `${this.base}/api/exercises/${exerciseId}/engine/pause`,

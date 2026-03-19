@@ -84,6 +84,13 @@ class ExerciseService:
         if request.phase is not None:
             self._validate_phase_transition(exercise.phase, request.phase)
 
+        final_game_mode = request.game_mode if request.game_mode is not None else exercise.game_mode
+        final_practice = (
+            request.practice_mode if request.practice_mode is not None else exercise.practice_mode
+        )
+        if final_practice and final_game_mode != "simple_collaborative":
+            raise BadRequestError("practice_mode requires game_mode 'simple_collaborative'")
+
         update_data = request.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(exercise, field, value)

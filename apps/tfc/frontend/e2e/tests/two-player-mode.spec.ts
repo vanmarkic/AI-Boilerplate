@@ -88,7 +88,7 @@ const DECISION_OPEN = {
     { id: "opt-c", label: "Maintain course", score: -2 },
   ],
   completion_mode: "first_response",
-  target_roles: [],
+  target_roles: [] as string[],
   timeout_ms: 300_000,
   status: "open",
   opened_at_pt_ms: 60_000,

@@ -163,6 +163,17 @@
   </div>
   }
 
+  @if (store.phase() === 'briefing' && store.context(); as ctx) {
+    <tfc-briefing-overlay
+      [title]="ctx.title"
+      [briefing]="ctx.briefing"
+      [objectives]="ctx.objectives"
+      [roles]="ctx.roles"
+      [starting]="beginningExercise()"
+      (begun)="onBeginExercise()"
+    />
+  }
+
   <footer class="exercise-controls">
     <div class="exercise-controls__group">
       <p class="text-sm text-muted-foreground">
