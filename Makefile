@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint-length lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check
+.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint-length lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check context-tfc context-tfc-fe context-tfc-be context-main context-main-fe context-main-be context-all
 
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
@@ -190,6 +190,61 @@ build-tier-2: ## Build main for tier 2
 
 build-tier-3: ## Build main for tier 3 (all features)
 	TIER=3 $(DC_MAIN) build --build-arg TIER=3
+
+# ── LLM Context Scoping ──────────────────────────────────────
+# Append SLIM=1 to any target to also exclude tests and e2e.
+# Example: make context-tfc-fe SLIM=1
+
+define SLIM_IGNORES
+*.spec.ts
+*_test.py
+test_*.py
+conftest.py
+**/e2e/
+endef
+export SLIM_IGNORES
+
+_apply-slim:
+ifdef SLIM
+	@printf "$$SLIM_IGNORES\n" >> .claudeignore
+	@echo "  + SLIM: tests and e2e excluded"
+else
+	@true
+endif
+
+context-tfc: _apply-slim ## Set LLM context to TFC only (frontend + backend)
+	@printf "apps/main/\n" > .claudeignore
+	@echo "LLM context set to TFC only"
+	@$(MAKE) --no-print-directory _apply-slim
+
+context-tfc-fe: ## Set LLM context to TFC frontend only (excludes all backends)
+	@printf "apps/main/\napps/tfc/backend/\n" > .claudeignore
+	@echo "LLM context set to TFC frontend only"
+	@$(MAKE) --no-print-directory _apply-slim
+
+context-tfc-be: ## Set LLM context to TFC backend only (excludes all frontends)
+	@printf "apps/main/\napps/tfc/frontend/\n" > .claudeignore
+	@echo "LLM context set to TFC backend only"
+	@$(MAKE) --no-print-directory _apply-slim
+
+context-main: ## Set LLM context to main app only
+	@printf "apps/tfc/\n" > .claudeignore
+	@echo "LLM context set to main app only"
+	@$(MAKE) --no-print-directory _apply-slim
+
+context-main-fe: ## Set LLM context to main frontend only (excludes all backends)
+	@printf "apps/tfc/\napps/main/backend/\n" > .claudeignore
+	@echo "LLM context set to main frontend only"
+	@$(MAKE) --no-print-directory _apply-slim
+
+context-main-be: ## Set LLM context to main backend only (excludes all frontends)
+	@printf "apps/tfc/\napps/main/frontend/\n" > .claudeignore
+	@echo "LLM context set to main backend only"
+	@$(MAKE) --no-print-directory _apply-slim
+
+context-all: ## Remove LLM context filter (full monorepo)
+	@rm -f .claudeignore
+	@echo "LLM context set to full monorepo"
 
 # ── Aider Sessions ───────────────────────────────────────────
 # Default config; override with: make aider-fill-in AIDER_CONF=.aider-codestral.conf.yml
