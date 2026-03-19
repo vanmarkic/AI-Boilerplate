@@ -47,6 +47,9 @@ export function buildRoleCards(
         const advisorTargets = targetRoles.filter((rid) => rid !== role.id);
         for (const advisorRoleId of advisorTargets) {
           const advisorRole = roles.find((r) => r.id === advisorRoleId);
+          // Recommendation keys use the format "participantId:roleId".
+          // We extract the roleId portion (after the colon) to match against advisor roles.
+          // Keys without a colon are treated as bare roleIds (legacy format).
           const recEntry = Object.entries(
             decision.recommendations || {},
           ).find(([key]) => {
@@ -67,10 +70,15 @@ export function buildRoleCards(
         }
       }
 
+      const playerType =
+        role.player_type === "decision_maker" || role.player_type === "advisor"
+          ? role.player_type
+          : "advisor"; // fallback — should never happen with valid scenario data
+
       return {
         roleId: role.id,
         roleLabel: role.label,
-        playerType: role.player_type as "decision_maker" | "advisor",
+        playerType,
         intel: roleDescs[role.id] ?? null,
         decision: hasDecision ? decision : null,
         status: hasDecision ? (isDone ? "done" : "active") : "intel",
