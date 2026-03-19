@@ -17,7 +17,10 @@ stages:
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  PIP_INDEX_URL: "https://developers.naval-group.com/nexus/repository/pypi-group/simple/"
+  PIP_TRUSTED_HOST: "developers.naval-group.com"
   NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.cache/npm"
+  NPM_CONFIG_REGISTRY: "https://developers.naval-group.com/nexus/repository/npm-group/"
   POSTGRES_DB: boilerplate_test
   POSTGRES_USER: dev
   POSTGRES_PASSWORD: dev
