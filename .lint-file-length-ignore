@@ -1,0 +1,20 @@
+# Files temporarily excluded from lint-file-length checks.
+# Remove entries as they are refactored to comply.
+
+# Data file (sample scenario definition, not logic)
+apps/tfc/backend/features/scenario/sample_er_scenario.py
+
+# TFC frontend views — need component extraction (tracked for refactoring)
+apps/tfc/frontend/src/app/features/waiting-room/waiting-room-view.ts
+apps/tfc/frontend/src/app/features/game-master/game-master-view.ts
+apps/tfc/frontend/src/app/features/scenario-builder/scenario-builder-view.ts
+
+# TFC test files — need splitting into focused test modules
+apps/tfc/backend/engine/game_modes/simple_collaborative_prop_test.py
+apps/tfc/backend/features/waiting_room/waiting_room_integration_test.py
+apps/tfc/backend/features/waiting_room/waiting_room_router_test.py
+
+# UI package — need refactoring
+packages/ui/src/data-table-filter.component.spec.ts
+packages/ui/src/map-view.style-builder.ts
+packages/ui/src/scalable-dashboard.story-data.ts

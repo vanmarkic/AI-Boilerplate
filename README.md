@@ -2,7 +2,7 @@
 
 A full-stack monorepo (Angular 21 / FastAPI / PostgreSQL) architected to maximize productivity with small local LLM coding agents (7B–14B parameters).
 
-> **Philosophy:** The bottleneck for local LLMs is not model quality — it's codebase structure. Files under 250 lines, explicit types, feature-sliced modules, and AGENTS.md convention files reduce context burden enough for a 14B model to make reliable single-file edits.
+> **Philosophy:** The bottleneck for local LLMs is not model quality — it's codebase structure. Files under 350 lines, explicit types, feature-sliced modules, and AGENTS.md convention files reduce context burden enough for a 14B model to make reliable single-file edits.
 
 ## Stack
 
@@ -137,7 +137,7 @@ Components use `data-*` HTML attributes for variants, styled via CSS attribute s
 
 ## Design Decisions for LLM Agents
 
-1. **Files ≤ 250 lines** — fits in a small model's context window (~3,600 tokens)
+1. **Files ≤ 350 lines** — fits in a small model's context window (~4,900 tokens)
 2. **Feature-sliced vertical architecture** — self-contained flat folders, no cross-cutting jumps
 3. **Code-first API (OpenAPI)** — FastAPI routers are the single source of truth; `make generate` regenerates the TS client
 4. **Strict types everywhere** — TypeScript `strict: true`, Python type hints on all signatures

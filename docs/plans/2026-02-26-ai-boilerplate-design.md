@@ -8,7 +8,7 @@
 
 ## Design Principles
 
-1. **Files under 250 lines** — every file fits in a small LLM's context window
+1. **Files under 350 lines** — every file fits in a small LLM's context window
 2. **Feature-sliced vertical architecture** — self-contained modules, no cross-cutting jumps
 3. **Contract-first (OpenAPI)** — single source of truth, auto-generated types
 4. **Strict types everywhere** — TypeScript strict mode, Python type hints on all functions
@@ -122,7 +122,7 @@ ai-boilerplate/
 
 ## Backend Architecture (FastAPI + Pragmatic DDD)
 
-### Feature Module Pattern (6 files per feature, all under 250 lines)
+### Feature Module Pattern (6 files per feature, all under 350 lines)
 
 | File | Responsibility | Imports from |
 |------|---------------|-------------|
