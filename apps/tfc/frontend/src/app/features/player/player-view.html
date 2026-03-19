@@ -39,9 +39,9 @@
         </div>
         } @empty {
         <div class="empty-state">
-          <span class="empty-state__icon">&#x1f4e8;</span>
+          <span class="empty-state__icon">[--]</span>
           <span class="empty-state__text"
-            >No {{ domain.term('event') }}s released yet.</span
+            >No {{ domain.term('event') }}s intercepted.</span
           >
         </div>
         }
@@ -71,9 +71,9 @@
         </div>
         } @empty {
         <div class="empty-state">
-          <span class="empty-state__icon">&#x2705;</span>
+          <span class="empty-state__icon">[OK]</span>
           <span class="empty-state__text"
-            >No {{ domain.term('issue') }}s assigned yet.</span
+            >No {{ domain.term('issue') }}s detected. Systems nominal.</span
           >
         </div>
         }
@@ -92,8 +92,8 @@
       } }
     </div>
     } @else {
-    <p class="text-muted-foreground text-sm">
-      Select an {{ domain.term('issue') }} to view details.
+    <p class="empty-state__text text-muted-foreground">
+      Select a threat vector to inspect.
     </p>
     } @if (store.context(); as ctx) {
     <tfc-context-panel
@@ -113,8 +113,8 @@
       </div>
       } @empty {
       <div class="empty-state">
-        <span class="empty-state__icon">&#x1f4dc;</span>
-        <span class="empty-state__text">No past decisions.</span>
+        <span class="empty-state__icon">[...]</span>
+        <span class="empty-state__text">No decisions logged.</span>
       </div>
       }
     </ui-card>
