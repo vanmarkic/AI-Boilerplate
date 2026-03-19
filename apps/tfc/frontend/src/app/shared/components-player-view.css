@@ -297,7 +297,7 @@
   }
   .role-card--active {
     border: 2px solid var(--color-success);
-    background: oklch(15% 0.04 160);
+    background: color-mix(in oklch, var(--color-success) 10%, var(--color-card));
   }
   .role-card--done {
     border: 1px solid var(--color-muted);
