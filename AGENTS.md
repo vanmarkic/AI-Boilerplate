@@ -77,6 +77,7 @@ Router registration and dependency wiring are automatic — no manual edits to `
   - `context-tfc-fe` / `context-main-fe` — frontend only (pure GUI work)
   - `context-tfc-be` / `context-main-be` — backend only
   - `context-all` — full monorepo
+- Append `SLIM=1` to also exclude tests and e2e (e.g. `make context-tfc-fe SLIM=1`).
 - Shared packages (`packages/`) are always visible regardless of context scope.
 - `.claudeignore` is gitignored — each developer sets their own scope.
 
