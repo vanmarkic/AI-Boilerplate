@@ -8,7 +8,7 @@ export interface WsStateChange {
 }
 
 export interface WsMessage {
-  type: "state_changes" | "snapshot" | "waiting_room_update" | "presence_update" | "exercise_started" | "pong";
+  type: "state_changes" | "snapshot" | "waiting_room_update" | "presence_update" | "exercise_started" | "exercise_stopped" | "pong";
   changes?: WsStateChange[];
   [key: string]: unknown;
 }

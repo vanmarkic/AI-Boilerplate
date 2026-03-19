@@ -12,7 +12,7 @@
     </div>
   </header>
 
-  @if (store.score(); as score) {
+  @if (store.phase() !== 'briefing' && store.score(); as score) {
   <tfc-turn-banner
     [label]="'Turn ' + score.turnNumber"
     [turnNumber]="score.turnNumber"
@@ -94,7 +94,7 @@
     </ui-card>
   </div>
 
-  @if (store.score(); as score) {
+  @if (store.phase() !== 'briefing' && store.score(); as score) {
   <tfc-score-bar [score]="score" />
   } @if (activeDecision(); as decision) {
   <div class="overlay">
@@ -189,6 +189,11 @@
           Waiting for {{ domain.term('gameMaster') }} actions...
         }
       </p>
+      @if (store.isPracticeMode() && store.phase() !== 'setup') {
+        <button uiButton variant="destructive" size="sm" (click)="onStop()">
+          Stop Exercise
+        </button>
+      }
     </div>
   </footer>
 </div>

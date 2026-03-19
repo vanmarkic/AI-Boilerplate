@@ -11,6 +11,7 @@ export interface CreateExerciseRequest {
   domain_id?: number | null;
   time_factor?: number;
   game_mode?: string;
+  practice_mode?: boolean;
 }
 
 export interface ExerciseResponse {
@@ -22,6 +23,7 @@ export interface ExerciseResponse {
   domain_id: number | null;
   time_factor: number;
   game_mode: string;
+  practice_mode: boolean;
   session_code: string;
   created_at: string;
   updated_at: string;

@@ -24,7 +24,12 @@ export function handleDecisionWsChanges(
 export function handlePlayerWsMessage(
   msg: WsMessage,
   store: StoreInstance,
+  onStopped?: () => void,
 ): void {
+  if (msg.type === "exercise_stopped") {
+    onStopped?.();
+    return;
+  }
   if (msg.type === "snapshot") {
     store.applySnapshot(msg as never);
   }
