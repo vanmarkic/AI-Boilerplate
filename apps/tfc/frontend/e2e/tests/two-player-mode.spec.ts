@@ -249,8 +249,8 @@ test.describe("Waiting room — role selector after 2 Players click @waiting-roo
     await expect(selects.first()).toBeVisible();
     const options = selects.first().locator("option");
     await expect(options).toHaveCount(2);
-    await expect(options.nth(0)).toHaveText("Decision Maker");
-    await expect(options.nth(1)).toHaveText("All Advisors");
+    await expect(options.nth(0)).toHaveText("Commanding Officer");
+    await expect(options.nth(1)).toHaveText("Crew Members");
   });
 
   test("clicking Full Team hides 2-player role dropdowns", async ({
@@ -269,7 +269,7 @@ test.describe("Waiting room — role selector after 2 Players click @waiting-roo
     const firstSelect = page.locator("select").first();
     await expect(firstSelect).toBeVisible();
     const opts = firstSelect.locator("option");
-    await expect(opts.nth(0)).toHaveText("Decision Maker");
+    await expect(opts.nth(0)).toHaveText("Commanding Officer");
 
     // Switch to Full Team — selects gone
     await page.getByRole("button", { name: "Full Team" }).click();
@@ -441,7 +441,7 @@ test.describe("Player view — all-advisors panel @player @two-player", () => {
     await page.goto(playerUrl("all-adv-01", "all_advisors"));
 
     await expect(page.locator("tfc-all-advisors-panel")).not.toBeVisible();
-    await expect(page.locator(".overlay")).not.toBeVisible();
+    await expect(page.locator("tfc-decision-panel")).not.toBeVisible();
   });
 });
 
@@ -456,7 +456,7 @@ test.describe("Player view — all-advisors decision targeting @player @two-play
     );
     await page.goto(playerUrl("all-adv-01", "all_advisors"));
 
-    await expect(page.locator(".overlay")).toBeVisible();
+    await expect(page.locator("tfc-all-advisors-panel")).toBeVisible();
     await expect(page.getByText("CO Only Decision")).toBeVisible();
   });
 
@@ -469,7 +469,7 @@ test.describe("Player view — all-advisors decision targeting @player @two-play
     );
     await page.goto(playerUrl("nav-01", "nav"));
 
-    await expect(page.locator(".overlay")).not.toBeVisible();
+    await expect(page.locator("tfc-decision-panel")).not.toBeVisible();
   });
 });
 
@@ -560,7 +560,7 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     await page.goto(playerUrl("all-adv-01", "all_advisors"));
 
     // Header always visible
-    await expect(page.locator(".exercise-header__title")).toBeVisible();
+    await expect(page.locator(".player-header__title")).toBeVisible();
 
     // Score visible
     await expect(page.locator("tfc-turn-banner")).toContainText("Turn 2");
@@ -595,13 +595,13 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     await page.goto(playerUrl("co-01", "co"));
 
     // Header always visible
-    await expect(page.locator(".exercise-header__title")).toBeVisible();
+    await expect(page.locator(".player-header__title")).toBeVisible();
 
     // Score visible
     await expect(page.locator("tfc-turn-banner")).toContainText("Turn 2");
 
     // Decision panel visible (DM style, no [Advisor] prefix)
-    await expect(page.locator(".overlay")).toBeAttached();
+    await expect(page.locator("tfc-decision-panel")).toBeAttached();
     await expect(page.getByText("[Advisor]")).not.toBeAttached();
 
     // Composite-key advisor bubbles with role labels

@@ -114,30 +114,38 @@ async def start_engine(
 async def begin_engine(exercise_id: int) -> PhaseChange:
     """Transition BRIEFING → RUNNING after the player has read the briefing."""
     try:
-        return await _get_engine(exercise_id).begin()
+        result = await _get_engine(exercise_id).begin()
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    await broadcast_changes(connection_manager, exercise_id, [result])
+    return result
 
 
 @router.post("/pause", operation_id="pauseEngine")
 async def pause_engine(exercise_id: int) -> PhaseChange:
     try:
-        return await _get_engine(exercise_id).pause()
+        result = await _get_engine(exercise_id).pause()
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    await broadcast_changes(connection_manager, exercise_id, [result])
+    return result
 
 
 @router.post("/resume", operation_id="resumeEngine")
 async def resume_engine(exercise_id: int) -> PhaseChange:
     try:
-        return await _get_engine(exercise_id).resume()
+        result = await _get_engine(exercise_id).resume()
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+    await broadcast_changes(connection_manager, exercise_id, [result])
+    return result
 
 
 @router.post("/reset", operation_id="resetEngine")
 async def reset_engine(exercise_id: int) -> PhaseChange:
-    return await _get_engine(exercise_id).reset()
+    result = await _get_engine(exercise_id).reset()
+    await broadcast_changes(connection_manager, exercise_id, [result])
+    return result
 
 
 @router.post("/complete", operation_id="completeEngine")

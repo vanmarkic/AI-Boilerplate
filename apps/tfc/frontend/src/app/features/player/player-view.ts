@@ -85,9 +85,9 @@ export class PlayerView implements OnInit, OnDestroy {
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
 
-  protected readonly activeDecision = computed(() => {
+  protected readonly activeDecisions = computed(() => {
     const role = this.store.playerRole();
-    return this.store.openDecisions().find((d) => {
+    return this.store.openDecisions().filter((d) => {
       if (!d.target_roles || d.target_roles.length === 0) return true;
       if (role === "all_advisors" || role === "solo_player") return true;
       return d.target_roles.includes(role);
@@ -95,12 +95,17 @@ export class PlayerView implements OnInit, OnDestroy {
   });
 
   private readonly resetPracticePhaseEffect = effect(() => {
-    const decision = this.activeDecision();
+    const decision = this.activeDecisions()[0];
     const id = decision?.id ?? null;
     // When the active decision changes in practice mode, reset to advising phase
     if (id && this.store.isPracticeMode()) {
       this.practicePhase.set("advising");
     }
+  });
+
+  protected readonly isMultiRole = computed(() => {
+    const role = this.store.playerRole();
+    return role === "all_advisors" || role === "solo_player" || role === "all_roles";
   });
 
   protected readonly visibleEvents = computed(() => {
@@ -111,13 +116,20 @@ export class PlayerView implements OnInit, OnDestroy {
         if (e.lifecycle !== "running" && e.lifecycle !== "completed") return false;
         const targetRoles = e.target_roles ?? [];
         if (targetRoles.length === 0) return true;
-        if (role === "all_advisors" || role === "solo_player") return true;
+        if (this.isMultiRole()) return true;
         return targetRoles.includes(role);
       })
-      .map((e) => ({
-        ...e,
-        resolvedDescription: (e.role_descriptions ?? {})[role] ?? e.description,
-      }));
+      .map((e) => {
+        const rd = e.role_descriptions ?? {};
+        const roleCards = this.isMultiRole()
+          ? Object.entries(rd).map(([roleId, desc]) => ({ roleId, desc }))
+          : [];
+        return {
+          ...e,
+          resolvedDescription: this.isMultiRole() ? e.description : (rd[role] ?? e.description),
+          roleCards,
+        };
+      });
   });
 
   protected advisorRecs(decision: ActiveDecision) {
@@ -182,6 +194,7 @@ export class PlayerView implements OnInit, OnDestroy {
     this.api.begin(this.exerciseId()).subscribe({
       next: (change) => {
         this.store.applyPhaseChange(change.phase);
+        this.store.applyTimeUpdate(change.time);
         this.beginningExercise.set(false);
       },
       error: () => {

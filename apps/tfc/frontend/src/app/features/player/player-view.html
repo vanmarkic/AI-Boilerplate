@@ -121,8 +121,8 @@
   </main>
 
   @if (store.phase() !== 'briefing' && store.score(); as score) {
-  <tfc-score-bar [score]="score" />
-  } @if (activeDecision(); as decision) {
+  <tfc-score-bar [score]="score" [countdownMs]="store.decisionCountdownMs()" />
+  } @if (activeDecisions()[0]; as decision) {
   <div>
     @if (store.isPracticeMode()) {
       @if (practicePhase() === 'advising') {

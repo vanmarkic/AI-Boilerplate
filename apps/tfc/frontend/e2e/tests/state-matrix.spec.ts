@@ -157,7 +157,7 @@ test.describe("/home — Picker state @home @scenario-builder", () => {
 // ═══════════════════════════════════════════════════════════════════════
 
 test.describe("/home — Lobby: empty, collaborative, not joined @home @waiting-room", () => {
-  test("shows role slots as Open, name input, Join button", async ({
+  test("shows role slots as Open and Join Exercise button", async ({
     page,
     mockApi,
   }) => {
@@ -170,9 +170,7 @@ test.describe("/home — Lobby: empty, collaborative, not joined @home @waiting-
     await expect(page.getByText("Navigator (NAV)")).toBeVisible();
     const openSlots = page.getByText("Open", { exact: true });
     await expect(openSlots).toHaveCount(2);
-    await expect(page.locator("input#lobby-name")).toBeVisible();
-    await expect(page.getByRole("button", { name: "Join" })).toBeVisible();
-    await expect(page.getByText("Joined")).not.toBeVisible();
+    await expect(page.getByRole("button", { name: "Join Exercise" })).toBeVisible();
   });
 
   test("no GM slot visible", async ({ page, mockApi }) => {
@@ -232,7 +230,7 @@ test.describe("/home — Lobby: full (2/2) @home @waiting-room", () => {
 });
 
 test.describe("/home — Lobby: start button logic @home @waiting-room", () => {
-  test("not joined → no start button visible (join form shown instead)", async ({
+  test("not joined → no start button visible (Join Exercise shown instead)", async ({
     page,
     mockApi,
   }) => {
@@ -240,12 +238,12 @@ test.describe("/home — Lobby: start button logic @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    // Before joining, only the join form is visible, not start/leave
+    // Before joining, only the Join Exercise button is visible, not start/leave
     await expect(
       page.getByRole("button", { name: /Start Exercise/ }),
     ).not.toBeVisible();
     await expect(page.getByRole("button", { name: "Leave" })).not.toBeVisible();
-    await expect(page.locator("input#lobby-name")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Join Exercise" })).toBeVisible();
   });
 });
 

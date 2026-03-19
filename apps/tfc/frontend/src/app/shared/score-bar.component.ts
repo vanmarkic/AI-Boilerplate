@@ -33,7 +33,11 @@ export interface ScoreState {
       >
       <span class="score-bar__value">{{ displayScore }}</span>
       <span class="flex-1"></span>
-      @if (score()?.nextDecisionTimeMs; as ms) {
+      @if (countdownMs() !== null && countdownMs()! > 0) {
+        <span class="score-bar__countdown" [class.score-bar__countdown--urgent]="countdownMs()! < 30000">
+          {{ formattedCountdown }}
+        </span>
+      } @else if (score()?.nextDecisionTimeMs; as ms) {
         <span class="text-xs text-muted-foreground">
           Next in {{ ms / 1000 }}s
         </span>
@@ -43,12 +47,21 @@ export interface ScoreState {
 })
 export class ScoreBarComponent implements AfterViewInit, OnChanges {
   readonly score = input<ScoreState | null>(null);
+  readonly countdownMs = input<number | null>(null);
   private readonly anim = inject(AnimationService);
   private readonly el = inject(ElementRef);
   private initialized = false;
   private prevScore = 0;
   protected displayScore = 0;
   protected penaltyActive = false;
+
+  protected get formattedCountdown(): string {
+    const ms = this.countdownMs() ?? 0;
+    const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${String(seconds).padStart(2, "0")}`;
+  }
 
   ngAfterViewInit(): void {
     this.initialized = true;
