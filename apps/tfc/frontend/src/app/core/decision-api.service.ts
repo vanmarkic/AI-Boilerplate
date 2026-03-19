@@ -10,6 +10,7 @@ export interface DecisionOption {
   id: string;
   label: string;
   score?: number;
+  role?: string | null;
 }
 
 export interface ActiveDecision {

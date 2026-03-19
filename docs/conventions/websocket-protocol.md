@@ -37,7 +37,7 @@ Each entry in the `changes` array has a `type` field. Defined in `apps/tfc/backe
 | `type` | Key fields | Triggers |
 |--------|-----------|----------|
 | `phase_change` | `action` (started/paused/completed/reset), `phase`, `time` | UI phase badge + clock update |
-| `event_change` | `event_id`, `action` (activated/started/completed/force_triggered/cancelled), `lifecycle`, `title` | Store `updateEvent` |
+| `event_change` | `event_id`, `action` (activated/started/completed/force_triggered/cancelled), `lifecycle`, `title`, `target_roles`, `role_descriptions` | Store `updateEvent` |
 | `issue_change` | `issue_id`, `action` (activated/mitigated/resolved/auto_resolve_expired), `lifecycle`, `title`, `released` | Store `updateIssue` |
 | `decision_opened` | `decision_id`, `title`, `question_type`, `options`, `target_roles`, `timeout_ms` | Store `applyDecisions` (appends) |
 | `decision_closed` | `decision_id`, `title`, `selected_option_ids` | Store `closeDecision` |
@@ -49,7 +49,7 @@ Each entry in the `changes` array has a `type` field. Defined in `apps/tfc/backe
 
 ## Role-Targeted Broadcasting
 
-`decision_opened` changes with `target_roles` are sent only to matching roles plus always to GMs. All other changes broadcast to every connected client. See `engine_broadcast.py` for the splitting logic.
+`decision_opened` and `event_change` changes with non-empty `target_roles` are sent only to matching roles plus always to GMs. All other changes broadcast to every connected client. See `engine_broadcast.py:split_targeted_changes()` for the splitting logic.
 
 ## Data Flow
 
@@ -57,7 +57,7 @@ Each entry in the `changes` array has a `type` field. Defined in `apps/tfc/backe
 Engine tick (250 ms)
   -> exercise_engine.tick() returns list[StateChange]
   -> engine_router calls broadcast_changes(connection_manager, exercise_id, changes)
-    -> split_targeted_changes: separates role-targeted decisions from general
+    -> split_targeted_changes: separates role-targeted decisions + events from general
     -> connection_manager.broadcast / broadcast_to_role
       -> JSON over WebSocket
   -> Frontend ExerciseWsService.messages$ emits WsMessage

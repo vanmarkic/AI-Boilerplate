@@ -320,6 +320,64 @@ class TestTargetRolesExist:
         assert sc.decision_templates[0].target_roles == []
 
 
+class TestEventTargetRolesExist:
+    """Event target_roles and role_descriptions must reference defined role IDs."""
+
+    def test_unknown_event_target_role_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="nonexistent"):
+            ScenarioContent(
+                roles=[
+                    RoleDef(id="co", label="CO", player_type="decision_maker"),
+                ],
+                events=[
+                    ScenarioEventDef(
+                        id="e1",
+                        title="T",
+                        event_type="informational",
+                        scheduled_pt_ms=0,
+                        target_roles=["nonexistent"],
+                    ),
+                ],
+            )
+
+    def test_unknown_role_description_key_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="role_description for unknown"):
+            ScenarioContent(
+                roles=[
+                    RoleDef(id="co", label="CO", player_type="decision_maker"),
+                ],
+                events=[
+                    ScenarioEventDef(
+                        id="e1",
+                        title="T",
+                        event_type="informational",
+                        scheduled_pt_ms=0,
+                        role_descriptions={"ghost": "should fail"},
+                    ),
+                ],
+            )
+
+    def test_valid_event_target_roles_accepted(self) -> None:
+        sc = ScenarioContent(
+            roles=[
+                RoleDef(id="co", label="CO", player_type="decision_maker"),
+                RoleDef(id="nav", label="Nav", player_type="advisor"),
+            ],
+            events=[
+                ScenarioEventDef(
+                    id="e1",
+                    title="T",
+                    event_type="informational",
+                    scheduled_pt_ms=0,
+                    target_roles=["nav"],
+                    role_descriptions={"nav": "Nav-specific text", "co": "CO text"},
+                ),
+            ],
+        )
+        assert sc.events[0].target_roles == ["nav"]
+        assert sc.events[0].role_descriptions["nav"] == "Nav-specific text"
+
+
 class TestCollaborativeRoleMinimum:
     """Simple collaborative mode requires at least 2 playable roles."""
 

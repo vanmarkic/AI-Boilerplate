@@ -31,7 +31,8 @@ class EventSnapshot(TypedDict):
     lifecycle: str
     started_at_pt_ms: float | None
     completed_at_pt_ms: float | None
-    target_role: str | None
+    target_roles: list[str]
+    role_descriptions: dict[str, str]
 
 
 class IssueSnapshot(TypedDict):
@@ -108,6 +109,8 @@ class EventChange(TypedDict):
     action: str  # activated | started | completed | force_triggered | cancelled
     lifecycle: str  # scheduled | pending | running | paused | completed | cancelled
     title: str
+    target_roles: list[str]
+    role_descriptions: dict[str, str]
 
 
 class IssueChange(TypedDict):

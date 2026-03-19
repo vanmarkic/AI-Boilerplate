@@ -59,6 +59,8 @@ class ScheduledEvent:
     lifecycle: EventLifecycle = EventLifecycle.SCHEDULED
     started_at_pt_ms: float | None = None
     completed_at_pt_ms: float | None = None
+    target_roles: list[str] = field(default_factory=list)
+    role_descriptions: dict[str, str] = field(default_factory=dict)
 
 
 class EventScheduler:
@@ -222,6 +224,8 @@ class EventScheduler:
             "action": action,
             "lifecycle": event.lifecycle.value,
             "title": event.title,
+            "target_roles": event.target_roles,
+            "role_descriptions": event.role_descriptions,
         }
 
     def snapshot(self) -> list[EventSnapshot]:
@@ -239,6 +243,8 @@ class EventScheduler:
                 lifecycle=e.lifecycle.value,
                 started_at_pt_ms=e.started_at_pt_ms,
                 completed_at_pt_ms=e.completed_at_pt_ms,
+                target_roles=e.target_roles,
+                role_descriptions=e.role_descriptions,
             )
             for e in self._events.values()
         ]

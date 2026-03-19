@@ -20,6 +20,8 @@ export interface EventSnapshot {
   lifecycle: string;
   started_at_pt_ms: number | null;
   completed_at_pt_ms: number | null;
+  target_roles: string[];
+  role_descriptions: Record<string, string>;
 }
 
 export interface IssueSnapshot {
@@ -38,6 +40,7 @@ export interface DecisionOptionSnapshot {
   id: string;
   label: string;
   score: number;
+  role: string | null;
 }
 
 export interface DecisionSnapshot {
@@ -91,6 +94,8 @@ export interface EventChange {
   action: string;
   lifecycle: string;
   title: string;
+  target_roles: string[];
+  role_descriptions: Record<string, string>;
 }
 
 /** Domain term: 'defect change'. Code uses 'issue_change'. */

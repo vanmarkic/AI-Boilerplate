@@ -46,6 +46,8 @@ class ScenarioEventDef(BaseModel):
     duration_ms: float | None = None  # auto-complete after duration
     dependencies: list[str] = []  # event IDs that must complete first
     triggered_issues: list[str] = []  # issue IDs activated on completion
+    target_roles: list[str] = []  # empty = visible to all roles
+    role_descriptions: dict[str, str] = {}  # per-role description overrides
 
 
 class ScenarioIssueDef(BaseModel):
@@ -120,6 +122,19 @@ class ScenarioContent(BaseModel):
                 if rid not in role_ids:
                     raise ValueError(
                         f"Decision template '{dt.id}' targets unknown "
+                        f"role '{rid}'. Defined roles: {sorted(role_ids)}."
+                    )
+        for evt in self.events:
+            for rid in evt.target_roles:
+                if rid not in role_ids:
+                    raise ValueError(
+                        f"Event '{evt.id}' targets unknown "
+                        f"role '{rid}'. Defined roles: {sorted(role_ids)}."
+                    )
+            for rid in evt.role_descriptions:
+                if rid not in role_ids:
+                    raise ValueError(
+                        f"Event '{evt.id}' has role_description for unknown "
                         f"role '{rid}'. Defined roles: {sorted(role_ids)}."
                     )
         return self

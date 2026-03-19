@@ -34,6 +34,8 @@ def load_scenario_events(content: ScenarioContent) -> list[ScheduledEvent]:
                 duration_ms=evt.duration_ms,
                 dependencies=list(evt.dependencies),
                 triggered_issues=list(evt.triggered_issues),
+                target_roles=list(evt.target_roles),
+                role_descriptions=dict(evt.role_descriptions),
             ),
         )
     return events

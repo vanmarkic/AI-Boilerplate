@@ -13,6 +13,8 @@ export interface ScenarioEventDef {
   duration_ms: number | null;
   dependencies: string[];
   triggered_issues: string[];
+  target_roles: string[];
+  role_descriptions: Record<string, string>;
 }
 
 export interface ScenarioIssueDef {
