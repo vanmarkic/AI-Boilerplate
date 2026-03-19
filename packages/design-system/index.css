@@ -10,8 +10,6 @@
 
 @import "./vendor.css";
 @import "./tokens.css";
-@import "./themes-tfc-domains.css";
-@import "./themes-tfc-hoi-extras.css";
 @import "./reset.css";
 @import "./utilities.css";
 @import "./components.css";
