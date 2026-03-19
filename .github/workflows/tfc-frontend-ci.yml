@@ -3,10 +3,10 @@ name: TFC Frontend CI
 on:
   push:
     branches: [master]
-    paths: ['apps/tfc/frontend/**', 'packages/**']
+    paths: ['apps/tfc/frontend/**', 'apps/tfc/backend/engine/state_changes.py', 'apps/tfc/codegen/**', 'packages/**']
   pull_request:
     branches: [master]
-    paths: ['apps/tfc/frontend/**', 'packages/**']
+    paths: ['apps/tfc/frontend/**', 'apps/tfc/backend/engine/state_changes.py', 'apps/tfc/codegen/**', 'packages/**']
 
 permissions:
   contents: read
@@ -36,6 +36,17 @@ jobs:
             apps/tfc/frontend/node_modules
             packages/design-system/node_modules
           key: tfc-frontend-${{ github.sha }}
+
+  codegen-check:
+    name: Codegen Freshness
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: bash apps/tfc/codegen/check-freshness.sh
+        working-directory: .
 
   type-check:
     name: Type Check
