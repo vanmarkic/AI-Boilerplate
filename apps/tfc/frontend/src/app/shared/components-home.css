@@ -1,0 +1,225 @@
+/* ── TFC Home Screen — Command Center ────────────────────
+ *  Tactical operations aesthetic for the main menu,
+ *  scenario picker flow, and mode selector.
+ * ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Host ─────────────────────────────────────────────── */
+
+  .home-host {
+    display: block;
+    position: relative;
+    min-height: 100dvh;
+    isolation: isolate;
+  }
+
+  /* ── Layout ───────────────────────────────────────────── */
+
+  .home-layout {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: var(--spacing-xl);
+    gap: var(--spacing-xl);
+  }
+
+  /* ── Hero / System Title ──────────────────────────────── */
+
+  .home-hero {
+    text-align: center;
+    position: relative;
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+
+  .home-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      oklch(0% 0 0 / 6%) 2px,
+      oklch(0% 0 0 / 6%) 4px
+    );
+    pointer-events: none;
+    border-radius: var(--radius-sm);
+  }
+
+  .home-hero__title {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-4xl);
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0 0 var(--spacing-xs);
+  }
+
+  .home-hero__title::before {
+    content: "[ ";
+    color: var(--color-muted-foreground);
+    font-weight: 400;
+  }
+
+  .home-hero__title::after {
+    content: " ]";
+    color: var(--color-muted-foreground);
+    font-weight: 400;
+  }
+
+  .home-hero__subtitle {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted-foreground);
+    margin: 0;
+  }
+
+  /* ── Navigation Menu ──────────────────────────────────── */
+
+  .home-menu {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-md);
+    width: 100%;
+    max-width: 560px;
+  }
+
+  /* ── Tactical Panel Cards ─────────────────────────────── */
+
+  .tac-panel {
+    --glass-strength: 2.5;
+    --glow-strength: 1.5;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
+    border-left: 3px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--glass-shadow);
+    text-decoration: none;
+    color: inherit;
+    transition:
+      border-color var(--duration-fast),
+      background var(--duration-fast),
+      box-shadow var(--duration-fast);
+    cursor: pointer;
+  }
+
+  .tac-panel:hover {
+    border-color: var(--color-primary);
+    background: color-mix(
+      in oklch,
+      var(--glass-bg) 80%,
+      var(--color-primary) 20%
+    );
+    box-shadow: var(--glass-shadow), var(--glow-sm);
+  }
+
+  .tac-panel[data-primary] {
+    border-color: var(--color-primary);
+    background: color-mix(
+      in oklch,
+      var(--glass-bg) 85%,
+      var(--color-primary) 15%
+    );
+    box-shadow: var(--glass-shadow), var(--glow-sm);
+  }
+
+  .tac-panel[data-primary]:hover {
+    background: color-mix(
+      in oklch,
+      var(--glass-bg) 75%,
+      var(--color-primary) 25%
+    );
+    box-shadow: var(--glass-shadow), var(--glow-primary);
+  }
+
+  .tac-panel__indicator {
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .tac-panel__label {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .tac-panel__desc {
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    line-height: 1.4;
+  }
+
+  /* ── Mode Selector ────────────────────────────────────── */
+
+  .mode-heading {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-primary);
+    margin: 0;
+  }
+
+  .mode-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-md);
+  }
+
+  /* ── Picker Grid (shared layout) ──────────────────────── */
+
+  .picker-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 560px;
+    width: 100%;
+  }
+
+  /* ── Back Link ────────────────────────────────────────── */
+
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-muted-foreground);
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .back-link::before {
+    content: "< ";
+  }
+
+  .back-link:hover {
+    color: var(--color-primary);
+  }
+}

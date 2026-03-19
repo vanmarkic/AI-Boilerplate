@@ -4,34 +4,28 @@
   max-width: 560px;
 }
 
-.role-slots {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-}
-
-.role-slot {
+.lobby-op-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--spacing-sm) var(--spacing-md);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md, 0.5rem);
-  font-size: var(--font-size-sm, 0.875rem);
-}
-
-.role-slot[data-taken] {
-  background: color-mix(
-    in oklch,
-    var(--glass-bg) 90%,
-    var(--color-muted-foreground) 10%
-  );
-}
-
-.role-label {
-  font-weight: 500;
-}
-.role-type {
-  font-size: var(--font-size-xs, 0.75rem);
+  padding: var(--spacing-xs) 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--color-muted-foreground);
+}
+
+.lobby-op-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.lobby-op-status__light {
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-success);
+  box-shadow: 0 0 6px var(--color-success);
 }

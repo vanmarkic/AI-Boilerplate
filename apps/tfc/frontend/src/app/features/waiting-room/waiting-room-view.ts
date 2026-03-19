@@ -8,12 +8,7 @@ import {
   computed,
 } from "@angular/core";
 import { ActivatedRoute, Router } from "@angular/router";
-import {
-  CardComponent,
-  BadgeComponent,
-  ButtonDirective,
-  InputComponent,
-} from "@aspect/ui";
+import { BadgeComponent, ButtonDirective, InputComponent } from "@aspect/ui";
 import { FormsModule } from "@angular/forms";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
 import { ExerciseApiService } from "../../core/exercise-api.service";
@@ -26,49 +21,47 @@ import {
   type ParticipantResponse,
 } from "../../core/waiting-room-api.service";
 import { RoleSlotListComponent } from "../../shared/role-slot-list.component";
+import { SeaBackdrop } from "../home/sea-backdrop";
+import { TwoPlayerStations } from "./two-player-stations";
 import { Subscription } from "rxjs";
-
-const TWO_PLAYER_ROLES = [
-  { id: "decision_maker", label: "Commanding Officer" },
-  { id: "all_advisors", label: "Crew Members" },
-];
 
 type PlayerCountMode = "full" | "two_player" | "practice";
 
 @Component({
   selector: "tfc-waiting-room-view",
+  host: { class: "wr-host" },
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     FormsModule,
-    CardComponent,
     BadgeComponent,
     ButtonDirective,
     InputComponent,
     RoleSlotListComponent,
+    SeaBackdrop,
+    TwoPlayerStations,
   ],
   template: `
-    <div class="flex justify-center items-center min-h-screen p-lg">
-      <ui-card title="Waiting Room">
-        <div
-          class="flex flex-col gap-md"
-          style="min-width: var(--container-md); max-width: var(--container-2xl);"
-        >
+    <tfc-sea-backdrop />
+    <div class="flex justify-center items-center min-h-screen p-lg relative" style="z-index: 1;">
+      <div class="cmd-panel">
+        <div class="cmd-panel__header">
+          <span class="cmd-panel__title">Operations Lobby</span>
+          <span class="session-code">EX-{{ exerciseId() }}</span>
+        </div>
+        <div class="cmd-panel__body flex flex-col gap-md">
           @if (!participantId()) {
             <div class="flex flex-col gap-sm">
-              <p class="text-sm text-muted-foreground">
-                Enter your name to join this exercise.
-              </p>
+              <p class="wr-join__prompt">// Enter callsign to join operations</p>
               <div class="flex gap-sm items-end">
                 <ui-input
                   id="wr-name"
-                  label="Your Name"
+                  label="Callsign"
                   placeholder="Enter your name"
                   [(value)]="displayName"
                   style="flex: 1;"
                 />
                 <button
-                  uiButton
-                  variant="default"
+                  uiButton variant="default"
                   [disabled]="!displayName().trim() || joining()"
                   (click)="onJoin()"
                 >
@@ -78,112 +71,57 @@ type PlayerCountMode = "full" | "two_player" | "practice";
             </div>
           }
 
-          <p class="text-sm text-muted-foreground">
+          <p class="wr-join__prompt">
             @if (isSimpleCollaborative()) {
-              Collaborative exercise — no facilitator needed.
+              // Collaborative exercise — no facilitator needed.
               @if (practiceMode()) {
                 Practice mode: you'll handle all roles solo.
               } @else if (twoPlayerMode()) {
-                2 Player Mode: assign Commanding Officer and Crew Members roles.
+                2-Player mode: assign CO and Crew roles.
               } @else {
-                Pick a role and start when all slots are filled.
+                Pick a station and deploy when all slots are filled.
               }
             } @else {
-              Assign roles before starting.
+              // Assign stations before deploying.
             }
           </p>
 
           @if (isSimpleCollaborative()) {
             <div class="flex gap-sm items-center">
-              <span class="text-sm font-medium">Players:</span>
+              <span class="wr-mode-bar__label">Players:</span>
               <div class="flex gap-xs">
-                <button
-                  uiButton
-                  [variant]="playerCountMode() === 'full' ? 'default' : 'outline'"
-                  size="sm"
-                  (click)="onPlayerCountMode('full')"
-                >
-                  Full Team
-                </button>
-                <button
-                  uiButton
-                  [variant]="playerCountMode() === 'two_player' ? 'default' : 'outline'"
-                  size="sm"
-                  (click)="onPlayerCountMode('two_player')"
-                >
-                  2 Players
-                </button>
-                <button
-                  uiButton
-                  [variant]="playerCountMode() === 'practice' ? 'default' : 'outline'"
-                  size="sm"
-                  (click)="onPlayerCountMode('practice')"
-                >
-                  Practice (Solo)
-                </button>
+                @for (m of modes; track m.key) {
+                  <button uiButton
+                    [variant]="playerCountMode() === m.key ? 'default' : 'outline'"
+                    size="sm" (click)="onPlayerCountMode(m.key)">
+                    {{ m.label }}
+                  </button>
+                }
               </div>
             </div>
           }
 
           @if (practiceMode()) {
-            <div class="flex flex-col gap-sm">
-              <p class="text-sm text-muted-foreground p-sm">
-                Practice mode — you'll play all roles.
-              </p>
+            <div class="crew-stations">
+              <p class="wr-join__prompt">// Solo simulation — all stations active</p>
               @if (participants().length) {
-                <div class="flex items-center justify-between p-sm border-b gap-md">
-                  <div class="flex items-center gap-sm">
-                    <span class="text-sm font-medium">{{ participants()[0].display_name }}</span>
+                <div class="crew-station" data-filled data-self>
+                  <div class="crew-station__info">
+                    <span class="crew-station__light" data-active></span>
+                    <span class="crew-station__role">{{ participants()[0].display_name }}</span>
                     <ui-badge variant="secondary">You</ui-badge>
                   </div>
-                  <span class="text-sm text-muted-foreground">All Roles</span>
+                  <span class="crew-station__type">ALL</span>
                 </div>
               }
             </div>
           } @else if (twoPlayerMode()) {
-            <div class="flex flex-col gap-md">
-              <div class="flex flex-col gap-sm">
-                <span class="text-sm font-medium">Scenario Roles</span>
-                @for (role of scenarioRoles(); track role.id) {
-                  <div class="flex items-center gap-sm p-xs">
-                    <span class="text-sm">{{ role.label }}</span>
-                    <span class="text-xs text-muted-foreground">
-                      {{ role.player_type === 'decision_maker' ? 'Decision Maker' : 'Advisor' }}
-                    </span>
-                  </div>
-                }
-              </div>
-              <div class="flex flex-col gap-sm">
-                <span class="text-sm font-medium">Players</span>
-                @for (p of participants(); track p.id) {
-                  <div
-                    class="flex items-center justify-between p-sm border-b gap-md"
-                  >
-                    <div class="flex items-center gap-sm">
-                      <span class="text-sm font-medium">{{
-                        p.display_name
-                      }}</span>
-                      @if (p.id === participantId()) {
-                        <ui-badge variant="secondary">You</ui-badge>
-                      }
-                    </div>
-                    <select
-                      class="input-base"
-                      [value]="p.role"
-                      (change)="onRoleChange(p.id, $event)"
-                    >
-                      @for (role of twoPlayerRoles; track role.id) {
-                        <option [value]="role.id">{{ role.label }}</option>
-                      }
-                    </select>
-                  </div>
-                } @empty {
-                  <p class="text-muted-foreground text-sm p-sm">
-                    No participants yet.
-                  </p>
-                }
-              </div>
-            </div>
+            <tfc-two-player-stations
+              [roles]="scenarioRoles()"
+              [participants]="participants()"
+              [currentParticipantId]="participantId()"
+              (roleChanged)="onTwoPlayerRoleChange($event)"
+            />
           } @else if (scenarioRoles().length) {
             <tfc-role-slot-list
               [roles]="scenarioRoles()"
@@ -194,29 +132,31 @@ type PlayerCountMode = "full" | "two_player" | "practice";
             />
           } @else {
             <p class="text-sm text-destructive p-sm">
-              Scenario has no roles defined. The exercise cannot start until the
-              scenario is updated with at least one decision-maker and one
-              advisor role.
+              Scenario has no roles defined.
             </p>
           }
 
           @if (participantId()) {
-            <div class="flex gap-sm justify-end">
-              <button uiButton variant="outline" (click)="onLeave()">
-                Leave
-              </button>
-              <button
-                uiButton
-                variant="default"
-                [disabled]="!canStart()"
-                (click)="onStartExercise()"
-              >
-                Start Exercise ({{ participants().length }})
+            <div class="readiness-gauge">
+              <span class="readiness-gauge__label">Readiness</span>
+              <div class="readiness-gauge__track">
+                <div class="readiness-gauge__fill"
+                  [style.width.%]="readinessPercent()"></div>
+              </div>
+              <span class="readiness-gauge__label">
+                {{ participants().length }}/{{ maxSlots() }}
+              </span>
+            </div>
+            <div class="wr-actions">
+              <button uiButton variant="outline" (click)="onLeave()">Leave</button>
+              <button uiButton variant="default"
+                [disabled]="!canStart()" (click)="onStartExercise()">
+                Deploy ({{ participants().length }})
               </button>
             </div>
           }
         </div>
-      </ui-card>
+      </div>
     </div>
   `,
 })
@@ -238,26 +178,39 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   protected readonly requiresGm = signal(false);
   protected readonly displayName = signal("");
   protected readonly joining = signal(false);
-  protected readonly twoPlayerRoles = TWO_PLAYER_ROLES;
+
+  protected readonly modes: { key: PlayerCountMode; label: string }[] = [
+    { key: "full", label: "Full Team" },
+    { key: "two_player", label: "2 Players" },
+    { key: "practice", label: "Practice" },
+  ];
 
   protected readonly isSimpleCollaborative = computed(
     () => this.gameMode() === "simple_collaborative",
   );
-
   protected readonly twoPlayerMode = computed(
     () => this.playerCountMode() === "two_player",
   );
-
   protected readonly practiceMode = computed(
     () => this.playerCountMode() === "practice",
   );
 
+  protected readonly maxSlots = computed(() => {
+    if (this.practiceMode()) return 1;
+    if (this.twoPlayerMode()) return 2;
+    const roles = this.scenarioRoles();
+    return roles.length + (this.requiresGm() ? 1 : 0);
+  });
+
+  protected readonly readinessPercent = computed(() => {
+    const max = this.maxSlots();
+    return max > 0 ? (this.participants().length / max) * 100 : 0;
+  });
+
   protected readonly canStart = computed(() => {
     const roles = this.scenarioRoles();
     if (!roles.length) return false;
-    if (this.practiceMode()) {
-      return this.participants().length === 1;
-    }
+    if (this.practiceMode()) return this.participants().length === 1;
     if (this.twoPlayerMode()) {
       const pRoles = this.participants().map((p) => p.role);
       return (
@@ -266,8 +219,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
         pRoles.includes("all_advisors")
       );
     }
-    const requiredCount = roles.length + (this.requiresGm() ? 1 : 0);
-    return this.participants().length >= requiredCount;
+    return this.participants().length >= this.maxSlots();
   });
 
   ngOnInit(): void {
@@ -310,20 +262,14 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     });
   }
 
-  protected holderOf(roleId: string): ParticipantResponse | undefined {
-    return this.participants().find((p) => p.role === roleId);
-  }
-
   protected onClaimRole(roleId: string): void {
     this.api
       .updateRole(this.exerciseId(), this.participantId(), roleId)
       .subscribe();
   }
 
-  protected onRoleChange(targetId: string, event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLSelectElement)) return;
-    this.api.updateRole(this.exerciseId(), targetId, target.value).subscribe();
+  protected onTwoPlayerRoleChange(ev: { targetId: string; roleId: string }): void {
+    this.api.updateRole(this.exerciseId(), ev.targetId, ev.roleId).subscribe();
   }
 
   protected onLeave(): void {

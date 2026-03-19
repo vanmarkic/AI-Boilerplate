@@ -5,11 +5,7 @@ import {
   input,
 } from "@angular/core";
 import { Router } from "@angular/router";
-import {
-  BadgeComponent,
-  ButtonDirective,
-  CardComponent,
-} from "@aspect/ui";
+import { BadgeComponent, ButtonDirective } from "@aspect/ui";
 import type { ParticipantResponse } from "../../core/waiting-room-api.service";
 import type { RoleDef } from "../../core/scenario-api.service";
 
@@ -29,58 +25,78 @@ export interface JoinableExercise {
 @Component({
   selector: "tfc-lobby-preview",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardComponent, BadgeComponent, ButtonDirective],
+  imports: [BadgeComponent, ButtonDirective],
   styleUrl: "./lobby-preview.css",
   template: `
-    <ui-card [title]="data().exercise.title">
-      <div class="flex flex-col gap-md">
-        <p class="text-sm text-muted-foreground">
-          {{ data().participants.length }} / {{ data().max_players }} players
-        </p>
-
-        <div class="role-slots">
-          @for (role of data().roles; track role.id) {
-            @let holder = holderOf(role.id);
-            <div class="role-slot" [attr.data-taken]="holder ? '' : null">
-              <div>
-                <span class="role-label">{{ role.label }}</span>
-                <span class="role-type">
-                  {{
-                    role.player_type === "decision_maker"
-                      ? "Decision Maker"
-                      : "Advisor"
-                  }}
-                </span>
-              </div>
-              @if (holder) {
-                <ui-badge variant="outline">{{ holder.display_name }}</ui-badge>
-              } @else {
-                <span class="text-sm text-muted-foreground">Open</span>
-              }
-            </div>
-          }
-
-          @if (data().requires_gm) {
-            @let gmHolder = holderOf("game-master");
-            <div class="role-slot" [attr.data-taken]="gmHolder ? '' : null">
-              <div>
-                <span class="role-label">Game Master (Trainer)</span>
-                <span class="role-type">Facilitator</span>
-              </div>
-              @if (gmHolder) {
-                <ui-badge variant="outline">{{ gmHolder.display_name }}</ui-badge>
-              } @else {
-                <span class="text-sm text-muted-foreground">Open</span>
-              }
-            </div>
-          }
-        </div>
-
-        <button uiButton variant="default" (click)="onJoin()">
-          Join Exercise
-        </button>
+    <div class="tac-panel">
+      <div class="lobby-op-header">
+        <span>Active Operation</span>
+        <span class="lobby-op-status">
+          <span class="lobby-op-status__light"></span>
+          Live
+        </span>
       </div>
-    </ui-card>
+
+      <span class="tac-panel__label">{{ data().exercise.title }}</span>
+
+      <p class="text-sm text-muted-foreground">
+        {{ data().participants.length }} / {{ data().max_players }} crew
+      </p>
+
+      <div class="crew-stations">
+        @for (role of data().roles; track role.id) {
+          @let holder = holderOf(role.id);
+          <div
+            class="crew-station"
+            [attr.data-filled]="holder ? '' : null"
+          >
+            <div class="crew-station__info">
+              <span
+                class="crew-station__light"
+                [attr.data-active]="holder ? '' : null"
+              ></span>
+              <span class="crew-station__role">{{ role.label }}</span>
+              <span class="crew-station__type">
+                {{
+                  role.player_type === "decision_maker" ? "CMD" : "ADV"
+                }}
+              </span>
+            </div>
+            @if (holder) {
+              <ui-badge variant="outline">{{ holder.display_name }}</ui-badge>
+            } @else {
+              <span class="text-sm text-muted-foreground">Open</span>
+            }
+          </div>
+        }
+
+        @if (data().requires_gm) {
+          @let gmHolder = holderOf("game-master");
+          <div
+            class="crew-station"
+            [attr.data-filled]="gmHolder ? '' : null"
+          >
+            <div class="crew-station__info">
+              <span
+                class="crew-station__light"
+                [attr.data-active]="gmHolder ? '' : null"
+              ></span>
+              <span class="crew-station__role">Game Master</span>
+              <span class="crew-station__type">GM</span>
+            </div>
+            @if (gmHolder) {
+              <ui-badge variant="outline">{{ gmHolder.display_name }}</ui-badge>
+            } @else {
+              <span class="text-sm text-muted-foreground">Open</span>
+            }
+          </div>
+        }
+      </div>
+
+      <button uiButton variant="default" (click)="onJoin()">
+        Join Operation
+      </button>
+    </div>
   `,
 })
 export class LobbyPreview {
