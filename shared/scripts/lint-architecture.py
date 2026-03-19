@@ -9,21 +9,27 @@ from pathlib import Path
 
 from python_layer_lint.linter import lint_features_dir
 
-FEATURES_DIR = Path(__file__).resolve().parent.parent.parent / "backend" / "features"
+ROOT = Path(__file__).resolve().parent.parent.parent
+
+FEATURES_DIRS = [
+    ROOT / "apps" / "main" / "backend" / "features",
+    ROOT / "apps" / "tfc" / "backend" / "features",
+]
 
 
 def main() -> int:
-    if not FEATURES_DIR.exists():
-        print(f"Features directory not found: {FEATURES_DIR}")
-        return 0
+    all_violations: list[str] = []
 
-    violations = lint_features_dir(FEATURES_DIR)
+    for features_dir in FEATURES_DIRS:
+        if not features_dir.exists():
+            continue
+        all_violations.extend(lint_features_dir(features_dir))
 
-    if violations:
+    if all_violations:
         print("Architecture boundary violations found:\n")
-        for v in violations:
+        for v in all_violations:
             print(f"  ✗ {v}")
-        print(f"\n{len(violations)} violation(s) found.")
+        print(f"\n{len(all_violations)} violation(s) found.")
         return 1
 
     print("✓ No architecture boundary violations found.")
