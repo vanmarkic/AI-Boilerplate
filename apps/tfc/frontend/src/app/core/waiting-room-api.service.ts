@@ -53,4 +53,11 @@ export class WaitingRoomApiService {
       `${this.base}/api/exercises/${exerciseId}/waiting-room/participants/${participantId}`,
     );
   }
+
+  close(exerciseId: number, participantId: string): Observable<void> {
+    return this.http.post<void>(
+      `${this.base}/api/exercises/${exerciseId}/waiting-room/close`,
+      { participant_id: participantId },
+    );
+  }
 }

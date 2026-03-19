@@ -19,6 +19,7 @@ from features.exercise.exercise_service import ExerciseService
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_schema import (
+    CloseRequest,
     JoinRequest,
     ParticipantResponse,
     UpdateRoleRequest,
@@ -175,3 +176,33 @@ async def leave_waiting_room(
         exercise_id,
         _participants_payload(exercise_id),
     )
+
+
+@router.post("/close", status_code=204)
+async def close_waiting_room(
+    exercise_id: int,
+    body: CloseRequest,
+    exercise_service: ExerciseService = Depends(get_exercise_service),
+) -> None:
+    """Close a joinable waiting room and delete the exercise.
+
+    Only a current participant may close the room. Broadcasts
+    ``waiting_room_closed`` so all connected clients can navigate away,
+    then cleans up the waiting room and deletes the exercise.
+    """
+    participant = waiting_room_store.get_participant(
+        exercise_id, body.participant_id,
+    )
+    if participant is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only a participant can close the waiting room",
+        )
+
+    await connection_manager.broadcast(
+        exercise_id,
+        {"type": "waiting_room_closed", "exercise_id": exercise_id},
+    )
+    await connection_manager.close_all(exercise_id)
+    waiting_room_store.clear(exercise_id)
+    await exercise_service.delete_exercise(exercise_id)

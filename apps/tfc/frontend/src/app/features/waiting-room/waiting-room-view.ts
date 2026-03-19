@@ -232,6 +232,9 @@ export class WaitingRoomView implements OnInit, OnDestroy {
       if (msg.type === "waiting_room_update") {
         if (msg.participants) this.participants.set(msg.participants);
       }
+      if (msg.type === "waiting_room_closed") {
+        this.router.navigate(["/home"]);
+      }
     });
     this.api.listParticipants(eId).subscribe({
       next: (res) => this.participants.set(res.participants),

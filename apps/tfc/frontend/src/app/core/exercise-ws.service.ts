@@ -47,6 +47,11 @@ export interface WsWaitingRoomUpdate {
   participants: ParticipantResponse[];
 }
 
+export interface WsWaitingRoomClosed {
+  type: "waiting_room_closed";
+  exercise_id: number;
+}
+
 export interface WsSimpleMessage {
   type: "exercise_stopped" | "pong";
 }
@@ -57,6 +62,7 @@ export type WsMessage =
   | WsPresenceMessage
   | WsExerciseStartedMessage
   | WsWaitingRoomUpdate
+  | WsWaitingRoomClosed
   | WsSimpleMessage;
 
 const RECONNECT_DELAYS = [1000, 2000, 4000, 8000, 16000];

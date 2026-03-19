@@ -12,6 +12,12 @@ class JoinRequest(BaseModel):
     role: str = Field(default="player", min_length=1, max_length=50)
 
 
+class CloseRequest(BaseModel):
+    """Request to close a waiting room. Caller must be a participant."""
+
+    participant_id: str = Field(..., min_length=1)
+
+
 class UpdateRoleRequest(BaseModel):
     """Request to change a participant's role."""
 

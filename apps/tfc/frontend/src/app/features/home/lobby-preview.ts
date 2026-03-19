@@ -150,9 +150,14 @@ export interface JoinableExercise {
           </div>
         } @else {
           <div class="flex gap-sm justify-between">
-            <button uiButton variant="outline" (click)="onLeave()">
-              Leave
-            </button>
+            <div class="flex gap-sm">
+              <button uiButton variant="outline" (click)="onLeave()">
+                Leave
+              </button>
+              <button uiButton variant="destructive" (click)="onClose()">
+                Close Room
+              </button>
+            </div>
             <button
               uiButton
               variant="default"
@@ -200,6 +205,10 @@ export class LobbyPreview implements OnInit, OnDestroy {
       }
       if (msg.type === "exercise_started") {
         this.navigateToExercise();
+      }
+      if (msg.type === "waiting_room_closed") {
+        this.myParticipantId.set("");
+        this.exerciseLeft.emit();
       }
     });
   }
@@ -249,6 +258,15 @@ export class LobbyPreview implements OnInit, OnDestroy {
         this.myParticipantId.set("");
         this.exerciseLeft.emit();
       },
+    });
+  }
+
+  protected onClose(): void {
+    const pId = this.myParticipantId();
+    if (!pId) return;
+    this.api.close(this.data().exercise.id, pId).subscribe({
+      next: () => this.exerciseLeft.emit(),
+      error: () => this.exerciseLeft.emit(),
     });
   }
 
