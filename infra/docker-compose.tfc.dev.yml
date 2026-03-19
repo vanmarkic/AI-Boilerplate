@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: tfc
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - tfc-dev-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d tfc"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  tfc-api:
+    build:
+      context: ..
+      dockerfile: apps/tfc/backend/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://dev:dev@db:5432/tfc
+      ENVIRONMENT: development
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ../apps/tfc/backend:/app
+    command: sh -c "alembic upgrade head && python seed.py && uvicorn main:app --host 0.0.0.0 --port 8001 --reload"
+
+  tfc-frontend:
+    image: node:22-slim
+    working_dir: /app
+    ports:
+      - "4201:4201"
+    volumes:
+      - ../:/app
+      - tfc-dev-node-modules:/app/node_modules
+    command: sh -c "npm install --workspace=apps/tfc/frontend && npx --workspace=apps/tfc/frontend ng serve --host 0.0.0.0 --port 4201"
+    depends_on:
+      - tfc-api
+
+volumes:
+  tfc-dev-pgdata:
+  tfc-dev-node-modules:

@@ -61,7 +61,7 @@ def test_perfect_score_no_penalty() -> None:
     sc = next(c for c in changes if c["type"] == "score_change")
     assert sc["total_score"] == 3.0
     assert sc["penalty_ms"] == 0.0
-    assert sc["turn_number"] == 1
+    assert sc["turn_number"] == 2
     assert mode.accumulated_penalty_ms == 0.0
 
 
@@ -80,7 +80,7 @@ def test_penalty_accumulates() -> None:
     # penalty1 = 200, penalty2 = (2.0 - 0.0) * 0.1 * 1000 = 200
     assert mode.accumulated_penalty_ms == 400.0
     assert mode.total_score == 1.0
-    assert mode.turn_number == 2
+    assert mode.turn_number == 3
 
 
 def test_penalty_floor() -> None:
@@ -160,7 +160,7 @@ def test_option_scoring_perfect_selection_no_penalty() -> None:
 def test_option_scoring_advances_turn_and_index() -> None:
     mode = _mode()
     mode.on_decision_closed_v2("d1", [_OPTS[0]], _OPTS)
-    assert mode.turn_number == 1
+    assert mode.turn_number == 2
     assert mode.current_index == 1
 
 
@@ -217,7 +217,7 @@ def test_snapshot_initial_state() -> None:
     assert snap is not None
     assert snap["total_score"] == 0.0
     assert snap["penalty_ms"] == 0.0
-    assert snap["turn_number"] == 0
+    assert snap["turn_number"] == 1
     assert snap["next_decision_time_ms"] == 300_000
 
 
@@ -228,4 +228,4 @@ def test_snapshot_after_decisions() -> None:
     snap = mode.snapshot()
     assert snap is not None
     assert snap["total_score"] == 10.0
-    assert snap["turn_number"] == 1
+    assert snap["turn_number"] == 2

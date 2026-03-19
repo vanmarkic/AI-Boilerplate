@@ -193,7 +193,6 @@ export class PlayerView implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
     this.connSub?.unsubscribe();
   }
-
   protected getIssueCountdown(issueId: string): string | null {
     const item = this.store.issuesWithCountdown().find((i) => i.id === issueId);
     if (!item || item.remaining_ms <= 0) return null;
@@ -203,7 +202,9 @@ export class PlayerView implements OnInit, OnDestroy {
   protected selectIssue(issueId: string): void {
     this.selectedIssueId.set(issueId);
   }
-
+  protected eventTypeInitial(type: string): string {
+    return type ? type[0].toUpperCase() : '?';
+  }
   protected onRecommendationSubmitted(
     decision: ActiveDecision,
     event: { selectedOptions: string[]; freeText: string },
@@ -216,7 +217,6 @@ export class PlayerView implements OnInit, OnDestroy {
       event,
     );
   }
-
   protected onRoleRecommendationSubmitted(
     decision: ActiveDecision,
     rec: RoleRecommendation,

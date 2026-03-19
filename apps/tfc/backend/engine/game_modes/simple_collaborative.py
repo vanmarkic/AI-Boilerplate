@@ -25,7 +25,7 @@ class SimpleCollaborativeMode:
     # Mutable runtime state
     accumulated_penalty_ms: float = 0.0
     total_score: float = 0.0
-    turn_number: int = 0
+    turn_number: int = 1
     current_index: int = 0
 
     def should_pause_on_decision(self) -> bool:
