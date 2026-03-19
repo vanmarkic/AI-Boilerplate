@@ -19,153 +19,17 @@ import { switchMap } from "rxjs";
 
 @Component({
   selector: "tfc-home-view",
+  host: { class: "home-host" },
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterLink, SeaBackdrop, ScenarioPicker, LobbyPreview],
-  styles: [
-    `
-      :host {
-        display: block;
-        position: relative;
-        min-height: 100dvh;
-        isolation: isolate;
-      }
-
-      .home-layout {
-        position: relative;
-        z-index: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100dvh;
-        padding: var(--spacing-xl);
-        gap: var(--spacing-xl);
-      }
-
-      .home-hero {
-        text-align: center;
-      }
-
-      .home-hero h1 {
-        font-size: var(--font-size-3xl, 2rem);
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        margin: 0 0 var(--spacing-xs);
-      }
-
-      .home-hero p {
-        color: var(--color-muted-foreground);
-        margin: 0;
-      }
-
-      .home-menu {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: var(--spacing-md);
-        width: 100%;
-        max-width: 560px;
-      }
-
-      .menu-card {
-        --glass-strength: 2.5;
-        --glow-strength: 1.5;
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-sm);
-        padding: var(--spacing-xl);
-        background: var(--glass-bg);
-        backdrop-filter: blur(var(--glass-blur));
-        -webkit-backdrop-filter: blur(var(--glass-blur));
-        border: 1px solid var(--glass-border);
-        border-radius: var(--radius-lg, 0.75rem);
-        box-shadow: var(--glass-shadow);
-        text-decoration: none;
-        color: inherit;
-        transition:
-          border-color 0.15s,
-          background 0.15s,
-          box-shadow 0.15s;
-        cursor: pointer;
-      }
-
-      .menu-card:hover {
-        border-color: var(--color-primary);
-        background: color-mix(
-          in oklch,
-          var(--glass-bg) 80%,
-          var(--color-primary) 20%
-        );
-        box-shadow: var(--glass-shadow), var(--glow-sm);
-      }
-
-      .menu-card[data-primary] {
-        border-color: var(--color-primary);
-        background: color-mix(
-          in oklch,
-          var(--glass-bg) 85%,
-          var(--color-primary) 15%
-        );
-        box-shadow: var(--glass-shadow), var(--glow-sm);
-      }
-
-      .menu-card[data-primary]:hover {
-        background: color-mix(
-          in oklch,
-          var(--glass-bg) 75%,
-          var(--color-primary) 25%
-        );
-        box-shadow: var(--glass-shadow), var(--glow-primary);
-      }
-
-      .card-icon {
-        font-size: 1.5rem;
-        line-height: 1;
-      }
-
-      .card-label {
-        font-size: var(--font-size-sm, 0.875rem);
-        font-weight: 600;
-      }
-
-      .card-desc {
-        font-size: var(--font-size-xs, 0.75rem);
-        color: var(--color-muted-foreground);
-        line-height: 1.4;
-      }
-
-      .picker-grid {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-md);
-        max-width: 560px;
-        width: 100%;
-      }
-
-      .back-link {
-        font-size: var(--font-size-sm, 0.875rem);
-        color: var(--color-muted-foreground);
-        cursor: pointer;
-      }
-
-      .mode-heading {
-        font-size: var(--font-size-md, 1rem);
-        font-weight: 600;
-        margin: 0;
-      }
-
-      .mode-options {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: var(--spacing-md);
-      }
-    `,
-  ],
   template: `
     <tfc-sea-backdrop />
     <div class="home-layout">
       <div class="home-hero">
-        <h1>Training Flow Control</h1>
-        <p>Collaborative exercise simulation platform</p>
+        <h1 class="home-hero__title">TFC</h1>
+        <p class="home-hero__subtitle">
+          SYS.INIT // Training Flow Control — Exercise Simulation Platform
+        </p>
       </div>
 
       @for (lobby of lobbyData(); track lobby.exercise.id) {
@@ -174,23 +38,29 @@ import { switchMap } from "rxjs";
 
       @if (pendingScenario()) {
         <div class="picker-grid">
-          <span class="back-link" (click)="pendingScenario.set(null)">&larr; Back</span>
-          <p class="mode-heading">How do you want to play?</p>
+          <span class="back-link" (click)="pendingScenario.set(null)">Back</span>
+          <p class="mode-heading">Select Operation Type</p>
           <div class="mode-options">
-            <div class="menu-card" (click)="createMultiplayer('full')">
-              <span class="card-icon">👥</span>
-              <span class="card-label">Full Team</span>
-              <span class="card-desc">All roles filled by different players</span>
+            <div class="tac-panel" (click)="createMultiplayer('full')">
+              <span class="tac-panel__indicator">FTM</span>
+              <span class="tac-panel__label">Full Team</span>
+              <span class="tac-panel__desc"
+                >All roles filled by different players</span
+              >
             </div>
-            <div class="menu-card" (click)="createMultiplayer('two_player')">
-              <span class="card-icon">👤👤</span>
-              <span class="card-label">2 Players</span>
-              <span class="card-desc">One decides, one advises all roles</span>
+            <div class="tac-panel" (click)="createMultiplayer('two_player')">
+              <span class="tac-panel__indicator">2PL</span>
+              <span class="tac-panel__label">2 Players</span>
+              <span class="tac-panel__desc"
+                >One decides, one advises all roles</span
+              >
             </div>
-            <div class="menu-card" data-primary (click)="createPractice()">
-              <span class="card-icon">🎯</span>
-              <span class="card-label">Practice (Solo)</span>
-              <span class="card-desc">Play all roles yourself — start immediately</span>
+            <div class="tac-panel" data-primary (click)="createPractice()">
+              <span class="tac-panel__indicator">SIM</span>
+              <span class="tac-panel__label">Practice (Solo)</span>
+              <span class="tac-panel__desc"
+                >Play all roles yourself — start immediately</span
+              >
             </div>
           </div>
         </div>
@@ -201,24 +71,26 @@ import { switchMap } from "rxjs";
         />
       } @else {
         <nav class="home-menu" aria-label="Main menu">
-          <a class="menu-card" data-primary (click)="showPicker.set(true)">
-            <span class="card-icon">🎯</span>
-            <span class="card-label">Run Exercise</span>
-            <span class="card-desc"
+          <a class="tac-panel" data-primary (click)="showPicker.set(true)">
+            <span class="tac-panel__indicator">OPS</span>
+            <span class="tac-panel__label">Run Exercise</span>
+            <span class="tac-panel__desc"
               >Pick a scenario and start a new exercise</span
             >
           </a>
 
-          <a class="menu-card" routerLink="/builder">
-            <span class="card-icon">🛠️</span>
-            <span class="card-label">Build Scenario</span>
-            <span class="card-desc">Create and edit exercise scenarios</span>
+          <a class="tac-panel" routerLink="/builder">
+            <span class="tac-panel__indicator">BLD</span>
+            <span class="tac-panel__label">Build Scenario</span>
+            <span class="tac-panel__desc"
+              >Create and edit exercise scenarios</span
+            >
           </a>
 
-          <a class="menu-card" routerLink="/review">
-            <span class="card-icon">📊</span>
-            <span class="card-label">Review Results</span>
-            <span class="card-desc"
+          <a class="tac-panel" routerLink="/review">
+            <span class="tac-panel__indicator">REV</span>
+            <span class="tac-panel__label">Review Results</span>
+            <span class="tac-panel__desc"
               >Analyse past exercise outcomes and decisions</span
             >
           </a>
