@@ -11,7 +11,6 @@ A real-time exercise simulation platform. A Game Master loads a scenario, starts
 | Database | PostgreSQL 17 — SQLAlchemy 2.0 (async), Alembic migrations (port 5433, separate from main) |
 | Auth | None (disabled — anonymous access) |
 | Real-time | WebSocket — engine state broadcast + client commands |
-| Shared types | `@aspect/tfc-shared` — TypeScript types and lifecycle constants |
 | Design System | `@aspect/design-system` + `@aspect/ui` (shared with main app) |
 
 ## Quick Start
@@ -83,11 +82,6 @@ apps/tfc/
 │           ├── review/               #   Post-exercise review
 │           ├── scenario-builder/     #   Scenario creation UI
 │           └── waiting-room/         #   Pre-exercise lobby (presence, ready-up)
-│
-packages/tfc-shared/                  # Shared TypeScript types + constants
-    └── src/
-        ├── types/                    #   Time, Event, Issue, Decision, Exercise, Scenario, Domain
-        └── constants/                #   Lifecycle transitions, domain presets
 ```
 
 ## How It Works

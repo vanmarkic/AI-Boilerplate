@@ -1,9 +1,9 @@
 import { Injectable, inject, signal } from "@angular/core";
 import { firstValueFrom } from "rxjs";
-import type { TerminologyMap } from "@aspect/tfc-shared";
 import {
   DomainConfigApiService,
   type DomainConfigResponse,
+  type TerminologyMap,
 } from "./domain-config-api.service";
 
 const FALLBACK_TERMINOLOGY: TerminologyMap = {
