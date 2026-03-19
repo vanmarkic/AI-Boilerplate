@@ -8,7 +8,7 @@ import {
 } from "@angular/core";
 import { BadgeComponent, ButtonDirective } from "@aspect/ui";
 import { DecisionPanelComponent } from "./decision-panel.component";
-import type { DecisionOption } from "./decision-panel.component";
+import type { DecisionOption } from "../core/decision-api.service";
 
 export interface AdvisorRoleTab {
   id: string;

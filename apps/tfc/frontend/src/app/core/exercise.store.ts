@@ -7,17 +7,20 @@ import {
   withState,
 } from "@ngrx/signals";
 import type {
-  EngineSnapshot,
   EventSnapshot,
   IssueSnapshot,
+  ScoreSnapshot,
+  SnapshotWithScore,
+  TimeSnapshot,
 } from "./engine-api.service";
 import type { ActiveDecision, ScenarioContext } from "./decision-api.service";
+import type { ScoreChange } from "./generated/state-changes.types";
 import { formatTimeMs } from "./format-time";
 
 export interface ParticipantPresence {
   id: string;
   display_name: string;
-  role: string;
+  role: string | null;
   connected: boolean;
 }
 
@@ -146,7 +149,7 @@ export const ExerciseStore = signalStore(
       patchState(store, { exerciseId: id });
     },
 
-    applySnapshot(snapshot: EngineSnapshot): void {
+    applySnapshot(snapshot: SnapshotWithScore): void {
       patchState(store, {
         exerciseId: snapshot.exercise_id,
         title: snapshot.title,
@@ -157,6 +160,7 @@ export const ExerciseStore = signalStore(
         paused: snapshot.time.paused,
         events: snapshot.events,
         issues: snapshot.issues,
+        decisions: snapshot.decisions ?? store.decisions(),
         score: snapshot.score
           ? {
               totalScore: snapshot.score.total_score,
@@ -170,12 +174,7 @@ export const ExerciseStore = signalStore(
       });
     },
 
-    applyTimeUpdate(time: {
-      play_time_ms: number;
-      real_time_ms: number;
-      factor: number;
-      paused: boolean;
-    }): void {
+    applyTimeUpdate(time: TimeSnapshot): void {
       patchState(store, {
         playTimeMs: time.play_time_ms,
         realTimeMs: time.real_time_ms,
@@ -253,12 +252,7 @@ export const ExerciseStore = signalStore(
       patchState(store, { playerType });
     },
 
-    applyScoreChange(change: {
-      total_score: number;
-      penalty_ms: number;
-      next_decision_time_ms: number;
-      turn_number: number;
-    }): void {
+    applyScoreChange(change: Pick<ScoreChange, "total_score" | "penalty_ms" | "next_decision_time_ms" | "turn_number">): void {
       patchState(store, {
         score: {
           totalScore: change.total_score,

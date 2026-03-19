@@ -2,6 +2,9 @@ import { inject, Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { environment } from "./environment";
+import type { RoleDef } from "./scenario-api.service";
+
+export type { RoleDef as RoleInfo } from "./scenario-api.service";
 
 export interface DecisionOption {
   id: string;
@@ -20,6 +23,7 @@ export interface ActiveDecision {
   completion_mode: string;
   target_roles: string[];
   timeout_ms: number;
+  max_selections: number | null;
   status: string;
   opened_at_pt_ms: number;
   closed_at_pt_ms: number | null;
@@ -57,19 +61,13 @@ export interface DecisionDetail {
   responses: DecisionResponseItem[];
 }
 
-export interface RoleInfo {
-  id: string;
-  label: string;
-  player_type: string;
-}
-
 export interface ScenarioContext {
   title: string;
   description: string;
   briefing: string;
   objectives: string[];
   rules: string[];
-  roles: RoleInfo[];
+  roles: RoleDef[];
 }
 
 @Injectable({ providedIn: "root" })

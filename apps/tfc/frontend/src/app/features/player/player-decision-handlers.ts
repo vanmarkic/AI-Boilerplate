@@ -5,6 +5,7 @@ import type {
   ActiveDecision,
   ScenarioContext,
 } from "../../core/decision-api.service";
+import type { RoleDef } from "../../core/scenario-api.service";
 import { ExerciseStore } from "../../core/exercise.store";
 import type { RoleRecommendation } from "../../shared/all-advisors-panel.component";
 
@@ -12,7 +13,7 @@ type SubmitEvent = { selectedOptions: string[]; freeText: string };
 
 export function buildAdvisorRecs(
   decision: ActiveDecision,
-  roles: { id: string; label: string }[],
+  roles: Pick<RoleDef, "id" | "label">[],
 ): AdvisorRecommendation[] {
   const recs = decision.recommendations || {};
   return Object.entries(recs).map(([key, oid]) => {
@@ -31,8 +32,8 @@ export function buildAdvisorRecs(
 }
 
 export function getScenarioAdvisorRoles(
-  roles: { id: string; label: string; player_type: string }[],
-): { id: string; label: string }[] {
+  roles: RoleDef[],
+): Pick<RoleDef, "id" | "label">[] {
   return roles.filter((r) => r.player_type === "advisor");
 }
 

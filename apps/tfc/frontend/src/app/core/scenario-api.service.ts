@@ -2,6 +2,7 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { environment } from "./environment";
+import type { DecisionOption } from "./decision-api.service";
 
 export interface ScenarioEventDef {
   id: string;
@@ -24,19 +25,13 @@ export interface ScenarioIssueDef {
   auto_resolve_ms: number;
 }
 
-export interface DecisionOptionDef {
-  id: string;
-  label: string;
-  score: number;
-}
-
 export interface DecisionTemplateDef {
   id: string;
   title: string;
   description: string;
   issue_id: string;
   question_type: string;
-  options: DecisionOptionDef[];
+  options: DecisionOption[];
   completion_mode: string;
   timeout_ms?: number;
   target_roles?: string[];
