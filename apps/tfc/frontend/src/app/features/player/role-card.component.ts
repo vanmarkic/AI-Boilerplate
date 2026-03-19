@@ -2,14 +2,16 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   input,
   output,
   signal,
+  untracked,
 } from "@angular/core";
 import { UpperCasePipe } from "@angular/common";
 import { BadgeComponent, ButtonDirective } from "@aspect/ui";
 import type { DecisionOption } from "../../core/decision-api.service";
-import type { RoleCard } from "./role-card.types";
+import { extractRecRoleId, type RoleCard } from "./role-card.types";
 
 export interface RoleCardSubmission {
   roleId: string;
@@ -106,6 +108,14 @@ export class RoleCardComponent {
   readonly selectedOptions = signal<string[]>([]);
   readonly freeText = signal("");
 
+  private readonly resetOnCardChange = effect(() => {
+    this.card();
+    untracked(() => {
+      this.selectedOptions.set([]);
+      this.freeText.set("");
+    });
+  });
+
   readonly filteredOptions = computed<DecisionOption[]>(() => {
     const decision = this.card().decision;
     if (!decision) return [];
@@ -135,13 +145,9 @@ export class RoleCardComponent {
     const decision = this.card().decision;
     if (!decision) return "";
     const roleId = this.card().roleId;
-    // Keys use "participantId:roleId" format — extract roleId portion after first colon
-    const recEntry = Object.entries(decision.recommendations).find(([key]) => {
-      const colonIdx = key.indexOf(":");
-      return colonIdx !== -1
-        ? key.slice(colonIdx + 1) === roleId
-        : key === roleId;
-    });
+    const recEntry = Object.entries(decision.recommendations).find(
+      ([key]) => extractRecRoleId(key) === roleId,
+    );
     const optionId = recEntry?.[1];
     if (!optionId) return "";
     return decision.options.find((o) => o.id === optionId)?.label ?? optionId;

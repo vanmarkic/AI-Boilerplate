@@ -3,6 +3,12 @@ import type { ActiveDecision } from "../../core/decision-api.service";
 import type { RoleDef } from "../../core/scenario-api.service";
 import type { EventSnapshot } from "../../core/generated/state-changes.types";
 
+/** Extract the roleId from a recommendation key ("participantId:roleId" or bare "roleId"). */
+export function extractRecRoleId(key: string): string {
+  const colonIdx = key.indexOf(":");
+  return colonIdx !== -1 ? key.slice(colonIdx + 1) : key;
+}
+
 export interface AdvisorRec {
   roleId: string;
   roleLabel: string;
@@ -47,17 +53,9 @@ export function buildRoleCards(
         const advisorTargets = targetRoles.filter((rid) => rid !== role.id);
         for (const advisorRoleId of advisorTargets) {
           const advisorRole = roles.find((r) => r.id === advisorRoleId);
-          // Recommendation keys use the format "participantId:roleId".
-          // We extract the roleId portion (after the colon) to match against advisor roles.
-          // Keys without a colon are treated as bare roleIds (legacy format).
           const recEntry = Object.entries(
             decision.recommendations || {},
-          ).find(([key]) => {
-            const colonIdx = key.indexOf(":");
-            return colonIdx !== -1
-              ? key.slice(colonIdx + 1) === advisorRoleId
-              : key === advisorRoleId;
-          });
+          ).find(([key]) => extractRecRoleId(key) === advisorRoleId);
           const optionId = recEntry?.[1] ?? null;
           const optionLabel = optionId
             ? (decision.options.find((o) => o.id === optionId)?.label ?? optionId)

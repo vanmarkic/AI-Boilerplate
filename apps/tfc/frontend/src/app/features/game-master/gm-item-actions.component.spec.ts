@@ -27,6 +27,8 @@ describe("GmItemActionsComponent", () => {
       lifecycle: "scheduled",
       started_at_pt_ms: null,
       completed_at_pt_ms: null,
+      target_roles: [],
+      role_descriptions: {},
     },
     {
       id: "e2",
@@ -40,6 +42,8 @@ describe("GmItemActionsComponent", () => {
       lifecycle: "running",
       started_at_pt_ms: 5000,
       completed_at_pt_ms: null,
+      target_roles: [],
+      role_descriptions: {},
     },
   ];
 

@@ -23,6 +23,8 @@ function makeEvent(overrides: Partial<EventSnapshot> = {}): EventSnapshot {
     lifecycle: "scheduled",
     started_at_pt_ms: null,
     completed_at_pt_ms: null,
+    target_roles: [],
+    role_descriptions: {},
     ...overrides,
   };
 }
