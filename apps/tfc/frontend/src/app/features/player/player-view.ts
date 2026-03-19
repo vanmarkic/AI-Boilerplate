@@ -43,6 +43,9 @@ import type {
 } from "../../core/decision-api.service";
 import { Subscription } from "rxjs";
 import { handlePlayerWsMessage } from "./player-ws-handler";
+import { RoleCardComponent } from "./role-card.component";
+import type { RoleCardSubmission } from "./role-card.component";
+import { buildRoleCards } from "./role-card.types";
 
 @Component({
   selector: "tfc-player-view",
@@ -62,6 +65,7 @@ import { handlePlayerWsMessage } from "./player-ws-handler";
     AllAdvisorsPanelComponent,
     ScoreBarComponent,
     ButtonDirective,
+    RoleCardComponent,
   ],
   templateUrl: "./player-view.html",
 })
@@ -106,6 +110,35 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly isMultiRole = computed(() => {
     const role = this.store.playerRole();
     return role === "all_advisors" || role === "solo_player" || role === "all_roles";
+  });
+
+  protected readonly submittedRoles = signal<Set<string>>(new Set());
+
+  protected readonly currentTurnEvent = computed(() => {
+    const decisions = this.activeDecisions();
+    if (decisions.length === 0) return null;
+    const decision = decisions[0];
+    if (!decision.event_id) return null;
+    return this.store.events().find((e) => e.id === decision.event_id) ?? null;
+  });
+
+  protected readonly roleCards = computed(() => {
+    const roles = this.store.context()?.roles ?? [];
+    const event = this.currentTurnEvent();
+    const decision = this.activeDecisions()[0] ?? null;
+    const role = this.store.playerRole();
+    const showDecisionMaker =
+      role === "all_roles" || role === "solo_player" || this.store.isPracticeMode();
+    return buildRoleCards(roles, event, decision, this.submittedRoles(), showDecisionMaker);
+  });
+
+  private readonly resetSubmittedRolesEffect = effect(() => {
+    const decision = this.activeDecisions()[0];
+    const _id = decision?.id ?? null;
+    // Reset submitted state whenever the active decision changes
+    if (_id) {
+      this.submittedRoles.set(new Set());
+    }
   });
 
   protected readonly visibleEvents = computed(() => {
@@ -274,5 +307,34 @@ export class PlayerView implements OnInit, OnDestroy {
       this.participantId(),
       event,
     );
+  }
+
+  protected onRoleCardSubmitted(submission: RoleCardSubmission): void {
+    const decision = this.activeDecisions()[0];
+    if (!decision) return;
+    const role = this.store.context()?.roles?.find(
+      (r) => r.id === submission.roleId,
+    );
+    if (role?.player_type === "decision_maker") {
+      submitDecision(
+        this.decisionApi,
+        this.store,
+        this.exerciseId(),
+        decision,
+        this.participantId(),
+        submission,
+      );
+    } else {
+      submitRoleRecommendation(
+        this.decisionApi,
+        this.exerciseId(),
+        decision,
+        this.participantId(),
+        { roleId: submission.roleId, selectedOptions: submission.selectedOptions, freeText: submission.freeText },
+      );
+    }
+    const updated = new Set(this.submittedRoles());
+    updated.add(submission.roleId);
+    this.submittedRoles.set(updated);
   }
 }
