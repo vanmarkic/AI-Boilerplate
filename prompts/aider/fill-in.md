@@ -37,7 +37,7 @@ For each file, follow TDD:
 
 ## Rules
 
-- No file > 250 lines. Split if exceeded.
+- No file > 350 lines (500 for test files). Split if exceeded.
 - No `any` in TypeScript. No untyped functions in Python.
 - Auth stays a stub — use `Depends(get_current_user)` on protected endpoints.
 - Use the generated API client (`shared/api/generated/`) in frontend, not raw HttpClient.
