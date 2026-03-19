@@ -75,6 +75,7 @@ lint-architecture:
   stage: lint
   image: python:3.12-slim
   extends: .python-cache
+  needs: []
   script:
     - pip install pyyaml
     - python shared/scripts/lint-architecture.py
@@ -83,6 +84,7 @@ lint-backend:
   stage: lint
   image: python:3.12-slim
   extends: .python-cache
+  needs: []
   script:
     - cd apps/main/backend
     - pip install ruff
@@ -113,6 +115,7 @@ test-backend:
   stage: test
   image: python:3.12-slim
   extends: .python-cache
+  needs: []
   services:
     - name: postgres:17
       alias: postgres
@@ -186,6 +189,7 @@ build-frontend:
 
 build-backend-image:
   extends: .docker-build
+  needs: []
   script:
     - docker build -t "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA" -f apps/main/backend/Dockerfile .
     - |
@@ -195,6 +199,7 @@ build-backend-image:
 
 build-frontend-image:
   extends: .docker-build
+  needs: []
   script:
     - docker build -t "$CI_REGISTRY_IMAGE/frontend:$CI_COMMIT_SHA" -f apps/main/frontend/Dockerfile .
     - |
@@ -268,6 +273,7 @@ security-npm-audit:
   stage: security
   image: node:22-slim
   extends: .node-cache
+  needs: []
   script:
     - cd frontend
     - npm i
@@ -278,6 +284,7 @@ security-pip-audit:
   stage: security
   image: python:3.12-slim
   extends: .python-cache
+  needs: []
   script:
     - pip install pip-audit
     - cd apps/main/backend
@@ -290,12 +297,14 @@ security-trivy-fs:
   image:
     name: aquasec/trivy:latest
     entrypoint: [""]
+  needs: []
   script:
     - trivy fs --severity HIGH,CRITICAL --exit-code 1 .
   allow_failure: true
 
 sonarqube:
   stage: security
+  needs: []
   tags: ["docker", "linux"]
   image:
     name: sonarsource/sonar-scanner-cli:latest
