@@ -26,6 +26,31 @@
         "id": "ops",
         "label": "Operations Officer",
         "player_type": "advisor"
+      },
+      {
+        "id": "nav",
+        "label": "Navigator",
+        "player_type": "advisor"
+      },
+      {
+        "id": "eo",
+        "label": "Engineering Officer",
+        "player_type": "advisor"
+      },
+      {
+        "id": "cyop",
+        "label": "Cyber Operations Officer",
+        "player_type": "advisor"
+      },
+      {
+        "id": "aawo",
+        "label": "Anti-Air Warfare Officer",
+        "player_type": "advisor"
+      },
+      {
+        "id": "pwo",
+        "label": "Principal Warfare Officer",
+        "player_type": "advisor"
       }
     ],
     "phases": [
@@ -351,6 +376,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": [],
         "options": [
           {
             "id": "SWB01",
@@ -372,6 +398,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "nav", "pwo"],
         "options": [
           {
             "id": "SWB01",
@@ -393,6 +420,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "eo", "nav"],
         "options": [
           {
             "id": "SWB05",
@@ -419,6 +447,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "nav", "eo"],
         "options": [
           {
             "id": "SWB09",
@@ -450,6 +479,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "cyop", "eo"],
         "options": [
           {
             "id": "SWB07",
@@ -471,6 +501,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "cyop", "nav", "pwo"],
         "forced_option_ids": ["SWB20"],
         "options": [
           {
@@ -498,6 +529,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "aawo"],
         "options": [
           {
             "id": "SWB01",
@@ -524,6 +556,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "aawo", "eo"],
         "options": [
           {
             "id": "SWB01",
@@ -550,6 +583,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "nav", "eo", "pwo"],
         "options": [
           {
             "id": "SWB29",
@@ -576,6 +610,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "eo", "pwo", "nav"],
         "options": [
           {
             "id": "SWB18",
@@ -607,6 +642,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "cyop", "pwo"],
         "options": [
           {
             "id": "SWB10",
@@ -638,6 +674,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "cyop", "aawo", "pwo", "eo"],
         "options": [
           {
             "id": "SWB08",
@@ -664,6 +701,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "cyop", "aawo"],
         "options": [
           {
             "id": "SWB10",
@@ -690,6 +728,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": ["co", "nav", "pwo"],
         "options": [
           {
             "id": "SWB16",
@@ -716,6 +755,7 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
+        "target_roles": [],
         "options": [
           {
             "id": "SWB03",
