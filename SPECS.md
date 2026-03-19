@@ -55,6 +55,9 @@ DomainConfig ──referenced-by──▶ Scenario
   - A scenario must have a title and at least one event.
   - Scenario content includes: briefing, objectives, rules, events, issues, decision templates.
   - Scenario must define at least one role with `player_type='decision_maker'`.
+  - Simple collaborative scenarios must define at least 2 roles (poka-yoke).
+  - Decision template `target_roles` must reference valid role IDs defined in the scenario.
+  - Decision templates support an optional `max_selections` field to cap multi-choice selections (`null` = unlimited).
   - Scenarios are loaded by `scenario_loader.py` and converted to `EngineConfig`.
   - Seed script (`seed.py`) upserts scenarios by title — existing scenarios are updated with current seed content on restart.
 - **API:**
@@ -68,12 +71,14 @@ DomainConfig ──referenced-by──▶ Scenario
 
 - **Purpose:** Exercise lifecycle management + engine HTTP/WS API.
 - **Rules:**
-  - Exercise phases: `setup → running → paused → completed`.
+  - Exercise phases: `setup → briefing → running → paused → completed`.
+  - **Briefing phase:** `start()` transitions from SETUP to BRIEFING (not directly to RUNNING). The player reads the scenario context (briefing text, objectives, rules, roles). Time does **not** advance. `begin()` transitions BRIEFING → RUNNING. `reset()` can return BRIEFING → SETUP.
   - An exercise is created from a scenario and a game mode (`classic` or `simple_collaborative`).
+  - **Practice mode:** A solo-play variant for facilitator training and scenario testing. Available only with `simple_collaborative` game mode. Enforces max 1 player in the waiting room. Decision base time is multiplied by 1.5× to compensate for solo cognitive load. Practice exercises are excluded from the joinable list.
   - Session codes are unique 6-character alphanumeric strings, generated on creation.
   - Engine tick loop runs at 250ms interval.
   - Speed factor adjusts play time vs real time (e.g., 2× = 2 play-minutes per 1 real minute).
-  - DECISION events auto-pause the engine until resolved.
+  - In classic mode, DECISION events auto-pause the engine until resolved. In collaborative mode, the engine continues running.
   - WebSocket broadcasts state changes to all connected participants.
 - **API:**
   - `POST /api/exercises` — Create exercise
@@ -83,7 +88,7 @@ DomainConfig ──referenced-by──▶ Scenario
   - `GET /api/exercises/{id}` — Get exercise details
   - `PUT /api/exercises/{id}` — Update exercise
   - `DELETE /api/exercises/{id}` — Delete exercise
-  - Engine sub-routes: `POST .../engine/start`, `POST .../engine/pause`, `POST .../engine/resume`, `POST .../engine/reset`, `POST .../engine/complete`, `PUT .../engine/speed`, `GET .../engine/snapshot`, `GET .../engine/context`
+  - Engine sub-routes: `POST .../engine/start`, `POST .../engine/begin`, `POST .../engine/pause`, `POST .../engine/resume`, `POST .../engine/reset`, `POST .../engine/complete`, `PUT .../engine/speed`, `GET .../engine/snapshot`, `GET .../engine/context`
   - Event actions: `POST .../engine/events/{id}/trigger|cancel|complete|pause|resume|delay|skip`
   - Issue actions: `POST .../engine/issues/{id}/activate|mitigate|resolve|release`
   - Decision actions: `GET .../engine/decisions`, `POST .../engine/decisions/{id}/close`, `POST .../engine/decisions/recommend`
@@ -98,6 +103,7 @@ DomainConfig ──referenced-by──▶ Scenario
   - Effective decision time: `max(min_decision_time_ms, base_decision_time_ms - accumulated_penalty_ms)`.
   - Timeout auto-submits the worst option.
   - `forced_option_ids` on a decision template causes auto-inclusion with penalty when omitted.
+  - `max_selections` on a decision template caps how many options can be selected in a `multi_choice` decision (`null` = unlimited).
 - **API:**
   - `POST /api/decisions` — Create decision
   - `GET /api/decisions` — List decisions
@@ -111,6 +117,7 @@ DomainConfig ──referenced-by──▶ Scenario
 - **Rules:**
   - Players join via session code.
   - Role assignment is first-come-first-served from scenario-defined roles.
+  - In practice mode, max players is capped at 1 (overrides scenario role count).
   - WebSocket broadcasts presence changes (join, leave, ready-up).
 - **API:**
   - `POST /api/exercises/{id}/waiting-room/join` — Join waiting room
@@ -152,8 +159,8 @@ DomainConfig ──referenced-by──▶ Scenario
 
 ### Game Modes
 
-- **Classic:** GM-driven, no scoring. GM manually triggers events and closes decisions.
-- **Simple Collaborative:** Turn-based with advisor/decision-maker roles. Sequential decisions with time-penalty scoring. Advisors recommend, decision-maker rules. Penalty accumulates across turns and reduces available decision time.
+- **Classic:** GM-driven, no scoring. GM manually triggers events and closes decisions. Engine pauses on decisions. Requires a Game Master.
+- **Simple Collaborative:** Turn-based with advisor/decision-maker roles. Sequential decisions with time-penalty scoring. Advisors recommend, decision-maker rules. Penalty accumulates across turns and reduces available decision time. Engine continues running during decisions. Does not require a GM. Supports practice mode (solo play with 1.5× decision timer).
 
 ## TFC Terminology Mapping (Domain ↔ Code)
 
@@ -187,4 +194,6 @@ The TFC codebase uses generic code names for domain concepts. The table below ma
 | Advisor | In collaborative mode, a player who submits non-binding recommendations. |
 | Decision-Maker | In collaborative mode, the player who submits the binding ruling. |
 | Domain Config | A terminology/theme/role configuration that customizes the UI for a specific domain (e.g., military, cybersecurity). |
+| Briefing Phase | A gated pre-game phase where players read scenario context before gameplay begins. Time does not advance. |
+| Practice Mode | A solo-play variant of simple collaborative mode for facilitator training. 1 player, 1.5× decision timer. |
 | Session Code | A unique 6-character alphanumeric code used to join an exercise. |
