@@ -25,6 +25,7 @@ import { DomainService } from "../../core/domain.service";
 import { ExerciseApiService } from "../../core/exercise-api.service";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
 import { ExerciseStore } from "../../core/exercise.store";
+import { TickService } from "../../core/tick.service";
 import { ScenarioPickerComponent } from "./scenario-picker";
 import type { ScenarioSelection } from "./scenario-picker";
 import { handleGmWsMessage } from "./gm-ws-handler";
@@ -44,7 +45,7 @@ import { Subscription } from "rxjs";
 @Component({
   selector: "tfc-game-master-view",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [ExerciseStore],
+  providers: [ExerciseStore, TickService],
   imports: [
     BadgeComponent,
     ButtonDirective,
@@ -223,6 +224,7 @@ export class GameMasterView implements OnInit, OnDestroy {
   protected readonly exerciseId = signal<number | null>(null);
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
+  private readonly tick = inject(TickService);
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
@@ -268,7 +270,7 @@ export class GameMasterView implements OnInit, OnDestroy {
       .subscribe({
         next: (ex) => {
           this.router.navigate(["/waiting-room"], {
-            queryParams: { exerciseId: ex.id, gameMode },
+            queryParams: { exerciseId: ex.id },
           });
         },
         error: () => this.store.setError("Failed to create exercise"),
@@ -287,9 +289,11 @@ export class GameMasterView implements OnInit, OnDestroy {
     this.connSub = this.ws.connected$.subscribe((c) => {
       if (c) this.loadSnapshot(id);
     });
+    this.tick.start(this.store);
   }
 
   ngOnDestroy(): void {
+    this.tick.stop();
     this.ws.disconnect();
     this.sub?.unsubscribe();
     this.connSub?.unsubscribe();

@@ -169,7 +169,7 @@ import { switchMap } from "rxjs";
       </div>
 
       @for (lobby of lobbyData(); track lobby.exercise.id) {
-        <tfc-lobby-preview [data]="lobby" (exerciseLeft)="onLobbyLeft()" />
+        <tfc-lobby-preview [data]="lobby" />
       }
 
       @if (pendingScenario()) {
@@ -299,10 +299,6 @@ export class HomeView implements OnInit {
       .subscribe();
   }
 
-  protected onLobbyLeft(): void {
-    this.checkForJoinableExercises();
-  }
-
   private createAndShowLobby(
     scenario: ScenarioResponse,
     practiceMode: boolean,
@@ -318,7 +314,7 @@ export class HomeView implements OnInit {
       .subscribe({
         next: (exercise) => {
           this.router.navigate(["/waiting-room"], {
-            queryParams: { exerciseId: exercise.id, gameMode },
+            queryParams: { exerciseId: exercise.id },
           });
         },
       });

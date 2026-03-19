@@ -177,7 +177,7 @@ test.describe("Gap 3 — Participant identity @player @waiting-room", () => {
 
     // Navigate from waiting room to player view
     await page.goto(
-      `/waiting-room?exerciseId=${exerciseId}&participantId=${alice.id}&gameMode=simple_collaborative`,
+      `/waiting-room?exerciseId=${exerciseId}&participantId=${alice.id}`,
     );
     await page.getByRole("button", { name: /Start Exercise/ }).click();
 

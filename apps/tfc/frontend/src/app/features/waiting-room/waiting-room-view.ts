@@ -29,8 +29,8 @@ import { RoleSlotListComponent } from "../../shared/role-slot-list.component";
 import { Subscription } from "rxjs";
 
 const TWO_PLAYER_ROLES = [
-  { id: "decision_maker", label: "Decision Maker" },
-  { id: "all_advisors", label: "All Advisors" },
+  { id: "decision_maker", label: "Commanding Officer" },
+  { id: "all_advisors", label: "Crew Members" },
 ];
 
 type PlayerCountMode = "full" | "two_player" | "practice";
@@ -84,7 +84,7 @@ type PlayerCountMode = "full" | "two_player" | "practice";
               @if (practiceMode()) {
                 Practice mode: you'll handle all roles solo.
               } @else if (twoPlayerMode()) {
-                2 Player Mode: assign Decision Maker and All Advisors roles.
+                2 Player Mode: assign Commanding Officer and Crew Members roles.
               } @else {
                 Pick a role and start when all slots are filled.
               }
@@ -141,34 +141,48 @@ type PlayerCountMode = "full" | "two_player" | "practice";
               }
             </div>
           } @else if (twoPlayerMode()) {
-            <div class="flex flex-col gap-sm">
-              @for (p of participants(); track p.id) {
-                <div
-                  class="flex items-center justify-between p-sm border-b gap-md"
-                >
-                  <div class="flex items-center gap-sm">
-                    <span class="text-sm font-medium">{{
-                      p.display_name
-                    }}</span>
-                    @if (p.id === participantId()) {
-                      <ui-badge variant="secondary">You</ui-badge>
-                    }
+            <div class="flex flex-col gap-md">
+              <div class="flex flex-col gap-sm">
+                <span class="text-sm font-medium">Scenario Roles</span>
+                @for (role of scenarioRoles(); track role.id) {
+                  <div class="flex items-center gap-sm p-xs">
+                    <span class="text-sm">{{ role.label }}</span>
+                    <span class="text-xs text-muted-foreground">
+                      {{ role.player_type === 'decision_maker' ? 'Decision Maker' : 'Advisor' }}
+                    </span>
                   </div>
-                  <select
-                    class="input-base"
-                    [value]="p.role"
-                    (change)="onRoleChange(p.id, $event)"
+                }
+              </div>
+              <div class="flex flex-col gap-sm">
+                <span class="text-sm font-medium">Players</span>
+                @for (p of participants(); track p.id) {
+                  <div
+                    class="flex items-center justify-between p-sm border-b gap-md"
                   >
-                    @for (role of twoPlayerRoles; track role.id) {
-                      <option [value]="role.id">{{ role.label }}</option>
-                    }
-                  </select>
-                </div>
-              } @empty {
-                <p class="text-muted-foreground text-sm p-sm">
-                  No participants yet.
-                </p>
-              }
+                    <div class="flex items-center gap-sm">
+                      <span class="text-sm font-medium">{{
+                        p.display_name
+                      }}</span>
+                      @if (p.id === participantId()) {
+                        <ui-badge variant="secondary">You</ui-badge>
+                      }
+                    </div>
+                    <select
+                      class="input-base"
+                      [value]="p.role"
+                      (change)="onRoleChange(p.id, $event)"
+                    >
+                      @for (role of twoPlayerRoles; track role.id) {
+                        <option [value]="role.id">{{ role.label }}</option>
+                      }
+                    </select>
+                  </div>
+                } @empty {
+                  <p class="text-muted-foreground text-sm p-sm">
+                    No participants yet.
+                  </p>
+                }
+              </div>
             </div>
           } @else if (scenarioRoles().length) {
             <tfc-role-slot-list
@@ -186,19 +200,21 @@ type PlayerCountMode = "full" | "two_player" | "practice";
             </p>
           }
 
-          <div class="flex gap-sm justify-end">
-            <button uiButton variant="outline" (click)="onLeave()">
-              Leave
-            </button>
-            <button
-              uiButton
-              variant="default"
-              [disabled]="!canStart()"
-              (click)="onStartExercise()"
-            >
-              Start Exercise ({{ participants().length }})
-            </button>
-          </div>
+          @if (participantId()) {
+            <div class="flex gap-sm justify-end">
+              <button uiButton variant="outline" (click)="onLeave()">
+                Leave
+              </button>
+              <button
+                uiButton
+                variant="default"
+                [disabled]="!canStart()"
+                (click)="onStartExercise()"
+              >
+                Start Exercise ({{ participants().length }})
+              </button>
+            </div>
+          }
         </div>
       </ui-card>
     </div>
@@ -258,10 +274,8 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     const params = this.route.snapshot.queryParams;
     const eId = Number(params["exerciseId"] ?? 0);
     const pId = String(params["participantId"] ?? "");
-    const gm = String(params["gameMode"] ?? "classic");
     this.exerciseId.set(eId);
     this.participantId.set(pId);
-    this.gameMode.set(gm);
     this.ws.connect(eId, "player");
     this.sub = this.ws.messages$.subscribe((msg) => {
       if (msg.type === "waiting_room_update") {

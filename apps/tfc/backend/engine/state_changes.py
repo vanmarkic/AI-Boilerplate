@@ -31,6 +31,7 @@ class EventSnapshot(TypedDict):
     lifecycle: str
     started_at_pt_ms: float | None
     completed_at_pt_ms: float | None
+    target_role: str | None
 
 
 class IssueSnapshot(TypedDict):
@@ -49,6 +50,7 @@ class DecisionOptionSnapshot(TypedDict):
     id: str
     label: str
     score: float
+    role: str | None
 
 
 class DecisionSnapshot(TypedDict):

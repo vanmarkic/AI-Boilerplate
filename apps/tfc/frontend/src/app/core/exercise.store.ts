@@ -183,6 +183,16 @@ export const ExerciseStore = signalStore(
       });
     },
 
+    /** Advance clocks locally by wall-clock delta (call from a setInterval). */
+    tick(wallDeltaMs: number): void {
+      if (store.paused()) return;
+      const factor = store.speedFactor();
+      patchState(store, {
+        realTimeMs: store.realTimeMs() + wallDeltaMs,
+        playTimeMs: store.playTimeMs() + wallDeltaMs * factor,
+      });
+    },
+
     applyPhaseChange(phase: string): void {
       patchState(store, { phase });
     },

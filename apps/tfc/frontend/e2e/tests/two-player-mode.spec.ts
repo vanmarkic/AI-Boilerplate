@@ -189,7 +189,7 @@ async function installPlayerMocks(
 }
 
 function collabWaitingRoomUrl(participantId: string): string {
-  return `/waiting-room?exerciseId=${EX_ID}&participantId=${participantId}&gameMode=simple_collaborative`;
+  return `/waiting-room?exerciseId=${EX_ID}&participantId=${participantId}`;
 }
 
 // ── 1. WAITING ROOM — 2 PLAYER MODE TOGGLE ──────────────────────────
