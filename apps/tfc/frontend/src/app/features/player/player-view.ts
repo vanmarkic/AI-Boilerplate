@@ -79,6 +79,7 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly beginningExercise = signal(false);
   private readonly exerciseId = signal(1);
   private readonly participantId = signal("");
+  private snapshotLoaded = false;
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
 
@@ -137,21 +138,27 @@ export class PlayerView implements OnInit, OnDestroy {
     this.decisionApi.getContext(id).subscribe({
       next: (ctx) =>
         resolvePlayerRole(ctx, role, gameMode, this.store, this.roleLabel),
+      error: () => {},
     });
     this.decisionApi.getEngineDecisions(id).subscribe({
       next: (decisions) => this.store.applyDecisions(decisions),
+      error: () => {},
     });
     this.decisionApi.listDecisions(id, "closed").subscribe({
       next: (decisions) => this.decisionHistory.set(decisions),
+      error: () => {},
     });
     this.connSub = this.ws.connected$.subscribe((connected) => {
-      if (connected) this.loadSnapshot(id);
+      if (connected && this.snapshotLoaded) this.loadSnapshot(id);
     });
   }
 
   private loadSnapshot(exerciseId: number): void {
     this.api.snapshot(exerciseId).subscribe({
-      next: (snap) => this.store.applySnapshot(snap),
+      next: (snap) => {
+        this.snapshotLoaded = true;
+        this.store.applySnapshot(snap);
+      },
       error: () => this.store.setError("Failed to load snapshot"),
     });
   }

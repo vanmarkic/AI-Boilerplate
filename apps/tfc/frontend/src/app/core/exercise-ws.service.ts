@@ -76,7 +76,6 @@ export class ExerciseWsService implements OnDestroy {
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
-      this.reconnectAttempt = 0;
       this._connected$.next(true);
       this.startPing();
     };
@@ -84,6 +83,7 @@ export class ExerciseWsService implements OnDestroy {
     this.ws.onmessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data as string) as WsMessage;
+        this.reconnectAttempt = 0;
         this._messages$.next(data);
       } catch {
         // ignore malformed messages
