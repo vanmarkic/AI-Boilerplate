@@ -132,7 +132,10 @@ export class DecisionPanelComponent implements AfterViewInit {
   }
 
   protected onTextInput(event: Event): void {
-    this.freeText.set((event.target as HTMLTextAreaElement).value);
+    const target = event.target;
+    if (target instanceof HTMLTextAreaElement) {
+      this.freeText.set(target.value);
+    }
   }
 
   protected onSubmit(): void {

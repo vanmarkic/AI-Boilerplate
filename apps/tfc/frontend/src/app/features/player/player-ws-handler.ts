@@ -75,7 +75,7 @@ export function handlePlayerWsMessage(
       onStopped?.();
       break;
     case "snapshot":
-      store.applySnapshot(msg as never);
+      store.applySnapshot(msg);
       break;
     case "state_changes":
       for (const change of msg.changes) {

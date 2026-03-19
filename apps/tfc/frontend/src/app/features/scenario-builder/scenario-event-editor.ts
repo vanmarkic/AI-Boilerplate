@@ -166,7 +166,9 @@ export class ScenarioEventEditorComponent {
   protected readonly editDur = signal<number | null>(null);
 
   protected sel(event: Event): string {
-    return (event.target as HTMLSelectElement).value;
+    const target = event.target;
+    if (target instanceof HTMLSelectElement) return target.value;
+    return "";
   }
 
   protected add(): void {

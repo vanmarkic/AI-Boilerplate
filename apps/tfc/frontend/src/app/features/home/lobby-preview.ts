@@ -196,8 +196,7 @@ export class LobbyPreview implements OnInit, OnDestroy {
     this.ws.connect(eId, "player");
     this.sub = this.ws.messages$.subscribe((msg) => {
       if (msg.type === "waiting_room_update") {
-        const updated = msg.participants as ParticipantResponse[];
-        if (updated) this.participants.set(updated);
+        if (msg.participants) this.participants.set(msg.participants);
       }
       if (msg.type === "exercise_started") {
         this.navigateToExercise();

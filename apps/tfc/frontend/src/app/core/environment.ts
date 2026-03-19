@@ -5,9 +5,17 @@
  * apiBaseUrl and wsBaseUrl from Railway environment variables.
  * Falls back to local dev defaults.
  */
-const runtimeEnv = (globalThis as Record<string, unknown>)["__env"] as
-  | { apiBaseUrl?: string; wsBaseUrl?: string }
-  | undefined;
+interface RuntimeEnv {
+  apiBaseUrl?: string;
+  wsBaseUrl?: string;
+}
+
+declare global {
+  // Set by entrypoint.sh in production containers
+  var __env: RuntimeEnv | undefined;
+}
+
+const runtimeEnv: RuntimeEnv | undefined = globalThis.__env;
 
 export const environment = {
   production: !!runtimeEnv,
