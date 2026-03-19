@@ -51,3 +51,13 @@ export function completeExercise(
     next: (r) => applyPhaseResponse(store, r),
   });
 }
+
+export function stopExercise(
+  api: EngineApiService,
+  exerciseId: number,
+  onStopped: () => void,
+): void {
+  api.stop(exerciseId).subscribe({
+    next: () => onStopped(),
+  });
+}

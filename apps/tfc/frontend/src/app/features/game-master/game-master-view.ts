@@ -32,6 +32,7 @@ import {
   pauseExercise,
   resetExercise,
   completeExercise,
+  stopExercise,
 } from "./gm-engine-actions";
 import { EventTimelineComponent } from "./event-timeline.component";
 import { GmItemActionsComponent } from "./gm-item-actions.component";
@@ -177,6 +178,9 @@ import { Subscription } from "rxjs";
               <button uiButton variant="outline" (click)="onComplete()">
                 Complete
               </button>
+              <button uiButton variant="destructive" (click)="onStop()">
+                Stop
+              </button>
             }
             <button uiButton variant="destructive" (click)="onReset()">
               Reset
@@ -248,7 +252,7 @@ export class GameMasterView implements OnDestroy {
   private connectExercise(id: number): void {
     this.ws.connect(id, "gm");
     this.sub = this.ws.messages$.subscribe((msg) =>
-      handleGmWsMessage(msg, this.store),
+      handleGmWsMessage(msg, this.store, () => this.onExerciseStopped()),
     );
     this.loadSnapshot(id);
     this.decisionApi
@@ -295,6 +299,13 @@ export class GameMasterView implements OnDestroy {
   }
   protected onComplete(): void {
     completeExercise(this.api, this.store, this.exerciseId()!);
+  }
+  protected onStop(): void {
+    stopExercise(this.api, this.exerciseId()!, () => this.onExerciseStopped());
+  }
+  private onExerciseStopped(): void {
+    this.ws.disconnect();
+    this.router.navigate(["/"]);
   }
   protected onSpeedChange(e: Event): void {
     this.api
