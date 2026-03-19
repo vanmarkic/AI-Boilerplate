@@ -252,6 +252,10 @@ export const ExerciseStore = signalStore(
       patchState(store, { playerType });
     },
 
+    setSpeedFactor(factor: number): void {
+      patchState(store, { speedFactor: factor });
+    },
+
     applyScoreChange(change: Pick<ScoreChange, "total_score" | "penalty_ms" | "next_decision_time_ms" | "turn_number">): void {
       patchState(store, {
         score: {
