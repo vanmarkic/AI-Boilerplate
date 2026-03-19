@@ -143,11 +143,11 @@ async def test_scenario_to_engine_lifecycle(client: AsyncClient) -> None:
     )
     assert complete_resp.json()["phase"] == "completed"
 
-    # 7. Verify snapshot reflects completed state
+    # 7. Engine session is cleaned up after complete — snapshot returns 404
     final_snap = await client.get(
         f"/api/exercises/{exercise_id}/engine/snapshot",
     )
-    assert final_snap.json()["phase"] == "completed"
+    assert final_snap.status_code == 404
 
 
 @pytest.mark.asyncio
