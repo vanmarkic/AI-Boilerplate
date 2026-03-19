@@ -72,7 +72,11 @@ Router registration and dependency wiring are automatic — no manual edits to `
 
 ## LLM Context Scoping
 - TFC and main app share NO backend/frontend code — they are independent apps.
-- Use `make context-tfc` before working on TFC, `make context-main` before working on the main app, `make context-all` for full monorepo.
+- Use `make context-<scope>` to focus the LLM on what matters:
+  - `context-tfc` / `context-main` — full app (frontend + backend)
+  - `context-tfc-fe` / `context-main-fe` — frontend only (pure GUI work)
+  - `context-tfc-be` / `context-main-be` — backend only
+  - `context-all` — full monorepo
 - Shared packages (`packages/`) are always visible regardless of context scope.
 - `.claudeignore` is gitignored — each developer sets their own scope.
 
