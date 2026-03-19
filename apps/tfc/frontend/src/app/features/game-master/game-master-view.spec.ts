@@ -53,6 +53,7 @@ describe("GameMasterView", () => {
     domain_id: null,
     time_factor: 2.5,
     game_mode: "classic",
+    practice_mode: false,
     session_code: "TEST99",
     created_at: "2026-03-17T00:00:00Z",
     updated_at: "2026-03-17T00:00:00Z",
