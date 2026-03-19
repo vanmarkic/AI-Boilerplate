@@ -3,6 +3,8 @@ import {
   Component,
   OnInit,
   OnDestroy,
+  computed,
+  effect,
   inject,
   signal,
 } from "@angular/core";
@@ -14,6 +16,7 @@ import { PhaseBadgeComponent } from "../../shared/phase-badge.component";
 import { DecisionPanelComponent } from "../../shared/decision-panel.component";
 import { ContextPanelComponent } from "../../shared/context-panel.component";
 import { AmbientBackgroundComponent } from "../../shared/ambient-background.component";
+import { BriefingOverlayComponent } from "../../shared/briefing-overlay.component";
 import { TurnBannerComponent } from "../../shared/turn-banner.component";
 import { AdvisorBubblesComponent } from "../../shared/advisor-bubbles.component";
 import { AllAdvisorsPanelComponent } from "../../shared/all-advisors-panel.component";
@@ -52,6 +55,7 @@ import { handlePlayerWsMessage } from "./player-ws-handler";
     DecisionPanelComponent,
     ContextPanelComponent,
     AmbientBackgroundComponent,
+    BriefingOverlayComponent,
     TurnBannerComponent,
     AdvisorBubblesComponent,
     AllAdvisorsPanelComponent,
@@ -71,32 +75,34 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
   protected readonly roleLabel = signal("Advisor");
   protected readonly practicePhase = signal<"advising" | "deciding">("advising");
+  protected readonly beginningExercise = signal(false);
   private readonly exerciseId = signal(1);
   private readonly participantId = signal("");
-  private lastDecisionId = "";
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
+
+  protected readonly activeDecision = computed(() => {
+    const role = this.store.playerRole();
+    return this.store.openDecisions().find((d) => {
+      if (!d.target_roles || d.target_roles.length === 0) return true;
+      if (role === "all_advisors" || role === "solo_player") return true;
+      return d.target_roles.includes(role);
+    });
+  });
+
+  private readonly resetPracticePhaseEffect = effect(() => {
+    const decision = this.activeDecision();
+    const id = decision?.id ?? null;
+    // When the active decision changes in practice mode, reset to advising phase
+    if (id && this.store.isPracticeMode()) {
+      this.practicePhase.set("advising");
+    }
+  });
 
   protected visibleEvents() {
     return this.store
       .events()
       .filter((e) => e.lifecycle === "running" || e.lifecycle === "completed");
-  }
-
-  protected activeDecision(): ActiveDecision | undefined {
-    const role = this.store.playerRole();
-    const decision = this.store.openDecisions().find((d) => {
-      if (!d.target_roles || d.target_roles.length === 0) return true;
-      if (role === "all_advisors" || role === "solo_player") return true;
-      return d.target_roles.includes(role);
-    });
-    if (decision && decision.id !== this.lastDecisionId) {
-      this.lastDecisionId = decision.id;
-      if (this.store.isPracticeMode()) {
-        this.practicePhase.set("advising");
-      }
-    }
-    return decision;
   }
 
   protected advisorRecs(decision: ActiveDecision) {
@@ -146,6 +152,20 @@ export class PlayerView implements OnInit, OnDestroy {
     this.api.snapshot(exerciseId).subscribe({
       next: (snap) => this.store.applySnapshot(snap),
       error: () => this.store.setError("Failed to load snapshot"),
+    });
+  }
+
+  protected onBeginExercise(): void {
+    this.beginningExercise.set(true);
+    this.api.begin(this.exerciseId()).subscribe({
+      next: (change) => {
+        this.store.applyPhaseChange(change.phase);
+        this.beginningExercise.set(false);
+      },
+      error: () => {
+        this.store.setError("Failed to begin exercise");
+        this.beginningExercise.set(false);
+      },
     });
   }
 

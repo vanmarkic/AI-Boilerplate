@@ -105,6 +105,44 @@ class TestPracticeModeCreation:
         assert resp.json()["practice_mode"] is True
 
 
+class TestPracticeModeUpdateValidation:
+    @pytest.mark.asyncio
+    async def test_update_game_mode_away_from_collaborative_rejected(
+        self,
+        client: AsyncClient,
+    ) -> None:
+        resp = await client.post(
+            "/api/exercises",
+            json={
+                "title": "Solo",
+                "game_mode": "simple_collaborative",
+                "practice_mode": True,
+            },
+        )
+        eid = resp.json()["id"]
+        resp = await client.put(
+            f"/api/exercises/{eid}",
+            json={"game_mode": "classic"},
+        )
+        assert resp.status_code == 400
+
+    @pytest.mark.asyncio
+    async def test_update_practice_mode_on_classic_rejected(
+        self,
+        client: AsyncClient,
+    ) -> None:
+        resp = await client.post(
+            "/api/exercises",
+            json={"title": "Classic", "game_mode": "classic"},
+        )
+        eid = resp.json()["id"]
+        resp = await client.put(
+            f"/api/exercises/{eid}",
+            json={"practice_mode": True},
+        )
+        assert resp.status_code == 400
+
+
 class TestPracticeModeWaitingRoom:
     @pytest.mark.asyncio
     async def test_practice_mode_allows_single_player(

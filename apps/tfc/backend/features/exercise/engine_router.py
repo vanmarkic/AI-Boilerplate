@@ -63,12 +63,11 @@ async def _build_config(
             detail="Scenario has no content. Add events, roles, and decisions first.",
         )
     content = ScenarioContent.model_validate(scenario.content)
-    practice = getattr(exercise, "practice_mode", False)
     return build_engine_config(
         exercise_id=exercise.id,
         title=exercise.title,
         content=content,
-        practice_mode=practice,
+        practice_mode=exercise.practice_mode,
     )
 
 

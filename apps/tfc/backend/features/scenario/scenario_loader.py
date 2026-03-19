@@ -14,6 +14,7 @@ from engine.exercise_engine import (
     ScenarioContext,
 )
 from engine.game_modes import create_game_mode
+from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.issue_manager import TrackedIssue, TriggerMode
 from engine.state_changes import DecisionOptionSnapshot
 from features.scenario.scenario_content import ScenarioContent
@@ -100,7 +101,7 @@ def build_engine_config(
     if content.decision_sequence:
         mode_config.setdefault("decision_sequence", list(content.decision_sequence))
     game_mode = create_game_mode(content.game_mode, mode_config)
-    if practice_mode and hasattr(game_mode, "base_decision_time_ms"):
+    if practice_mode and isinstance(game_mode, SimpleCollaborativeMode):
         game_mode.base_decision_time_ms = int(game_mode.base_decision_time_ms * 1.5)
     return EngineConfig(
         exercise_id=exercise_id,
