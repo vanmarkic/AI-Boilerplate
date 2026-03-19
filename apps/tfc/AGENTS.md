@@ -47,7 +47,6 @@ Scenario  ──loads──▶  Exercise  ──runs──▶  Engine
 ## Stack (same as root, with TFC-specific additions)
 - Backend: FastAPI (`apps/tfc/backend/`), port 8001
 - Frontend: Angular 21 (`apps/tfc/frontend/`), port 4201
-- Shared types: `@aspect/tfc-shared` (`packages/tfc-shared/`)
 - Real-time: WebSocket (`features/exercise/ws_router.py`) — see [WebSocket protocol docs](../../docs/conventions/websocket-protocol.md)
 - Engine: pure-Python tick loop (250ms), no external dependencies
 
@@ -104,11 +103,6 @@ src/app/
     waiting-room/ # Pre-exercise lobby (presence indicators, ready-up)
 ```
 
-### Shared Package (`packages/tfc-shared/`)
-Exports TypeScript types and lifecycle constants consumed by both frontend and backend (via codegen or direct import):
-- Types: `TimeState`, `ExerciseEvent`, `Issue`, `DecisionPoint`, `Exercise`, `Scenario`, `DomainConfig`
-- Constants: `EVENT_TRANSITIONS`, `ISSUE_TRANSITIONS`, `EXERCISE_TRANSITIONS`, domain presets
-
 ## Engine Concepts
 - **Tick loop**: 250ms interval. Each tick advances play time, checks event triggers, transitions issue lifecycles, and broadcasts state changes via WebSocket.
 - **Play time vs real time**: `TimeManager` supports a speed factor (e.g., 2× = 2 minutes of play time per 1 real minute).
@@ -154,7 +148,7 @@ TFC uses the same `AppError` hierarchy as the main app (see `core/exceptions.py`
 ## Rules (in addition to root AGENTS.md)
 1. The `engine/` directory must remain pure Python — no SQLAlchemy, no FastAPI, no HTTP imports. Test it in isolation.
 2. All real-time communication goes through the WebSocket in `features/exercise/ws_router.py`. Do NOT add additional WebSocket endpoints.
-3. Shared types between frontend and backend live in `packages/tfc-shared/`. Do NOT duplicate type definitions.
+3. Domain-config types (`TerminologyMap`, `ThemeConfig`, `DomainRole`, `SeverityLevel`) live in `domain-config-api.service.ts`. Do NOT duplicate type definitions.
 4. TFC frontend components use the same `@aspect/design-system` tokens and `@aspect/ui` components as the main app. TFC-specific component styles go in `shared/components-*.css` files.
 5. The exercise store (`shared/exercise.store.ts`) is the single source of truth for frontend exercise state. Features read from it, never from raw WebSocket messages.
 6. Scenario content (briefing, events, issues, decision templates) is loaded by `scenario_loader.py` and passed to the engine as an `EngineConfig`. Do NOT hardcode scenario data in the engine.
@@ -221,7 +215,7 @@ When adding a new migration:
 ## Common Pitfalls
 - Do NOT import `sqlalchemy`, `fastapi`, or `httpx` inside `engine/` — it must stay pure.
 - Do NOT create a second WebSocket endpoint — extend `ws_router.py` if needed.
-- Do NOT duplicate types that already exist in `@aspect/tfc-shared`.
+- Do NOT duplicate types — domain-config types live in `domain-config-api.service.ts`.
 - Do NOT put exercise-specific UI components in `packages/ui/` — they belong in `apps/tfc/frontend/src/app/shared/`.
 - Do NOT mutate engine state from outside the tick loop — use engine methods (`start`, `pause`, `complete`, `reset`, `set_speed`).
 - Do NOT skip `make test-tfc-backend` before committing engine changes — the engine has dedicated unit tests.
@@ -242,8 +236,8 @@ When adding a new migration:
 6. When a gap or deferred item is resolved: update its status in the gaps doc immediately. Contradictory statuses across docs cause agents to re-fix resolved issues.
 
 ### Type safety across the stack
-7. The shared package (`@aspect/tfc-shared`) defines the canonical TypeScript interfaces. The backend Pydantic schemas define the canonical Python types. These must stay aligned — if you change a field in one, update the other.
-8. Frontend `DomainConfigResponse` (in `domain-config-api.service.ts`) mirrors the backend `DomainConfigResponse` (in `domain_config_schema.py`). The shared `DomainConfig` interface is the generic version — the API response types add DB fields (`created_at`, `updated_at`).
+7. The backend Pydantic schemas are the canonical source for types. Frontend types in `domain-config-api.service.ts` must stay aligned — if you change a field in one, update the other.
+8. Frontend `DomainConfigResponse` (in `domain-config-api.service.ts`) mirrors the backend `DomainConfigResponse` (in `domain_config_schema.py`).
 
 ### Engine changes
 9. When adding a new `GameMode` method: update the protocol in `game_modes/__init__.py`, implement in ALL existing modes (Classic + SimpleCollaborative), and add property tests with strategies.

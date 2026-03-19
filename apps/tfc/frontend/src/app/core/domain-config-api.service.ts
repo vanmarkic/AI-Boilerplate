@@ -2,12 +2,39 @@ import { Injectable, inject } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { environment } from "./environment";
-import type {
-  TerminologyMap,
-  ThemeConfig,
-  DomainRole,
-  SeverityLevel,
-} from "@aspect/tfc-shared";
+
+export interface TerminologyMap {
+  event: string;
+  issue: string;
+  player: string;
+  gameMaster: string;
+  exercise: string;
+  scenario: string;
+  decision: string;
+}
+
+export interface SeverityLevel {
+  id: string;
+  label: string;
+  color: string;
+  order: number;
+}
+
+export interface DomainRole {
+  id: string;
+  label: string;
+  description: string;
+}
+
+export interface ThemeConfig {
+  colorPrimary: string;
+  colorSecondary: string;
+  colorBackground: string;
+  colorForeground: string;
+  fontFamily: string;
+  fontFamilyMono: string;
+  density: string;
+}
 
 export interface DomainConfigResponse {
   id: number;
