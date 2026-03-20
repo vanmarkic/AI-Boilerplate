@@ -83,17 +83,26 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - `.claudeignore` is gitignored — each developer sets their own scope.
 
 ## Entire CLI (AI Session Recording)
-- Entire captures AI agent sessions (transcripts, prompts, token usage) alongside git commits on a separate `entire/checkpoints/v1` branch.
-- Hooks are configured in `.claude/settings.json` — do NOT remove or modify the `entire hooks` entries.
-- Do NOT read or write to `.entire/metadata/` or `.entire/tmp/`.
-- Entire runs passively — no changes to your workflow required.
+Entire captures AI agent sessions (transcripts, prompts, token usage, tool calls) alongside git commits. Checkpoints are created on every git commit and stored on a separate `entire/checkpoints/v1` branch — your active branch stays clean.
 
-### When to use Entire commands
-- `entire status` — run when resuming work on a branch to check if a session is active.
-- `entire explain` — run when the user asks about the reasoning behind a commit or branch, or when you need context about prior AI sessions on the current branch.
-- `entire resume <branch>` — run when switching to a branch that had a previous AI session, to restore session context.
-- `entire rewind` — suggest to the user when they want to restore files to a mid-session state (not a git commit). Requires interactive selection, so let the user run it.
-- `entire doctor` — run when Entire hooks fail or session state looks broken.
+### How it works
+1. Hooks in `.claude/settings.json` capture session data as you work — do NOT remove or modify the `entire hooks` entries.
+2. Checkpoints are created automatically when a git commit is made.
+3. Entire never creates commits on your active branch.
+4. Do NOT read or write to `.entire/metadata/` or `.entire/tmp/`.
+
+### Workflow
+- `entire status` — check if a session is active and see current session info.
+- `entire explain` — show the full AI conversation (prompts, responses, files touched) behind a commit or session. Use when the user asks about reasoning behind changes, or when you need context from prior sessions.
+- `entire resume <branch>` — checkout a branch and restore its latest session metadata. Use when switching to a branch that had previous AI work.
+- `entire rewind` — restore files to a mid-session checkpoint (interactive — let the user run this).
+- `entire doctor` — diagnose and fix stuck sessions or desynchronized state.
+
+### When Claude should use Entire
+- **Starting work on an existing branch**: run `entire status` to check for active sessions.
+- **User asks "why was this done?"**: run `entire explain` to retrieve the AI reasoning behind commits.
+- **User switches branches with prior AI work**: run `entire resume <branch>` to restore context.
+- **Something looks broken**: run `entire doctor` to troubleshoot.
 
 ## Meta
 - See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
