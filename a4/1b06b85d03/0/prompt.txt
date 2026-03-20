@@ -1,0 +1,16 @@
+<ide_selection>The user selected the lines 85 to 96 from /Users/dragan/Documents/AI-Boilerplate/AGENTS.md:
+## Entire CLI (AI Session Recording)
+- Entire captures AI agent sessions (transcripts, prompts, token usage) alongside git commits on a separate `entire/checkpoints/v1` branch.
+- Hooks are configured in `.claude/settings.json` — do NOT remove or modify the `entire hooks` entries.
+- Do NOT read or write to `.entire/metadata/` or `.entire/tmp/`.
+- Entire runs passively — no changes to your workflow required.
+
+### When to use Entire commands
+- `entire status` — run when resuming work on a branch to check if a session is active.
+- `entire explain` — run when the user asks about the reasoning behind a commit or branch, or when you need context about prior AI sessions on the current branch.
+- `entire resume <branch>` — run when switching to a branch that had a previous AI session, to restore session context.
+- `entire rewind` — suggest to the user when they want to restore files to a mid-session state (not a git commit). Requires interactive selection, so let the user run it.
+- `entire doctor` — run when Entire hooks fail or session state looks broken.
+
+This may or may not be related to the current task.</ide_selection>
+https://github.com/entireio/cli?tab=readme-ov-file#typical-workflow
