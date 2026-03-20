@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "296d1ad9940f",
+  "strategy": "manual-commit",
+  "branch": "feature/turn-structure-stress-systems",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "apps/tfc/backend/engine/exercise_engine.py",
+    "apps/tfc/backend/features/exercise/engine_broadcast_test.py",
+    "apps/tfc/backend/features/exercise/engine_decision_chain_test.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/29/6d1ad9940f/0/metadata.json",
+      "transcript": "/29/6d1ad9940f/0/full.jsonl",
+      "content_hash": "/29/6d1ad9940f/0/content_hash.txt",
+      "prompt": "/29/6d1ad9940f/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 978,
+    "cache_creation_tokens": 71100,
+    "cache_read_tokens": 1339292,
+    "output_tokens": 6539,
+    "api_call_count": 29
+  }
+}
