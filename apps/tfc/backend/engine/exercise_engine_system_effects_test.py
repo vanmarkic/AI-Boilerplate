@@ -291,6 +291,6 @@ class TestTimeoutLoopSystemEffects:
         for call in callback.call_args_list:
             all_changes.extend(call[0][0])
         sys_changes = [c for c in all_changes if c.get("type") == "system_state_change"]
-        assert len(sys_changes) >= 1
+        assert len(sys_changes) == 1
         assert sys_changes[0]["system_id"] == "nav"
         assert sys_changes[0]["operational"] == "red"
