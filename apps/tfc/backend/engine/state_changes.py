@@ -82,6 +82,7 @@ class EngineSnapshot(TypedDict):
     issues: list[IssueSnapshot]
     decisions: list[DecisionSnapshot]
     score: dict[str, object] | None
+    systems: list[dict]
 
 
 class PresenceEntry(TypedDict):
@@ -178,6 +179,14 @@ class ForcedCardApplied(TypedDict):
     reason: str
 
 
+class SystemStateChange(TypedDict):
+    type: str  # "system_state_change"
+    system_id: str
+    action: str  # "power_changed" | "operational_changed"
+    power: bool
+    operational: str
+
+
 # Union of all change types for type-narrowing on `change["type"]`.
 StateChange = (
     PhaseChange
@@ -189,4 +198,5 @@ StateChange = (
     | ScoreChange
     | RecommendationSubmitted
     | ForcedCardApplied
+    | SystemStateChange
 )

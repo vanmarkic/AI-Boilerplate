@@ -13,6 +13,7 @@ from engine.game_modes.classic import ClassicMode
 from engine.game_modes.protocol import GameMode
 from engine.issue_manager import TrackedIssue
 from engine.state_changes import DecisionOptionSnapshot
+from engine.system_manager import SystemState
 
 TICK_INTERVAL_S = 0.25
 
@@ -59,3 +60,4 @@ class EngineConfig:
     decision_templates: list[DecisionTemplate] = field(default_factory=list)
     context: ScenarioContext = field(default_factory=ScenarioContext)
     game_mode: GameMode = field(default_factory=ClassicMode)
+    initial_system_states: list[SystemState] = field(default_factory=list)

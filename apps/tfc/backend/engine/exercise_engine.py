@@ -21,6 +21,7 @@ from engine.event_scheduler import EventLifecycle, EventScheduler, EventType
 from engine.game_modes.protocol import GameMode
 from engine.issue_manager import IssueManager
 from engine.state_changes import DecisionOpened, EngineSnapshot, PhaseChange, StateChange
+from engine.system_manager import SystemManager
 from engine.time_manager import TimeManager
 
 
@@ -49,6 +50,7 @@ class ExerciseEngine:
         self._time = TimeManager(factor=config.time_factor)
         self._events = EventScheduler()
         self._issues = IssueManager()
+        self._systems = SystemManager()
         self._decisions = DecisionManager()
         self._tick_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._timeout_task: asyncio.Task | None = None  # type: ignore[type-arg]
@@ -56,6 +58,7 @@ class ExerciseEngine:
 
         self._events.load_events(config.events)
         self._issues.load_issues(config.issues)
+        self._systems.load_systems(list(config.initial_system_states))
 
     @property
     def phase(self) -> EnginePhase:
@@ -72,6 +75,10 @@ class ExerciseEngine:
     @property
     def issue_manager(self) -> IssueManager:
         return self._issues
+
+    @property
+    def system_manager(self) -> SystemManager:
+        return self._systems
 
     @property
     def decision_manager(self) -> DecisionManager:
@@ -132,6 +139,7 @@ class ExerciseEngine:
         self._time.reset()
         self._events.load_events(self._config.events)
         self._issues.load_issues(self._config.issues)
+        self._systems.load_systems(list(self._config.initial_system_states))
         self._decisions.clear()
         return self._phase_change("reset")
 
@@ -181,6 +189,7 @@ class ExerciseEngine:
             issues=self._issues.snapshot(),
             decisions=self._decisions.snapshot(),
             score=self._config.game_mode.snapshot(),
+            systems=self._systems.snapshot(),
         )
 
     def _handle_decision_events(

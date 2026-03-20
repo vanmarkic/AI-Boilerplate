@@ -22,6 +22,13 @@ class SeverityLevelPayload(BaseModel):
     order: int
 
 
+class SystemDefPayload(BaseModel):
+    id: str
+    label: str
+    description: str = ""
+    category: str = "system"  # "system" | "weapon"
+
+
 class RolePayload(BaseModel):
     id: str
     label: str
@@ -46,6 +53,7 @@ class CreateDomainConfigRequest(BaseModel):
     theme: ThemePayload
     roles: list[RolePayload]
     severity_levels: list[SeverityLevelPayload]
+    systems: list[SystemDefPayload] = []
 
 
 class UpdateDomainConfigRequest(BaseModel):
@@ -55,6 +63,7 @@ class UpdateDomainConfigRequest(BaseModel):
     theme: ThemePayload | None = None
     roles: list[RolePayload] | None = None
     severity_levels: list[SeverityLevelPayload] | None = None
+    systems: list[SystemDefPayload] | None = None
 
 
 class DomainConfigResponse(ResponseBase):
@@ -66,5 +75,6 @@ class DomainConfigResponse(ResponseBase):
     theme: ThemePayload
     roles: list[RolePayload]
     severity_levels: list[SeverityLevelPayload]
+    systems: list[SystemDefPayload] = []
     created_at: datetime
     updated_at: datetime
