@@ -88,6 +88,13 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - Do NOT read or write to `.entire/metadata/` or `.entire/tmp/`.
 - Entire runs passively — no changes to your workflow required.
 
+### When to use Entire commands
+- `entire status` — run when resuming work on a branch to check if a session is active.
+- `entire explain` — run when the user asks about the reasoning behind a commit or branch, or when you need context about prior AI sessions on the current branch.
+- `entire resume <branch>` — run when switching to a branch that had a previous AI session, to restore session context.
+- `entire rewind` — suggest to the user when they want to restore files to a mid-session state (not a git commit). Requires interactive selection, so let the user run it.
+- `entire doctor` — run when Entire hooks fail or session state looks broken.
+
 ## Meta
 - See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
 - Do NOT edit `CLAUDE.md` — it is a read-only entry point that loads this file into Claude Code's context.
