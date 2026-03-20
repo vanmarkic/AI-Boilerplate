@@ -70,7 +70,7 @@ export class PlayerView implements OnInit, OnDestroy {
     const role = this.store.playerRole();
     return this.store.openDecisions().filter((d) => {
       if (!d.target_roles || d.target_roles.length === 0) return true;
-      if (role === "all_advisors" || role === "solo_player") return true;
+      if (role === "all_roles" || role === "all_advisors" || role === "solo_player") return true;
       return d.target_roles.includes(role);
     });
   });

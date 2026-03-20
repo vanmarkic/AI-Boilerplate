@@ -205,6 +205,29 @@
 
   /* ── Back Link ────────────────────────────────────────── */
 
+  /* ── Join Exercise Live Badge ─────────────────────────── */
+
+  .lobby-live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-success);
+  }
+
+  .lobby-live-badge__light {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: var(--color-success);
+    box-shadow: 0 0 6px var(--color-success);
+  }
+
+  /* ── Back Link ────────────────────────────────────────── */
+
   .back-link {
     font-family: var(--font-mono);
     font-size: var(--font-size-xs);

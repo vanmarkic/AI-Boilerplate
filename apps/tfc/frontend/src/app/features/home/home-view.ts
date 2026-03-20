@@ -9,7 +9,7 @@ import { HttpClient } from "@angular/common/http";
 import { Router, RouterLink } from "@angular/router";
 import { SeaBackdrop } from "./sea-backdrop";
 import { ScenarioPicker } from "./scenario-picker";
-import { LobbyPreview, type JoinableExercise } from "./lobby-preview";
+import type { JoinableExercise } from "./lobby-preview";
 import { ExerciseApiService } from "../../core/exercise-api.service";
 import { EngineApiService } from "../../core/engine-api.service";
 import { WaitingRoomApiService } from "../../core/waiting-room-api.service";
@@ -21,7 +21,7 @@ import { switchMap } from "rxjs";
   selector: "tfc-home-view",
   host: { class: "home-host" },
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, SeaBackdrop, ScenarioPicker, LobbyPreview],
+  imports: [RouterLink, SeaBackdrop, ScenarioPicker],
   template: `
     <tfc-sea-backdrop />
     <div class="home-layout">
@@ -31,10 +31,6 @@ import { switchMap } from "rxjs";
           SYS.INIT // Training Flow Control — Exercise Simulation Platform
         </p>
       </div>
-
-      @for (lobby of lobbyData(); track lobby.exercise.id) {
-        <tfc-lobby-preview [data]="lobby" />
-      }
 
       @if (pendingScenario()) {
         <div class="picker-grid">
@@ -94,6 +90,26 @@ import { switchMap } from "rxjs";
               >Analyse past exercise outcomes and decisions</span
             >
           </a>
+
+          @if (lobbyData().length) {
+            <a
+              class="tac-panel"
+              data-primary
+              (click)="joinExercise()"
+            >
+              <span class="tac-panel__indicator">JON</span>
+              <span class="tac-panel__label">Join Exercise</span>
+              <span class="tac-panel__desc">
+                {{ lobbyData().length }} active
+                {{ lobbyData().length === 1 ? "operation" : "operations" }}
+                awaiting crew
+              </span>
+              <span class="lobby-live-badge">
+                <span class="lobby-live-badge__light"></span>
+                Live
+              </span>
+            </a>
+          }
         </nav>
       }
     </div>
@@ -128,7 +144,7 @@ export class HomeView implements OnInit {
     const scenario = this.pendingScenario();
     if (!scenario) return;
     this.pendingScenario.set(null);
-    this.createAndShowLobby(scenario, false);
+    this.createAndShowLobby(scenario, false, playerCountMode);
   }
 
   protected createPractice(): void {
@@ -174,6 +190,7 @@ export class HomeView implements OnInit {
   private createAndShowLobby(
     scenario: ScenarioResponse,
     practiceMode: boolean,
+    playerCountMode?: "full" | "two_player",
   ): void {
     const gameMode = scenario.content?.game_mode ?? "classic";
     this.exerciseApi
@@ -186,10 +203,19 @@ export class HomeView implements OnInit {
       .subscribe({
         next: (exercise) => {
           this.router.navigate(["/waiting-room"], {
-            queryParams: { exerciseId: exercise.id },
+            queryParams: {
+              exerciseId: exercise.id,
+              ...(playerCountMode ? { playerCountMode } : {}),
+            },
           });
         },
       });
+  }
+
+  protected joinExercise(): void {
+    this.router.navigate(["/waiting-room"], {
+      queryParams: { browse: true },
+    });
   }
 
   private checkForJoinableExercises(): void {

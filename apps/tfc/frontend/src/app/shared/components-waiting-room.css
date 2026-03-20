@@ -13,6 +13,127 @@
     isolation: isolate;
   }
 
+  /* ── Browse Layout ───────────────────────────────────── */
+
+  .wr-browse-layout {
+    position: relative;
+    display: flex;
+    min-height: 100dvh;
+    gap: 0;
+  }
+
+  /* ── Sidebar ─────────────────────────────────────────── */
+
+  .wr-sidebar {
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    flex-shrink: 0;
+    background: var(--color-card);
+    border-right: 1px solid var(--color-border);
+    z-index: 2;
+  }
+
+  .wr-sidebar__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .wr-sidebar__count {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-primary);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-primary);
+    border-radius: var(--radius-sm);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wr-sidebar__list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    background: var(--color-border);
+  }
+
+  .wr-sidebar__item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md) var(--spacing-lg);
+    background: var(--color-card);
+    border: none;
+    border-left: 3px solid transparent;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color var(--duration-fast),
+      background var(--duration-fast);
+    color: inherit;
+  }
+
+  .wr-sidebar__item:hover {
+    background: color-mix(in oklch, var(--color-card) 90%, var(--color-primary) 10%);
+    border-left-color: var(--color-muted);
+  }
+
+  .wr-sidebar__item[data-active] {
+    border-left-color: var(--color-primary);
+    background: color-mix(in oklch, var(--color-card) 85%, var(--color-primary) 15%);
+    box-shadow: inset 0 0 12px oklch(0% 0 0 / 10%);
+  }
+
+  .wr-sidebar__item-title {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .wr-sidebar__item-meta {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    letter-spacing: 0.04em;
+  }
+
+  .wr-sidebar__footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-top: 1px solid var(--color-border);
+  }
+
+  /* ── Main Content Area ─────────────────────────────────── */
+
+  .wr-main {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacing-lg);
+  }
+
+  .wr-empty-state {
+    text-align: center;
+  }
+
+  /* ── Mode Value Label ────────────────────────────────── */
+
+  .wr-mode-bar__value {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-primary);
+  }
+
   /* ── Command Panel ────────────────────────────────────── */
 
   .cmd-panel {
