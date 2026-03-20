@@ -16,8 +16,8 @@ from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.session_store import session_store
 
 OPTIONS = [
-    {"id": "good", "label": "Good", "score": 10},
-    {"id": "bad", "label": "Bad", "score": 0},
+    {"id": "good", "label": "Good", "score": 10, "stress_delta": 0},
+    {"id": "bad", "label": "Bad", "score": 0, "stress_delta": 1},
 ]
 
 
@@ -149,8 +149,8 @@ async def test_close_decision_with_forced_card_broadcasts_forced_applied(
     """Forced card enforcement triggers forced_card_applied broadcast."""
     eid = await _create_exercise(client)
     forced_opts = [
-        {"id": "good", "label": "Good", "score": 10},
-        {"id": "forced", "label": "Forced", "score": -5},
+        {"id": "good", "label": "Good", "score": 10, "stress_delta": 0},
+        {"id": "forced", "label": "Forced", "score": -5, "stress_delta": 0},
     ]
     t1 = DecisionTemplate(
         id="d1",

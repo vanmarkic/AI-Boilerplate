@@ -2,12 +2,11 @@
 
 Invariants tested:
 - Score monotonicity: total_score never decreases across turns.
-- Penalty monotonicity: accumulated_penalty_ms never decreases.
-- Timer floor: effective decision time >= min_decision_time_ms.
+- Stress clamping: stress always in [0, 10].
+- Timer bounds: effective decision time is always a valid table entry or 180_000.
 - Turn counting: turn_number == 1 + number of on_decision_closed_v2 calls.
 - Sequence advancement: current_index tracks correctly, None at end.
-- Penalty formula: penalty_ms == (max - selected) * factor * 1000.
-- Perfect score: selected == max → zero penalty delta.
+- Perfect score: zero-stress-delta options -> stress unchanged.
 - Auto-submit: timeout always picks the min-score option.
 """
 
@@ -16,27 +15,23 @@ from __future__ import annotations
 from hypothesis import assume, given, settings
 from hypothesis import strategies as st
 
-from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
+from engine.game_modes.simple_collaborative import STRESS_TIME_TABLE, SimpleCollaborativeMode
 from engine.strategies import (
     decision_sequences,
     option_lists,
-    penalty_factors,
     scores,
     signed_option_lists,
+    stress_deltas,
 )
 
 
 def _mode(
     seq: list[str] | None = None,
     base_time: int = 300_000,
-    penalty_factor: float = 0.1,
-    min_time: int = 30_000,
 ) -> SimpleCollaborativeMode:
     return SimpleCollaborativeMode(
         decision_sequence=seq or ["d0", "d1", "d2"],
         base_decision_time_ms=base_time,
-        penalty_factor=penalty_factor,
-        min_decision_time_ms=min_time,
     )
 
 
@@ -45,12 +40,13 @@ def _close_v2(
     decision_id: str,
     selected_score: float,
     max_score: float,
+    stress_delta: int = 0,
 ) -> list[dict]:
     """Helper: wrap scalar scores as v2 option lists for property tests."""
-    selected = [{"id": "sel", "label": "Sel", "score": selected_score}]
+    selected = [{"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta}]
     all_opts = [
-        {"id": "sel", "label": "Sel", "score": selected_score},
-        {"id": "best", "label": "Best", "score": max_score},
+        {"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta},
+        {"id": "best", "label": "Best", "score": max_score, "stress_delta": 0},
     ]
     return mode.on_decision_closed_v2(decision_id, selected, all_opts)
 
@@ -59,7 +55,7 @@ def _close_v2(
 
 
 class TestScoreMonotonicity:
-    """total_score can only increase or stay the same."""
+    """total_score never decreases when all option scores are non-negative."""
 
     @given(
         selected_scores=st.lists(
@@ -82,71 +78,56 @@ class TestScoreMonotonicity:
             prev_total = mode.total_score
 
 
-# -- Penalty monotonicity ----------------------------------------------
+# -- Stress clamping ---------------------------------------------------
 
 
-class TestPenaltyMonotonicity:
-    """accumulated_penalty_ms can only increase or stay the same."""
+class TestStressClamping:
+    """stress always stays in [0, 10]."""
 
     @given(
-        gaps=st.lists(
-            scores(),
+        deltas=st.lists(
+            stress_deltas(),
             min_size=2,
             max_size=20,
         ),
     )
     @settings(max_examples=200)
-    def test_penalty_never_decreases(self, gaps: list[float]) -> None:
-        mode = _mode(seq=[f"d{i}" for i in range(len(gaps))])
-        prev_penalty = 0.0
-        for i, gap in enumerate(gaps):
-            _close_v2(mode, f"d{i}", selected_score=0.0, max_score=gap)
-            assert mode.accumulated_penalty_ms >= prev_penalty
-            prev_penalty = mode.accumulated_penalty_ms
+    def test_stress_always_clamped(self, deltas: list[int]) -> None:
+        mode = _mode(seq=[f"d{i}" for i in range(len(deltas))])
+        for i, delta in enumerate(deltas):
+            _close_v2(mode, f"d{i}", selected_score=1.0, max_score=1.0, stress_delta=delta)
+            assert 0 <= mode.stress <= 10
 
 
-# -- Timer floor -------------------------------------------------------
+# -- Timer bounds ------------------------------------------------------
 
 
-class TestTimerFloor:
-    """Effective decision time never drops below min_decision_time_ms."""
+class TestTimerBounds:
+    """Effective decision time is always a valid STRESS_TIME_TABLE entry or fallback."""
 
     @given(
-        base_time=st.integers(min_value=10_000, max_value=600_000),
-        min_time=st.integers(min_value=1_000, max_value=60_000),
-        penalty=st.floats(
-            min_value=0.0,
-            max_value=1e9,
-            allow_nan=False,
-            allow_infinity=False,
-        ),
+        stress=st.integers(min_value=0, max_value=10),
     )
-    @settings(max_examples=300)
-    def test_decision_time_at_least_minimum(
-        self,
-        base_time: int,
-        min_time: int,
-        penalty: float,
-    ) -> None:
-        assume(min_time <= base_time)
-        mode = _mode(base_time=base_time, min_time=min_time)
-        mode.accumulated_penalty_ms = penalty
-        effective = mode.get_decision_time_ms(base_time)
-        assert effective >= min_time
+    @settings(max_examples=50)
+    def test_decision_time_from_table(self, stress: int) -> None:
+        mode = _mode()
+        mode.stress = stress
+        effective = mode.get_decision_time_ms(300_000)
+        assert effective == STRESS_TIME_TABLE[stress]
 
     @given(
-        base_time=st.integers(min_value=10_000, max_value=600_000),
-        min_time=st.integers(min_value=1_000, max_value=60_000),
+        stress=st.integers(min_value=11, max_value=100),
     )
-    @settings(max_examples=100)
-    def test_zero_penalty_gives_base_time(
-        self,
-        base_time: int,
-        min_time: int,
-    ) -> None:
-        assume(min_time <= base_time)
-        mode = _mode(base_time=base_time, min_time=min_time)
-        assert mode.get_decision_time_ms(base_time) == base_time
+    @settings(max_examples=50)
+    def test_decision_time_fallback(self, stress: int) -> None:
+        mode = _mode()
+        mode.stress = stress
+        effective = mode.get_decision_time_ms(300_000)
+        assert effective == 180_000
+
+    def test_zero_stress_gives_max_time(self) -> None:
+        mode = _mode()
+        assert mode.get_decision_time_ms(300_000) == 300_000
 
 
 # -- Turn counting -----------------------------------------------------
@@ -193,44 +174,39 @@ class TestSequenceAdvancement:
         assert mode.get_next_decision_id("any") is None
 
 
-# -- Penalty formula correctness ---------------------------------------
+# -- Stress delta correctness ------------------------------------------
 
 
-class TestPenaltyFormula:
-    """penalty_ms == (max_score - selected_score) * penalty_factor * 1000."""
+class TestStressDelta:
+    """Stress changes correctly based on stress_delta from options."""
 
     @given(
-        selected=scores(),
-        gap=scores(),
-        factor=penalty_factors(),
+        delta=stress_deltas(),
     )
-    @settings(max_examples=300)
-    def test_penalty_matches_formula(
-        self,
-        selected: float,
-        gap: float,
-        factor: float,
-    ) -> None:
-        max_score = selected + gap
-        mode = _mode(penalty_factor=factor)
-        changes = _close_v2(mode, "d0", selected_score=selected, max_score=max_score)
-        expected_penalty = gap * factor * 1000
-        sc = next(c for c in changes if c["type"] == "score_change")
-        assert abs(sc["penalty_ms"] - expected_penalty) < 1e-6
-
-    @given(selected=scores(), factor=penalty_factors())
     @settings(max_examples=200)
-    def test_perfect_score_zero_penalty(
+    def test_stress_changes_by_delta(
+        self,
+        delta: int,
+    ) -> None:
+        mode = _mode()
+        mode.stress = 5  # start mid-range
+        _close_v2(mode, "d0", selected_score=1.0, max_score=1.0, stress_delta=delta)
+        expected = max(0, min(10, 5 + delta))
+        assert mode.stress == expected
+
+    @given(selected=scores())
+    @settings(max_examples=200)
+    def test_zero_delta_no_stress_change(
         self,
         selected: float,
-        factor: float,
     ) -> None:
-        mode = _mode(penalty_factor=factor)
-        opts = [{"id": "a", "label": "A", "score": selected}]
+        mode = _mode()
+        initial_stress = mode.stress
+        opts = [{"id": "a", "label": "A", "score": selected, "stress_delta": 0}]
         changes = mode.on_decision_closed_v2("d0", opts, opts)
         sc = next(c for c in changes if c["type"] == "score_change")
-        assert sc["penalty_ms"] == 0.0
-        assert mode.accumulated_penalty_ms == 0.0
+        assert sc["stress"] == initial_stress
+        assert mode.stress == initial_stress
 
 
 # -- Score change structure --------------------------------------------
@@ -253,7 +229,7 @@ class TestScoreChangeStructure:
         assert len(score_changes) == 1
         c = score_changes[0]
         assert "total_score" in c
-        assert "penalty_ms" in c
+        assert "stress" in c
         assert "next_decision_time_ms" in c
         assert "turn_number" in c
 
@@ -290,28 +266,23 @@ class TestMultiTurnAccumulation:
             min_size=1,
             max_size=15,
         ),
-        factor=penalty_factors(),
     )
     @settings(max_examples=200)
     def test_full_sequence_state_consistency(
         self,
         score_pairs: list[tuple[float, float]],
-        factor: float,
     ) -> None:
         # Normalize: ensure max >= selected
         pairs = [(sel, sel + gap) for sel, gap in score_pairs]
         seq = [f"d{i}" for i in range(len(pairs))]
-        mode = _mode(seq=seq, penalty_factor=factor)
+        mode = _mode(seq=seq)
 
         expected_total = 0.0
-        expected_penalty = 0.0
         for i, (sel, max_s) in enumerate(pairs):
             changes = _close_v2(mode, f"d{i}", selected_score=sel, max_score=max_s)
             expected_total += sel
-            expected_penalty += (max_s - sel) * factor * 1000
 
             assert abs(mode.total_score - expected_total) < 1e-6
-            assert abs(mode.accumulated_penalty_ms - expected_penalty) < 1e-6
             sc = next(c for c in changes if c["type"] == "score_change")
             assert sc["turn_number"] == i + 2
 
@@ -329,38 +300,19 @@ class TestV2ScoringFormula:
     @given(
         all_opts=signed_option_lists(min_size=2, max_size=6),
         n_selected=st.integers(min_value=1, max_value=3),
-        factor=penalty_factors(),
     )
     @settings(max_examples=200)
-    def test_penalty_is_nonneg(
+    def test_stress_is_clamped(
         self,
         all_opts: list[dict],
         n_selected: int,
-        factor: float,
     ) -> None:
         assume(n_selected <= len(all_opts))
-        mode = _mode(penalty_factor=factor)
+        mode = _mode()
         selected = all_opts[:n_selected]
         changes = mode.on_decision_closed_v2("d0", selected, all_opts)
         score_change = next(c for c in changes if c["type"] == "score_change")
-        assert score_change["penalty_ms"] >= 0.0
-
-    @given(
-        all_opts=signed_option_lists(min_size=2, max_size=6),
-        factor=penalty_factors(),
-    )
-    @settings(max_examples=200)
-    def test_best_selection_zero_penalty(
-        self,
-        all_opts: list[dict],
-        factor: float,
-    ) -> None:
-        """Selecting the single best option → zero penalty."""
-        mode = _mode(penalty_factor=factor)
-        best = max(all_opts, key=lambda o: o["score"])
-        changes = mode.on_decision_closed_v2("d0", [best], all_opts)
-        score_change = next(c for c in changes if c["type"] == "score_change")
-        assert score_change["penalty_ms"] == 0.0
+        assert 0 <= score_change["stress"] <= 10
 
     @given(
         all_opts=signed_option_lists(min_size=2, max_size=6),
@@ -388,26 +340,25 @@ class TestV2ScoringFormula:
         assert mode.turn_number == 2
 
 
-class TestV2TimerFloor:
-    """Timer floor still holds with v2 scoring."""
+class TestV2TimerBounds:
+    """Timer always returns a valid value with v2 scoring."""
 
     @given(
         all_opts=signed_option_lists(min_size=2, max_size=6),
         n_selected=st.integers(min_value=1, max_value=3),
-        factor=penalty_factors(),
     )
     @settings(max_examples=200)
-    def test_decision_time_at_least_minimum(
+    def test_decision_time_valid(
         self,
         all_opts: list[dict],
         n_selected: int,
-        factor: float,
     ) -> None:
         assume(n_selected <= len(all_opts))
-        mode = _mode(penalty_factor=factor)
+        mode = _mode()
         mode.on_decision_closed_v2("d0", all_opts[:n_selected], all_opts)
         effective = mode.get_decision_time_ms(300_000)
-        assert effective >= mode.min_decision_time_ms
+        valid_times = set(STRESS_TIME_TABLE.values()) | {180_000}
+        assert effective in valid_times
 
 
 # -- Forced card property tests -------------------------------------------
@@ -424,17 +375,15 @@ class TestSnapshotConsistency:
             min_size=1,
             max_size=10,
         ),
-        factor=penalty_factors(),
     )
     @settings(max_examples=200)
     def test_snapshot_total_score_equals_sum(
         self,
         score_pairs: list[tuple[float, float]],
-        factor: float,
     ) -> None:
         pairs = [(sel, sel + gap) for sel, gap in score_pairs]
         seq = [f"d{i}" for i in range(len(pairs))]
-        mode = _mode(seq=seq, penalty_factor=factor)
+        mode = _mode(seq=seq)
         expected_total = 0.0
         for i, (sel, max_s) in enumerate(pairs):
             _close_v2(mode, f"d{i}", selected_score=sel, max_score=max_s)
@@ -454,22 +403,20 @@ class TestSnapshotConsistency:
         assert snap["turn_number"] == n_turns + 1
 
     @given(
-        gaps=st.lists(scores(), min_size=1, max_size=10),
-        factor=penalty_factors(),
+        deltas=st.lists(stress_deltas(), min_size=1, max_size=10),
     )
     @settings(max_examples=200)
-    def test_snapshot_penalty_matches_accumulated(
+    def test_snapshot_stress_matches_mode(
         self,
-        gaps: list[float],
-        factor: float,
+        deltas: list[int],
     ) -> None:
-        seq = [f"d{i}" for i in range(len(gaps))]
-        mode = _mode(seq=seq, penalty_factor=factor)
-        for i, gap in enumerate(gaps):
-            _close_v2(mode, f"d{i}", selected_score=0.0, max_score=gap)
+        seq = [f"d{i}" for i in range(len(deltas))]
+        mode = _mode(seq=seq)
+        for i, delta in enumerate(deltas):
+            _close_v2(mode, f"d{i}", selected_score=0.0, max_score=1.0, stress_delta=delta)
         snap = mode.snapshot()
         assert snap is not None
-        assert abs(snap["penalty_ms"] - mode.accumulated_penalty_ms) < 1e-6
+        assert snap["stress"] == mode.stress
 
 
 class TestForcedCardInvariant:
@@ -525,7 +472,7 @@ class TestForcedCardInvariant:
         self,
         all_opts: list[dict],
     ) -> None:
-        """No forced_option_ids → no ForcedCardApplied."""
+        """No forced_option_ids -> no ForcedCardApplied."""
         mode = _mode()
         changes = mode.on_decision_closed_v2("d0", [all_opts[0]], all_opts)
         forced = [c for c in changes if c["type"] == "forced_card_applied"]

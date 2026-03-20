@@ -112,9 +112,9 @@ MUTATIONS: list[Mutation] = [
     # ── simple_collaborative.py mutations ───────────────────────────────
     Mutation(
         file="engine/game_modes/simple_collaborative.py",
-        description="on_decision_closed: don't accumulate penalty",
-        original="self.accumulated_penalty_ms += penalty_ms",
-        mutated="pass  # self.accumulated_penalty_ms += penalty_ms",
+        description="on_decision_closed: don't update stress",
+        original="self.stress = max(0, min(10, self.stress + stress_delta))",
+        mutated="pass  # self.stress = max(0, min(10, self.stress + stress_delta))",
     ),
     Mutation(
         file="engine/game_modes/simple_collaborative.py",
