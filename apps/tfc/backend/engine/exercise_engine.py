@@ -67,23 +67,37 @@ class ExerciseEngine:
         self._issues.load_issues(config.issues)
         self._systems.load_systems(list(config.initial_system_states))
 
-    # ── read-only accessors ───────────────────────────────────────
     @property
-    def phase(self) -> EnginePhase: return self._phase
+    def phase(self) -> EnginePhase:
+        return self._phase
+
     @property
-    def time_manager(self) -> TimeManager: return self._time
+    def time_manager(self) -> TimeManager:
+        return self._time
+
     @property
-    def event_scheduler(self) -> EventScheduler: return self._events
+    def event_scheduler(self) -> EventScheduler:
+        return self._events
+
     @property
-    def issue_manager(self) -> IssueManager: return self._issues
+    def issue_manager(self) -> IssueManager:
+        return self._issues
+
     @property
-    def system_manager(self) -> SystemManager: return self._systems
+    def system_manager(self) -> SystemManager:
+        return self._systems
+
     @property
-    def decision_manager(self) -> DecisionManager: return self._decisions
+    def decision_manager(self) -> DecisionManager:
+        return self._decisions
+
     @property
-    def config(self) -> EngineConfig: return self._config
+    def config(self) -> EngineConfig:
+        return self._config
+
     @property
-    def game_mode(self) -> GameMode: return self._config.game_mode
+    def game_mode(self) -> GameMode:
+        return self._config.game_mode
 
     async def start(self) -> PhaseChange:
         if self._phase not in {EnginePhase.SETUP}:
@@ -330,11 +344,11 @@ class ExerciseEngine:
         """Apply system_effects from selected options via SystemManager."""
         out: list[SystemStateChange] = []  # TODO: targets_system needs submission data plumbing
         for opt in selected_options:
-            for fx in opt.get("system_effects", []):
-                if fx.get("power_state") is not None:
+            for fx in opt["system_effects"]:
+                if fx["power_state"] is not None:
                     if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
                         out.append(c)
-                if fx.get("operational_state") is not None:
+                if fx["operational_state"] is not None:
                     if c := self._systems.set_operational(fx["system_id"], fx["operational_state"]):
                         out.append(c)
         return out
