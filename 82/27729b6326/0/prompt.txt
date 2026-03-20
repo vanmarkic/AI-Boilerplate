@@ -1,0 +1,6 @@
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (fjg3fb) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+how can i use it now ?
+
+---
+
+should claude know about it ?
