@@ -189,6 +189,7 @@ def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[di
                 "system_effects": system_effects(),
                 "targets_system": st.booleans(),
                 "max_plays": st.integers(min_value=1, max_value=5),
+                "role": st.none(),
             }
         ),
         min_size=min_size,
@@ -212,6 +213,7 @@ def signed_option_lists(
                 "system_effects": system_effects(),
                 "targets_system": st.booleans(),
                 "max_plays": st.integers(min_value=1, max_value=5),
+                "role": st.none(),
             }
         ),
         min_size=min_size,
