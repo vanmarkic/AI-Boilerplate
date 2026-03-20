@@ -47,11 +47,20 @@ class IssueSnapshot(TypedDict):
     released: bool
 
 
+class SystemEffect(TypedDict):
+    system_id: str
+    operational_state: str | None
+    power_state: bool | None
+
+
 class DecisionOptionSnapshot(TypedDict):
     id: str
     label: str
     score: float
     stress_delta: int
+    system_effects: list[SystemEffect]
+    targets_system: bool
+    max_plays: int
     role: str | None
 
 

@@ -72,7 +72,20 @@ def load_decision_templates(
             issue_id=dt.issue_id,
             question_type=dt.question_type,
             options=[
-                DecisionOptionSnapshot(id=o.id, label=o.label, score=o.score, stress_delta=0, role=None) for o in dt.options
+                DecisionOptionSnapshot(
+                    id=o.id,
+                    label=o.label,
+                    score=o.score,
+                    stress_delta=0,
+                    system_effects=[
+                        {"system_id": e.system_id, "operational_state": e.operational_state, "power_state": e.power_state}
+                        for e in o.system_effects
+                    ],
+                    targets_system=o.targets_system,
+                    max_plays=o.max_plays,
+                    role=None,
+                )
+                for o in dt.options
             ],
             completion_mode=dt.completion_mode,
             timeout_ms=dt.timeout_ms,

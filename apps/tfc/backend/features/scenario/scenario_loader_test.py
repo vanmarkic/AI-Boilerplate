@@ -50,7 +50,16 @@ def test_build_engine_config_loads_decision_templates() -> None:
     assert tmpl.issue_id == "i1"
     assert tmpl.question_type == "single_choice"
     assert len(tmpl.options) == 2
-    assert tmpl.options[0] == {"id": "o1", "label": "Yes", "score": 1.0, "stress_delta": 0, "role": None}
+    assert tmpl.options[0] == {
+        "id": "o1",
+        "label": "Yes",
+        "score": 1.0,
+        "stress_delta": 0,
+        "system_effects": [],
+        "targets_system": False,
+        "max_plays": 1,
+        "role": None,
+    }
     assert tmpl.completion_mode == "first_response"
 
 

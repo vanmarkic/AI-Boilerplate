@@ -134,6 +134,24 @@ def monotonic_play_times(min_size: int = 1, max_size: int = 50) -> SearchStrateg
     ).map(sorted)
 
 
+def system_effects() -> SearchStrategy[list[dict]]:
+    """Generate a list of SystemEffect dicts (may be empty)."""
+    return st.lists(
+        st.fixed_dictionaries(
+            {
+                "system_id": system_ids(),
+                "operational_state": st.one_of(
+                    st.just(None),
+                    st.sampled_from(["green", "yellow", "red"]),
+                ),
+                "power_state": st.one_of(st.just(None), st.booleans()),
+            }
+        ),
+        min_size=0,
+        max_size=3,
+    )
+
+
 def scores() -> SearchStrategy[float]:
     """Non-negative scores for decision options."""
     return st.floats(min_value=0.0, max_value=100.0, allow_nan=False, allow_infinity=False)
@@ -160,7 +178,7 @@ def decision_sequences(min_size: int = 1, max_size: int = 10) -> SearchStrategy[
 
 
 def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[dict]]:
-    """Generate lists of decision options with id, label, score, and stress_delta."""
+    """Generate lists of decision options with all DecisionOptionSnapshot fields."""
     return st.lists(
         st.fixed_dictionaries(
             {
@@ -168,6 +186,9 @@ def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[di
                 "label": st.just("Option"),
                 "score": scores(),
                 "stress_delta": stress_deltas(),
+                "system_effects": system_effects(),
+                "targets_system": st.booleans(),
+                "max_plays": st.integers(min_value=1, max_value=5),
             }
         ),
         min_size=min_size,
@@ -180,7 +201,7 @@ def signed_option_lists(
     min_size: int = 1,
     max_size: int = 6,
 ) -> SearchStrategy[list[dict]]:
-    """Option lists with +/0/- scores and stress_delta."""
+    """Option lists with +/0/- scores and all DecisionOptionSnapshot fields."""
     return st.lists(
         st.fixed_dictionaries(
             {
@@ -188,6 +209,9 @@ def signed_option_lists(
                 "label": st.just("Option"),
                 "score": signed_scores(),
                 "stress_delta": stress_deltas(),
+                "system_effects": system_effects(),
+                "targets_system": st.booleans(),
+                "max_plays": st.integers(min_value=1, max_value=5),
             }
         ),
         min_size=min_size,
