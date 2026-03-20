@@ -10,13 +10,11 @@ from pydantic import ValidationError
 
 from features.scenario.scenario_content import (
     DecisionOptionDef,
+    DecisionTemplateDef,
+    ScenarioContent,
     SystemEffectDef,
 )
 from features.scenario.scenario_loader import load_decision_templates
-from features.scenario.scenario_content import (
-    DecisionTemplateDef,
-    ScenarioContent,
-)
 
 MINIMAL_ROLES = [
     {"id": "co", "label": "CO", "player_type": "decision_maker"},

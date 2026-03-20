@@ -20,7 +20,14 @@ from engine.engine_config import (  # noqa: F401 — re-exported
 from engine.event_scheduler import EventLifecycle, EventScheduler, EventType
 from engine.game_modes.protocol import GameMode
 from engine.issue_manager import IssueManager
-from engine.state_changes import DecisionOpened, EngineSnapshot, PhaseChange, StateChange
+from engine.state_changes import (
+    DecisionOpened,
+    DecisionOptionSnapshot,
+    EngineSnapshot,
+    PhaseChange,
+    StateChange,
+    SystemStateChange,
+)
 from engine.system_manager import SystemManager
 from engine.time_manager import TimeManager
 
@@ -60,37 +67,23 @@ class ExerciseEngine:
         self._issues.load_issues(config.issues)
         self._systems.load_systems(list(config.initial_system_states))
 
+    # ── read-only accessors ───────────────────────────────────────
     @property
-    def phase(self) -> EnginePhase:
-        return self._phase
-
+    def phase(self) -> EnginePhase: return self._phase
     @property
-    def time_manager(self) -> TimeManager:
-        return self._time
-
+    def time_manager(self) -> TimeManager: return self._time
     @property
-    def event_scheduler(self) -> EventScheduler:
-        return self._events
-
+    def event_scheduler(self) -> EventScheduler: return self._events
     @property
-    def issue_manager(self) -> IssueManager:
-        return self._issues
-
+    def issue_manager(self) -> IssueManager: return self._issues
     @property
-    def system_manager(self) -> SystemManager:
-        return self._systems
-
+    def system_manager(self) -> SystemManager: return self._systems
     @property
-    def decision_manager(self) -> DecisionManager:
-        return self._decisions
-
+    def decision_manager(self) -> DecisionManager: return self._decisions
     @property
-    def config(self) -> EngineConfig:
-        return self._config
-
+    def config(self) -> EngineConfig: return self._config
     @property
-    def game_mode(self) -> GameMode:
-        return self._config.game_mode
+    def game_mode(self) -> GameMode: return self._config.game_mode
 
     async def start(self) -> PhaseChange:
         if self._phase not in {EnginePhase.SETUP}:
@@ -232,10 +225,7 @@ class ExerciseEngine:
         return changes
 
     def find_decision_template(self, event_id: str) -> DecisionTemplate | None:
-        for dt in self._config.decision_templates:
-            if dt.id == event_id:
-                return dt
-        return None
+        return next((dt for dt in self._config.decision_templates if dt.id == event_id), None)
 
     def _start_tick_loop(self) -> None:
         if self._tick_task is None or self._tick_task.done():
@@ -255,9 +245,8 @@ class ExerciseEngine:
             pass
 
     def _start_timeout_monitor(self) -> None:
-        if self._timeout_task and not self._timeout_task.done():
-            return
-        self._timeout_task = asyncio.create_task(self._timeout_loop())
+        if not self._timeout_task or self._timeout_task.done():
+            self._timeout_task = asyncio.create_task(self._timeout_loop())
 
     def _stop_timeout_monitor(self) -> None:
         if self._timeout_task and not self._timeout_task.done():
@@ -301,6 +290,8 @@ class ExerciseEngine:
                         forced_option_ids=forced_ids or None,
                     )
                     all_changes.extend(extra)
+                    # Apply system effects from selected options
+                    all_changes.extend(self._apply_system_effects(selected_opts))
                     # Chain to next decision
                     next_id = self._config.game_mode.get_next_decision_id(d.id)
                     if next_id:
@@ -332,6 +323,21 @@ class ExerciseEngine:
                     break
         except asyncio.CancelledError:
             pass
+
+    def _apply_system_effects(
+        self, selected_options: list[DecisionOptionSnapshot],
+    ) -> list[SystemStateChange]:
+        """Apply system_effects from selected options via SystemManager."""
+        out: list[SystemStateChange] = []  # TODO: targets_system needs submission data plumbing
+        for opt in selected_options:
+            for fx in opt.get("system_effects", []):
+                if fx.get("power_state") is not None:
+                    if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
+                        out.append(c)
+                if fx.get("operational_state") is not None:
+                    if c := self._systems.set_operational(fx["system_id"], fx["operational_state"]):
+                        out.append(c)
+        return out
 
     def _phase_change(self, action: str) -> PhaseChange:
         return {
