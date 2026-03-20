@@ -29,6 +29,94 @@ The exercise simulation domain uses specific terms. The codebase uses generic eq
 | inject snapshot | `EventSnapshot` | `engine-api.service.ts` |
 | defect snapshot | `IssueSnapshot` | `engine-api.service.ts` |
 
+### Silent Wake Scenario Reference
+
+The "Silent Wake" scenario is a multi-domain naval cyber wargame. These terms appear in scenario packs, briefing docs, and seed data.
+
+#### Teams
+| Term | Meaning |
+|------|---------|
+| **WHITE/RED TEAM** | Facilitator (Game Master) |
+| **BLUE TEAM** | Ship crew (Players) |
+
+#### Roles
+| Role | Abbreviation | Responsibility |
+|------|-------------|----------------|
+| Commanding Officer | **CO** | Decision-maker — receives advisor input, makes final calls |
+| Operations Officer | **OPS** | Mission planning, intelligence, MTC liaison |
+| Principal Warfare Officer | **PWO** | Surface picture, ESM, engagement coordination |
+| Anti-Air Warfare Officer | **AAWO** | Air surveillance radar, air threat assessment |
+| Cyber Operator | **CyOp** | Network monitoring, cyber threat detection, IBMS analysis |
+| Navigator | **NAV** | Navigation systems, AIS, WECDIS, route management |
+| Engineering Officer | **EO** | System health, repairs, ETBOL estimates |
+
+#### Ship Systems (ON/OFF + Operational State)
+| System | Description |
+|--------|-------------|
+| **NAV RADAR** | Navigation radar |
+| **IBMS / INS** | Integrated Bridge Management System / Inertial Navigation System (incl. WECDIS) |
+| **NAV SENSORS** | Navigation sensors (GPS, speed log, compasses) |
+| **ASUW TRACKING RADAR** | Anti-Surface Warfare tracking radar |
+| **COMMS** | Communications (SATCOM, HF, UHF) |
+| **AAW RADAR** | Anti-Air Warfare surveillance radar |
+
+#### Weapons (OK/Damaged + ON/OFF)
+| Weapon | Description |
+|--------|-------------|
+| **CIWS FWD / AFT** | Close-In Weapon System (last-line missile defence) |
+| **Missile Launcher** | Primary anti-ship / anti-air missile system |
+| **Gun** | Naval gun for surface engagement |
+| **Decoys** | Deceptive countermeasures against incoming missiles |
+
+#### Operational State (3-tier traffic-light)
+
+**Systems:**
+| Color | Label | Meaning |
+|-------|-------|---------|
+| Green | OK | Fully operational |
+| Yellow | Degraded | Reduced capability |
+| Red | Critical/Disabled | Non-functional or critically impaired |
+
+**Warfare Domains:**
+| Color | Label | Meaning |
+|-------|-------|---------|
+| Green | No threat | No detected threat in this domain |
+| Yellow | Possible threat | Suspicious activity, unconfirmed |
+| Red | Actual threat | Confirmed hostile activity |
+
+#### Stress Mechanic
+| Term | Meaning |
+|------|---------|
+| **Stress** | Team-level counter (0–10), increases/decreases based on blue card choices and inject consequences |
+| **Stress to Decision Time** | Stress 0 = 5:00, Stress 10 = 3:00 (non-linear decay). Updated by Facilitator in tabletop; auto-calculated in digital |
+
+#### Game Components
+| Term | Meaning |
+|------|---------|
+| **Blue Card** (SWBxx) | Decision option — a response action the CO can play (up to 2 per turn) |
+| **Inject Card** | Role-targeted event card delivered per turn |
+| **Briefing Card** | Context/background card for pre-mission briefing |
+| **Game Board** | Central display: systems ON/OFF, operational states, warfare domains, stress, notes |
+
+#### Key Abbreviations
+| Abbr | Meaning |
+|------|---------|
+| **ETBOL** | Estimated Time Back On-Line (repair duration) |
+| **SITREP** | Situational Report — CO or Facilitator calls for all roles to report status |
+| **SOG / STW** | Speed Over Ground / Speed Through Water |
+| **EMCON** | Emissions Control (radar silence posture) |
+| **ROE** | Rules of Engagement |
+| **MTC** | Maritime Tactical Center (shore-side C2) |
+| **AIS** | Automatic Identification System |
+| **WECDIS** | Warship Electronic Chart Display and Information System |
+| **ESM** | Electronic Support Measures (passive radar detection) |
+| **General Quarters** | Full combat readiness — all systems and weapons ON |
+
+#### Turn Structure (Silent Wake)
+- **Turn 0**: Pre-Sail Briefing — role-targeted briefing injects, no blue cards, 15-minute preparation
+- **Turns 1–15**: Execution — each turn has role-targeted injects + up to 2 blue cards chosen by CO
+- **Hot Wash-up**: Post-exercise internal debrief (not a game turn)
+
 ## Domain Model
 
 ```
