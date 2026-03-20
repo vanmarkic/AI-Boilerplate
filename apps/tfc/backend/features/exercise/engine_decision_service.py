@@ -68,12 +68,11 @@ class EngineDecisionService:
             forced_option_ids=forced_ids or None,
         )
 
-        # TODO(Phase3): Apply system effects from selected options via
-        # engine._apply_system_effects(selected_options) and broadcast.
-        # Currently only applied on timeout path (_timeout_loop).
+        # Apply system effects from selected options
+        sys_changes = engine._apply_system_effects(selected_options)
 
-        if extra:
-            await broadcast(extra)
+        if extra or sys_changes:
+            await broadcast(extra + sys_changes)
 
         # Chain to next decision in sequence
         next_id = engine.game_mode.get_next_decision_id(decision_id)
