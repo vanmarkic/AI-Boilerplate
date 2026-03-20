@@ -1,0 +1,105 @@
+<task-notification>
+<task-id>a71cd2e146a85e90a</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/93faf08d-7d56-42cf-a2af-7671c058e94c/tasks/a71cd2e146a85e90a.output</output-file>
+<status>completed</status>
+<summary>Agent "Code review Phase 3 diff" completed</summary>
+<result>I now have everything I need for a complete review. Here is the full assessment.
+
+---
+
+## Phase 3 Code Review: System Effects on Decision Options
+
+### Summary
+
+The implementation is functionally sound for the timeout path and the data model additions are correct. There are no blockers. I found two important issues, three suggestions, and several things worth calling out as well-done.
+
+---
+
+### IMPORTANT Issues (2)
+
+**File:** `apps/tfc/backend/engine/exercise_engine.py:327–340`
+**Issue:** `_apply_system_effects` uses `.get()` on a TypedDict, but `DecisionOptionSnapshot` is a TypedDict, not a plain dict. At runtime in CPython TypedDicts are plain dicts, so `.get()` works, but it circumvents the static type system. The declared type of `selected_options` is `list[DecisionOptionSnapshot]`, and mypy/pyright will flag `opt.get("system_effects", [])` as an error on TypedDict instances because TypedDict does not define `.get()` returning a default. The field `system_effects` is non-optional on the TypedDict (no `total=False`), so direct key access is both correct and type-safe.
+
+Replace:
+```python
+for fx in opt.get("system_effects", []):
+    if fx.get("power_state") is not None:
+        ...
+    if fx.get("operational_state") is not None:
+        ...
+```
+With:
+```python
+for fx in opt["system_effects"]:
+    if fx["power_state"] is not None:
+        ...
+    if fx["operational_state"] is not None:
+        ...
+```
+The `.get()` fallback to `[]` is also a silent swallower of any future structural mismatch — if `system_effects` is missing for some reason, failing loudly is preferable.
+
+---
+
+**File:** `apps/tfc/backend/features/exercise/engine_decision_service.py:71–73`
+**Issue:** System effects are silently skipped on the player-close path. The TODO comment is clear and the separation is deliberate, but there is no test asserting that effects are *not* applied on this path, and no documentation of what a player-close call actually produces in terms of system state. If a scenario author sets `system_effects` on an option and a player closes the decision normally (not via timeout), they will see zero system state changes with no error and no diagnostic. This is a behavioral gap that will surface as a confusing bug during scenario authoring.
+
+Suggestion: Add a test in `engine_decision_service` that closes a decision with an option that has `system_effects` and asserts that no `system_state_change` is broadcast yet — making the incomplete path explicit and regression-safe before Phase 4 fills it in.
+
+---
+
+### Suggestions (3)
+
+**File:** `apps/tfc/backend/features/scenario/scenario_content.py:17–19`
+**Observation:** `SystemEffectDef.operational_state` accepts any `str | None`, but `SystemManager.set_operational` only accepts `"green"`, `"yellow"`, or `"red"` (validated against `OPERATIONAL_ORDER`). An invalid value like `"degraded"` passes Pydantic validation, reaches `_apply_system_effects`, calls `set_operational`, and is silently discarded (because `state not in OPERATIONAL_ORDER` returns `None`). The failure is invisible — no error, no log, no state change.
+
+The fix is a `Literal["green", "yellow", "red"] | None` type on both `SystemEffectDef.operational_state` and the corresponding `SystemEffect` TypedDict field. This pushes validation to the schema boundary where it belongs and eliminates the silent no-op path. The same applies to `SystemStateDef.operational_state` in the same file, which has the same issue but predates this diff.
+
+---
+
+**File:** `apps/tfc/backend/features/scenario/scenario_content.py:30`
+**Observation:** `max_plays: int = 1` has no lower-bound constraint. A scenario author could set `max_plays=0` or `max_plays=-1`, which would pass validation. The engine does not yet enforce `max_plays` (it is carried as passive data), but when enforcement is added, it should not have to guard against non-positive values.
+
+Add `max_plays: int = Field(default=1, ge=1)` now, before enforcement is built on top of it.
+
+---
+
+**File:** `apps/tfc/backend/engine/exercise_engine.py:70–86` (inline property formatting)
+**Observation:** The change from standard multi-line property bodies to inline single-line form (`def phase(self) -> EnginePhase: return self._phase`) is non-standard Python style. PEP 8 recommends compound statements on separate lines, and the existing codebase uses the multi-line form everywhere else (including all other methods in this file). The grouping under a `# ── read-only accessors ──` banner is a net positive, but the inline body format will fail standard linters (`E704` in pycodestyle/flake8) unless that rule is explicitly ignored.
+
+Either keep the grouped comment and restore the conventional body-on-next-line style, or verify that `E704` is suppressed project-wide. The compressed form also makes individual properties harder to target with a debugger breakpoint.
+
+---
+
+### Positive Observations
+
+**File:** `apps/tfc/backend/engine/state_changes.py:50–64`
+The `SystemEffect` TypedDict is the right construct here — it keeps the type in the source-of-truth layer for codegen, matches the dict-based API contract throughout the engine, and is consistent with all other snapshot types in this file. The field order in `DecisionOptionSnapshot` (new fields inserted before `role`) is sensible and does not break any callers because TypedDicts are structurally typed.
+
+**File:** `apps/tfc/backend/engine/strategies.py:137–152`
+The `system_effects()` strategy is correctly placed before `option_lists()` and `signed_option_lists()`, satisfying the project's "strategies must exist before property tests" convention. The `system_ids()` reuse is the right call — keeps generated IDs consistent across the test suite so property tests can find systems that actually exist in the engine.
+
+**File:** `apps/tfc/backend/engine/exercise_engine_system_effects_test.py:307–336`
+The `test_no_change_skipped` and `test_unknown_system_skipped` tests are exactly the edge cases that commonly get missed. Testing idempotency (applying the same state that already exists returns no changes) and unknown system leniency (no crash, no change) covers the two most important silent-failure paths in `SystemManager`.
+
+**File:** `apps/tfc/backend/engine/exercise_engine.py:87–88`
+The `_start_timeout_monitor` guard flip from `if task and not done: return` to `if not task or done: create` is a cleaner expression of the same condition and eliminates the early-return branch. Small but clearly correct.
+
+**File:** `apps/tfc/backend/engine/exercise_engine.py:72–76`
+`find_decision_template` replaced with a `next(..., None)` expression — removes four lines and is more idiomatic. No correctness change.
+
+---
+
+### Checklist
+
+- [x] No DB or HTTP imports in `engine/` — the new method is pure Python, delegating only to `SystemManager`
+- [x] TypedDicts present for all new serialised shapes (`SystemEffect`, updated `DecisionOptionSnapshot`)
+- [x] Hypothesis strategies updated before property tests can use them
+- [x] Timeout path applies effects and broadcasts them via `_on_state_change`
+- [ ] Player-close path does not apply effects — gap tracked by TODO but not test-guarded
+- [ ] `operational_state` not validated against the enum at the schema boundary
+- [ ] `max_plays` has no lower-bound constraint in the Pydantic model
+- [ ] Inline property style diverges from project conventions and may trigger linter warnings</result>
+<usage><total_tokens>39757</total_tokens><tool_uses>25</tool_uses><duration_ms>185992</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/93faf08d-7d56-42cf-a2af-7671c058e94c/tasks/a71cd2e146a85e90a.output
