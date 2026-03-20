@@ -11,6 +11,7 @@ from hypothesis.strategies import SearchStrategy
 
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.issue_manager import TrackedIssue, TriggerMode
+from engine.system_manager import SystemState
 
 
 def event_ids(prefix: str = "e") -> SearchStrategy[str]:
@@ -95,6 +96,35 @@ def tracked_issues(
     )
 
 
+def system_ids() -> SearchStrategy[str]:
+    return event_ids(prefix="sys")
+
+
+@st.composite
+def system_states(draw: st.DrawFn) -> SystemState:
+    """Generate a random SystemState."""
+    sid = draw(system_ids())
+    return SystemState(
+        system_id=sid,
+        label=f"System {sid}",
+        category=draw(st.sampled_from(["system", "weapon"])),
+        power=draw(st.booleans()),
+        operational=draw(st.sampled_from(["green", "yellow", "red"])),
+    )
+
+
+def system_state_lists(
+    min_size: int = 0, max_size: int = 10,
+) -> SearchStrategy[list[SystemState]]:
+    """Generate a list of SystemState with unique system_ids."""
+    return st.lists(
+        system_states(),
+        min_size=min_size,
+        max_size=max_size,
+        unique_by=lambda s: s.system_id,
+    )
+
+
 def monotonic_play_times(min_size: int = 1, max_size: int = 50) -> SearchStrategy[list[float]]:
     """Generate a sorted list of non-negative play times (monotonic ticks)."""
     return st.lists(
@@ -102,6 +132,24 @@ def monotonic_play_times(min_size: int = 1, max_size: int = 50) -> SearchStrateg
         min_size=min_size,
         max_size=max_size,
     ).map(sorted)
+
+
+def system_effects() -> SearchStrategy[list[dict]]:
+    """Generate a list of SystemEffect dicts (may be empty)."""
+    return st.lists(
+        st.fixed_dictionaries(
+            {
+                "system_id": system_ids(),
+                "operational_state": st.one_of(
+                    st.just(None),
+                    st.sampled_from(["green", "yellow", "red"]),
+                ),
+                "power_state": st.one_of(st.just(None), st.booleans()),
+            }
+        ),
+        min_size=0,
+        max_size=3,
+    )
 
 
 def scores() -> SearchStrategy[float]:
@@ -114,9 +162,9 @@ def signed_scores() -> SearchStrategy[float]:
     return st.floats(min_value=-50.0, max_value=100.0, allow_nan=False, allow_infinity=False)
 
 
-def penalty_factors() -> SearchStrategy[float]:
-    """Positive penalty multipliers."""
-    return st.floats(min_value=0.01, max_value=10.0, allow_nan=False, allow_infinity=False)
+def stress_deltas() -> SearchStrategy[int]:
+    """Stress delta values for decision options (can be positive or negative)."""
+    return st.integers(min_value=-5, max_value=5)
 
 
 def decision_sequences(min_size: int = 1, max_size: int = 10) -> SearchStrategy[list[str]]:
@@ -130,13 +178,18 @@ def decision_sequences(min_size: int = 1, max_size: int = 10) -> SearchStrategy[
 
 
 def option_lists(min_size: int = 1, max_size: int = 6) -> SearchStrategy[list[dict]]:
-    """Generate lists of decision options with id, label, and score."""
+    """Generate lists of decision options with all DecisionOptionSnapshot fields."""
     return st.lists(
         st.fixed_dictionaries(
             {
                 "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
                 "label": st.just("Option"),
                 "score": scores(),
+                "stress_delta": stress_deltas(),
+                "system_effects": system_effects(),
+                "targets_system": st.booleans(),
+                "max_plays": st.integers(min_value=1, max_value=5),
+                "role": st.none(),
             }
         ),
         min_size=min_size,
@@ -149,13 +202,18 @@ def signed_option_lists(
     min_size: int = 1,
     max_size: int = 6,
 ) -> SearchStrategy[list[dict]]:
-    """Option lists with +/0/- scores."""
+    """Option lists with +/0/- scores and all DecisionOptionSnapshot fields."""
     return st.lists(
         st.fixed_dictionaries(
             {
                 "id": st.text(alphabet="abcdefghijklmnop", min_size=1, max_size=5),
                 "label": st.just("Option"),
                 "score": signed_scores(),
+                "stress_delta": stress_deltas(),
+                "system_effects": system_effects(),
+                "targets_system": st.booleans(),
+                "max_plays": st.integers(min_value=1, max_value=5),
+                "role": st.none(),
             }
         ),
         min_size=min_size,

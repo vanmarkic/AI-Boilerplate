@@ -43,7 +43,5 @@ def create_game_mode(name: str, config: dict[str, object] | None = None) -> Game
         return SimpleCollaborativeMode(
             decision_sequence=cfg.get("decision_sequence", []),
             base_decision_time_ms=cfg.get("base_decision_time_ms", 300_000),
-            penalty_factor=cfg.get("penalty_factor", 0.1),
-            min_decision_time_ms=cfg.get("min_decision_time_ms", 30_000),
         )
     return ClassicMode()

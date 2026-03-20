@@ -67,8 +67,12 @@ class EngineDecisionService:
             all_options,
             forced_option_ids=forced_ids or None,
         )
-        if extra:
-            await broadcast(extra)
+
+        # Apply system effects from selected options
+        sys_changes = engine._apply_system_effects(selected_options)
+
+        if extra or sys_changes:
+            await broadcast(extra + sys_changes)
 
         # Chain to next decision in sequence
         next_id = engine.game_mode.get_next_decision_id(decision_id)

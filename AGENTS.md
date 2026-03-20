@@ -72,7 +72,8 @@ Router registration and dependency wiring are automatic — no manual edits to `
 
 ## LLM Context Scoping
 - TFC and main app share NO backend/frontend code — they are independent apps.
-- Use `make context-<scope>` to focus the LLM on what matters:
+- **Before starting work, run the appropriate `make context-*` target based on the task scope.** If the scope is unclear, ask the user.
+- Available scopes:
   - `context-tfc` / `context-main` — full app (frontend + backend)
   - `context-tfc-fe` / `context-main-fe` — frontend only (pure GUI work)
   - `context-tfc-be` / `context-main-be` — backend only
@@ -80,6 +81,12 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - Append `SLIM=1` to also exclude tests and e2e (e.g. `make context-tfc-fe SLIM=1`).
 - Shared packages (`packages/`) are always visible regardless of context scope.
 - `.claudeignore` is gitignored — each developer sets their own scope.
+
+## Entire CLI (AI Session Recording)
+- Entire captures AI agent sessions (transcripts, prompts, token usage) alongside git commits on a separate `entire/checkpoints/v1` branch.
+- Hooks are configured in `.claude/settings.json` — do NOT remove or modify the `entire hooks` entries.
+- Do NOT read or write to `.entire/metadata/` or `.entire/tmp/`.
+- Entire runs passively — no changes to your workflow required.
 
 ## Meta
 - See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.

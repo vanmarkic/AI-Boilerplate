@@ -1,16 +1,14 @@
-"""Tests for SimpleCollaborativeMode — scoring, penalties, auto-submit."""
+"""Tests for SimpleCollaborativeMode — scoring, stress, auto-submit."""
 
 from __future__ import annotations
 
-from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
+from engine.game_modes.simple_collaborative import STRESS_TIME_TABLE, SimpleCollaborativeMode
 
 
 def _mode(**kwargs: object) -> SimpleCollaborativeMode:
     defaults = {
         "decision_sequence": ["d1", "d2", "d3"],
         "base_decision_time_ms": 300_000,
-        "penalty_factor": 0.1,
-        "min_decision_time_ms": 30_000,
     }
     defaults.update(kwargs)
     return SimpleCollaborativeMode(**defaults)
@@ -21,12 +19,13 @@ def _close_v2(
     decision_id: str,
     selected_score: float,
     max_score: float,
+    stress_delta: int = 0,
 ) -> list[dict]:
     """Helper: wrap scalar scores as v2 option lists for testing."""
-    selected = [{"id": "sel", "label": "Sel", "score": selected_score}]
+    selected = [{"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta}]
     all_opts = [
-        {"id": "sel", "label": "Sel", "score": selected_score},
-        {"id": "best", "label": "Best", "score": max_score},
+        {"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta},
+        {"id": "best", "label": "Best", "score": max_score, "stress_delta": 0},
     ]
     return mode.on_decision_closed_v2(decision_id, selected, all_opts)
 
@@ -42,9 +41,9 @@ def test_does_not_require_gm() -> None:
 def test_auto_submit_picks_worst_option() -> None:
     mode = _mode()
     options = [
-        {"id": "good", "label": "Good", "score": 3.0},
-        {"id": "bad", "label": "Bad", "score": 0.5},
-        {"id": "ok", "label": "OK", "score": 1.5},
+        {"id": "good", "label": "Good", "score": 3.0, "stress_delta": 0},
+        {"id": "bad", "label": "Bad", "score": 0.5, "stress_delta": 0},
+        {"id": "ok", "label": "OK", "score": 1.5, "stress_delta": 0},
     ]
     assert mode.on_decision_timeout("d1", options) == "bad"
 
@@ -54,39 +53,63 @@ def test_auto_submit_empty_options() -> None:
     assert mode.on_decision_timeout("d1", []) is None
 
 
-def test_perfect_score_no_penalty() -> None:
+def test_perfect_score_no_stress() -> None:
     mode = _mode()
-    opts = [{"id": "a", "label": "A", "score": 3.0}]
+    opts = [{"id": "a", "label": "A", "score": 3.0, "stress_delta": 0}]
     changes = mode.on_decision_closed_v2("d1", opts, opts)
     sc = next(c for c in changes if c["type"] == "score_change")
     assert sc["total_score"] == 3.0
-    assert sc["penalty_ms"] == 0.0
+    assert sc["stress"] == 0
     assert sc["turn_number"] == 2
-    assert mode.accumulated_penalty_ms == 0.0
+    assert mode.stress == 0
 
 
-def test_wrong_answer_applies_penalty() -> None:
+def test_stress_increases_with_positive_delta() -> None:
     mode = _mode()
-    _close_v2(mode, "d1", selected_score=1.0, max_score=3.0)
-    # penalty = (3.0 - 1.0) * 0.1 * 1000 = 200ms
-    assert mode.accumulated_penalty_ms == 200.0
-    assert mode.get_decision_time_ms(300_000) == 300_000 - 200
+    _close_v2(mode, "d1", selected_score=1.0, max_score=3.0, stress_delta=2)
+    assert mode.stress == 2
+    assert mode.get_decision_time_ms(300_000) == STRESS_TIME_TABLE[2]
 
 
-def test_penalty_accumulates() -> None:
+def test_stress_accumulates() -> None:
     mode = _mode()
-    _close_v2(mode, "d1", selected_score=1.0, max_score=3.0)
-    _close_v2(mode, "d2", selected_score=0.0, max_score=2.0)
-    # penalty1 = 200, penalty2 = (2.0 - 0.0) * 0.1 * 1000 = 200
-    assert mode.accumulated_penalty_ms == 400.0
+    _close_v2(mode, "d1", selected_score=1.0, max_score=3.0, stress_delta=3)
+    _close_v2(mode, "d2", selected_score=0.0, max_score=2.0, stress_delta=2)
+    assert mode.stress == 5
     assert mode.total_score == 1.0
     assert mode.turn_number == 3
 
 
-def test_penalty_floor() -> None:
-    mode = _mode(min_decision_time_ms=30_000)
-    mode.accumulated_penalty_ms = 999_999  # extreme penalty
-    assert mode.get_decision_time_ms(300_000) == 30_000
+def test_stress_clamped_at_10() -> None:
+    mode = _mode()
+    mode.stress = 8
+    _close_v2(mode, "d1", selected_score=1.0, max_score=3.0, stress_delta=5)
+    assert mode.stress == 10
+
+
+def test_stress_clamped_at_0() -> None:
+    mode = _mode()
+    mode.stress = 2
+    _close_v2(mode, "d1", selected_score=1.0, max_score=1.0, stress_delta=-5)
+    assert mode.stress == 0
+
+
+def test_stress_time_table_lookup() -> None:
+    mode = _mode()
+    for stress_level, expected_ms in STRESS_TIME_TABLE.items():
+        mode.stress = stress_level
+        assert mode.get_decision_time_ms(300_000) == expected_ms
+
+
+def test_stress_out_of_table_gives_180000() -> None:
+    """Stress values outside the table fall back to 180_000."""
+    mode = _mode()
+    mode.stress = 10
+    # Stress 10 is in the table
+    assert mode.get_decision_time_ms(300_000) == 180_000
+    # If somehow stress were beyond 10 (shouldn't happen but defensive)
+    mode.stress = 99
+    assert mode.get_decision_time_ms(300_000) == 180_000
 
 
 def test_decision_sequence_advances() -> None:
@@ -102,32 +125,30 @@ def test_decision_sequence_advances() -> None:
 
 def test_score_change_includes_next_decision_time() -> None:
     mode = _mode()
-    _close_v2(mode, "d1", selected_score=0.0, max_score=2.0)
-    # penalty = 200ms
-    changes = _close_v2(mode, "d2", selected_score=1.0, max_score=2.0)
-    # second penalty = (2.0 - 1.0) * 0.1 * 1000 = 100
+    _close_v2(mode, "d1", selected_score=0.0, max_score=2.0, stress_delta=3)
+    changes = _close_v2(mode, "d2", selected_score=1.0, max_score=2.0, stress_delta=2)
     sc = next(c for c in changes if c["type"] == "score_change")
-    assert sc["next_decision_time_ms"] == 300_000 - 300
+    # stress should be 3 + 2 = 5
+    assert sc["next_decision_time_ms"] == STRESS_TIME_TABLE[5]
 
 
 # -- Phase 2: Option-list based scoring -----------------------------------
 
 
 _OPTS = [
-    {"id": "good", "label": "Good", "score": 10.0},
-    {"id": "ok", "label": "OK", "score": 6.0},
-    {"id": "bad", "label": "Bad", "score": -2.0},
+    {"id": "good", "label": "Good", "score": 10.0, "stress_delta": 0},
+    {"id": "ok", "label": "OK", "score": 6.0, "stress_delta": 1},
+    {"id": "bad", "label": "Bad", "score": -2.0, "stress_delta": 2},
 ]
 
 
 def test_option_scoring_single_card() -> None:
     """Selecting 1 card: score = card score, max = top-1 score."""
     mode = _mode()
-    selected = [_OPTS[1]]  # ok, score=6
+    selected = [_OPTS[1]]  # ok, score=6, stress_delta=1
     changes = mode.on_decision_closed_v2("d1", selected, _OPTS)
     assert changes[0]["total_score"] == 6.0
-    # penalty = (10.0 - 6.0) * 0.1 * 1000 = 400ms
-    assert changes[0]["penalty_ms"] == 400.0
+    assert changes[0]["stress"] == 1
 
 
 def test_option_scoring_multiple_cards() -> None:
@@ -136,9 +157,8 @@ def test_option_scoring_multiple_cards() -> None:
     selected = [_OPTS[1], _OPTS[2]]  # ok + bad = 6.0 + (-2.0) = 4.0
     changes = mode.on_decision_closed_v2("d1", selected, _OPTS)
     assert changes[0]["total_score"] == 4.0
-    # max for 2 cards = top-2 scores sorted desc = 10.0 + 6.0 = 16.0
-    # penalty = (16.0 - 4.0) * 0.1 * 1000 = 1200ms
-    assert abs(changes[0]["penalty_ms"] - 1200.0) < 1e-6
+    # stress_delta = 1 + 2 = 3
+    assert changes[0]["stress"] == 3
 
 
 def test_option_scoring_negative_score_reduces_total() -> None:
@@ -149,12 +169,12 @@ def test_option_scoring_negative_score_reduces_total() -> None:
     assert changes[0]["total_score"] == -2.0
 
 
-def test_option_scoring_perfect_selection_no_penalty() -> None:
-    """Selecting the best card(s) → zero penalty."""
+def test_option_scoring_perfect_selection_no_stress() -> None:
+    """Selecting the best card(s) with zero stress_delta -> zero stress."""
     mode = _mode()
-    selected = [_OPTS[0]]  # good, score=10
+    selected = [_OPTS[0]]  # good, score=10, stress_delta=0
     changes = mode.on_decision_closed_v2("d1", selected, _OPTS)
-    assert changes[0]["penalty_ms"] == 0.0
+    assert changes[0]["stress"] == 0
 
 
 def test_option_scoring_advances_turn_and_index() -> None:
@@ -167,8 +187,8 @@ def test_option_scoring_advances_turn_and_index() -> None:
 # -- Phase 3: Forced card enforcement -------------------------------------
 
 
-def test_forced_card_present_no_penalty() -> None:
-    """If player selects the forced card, no forced-card penalty applied."""
+def test_forced_card_present_no_extra_change() -> None:
+    """If player selects the forced card, no forced-card change applied."""
     mode = _mode()
     forced = ["good"]
     selected = [_OPTS[0]]  # includes forced card
@@ -177,8 +197,8 @@ def test_forced_card_present_no_penalty() -> None:
     assert all(c["type"] != "forced_card_applied" for c in changes)
 
 
-def test_forced_card_missing_auto_added_with_penalty() -> None:
-    """If player omits forced card, it's auto-added and penalty applied."""
+def test_forced_card_missing_auto_added() -> None:
+    """If player omits forced card, it's auto-added."""
     mode = _mode()
     forced = ["good"]
     selected = [_OPTS[1]]  # omits forced card "good"
@@ -201,7 +221,7 @@ def test_forced_card_score_included_in_total() -> None:
 
 
 def test_no_forced_cards_no_enforcement() -> None:
-    """No forced_option_ids → no forced card logic fires."""
+    """No forced_option_ids -> no forced card logic fires."""
     mode = _mode()
     changes = mode.on_decision_closed_v2("d1", [_OPTS[1]], _OPTS)
     assert all(c["type"] != "forced_card_applied" for c in changes)
@@ -216,7 +236,7 @@ def test_snapshot_initial_state() -> None:
     snap = mode.snapshot()
     assert snap is not None
     assert snap["total_score"] == 0.0
-    assert snap["penalty_ms"] == 0.0
+    assert snap["stress"] == 0
     assert snap["turn_number"] == 1
     assert snap["next_decision_time_ms"] == 300_000
 
@@ -224,7 +244,7 @@ def test_snapshot_initial_state() -> None:
 def test_snapshot_after_decisions() -> None:
     """Snapshot reflects accumulated score after decisions close."""
     mode = _mode()
-    mode.on_decision_closed_v2("d1", [_OPTS[0]], _OPTS)  # good=10, best=10 → 0 penalty
+    mode.on_decision_closed_v2("d1", [_OPTS[0]], _OPTS)  # good=10, stress_delta=0
     snap = mode.snapshot()
     assert snap is not None
     assert snap["total_score"] == 10.0
