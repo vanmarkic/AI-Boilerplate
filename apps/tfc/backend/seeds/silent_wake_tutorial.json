@@ -4,9 +4,7 @@
   "content": {
     "game_mode": "simple_collaborative",
     "game_mode_config": {
-      "base_decision_time_ms": 300000,
-      "penalty_factor": 0.1,
-      "min_decision_time_ms": 280000
+      "base_decision_time_ms": 300000
     },
     "default_time_factor": 1.0,
     "briefing": "Your frigate is approaching its home port after a routine patrol. You must complete the port entry before the tide window closes. Your time of arrival is crucial. Weather is fair, sea state calm, all systems nominal at departure.",

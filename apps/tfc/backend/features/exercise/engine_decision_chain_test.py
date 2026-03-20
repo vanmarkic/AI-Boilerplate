@@ -16,14 +16,14 @@ from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.session_store import session_store
 
 OPTIONS = [
-    {"id": "good", "label": "Good", "score": 10},
-    {"id": "bad", "label": "Bad", "score": 0},
+    {"id": "good", "label": "Good", "score": 10, "stress_delta": 0},
+    {"id": "bad", "label": "Bad", "score": 0, "stress_delta": 1},
 ]
 
 FORCED_OPTIONS = [
-    {"id": "good", "label": "Good", "score": 10},
-    {"id": "forced", "label": "Forced", "score": -5},
-    {"id": "bad", "label": "Bad", "score": 0},
+    {"id": "good", "label": "Good", "score": 10, "stress_delta": 0},
+    {"id": "forced", "label": "Forced", "score": -5, "stress_delta": 0},
+    {"id": "bad", "label": "Bad", "score": 0, "stress_delta": 1},
 ]
 
 
@@ -31,8 +31,6 @@ def _chain_config(exercise_id: int, templates: list[DecisionTemplate]) -> Engine
     mode = SimpleCollaborativeMode(
         decision_sequence=[t.id for t in templates],
         base_decision_time_ms=60_000,
-        penalty_factor=0.1,
-        min_decision_time_ms=5_000,
     )
     return EngineConfig(
         exercise_id=exercise_id,
@@ -140,17 +138,17 @@ async def test_close_last_decision_no_more_open(
     assert len(decisions.json()) == 0
 
 
-# ── Scoring and penalties ────────────────────────────────────────────────
+# ── Scoring and stress ───────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_wrong_answer_applies_penalty(client: AsyncClient) -> None:
+async def test_wrong_answer_increases_stress(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     t1, t2 = _template("d1"), _template("d2")
     _make_engine(eid, [t1, t2])
     _open_first_decision(eid, t1)
 
-    # Select bad option (score=0) — max is 10, penalty expected
+    # Select bad option (score=0, stress_delta=1) — stress increases
     await client.post(
         f"/api/exercises/{eid}/engine/decisions/d1/close",
         json={"selected_option_ids": ["bad"]},
@@ -159,11 +157,11 @@ async def test_wrong_answer_applies_penalty(client: AsyncClient) -> None:
     engine = session_store.get(eid)
     mode = engine.game_mode
     assert mode.total_score == 0.0
-    assert mode.accumulated_penalty_ms > 0
+    assert mode.stress == 1
 
 
 @pytest.mark.asyncio
-async def test_correct_answer_no_penalty(client: AsyncClient) -> None:
+async def test_correct_answer_no_stress(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     t1, t2 = _template("d1"), _template("d2")
     _make_engine(eid, [t1, t2])
@@ -176,7 +174,7 @@ async def test_correct_answer_no_penalty(client: AsyncClient) -> None:
 
     engine = session_store.get(eid)
     assert engine.game_mode.total_score == 10.0
-    assert engine.game_mode.accumulated_penalty_ms == 0.0
+    assert engine.game_mode.stress == 0
 
 
 # ── Forced card enforcement ──────────────────────────────────────────────

@@ -4,8 +4,7 @@
   "content": {
     "game_mode": "simple_collaborative",
     "game_mode_config": {
-      "base_decision_time_ms": 300000,
-      "penalty_factor": 0.1
+      "base_decision_time_ms": 300000
     },
     "default_time_factor": 1.0,
     "briefing": "You are the crew of a Frigate on independent transit to patrol sector Alpha-3. NLT 112000B arrival. Transit time approx. 6 hrs at planned speed 15 kts. Regional posture: heightened readiness. ROE: Weapons Tight. Intelligence indicates possible hostile naval presence in theatre with potential use of visual and electronic deception tactics. No escort assigned. All systems nominal. Organic helicopter joins upon arrival.",

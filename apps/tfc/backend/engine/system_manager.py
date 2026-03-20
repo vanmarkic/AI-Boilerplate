@@ -6,9 +6,9 @@ and an operational state (green/yellow/red).
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
-from engine.state_changes import SystemStateChange
+from engine.state_changes import SystemSnapshot, SystemStateChange
 
 OPERATIONAL_ORDER = ["red", "yellow", "green"]
 
@@ -22,9 +22,11 @@ class SystemState:
     operational: str = "green"
 
 
-@dataclass
 class SystemManager:
-    _systems: dict[str, SystemState] = field(default_factory=dict)
+    """Manages ship system states (power on/off + operational traffic-light)."""
+
+    def __init__(self) -> None:
+        self._systems: dict[str, SystemState] = {}
 
     def load_systems(self, systems: list[SystemState]) -> None:
         self._systems = {s.system_id: s for s in systems}
@@ -74,16 +76,16 @@ class SystemManager:
                 changes.append(self._change(s, "power_changed"))
         return changes
 
-    def snapshot(self) -> list[dict]:
+    def snapshot(self) -> list[SystemSnapshot]:
         """Return list of system state dicts for all systems."""
         return [
-            {
-                "system_id": s.system_id,
-                "label": s.label,
-                "category": s.category,
-                "power": s.power,
-                "operational": s.operational,
-            }
+            SystemSnapshot(
+                system_id=s.system_id,
+                label=s.label,
+                category=s.category,
+                power=s.power,
+                operational=s.operational,
+            )
             for s in self._systems.values()
         ]
 

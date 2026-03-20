@@ -51,6 +51,7 @@ class DecisionOptionSnapshot(TypedDict):
     id: str
     label: str
     score: float
+    stress_delta: int
     role: str | None
 
 
@@ -73,6 +74,14 @@ class DecisionSnapshot(TypedDict):
     selected_option_ids: list[str]
 
 
+class SystemSnapshot(TypedDict):
+    system_id: str
+    label: str
+    category: str
+    power: bool
+    operational: str
+
+
 class EngineSnapshot(TypedDict):
     exercise_id: int
     title: str
@@ -82,7 +91,7 @@ class EngineSnapshot(TypedDict):
     issues: list[IssueSnapshot]
     decisions: list[DecisionSnapshot]
     score: dict[str, object] | None
-    systems: list[dict]
+    systems: list[SystemSnapshot]
 
 
 class PresenceEntry(TypedDict):
@@ -160,7 +169,7 @@ class SpeedChange(TypedDict):
 class ScoreChange(TypedDict):
     type: str  # "score_change"
     total_score: float
-    penalty_ms: float
+    stress: int
     next_decision_time_ms: int
     turn_number: int
 
