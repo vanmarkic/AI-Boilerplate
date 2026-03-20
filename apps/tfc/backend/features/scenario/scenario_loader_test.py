@@ -6,6 +6,7 @@ from features.scenario.scenario_content import (
     DecisionOptionDef,
     DecisionTemplateDef,
     ScenarioContent,
+    SystemEffectDef,
 )
 from features.scenario.scenario_loader import (
     build_engine_config,
@@ -138,3 +139,73 @@ def test_load_decision_templates_preserves_target_roles() -> None:
     result = load_decision_templates(content)
     assert len(result) == 1
     assert result[0].target_roles == []
+
+
+def test_build_engine_config_propagates_system_effects_round_trip() -> None:
+    """Round-trip: system_effects, targets_system, max_plays survive loader."""
+    dt = DecisionTemplateDef(
+        id="dt-sys",
+        title="Power down radar?",
+        description="Shut down the radar system",
+        issue_id="i-radar",
+        question_type="single_choice",
+        options=[
+            DecisionOptionDef(
+                id="o-yes",
+                label="Shut down",
+                score=0.5,
+                system_effects=[
+                    SystemEffectDef(
+                        system_id="radar-primary",
+                        operational_state="red",
+                        power_state=False,
+                    ),
+                    SystemEffectDef(
+                        system_id="radar-backup",
+                        operational_state="yellow",
+                        power_state=None,
+                    ),
+                ],
+                targets_system=True,
+                max_plays=2,
+            ),
+            DecisionOptionDef(
+                id="o-no",
+                label="Keep running",
+                score=0.0,
+                system_effects=[],
+                targets_system=False,
+                max_plays=1,
+            ),
+        ],
+        completion_mode="first_response",
+    )
+    content = _minimal_content(decision_templates=[dt])
+    config = build_engine_config(exercise_id=99, title="System Test", content=content)
+
+    assert len(config.decision_templates) == 1
+    tmpl = config.decision_templates[0]
+    assert tmpl.id == "dt-sys"
+    assert len(tmpl.options) == 2
+
+    opt_yes = tmpl.options[0]
+    assert opt_yes["id"] == "o-yes"
+    assert opt_yes["targets_system"] is True
+    assert opt_yes["max_plays"] == 2
+    assert len(opt_yes["system_effects"]) == 2
+
+    eff0 = opt_yes["system_effects"][0]
+    assert eff0["system_id"] == "radar-primary"
+    assert eff0["operational_state"] == "red"
+    assert eff0["power_state"] is False
+
+    eff1 = opt_yes["system_effects"][1]
+    assert eff1["system_id"] == "radar-backup"
+    assert eff1["operational_state"] == "yellow"
+    assert eff1["power_state"] is None
+
+    opt_no = tmpl.options[1]
+    assert opt_no["id"] == "o-no"
+    assert opt_no["targets_system"] is False
+    assert opt_no["max_plays"] == 1
+    assert opt_no["system_effects"] == []
