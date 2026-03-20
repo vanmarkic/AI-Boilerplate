@@ -11,12 +11,23 @@ from pydantic import BaseModel, model_validator
 from core.game_mode_constants import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
 
 
+class SystemEffectDef(BaseModel):
+    """A system state change triggered by selecting a decision option."""
+
+    system_id: str
+    operational_state: str | None = None  # "green" | "yellow" | "red"
+    power_state: bool | None = None
+
+
 class DecisionOptionDef(BaseModel):
     """A single selectable option within a decision template."""
 
     id: str
     label: str
     score: float = 0.0
+    system_effects: list[SystemEffectDef] = []
+    targets_system: bool = False
+    max_plays: int = 1
 
 
 class DecisionTemplateDef(BaseModel):
@@ -72,6 +83,26 @@ class ScenarioPhaseDef(BaseModel):
     events: list[str] = []  # event IDs in this phase
 
 
+class SystemStateDef(BaseModel):
+    """Initial or expected system state in scenario definition."""
+
+    system_id: str
+    operational_state: str | None = None  # "green"|"yellow"|"red"
+    power_state: bool | None = None
+
+
+class TurnDefinition(BaseModel):
+    """Groups injects and a decision template into a turn."""
+
+    turn_index: int
+    title: str = ""
+    facilitator_prompt: str | None = None
+    has_decisions: bool = True
+    inject_ids: list[str] = []
+    decision_template_id: str | None = None
+    base_stress_delta: int = 0
+
+
 class RoleDef(BaseModel):
     """Definition of a participant role within a scenario."""
 
@@ -100,6 +131,9 @@ class ScenarioContent(BaseModel):
     game_mode_config: dict[str, object] = {}
     decision_sequence: list[str] = []
     roles: list[RoleDef] = []
+    turns: list[TurnDefinition] = []
+    initial_system_states: list[SystemStateDef] = []
+    score_tier_thresholds: dict[str, float] = {}  # {"lo": 0.33, "mid": 0.66}
 
     @model_validator(mode="after")
     def validate_roles(self) -> ScenarioContent:

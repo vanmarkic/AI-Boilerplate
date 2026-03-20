@@ -47,10 +47,20 @@ class IssueSnapshot(TypedDict):
     released: bool
 
 
+class SystemEffect(TypedDict):
+    system_id: str
+    operational_state: str | None
+    power_state: bool | None
+
+
 class DecisionOptionSnapshot(TypedDict):
     id: str
     label: str
     score: float
+    stress_delta: int
+    system_effects: list[SystemEffect]
+    targets_system: bool
+    max_plays: int
     role: str | None
 
 
@@ -73,6 +83,14 @@ class DecisionSnapshot(TypedDict):
     selected_option_ids: list[str]
 
 
+class SystemSnapshot(TypedDict):
+    system_id: str
+    label: str
+    category: str
+    power: bool
+    operational: str
+
+
 class EngineSnapshot(TypedDict):
     exercise_id: int
     title: str
@@ -82,6 +100,7 @@ class EngineSnapshot(TypedDict):
     issues: list[IssueSnapshot]
     decisions: list[DecisionSnapshot]
     score: dict[str, object] | None
+    systems: list[SystemSnapshot]
 
 
 class PresenceEntry(TypedDict):
@@ -159,7 +178,7 @@ class SpeedChange(TypedDict):
 class ScoreChange(TypedDict):
     type: str  # "score_change"
     total_score: float
-    penalty_ms: float
+    stress: int
     next_decision_time_ms: int
     turn_number: int
 
@@ -178,6 +197,14 @@ class ForcedCardApplied(TypedDict):
     reason: str
 
 
+class SystemStateChange(TypedDict):
+    type: str  # "system_state_change"
+    system_id: str
+    action: str  # "power_changed" | "operational_changed"
+    power: bool
+    operational: str
+
+
 # Union of all change types for type-narrowing on `change["type"]`.
 StateChange = (
     PhaseChange
@@ -189,4 +216,5 @@ StateChange = (
     | ScoreChange
     | RecommendationSubmitted
     | ForcedCardApplied
+    | SystemStateChange
 )

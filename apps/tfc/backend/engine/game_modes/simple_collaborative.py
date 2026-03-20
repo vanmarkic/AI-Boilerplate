@@ -3,7 +3,7 @@
 No GM required. Decisions chain sequentially — each opens immediately
 when the previous one closes. Advisors submit recommendations in
 real-time; the decision-maker makes the final call. Wrong answers
-shrink the time available for subsequent decisions.
+increase stress, which reduces the time available for subsequent decisions.
 """
 
 from __future__ import annotations
@@ -12,6 +12,11 @@ from dataclasses import dataclass, field
 
 from engine.state_changes import DecisionOptionSnapshot, ForcedCardApplied, ScoreChange, StateChange
 
+STRESS_TIME_TABLE: dict[int, int] = {
+    0: 300_000, 1: 290_000, 2: 280_000, 3: 270_000, 4: 260_000,
+    5: 250_000, 6: 240_000, 7: 230_000, 8: 210_000, 9: 190_000, 10: 180_000,
+}
+
 
 @dataclass
 class SimpleCollaborativeMode:
@@ -19,11 +24,9 @@ class SimpleCollaborativeMode:
 
     decision_sequence: list[str] = field(default_factory=list)
     base_decision_time_ms: int = 300_000
-    penalty_factor: float = 0.1
-    min_decision_time_ms: int = 30_000
 
     # Mutable runtime state
-    accumulated_penalty_ms: float = 0.0
+    stress: int = 0
     total_score: float = 0.0
     turn_number: int = 1
     current_index: int = 0
@@ -75,26 +78,20 @@ class SimpleCollaborativeMode:
                     changes.append(change)
 
         # Compute scores
-        n = len(effective_options)
         selected_score = sum(o.get("score", 0) for o in effective_options)
-        top_n = sorted(
-            (o.get("score", 0) for o in all_options),
-            reverse=True,
-        )[:n]
-        max_score = sum(top_n)
 
-        # Score the decision, apply penalty, advance turn (inlined from v1)
+        # Compute stress delta from selected options
+        stress_delta = sum(o.get("stress_delta", 0) for o in effective_options)
+
+        # Score the decision, apply stress, advance turn
         self.turn_number += 1
         self.total_score += selected_score
-        penalty_ms = 0.0
-        if selected_score < max_score:
-            penalty_ms = (max_score - selected_score) * self.penalty_factor * 1000
-            self.accumulated_penalty_ms += penalty_ms
+        self.stress = max(0, min(10, self.stress + stress_delta))
         self.current_index += 1
         score_change: ScoreChange = {
             "type": "score_change",
             "total_score": self.total_score,
-            "penalty_ms": penalty_ms,
+            "stress": self.stress,
             "next_decision_time_ms": self.get_decision_time_ms(
                 self.base_decision_time_ms,
             ),
@@ -107,7 +104,7 @@ class SimpleCollaborativeMode:
         """Return current scoring state for client sync."""
         return {
             "total_score": self.total_score,
-            "penalty_ms": self.accumulated_penalty_ms,
+            "stress": self.stress,
             "turn_number": self.turn_number,
             "next_decision_time_ms": self.get_decision_time_ms(
                 self.base_decision_time_ms,
@@ -121,11 +118,12 @@ class SimpleCollaborativeMode:
         return None
 
     def get_decision_time_ms(self, base_time_ms: int) -> int:
-        """Effective timer = base minus accumulated penalties, floored."""
-        return max(
-            self.min_decision_time_ms,
-            base_time_ms - int(self.accumulated_penalty_ms),
-        )
+        """Effective timer from stress lookup table.
+
+        ``base_time_ms`` is unused — stress table provides absolute values.
+        Parameter kept for GameMode protocol compatibility.
+        """
+        return STRESS_TIME_TABLE.get(self.stress, 180_000)
 
     def requires_gm(self) -> bool:
         return False

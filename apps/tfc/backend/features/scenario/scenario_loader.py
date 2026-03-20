@@ -17,6 +17,7 @@ from engine.game_modes import create_game_mode
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.issue_manager import TrackedIssue, TriggerMode
 from engine.state_changes import DecisionOptionSnapshot
+from engine.system_manager import SystemState
 from features.scenario.scenario_content import ScenarioContent
 
 
@@ -71,7 +72,20 @@ def load_decision_templates(
             issue_id=dt.issue_id,
             question_type=dt.question_type,
             options=[
-                DecisionOptionSnapshot(id=o.id, label=o.label, score=o.score) for o in dt.options
+                DecisionOptionSnapshot(
+                    id=o.id,
+                    label=o.label,
+                    score=o.score,
+                    stress_delta=0,
+                    system_effects=[
+                        {"system_id": e.system_id, "operational_state": e.operational_state, "power_state": e.power_state}
+                        for e in o.system_effects
+                    ],
+                    targets_system=o.targets_system,
+                    max_plays=o.max_plays,
+                    role=None,
+                )
+                for o in dt.options
             ],
             completion_mode=dt.completion_mode,
             timeout_ms=dt.timeout_ms,
@@ -80,6 +94,18 @@ def load_decision_templates(
             max_selections=dt.max_selections,
         )
         for dt in content.decision_templates
+    ]
+
+
+def load_system_states(content: ScenarioContent) -> list[SystemState]:
+    """Convert scenario system state definitions to engine SystemState objects."""
+    return [
+        SystemState(
+            system_id=s.system_id,
+            operational=s.operational_state or "green",
+            power=s.power_state if s.power_state is not None else False,
+        )
+        for s in content.initial_system_states
     ]
 
 
@@ -103,8 +129,6 @@ def build_engine_config(
     if content.decision_sequence:
         mode_config.setdefault("decision_sequence", list(content.decision_sequence))
     game_mode = create_game_mode(content.game_mode, mode_config)
-    if practice_mode and isinstance(game_mode, SimpleCollaborativeMode):
-        game_mode.base_decision_time_ms = int(game_mode.base_decision_time_ms * 1.5)
     return EngineConfig(
         exercise_id=exercise_id,
         title=title,
@@ -114,4 +138,5 @@ def build_engine_config(
         decision_templates=load_decision_templates(content),
         context=context,
         game_mode=game_mode,
+        initial_system_states=load_system_states(content),
     )

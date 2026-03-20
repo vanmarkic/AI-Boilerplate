@@ -55,4 +55,4 @@ coverage/
 .superpowers/
 
 # LLM context scope (per-developer preference)
-# .claudeignore
+.claudeignore
