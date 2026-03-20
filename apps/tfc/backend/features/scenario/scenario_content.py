@@ -11,12 +11,23 @@ from pydantic import BaseModel, model_validator
 from core.game_mode_constants import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
 
 
+class SystemEffectDef(BaseModel):
+    """A system state change triggered by selecting a decision option."""
+
+    system_id: str
+    operational_state: str | None = None  # "green" | "yellow" | "red"
+    power_state: bool | None = None
+
+
 class DecisionOptionDef(BaseModel):
     """A single selectable option within a decision template."""
 
     id: str
     label: str
     score: float = 0.0
+    system_effects: list[SystemEffectDef] = []
+    targets_system: bool = False
+    max_plays: int = 1
 
 
 class DecisionTemplateDef(BaseModel):
