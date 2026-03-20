@@ -82,6 +82,12 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - Shared packages (`packages/`) are always visible regardless of context scope.
 - `.claudeignore` is gitignored — each developer sets their own scope.
 
+## Entire CLI (AI Session Recording)
+- Entire captures AI agent sessions (transcripts, prompts, token usage) alongside git commits on a separate `entire/checkpoints/v1` branch.
+- Hooks are configured in `.claude/settings.json` — do NOT remove or modify the `entire hooks` entries.
+- Do NOT read or write to `.entire/metadata/` or `.entire/tmp/`.
+- Entire runs passively — no changes to your workflow required.
+
 ## Meta
 - See `docs/conventions/agents-authoring-guide.md` for rules on writing and maintaining AGENTS.md and manifest.yaml files.
 - Do NOT edit `CLAUDE.md` — it is a read-only entry point that loads this file into Claude Code's context.
