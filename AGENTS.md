@@ -72,7 +72,8 @@ Router registration and dependency wiring are automatic — no manual edits to `
 
 ## LLM Context Scoping
 - TFC and main app share NO backend/frontend code — they are independent apps.
-- Use `make context-<scope>` to focus the LLM on what matters:
+- **Before starting work, run the appropriate `make context-*` target based on the task scope.** If the scope is unclear, ask the user.
+- Available scopes:
   - `context-tfc` / `context-main` — full app (frontend + backend)
   - `context-tfc-fe` / `context-main-fe` — frontend only (pure GUI work)
   - `context-tfc-be` / `context-main-be` — backend only
