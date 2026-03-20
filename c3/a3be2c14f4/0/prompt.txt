@@ -1,0 +1,8 @@
+<task-notification>
+<task-id>b4puu8iox</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/509d3132-992b-4b04-8033-b21ba695ece5/tasks/b4puu8iox.output</output-file>
+<status>completed</status>
+<summary>Background command "Install Entire CLI via Homebrew" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/509d3132-992b-4b04-8033-b21ba695ece5/tasks/b4puu8iox.output

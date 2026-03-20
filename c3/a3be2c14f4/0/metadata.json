@@ -1,0 +1,34 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "c3a3be2c14f4",
+  "session_id": "509d3132-992b-4b04-8033-b21ba695ece5",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-20T23:39:15.351511Z",
+  "branch": "feature/turn-structure-stress-systems",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "apps/tfc/backend/features/exercise/engine_decision_service.py",
+    "apps/tfc/backend/features/exercise/engine_decision_service_test.py"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "ad0223521fcf",
+  "token_usage": {
+    "input_tokens": 966,
+    "cache_creation_tokens": 68751,
+    "cache_read_tokens": 877942,
+    "output_tokens": 5517,
+    "api_call_count": 21
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-20T23:39:15.203988Z",
+    "agent_lines": 183,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 183,
+    "agent_percentage": 100
+  }
+}
