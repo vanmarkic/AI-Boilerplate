@@ -3,9 +3,10 @@
   "checkpoint_id": "9309dfd31853",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 2,
+  "checkpoints_count": 3,
   "files_touched": [
-    ".playwright-mcp/page-2026-03-21T16-11-46-645Z.png"
+    ".playwright-mcp/page-2026-03-21T16-11-46-645Z.png",
+    ".playwright-mcp/page-2026-03-21T16-13-46-860Z.png"
   ],
   "sessions": [
     {
@@ -19,13 +20,19 @@
       "transcript": "/93/09dfd31853/1/full.jsonl",
       "content_hash": "/93/09dfd31853/1/content_hash.txt",
       "prompt": "/93/09dfd31853/1/prompt.txt"
+    },
+    {
+      "metadata": "/93/09dfd31853/2/metadata.json",
+      "transcript": "/93/09dfd31853/2/full.jsonl",
+      "content_hash": "/93/09dfd31853/2/content_hash.txt",
+      "prompt": "/93/09dfd31853/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 64,
-    "cache_creation_tokens": 132888,
-    "cache_read_tokens": 2302435,
-    "output_tokens": 13934,
-    "api_call_count": 46
+    "input_tokens": 3829,
+    "cache_creation_tokens": 162541,
+    "cache_read_tokens": 9112837,
+    "output_tokens": 19207,
+    "api_call_count": 67
   }
 }
