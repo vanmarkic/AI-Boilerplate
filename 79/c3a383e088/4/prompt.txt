@@ -1,0 +1,53 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/AGENTS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+updates @apps/tfc/SPECS.md
+
+---
+
+<ide_selection>The user selected the lines 9 to 9 from /Users/dragan/Documents/AI-Boilerplate/apps/tfc/PM Questions (Domain Vocabulary).md:
+blue card
+
+This may or may not be related to the current task.</ide_selection>
+add these and mark wether done (backend + frontend), partial, to do 
+
+Scoring decoupled from blue card — A blue card (decision) can have a different score depending context. Scores are +/−/0.
+
+Total score expressed at the end in 3 tiers — Lo / Mid / Hi. No numbers shown.
+Never show score — Not during play, not at the end of the exercise.
+No negative wording — Encouraging, praise effort, even if score is low.
+
+Stress delta coupled to decisions (bluecards) — +/−/0 per blue card played.
+There can also be turn-related stressdelta.
+
+New feature: system states displayed for all roles and players — ON/OFF + Red/Yellow/Green
+
+Some blue cards repair certain systems.
+A card that can repair multiple systems can only be played on 2 of them.
+
+Systems can degrade based on injects (events)
+
+Decision log drawer on the side — See previous turns for all players and roles (inject and decision log).
+
+
+systems will be turned on based on the cards played. For example: General Quarters card will turn all systems on
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/features/exercise/engine_router.py in the IDE. This may or may not be related to the current task.</ide_opened_file>
+align all tfc md docs with @apps/tfc/SPECS.md  if a spec is mentioned elsewhere and not mentioned in specs.md, list it out for my validation
+
+---
+
+what do you think of this ? : add all. remove from other docs. centralize all specs.
+
+---
+
+those new rules should go under "BACKLOG"
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/SPECS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+add reference to @apps/tfc/SPECS.md in @apps/tfc/AGENTS.md . state that @apps/tfc/SPECS.md must be kept up to date
+
+---
+
+make another pass on @apps/tfc/SPECS.md to make it more usable as a backlog and blueprint of the app. look for best practices online
