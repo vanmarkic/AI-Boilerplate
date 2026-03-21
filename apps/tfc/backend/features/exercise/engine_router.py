@@ -216,16 +216,21 @@ async def close_decision(
 ) -> StateChange:
     engine = _get_engine(exercise_id)
 
+    all_changes: list[StateChange] = []
+
     async def _broadcast(changes: list[StateChange]) -> None:
+        all_changes.extend(changes)
         await broadcast_changes(connection_manager, exercise_id, changes)
 
     svc = EngineDecisionService()
-    return await svc.close_decision(
+    result = await svc.close_decision(
         engine,
         decision_id,
         body.selected_option_ids,
         broadcast=_broadcast,
     )
+    await _log_to_audit(exercise_id, [result, *all_changes])
+    return result
 
 
 @router.post("/decisions/recommend", operation_id="submitRecommendation")

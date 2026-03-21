@@ -5,33 +5,25 @@
     <span class="player-header__title"
       >{{ store.title() || domain.term('exercise') + ' Dashboard' }}</span
     >
+    <tfc-stress-bar [stress]="store.score()?.stress ?? 0" />
     <div class="player-header__clocks">
       <tfc-clock-display label="RT" [value]="store.rtClock()" />
       <tfc-phase-badge [phase]="store.phase()" />
     </div>
   </header>
 
-  @if (store.phase() === 'briefing') {
-  <tfc-turn-banner label="Turn 0" [turnNumber]="0" />
-  } @else if (store.score(); as score) {
-  <tfc-turn-banner
-    [label]="'Turn ' + score.turnNumber"
-    [turnNumber]="score.turnNumber"
-  />
-  }
-
   <main class="player-main player-main--board">
     @if (currentTurnEvent(); as event) {
       <div class="board-turn-banner">
         @if (store.score(); as score) {
-          <div class="board-turn-banner__turn">TURN {{ score.turnNumber }}</div>
+          <span class="board-turn-banner__turn">TURN {{ score.turnNumber }}</span>
         }
-        <div class="board-turn-banner__title">{{ event.title }}</div>
-        <div class="board-turn-banner__desc">{{ event.description }}</div>
+        <span class="board-turn-banner__title">{{ event.title }}</span>
+        <span class="board-turn-banner__desc">{{ event.description }}</span>
       </div>
     } @else {
       <div class="board-turn-banner">
-        <div class="board-turn-banner__title">Waiting for next turn...</div>
+        <span class="board-turn-banner__title">Waiting for next turn...</span>
       </div>
     }
 
@@ -46,10 +38,6 @@
       }
     </div>
   </main>
-
-  @if (store.phase() !== 'briefing' && store.score(); as score) {
-  <tfc-score-bar [score]="score" [countdownMs]="store.decisionCountdownMs()" />
-  }
 
   @if (store.phase() === 'briefing' && store.context(); as ctx) {
     <tfc-briefing-overlay

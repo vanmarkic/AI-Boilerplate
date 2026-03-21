@@ -156,6 +156,7 @@ async def get_open_decisions(exercise_id: int) -> list[dict[str, object]]:
     return [
         {
             "id": d.id,
+            "event_id": d.event_id,
             "title": d.title,
             "question_type": d.question_type,
             "options": d.options,

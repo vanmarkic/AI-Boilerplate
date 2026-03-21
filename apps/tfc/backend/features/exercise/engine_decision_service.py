@@ -84,7 +84,7 @@ class EngineDecisionService:
                 )
                 opened = engine.decision_manager.open_decision(
                     id=next_template.id,
-                    event_id=None,
+                    event_id=next_template.id,
                     issue_id=next_template.issue_id,
                     title=next_template.title,
                     description=next_template.description,

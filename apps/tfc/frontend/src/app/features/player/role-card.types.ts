@@ -35,17 +35,18 @@ export function buildRoleCards(
   if (!event && !decision) return [];
   const roleDescs = event?.role_descriptions ?? {};
   const targetRoles = decision?.target_roles ?? [];
+  const allRolesTargeted = targetRoles.length === 0 && decision != null;
 
   return roles
     .filter((role) => {
       if (role.player_type === "decision_maker" && !showDecisionMaker)
         return false;
       const hasIntel = roleDescs[role.id] != null;
-      const hasDecision = targetRoles.includes(role.id);
+      const hasDecision = allRolesTargeted || targetRoles.includes(role.id);
       return hasIntel || hasDecision;
     })
     .map((role) => {
-      const hasDecision = targetRoles.includes(role.id);
+      const hasDecision = allRolesTargeted || targetRoles.includes(role.id);
       const isDone = hasDecision && submittedRoles.has(role.id);
       const advisorRecs: AdvisorRec[] = [];
 

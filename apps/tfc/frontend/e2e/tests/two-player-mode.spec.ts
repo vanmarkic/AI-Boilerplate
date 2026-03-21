@@ -570,7 +570,6 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     await expect(page.locator(".player-header__title")).toBeVisible();
 
     // Score visible
-    await expect(page.locator("tfc-turn-banner")).toContainText("Turn 2");
     await expect(page.locator("tfc-score-bar")).toBeVisible();
 
     // All-advisors panel visible with tabs
@@ -605,7 +604,7 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     await expect(page.locator(".player-header__title")).toBeVisible();
 
     // Score visible
-    await expect(page.locator("tfc-turn-banner")).toContainText("Turn 2");
+    await expect(page.locator("tfc-score-bar")).toBeVisible();
 
     // Decision panel visible (DM style, no [Advisor] prefix)
     await expect(page.locator("tfc-decision-panel")).toBeAttached();
