@@ -127,9 +127,7 @@ Score tracking with contextual per-option scores and tiered end-of-exercise summ
 - Tier computed on backend: `ratio = total_score / max_possible_score` mapped via `score_tier_thresholds`.
 - `score_tier` included in engine snapshot and `ScoreChange` WS messages.
 - All tier messages use positive-only wording (Lo: "Solid Effort", Mid: "Great Performance", Hi: "Outstanding").
-
-**Planned:**
-- [ ] Completion overlay WS delivery — `exercise_stopped` races `close_all`; overlay may not render if server closes WS before message arrives (see `docs/plans/2026-03-21-scoring-tiers-design.md`)
+- `complete_engine` endpoint broadcasts phase_change but does NOT call `svc.stop()` — engine stays alive so clients can show the overlay.
 
 ### Feature: systems · backend + frontend
 

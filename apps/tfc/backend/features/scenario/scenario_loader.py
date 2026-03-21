@@ -112,7 +112,11 @@ def load_system_states(content: ScenarioContent) -> list[SystemState]:
 
 
 def _compute_max_possible_score(content: ScenarioContent) -> float:
-    """Sum the best achievable score across all decision templates in the sequence."""
+    """Sum the best achievable score across all decision templates in the sequence.
+
+    For multi-choice without max_selections, only positive-score options count
+    (a rational player would never voluntarily pick a negative-score card).
+    """
     seq_ids = set(content.decision_sequence)
     total = 0.0
     for dt in content.decision_templates:
@@ -121,9 +125,10 @@ def _compute_max_possible_score(content: ScenarioContent) -> float:
         scores = sorted((o.score for o in dt.options), reverse=True)
         if dt.question_type == "single_choice":
             total += scores[0] if scores else 0.0
+        elif dt.max_selections is not None:
+            total += sum(scores[: dt.max_selections])
         else:
-            n = dt.max_selections or len(scores)
-            total += sum(scores[:n])
+            total += sum(s for s in scores if s > 0)
     return total
 
 
