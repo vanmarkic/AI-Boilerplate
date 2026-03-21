@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "79c3a383e088",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "apps/tfc/backend/conftest.py",
+    "apps/tfc/frontend/src/app/shared/components-logs.css",
+    "apps/tfc/frontend/src/app/shared/logs-drawer.component.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/79/c3a383e088/0/metadata.json",
+      "transcript": "/79/c3a383e088/0/full.jsonl",
+      "content_hash": "/79/c3a383e088/0/content_hash.txt",
+      "prompt": "/79/c3a383e088/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 686,
+    "cache_creation_tokens": 489011,
+    "cache_read_tokens": 36169664,
+    "output_tokens": 94274,
+    "api_call_count": 346
+  }
+}
