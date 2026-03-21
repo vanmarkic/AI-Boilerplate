@@ -18,3 +18,8 @@ run 2 player silent wake scenario
 if bug -> stop scenario run, file issue solve bug, TDD, commit
 docker restart reseed
 restart loop
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (wvv7hu) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+do it once again as quick as possible
