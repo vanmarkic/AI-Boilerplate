@@ -183,9 +183,9 @@ class ExerciseEngine:
         event_changes = self._events.tick(pt)
         changes.extend(event_changes)
 
-        # Apply system effects from events that just started
+        # Apply system effects from events that just started or were force-triggered
         for change in event_changes:
-            if change.get("action") == "started":
+            if change.get("action") in ("started", "force_triggered"):
                 event = self._events.events.get(change["event_id"])
                 if event and event.system_effects:
                     changes.extend(self._apply_event_system_effects(event.system_effects))
@@ -290,6 +290,9 @@ class ExerciseEngine:
         if not event_change:
             return []
         changes: list[StateChange] = [event_change]
+        # Apply system effects from force-triggered event
+        if event and event.system_effects:
+            changes.extend(self._apply_event_system_effects(event.system_effects))
         changes.extend(self._handle_decision_events([event_change], pt))
         return changes
 
