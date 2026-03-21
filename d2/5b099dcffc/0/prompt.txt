@@ -1,0 +1,4 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/SPECS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+http://localhost:4201/player?exerciseId=3&participantId=f68d7272-e056-434e-a2b7-ef0037367e42&role=all_roles&gameMode=simple_collaborative&practiceMode=true
+
+click on submit and check network calls
