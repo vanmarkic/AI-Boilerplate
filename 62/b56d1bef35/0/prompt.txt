@@ -1,0 +1,40 @@
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (ihul6e) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+do a new worktree branch
+docker restart reseedd
+try to cleanly merge feat/scoring-tiers and feature/systems together
+
+after you're totally done,
+follow this loop using smoke-test-tfc skill (don't forget to watch network calls)
+loop :
+run 2 player silent wake scenario
+if bug -> stop scenario run, file issue solve bug, TDD, commit
+docker restart reseed
+restart loop
+
+when done don't merge the branch to master
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (3bcm8s) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+proceed
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (ly7743) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+I mean restart docker and make sure @apps/tfc/backend/seeds/silent_wake.json is well seeded to PG
+
+---
+
+there are new changes in the 2 sources branches
+
+---
+
+proceed
+
+---
+
+you should use 2 browsers instance. one with chrome devtools mcp, the other with playwright mcp
+
+---
+
+you should use smoke test tfc skill to achieve this
