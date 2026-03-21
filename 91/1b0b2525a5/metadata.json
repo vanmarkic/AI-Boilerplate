@@ -3,7 +3,7 @@
   "checkpoint_id": "911b0b2525a5",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 7,
+  "checkpoints_count": 10,
   "files_touched": [
     ".playwright-mcp/console-2026-03-21T07-32-48-814Z.log",
     ".playwright-mcp/console-2026-03-21T07-33-38-287Z.log",
@@ -11,6 +11,7 @@
     ".playwright-mcp/console-2026-03-21T07-38-26-072Z.log",
     ".playwright-mcp/console-2026-03-21T07-39-37-166Z.log",
     "apps/tfc/backend/features/exercise/engine_router.py",
+    "apps/tfc/backend/seeds/silent_wake.json",
     "apps/tfc/frontend/e2e/helpers/arbitraries.ts",
     "apps/tfc/frontend/e2e/tests/player-gaps.spec.ts",
     "apps/tfc/frontend/e2e/tests/player-view-properties.spec.ts",
@@ -31,6 +32,7 @@
     "apps/tfc/frontend/src/app/features/player/player-view.html",
     "apps/tfc/frontend/src/app/features/player/player-view.ts",
     "apps/tfc/frontend/src/app/features/player/role-card.types.ts",
+    "apps/tfc/frontend/src/app/features/scenario-builder/scenario-builder-view.ts",
     "apps/tfc/frontend/src/app/shared/components-animations.css",
     "apps/tfc/frontend/src/app/shared/turn-banner.component.ts"
   ],
@@ -46,13 +48,19 @@
       "transcript": "/91/1b0b2525a5/1/full.jsonl",
       "content_hash": "/91/1b0b2525a5/1/content_hash.txt",
       "prompt": "/91/1b0b2525a5/1/prompt.txt"
+    },
+    {
+      "metadata": "/91/1b0b2525a5/2/metadata.json",
+      "transcript": "/91/1b0b2525a5/2/full.jsonl",
+      "content_hash": "/91/1b0b2525a5/2/content_hash.txt",
+      "prompt": "/91/1b0b2525a5/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 4947,
-    "cache_creation_tokens": 641782,
-    "cache_read_tokens": 48787988,
-    "output_tokens": 139136,
-    "api_call_count": 461
+    "input_tokens": 7254,
+    "cache_creation_tokens": 918489,
+    "cache_read_tokens": 67753892,
+    "output_tokens": 194335,
+    "api_call_count": 628
   }
 }
