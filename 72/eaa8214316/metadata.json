@@ -1,0 +1,28 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "72eaa8214316",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "apps/tfc/frontend/src/app/core/engine-api.service.ts",
+    "apps/tfc/frontend/src/app/core/exercise.store.spec.ts",
+    "apps/tfc/frontend/src/app/core/exercise.store.ts",
+    "apps/tfc/frontend/src/app/core/ws-state-handler.spec.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/72/eaa8214316/0/metadata.json",
+      "transcript": "/72/eaa8214316/0/full.jsonl",
+      "content_hash": "/72/eaa8214316/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 26,
+    "cache_creation_tokens": 26511,
+    "cache_read_tokens": 2107497,
+    "output_tokens": 10149,
+    "api_call_count": 26
+  }
+}
