@@ -8,22 +8,24 @@ import {
   AfterViewInit,
 } from "@angular/core";
 import { AnimationService } from "../core/animation.service";
+import { StressBarComponent } from "./stress-bar.component";
 
 export interface ScoreState {
   totalScore: number;
   turnNumber: number;
   nextDecisionTimeMs: number;
-  penaltyMs?: number;
+  stress: number;
 }
 
 @Component({
   selector: "tfc-score-bar",
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [StressBarComponent],
   template: `
     <div class="score-bar">
       <div
         class="score-bar__vignette"
-        [class.score-bar__vignette--active]="penaltyActive"
+        [class.score-bar__vignette--active]="stressFlash"
       ></div>
       <span class="text-xs text-primary uppercase tracking-wide font-semibold"
         >Turn {{ score()?.turnNumber }}</span
@@ -32,6 +34,7 @@ export interface ScoreState {
         >Score</span
       >
       <span class="score-bar__value">{{ displayScore }}</span>
+      <tfc-stress-bar [stress]="score()?.stress ?? 0" />
       <span class="flex-1"></span>
       @if (countdownMs() !== null && countdownMs()! > 0) {
         <span class="score-bar__countdown" [class.score-bar__countdown--urgent]="countdownMs()! < 30000">
@@ -52,8 +55,9 @@ export class ScoreBarComponent implements AfterViewInit, OnChanges {
   private readonly el = inject(ElementRef);
   private initialized = false;
   private prevScore = 0;
+  private prevStress = 0;
   protected displayScore = 0;
-  protected penaltyActive = false;
+  protected stressFlash = false;
 
   protected get formattedCountdown(): string {
     const ms = this.countdownMs() ?? 0;
@@ -67,6 +71,7 @@ export class ScoreBarComponent implements AfterViewInit, OnChanges {
     this.initialized = true;
     this.displayScore = this.score()?.totalScore ?? 0;
     this.prevScore = this.displayScore;
+    this.prevStress = this.score()?.stress ?? 0;
   }
 
   ngOnChanges(): void {
@@ -81,16 +86,17 @@ export class ScoreBarComponent implements AfterViewInit, OnChanges {
       this.prevScore = s.totalScore;
     }
 
-    if (s.penaltyMs && s.penaltyMs > 0) {
-      this.penaltyActive = true;
+    if (s.stress > this.prevStress) {
+      this.stressFlash = true;
       this.anim.shake(
         this.el.nativeElement.querySelector(".score-bar"),
         2,
         0.3,
       );
       setTimeout(() => {
-        this.penaltyActive = false;
+        this.stressFlash = false;
       }, 800);
     }
+    this.prevStress = s.stress;
   }
 }

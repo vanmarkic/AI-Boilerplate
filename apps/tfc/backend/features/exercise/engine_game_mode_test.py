@@ -27,8 +27,8 @@ CLASSIC_SCENARIO = {
             "issue_id": "iss-1",
             "question_type": "single_choice",
             "options": [
-                {"id": "a", "label": "A", "score": 10},
-                {"id": "b", "label": "B", "score": 0},
+                {"id": "a", "label": "A", "score": 10, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+                {"id": "b", "label": "B", "score": 0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
             ],
             "completion_mode": "gm_closes",
         },
@@ -55,8 +55,8 @@ COLLABORATIVE_SCENARIO = {
             "issue_id": "iss-1",
             "question_type": "single_choice",
             "options": [
-                {"id": "a", "label": "A", "score": 10},
-                {"id": "b", "label": "B", "score": 0},
+                {"id": "a", "label": "A", "score": 10, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+                {"id": "b", "label": "B", "score": 0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
             ],
             "completion_mode": "gm_closes",
         },

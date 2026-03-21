@@ -34,7 +34,7 @@ const TIME_PAUSED = { ...TIME, paused: true };
 
 const SCORE_TURN_3 = {
   total_score: 25.0,
-  penalty_ms: 400.0,
+  stress: 0,
   turn_number: 3,
   next_decision_time_ms: 299_600,
 };
@@ -307,7 +307,7 @@ test.describe("Score display — visible iff score exists and not briefing @play
   test("no turn banner or score bar during briefing phase", async ({ page }) => {
     const SCORE_TURN_0 = {
       total_score: 0,
-      penalty_ms: 0,
+      stress: 0,
       turn_number: 0,
       next_decision_time_ms: 300_000,
     };

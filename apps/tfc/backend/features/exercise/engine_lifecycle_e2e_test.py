@@ -45,8 +45,8 @@ SCENARIO_CONTENT = {
             "issue_id": "iss-1",
             "question_type": "single_choice",
             "options": [
-                {"id": "isolate", "label": "Isolate", "score": 10},
-                {"id": "ignore", "label": "Ignore", "score": 0},
+                {"id": "isolate", "label": "Isolate", "score": 10, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+                {"id": "ignore", "label": "Ignore", "score": 0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
             ],
             "completion_mode": "gm_closes",
         },

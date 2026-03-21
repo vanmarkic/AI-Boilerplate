@@ -28,7 +28,6 @@ interface ScoreState {
   totalScore: number;
   turnNumber: number;
   nextDecisionTimeMs: number;
-  penaltyMs: number;
   stress: number;
 }
 
@@ -179,7 +178,6 @@ export const ExerciseStore = signalStore(
         score: snapshot.score
           ? {
               totalScore: snapshot.score.total_score,
-              penaltyMs: 0,
               stress: snapshot.score.stress,
               turnNumber: snapshot.score.turn_number,
               nextDecisionTimeMs: snapshot.score.next_decision_time_ms,
@@ -286,7 +284,6 @@ export const ExerciseStore = signalStore(
       patchState(store, {
         score: {
           totalScore: change.total_score,
-          penaltyMs: 0,
           stress: change.stress,
           nextDecisionTimeMs: change.next_decision_time_ms,
           turnNumber: change.turn_number,

@@ -43,10 +43,10 @@ def _close_v2(
     stress_delta: int = 0,
 ) -> list[dict]:
     """Helper: wrap scalar scores as v2 option lists for property tests."""
-    selected = [{"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta}]
+    selected = [{"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}]
     all_opts = [
-        {"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta},
-        {"id": "best", "label": "Best", "score": max_score, "stress_delta": 0},
+        {"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+        {"id": "best", "label": "Best", "score": max_score, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
     ]
     return mode.on_decision_closed_v2(decision_id, selected, all_opts)
 
@@ -202,7 +202,7 @@ class TestStressDelta:
     ) -> None:
         mode = _mode()
         initial_stress = mode.stress
-        opts = [{"id": "a", "label": "A", "score": selected, "stress_delta": 0}]
+        opts = [{"id": "a", "label": "A", "score": selected, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}]
         changes = mode.on_decision_closed_v2("d0", opts, opts)
         sc = next(c for c in changes if c["type"] == "score_change")
         assert sc["stress"] == initial_stress
