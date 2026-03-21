@@ -1,0 +1,46 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "4e835858dc26",
+  "session_id": "c85e24ef-1919-45f2-a6bd-feba2a2c7024",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-21T14:06:29.678455Z",
+  "branch": "master",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "apps/tfc/SPECS.md",
+    "apps/tfc/frontend/e2e/tests/silent-wake-practice.spec.ts",
+    "apps/tfc/frontend/src/app/core/decision-api.service.ts",
+    "apps/tfc/frontend/src/app/core/exercise.store.ts",
+    "apps/tfc/frontend/src/app/core/ws-state-handler.ts",
+    "apps/tfc/frontend/src/app/features/game-master/game-master-view.ts",
+    "apps/tfc/frontend/src/app/features/player/manifest.yaml",
+    "apps/tfc/frontend/src/app/features/player/player-decision-handlers.ts",
+    "apps/tfc/frontend/src/app/features/player/player-view.html",
+    "apps/tfc/frontend/src/app/features/player/player-view.ts",
+    "apps/tfc/frontend/src/app/features/player/role-card.types.spec.ts",
+    "apps/tfc/frontend/src/app/shared/components-logs.css",
+    "apps/tfc/frontend/src/app/shared/logs-drawer.component.spec.ts",
+    "apps/tfc/frontend/src/app/shared/logs-drawer.component.ts"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "f52fb5a288c1",
+  "token_usage": {
+    "input_tokens": 62,
+    "cache_creation_tokens": 42435,
+    "cache_read_tokens": 1791624,
+    "output_tokens": 5085,
+    "api_call_count": 44
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T14:06:29.558876Z",
+    "agent_lines": 294,
+    "human_added": 49,
+    "human_modified": 44,
+    "human_removed": 0,
+    "total_committed": 387,
+    "agent_percentage": 75.96899224806202
+  }
+}
