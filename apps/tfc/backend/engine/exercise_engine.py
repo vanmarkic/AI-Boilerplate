@@ -279,6 +279,30 @@ class ExerciseEngine:
                 pass  # Another path already completed
         return []
 
+    # ── Canonical event trigger ────────────────────────────────────────
+
+    def trigger_event(self, event_id: str) -> list[StateChange]:
+        """Single canonical path for triggering an event.
+
+        Handles: force-trigger → event system effects → open decision (if applicable).
+
+        Raises ValueError if event missing or not triggerable.
+        """
+        pt = self._time.play_time_ms
+        event = self._events.events.get(event_id)
+        if not event:
+            raise ValueError(f"Event {event_id} not found")
+        event_change = self._events.force_trigger(event_id, pt)
+        if not event_change:
+            raise ValueError(f"Event {event_id} not triggerable")
+        changes: list[StateChange] = [event_change]
+        # Apply system effects
+        if event.system_effects:
+            changes.extend(self._apply_event_system_effects(event.system_effects))
+        # Open decision if applicable
+        changes.extend(self._handle_decision_events([event_change], pt))
+        return changes
+
     async def tick(self) -> list[StateChange]:
         """Advance time, check triggers, return state changes."""
         changes: list[StateChange] = []
