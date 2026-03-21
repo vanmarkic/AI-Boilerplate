@@ -1,12 +1,7 @@
 """Application service for engine decision orchestration.
 
-Encapsulates the close-decision workflow:
-  close → score → advance to next turn → broadcast.
-
-The backend owns sequencing. After closing a decision, the service
-delegates to engine.force_trigger_next_decision() which force-triggers
-the next event and opens the corresponding decision. The frontend is
-purely reactive — it receives WS broadcasts and updates the UI.
+Thin shell: validates HTTP request shape, delegates to engine.close_decision(),
+and broadcasts the returned state changes.
 """
 
 from __future__ import annotations
@@ -14,12 +9,12 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 
 from core.exceptions import BadRequestError, NotFoundError
-from engine.exercise_engine import EnginePhase, EngineStateError, ExerciseEngine
+from engine.exercise_engine import ExerciseEngine
 from engine.state_changes import DecisionClosed, StateChange
 
 
 class EngineDecisionService:
-    """Orchestrates decision closing, scoring, and turn advancement."""
+    """Orchestrates decision closing via the engine's canonical close path."""
 
     async def close_decision(
         self,
@@ -28,20 +23,13 @@ class EngineDecisionService:
         selected_option_ids: list[str],
         broadcast: Callable[[list[StateChange]], Awaitable[None]],
     ) -> DecisionClosed:
-        """Close a decision and handle all side effects.
-
-        Flow: close → score → system effects → advance to next turn → broadcast.
-        """
-        pt = engine.time_manager.play_time_ms
-
+        """Validate request shape, delegate to engine, broadcast changes."""
+        # Pre-validate for nicer HTTP errors (engine also enforces)
         decision = engine.decision_manager.get_decision(decision_id)
         if decision is None or decision.status != "open":
             raise NotFoundError(
                 f"Decision {decision_id} not found or already closed",
             )
-        all_options = decision.options
-
-        # Validate max_selections before mutating state
         template = engine.find_decision_template(decision_id)
         if template and template.max_selections is not None:
             if len(selected_option_ids) > template.max_selections:
@@ -51,53 +39,12 @@ class EngineDecisionService:
                     f"got {len(selected_option_ids)}",
                 )
 
-        result = engine.decision_manager.close_decision(
-            decision_id,
-            current_pt_ms=pt,
-            selected_option_ids=selected_option_ids,
-        )
-        if result is None:
-            raise NotFoundError(
-                f"Decision {decision_id} not found or already closed",
-            )
+        try:
+            changes = await engine.close_decision(decision_id, selected_option_ids)
+        except ValueError as exc:
+            raise NotFoundError(str(exc)) from exc
 
-        # Score via game mode strategy
-        selected_options = [o for o in all_options if o["id"] in selected_option_ids]
-        forced_ids = template.forced_option_ids if template else []
+        await broadcast(changes)
 
-        score_changes = engine.game_mode.on_decision_closed_v2(
-            decision_id,
-            selected_options,
-            all_options,
-            forced_option_ids=forced_ids or None,
-            turn_stress_delta=template.stress_delta if template else 0,
-        )
-
-        # Record plays and apply system effects
-        engine.record_option_plays(selected_options)
-        sys_changes = engine._apply_system_effects(selected_options)
-
-        close_and_score: list[StateChange] = [result, *score_changes, *sys_changes]
-        await broadcast(close_and_score)
-
-        # Advance to next turn: force-trigger next event in sequence
-        advance_changes = engine.force_trigger_next_decision(pt, decision_id)
-        if advance_changes:
-            await broadcast(advance_changes)
-        elif (
-            engine.game_mode.get_next_decision_id(decision_id) is None
-            and engine.phase == EnginePhase.RUNNING
-        ):
-            # Decision sequence exhausted — auto-complete the exercise
-            try:
-                phase_change = await engine.complete()
-                await broadcast([phase_change])
-            except EngineStateError:
-                pass  # Another path (e.g. timeout) already completed
-
-        # Auto-resume if GM mode and no more open decisions
-        if engine.game_mode.requires_gm():
-            if not engine.decision_manager.get_open_decisions():
-                await engine.resume()
-
-        return result
+        # Return the DecisionClosed change (first in the list)
+        return changes[0]  # type: ignore[return-value]
