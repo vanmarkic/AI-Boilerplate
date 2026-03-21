@@ -1,0 +1,19 @@
+why does it close ws connections ?
+
+---
+
+what is "svc"
+
+---
+
+review your commits ahead of master
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (3bcm8s) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+when should it call svc.stop() ?
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/components-exercise-layout.css in the IDE. This may or may not be related to the current task.</ide_opened_file>
+did you change files on master ? simple question don't code
