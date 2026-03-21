@@ -193,8 +193,7 @@ async def complete_engine(exercise_id: int) -> PhaseChange:
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     await broadcast_changes(connection_manager, exercise_id, [result])
-    svc = ExerciseSessionService(session_store, connection_manager, waiting_room_store)
-    await svc.stop(exercise_id, reason="completed")
+    await _log_to_audit(exercise_id, [result])
     return result
 
 

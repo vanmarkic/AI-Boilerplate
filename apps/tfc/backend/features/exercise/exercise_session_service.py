@@ -6,7 +6,6 @@ and session store removal into a single use-case method.
 
 from __future__ import annotations
 
-import asyncio
 import logging
 
 from engine.exercise_engine import EnginePhase, EngineStateError
@@ -63,10 +62,6 @@ class ExerciseSessionService:
                 "reason": reason,
             },
         )
-
-        # Brief delay to allow WS message delivery before closing connections.
-        # Without this, the close_all races the broadcast frame delivery.
-        await asyncio.sleep(0.5)
 
         closed = await self._connections.close_all(exercise_id)
         logger.info(

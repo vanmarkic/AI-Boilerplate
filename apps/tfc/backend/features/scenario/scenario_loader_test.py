@@ -255,7 +255,7 @@ def test_max_possible_score_multi_choice_with_max_selections() -> None:
 
 
 def test_max_possible_score_multi_choice_unlimited() -> None:
-    """Multi choice with no max_selections: sum of all scores."""
+    """Multi choice with no max_selections: sum of positive scores only."""
     dt = DecisionTemplateDef(
         id="dt1",
         title="T",
@@ -270,8 +270,8 @@ def test_max_possible_score_multi_choice_unlimited() -> None:
         completion_mode="first_response",
     )
     content = _minimal_content(decision_templates=[dt], decision_sequence=["dt1"])
-    # sum of all 3 (sorted desc): 10 + 8 + (-2) = 16
-    assert _compute_max_possible_score(content) == 16.0
+    # Only positive scores: 10 + 8 = 18 (rational player skips -2)
+    assert _compute_max_possible_score(content) == 18.0
 
 
 def test_max_possible_score_multiple_decisions() -> None:

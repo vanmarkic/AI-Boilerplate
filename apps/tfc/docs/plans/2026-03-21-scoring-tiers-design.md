@@ -44,22 +44,17 @@ Frontend can read thresholds if needed for display, but currently only uses the 
 Added `score_tier` to `ScoreChange` state change (not just snapshot). This keeps the
 frontend tier value up-to-date on every turn close, not just on initial page load.
 
-## Known Issue: Completion overlay WS race condition
-The `complete_engine` endpoint broadcasts `phase_change(completed)` then calls
-`svc.stop()` which broadcasts `exercise_stopped` and closes all WS connections.
-The server-side `close_all()` can race the message frame delivery — clients may
-not receive either message before the connection is terminated.
+## Decision 9: Don't call svc.stop() on completion
+The `complete_engine` endpoint previously called `svc.stop()` which tore down
+WS connections immediately after completion. This prevented the completion overlay
+from rendering because clients lost their connection before receiving the phase_change.
 
-**Current mitigations applied:**
-- `exercise_stopped` with `reason=completed` sets phase to completed (not nav away)
-- `phase_change(completed)` via state_changes disconnects WS intentionally
-- 500ms delay between broadcast and close_all in session service
+Fix: `complete_engine` now only broadcasts the phase_change and logs to audit.
+The engine and WS connections stay alive. Clients disconnect naturally when the
+user clicks "Return to Home" in the completion overlay. The engine can be cleaned
+up lazily (e.g., on server restart or via a TTL).
 
-**Root cause:** The WS teardown architecture (`broadcast → close_all`) doesn't
-guarantee message delivery. This is a pre-existing issue that affects any
-server-initiated shutdown, not specific to scoring tiers.
-
-**Recommended fix (future):** Use WS close code 4000 (custom) for "completed"
-and handle it in the frontend `onclose` handler, removing the need for a
-separate message delivery guarantee. Or keep the engine alive after completion
-so clients can reload the snapshot.
+Frontend mitigations for `exercise_stopped`:
+- `reason=completed` → set phase to completed + disconnect WS (don't navigate away)
+- `phase_change(completed)` via state_changes → disconnect WS intentionally
+- Other stop reasons (stopped_by_gm) → navigate to home as before
