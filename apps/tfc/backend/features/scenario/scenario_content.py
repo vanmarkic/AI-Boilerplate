@@ -12,11 +12,12 @@ from core.game_mode_constants import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
 
 
 class SystemEffectDef(BaseModel):
-    """A system state change triggered by selecting a decision option."""
+    """A system state change triggered by selecting a decision option or event start."""
 
     system_id: str
     operational_state: str | None = None  # "green" | "yellow" | "red"
     power_state: bool | None = None
+    set_all_power: bool = False  # General Quarters: power all systems ON
 
 
 class DecisionOptionDef(BaseModel):
@@ -61,6 +62,7 @@ class ScenarioEventDef(BaseModel):
     triggered_issues: list[str] = []  # issue IDs activated on completion
     target_roles: list[str] = []  # empty = visible to all roles
     role_descriptions: dict[str, str] = {}  # per-role description overrides
+    system_effects: list[SystemEffectDef] = []  # system state changes on event start
 
 
 class ScenarioIssueDef(BaseModel):
@@ -90,6 +92,7 @@ class SystemStateDef(BaseModel):
 
     system_id: str
     label: str = ""
+    category: str = "system"  # "system" | "weapon"
     operational_state: str | None = None  # "green"|"yellow"|"red"
     power_state: bool | None = None
 
