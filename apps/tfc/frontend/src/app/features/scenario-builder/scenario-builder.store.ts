@@ -4,6 +4,7 @@ import type {
   ScenarioEventDef,
   ScenarioIssueDef,
   DecisionTemplateDef,
+  RoleDef,
 } from "../../core/scenario-api.service";
 
 interface ScenarioBuilderState {
@@ -13,6 +14,7 @@ interface ScenarioBuilderState {
   content: ScenarioContent;
   saving: boolean;
   error: string | null;
+  loadedSnapshot: string | null;
 }
 
 const emptyContent: ScenarioContent = {
@@ -26,6 +28,8 @@ const emptyContent: ScenarioContent = {
   rules: [],
   roles: [],
   game_mode: "classic",
+  turns: [],
+  initial_system_states: [],
 };
 
 export const ScenarioBuilderStore = signalStore(
@@ -36,6 +40,7 @@ export const ScenarioBuilderStore = signalStore(
     content: emptyContent,
     saving: false,
     error: null,
+    loadedSnapshot: null,
   }),
 
   withMethods((store) => ({
@@ -45,12 +50,41 @@ export const ScenarioBuilderStore = signalStore(
       description: string,
       content: ScenarioContent | null,
     ): void {
+      const c = content ?? emptyContent;
+      const snapshot = JSON.stringify({ title, description, content: c });
       patchState(store, {
         scenarioId: id,
         title,
         description,
-        content: content ?? emptyContent,
+        content: c,
+        loadedSnapshot: snapshot,
       });
+    },
+
+    loadImport(
+      title: string,
+      description: string,
+      content: ScenarioContent,
+    ): void {
+      patchState(store, {
+        scenarioId: null,
+        title,
+        description,
+        content,
+        loadedSnapshot: null,
+        error: null,
+      });
+    },
+
+    revert(): void {
+      const snap = store.loadedSnapshot();
+      if (!snap) return;
+      const { title, description, content } = JSON.parse(snap) as {
+        title: string;
+        description: string;
+        content: ScenarioContent;
+      };
+      patchState(store, { title, description, content });
     },
 
     setTitle(title: string): void {
@@ -161,6 +195,35 @@ export const ScenarioBuilderStore = signalStore(
       });
     },
 
+    addRole(role: RoleDef): void {
+      patchState(store, {
+        content: {
+          ...store.content(),
+          roles: [...(store.content().roles ?? []), role],
+        },
+      });
+    },
+
+    removeRole(roleId: string): void {
+      patchState(store, {
+        content: {
+          ...store.content(),
+          roles: (store.content().roles ?? []).filter((r) => r.id !== roleId),
+        },
+      });
+    },
+
+    updateRole(roleId: string, updates: Partial<RoleDef>): void {
+      patchState(store, {
+        content: {
+          ...store.content(),
+          roles: (store.content().roles ?? []).map((r) =>
+            r.id === roleId ? { ...r, ...updates } : r,
+          ),
+        },
+      });
+    },
+
     setBriefing(briefing: string): void {
       patchState(store, {
         content: { ...store.content(), briefing },
@@ -187,6 +250,7 @@ export const ScenarioBuilderStore = signalStore(
         content: emptyContent,
         saving: false,
         error: null,
+        loadedSnapshot: null,
       });
     },
   })),

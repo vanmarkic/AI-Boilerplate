@@ -27,7 +27,7 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
   template: `
     <ui-card title="Issues">
       @for (issue of store.content().issues; track issue.id) {
-        <div class="flex flex-col gap-xs p-sm border-b">
+        <div [id]="'issue-' + issue.id" class="flex flex-col gap-xs p-sm border-b">
           @if (editingId() === issue.id) {
             <div class="flex flex-col gap-xs">
               <ui-input
@@ -92,6 +92,13 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                   <span class="text-xs text-muted-foreground ml-sm">
                     auto-resolve: {{ issue.auto_resolve_ms / 1000 }}s
                   </span>
+                }
+                @if (issue.trigger_event_id) {
+                  <span
+                    class="text-xs cursor-pointer"
+                    style="text-decoration: underline dotted; color: var(--color-primary)"
+                    (click)="scrollTo('event-' + issue.trigger_event_id); $event.stopPropagation()"
+                  >{{ issue.trigger_event_id }}</span>
                 }
               </div>
               <div class="flex gap-xs">
@@ -181,6 +188,10 @@ export class ScenarioIssueEditorComponent {
     this.editDesc.set(issue.description);
     this.editTrigger.set(issue.trigger_mode);
     this.editAutoResolve.set(issue.auto_resolve_ms);
+  }
+
+  protected scrollTo(elementId: string): void {
+    document.getElementById(elementId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   protected save(issueId: string): void {
