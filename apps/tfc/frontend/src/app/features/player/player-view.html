@@ -11,7 +11,9 @@
     </div>
   </header>
 
-  @if (store.phase() !== 'briefing' && store.score(); as score) {
+  @if (store.phase() === 'briefing') {
+  <tfc-turn-banner label="Turn 0" [turnNumber]="0" />
+  } @else if (store.score(); as score) {
   <tfc-turn-banner
     [label]="'Turn ' + score.turnNumber"
     [turnNumber]="score.turnNumber"
