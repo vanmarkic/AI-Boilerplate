@@ -47,7 +47,7 @@ export function handleStateChange(
       break;
     case "decision_opened":
       store.applyDecisions([
-        ...store.openDecisions(),
+        ...store.decisions(),
         toActiveDecision(change),
       ]);
       break;

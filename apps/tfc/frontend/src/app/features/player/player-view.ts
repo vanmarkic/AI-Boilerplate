@@ -99,8 +99,10 @@ export class PlayerView implements OnInit, OnDestroy {
     const decision = this.activeDecisions()[0] ?? null;
     const role = this.store.playerRole();
     const multiRole = this.isMultiRole();
+    const playerRoleDef = allRoles.find((r) => r.id === role);
     const showDecisionMaker =
-      role === "all_roles" || role === "solo_player" || this.store.isPracticeMode();
+      role === "all_roles" || role === "solo_player" || this.store.isPracticeMode()
+      || playerRoleDef?.player_type === "decision_maker";
     // Single-role players see only their own role card
     const roles = multiRole ? allRoles : allRoles.filter((r) => r.id === role);
     return buildRoleCards(roles, event, decision, this.submittedRoles(), showDecisionMaker);

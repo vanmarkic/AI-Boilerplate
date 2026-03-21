@@ -182,7 +182,7 @@ Immutable audit trail for all exercise events.
 Player-facing exercise UI with real-time state display.
 
 - **Turn countdown clock:** Decision countdown when open (timeout > 0), otherwise time to next scheduled event. Falls back to real-time clock.
-- **Logs drawer:** Right-side drawer with audit trail — previous turns for all roles (inject + decision log). Decision entries show selected option IDs inline.
+- **Decision log drawer:** Right-side drawer showing per-turn decision history. Each entry shows turn number, decision title, per-role recommendations (role label → option label), and final decision. Data sourced from `store.decisions()` (not audit API). Open decisions show "Awaiting decision..."; closed decisions show the selected option(s).
 - **Decision submission:** Decision-maker submits via engine close endpoint (`closeEngineDecision`). Advisors submit via engine recommend endpoint (`submitRecommendation`). Neither path uses the DB decision CRUD API.
 
 ### Feature: health · backend
