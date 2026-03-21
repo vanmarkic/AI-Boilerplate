@@ -11,8 +11,10 @@ export function handlePlayerWsMessage(
 ): void {
   switch (msg.type) {
     case "exercise_stopped":
-      // Don't navigate away if completed — let the completion overlay handle it
-      if (store.phase() !== "completed") {
+      // When exercise completes normally, show the completion overlay instead of navigating away
+      if (msg.reason === "completed") {
+        store.applyPhaseChange("completed");
+      } else {
         onStopped?.();
       }
       break;
