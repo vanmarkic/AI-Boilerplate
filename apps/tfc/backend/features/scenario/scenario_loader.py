@@ -42,6 +42,7 @@ def load_scenario_events(content: ScenarioContent) -> list[ScheduledEvent]:
                         system_id=e.system_id,
                         operational_state=e.operational_state,
                         power_state=e.power_state,
+                        set_all_power=e.set_all_power,
                     )
                     for e in evt.system_effects
                 ],
@@ -86,7 +87,7 @@ def load_decision_templates(
                     score=o.score,
                     stress_delta=o.stress_delta,
                     system_effects=[
-                        {"system_id": e.system_id, "operational_state": e.operational_state, "power_state": e.power_state}
+                        {"system_id": e.system_id, "operational_state": e.operational_state, "power_state": e.power_state, "set_all_power": e.set_all_power}
                         for e in o.system_effects
                     ],
                     targets_system=o.targets_system,

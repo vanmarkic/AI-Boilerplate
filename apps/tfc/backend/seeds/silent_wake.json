@@ -573,7 +573,7 @@
         "stress_delta": 1,
         "options": [
           { "id": "SWB08", "label": "Start In-Depth Investigation", "score": 10.0, "stress_delta": 0, "max_plays": 2 },
-          { "id": "SWB20", "label": "General Quarters", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "ew_suite", "operational_state": "green", "power_state": true}] },
+          { "id": "SWB20", "label": "General Quarters", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "__all__", "power_state": true, "set_all_power": true}] },
           { "id": "SWB01", "label": "Continue Mission", "score": 6.0, "stress_delta": 1 }
         ]
       },

@@ -52,6 +52,7 @@ class SystemEffect(TypedDict):
     system_id: str
     operational_state: str | None
     power_state: bool | None
+    set_all_power: bool
 
 
 class DecisionOptionSnapshot(TypedDict):
