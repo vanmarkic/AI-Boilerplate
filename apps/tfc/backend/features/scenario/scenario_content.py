@@ -61,6 +61,7 @@ class ScenarioEventDef(BaseModel):
     triggered_issues: list[str] = []  # issue IDs activated on completion
     target_roles: list[str] = []  # empty = visible to all roles
     role_descriptions: dict[str, str] = {}  # per-role description overrides
+    system_effects: list[SystemEffectDef] = []  # system state changes on event start
 
 
 class ScenarioIssueDef(BaseModel):
@@ -90,6 +91,7 @@ class SystemStateDef(BaseModel):
 
     system_id: str
     label: str = ""
+    category: str = "system"  # "system" | "weapon"
     operational_state: str | None = None  # "green"|"yellow"|"red"
     power_state: bool | None = None
 

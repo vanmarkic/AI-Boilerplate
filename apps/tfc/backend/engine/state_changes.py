@@ -33,6 +33,7 @@ class EventSnapshot(TypedDict):
     completed_at_pt_ms: float | None
     target_roles: list[str]
     role_descriptions: dict[str, str]
+    system_effects: list[SystemEffect]
 
 
 class IssueSnapshot(TypedDict):
