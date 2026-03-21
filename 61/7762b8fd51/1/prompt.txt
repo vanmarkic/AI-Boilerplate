@@ -150,3 +150,7 @@ check the commits made in the last 12hours to try to understand what was intende
 
 Turn 0 : yes and also calle it "Turn 0" in the ui
 History drawer: yes, call it "Logs"
+
+---
+
+2
