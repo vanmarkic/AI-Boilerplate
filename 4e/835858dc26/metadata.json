@@ -1,0 +1,31 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "4e835858dc26",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "apps/tfc/frontend/e2e/tests/silent-wake-practice.spec.ts",
+    "apps/tfc/frontend/src/app/features/game-master/game-master-view.ts",
+    "apps/tfc/frontend/src/app/features/player/player-decision-handlers.ts",
+    "apps/tfc/frontend/src/app/features/player/player-view.html",
+    "apps/tfc/frontend/src/app/features/player/player-view.ts",
+    "apps/tfc/frontend/src/app/shared/components-logs.css",
+    "apps/tfc/frontend/src/app/shared/logs-drawer.component.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/4e/835858dc26/0/metadata.json",
+      "transcript": "/4e/835858dc26/0/full.jsonl",
+      "content_hash": "/4e/835858dc26/0/content_hash.txt",
+      "prompt": "/4e/835858dc26/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 13,
+    "cache_creation_tokens": 10619,
+    "cache_read_tokens": 180334,
+    "output_tokens": 814,
+    "api_call_count": 7
+  }
+}

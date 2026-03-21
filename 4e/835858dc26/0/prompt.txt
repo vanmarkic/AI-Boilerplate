@@ -1,0 +1,9 @@
+fix zoom issue vs code
+
+---
+
+terminal vs rest of ui
+
+---
+
+do it
