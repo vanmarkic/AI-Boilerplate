@@ -140,7 +140,7 @@ export class PlayerView implements OnInit, OnDestroy {
     this.store.setPracticeMode(practiceMode);
     this.ws.connect(id, "player", pId || undefined);
     this.sub = this.ws.messages$.subscribe((msg) =>
-      handlePlayerWsMessage(msg, this.store, () => this.onExerciseStopped()),
+      handlePlayerWsMessage(msg, this.store, () => this.onExerciseStopped(), this.ws),
     );
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
