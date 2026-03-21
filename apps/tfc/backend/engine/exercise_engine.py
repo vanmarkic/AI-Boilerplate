@@ -26,6 +26,7 @@ from engine.state_changes import (
     EngineSnapshot,
     PhaseChange,
     StateChange,
+    SystemEffect,
     SystemStateChange,
 )
 from engine.system_manager import SystemManager
@@ -162,6 +163,13 @@ class ExerciseEngine:
 
         event_changes = self._events.tick(pt)
         changes.extend(event_changes)
+
+        # Apply system effects from events that just started
+        for change in event_changes:
+            if change.get("action") == "started":
+                event = self._events.events.get(change["event_id"])
+                if event and event.system_effects:
+                    changes.extend(self._apply_event_system_effects(event.system_effects))
 
         decision_changes = self._handle_decision_events(event_changes, pt)
         changes.extend(decision_changes)
@@ -346,8 +354,8 @@ class ExerciseEngine:
     def _apply_system_effects(
         self, selected_options: list[DecisionOptionSnapshot],
     ) -> list[SystemStateChange]:
-        """Apply system_effects from selected options via SystemManager."""
-        out: list[SystemStateChange] = []  # TODO: targets_system needs submission data plumbing
+        """Apply system_effects from selected decision options via SystemManager."""
+        out: list[SystemStateChange] = []
         for opt in selected_options:
             for fx in opt["system_effects"]:
                 if fx["power_state"] is not None:
@@ -356,6 +364,20 @@ class ExerciseEngine:
                 if fx["operational_state"] is not None:
                     if c := self._systems.set_operational(fx["system_id"], fx["operational_state"]):
                         out.append(c)
+        return out
+
+    def _apply_event_system_effects(
+        self, effects: list[SystemEffect],
+    ) -> list[SystemStateChange]:
+        """Apply system_effects from an event (inject) via SystemManager."""
+        out: list[SystemStateChange] = []
+        for fx in effects:
+            if fx["power_state"] is not None:
+                if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
+                    out.append(c)
+            if fx["operational_state"] is not None:
+                if c := self._systems.set_operational(fx["system_id"], fx["operational_state"]):
+                    out.append(c)
         return out
 
     def _phase_change(self, action: str) -> PhaseChange:

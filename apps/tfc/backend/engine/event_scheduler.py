@@ -12,7 +12,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from engine.state_changes import EventChange, EventSnapshot
+from engine.state_changes import EventChange, EventSnapshot, SystemEffect
 
 
 class EventLifecycle(StrEnum):
@@ -61,6 +61,7 @@ class ScheduledEvent:
     completed_at_pt_ms: float | None = None
     target_roles: list[str] = field(default_factory=list)
     role_descriptions: dict[str, str] = field(default_factory=dict)
+    system_effects: list[SystemEffect] = field(default_factory=list)
 
 
 class EventScheduler:
@@ -245,6 +246,7 @@ class EventScheduler:
                 completed_at_pt_ms=e.completed_at_pt_ms,
                 target_roles=e.target_roles,
                 role_descriptions=e.role_descriptions,
+                system_effects=list(e.system_effects),
             )
             for e in self._events.values()
         ]

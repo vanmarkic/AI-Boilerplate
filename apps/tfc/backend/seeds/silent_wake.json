@@ -197,7 +197,10 @@
         "role_descriptions": {
           "cyop": "Anomaly detected in IBMS.",
           "eo": "SATCOM experiencing reduced bandwidth and intermittent connectivity. Observed throughput below allocated 512 kbps baseline. HF performance degraded. Signal clarity is inconsistent. Communication with MTC is not possible with UHF due to distance."
-        }
+        },
+        "system_effects": [
+          {"system_id": "comms", "operational_state": "yellow"}
+        ]
       },
       {
         "id": "evt-t6",
@@ -280,7 +283,11 @@
           "eo": "FWD CIWS: non-operational (ETBOL: 2 hours). Missiles launcher: non-operational (ETBOL: 5 hours). 1 HF antenna was disabled (unable to repair).",
           "pwo": "Target now in gun range.",
           "nav": "Missiles (counterattack) missed the target. No evidence of hostile manoeuvre to evade."
-        }
+        },
+        "system_effects": [
+          {"system_id": "ciws_fwd", "operational_state": "red", "power_state": false},
+          {"system_id": "missile_launcher", "operational_state": "red", "power_state": false}
+        ]
       },
       {
         "id": "evt-t11",
@@ -297,7 +304,10 @@
         "role_descriptions": {
           "cyop": "Analysis indicates a cyber-attack vector resulting in feeding all systems with wrong speed value. Option 1: Disconnect WECDIS and restart INS (ETBOL: 1 min) \u2014 WECDIS not available. Option 2: Restore WECDIS and restart INS (ETBOL 30 min) \u2014 WECDIS available.",
           "pwo": "Target within the effective gun range. Surface tracking radar is unable to achieve a stable lock. Manual targeting reduces effective engagement envelope (reduced gun effective range)."
-        }
+        },
+        "system_effects": [
+          {"system_id": "ibms_ins", "operational_state": "yellow"}
+        ]
       },
       {
         "id": "evt-t12",
@@ -869,10 +879,18 @@
     ],
     "initial_system_states": [
       {"system_id": "nav_radar", "label": "NAV RADAR", "operational_state": "green", "power_state": true},
+      {"system_id": "ibms_ins", "label": "IBMS / INS", "operational_state": "green", "power_state": true},
+      {"system_id": "nav_sensors", "label": "NAV SENSORS", "operational_state": "green", "power_state": true},
       {"system_id": "comms", "label": "COMMS", "operational_state": "green", "power_state": true},
       {"system_id": "aaw_radar", "label": "AAW RADAR", "operational_state": "green", "power_state": true},
+      {"system_id": "asuw_tracking", "label": "ASUW TRACKING RADAR", "operational_state": "green", "power_state": false},
       {"system_id": "ew_suite", "label": "EW SUITE", "operational_state": "green", "power_state": true},
-      {"system_id": "cic_network", "label": "CIC NETWORK", "operational_state": "green", "power_state": true}
+      {"system_id": "cic_network", "label": "CIC NETWORK", "operational_state": "green", "power_state": true},
+      {"system_id": "ciws_fwd", "label": "CIWS FWD", "category": "weapon", "operational_state": "green", "power_state": false},
+      {"system_id": "ciws_aft", "label": "CIWS AFT", "category": "weapon", "operational_state": "green", "power_state": false},
+      {"system_id": "missile_launcher", "label": "Missile Launcher", "category": "weapon", "operational_state": "green", "power_state": false},
+      {"system_id": "gun", "label": "Gun", "category": "weapon", "operational_state": "green", "power_state": false},
+      {"system_id": "decoys", "label": "Decoys", "category": "weapon", "operational_state": "green", "power_state": false}
     ],
     "score_tier_thresholds": {
       "lo": 0.33,

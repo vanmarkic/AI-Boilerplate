@@ -16,7 +16,7 @@ from engine.exercise_engine import (
 from engine.game_modes import create_game_mode
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.issue_manager import TrackedIssue, TriggerMode
-from engine.state_changes import DecisionOptionSnapshot
+from engine.state_changes import DecisionOptionSnapshot, SystemEffect
 from engine.system_manager import SystemState
 from features.scenario.scenario_content import ScenarioContent
 
@@ -37,6 +37,14 @@ def load_scenario_events(content: ScenarioContent) -> list[ScheduledEvent]:
                 triggered_issues=list(evt.triggered_issues),
                 target_roles=list(evt.target_roles),
                 role_descriptions=dict(evt.role_descriptions),
+                system_effects=[
+                    SystemEffect(
+                        system_id=e.system_id,
+                        operational_state=e.operational_state,
+                        power_state=e.power_state,
+                    )
+                    for e in evt.system_effects
+                ],
             ),
         )
     return events
@@ -104,6 +112,7 @@ def load_system_states(content: ScenarioContent) -> list[SystemState]:
         SystemState(
             system_id=s.system_id,
             label=s.label or s.system_id.upper().replace("_", " "),
+            category=s.category,
             operational=s.operational_state or "green",
             power=s.power_state if s.power_state is not None else False,
         )
