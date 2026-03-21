@@ -1,0 +1,13 @@
+add fails and warns to gh issues, then rerun smoke test
+
+---
+
+fix all
+
+---
+
+docke restart reseed and resmoke
+
+---
+
+now test the 2player mode -> need 2 browser instance for Websocket to work correctly

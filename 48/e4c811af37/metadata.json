@@ -3,8 +3,11 @@
   "checkpoint_id": "48e4c811af37",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 3,
+  "checkpoints_count": 6,
   "files_touched": [
+    ".playwright-mcp/console-2026-03-21T15-01-47-721Z.log",
+    ".playwright-mcp/page-2026-03-21T15-01-57-620Z.png",
+    ".playwright-mcp/page-2026-03-21T15-03-32-535Z.png",
     "apps/tfc/AGENTS.md",
     "apps/tfc/SPECS.md",
     "apps/tfc/backend/features/exercise/engine_router.py",
@@ -28,13 +31,19 @@
       "transcript": "/48/e4c811af37/1/full.jsonl",
       "content_hash": "/48/e4c811af37/1/content_hash.txt",
       "prompt": "/48/e4c811af37/1/prompt.txt"
+    },
+    {
+      "metadata": "/48/e4c811af37/2/metadata.json",
+      "transcript": "/48/e4c811af37/2/full.jsonl",
+      "content_hash": "/48/e4c811af37/2/content_hash.txt",
+      "prompt": "/48/e4c811af37/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 697,
-    "cache_creation_tokens": 770256,
-    "cache_read_tokens": 114665862,
-    "output_tokens": 112978,
-    "api_call_count": 545
+    "input_tokens": 4262,
+    "cache_creation_tokens": 948529,
+    "cache_read_tokens": 147905199,
+    "output_tokens": 161738,
+    "api_call_count": 766
   }
 }
