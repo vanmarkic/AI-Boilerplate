@@ -357,21 +357,24 @@ class ExerciseEngine:
         """Apply system_effects from selected decision options via SystemManager."""
         out: list[SystemStateChange] = []
         for opt in selected_options:
-            for fx in opt["system_effects"]:
-                if fx["power_state"] is not None:
-                    if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
-                        out.append(c)
-                if fx["operational_state"] is not None:
-                    if c := self._systems.set_operational(fx["system_id"], fx["operational_state"]):
-                        out.append(c)
+            out.extend(self._apply_effects_list(opt["system_effects"]))
         return out
 
     def _apply_event_system_effects(
         self, effects: list[SystemEffect],
     ) -> list[SystemStateChange]:
         """Apply system_effects from an event (inject) via SystemManager."""
+        return self._apply_effects_list(effects)
+
+    def _apply_effects_list(
+        self, effects: list[SystemEffect],
+    ) -> list[SystemStateChange]:
+        """Shared logic for applying a list of SystemEffect dicts."""
         out: list[SystemStateChange] = []
         for fx in effects:
+            if fx.get("set_all_power"):
+                out.extend(self._systems.set_all_power(fx["power_state"] or True))
+                continue
             if fx["power_state"] is not None:
                 if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
                     out.append(c)
