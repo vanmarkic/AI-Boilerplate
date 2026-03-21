@@ -1,13 +1,13 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "79c3a383e088",
+  "session_id": "84182a64-97ba-405e-8d40-754aae5164e6",
   "strategy": "manual-commit",
+  "created_at": "2026-03-21T11:50:20.516721Z",
   "branch": "master",
-  "checkpoints_count": 6,
+  "checkpoints_count": 4,
   "files_touched": [
-    ".claude/settings.json",
     ".playwright-mcp/console-2026-03-21T07-39-37-166Z.log",
-    "apps/tfc/AGENTS.md",
     "apps/tfc/backend/conftest.py",
     "apps/tfc/backend/engine/exercise_engine.py",
     "apps/tfc/backend/engine/exercise_engine_decision_trigger_prop_test.py",
@@ -17,7 +17,6 @@
     "apps/tfc/backend/features/exercise/engine_context_prop_test.py",
     "apps/tfc/backend/features/exercise/engine_router.py",
     "apps/tfc/backend/seeds/silent_wake.json",
-    "apps/tfc/frontend/package.json",
     "apps/tfc/frontend/src/app/core/exercise.store.ts",
     "apps/tfc/frontend/src/app/features/player/player-view.html",
     "apps/tfc/frontend/src/app/features/player/player-view.ts",
@@ -26,31 +25,25 @@
     "apps/tfc/frontend/src/app/shared/components-player-view.css",
     "apps/tfc/frontend/src/app/shared/logs-drawer.component.ts"
   ],
-  "sessions": [
-    {
-      "metadata": "/79/c3a383e088/0/metadata.json",
-      "transcript": "/79/c3a383e088/0/full.jsonl",
-      "content_hash": "/79/c3a383e088/0/content_hash.txt",
-      "prompt": "/79/c3a383e088/0/prompt.txt"
-    },
-    {
-      "metadata": "/79/c3a383e088/1/metadata.json",
-      "transcript": "/79/c3a383e088/1/full.jsonl",
-      "content_hash": "/79/c3a383e088/1/content_hash.txt",
-      "prompt": "/79/c3a383e088/1/prompt.txt"
-    },
-    {
-      "metadata": "/79/c3a383e088/2/metadata.json",
-      "transcript": "/79/c3a383e088/2/full.jsonl",
-      "content_hash": "/79/c3a383e088/2/content_hash.txt",
-      "prompt": "/79/c3a383e088/2/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "turn_id": "f0260d1de029",
   "token_usage": {
-    "input_tokens": 839,
-    "cache_creation_tokens": 808372,
-    "cache_read_tokens": 53024789,
-    "output_tokens": 148032,
-    "api_call_count": 481
+    "input_tokens": 127,
+    "cache_creation_tokens": 185594,
+    "cache_read_tokens": 15542276,
+    "output_tokens": 52147,
+    "api_call_count": 112
+  },
+  "session_metrics": {
+    "turn_count": 4
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T11:50:20.232068Z",
+    "agent_lines": 553,
+    "human_added": 268,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 821,
+    "agent_percentage": 67.35688185140073
   }
 }

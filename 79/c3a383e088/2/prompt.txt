@@ -1,0 +1,25 @@
+<ide_selection>The user selected the lines 449 to 449 from /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/seeds/silent_wake.json:
+dec
+
+This may or may not be related to the current task.</ide_selection>
+do something useful in a loop while I am away. don't stop don't ask permission don't ask input be autonomous.
+
+verify @apps/tfc/backend/seeds/silent_wake.json  works end to end in the UI in single player mode and 2 player mode.
+
+I want a full game simulation end 2 end.
+
+---
+
+how come I have this now ?
+
+---
+
+http://localhost:4201/player?exerciseId=1&participantId=9e0a85aa-1311-497a-a5f7-7614c95dd2a9&role=all_roles&gameMode=simple_collaborative&practiceMode=true
+
+
+poka yoke property testing Tdd
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/features/exercise/engine_actions_router.py in the IDE. This may or may not be related to the current task.</ide_opened_file>
+problem is ui mate... anyways what is  Same 1 pre-existing failure. ?
