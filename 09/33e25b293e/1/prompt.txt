@@ -1,0 +1,39 @@
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (k12a5s) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+tell me about lean 4, leanstral, and how could help develop TFC. search online, ask questions
+
+---
+
+tell me how many property tests we wrote over time
+
+---
+
+what is fast-check ?
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/package.json in the IDE. This may or may not be related to the current task.</ide_opened_file>
+I have some playwright test that adopts property testing concepts. find it
+
+---
+
+write me a prompt that would ask to address those caveats. and seach online for 2026 UI testing (alternatives to "meticulous" product maybe ?)
+
+---
+
+which are free ?
+
+---
+
+ok go with 1 and 2 and adapt existing tests
+
+---
+
+yes
+
+---
+
+A
+
+---
+
+yes
