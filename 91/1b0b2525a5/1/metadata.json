@@ -1,16 +1,17 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "911b0b2525a5",
+  "session_id": "2ae2af64-ff73-42fa-ae07-bacd18c1b1ea",
   "strategy": "manual-commit",
+  "created_at": "2026-03-21T08:28:49.565513Z",
   "branch": "master",
-  "checkpoints_count": 7,
+  "checkpoints_count": 5,
   "files_touched": [
     ".playwright-mcp/console-2026-03-21T07-32-48-814Z.log",
     ".playwright-mcp/console-2026-03-21T07-33-38-287Z.log",
     ".playwright-mcp/console-2026-03-21T07-34-19-431Z.log",
     ".playwright-mcp/console-2026-03-21T07-38-26-072Z.log",
     ".playwright-mcp/console-2026-03-21T07-39-37-166Z.log",
-    "apps/tfc/backend/features/exercise/engine_router.py",
     "apps/tfc/frontend/e2e/helpers/arbitraries.ts",
     "apps/tfc/frontend/e2e/tests/player-gaps.spec.ts",
     "apps/tfc/frontend/e2e/tests/player-view-properties.spec.ts",
@@ -34,25 +35,25 @@
     "apps/tfc/frontend/src/app/shared/components-animations.css",
     "apps/tfc/frontend/src/app/shared/turn-banner.component.ts"
   ],
-  "sessions": [
-    {
-      "metadata": "/91/1b0b2525a5/0/metadata.json",
-      "transcript": "/91/1b0b2525a5/0/full.jsonl",
-      "content_hash": "/91/1b0b2525a5/0/content_hash.txt",
-      "prompt": "/91/1b0b2525a5/0/prompt.txt"
-    },
-    {
-      "metadata": "/91/1b0b2525a5/1/metadata.json",
-      "transcript": "/91/1b0b2525a5/1/full.jsonl",
-      "content_hash": "/91/1b0b2525a5/1/content_hash.txt",
-      "prompt": "/91/1b0b2525a5/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "turn_id": "6a8c2c858f5f",
   "token_usage": {
-    "input_tokens": 4947,
-    "cache_creation_tokens": 641782,
-    "cache_read_tokens": 48787988,
-    "output_tokens": 139136,
-    "api_call_count": 461
+    "input_tokens": 4261,
+    "cache_creation_tokens": 152771,
+    "cache_read_tokens": 12618324,
+    "output_tokens": 44862,
+    "api_call_count": 115
+  },
+  "session_metrics": {
+    "turn_count": 17
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T08:28:49.308081Z",
+    "agent_lines": 937,
+    "human_added": 166,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1103,
+    "agent_percentage": 84.95013599274705
   }
 }
