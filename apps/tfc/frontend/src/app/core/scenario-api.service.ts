@@ -46,6 +46,37 @@ export interface RoleDef {
   player_type: string;
 }
 
+export interface SystemEffectDef {
+  system_id: string;
+  operational_state: string | null;
+  power_state: boolean | null;
+}
+
+export interface SystemStateDef {
+  system_id: string;
+  operational_state: string | null;
+  power_state: boolean | null;
+}
+
+export interface DecisionOptionDef {
+  id: string;
+  label: string;
+  score: number;
+  system_effects: SystemEffectDef[];
+  targets_system: boolean;
+  max_plays: number;
+}
+
+export interface TurnDefinition {
+  turn_index: number;
+  title: string;
+  facilitator_prompt: string | null;
+  has_decisions: boolean;
+  inject_ids: string[];
+  decision_template_id: string | null;
+  base_stress_delta: number;
+}
+
 export interface ScenarioContent {
   phases: {
     id: string;
@@ -58,11 +89,17 @@ export interface ScenarioContent {
   issues: ScenarioIssueDef[];
   decision_templates: DecisionTemplateDef[];
   default_time_factor: number;
+  default_event_duration_ms?: number | null;
   game_mode?: string;
+  game_mode_config?: Record<string, unknown>;
   briefing?: string;
   objectives?: string[];
   rules?: string[];
   roles?: RoleDef[];
+  decision_sequence?: string[];
+  turns?: TurnDefinition[];
+  initial_system_states?: SystemStateDef[];
+  score_tier_thresholds?: Record<string, number>;
 }
 
 export interface ScenarioResponse {
@@ -115,5 +152,12 @@ export class ScenarioApiService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.base}/api/scenarios/${id}`);
+  }
+
+  clone(id: number): Observable<ScenarioResponse> {
+    return this.http.post<ScenarioResponse>(
+      `${this.base}/api/scenarios/${id}/clone`,
+      {},
+    );
   }
 }
