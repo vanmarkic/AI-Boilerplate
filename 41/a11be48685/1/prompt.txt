@@ -1,0 +1,14 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/.worktrees/turn-structure-stress-systems/.entire/metadata/398a966c-a017-44c1-b699-71e9465cbdc4/full.jsonl in the IDE. This may or may not be related to the current task.</ide_opened_file>
+looks good if you think it's gonna help
+
+---
+
+are we covering all possible states ?
+
+---
+
+add yes
+
+---
+
+yes
