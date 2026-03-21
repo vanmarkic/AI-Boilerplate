@@ -99,6 +99,18 @@ describe("SystemStatusBoardComponent", () => {
     expect(rows()[0].textContent).toContain("OFF");
   });
 
+  // ── Traffic light ──
+
+  it("should render three traffic light dots per system", () => {
+    host.systems.set([makeSys()]);
+    fixture.detectChanges();
+    const lights = rows()[0].querySelectorAll(".system-chip__light");
+    expect(lights.length).toBe(3);
+    expect(lights[0].getAttribute("data-color")).toBe("red");
+    expect(lights[1].getAttribute("data-color")).toBe("yellow");
+    expect(lights[2].getAttribute("data-color")).toBe("green");
+  });
+
   // ── Operational attribute ──
 
   it("should set data-operational=green", () => {

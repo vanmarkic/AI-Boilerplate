@@ -1,0 +1,32 @@
+[     135ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[   34847ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[   49364ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[   55787ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[   56570ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/context:0
+[   56575ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/decisions:0
+[   56581ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[  154413ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/3/ws?role=player&participant_id=35772093-741c-419a-870f-2a6d61dac5e4' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://localhost:4201/chunk-OPY7MDP3.js:53
+[  156416ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/3/ws?role=player&participant_id=35772093-741c-419a-870f-2a6d61dac5e4' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://localhost:4201/chunk-OPY7MDP3.js:53
+[  444928ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[  623065ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[  627072ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[ 1345920ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[ 1876439ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[ 2163084ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[ 2300680ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[ 2480086ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/3/ws?role=player&participant_id=35772093-741c-419a-870f-2a6d61dac5e4' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://localhost:4201/chunk-OPY7MDP3.js:53
+[ 2482089ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/3/ws?role=player&participant_id=35772093-741c-419a-870f-2a6d61dac5e4' failed: Error in connection establishment: net::ERR_SOCKET_NOT_CONNECTED @ http://localhost:4201/chunk-OPY7MDP3.js:53
+[ 2486135ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[ 2605030ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[ 2605103ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[ 2605117ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/decisions:0
+[ 2605136ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/context:0
+[ 2609217ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[ 2625873ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[ 2625905ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/context:0
+[ 2625911ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/decisions:0
+[ 2625913ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[ 2849775ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
+[ 2849921ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/snapshot:0
+[ 2849942ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/decisions:0
+[ 2849964ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/3/engine/context:0

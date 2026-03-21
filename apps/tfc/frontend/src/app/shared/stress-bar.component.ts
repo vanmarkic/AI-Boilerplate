@@ -13,6 +13,7 @@ import {
     "[attr.data-severity]": "severity()",
   },
   template: `
+    <span class="stress-bar__title">Stress</span>
     <span class="stress-bar__label" data-testid="stress-bar">{{ stress() }}</span>
     <div class="stress-bar__track">
       <div

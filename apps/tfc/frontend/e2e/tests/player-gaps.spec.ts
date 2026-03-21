@@ -124,8 +124,8 @@ test.describe("Gap 5 — Score in snapshot @player", () => {
     await installPlayerMocks(page, snapshotWithScore);
     await page.goto(playerUrl("alice-01"));
 
-    // Turn banner should show turn 3
-    await expect(page.locator("tfc-turn-banner")).toContainText("Turn 3");
+    // Score bar should be visible
+    await expect(page.locator("tfc-score-bar")).toBeVisible();
   });
 
   test("no score shown when snapshot has null score", async ({ page }) => {

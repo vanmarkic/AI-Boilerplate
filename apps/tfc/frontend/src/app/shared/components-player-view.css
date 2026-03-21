@@ -44,6 +44,9 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
   }
+  .player-header > .stress-bar {
+    flex: 1;
+  }
   .player-header__clocks {
     display: flex;
     gap: var(--spacing-lg);
@@ -247,29 +250,32 @@
   }
 
   .board-turn-banner {
-    text-align: center;
-    padding: var(--spacing-lg) var(--spacing-md);
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-lg);
     border-bottom: 1px solid var(--color-border);
+    flex-wrap: wrap;
   }
   .board-turn-banner__turn {
     font-family: var(--font-mono);
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-sm);
     font-weight: 700;
     color: var(--color-foreground);
     letter-spacing: 0.05em;
+    flex-shrink: 0;
   }
   .board-turn-banner__title {
-    font-size: var(--font-size-md);
-    color: var(--color-muted-foreground);
-    margin-top: var(--spacing-xs);
-  }
-  .board-turn-banner__desc {
     font-size: var(--font-size-sm);
     color: var(--color-muted-foreground);
-    margin-top: var(--spacing-sm);
-    max-width: 40rem;
-    margin-inline: auto;
-    line-height: 1.5;
+  }
+  .board-turn-banner__desc {
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    line-height: 1.4;
+  }
+  .board-turn-banner__title::after {
+    content: " — ";
   }
 
   .board-grid {

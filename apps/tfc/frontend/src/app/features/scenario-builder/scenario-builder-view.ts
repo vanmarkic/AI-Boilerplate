@@ -44,7 +44,7 @@ import { validateScenarioContent } from "./validate-scenario-content";
     ScenarioWalkthroughComponent,
   ],
   template: `
-    <ui-sidebar-layout side="left" style="--sidebar-width: 14rem; height: 100%">
+    <ui-sidebar-layout side="left" style="--sidebar-width: 14rem; height: 100dvh">
       <div sidebar class="flex flex-col gap-md p-sm" style="height: 100%; overflow-y: auto">
         <tfc-scenario-sidebar-nav
           [sections]="sidebarSections()"

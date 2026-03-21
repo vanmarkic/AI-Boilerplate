@@ -14,14 +14,13 @@ import { ClockDisplayComponent } from "../../shared/clock-display.component";
 import { PhaseBadgeComponent } from "../../shared/phase-badge.component";
 import { AmbientBackgroundComponent } from "../../shared/ambient-background.component";
 import { BriefingOverlayComponent } from "../../shared/briefing-overlay.component";
-import { TurnBannerComponent } from "../../shared/turn-banner.component";
 import {
   resolvePlayerRole,
   submitRoleRecommendation,
   submitDecision,
 } from "./player-decision-handlers";
-import { ScoreBarComponent } from "../../shared/score-bar.component";
 import { LogsDrawerComponent } from "../../shared/logs-drawer.component";
+import { StressBarComponent } from "../../shared/stress-bar.component";
 import { AuditApiService, type AuditEntry } from "../../core/audit-api.service";
 import { DomainService } from "../../core/domain.service";
 import { EngineApiService } from "../../core/engine-api.service";
@@ -45,9 +44,8 @@ import { buildRoleCards } from "./role-card.types";
     PhaseBadgeComponent,
     AmbientBackgroundComponent,
     BriefingOverlayComponent,
-    TurnBannerComponent,
-    ScoreBarComponent,
     LogsDrawerComponent,
+    StressBarComponent,
     ButtonDirective,
     RoleCardComponent,
     SystemStatusBoardComponent,
