@@ -1,0 +1,53 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "0933e25b293e",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 7,
+  "files_touched": [
+    "apps/tfc/backend/engine/decision_manager_p2_test.py",
+    "apps/tfc/backend/engine/decision_manager_test.py",
+    "apps/tfc/backend/engine/game_modes/classic_test.py",
+    "apps/tfc/backend/engine/game_modes/simple_collaborative_prop_test.py",
+    "apps/tfc/backend/engine/game_modes/simple_collaborative_test.py",
+    "apps/tfc/backend/features/decision/decision_router_test.py",
+    "apps/tfc/backend/features/decision/decision_test.py",
+    "apps/tfc/backend/features/exercise/engine_game_mode_test.py",
+    "apps/tfc/backend/features/exercise/engine_lifecycle_e2e_test.py",
+    "apps/tfc/backend/features/scenario/scenario_content_test.py",
+    "apps/tfc/backend/seeds/silent_wake.json",
+    "apps/tfc/backend/seeds/silent_wake_tutorial.json",
+    "apps/tfc/frontend/e2e/tests/player-gaps.spec.ts",
+    "apps/tfc/frontend/e2e/tests/player-view-states.spec.ts",
+    "apps/tfc/frontend/e2e/tests/systems-stress.spec.ts",
+    "apps/tfc/frontend/e2e/tests/two-player-mode.spec.ts",
+    "apps/tfc/frontend/src/app/core/exercise.store.ts",
+    "apps/tfc/frontend/src/app/features/game-master/game-master-view.spec.ts",
+    "apps/tfc/frontend/src/app/features/game-master/game-master-view.ts",
+    "apps/tfc/frontend/src/app/features/player/player-view.html",
+    "apps/tfc/frontend/src/app/features/player/player-view.ts",
+    "apps/tfc/frontend/src/app/shared/components-systems.css",
+    "apps/tfc/frontend/src/app/shared/score-bar.component.spec.ts",
+    "apps/tfc/frontend/src/app/shared/score-bar.component.ts",
+    "apps/tfc/frontend/src/app/shared/stress-bar.component.spec.ts",
+    "apps/tfc/frontend/src/app/shared/stress-bar.component.ts",
+    "apps/tfc/frontend/src/app/shared/system-status-board.component.spec.ts",
+    "apps/tfc/frontend/src/app/shared/system-status-board.component.ts",
+    "apps/tfc/frontend/src/styles.css"
+  ],
+  "sessions": [
+    {
+      "metadata": "/09/33e25b293e/0/metadata.json",
+      "transcript": "/09/33e25b293e/0/full.jsonl",
+      "content_hash": "/09/33e25b293e/0/content_hash.txt",
+      "prompt": "/09/33e25b293e/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 599,
+    "cache_creation_tokens": 417057,
+    "cache_read_tokens": 27913137,
+    "output_tokens": 82659,
+    "api_call_count": 285
+  }
+}
