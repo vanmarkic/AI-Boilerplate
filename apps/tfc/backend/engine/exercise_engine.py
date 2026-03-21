@@ -246,6 +246,26 @@ class ExerciseEngine:
     def find_decision_template(self, event_id: str) -> DecisionTemplate | None:
         return next((dt for dt in self._config.decision_templates if dt.id == event_id), None)
 
+    def force_trigger_next_decision(self, pt: float) -> list[StateChange]:
+        """Force-trigger the next event in the game mode's decision sequence.
+
+        Called after closing a decision (player submission or timeout).
+        Returns event_change + decision_opened state changes, or [] if
+        the sequence is exhausted or the next event doesn't exist.
+        """
+        next_id = self._config.game_mode.get_next_decision_id("")
+        if not next_id:
+            return []
+        event = self._events.events.get(next_id)
+        if not event:
+            return []
+        event_change = self._events.force_trigger(next_id, pt)
+        if not event_change:
+            return []
+        changes: list[StateChange] = [event_change]
+        changes.extend(self._handle_decision_events([event_change], pt))
+        return changes
+
     def _start_tick_loop(self) -> None:
         if self._tick_task is None or self._tick_task.done():
             self._tick_task = asyncio.create_task(self._tick_loop())
@@ -312,7 +332,8 @@ class ExerciseEngine:
                     all_changes.extend(extra)
                     # Apply system effects from selected options
                     all_changes.extend(self._apply_system_effects(selected_opts))
-                    # Decision chaining handled by event triggers (tick loop / practice auto-advance)
+                    # Advance to next turn
+                    all_changes.extend(self.force_trigger_next_decision(pt))
                 if all_changes and self._on_state_change:
                     await self._on_state_change(all_changes)
                 if not self._decisions.get_open_decisions():
