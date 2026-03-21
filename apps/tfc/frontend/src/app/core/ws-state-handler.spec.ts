@@ -1,7 +1,7 @@
 import { TestBed } from "@angular/core/testing";
 import { ExerciseStore } from "./exercise.store";
 import { handleStateChange, toActiveDecision } from "./ws-state-handler";
-import type { DecisionOpened, PhaseChange } from "./generated/state-changes.types";
+import type { DecisionOpened, PhaseChange, SystemStateChange } from "./generated/state-changes.types";
 
 describe("ws-state-handler", () => {
   let store: InstanceType<typeof ExerciseStore>;
@@ -88,6 +88,29 @@ describe("ws-state-handler", () => {
         store,
       );
       expect(store.openDecisions().length).toBe(0);
+    });
+
+    it("dispatches applySystemChange on system_state_change", () => {
+      // Seed a system first
+      store.applySnapshot({
+        exercise_id: 1,
+        title: "Test",
+        phase: "running",
+        time: { play_time_ms: 0, real_time_ms: 0, factor: 1, paused: false },
+        events: [],
+        issues: [],
+        systems: [{ system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" }],
+        score: null,
+      });
+      const change: SystemStateChange = {
+        type: "system_state_change",
+        system_id: "nav",
+        action: "power_changed",
+        power: false,
+        operational: "green",
+      };
+      handleStateChange(change, store);
+      expect(store.systems()[0].power).toBe(false);
     });
   });
 });
