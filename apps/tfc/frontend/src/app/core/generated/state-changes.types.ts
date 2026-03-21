@@ -36,10 +36,20 @@ export interface IssueSnapshot {
   released: boolean;
 }
 
+export interface SystemEffect {
+  system_id: string;
+  operational_state: string | null;
+  power_state: boolean | null;
+}
+
 export interface DecisionOptionSnapshot {
   id: string;
   label: string;
   score: number;
+  stress_delta: number;
+  system_effects: SystemEffect[];
+  targets_system: boolean;
+  max_plays: number;
   role: string | null;
 }
 
@@ -62,6 +72,14 @@ export interface DecisionSnapshot {
   selected_option_ids: string[];
 }
 
+export interface SystemSnapshot {
+  system_id: string;
+  label: string;
+  category: string;
+  power: boolean;
+  operational: string;
+}
+
 export interface EngineSnapshot {
   exercise_id: number;
   title: string;
@@ -71,6 +89,7 @@ export interface EngineSnapshot {
   issues: IssueSnapshot[];
   decisions: DecisionSnapshot[];
   score: Record<string, object> | null;
+  systems: SystemSnapshot[];
 }
 
 export interface PresenceEntry {
@@ -143,7 +162,7 @@ export interface SpeedChange {
 export interface ScoreChange {
   type: "score_change";
   total_score: number;
-  penalty_ms: number;
+  stress: number;
   next_decision_time_ms: number;
   turn_number: number;
 }
@@ -162,6 +181,14 @@ export interface ForcedCardApplied {
   reason: string;
 }
 
+export interface SystemStateChange {
+  type: "system_state_change";
+  system_id: string;
+  action: string;
+  power: boolean;
+  operational: string;
+}
+
 export type StateChange =
   PhaseChange
   | EventChange
@@ -171,4 +198,5 @@ export type StateChange =
   | SpeedChange
   | ScoreChange
   | RecommendationSubmitted
-  | ForcedCardApplied;
+  | ForcedCardApplied
+  | SystemStateChange;
