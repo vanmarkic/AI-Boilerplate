@@ -1,0 +1,70 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/AGENTS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+chrome devtools this :
+http://localhost:4201/home
+click run exercise
+run silent wake solo player mode
+make decision at turn 1
+make sure everythin displays as it should
+
+---
+
+continue playing from current state
+
+---
+
+pause
+
+---
+
+isseus timer doesn't reset to 5min at each turn. stress doesn't increase
+
+---
+
+what is that for ?
+       t = self.find_decision_template(event_id)
+            template_timeout = t.timeout_ms if t else 0.0
+            # If template has no timeout, use game mode's stress-based timer
+            timeout_ms = template_timeout or self._config.game_mode.get_decision_time_ms(
+                self._config.game_mode.base_decision_time_ms
+                if hasattr(self._config.game_mode, "base_decision_time_ms")
+                else 0,
+            )
+
+---
+
+proceed
+
+---
+
+it works in this case but it's not a general rule. there's also turn-induced stress. also some decisions can induce stress AND good scoring
+
+---
+
+log this somewhere, where it makes sense. @apps/tfc/SPECS.md ? it's important to capture the business logic constant somewhere central
+
+---
+
+restart all dockers, reseed and relaunch chrome devtools testing
+
+---
+
+<ide_selection>The user selected the lines 9 to 9 from /Users/dragan/Documents/AI-Boilerplate/apps/tfc/PM Questions (Domain Vocabulary).md:
+blue card
+
+This may or may not be related to the current task.</ide_selection>
+Stress delta coupled to decisions (bluecards) — +/−/0 per blue card played.
+There can also be turn-related stressdelta.
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/features/exercise/engine_router.py in the IDE. This may or may not be related to the current task.</ide_opened_file>
+update @apps/tfc/backend/seeds/silent_wake.json
+
+---
+
+totally
+
+---
+
+restart a new test chrome devtools solo player mode from scratch.
+re docker reseed
