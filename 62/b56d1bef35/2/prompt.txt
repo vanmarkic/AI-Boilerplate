@@ -1,0 +1,25 @@
+any bug left ?
+
+---
+
+review your commits that are ahead of master
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/components-exercise-layout.css in the IDE. This may or may not be related to the current task.</ide_opened_file>
+did you change files on master ? simple question don't code
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/seeds/silent_wake.json in the IDE. This may or may not be related to the current task.</ide_opened_file>
+look at the diff on master and tell whether it looks like your work
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/seeds/silent_wake.json in the IDE. This may or may not be related to the current task.</ide_opened_file>
+proceed
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/completion-overlay.component.ts in the IDE. This may or may not be related to the current task.</ide_opened_file>
+apply latest stash to master (undo what you just did). not more not less

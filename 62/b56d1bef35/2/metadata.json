@@ -1,9 +1,11 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "62b56d1bef35",
+  "session_id": "66707dca-d3b7-4062-a77d-4251cc61142e",
   "strategy": "manual-commit",
+  "created_at": "2026-03-21T21:14:25.503286Z",
   "branch": "master",
-  "checkpoints_count": 4,
+  "checkpoints_count": 2,
   "files_touched": [
     ".playwright-mcp/console-2026-03-21T16-38-07-238Z.log",
     ".playwright-mcp/console-2026-03-21T16-41-48-617Z.log",
@@ -39,31 +41,27 @@
     "apps/tfc/frontend/src/app/shared/score-bar.component.spec.ts",
     "apps/tfc/frontend/src/app/shared/score-bar.component.ts"
   ],
-  "sessions": [
-    {
-      "metadata": "/62/b56d1bef35/0/metadata.json",
-      "transcript": "/62/b56d1bef35/0/full.jsonl",
-      "content_hash": "/62/b56d1bef35/0/content_hash.txt",
-      "prompt": "/62/b56d1bef35/0/prompt.txt"
-    },
-    {
-      "metadata": "/62/b56d1bef35/1/metadata.json",
-      "transcript": "/62/b56d1bef35/1/full.jsonl",
-      "content_hash": "/62/b56d1bef35/1/content_hash.txt",
-      "prompt": "/62/b56d1bef35/1/prompt.txt"
-    },
-    {
-      "metadata": "/62/b56d1bef35/2/metadata.json",
-      "transcript": "/62/b56d1bef35/2/full.jsonl",
-      "content_hash": "/62/b56d1bef35/2/content_hash.txt",
-      "prompt": "/62/b56d1bef35/2/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "turn_id": "daac2a7241f0",
+  "checkpoint_transcript_start": 203,
+  "transcript_lines_at_start": 203,
   "token_usage": {
-    "input_tokens": 757,
-    "cache_creation_tokens": 950792,
-    "cache_read_tokens": 91282531,
-    "output_tokens": 150834,
-    "api_call_count": 652
+    "input_tokens": 235,
+    "cache_creation_tokens": 310717,
+    "cache_read_tokens": 28609940,
+    "output_tokens": 49685,
+    "api_call_count": 206
+  },
+  "session_metrics": {
+    "turn_count": 6
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T21:14:25.032308Z",
+    "agent_lines": 547,
+    "human_added": 483,
+    "human_modified": 54,
+    "human_removed": 0,
+    "total_committed": 1084,
+    "agent_percentage": 50.46125461254613
   }
 }
