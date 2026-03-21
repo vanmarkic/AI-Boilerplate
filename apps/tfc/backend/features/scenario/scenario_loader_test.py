@@ -59,7 +59,7 @@ def test_build_engine_config_loads_decision_templates() -> None:
         "stress_delta": 0,
         "system_effects": [],
         "targets_system": False,
-        "max_plays": 1,
+        "max_plays": 0,
         "role": None,
     }
     assert tmpl.completion_mode == "first_response"
