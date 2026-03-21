@@ -43,5 +43,7 @@ def create_game_mode(name: str, config: dict[str, object] | None = None) -> Game
         return SimpleCollaborativeMode(
             decision_sequence=cfg.get("decision_sequence", []),
             base_decision_time_ms=cfg.get("base_decision_time_ms", 300_000),
+            max_possible_score=cfg.get("max_possible_score", 0.0),
+            score_tier_thresholds=cfg.get("score_tier_thresholds", {}),
         )
     return ClassicMode()

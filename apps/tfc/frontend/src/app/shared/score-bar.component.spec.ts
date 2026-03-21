@@ -16,10 +16,10 @@ class TestHost {
 
 function makeScore(overrides: Partial<ScoreState> = {}): ScoreState {
   return {
-    totalScore: 10,
     turnNumber: 1,
     nextDecisionTimeMs: 0,
     stress: 0,
+    scoreTier: null,
     ...overrides,
   };
 }
@@ -61,13 +61,18 @@ describe("ScoreBarComponent", () => {
     expect(el.querySelector("tfc-stress-bar")).not.toBeNull();
   });
 
+  it("should NOT display numeric score", () => {
+    host.score.set(makeScore());
+    fixture.detectChanges();
+    expect(el.textContent).not.toContain("Score");
+    expect(el.querySelector(".score-bar__value")).toBeNull();
+  });
+
   // ── Stress increase triggers shake ──
 
   it("should trigger shake animation when stress increases", () => {
     host.score.set(makeScore({ stress: 2 }));
     fixture.detectChanges();
-    // force afterViewInit
-    (fixture.componentInstance as unknown as { score: ReturnType<typeof signal> });
 
     host.score.set(makeScore({ stress: 5 }));
     fixture.detectChanges();
@@ -78,10 +83,9 @@ describe("ScoreBarComponent", () => {
   it("should not trigger shake when stress stays the same", () => {
     host.score.set(makeScore({ stress: 3 }));
     fixture.detectChanges();
-    // Clear any calls from initialization
     mockAnim.shake.mockClear();
 
-    host.score.set(makeScore({ stress: 3, totalScore: 20 }));
+    host.score.set(makeScore({ stress: 3 }));
     fixture.detectChanges();
 
     expect(mockAnim.shake).not.toHaveBeenCalled();
@@ -96,18 +100,6 @@ describe("ScoreBarComponent", () => {
     fixture.detectChanges();
 
     expect(mockAnim.shake).not.toHaveBeenCalled();
-  });
-
-  // ── Score counter animation ──
-
-  it("should trigger counter animation when score changes", () => {
-    host.score.set(makeScore({ totalScore: 10 }));
-    fixture.detectChanges();
-
-    host.score.set(makeScore({ totalScore: 25 }));
-    fixture.detectChanges();
-
-    expect(mockAnim.counter).toHaveBeenCalledWith(10, 25, expect.any(Function));
   });
 
   // ── Countdown ──
