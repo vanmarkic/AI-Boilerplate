@@ -9,6 +9,7 @@ from features.scenario.scenario_content import (
     SystemEffectDef,
 )
 from features.scenario.scenario_loader import (
+    _compute_max_possible_score,
     build_engine_config,
     load_decision_templates,
 )
@@ -58,7 +59,7 @@ def test_build_engine_config_loads_decision_templates() -> None:
         "stress_delta": 0,
         "system_effects": [],
         "targets_system": False,
-        "max_plays": 1,
+        "max_plays": 0,
         "role": None,
     }
     assert tmpl.completion_mode == "first_response"
@@ -209,3 +210,124 @@ def test_build_engine_config_propagates_system_effects_round_trip() -> None:
     assert opt_no["targets_system"] is False
     assert opt_no["max_plays"] == 1
     assert opt_no["system_effects"] == []
+
+
+# -- max_possible_score computation ----------------------------------------
+
+
+def test_max_possible_score_single_choice() -> None:
+    """Single choice: max of option scores per template."""
+    dt = DecisionTemplateDef(
+        id="dt1",
+        title="T",
+        description="D",
+        issue_id="",
+        question_type="single_choice",
+        options=[
+            DecisionOptionDef(id="a", label="A", score=3.0),
+            DecisionOptionDef(id="b", label="B", score=10.0),
+            DecisionOptionDef(id="c", label="C", score=5.0),
+        ],
+        completion_mode="first_response",
+    )
+    content = _minimal_content(decision_templates=[dt], decision_sequence=["dt1"])
+    assert _compute_max_possible_score(content) == 10.0
+
+
+def test_max_possible_score_multi_choice_with_max_selections() -> None:
+    """Multi choice with max_selections=2: sum of top 2 scores."""
+    dt = DecisionTemplateDef(
+        id="dt1",
+        title="T",
+        description="D",
+        issue_id="",
+        question_type="multi_choice",
+        options=[
+            DecisionOptionDef(id="a", label="A", score=10.0),
+            DecisionOptionDef(id="b", label="B", score=8.0),
+            DecisionOptionDef(id="c", label="C", score=3.0),
+        ],
+        completion_mode="first_response",
+        max_selections=2,
+    )
+    content = _minimal_content(decision_templates=[dt], decision_sequence=["dt1"])
+    assert _compute_max_possible_score(content) == 18.0
+
+
+def test_max_possible_score_multi_choice_unlimited() -> None:
+    """Multi choice with no max_selections: sum of positive scores only."""
+    dt = DecisionTemplateDef(
+        id="dt1",
+        title="T",
+        description="D",
+        issue_id="",
+        question_type="multi_choice",
+        options=[
+            DecisionOptionDef(id="a", label="A", score=10.0),
+            DecisionOptionDef(id="b", label="B", score=8.0),
+            DecisionOptionDef(id="c", label="C", score=-2.0),
+        ],
+        completion_mode="first_response",
+    )
+    content = _minimal_content(decision_templates=[dt], decision_sequence=["dt1"])
+    # Only positive scores: 10 + 8 = 18 (rational player skips -2)
+    assert _compute_max_possible_score(content) == 18.0
+
+
+def test_max_possible_score_multiple_decisions() -> None:
+    """Sum across multiple decisions in sequence."""
+    dt1 = DecisionTemplateDef(
+        id="dt1", title="T1", description="", issue_id="",
+        question_type="single_choice",
+        options=[
+            DecisionOptionDef(id="a", label="A", score=10.0),
+            DecisionOptionDef(id="b", label="B", score=5.0),
+        ],
+        completion_mode="first_response",
+    )
+    dt2 = DecisionTemplateDef(
+        id="dt2", title="T2", description="", issue_id="",
+        question_type="multi_choice",
+        options=[
+            DecisionOptionDef(id="c", label="C", score=20.0),
+            DecisionOptionDef(id="d", label="D", score=15.0),
+        ],
+        completion_mode="first_response",
+        max_selections=2,
+    )
+    content = _minimal_content(
+        decision_templates=[dt1, dt2],
+        decision_sequence=["dt1", "dt2"],
+    )
+    # dt1: 10 (single) + dt2: 20+15 (multi, top-2) = 45
+    assert _compute_max_possible_score(content) == 45.0
+
+
+def test_max_possible_score_ignores_non_sequenced_templates() -> None:
+    """Templates not in decision_sequence are excluded."""
+    dt1 = DecisionTemplateDef(
+        id="dt1", title="T1", description="", issue_id="",
+        question_type="single_choice",
+        options=[DecisionOptionDef(id="a", label="A", score=10.0)],
+        completion_mode="first_response",
+    )
+    dt_extra = DecisionTemplateDef(
+        id="dt-extra", title="Extra", description="", issue_id="",
+        question_type="single_choice",
+        options=[DecisionOptionDef(id="x", label="X", score=99.0)],
+        completion_mode="first_response",
+    )
+    content = _minimal_content(
+        decision_templates=[dt1, dt_extra],
+        decision_sequence=["dt1"],
+    )
+    assert _compute_max_possible_score(content) == 10.0
+
+
+def test_build_engine_config_passes_score_tier_thresholds() -> None:
+    """score_tier_thresholds from scenario content reach ScenarioContext."""
+    content = _minimal_content(
+        score_tier_thresholds={"lo": 0.33, "mid": 0.66},
+    )
+    config = build_engine_config(exercise_id=1, title="Test", content=content)
+    assert config.context.score_tier_thresholds == {"lo": 0.33, "mid": 0.66}

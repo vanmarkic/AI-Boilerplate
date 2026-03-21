@@ -67,7 +67,7 @@ class TestDecisionOptionDefNewFields:
         opt = DecisionOptionDef(id="o1", label="Option A", score=1.0)
         assert opt.system_effects == []
         assert opt.targets_system is False
-        assert opt.max_plays == 1
+        assert opt.max_plays == 0  # 0 = unlimited (default)
 
     def test_targets_system_true(self) -> None:
         opt = DecisionOptionDef(id="o1", label="Option A", targets_system=True)
@@ -144,7 +144,7 @@ class TestLoaderPropagatesNewFields:
         snap = templates[0].options[0]
         assert snap["system_effects"] == []
         assert snap["targets_system"] is False
-        assert snap["max_plays"] == 1
+        assert snap["max_plays"] == 0  # 0 = unlimited (default)
 
     def test_system_effects_propagated(self) -> None:
         content = _content_with_option(

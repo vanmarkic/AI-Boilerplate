@@ -16,7 +16,7 @@ from engine.exercise_engine import (
 from engine.game_modes import create_game_mode
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.issue_manager import TrackedIssue, TriggerMode
-from engine.state_changes import DecisionOptionSnapshot
+from engine.state_changes import DecisionOptionSnapshot, SystemEffect
 from engine.system_manager import SystemState
 from features.scenario.scenario_content import ScenarioContent
 
@@ -37,6 +37,15 @@ def load_scenario_events(content: ScenarioContent) -> list[ScheduledEvent]:
                 triggered_issues=list(evt.triggered_issues),
                 target_roles=list(evt.target_roles),
                 role_descriptions=dict(evt.role_descriptions),
+                system_effects=[
+                    SystemEffect(
+                        system_id=e.system_id,
+                        operational_state=e.operational_state,
+                        power_state=e.power_state,
+                        set_all_power=e.set_all_power,
+                    )
+                    for e in evt.system_effects
+                ],
             ),
         )
     return events
@@ -78,7 +87,12 @@ def load_decision_templates(
                     score=o.score,
                     stress_delta=o.stress_delta,
                     system_effects=[
-                        {"system_id": e.system_id, "operational_state": e.operational_state, "power_state": e.power_state}
+                        SystemEffect(
+                            system_id=e.system_id,
+                            operational_state=e.operational_state,
+                            power_state=e.power_state,
+                            set_all_power=e.set_all_power,
+                        )
                         for e in o.system_effects
                     ],
                     targets_system=o.targets_system,
@@ -104,11 +118,33 @@ def load_system_states(content: ScenarioContent) -> list[SystemState]:
         SystemState(
             system_id=s.system_id,
             label=s.label or s.system_id.upper().replace("_", " "),
+            category=s.category,
             operational=s.operational_state or "green",
             power=s.power_state if s.power_state is not None else False,
         )
         for s in content.initial_system_states
     ]
+
+
+def _compute_max_possible_score(content: ScenarioContent) -> float:
+    """Sum the best achievable score across all decision templates in the sequence.
+
+    For multi-choice without max_selections, only positive-score options count
+    (a rational player would never voluntarily pick a negative-score card).
+    """
+    seq_ids = set(content.decision_sequence)
+    total = 0.0
+    for dt in content.decision_templates:
+        if seq_ids and dt.id not in seq_ids:
+            continue
+        scores = sorted((o.score for o in dt.options), reverse=True)
+        if dt.question_type == "single_choice":
+            total += scores[0] if scores else 0.0
+        elif dt.max_selections is not None:
+            total += sum(scores[: dt.max_selections])
+        else:
+            total += sum(s for s in scores if s > 0)
+    return total
 
 
 def build_engine_config(
@@ -126,10 +162,17 @@ def build_engine_config(
         objectives=list(content.objectives),
         rules=list(content.rules),
         roles=[RoleInfo(id=r.id, label=r.label, player_type=r.player_type) for r in content.roles],
+        score_tier_thresholds=dict(content.score_tier_thresholds),
     )
     mode_config = dict(content.game_mode_config)
     if content.decision_sequence:
         mode_config.setdefault("decision_sequence", list(content.decision_sequence))
+    if content.score_tier_thresholds:
+        mode_config.setdefault("score_tier_thresholds", dict(content.score_tier_thresholds))
+    mode_config.setdefault(
+        "max_possible_score",
+        _compute_max_possible_score(content),
+    )
     game_mode = create_game_mode(content.game_mode, mode_config)
     return EngineConfig(
         exercise_id=exercise_id,

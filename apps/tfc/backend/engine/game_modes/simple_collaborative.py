@@ -24,6 +24,8 @@ class SimpleCollaborativeMode:
 
     decision_sequence: list[str] = field(default_factory=list)
     base_decision_time_ms: int = 300_000
+    max_possible_score: float = 0.0
+    score_tier_thresholds: dict[str, float] = field(default_factory=dict)
 
     # Mutable runtime state
     stress: int = 0
@@ -98,9 +100,23 @@ class SimpleCollaborativeMode:
                 self.base_decision_time_ms,
             ),
             "turn_number": self.turn_number,
+            "score_tier": self.compute_tier(),
         }
         changes.append(score_change)
         return changes
+
+    def compute_tier(self) -> str | None:
+        """Compute score tier based on thresholds. Returns None if no thresholds configured."""
+        if not self.score_tier_thresholds or self.max_possible_score <= 0:
+            return None
+        ratio = self.total_score / self.max_possible_score
+        lo = self.score_tier_thresholds.get("lo", 0.33)
+        mid = self.score_tier_thresholds.get("mid", 0.66)
+        if ratio < lo:
+            return "lo"
+        if ratio < mid:
+            return "mid"
+        return "hi"
 
     def snapshot(self) -> dict[str, object] | None:
         """Return current scoring state for client sync."""
@@ -111,6 +127,7 @@ class SimpleCollaborativeMode:
             "next_decision_time_ms": self.get_decision_time_ms(
                 self.base_decision_time_ms,
             ),
+            "score_tier": self.compute_tier(),
         }
 
     def get_next_decision_id(self, closed_decision_id: str) -> str | None:

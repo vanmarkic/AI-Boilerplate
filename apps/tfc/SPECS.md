@@ -122,10 +122,12 @@ Score tracking with contextual per-option scores and tiered end-of-exercise summ
 - Tier thresholds defined in `ScenarioContent.score_tier_thresholds` (e.g., `{"lo": 0.33, "mid": 0.66}`).
 - No negative wording — all feedback is encouraging and praises effort, even if score is low.
 
-**Planned:**
-- [ ] Hide score from player UI — currently visible in player header, must be removed → `player-view.html`, `exercise.store.ts`
-- [ ] End-of-exercise tier display (Lo/Mid/Hi with encouraging messaging)
-- [ ] Positive-only feedback wording for all tier levels
+- Numeric score hidden from player UI — `totalScore` removed from frontend `ScoreState`, `ScoreBarComponent` shows only stress/turn/timer.
+- End-of-exercise tier display via `CompletionOverlayComponent` — shows Lo/Mid/Hi with encouraging messaging.
+- Tier computed on backend: `ratio = total_score / max_possible_score` mapped via `score_tier_thresholds`.
+- `score_tier` included in engine snapshot and `ScoreChange` WS messages.
+- All tier messages use positive-only wording (Lo: "Solid Effort", Mid: "Great Performance", Hi: "Outstanding").
+- `complete_engine` endpoint broadcasts phase_change but does NOT call `svc.stop()` — engine stays alive so clients can show the overlay.
 
 ### Feature: systems · backend + frontend
 
@@ -138,10 +140,14 @@ Ship/facility systems displayed for all roles and players with power (ON/OFF) an
 - **Event-triggered degradation:** Injects (events) can degrade system states (power off, operational → red/yellow).
 - **General Quarters:** Certain forced cards turn all systems ON via `SystemManager.set_all_power(True)`.
 
-**Planned:**
-- [ ] Event-triggered system degradation — events need `system_effects` field + engine logic → `event_scheduler.py`, `exercise_engine.py`
-- [ ] General Quarters seed data — wire `system_effects` to `set_all_power(True)` → `seeds/silent_wake.json`
-- [ ] `targets_system` / `max_plays` submission data plumbing → `exercise_engine.py:348`
+**Completed:**
+- [x] Event-triggered system degradation — events carry `system_effects`, applied on event start (RUNNING)
+- [x] General Quarters seed data — `set_all_power: true` flag on SystemEffect, SWB20 updated
+- [x] `max_plays` enforcement — play counts tracked per option per session, exhausted options excluded from timeout auto-selection
+- [x] Full system catalog in Silent Wake seed (13 systems/weapons matching game mechanics doc)
+
+**Remaining:**
+- [ ] `targets_system` — system picker UI (player chooses which system a card targets) — deferred, field flows through to frontend
 
 ### Feature: waiting_room · backend + frontend
 
