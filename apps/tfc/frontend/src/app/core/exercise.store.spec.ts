@@ -1,5 +1,17 @@
 import { TestBed } from "@angular/core/testing";
 import { ExerciseStore } from "./exercise.store";
+import type { SnapshotWithScore } from "./engine-api.service";
+
+const minimalSnapshot: SnapshotWithScore = {
+  exercise_id: 1,
+  title: "Test",
+  phase: "running",
+  time: { play_time_ms: 0, real_time_ms: 0, factor: 1, paused: false },
+  events: [],
+  issues: [],
+  systems: [],
+  score: null,
+};
 
 describe("ExerciseStore", () => {
   let store: InstanceType<typeof ExerciseStore>;
@@ -11,6 +23,74 @@ describe("ExerciseStore", () => {
     store = TestBed.inject(ExerciseStore);
   });
 
+  describe("systems", () => {
+    it("should initialize with empty systems array", () => {
+      expect(store.systems()).toEqual([]);
+    });
+
+    it("should populate systems from snapshot", () => {
+      store.applySnapshot({
+        ...minimalSnapshot,
+        systems: [
+          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
+        ],
+      });
+      expect(store.systems().length).toBe(1);
+      expect(store.systems()[0].system_id).toBe("nav");
+    });
+
+    it("should update system state on applySystemChange", () => {
+      store.applySnapshot({
+        ...minimalSnapshot,
+        systems: [
+          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
+        ],
+      });
+      store.applySystemChange({
+        system_id: "nav",
+        action: "operational_changed",
+        power: true,
+        operational: "red",
+      });
+      expect(store.systems()[0].operational).toBe("red");
+      expect(store.systems()[0].power).toBe(true);
+    });
+
+    it("should update power state on applySystemChange", () => {
+      store.applySnapshot({
+        ...minimalSnapshot,
+        systems: [
+          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
+        ],
+      });
+      store.applySystemChange({
+        system_id: "nav",
+        action: "power_changed",
+        power: false,
+        operational: "green",
+      });
+      expect(store.systems()[0].power).toBe(false);
+    });
+
+    it("should not modify other systems", () => {
+      store.applySnapshot({
+        ...minimalSnapshot,
+        systems: [
+          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
+          { system_id: "comms", label: "COMMS", category: "comms", power: true, operational: "green" },
+        ],
+      });
+      store.applySystemChange({
+        system_id: "nav",
+        action: "power_changed",
+        power: false,
+        operational: "red",
+      });
+      expect(store.systems()[1].power).toBe(true);
+      expect(store.systems()[1].operational).toBe("green");
+    });
+  });
+
   describe("issuesWithCountdown", () => {
     it("returns empty when no active issues", () => {
       expect(store.issuesWithCountdown()).toEqual([]);
@@ -18,16 +98,8 @@ describe("ExerciseStore", () => {
 
     it("calculates remaining time for active issues with auto-resolve", () => {
       store.applySnapshot({
-        exercise_id: 1,
-        title: "Test",
-        phase: "running",
-        time: {
-          play_time_ms: 5000,
-          real_time_ms: 5000,
-          factor: 1,
-          paused: false,
-        },
-        events: [],
+        ...minimalSnapshot,
+        time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
         issues: [
           {
             id: "i1",
@@ -41,7 +113,6 @@ describe("ExerciseStore", () => {
             released: false,
           },
         ],
-        score: null,
       });
       const countdown = store.issuesWithCountdown();
       expect(countdown.length).toBe(1);
@@ -51,16 +122,8 @@ describe("ExerciseStore", () => {
 
     it("returns 0 remaining when past auto-resolve time", () => {
       store.applySnapshot({
-        exercise_id: 1,
-        title: "Test",
-        phase: "running",
-        time: {
-          play_time_ms: 15000,
-          real_time_ms: 15000,
-          factor: 1,
-          paused: false,
-        },
-        events: [],
+        ...minimalSnapshot,
+        time: { play_time_ms: 15000, real_time_ms: 15000, factor: 1, paused: false },
         issues: [
           {
             id: "i1",
@@ -74,7 +137,6 @@ describe("ExerciseStore", () => {
             released: false,
           },
         ],
-        score: null,
       });
       const countdown = store.issuesWithCountdown();
       expect(countdown[0].remaining_ms).toBe(0);
@@ -82,16 +144,8 @@ describe("ExerciseStore", () => {
 
     it("excludes issues without auto_resolve_ms", () => {
       store.applySnapshot({
-        exercise_id: 1,
-        title: "Test",
-        phase: "running",
-        time: {
-          play_time_ms: 5000,
-          real_time_ms: 5000,
-          factor: 1,
-          paused: false,
-        },
-        events: [],
+        ...minimalSnapshot,
+        time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
         issues: [
           {
             id: "i1",
@@ -105,23 +159,14 @@ describe("ExerciseStore", () => {
             released: false,
           },
         ],
-        score: null,
       });
       expect(store.issuesWithCountdown().length).toBe(0);
     });
 
     it("excludes inactive issues", () => {
       store.applySnapshot({
-        exercise_id: 1,
-        title: "Test",
-        phase: "running",
-        time: {
-          play_time_ms: 5000,
-          real_time_ms: 5000,
-          factor: 1,
-          paused: false,
-        },
-        events: [],
+        ...minimalSnapshot,
+        time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
         issues: [
           {
             id: "i1",
@@ -135,9 +180,22 @@ describe("ExerciseStore", () => {
             released: false,
           },
         ],
-        score: null,
       });
       expect(store.issuesWithCountdown().length).toBe(0);
+    });
+  });
+
+  describe("applyScoreChange", () => {
+    it("should apply stress from score change", () => {
+      store.applyScoreChange({
+        total_score: 5.0,
+        stress: 3,
+        turn_number: 2,
+        next_decision_time_ms: 270000,
+      });
+      expect(store.score()?.stress).toBe(3);
+      expect(store.score()?.totalScore).toBe(5.0);
+      expect(store.score()?.turnNumber).toBe(2);
     });
   });
 

@@ -22,7 +22,7 @@ import type {
 /** Frontend-only type for the score fields within EngineSnapshot.score */
 export interface ScoreSnapshot {
   total_score: number;
-  penalty_ms: number;
+  stress: number;
   turn_number: number;
   next_decision_time_ms: number;
 }

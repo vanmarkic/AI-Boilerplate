@@ -14,7 +14,7 @@ import type {
   TimeSnapshot,
 } from "./engine-api.service";
 import type { ActiveDecision, ScenarioContext } from "./decision-api.service";
-import type { ScoreChange } from "./generated/state-changes.types";
+import type { ScoreChange, SystemSnapshot, SystemStateChange } from "./generated/state-changes.types";
 import { formatTimeMs } from "./format-time";
 
 export interface ParticipantPresence {
@@ -29,6 +29,7 @@ interface ScoreState {
   turnNumber: number;
   nextDecisionTimeMs: number;
   penaltyMs: number;
+  stress: number;
 }
 
 interface ExerciseState {
@@ -44,6 +45,7 @@ interface ExerciseState {
   events: EventSnapshot[]; // domain: "injects"
   issues: IssueSnapshot[]; // domain: "defects"
   decisions: ActiveDecision[];
+  systems: SystemSnapshot[];
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
   participantId: string;
@@ -67,6 +69,7 @@ const initialState: ExerciseState = {
   events: [],
   issues: [],
   decisions: [],
+  systems: [],
   participants: [],
   context: null,
   participantId: "",
@@ -171,11 +174,13 @@ export const ExerciseStore = signalStore(
         paused: snapshot.time.paused,
         events: snapshot.events,
         issues: snapshot.issues,
+        systems: snapshot.systems ?? store.systems(),
         decisions: snapshot.decisions ?? store.decisions(),
         score: snapshot.score
           ? {
               totalScore: snapshot.score.total_score,
-              penaltyMs: snapshot.score.penalty_ms,
+              penaltyMs: 0,
+              stress: snapshot.score.stress,
               turnNumber: snapshot.score.turn_number,
               nextDecisionTimeMs: snapshot.score.next_decision_time_ms,
             }
@@ -277,11 +282,12 @@ export const ExerciseStore = signalStore(
       patchState(store, { speedFactor: factor });
     },
 
-    applyScoreChange(change: Pick<ScoreChange, "total_score" | "penalty_ms" | "next_decision_time_ms" | "turn_number">): void {
+    applyScoreChange(change: Pick<ScoreChange, "total_score" | "stress" | "next_decision_time_ms" | "turn_number">): void {
       patchState(store, {
         score: {
           totalScore: change.total_score,
-          penaltyMs: change.penalty_ms,
+          penaltyMs: 0,
+          stress: change.stress,
           nextDecisionTimeMs: change.next_decision_time_ms,
           turnNumber: change.turn_number,
         },
@@ -305,6 +311,15 @@ export const ExerciseStore = signalStore(
           : d,
       );
       patchState(store, { decisions });
+    },
+
+    applySystemChange(change: Pick<SystemStateChange, "system_id" | "action" | "power" | "operational">): void {
+      const systems = store.systems().map((s) =>
+        s.system_id === change.system_id
+          ? { ...s, power: change.power, operational: change.operational }
+          : s,
+      );
+      patchState(store, { systems });
     },
   })),
 );
