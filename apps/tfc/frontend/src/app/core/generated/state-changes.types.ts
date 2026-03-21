@@ -22,6 +22,7 @@ export interface EventSnapshot {
   completed_at_pt_ms: number | null;
   target_roles: string[];
   role_descriptions: Record<string, string>;
+  system_effects: SystemEffect[];
 }
 
 export interface IssueSnapshot {
@@ -40,6 +41,7 @@ export interface SystemEffect {
   system_id: string;
   operational_state: string | null;
   power_state: boolean | null;
+  set_all_power: boolean;
 }
 
 export interface DecisionOptionSnapshot {
@@ -165,6 +167,7 @@ export interface ScoreChange {
   stress: number;
   next_decision_time_ms: number;
   turn_number: number;
+  score_tier: string | null;
 }
 
 export interface RecommendationSubmitted {

@@ -26,6 +26,7 @@ from engine.state_changes import (
     EngineSnapshot,
     PhaseChange,
     StateChange,
+    SystemEffect,
     SystemStateChange,
 )
 from engine.system_manager import SystemManager
@@ -63,6 +64,8 @@ class ExerciseEngine:
         self._timeout_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._on_state_change = on_state_change
 
+        self._option_play_counts: dict[str, int] = {}
+
         self._events.load_events(config.events)
         self._issues.load_issues(config.issues)
         self._systems.load_systems(list(config.initial_system_states))
@@ -94,6 +97,22 @@ class ExerciseEngine:
     @property
     def config(self) -> EngineConfig:
         return self._config
+
+    @property
+    def option_play_counts(self) -> dict[str, int]:
+        return dict(self._option_play_counts)
+
+    def record_option_plays(self, options: list[DecisionOptionSnapshot]) -> None:
+        """Increment play count for each selected option."""
+        for opt in options:
+            self._option_play_counts[opt["id"]] = self._option_play_counts.get(opt["id"], 0) + 1
+
+    def is_option_exhausted(self, option: DecisionOptionSnapshot) -> bool:
+        """Check if an option has reached its max_plays limit."""
+        max_plays = option["max_plays"]
+        if max_plays == 0:
+            return False  # unlimited
+        return self._option_play_counts.get(option["id"], 0) >= max_plays
 
     @property
     def game_mode(self) -> GameMode:
@@ -148,6 +167,7 @@ class ExerciseEngine:
         self._issues.load_issues(self._config.issues)
         self._systems.load_systems(list(self._config.initial_system_states))
         self._decisions.clear()
+        self._option_play_counts.clear()
         return self._phase_change("reset")
 
     def set_speed(self, factor: float) -> StateChange:
@@ -162,6 +182,14 @@ class ExerciseEngine:
 
         event_changes = self._events.tick(pt)
         changes.extend(event_changes)
+
+        # Apply system effects from events that just started
+        # (force-triggered events are handled in force_trigger_next_decision)
+        for change in event_changes:
+            if change.get("action") == "started":
+                event = self._events.events.get(change["event_id"])
+                if event and event.system_effects:
+                    changes.extend(self._apply_event_system_effects(event.system_effects))
 
         decision_changes = self._handle_decision_events(event_changes, pt)
         changes.extend(decision_changes)
@@ -246,14 +274,16 @@ class ExerciseEngine:
     def find_decision_template(self, event_id: str) -> DecisionTemplate | None:
         return next((dt for dt in self._config.decision_templates if dt.id == event_id), None)
 
-    def force_trigger_next_decision(self, pt: float) -> list[StateChange]:
+    def force_trigger_next_decision(
+        self, pt: float, closed_decision_id: str = "",
+    ) -> list[StateChange]:
         """Force-trigger the next event in the game mode's decision sequence.
 
         Called after closing a decision (player submission or timeout).
         Returns event_change + decision_opened state changes, or [] if
         the sequence is exhausted or the next event doesn't exist.
         """
-        next_id = self._config.game_mode.get_next_decision_id("")
+        next_id = self._config.game_mode.get_next_decision_id(closed_decision_id)
         if not next_id:
             return []
         event = self._events.events.get(next_id)
@@ -263,6 +293,9 @@ class ExerciseEngine:
         if not event_change:
             return []
         changes: list[StateChange] = [event_change]
+        # Apply system effects from force-triggered event
+        if event and event.system_effects:
+            changes.extend(self._apply_event_system_effects(event.system_effects))
         changes.extend(self._handle_decision_events([event_change], pt))
         return changes
 
@@ -305,10 +338,14 @@ class ExerciseEngine:
                         continue
                     if (now_ms - d.opened_at_rt_ms) < d.timeout_ms:
                         continue
+                    # Filter out exhausted options before auto-selection
+                    available_options = [
+                        o for o in d.options if not self.is_option_exhausted(o)
+                    ]
                     # Auto-submit worst option via game mode
                     auto_id = self._config.game_mode.on_decision_timeout(
                         d.id,
-                        d.options,
+                        available_options or d.options,
                     )
                     selected_ids = [auto_id] if auto_id else []
                     close_change = self._decisions.close_decision(
@@ -330,10 +367,22 @@ class ExerciseEngine:
                         turn_stress_delta=template.stress_delta if template else 0,
                     )
                     all_changes.extend(extra)
-                    # Apply system effects from selected options
+                    # Record plays and apply system effects
+                    self.record_option_plays(selected_opts)
                     all_changes.extend(self._apply_system_effects(selected_opts))
                     # Advance to next turn
-                    all_changes.extend(self.force_trigger_next_decision(pt))
+                    advance = self.force_trigger_next_decision(pt, d.id)
+                    all_changes.extend(advance)
+                    # Auto-complete if sequence exhausted
+                    if (
+                        not advance
+                        and self._config.game_mode.get_next_decision_id(d.id) is None
+                        and self._phase == EnginePhase.RUNNING
+                    ):
+                        try:
+                            all_changes.append(await self.complete())
+                        except EngineStateError:
+                            pass  # Another path already completed
                 if all_changes and self._on_state_change:
                     await self._on_state_change(all_changes)
                 if not self._decisions.get_open_decisions():
@@ -346,16 +395,34 @@ class ExerciseEngine:
     def _apply_system_effects(
         self, selected_options: list[DecisionOptionSnapshot],
     ) -> list[SystemStateChange]:
-        """Apply system_effects from selected options via SystemManager."""
-        out: list[SystemStateChange] = []  # TODO: targets_system needs submission data plumbing
+        """Apply system_effects from selected decision options via SystemManager."""
+        out: list[SystemStateChange] = []
         for opt in selected_options:
-            for fx in opt["system_effects"]:
-                if fx["power_state"] is not None:
-                    if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
-                        out.append(c)
-                if fx["operational_state"] is not None:
-                    if c := self._systems.set_operational(fx["system_id"], fx["operational_state"]):
-                        out.append(c)
+            out.extend(self._apply_effects_list(opt["system_effects"]))
+        return out
+
+    def _apply_event_system_effects(
+        self, effects: list[SystemEffect],
+    ) -> list[SystemStateChange]:
+        """Apply system_effects from an event (inject) via SystemManager."""
+        return self._apply_effects_list(effects)
+
+    def _apply_effects_list(
+        self, effects: list[SystemEffect],
+    ) -> list[SystemStateChange]:
+        """Shared logic for applying a list of SystemEffect dicts."""
+        out: list[SystemStateChange] = []
+        for fx in effects:
+            if fx.get("set_all_power"):
+                on = fx["power_state"] if fx["power_state"] is not None else True
+                out.extend(self._systems.set_all_power(on))
+                continue
+            if fx["power_state"] is not None:
+                if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
+                    out.append(c)
+            if fx["operational_state"] is not None:
+                if c := self._systems.set_operational(fx["system_id"], fx["operational_state"]):
+                    out.append(c)
         return out
 
     def _phase_change(self, action: str) -> PhaseChange:

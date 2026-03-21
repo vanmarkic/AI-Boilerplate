@@ -281,4 +281,7 @@ class TestStopEngineEndpoint:
         resp = await client.post(f"/api/exercises/{eid}/engine/complete")
 
         assert resp.status_code == 200
-        assert session_store.get(eid) is None
+        # Engine stays alive after complete (for completion overlay)
+        engine_after = session_store.get(eid)
+        assert engine_after is not None
+        assert engine_after.phase.value == "completed"
