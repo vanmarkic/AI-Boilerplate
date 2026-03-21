@@ -11,7 +11,7 @@ import pytest
 from engine.engine_config import EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import ExerciseEngine
-from engine.state_changes import SystemEffect
+from engine.state_changes import DecisionOptionSnapshot, SystemEffect
 from engine.system_manager import SystemState
 
 
@@ -146,3 +146,30 @@ class TestEventSystemEffects:
         """Empty effects list returns no changes."""
         engine = ExerciseEngine(_config())
         assert engine._apply_event_system_effects([]) == []
+
+    def test_force_triggered_event_applies_system_effects(self) -> None:
+        """Events force-triggered via turn chaining also apply system_effects."""
+        systems = [SystemState(system_id="comms", label="COMMS", power=True, operational="green")]
+        # Only need one event with system_effects — test force_trigger directly
+        evt = ScheduledEvent(
+            id="evt-t2", title="Turn 2", description="Comms degrade",
+            event_type=EventType.INFORMATIONAL,  # non-decision to avoid timeout monitor
+            scheduled_pt_ms=300000.0,
+            system_effects=[
+                SystemEffect(system_id="comms", operational_state="yellow", power_state=None),
+            ],
+        )
+        engine = ExerciseEngine(_config(events=[evt], initial_system_states=systems))
+
+        # Force-trigger the event (simulates GM or turn chaining)
+        event_change = engine.event_scheduler.force_trigger("evt-t2", 0.0)
+        assert event_change is not None
+        assert event_change["action"] == "force_triggered"
+
+        # Now apply system effects — this is what force_trigger_next_decision should do
+        event = engine.event_scheduler.events["evt-t2"]
+        changes = engine._apply_event_system_effects(event.system_effects)
+
+        assert engine.system_manager.systems["comms"].operational == "yellow"
+        assert len(changes) == 1
+        assert changes[0]["system_id"] == "comms"
