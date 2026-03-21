@@ -1,7 +1,9 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "2a5e052467dc",
+  "session_id": "c85e24ef-1919-45f2-a6bd-feba2a2c7024",
   "strategy": "manual-commit",
+  "created_at": "2026-03-21T16:01:33.683816Z",
   "branch": "master",
   "checkpoints_count": 2,
   "files_touched": [
@@ -17,25 +19,27 @@
     "apps/tfc/frontend/src/app/features/player/role-card.types.spec.ts",
     "apps/tfc/frontend/src/app/features/player/role-card.types.ts"
   ],
-  "sessions": [
-    {
-      "metadata": "/2a/5e052467dc/0/metadata.json",
-      "transcript": "/2a/5e052467dc/0/full.jsonl",
-      "content_hash": "/2a/5e052467dc/0/content_hash.txt",
-      "prompt": "/2a/5e052467dc/0/prompt.txt"
-    },
-    {
-      "metadata": "/2a/5e052467dc/1/metadata.json",
-      "transcript": "/2a/5e052467dc/1/full.jsonl",
-      "content_hash": "/2a/5e052467dc/1/content_hash.txt",
-      "prompt": "/2a/5e052467dc/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "turn_id": "ba4d6087f579",
+  "checkpoint_transcript_start": 1203,
+  "transcript_lines_at_start": 1203,
   "token_usage": {
     "input_tokens": 113,
     "cache_creation_tokens": 77438,
     "cache_read_tokens": 22447702,
     "output_tokens": 23019,
     "api_call_count": 85
+  },
+  "session_metrics": {
+    "turn_count": 9
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T16:01:32.719162Z",
+    "agent_lines": 220,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 220,
+    "agent_percentage": 100
   }
 }

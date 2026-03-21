@@ -1,0 +1,20 @@
+run the same smoke test 3 more times at least, on @apps/tfc/backend/seeds/silent_wake.json scenario
+
+---
+
+not practice. 2 players mode, not practice
+
+---
+
+fix all 4 issues in subagents then run smoke tests again for the same mode
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/player/role-card.types.ts in the IDE. This may or may not be related to the current task.</ide_opened_file>
+do it again until the end of the silentwake scenario. 
+
+loop :
+run 2 player silent wake scenario
+if bug -> stop scenario run, file issue solve bug, TDD, commit
+docker restart reseed
+restart loop
