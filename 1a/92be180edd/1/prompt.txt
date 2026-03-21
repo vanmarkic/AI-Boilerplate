@@ -400,3 +400,49 @@ It reduces future regression risk when adding new consequences like scoring, sys
 ---
 
 yes plan the merge first approach. document decision in md file
+
+---
+
+ok
+
+---
+
+is there a risk it breaks frontend integration ?
+
+---
+
+ok proceed
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (we8vav) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+proceed
+
+---
+
+ok we're good, proceed
+
+---
+
+remove
+
+---
+
+what's next ?
+
+---
+
+I think #1 are all done
+
+---
+
+when where they created ?
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (6m4hux) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+close them all
+
+---
+
+phase 2
