@@ -69,5 +69,8 @@ export function handleStateChange(
     case "forced_card_applied":
       // No UI action needed — forced cards are reflected in the decision's options
       break;
+    case "system_state_change":
+      store.applySystemChange(change);
+      break;
   }
 }
