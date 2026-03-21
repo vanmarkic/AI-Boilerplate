@@ -73,7 +73,8 @@ class EngineDecisionService:
             turn_stress_delta=template.stress_delta if template else 0,
         )
 
-        # Apply system effects from selected options
+        # Record plays and apply system effects
+        engine.record_option_plays(selected_options)
         sys_changes = engine._apply_system_effects(selected_options)
 
         close_and_score: list[StateChange] = [result, *score_changes, *sys_changes]

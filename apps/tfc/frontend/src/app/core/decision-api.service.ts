@@ -70,6 +70,7 @@ export interface ScenarioContext {
   objectives: string[];
   rules: string[];
   roles: RoleDef[];
+  score_tier_thresholds?: Record<string, number>;
 }
 
 @Injectable({ providedIn: "root" })

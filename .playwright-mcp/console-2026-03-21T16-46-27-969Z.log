@@ -1,0 +1,4 @@
+[    5769ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/1/ws?role=player&participant_id=f89987ed-9295-434e-af26-e7e6d7f0bc3d' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4201/chunk-OPY7MDP3.js:53
+[    7772ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/1/ws?role=player&participant_id=f89987ed-9295-434e-af26-e7e6d7f0bc3d' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4201/chunk-OPY7MDP3.js:53
+[   11774ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/1/ws?role=player&participant_id=f89987ed-9295-434e-af26-e7e6d7f0bc3d' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4201/chunk-OPY7MDP3.js:53
+[   19828ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/1/engine/snapshot:0
