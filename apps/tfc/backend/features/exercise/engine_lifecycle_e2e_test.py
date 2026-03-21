@@ -151,6 +151,34 @@ async def test_scenario_to_engine_lifecycle(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
+async def test_engine_state_changes_logged_to_audit(client: AsyncClient) -> None:
+    """Starting an exercise should create audit entries for phase changes."""
+    sc_resp = await client.post(
+        "/api/scenarios",
+        json={"title": "Audit Test", "content": SCENARIO_CONTENT},
+    )
+    scenario_id = sc_resp.json()["id"]
+    ex_resp = await client.post(
+        "/api/exercises",
+        json={"title": "Audit Ex", "scenario_id": scenario_id},
+    )
+    exercise_id = ex_resp.json()["id"]
+
+    # Start triggers phase_change (setup→briefing)
+    await client.post(f"/api/exercises/{exercise_id}/engine/start")
+
+    # Begin triggers phase_change (briefing→running)
+    await client.post(f"/api/exercises/{exercise_id}/engine/begin")
+
+    # Check audit trail
+    resp = await client.get(f"/api/audit/{exercise_id}")
+    assert resp.status_code == 200
+    entries = resp.json()
+    types = [e["entry_type"] for e in entries]
+    assert "phase_change" in types
+
+
+@pytest.mark.asyncio
 async def test_exercise_without_scenario_rejects_start(
     client: AsyncClient,
 ) -> None:

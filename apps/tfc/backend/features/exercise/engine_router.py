@@ -12,6 +12,8 @@ from core.dependencies import get_exercise_service, get_scenario_service
 from engine.exercise_engine import EngineConfig, EnginePhase, EngineStateError, ExerciseEngine
 from engine.session_store import session_store
 from engine.state_changes import EngineSnapshot, PhaseChange, StateChange
+from features.audit.audit_repository import AuditRepository
+from features.audit.audit_service import AuditService
 from features.exercise.adapters.connection_manager import connection_manager
 from features.exercise.engine_broadcast import broadcast_changes
 from features.exercise.engine_decision_service import EngineDecisionService
@@ -23,6 +25,27 @@ from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_store import waiting_room_store
 
 router = APIRouter(prefix="/api/exercises/{exercise_id}/engine", tags=["engine"])
+
+
+async def _log_to_audit(
+    exercise_id: int,
+    changes: list[StateChange],
+) -> None:
+    """Persist state changes to the audit trail in a dedicated session."""
+    from core.database import async_session_factory
+
+    engine = session_store.get(exercise_id)
+    if not engine:
+        return
+    async with async_session_factory() as session:
+        async with session.begin():
+            audit = AuditService(AuditRepository(session))
+            await audit.log_engine_changes(
+                exercise_id,
+                changes,
+                play_time_ms=engine.time_manager.play_time_ms,
+                real_time_ms=engine.time_manager.real_time_ms,
+            )
 
 
 class SpeedRequest(BaseModel):
@@ -85,6 +108,7 @@ async def start_engine(
 
         async def _on_change(changes: list[StateChange]) -> None:
             await broadcast_changes(connection_manager, exercise_id, changes)
+            await _log_to_audit(exercise_id, changes)
 
         engine = session_store.create(config, on_state_change=_on_change)
 
@@ -96,6 +120,8 @@ async def start_engine(
         result = await engine.start()
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
+
+    await _log_to_audit(exercise_id, [result])
 
     # Notify all WS clients so lobby players auto-navigate
     participants = waiting_room_store.list_participants(exercise_id)
@@ -118,6 +144,7 @@ async def begin_engine(exercise_id: int) -> PhaseChange:
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     await broadcast_changes(connection_manager, exercise_id, [result])
+    await _log_to_audit(exercise_id, [result])
     return result
 
 
@@ -128,6 +155,7 @@ async def pause_engine(exercise_id: int) -> PhaseChange:
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     await broadcast_changes(connection_manager, exercise_id, [result])
+    await _log_to_audit(exercise_id, [result])
     return result
 
 
@@ -138,6 +166,7 @@ async def resume_engine(exercise_id: int) -> PhaseChange:
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     await broadcast_changes(connection_manager, exercise_id, [result])
+    await _log_to_audit(exercise_id, [result])
     return result
 
 
@@ -145,6 +174,7 @@ async def resume_engine(exercise_id: int) -> PhaseChange:
 async def reset_engine(exercise_id: int) -> PhaseChange:
     result = await _get_engine(exercise_id).reset()
     await broadcast_changes(connection_manager, exercise_id, [result])
+    await _log_to_audit(exercise_id, [result])
     return result
 
 

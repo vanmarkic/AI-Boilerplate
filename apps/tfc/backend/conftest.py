@@ -6,6 +6,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import StaticPool
 
+import core.database as db_module
 from core.database import Base, get_session
 from main import app
 
@@ -39,8 +40,12 @@ async def setup_db() -> AsyncGenerator[None]:
                 yield session
 
     app.dependency_overrides[get_session] = override_session
+    # Also override the module-level factory so out-of-request code uses the test DB
+    original_factory = db_module.async_session_factory
+    db_module.async_session_factory = session_factory
     yield
     app.dependency_overrides.clear()
+    db_module.async_session_factory = original_factory
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
