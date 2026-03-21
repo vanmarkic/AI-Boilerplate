@@ -14,6 +14,7 @@ import { ClockDisplayComponent } from "../../shared/clock-display.component";
 import { PhaseBadgeComponent } from "../../shared/phase-badge.component";
 import { AmbientBackgroundComponent } from "../../shared/ambient-background.component";
 import { BriefingOverlayComponent } from "../../shared/briefing-overlay.component";
+import { CompletionOverlayComponent } from "../../shared/completion-overlay.component";
 import {
   resolvePlayerRole,
   submitRoleRecommendation,
@@ -43,6 +44,7 @@ import { buildRoleCards } from "./role-card.types";
     PhaseBadgeComponent,
     AmbientBackgroundComponent,
     BriefingOverlayComponent,
+    CompletionOverlayComponent,
     LogsDrawerComponent,
     StressBarComponent,
     ButtonDirective,
@@ -187,7 +189,7 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   }
 
-  private onExerciseStopped(): void {
+  protected onExerciseStopped(): void {
     this.ws.disconnect();
     this.router.navigate(["/"]);
   }

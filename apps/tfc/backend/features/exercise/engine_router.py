@@ -284,4 +284,5 @@ async def get_engine_context(exercise_id: int) -> dict[str, object]:
         "rules": ctx.rules,
         "default_time_factor": engine.config.time_factor,
         "roles": [{"id": r.id, "label": r.label, "player_type": r.player_type} for r in ctx.roles],
+        "score_tier_thresholds": ctx.score_tier_thresholds,
     }
