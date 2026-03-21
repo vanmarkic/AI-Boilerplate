@@ -1,0 +1,13 @@
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (ihul6e) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+what's left to do from the @apps/tfc/SPECS.md
+
+---
+
+do this
+Scoring (Feature: scoring)
+
+Hide score from player UI — currently visible in player header
+End-of-exercise tier display (Lo/Mid/Hi with encouraging messaging)
+Positive-only feedback wording for all tier levels
+
+in different worktree branch
