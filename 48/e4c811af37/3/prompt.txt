@@ -1,0 +1,2 @@
+<ide_opened_file>The user opened the file /Users/dragan/.claude/skills/smoke-test-tfc/SKILL.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+make sure @apps/tfc/backend/seeds/silent_wake.json is compliant with and uses all engine capacities of simple collaborative mode
