@@ -49,6 +49,7 @@ class ScenarioContext:
     objectives: list[str] = field(default_factory=list)
     rules: list[str] = field(default_factory=list)
     roles: list[RoleInfo] = field(default_factory=list)
+    score_tier_thresholds: dict[str, float] = field(default_factory=dict)
 
 
 @dataclass
