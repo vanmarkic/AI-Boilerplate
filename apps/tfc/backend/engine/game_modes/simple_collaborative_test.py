@@ -22,10 +22,10 @@ def _close_v2(
     stress_delta: int = 0,
 ) -> list[dict]:
     """Helper: wrap scalar scores as v2 option lists for testing."""
-    selected = [{"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta}]
+    selected = [{"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}]
     all_opts = [
-        {"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta},
-        {"id": "best", "label": "Best", "score": max_score, "stress_delta": 0},
+        {"id": "sel", "label": "Sel", "score": selected_score, "stress_delta": stress_delta, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+        {"id": "best", "label": "Best", "score": max_score, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
     ]
     return mode.on_decision_closed_v2(decision_id, selected, all_opts)
 
@@ -41,9 +41,9 @@ def test_does_not_require_gm() -> None:
 def test_auto_submit_picks_worst_option() -> None:
     mode = _mode()
     options = [
-        {"id": "good", "label": "Good", "score": 3.0, "stress_delta": 0},
-        {"id": "bad", "label": "Bad", "score": 0.5, "stress_delta": 0},
-        {"id": "ok", "label": "OK", "score": 1.5, "stress_delta": 0},
+        {"id": "good", "label": "Good", "score": 3.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+        {"id": "bad", "label": "Bad", "score": 0.5, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+        {"id": "ok", "label": "OK", "score": 1.5, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
     ]
     assert mode.on_decision_timeout("d1", options) == "bad"
 
@@ -55,7 +55,7 @@ def test_auto_submit_empty_options() -> None:
 
 def test_perfect_score_no_stress() -> None:
     mode = _mode()
-    opts = [{"id": "a", "label": "A", "score": 3.0, "stress_delta": 0}]
+    opts = [{"id": "a", "label": "A", "score": 3.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}]
     changes = mode.on_decision_closed_v2("d1", opts, opts)
     sc = next(c for c in changes if c["type"] == "score_change")
     assert sc["total_score"] == 3.0
@@ -136,9 +136,9 @@ def test_score_change_includes_next_decision_time() -> None:
 
 
 _OPTS = [
-    {"id": "good", "label": "Good", "score": 10.0, "stress_delta": 0},
-    {"id": "ok", "label": "OK", "score": 6.0, "stress_delta": 1},
-    {"id": "bad", "label": "Bad", "score": -2.0, "stress_delta": 2},
+    {"id": "good", "label": "Good", "score": 10.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+    {"id": "ok", "label": "OK", "score": 6.0, "stress_delta": 1, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+    {"id": "bad", "label": "Bad", "score": -2.0, "stress_delta": 2, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
 ]
 
 

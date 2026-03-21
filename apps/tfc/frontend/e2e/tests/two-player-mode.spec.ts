@@ -61,7 +61,7 @@ const TIME = {
 
 const SCORE = {
   total_score: 10.0,
-  penalty_ms: 200.0,
+  stress: 0,
   turn_number: 2,
   next_decision_time_ms: 180_000,
 };

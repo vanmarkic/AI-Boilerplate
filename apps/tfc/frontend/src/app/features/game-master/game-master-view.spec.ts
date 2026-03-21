@@ -91,6 +91,7 @@ describe("GameMasterView", () => {
 
   afterEach(() => {
     httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
+    httpTesting.match((req) => req.url.includes("/api/audit/")).forEach((r) => r.flush([]));
     httpTesting.verify();
   });
 

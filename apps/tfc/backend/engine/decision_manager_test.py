@@ -17,7 +17,7 @@ def _decision_kwargs(
         "title": f"Decision {id}",
         "description": f"Desc {id}",
         "question_type": "single_choice",
-        "options": [{"id": "o1", "label": "Yes", "score": 1.0}],
+        "options": [{"id": "o1", "label": "Yes", "score": 1.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}],
         "completion_mode": "first_response",
         "target_roles": ["player"],
     }
@@ -132,8 +132,8 @@ def test_close_decision_defaults_empty_selected_option_ids() -> None:
 def test_snapshot_includes_selected_option_ids() -> None:
     mgr = DecisionManager()
     opts = [
-        {"id": "o1", "label": "Yes", "score": 10.0},
-        {"id": "o2", "label": "No", "score": 3.0},
+        {"id": "o1", "label": "Yes", "score": 10.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+        {"id": "o2", "label": "No", "score": 3.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
     ]
     mgr.open_decision(
         current_pt_ms=0.0,

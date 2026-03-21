@@ -80,8 +80,8 @@ def _full_content() -> dict:
                 "issue_id": "iss-1",
                 "question_type": "single_choice",
                 "options": [
-                    {"id": "opt-a", "label": "Yes", "score": 10.0},
-                    {"id": "opt-b", "label": "No", "score": 0.0},
+                    {"id": "opt-a", "label": "Yes", "score": 10.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+                    {"id": "opt-b", "label": "No", "score": 0.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
                 ],
                 "completion_mode": "first_response",
             },

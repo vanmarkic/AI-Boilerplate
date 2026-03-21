@@ -18,7 +18,9 @@ import { SpeedDisplayComponent } from "../../shared/speed-display.component";
 import { ContextPanelComponent } from "../../shared/context-panel.component";
 import { DomainSelectorComponent } from "../../shared/domain-selector.component";
 import { PresenceIndicatorComponent } from "../../shared/presence-indicator.component";
+import { LogsDrawerComponent } from "../../shared/logs-drawer.component";
 import { EngineApiService } from "../../core/engine-api.service";
+import { AuditApiService, type AuditEntry } from "../../core/audit-api.service";
 import { DecisionApiService } from "../../core/decision-api.service";
 import type { DecisionDetail } from "../../core/decision-api.service";
 import { DomainService } from "../../core/domain.service";
@@ -39,6 +41,8 @@ import {
 import { EventTimelineComponent } from "./event-timeline.component";
 import { ExerciseListComponent } from "./exercise-list.component";
 import { GmItemActionsComponent } from "./gm-item-actions.component";
+import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
+import { StressBarComponent } from "../../shared/stress-bar.component";
 import type { ExerciseResponse } from "../../core/exercise-api.service";
 import { Subscription } from "rxjs";
 
@@ -60,6 +64,9 @@ import { Subscription } from "rxjs";
     EventTimelineComponent,
     ExerciseListComponent,
     GmItemActionsComponent,
+    LogsDrawerComponent,
+    SystemStatusBoardComponent,
+    StressBarComponent,
   ],
   template: `
     @if (!exerciseId()) {
@@ -169,6 +176,10 @@ import { Subscription } from "rxjs";
               [rules]="ctx.rules"
             />
           }
+          <tfc-system-status-board [systems]="store.systems()" />
+          @if (store.score(); as score) {
+            <tfc-stress-bar [stress]="score.stress" />
+          }
         </div>
 
         <footer class="exercise-controls">
@@ -195,6 +206,7 @@ import { Subscription } from "rxjs";
               Reset
             </button>
           </div>
+          <button class="btn" data-variant="ghost" data-size="sm" (click)="logsOpen.set(true)">Logs</button>
           <div class="exercise-controls__spacer"></div>
           <tfc-speed-display [value]="store.speedFactor()">
             <input
@@ -207,6 +219,7 @@ import { Subscription } from "rxjs";
             />
           </tfc-speed-display>
         </footer>
+      <tfc-logs-drawer [(open)]="logsOpen" [logs]="auditLog()" />
       </div>
     }
   `,
@@ -220,8 +233,11 @@ export class GameMasterView implements OnInit, OnDestroy {
   private readonly ws = inject(ExerciseWsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly auditApi = inject(AuditApiService);
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
   protected readonly exerciseId = signal<number | null>(null);
+  protected readonly logsOpen = signal(false);
+  protected readonly auditLog = signal<AuditEntry[]>([]);
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
   private readonly tick = inject(TickService);
@@ -303,6 +319,10 @@ export class GameMasterView implements OnInit, OnDestroy {
     this.api.snapshot(id).subscribe({
       next: (snap) => this.store.applySnapshot(snap),
       error: () => this.store.setError("Failed to load snapshot"),
+    });
+    this.auditApi.getLog(id).subscribe({
+      next: (log) => this.auditLog.set(log),
+      error: (e) => console.warn("Failed to fetch audit log", e),
     });
   }
 

@@ -21,6 +21,8 @@ import {
   submitDecision,
 } from "./player-decision-handlers";
 import { ScoreBarComponent } from "../../shared/score-bar.component";
+import { LogsDrawerComponent } from "../../shared/logs-drawer.component";
+import { AuditApiService, type AuditEntry } from "../../core/audit-api.service";
 import { DomainService } from "../../core/domain.service";
 import { EngineApiService } from "../../core/engine-api.service";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
@@ -30,6 +32,7 @@ import { DecisionApiService } from "../../core/decision-api.service";
 import { Subscription } from "rxjs";
 import { handlePlayerWsMessage } from "./player-ws-handler";
 import { RoleCardComponent } from "./role-card.component";
+import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import type { RoleCardSubmission } from "./role-card.component";
 import { buildRoleCards } from "./role-card.types";
 
@@ -44,8 +47,10 @@ import { buildRoleCards } from "./role-card.types";
     BriefingOverlayComponent,
     TurnBannerComponent,
     ScoreBarComponent,
+    LogsDrawerComponent,
     ButtonDirective,
     RoleCardComponent,
+    SystemStatusBoardComponent,
   ],
   templateUrl: "./player-view.html",
 })
@@ -54,6 +59,9 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly domain = inject(DomainService);
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
+  private readonly auditApi = inject(AuditApiService);
+  protected readonly logsOpen = signal(false);
+  protected readonly auditLog = signal<AuditEntry[]>([]);
   private readonly ws = inject(ExerciseWsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -155,6 +163,10 @@ export class PlayerView implements OnInit, OnDestroy {
         this.store.applySnapshot(snap);
       },
       error: () => this.store.setError("Failed to load snapshot"),
+    });
+    this.auditApi.getLog(exerciseId).subscribe({
+      next: (log) => this.auditLog.set(log),
+      error: (e) => console.warn("Failed to fetch audit log", e),
     });
   }
 

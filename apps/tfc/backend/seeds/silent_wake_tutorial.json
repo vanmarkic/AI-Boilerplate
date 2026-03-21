@@ -120,7 +120,7 @@
         "options": [
           {"id": "swb01-t2", "label": "SWB01 — Continue Mission", "score": 0.5},
           {"id": "swb05-t2", "label": "SWB05 — Increase Lookouts / Visual Confirm", "score": 0.5},
-          {"id": "swb07-t2", "label": "SWB07 — Start Investigation (NAV offset)", "score": 1.0}
+          {"id": "swb07-t2", "label": "SWB07 — Start Investigation (NAV offset)", "score": 1.0, "system_effects": [{"system_id": "comms", "operational_state": "yellow"}]}
         ],
         "max_selections": 2,
         "target_roles": ["co", "nav", "pwo", "eo"],
@@ -135,7 +135,7 @@
         "question_type": "multi_choice",
         "options": [
           {"id": "swb01-t3", "label": "SWB01 — Continue Mission", "score": 0.5},
-          {"id": "swb02-t3", "label": "SWB02 — Reduce Speed / Safer Nav", "score": 1.0},
+          {"id": "swb02-t3", "label": "SWB02 — Reduce Speed / Safer Nav", "score": 1.0, "system_effects": [{"system_id": "nav_radar", "operational_state": "yellow"}]},
           {"id": "swb05-t3", "label": "SWB05 — Increase Lookouts / Visual Confirm", "score": 0.5},
           {"id": "swb19-t3", "label": "SWB19 — Correct Course", "score": 1.0}
         ],
@@ -146,6 +146,11 @@
       }
     ],
     "decision_sequence": ["dec-tut1", "dec-tut2", "dec-tut3"],
+    "initial_system_states": [
+      {"system_id": "nav_radar", "operational_state": "green", "power_state": true},
+      {"system_id": "comms", "operational_state": "green", "power_state": true},
+      {"system_id": "aaw_radar", "operational_state": "green", "power_state": true}
+    ],
     "rules": [
       "Up to 2 Blue cards per turn. Normally different.",
       "This is a tutorial — stress stays low (0–2). Discussion time is generous."

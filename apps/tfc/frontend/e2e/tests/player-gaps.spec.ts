@@ -29,7 +29,7 @@ const snapshotWithScore = {
   ...baseSnapshot,
   score: {
     total_score: 25.0,
-    penalty_ms: 400.0,
+    stress: 0,
     turn_number: 3,
     next_decision_time_ms: 299_600,
   },
