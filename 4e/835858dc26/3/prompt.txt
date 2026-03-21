@@ -1,0 +1,5 @@
+remove all logs from logs drawer. keep only each roles decision log (turn number / decision description. make the recommandtion to final decisin flow clear .
+
+---
+
+are you done ?

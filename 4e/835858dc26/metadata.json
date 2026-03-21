@@ -3,7 +3,7 @@
   "checkpoint_id": "4e835858dc26",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 9,
+  "checkpoints_count": 11,
   "files_touched": [
     "apps/tfc/SPECS.md",
     "apps/tfc/frontend/e2e/tests/silent-wake-practice.spec.ts",
@@ -38,13 +38,19 @@
       "transcript": "/4e/835858dc26/2/full.jsonl",
       "content_hash": "/4e/835858dc26/2/content_hash.txt",
       "prompt": "/4e/835858dc26/2/prompt.txt"
+    },
+    {
+      "metadata": "/4e/835858dc26/3/metadata.json",
+      "transcript": "/4e/835858dc26/3/full.jsonl",
+      "content_hash": "/4e/835858dc26/3/content_hash.txt",
+      "prompt": "/4e/835858dc26/3/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 731,
-    "cache_creation_tokens": 852945,
-    "cache_read_tokens": 115319808,
-    "output_tokens": 117675,
-    "api_call_count": 571
+    "input_tokens": 810,
+    "cache_creation_tokens": 1008494,
+    "cache_read_tokens": 120006955,
+    "output_tokens": 137914,
+    "api_call_count": 643
   }
 }
