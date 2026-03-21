@@ -181,6 +181,7 @@ class ScoreChange(TypedDict):
     stress: int
     next_decision_time_ms: int
     turn_number: int
+    score_tier: str | None
 
 
 class RecommendationSubmitted(TypedDict):

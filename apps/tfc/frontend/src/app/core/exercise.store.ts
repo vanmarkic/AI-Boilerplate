@@ -300,13 +300,13 @@ export const ExerciseStore = signalStore(
       patchState(store, { speedFactor: factor });
     },
 
-    applyScoreChange(change: Pick<ScoreChange, "total_score" | "stress" | "next_decision_time_ms" | "turn_number">): void {
+    applyScoreChange(change: Pick<ScoreChange, "total_score" | "stress" | "next_decision_time_ms" | "turn_number" | "score_tier">): void {
       patchState(store, {
         score: {
           stress: change.stress,
           nextDecisionTimeMs: change.next_decision_time_ms,
           turnNumber: change.turn_number,
-          scoreTier: store.score()?.scoreTier ?? null,
+          scoreTier: change.score_tier ?? store.score()?.scoreTier ?? null,
         },
       });
     },

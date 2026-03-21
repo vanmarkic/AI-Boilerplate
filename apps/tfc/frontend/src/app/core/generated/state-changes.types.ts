@@ -165,6 +165,7 @@ export interface ScoreChange {
   stress: number;
   next_decision_time_ms: number;
   turn_number: number;
+  score_tier: string | null;
 }
 
 export interface RecommendationSubmitted {
