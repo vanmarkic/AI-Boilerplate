@@ -1,9 +1,11 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "0933e25b293e",
+  "session_id": "398a966c-a017-44c1-b699-71e9465cbdc4",
   "strategy": "manual-commit",
+  "created_at": "2026-03-21T07:17:33.703978Z",
   "branch": "master",
-  "checkpoints_count": 21,
+  "checkpoints_count": 4,
   "files_touched": [
     "apps/tfc/backend/engine/decision_manager_p2_test.py",
     "apps/tfc/backend/engine/decision_manager_test.py",
@@ -19,7 +21,6 @@
     "apps/tfc/backend/seeds/silent_wake_tutorial.json",
     "apps/tfc/frontend/e2e/tests/player-gaps.spec.ts",
     "apps/tfc/frontend/e2e/tests/player-view-states.spec.ts",
-    "apps/tfc/frontend/e2e/tests/systems-stress.spec.ts",
     "apps/tfc/frontend/e2e/tests/two-player-mode.spec.ts",
     "apps/tfc/frontend/src/app/core/exercise.store.ts",
     "apps/tfc/frontend/src/app/features/game-master/game-master-view.spec.ts",
@@ -27,39 +28,30 @@
     "apps/tfc/frontend/src/app/features/player/player-view.html",
     "apps/tfc/frontend/src/app/features/player/player-view.ts",
     "apps/tfc/frontend/src/app/shared/components-systems.css",
-    "apps/tfc/frontend/src/app/shared/score-bar.component.spec.ts",
     "apps/tfc/frontend/src/app/shared/score-bar.component.ts",
     "apps/tfc/frontend/src/app/shared/stress-bar.component.spec.ts",
     "apps/tfc/frontend/src/app/shared/stress-bar.component.ts",
-    "apps/tfc/frontend/src/app/shared/system-status-board.component.spec.ts",
-    "apps/tfc/frontend/src/app/shared/system-status-board.component.ts",
     "apps/tfc/frontend/src/styles.css"
   ],
-  "sessions": [
-    {
-      "metadata": "/09/33e25b293e/0/metadata.json",
-      "transcript": "/09/33e25b293e/0/full.jsonl",
-      "content_hash": "/09/33e25b293e/0/content_hash.txt",
-      "prompt": "/09/33e25b293e/0/prompt.txt"
-    },
-    {
-      "metadata": "/09/33e25b293e/1/metadata.json",
-      "transcript": "/09/33e25b293e/1/full.jsonl",
-      "content_hash": "/09/33e25b293e/1/content_hash.txt",
-      "prompt": "/09/33e25b293e/1/prompt.txt"
-    },
-    {
-      "metadata": "/09/33e25b293e/2/metadata.json",
-      "transcript": "/09/33e25b293e/2/full.jsonl",
-      "content_hash": "/09/33e25b293e/2/content_hash.txt",
-      "prompt": "/09/33e25b293e/2/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "turn_id": "660297bb2a56",
   "token_usage": {
-    "input_tokens": 7007,
-    "cache_creation_tokens": 733301,
-    "cache_read_tokens": 41948241,
-    "output_tokens": 137193,
-    "api_call_count": 441
+    "input_tokens": 2252,
+    "cache_creation_tokens": 242020,
+    "cache_read_tokens": 12682885,
+    "output_tokens": 45616,
+    "api_call_count": 130
+  },
+  "session_metrics": {
+    "turn_count": 7
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T07:17:33.356161Z",
+    "agent_lines": 143,
+    "human_added": 676,
+    "human_modified": 82,
+    "human_removed": 0,
+    "total_committed": 883,
+    "agent_percentage": 16.194790486976217
   }
 }
