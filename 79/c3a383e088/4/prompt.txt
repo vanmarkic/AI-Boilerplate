@@ -47,7 +47,3 @@ those new rules should go under "BACKLOG"
 
 <ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/SPECS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
 add reference to @apps/tfc/SPECS.md in @apps/tfc/AGENTS.md . state that @apps/tfc/SPECS.md must be kept up to date
-
----
-
-make another pass on @apps/tfc/SPECS.md to make it more usable as a backlog and blueprint of the app. look for best practices online
