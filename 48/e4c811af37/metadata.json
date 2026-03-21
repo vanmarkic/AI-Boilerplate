@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "48e4c811af37",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "apps/tfc/backend/seeds/silent_wake.json"
+  ],
+  "sessions": [
+    {
+      "metadata": "/48/e4c811af37/0/metadata.json",
+      "transcript": "/48/e4c811af37/0/full.jsonl",
+      "content_hash": "/48/e4c811af37/0/content_hash.txt",
+      "prompt": "/48/e4c811af37/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 670,
+    "cache_creation_tokens": 745772,
+    "cache_read_tokens": 112544597,
+    "output_tokens": 108516,
+    "api_call_count": 524
+  }
+}
