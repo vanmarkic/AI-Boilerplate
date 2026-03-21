@@ -1,8 +1,7 @@
-"""Integration tests for decision scoring through the HTTP API.
+"""Integration tests for decision scoring and turn advancement through the HTTP API.
 
-Tests the collaborative game mode flow: close decision → scoring applied,
-forced cards enforced. Decision sequencing is driven by event triggers
-(tick loop or practice auto-advance), not direct chaining.
+Tests the collaborative game mode flow: close decision → scoring applied →
+next event force-triggered → next decision opens. Backend owns sequencing.
 """
 
 from __future__ import annotations
@@ -13,6 +12,7 @@ import pytest
 from httpx import AsyncClient
 
 from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
+from engine.event_scheduler import EventType, ScheduledEvent
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.session_store import session_store
 
@@ -33,9 +33,21 @@ def _chain_config(exercise_id: int, templates: list[DecisionTemplate]) -> Engine
         decision_sequence=[t.id for t in templates],
         base_decision_time_ms=60_000,
     )
+    # Create corresponding events so force_trigger_next_decision can find them
+    events = [
+        ScheduledEvent(
+            id=t.id,
+            title=f"Event {t.id}",
+            description="",
+            event_type=EventType.DECISION,
+            scheduled_pt_ms=999999,  # High value so tick loop never fires them
+        )
+        for t in templates
+    ]
     return EngineConfig(
         exercise_id=exercise_id,
         title="Chain Test",
+        events=events,
         decision_templates=templates,
         game_mode=mode,
         context=ScenarioContext(title="Chain"),
@@ -66,7 +78,7 @@ def _open_first_decision(exercise_id: int, template: DecisionTemplate) -> None:
     engine = session_store.get(exercise_id)
     engine._decisions.open_decision(
         id=template.id,
-        event_id=None,
+        event_id=template.id,
         issue_id=template.issue_id,
         title=template.title,
         description=template.description,
@@ -97,14 +109,14 @@ def _template(tid: str, opts: list[dict] | None = None) -> DecisionTemplate:
     )
 
 
-# ── Decision chaining ───────────────────────────────────────────────────
+# ── Decision chaining via event trigger ────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_close_decision_does_not_chain_directly(
+async def test_close_decision_advances_to_next_turn(
     client: AsyncClient,
 ) -> None:
-    """Closing d1 should NOT auto-open d2 — event triggers handle sequencing."""
+    """Closing d1 should advance to d2 via force-triggering the next event."""
     eid = await _create_exercise(client)
     t1, t2 = _template("d1"), _template("d2")
     _make_engine(eid, [t1, t2])
@@ -116,11 +128,11 @@ async def test_close_decision_does_not_chain_directly(
     )
     assert resp.status_code == 200
 
-    # D2 should NOT be auto-opened — events drive sequencing
+    # D2 should be open — advanced via force_trigger_next_decision
     decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
     assert decisions.status_code == 200
     open_ids = [d["id"] for d in decisions.json()]
-    assert "d2" not in open_ids
+    assert "d2" in open_ids
 
 
 @pytest.mark.asyncio
@@ -138,6 +150,46 @@ async def test_close_last_decision_no_more_open(
     )
     decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
     assert len(decisions.json()) == 0
+
+
+@pytest.mark.asyncio
+async def test_full_chain_advances_through_sequence(
+    client: AsyncClient,
+) -> None:
+    """Close d1 → d2 opens → close d2 → d3 opens → close d3 → no more."""
+    eid = await _create_exercise(client)
+    t1, t2, t3 = _template("d1"), _template("d2"), _template("d3")
+    _make_engine(eid, [t1, t2, t3])
+    _open_first_decision(eid, t1)
+
+    # Close d1 → d2 opens
+    await client.post(
+        f"/api/exercises/{eid}/engine/decisions/d1/close",
+        json={"selected_option_ids": ["good"]},
+    )
+    decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
+    assert [d["id"] for d in decisions.json()] == ["d2"]
+
+    # Close d2 → d3 opens
+    await client.post(
+        f"/api/exercises/{eid}/engine/decisions/d2/close",
+        json={"selected_option_ids": ["good"]},
+    )
+    decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
+    assert [d["id"] for d in decisions.json()] == ["d3"]
+
+    # Close d3 → sequence exhausted
+    await client.post(
+        f"/api/exercises/{eid}/engine/decisions/d3/close",
+        json={"selected_option_ids": ["good"]},
+    )
+    decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
+    assert len(decisions.json()) == 0
+
+    # Verify scoring tracked all 3 turns
+    engine = session_store.get(eid)
+    assert engine.game_mode.turn_number == 4  # started at 1, closed 3
+    assert engine.game_mode.total_score == 30.0  # 10 * 3
 
 
 # ── Scoring and stress ───────────────────────────────────────────────────

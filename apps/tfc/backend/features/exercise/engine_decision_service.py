@@ -1,7 +1,12 @@
 """Application service for engine decision orchestration.
 
-Encapsulates the close-decision workflow: close → score → chain → resume.
-Framework-agnostic — the caller provides a broadcast callback.
+Encapsulates the close-decision workflow:
+  close → score → advance to next turn → broadcast.
+
+The backend owns sequencing. After closing a decision, the service
+delegates to engine.force_trigger_next_decision() which force-triggers
+the next event and opens the corresponding decision. The frontend is
+purely reactive — it receives WS broadcasts and updates the UI.
 """
 
 from __future__ import annotations
@@ -14,7 +19,7 @@ from engine.state_changes import DecisionClosed, StateChange
 
 
 class EngineDecisionService:
-    """Orchestrates decision closing, scoring, chaining, and auto-resume."""
+    """Orchestrates decision closing, scoring, and turn advancement."""
 
     async def close_decision(
         self,
@@ -25,8 +30,7 @@ class EngineDecisionService:
     ) -> DecisionClosed:
         """Close a decision and handle all side effects.
 
-        Returns the ``DecisionClosed`` state change dict.
-        Raises ``NotFoundError`` if the decision is missing or already closed.
+        Flow: close → score → system effects → advance to next turn → broadcast.
         """
         pt = engine.time_manager.play_time_ms
 
@@ -61,7 +65,7 @@ class EngineDecisionService:
         selected_options = [o for o in all_options if o["id"] in selected_option_ids]
         forced_ids = template.forced_option_ids if template else []
 
-        extra = engine.game_mode.on_decision_closed_v2(
+        score_changes = engine.game_mode.on_decision_closed_v2(
             decision_id,
             selected_options,
             all_options,
@@ -72,13 +76,13 @@ class EngineDecisionService:
         # Apply system effects from selected options
         sys_changes = engine._apply_system_effects(selected_options)
 
-        if extra or sys_changes:
-            await broadcast(extra + sys_changes)
+        if score_changes or sys_changes:
+            await broadcast(score_changes + sys_changes)
 
-        # Decision chaining is handled by event triggers:
-        # - Practice mode: frontend practiceAutoAdvanceEffect force-triggers the next event
-        # - Normal mode: tick loop fires events on schedule
-        # Direct chaining here would create duplicate decisions.
+        # Advance to next turn: force-trigger next event in sequence
+        advance_changes = engine.force_trigger_next_decision(pt)
+        if advance_changes:
+            await broadcast(advance_changes)
 
         # Auto-resume if GM mode and no more open decisions
         if engine.game_mode.requires_gm():
