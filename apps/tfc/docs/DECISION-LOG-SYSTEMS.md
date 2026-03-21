@@ -38,3 +38,27 @@
 
 **Decision:** `targets_system` remains informational for now — field flows through to frontend but no engine enforcement.
 - **Why:** System picker UI is deferred per SPECS.md backlog. The field exists in the schema for forward compatibility.
+
+## Smoke Test Bug: force-triggered events not applying system_effects
+
+**Bug:** Event system_effects were only applied on `"started"` action, but the turn-based flow uses `force_trigger()` which emits `"force_triggered"`. COMMS stayed green on Turn 5.
+- **Root cause:** `tick()` checked `change.get("action") == "started"` but `force_trigger` emits `"force_triggered"`. Also `force_trigger_next_decision()` didn't call `_apply_event_system_effects()` at all.
+- **Fix:** Handle both `"started"` and `"force_triggered"` in `tick()`, and add explicit system_effects application in `force_trigger_next_decision()`.
+- **Verified:** COMMS → yellow on Turn 5 after fix.
+
+## Smoke Test Report (Round 2)
+
+| Check | Result |
+|-------|--------|
+| Turns 1-7 advanced correctly | PASS |
+| Turn content matches turn number | PASS |
+| Stress increased (0→3→6→7) | PASS |
+| Timer displayed and counting down | PASS |
+| All 13 systems displayed correctly | PASS |
+| COMMS → yellow on Turn 5 (event degradation) | PASS |
+| General Quarters (Turn 6) → all systems ON | PASS |
+| Weapons OFF initially, ON after GQ | PASS |
+| Role cards rendered with options | PASS |
+| Decision log populated | PASS |
+| No JS console errors | PASS |
+| All network requests 200 | PASS |
