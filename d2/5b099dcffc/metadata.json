@@ -3,7 +3,7 @@
   "checkpoint_id": "d25b099dcffc",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 5,
+  "checkpoints_count": 6,
   "files_touched": [
     "apps/tfc/SPECS.md",
     "apps/tfc/backend/engine/exercise_engine.py",
@@ -24,13 +24,19 @@
       "transcript": "/d2/5b099dcffc/1/full.jsonl",
       "content_hash": "/d2/5b099dcffc/1/content_hash.txt",
       "prompt": "/d2/5b099dcffc/1/prompt.txt"
+    },
+    {
+      "metadata": "/d2/5b099dcffc/2/metadata.json",
+      "transcript": "/d2/5b099dcffc/2/full.jsonl",
+      "content_hash": "/d2/5b099dcffc/2/content_hash.txt",
+      "prompt": "/d2/5b099dcffc/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 264,
-    "cache_creation_tokens": 128950,
-    "cache_read_tokens": 54906351,
-    "output_tokens": 35522,
-    "api_call_count": 197
+    "input_tokens": 273,
+    "cache_creation_tokens": 149069,
+    "cache_read_tokens": 55752906,
+    "output_tokens": 41631,
+    "api_call_count": 204
   }
 }

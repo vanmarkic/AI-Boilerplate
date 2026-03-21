@@ -1,0 +1,37 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "d25b099dcffc",
+  "session_id": "c71d6188-c308-4fba-9c68-d6938b8d5494",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-21T12:58:25.019686Z",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "apps/tfc/SPECS.md",
+    "apps/tfc/backend/engine/exercise_engine.py",
+    "apps/tfc/backend/features/exercise/engine_decision_service.py"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "e7870735d4b8",
+  "checkpoint_transcript_start": 435,
+  "transcript_lines_at_start": 435,
+  "token_usage": {
+    "input_tokens": 9,
+    "cache_creation_tokens": 20119,
+    "cache_read_tokens": 846555,
+    "output_tokens": 6109,
+    "api_call_count": 7
+  },
+  "session_metrics": {
+    "turn_count": 7
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T12:58:24.594795Z",
+    "agent_lines": 245,
+    "human_added": 307,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 552,
+    "agent_percentage": 44.38405797101449
+  }
+}
