@@ -217,4 +217,104 @@ describe("ExerciseStore", () => {
       expect(store.openDecisions().length).toBe(0);
     });
   });
+
+  describe("decisionCountdownMs", () => {
+    it("returns null when no open decision", () => {
+      expect(store.decisionCountdownMs()).toBeNull();
+    });
+
+    it("computes remaining time from play-time coordinates", () => {
+      store.applySnapshot({
+        ...minimalSnapshot,
+        time: { play_time_ms: 60000, real_time_ms: 60000, factor: 1, paused: false },
+        decisions: [
+          {
+            id: "d1",
+            title: "D1",
+            status: "open",
+            timeout_ms: 300000, // 5 minutes
+            opened_at_pt_ms: 50000,
+          } as any,
+        ],
+      });
+      // deadline = 50000 + 300000 = 350000, remaining = 350000 - 60000 = 290000
+      expect(store.decisionCountdownMs()).toBe(290000);
+    });
+
+    it("resets correctly when a new decision opens at a later play time", () => {
+      // Simulate Turn 1: decision opened at pt=60000, timeout 300000ms
+      store.applySnapshot({
+        ...minimalSnapshot,
+        time: { play_time_ms: 70000, real_time_ms: 70000, factor: 1, paused: false },
+        decisions: [
+          {
+            id: "d1",
+            title: "D1",
+            status: "open",
+            timeout_ms: 300000,
+            opened_at_pt_ms: 60000,
+          } as any,
+        ],
+      });
+      // remaining = (60000 + 300000) - 70000 = 290000
+      expect(store.decisionCountdownMs()).toBe(290000);
+
+      // CO submits Turn 1 at pt=70000, Turn 2 opens at pt=70000
+      store.applyDecisions([
+        {
+          id: "d1",
+          title: "D1",
+          status: "closed",
+          timeout_ms: 300000,
+          opened_at_pt_ms: 60000,
+        } as any,
+        {
+          id: "d2",
+          title: "D2",
+          status: "open",
+          timeout_ms: 300000,
+          opened_at_pt_ms: 70000,
+        } as any,
+      ]);
+      // remaining = (70000 + 300000) - 70000 = 300000 (full timeout)
+      expect(store.decisionCountdownMs()).toBe(300000);
+    });
+
+    it("works correctly with speed factor > 1", () => {
+      // At 2x speed: play time advances twice as fast as real time
+      store.applySnapshot({
+        ...minimalSnapshot,
+        time: { play_time_ms: 120000, real_time_ms: 60000, factor: 2, paused: false },
+        decisions: [
+          {
+            id: "d1",
+            title: "D1",
+            status: "open",
+            timeout_ms: 300000,
+            opened_at_pt_ms: 100000,
+          } as any,
+        ],
+      });
+      // deadline = 100000 + 300000 = 400000, remaining = 400000 - 120000 = 280000
+      expect(store.decisionCountdownMs()).toBe(280000);
+    });
+
+    it("clamps to zero when past deadline", () => {
+      store.applySnapshot({
+        ...minimalSnapshot,
+        time: { play_time_ms: 400000, real_time_ms: 400000, factor: 1, paused: false },
+        decisions: [
+          {
+            id: "d1",
+            title: "D1",
+            status: "open",
+            timeout_ms: 300000,
+            opened_at_pt_ms: 50000,
+          } as any,
+        ],
+      });
+      // deadline = 50000 + 300000 = 350000, playTime = 400000 → clamped to 0
+      expect(store.decisionCountdownMs()).toBe(0);
+    });
+  });
 });

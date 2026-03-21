@@ -31,8 +31,10 @@ export function buildRoleCards(
   decision: ActiveDecision | null,
   submittedRoles: Set<string>,
   showDecisionMaker: boolean,
+  allRoles?: RoleDef[],
 ): RoleCard[] {
   if (!event && !decision) return [];
+  const roleLookup = allRoles ?? roles;
   const roleDescs = event?.role_descriptions ?? {};
   const targetRoles = decision?.target_roles ?? [];
   const allRolesTargeted = targetRoles.length === 0 && decision != null;
@@ -53,7 +55,7 @@ export function buildRoleCards(
       if (role.player_type === "decision_maker" && decision) {
         const advisorTargets = targetRoles.filter((rid) => rid !== role.id);
         for (const advisorRoleId of advisorTargets) {
-          const advisorRole = roles.find((r) => r.id === advisorRoleId);
+          const advisorRole = roleLookup.find((r) => r.id === advisorRoleId);
           const recEntry = Object.entries(
             decision.recommendations || {},
           ).find(([key]) => extractRecRoleId(key) === advisorRoleId);

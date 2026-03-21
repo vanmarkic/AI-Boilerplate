@@ -207,6 +207,29 @@ describe("buildRoleCards", () => {
     expect(opsCard.advisorRecs).toEqual([]);
   });
 
+  it("resolves advisor labels from allRoles when roles is filtered to CO only", () => {
+    const coOnly = [
+      makeRole({ id: "co", label: "CO", player_type: "decision_maker" }),
+    ];
+    const allRoles = [
+      makeRole({ id: "co", label: "CO", player_type: "decision_maker" }),
+      makeRole({ id: "nav", label: "Navigator", player_type: "advisor" }),
+      makeRole({ id: "pwo", label: "Principal Warfare Officer", player_type: "advisor" }),
+    ];
+    const decision = makeDecision({
+      target_roles: ["co", "nav", "pwo"],
+      recommendations: { "p1:nav": "o1" },
+    });
+    const cards = buildRoleCards(coOnly, null, decision, new Set(), true, allRoles);
+    const coCard = cards.find((c) => c.roleId === "co")!;
+
+    expect(coCard.advisorRecs).toHaveLength(2);
+    expect(coCard.advisorRecs[0].roleLabel).toBe("Navigator");
+    expect(coCard.advisorRecs[0].selection).toBe("Option A");
+    expect(coCard.advisorRecs[1].roleLabel).toBe("Principal Warfare Officer");
+    expect(coCard.advisorRecs[1].selection).toBeNull();
+  });
+
   it("falls back option ID as label when option not found", () => {
     const roles = [
       makeRole({ id: "co", label: "CO", player_type: "decision_maker" }),

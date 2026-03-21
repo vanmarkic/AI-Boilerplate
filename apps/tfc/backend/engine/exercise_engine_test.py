@@ -259,3 +259,87 @@ async def test_reset_clears_decisions() -> None:
     await engine.reset()
     assert len(engine.decision_manager.get_open_decisions()) == 0
     assert engine.decision_manager.snapshot() == []
+
+
+# ── force_trigger_next_decision emits event_change (#194) ─────────────────
+
+
+@pytest.mark.asyncio
+async def test_force_trigger_next_decision_emits_event_change_with_role_descriptions() -> None:
+    """force_trigger_next_decision must emit an event_change carrying
+    role_descriptions so the advisor store receives updated event content.
+
+    Regression test for #194: advisor view shows stale event content
+    after the CO submits and the turn advances.
+    """
+    from engine.engine_config import DecisionTemplate
+    from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
+
+    role_descs = {"nav": "Check heading", "ops": "Monitor radar"}
+    d1_evt = ScheduledEvent(
+        id="d1",
+        title="Turn 1",
+        description="First turn",
+        event_type=EventType.DECISION,
+        scheduled_pt_ms=999999,
+        target_roles=["nav", "ops"],
+        role_descriptions=role_descs,
+    )
+    d2_evt = ScheduledEvent(
+        id="d2",
+        title="Turn 2",
+        description="Second turn",
+        event_type=EventType.DECISION,
+        scheduled_pt_ms=999999,
+        target_roles=["nav", "ops"],
+        role_descriptions={"nav": "Verify course", "ops": "Scan contacts"},
+    )
+    d1_tpl = DecisionTemplate(
+        id="d1",
+        title="Decision 1",
+        description="",
+        issue_id="",
+        question_type="single_choice",
+        options=[],
+        completion_mode="gm_closes",
+    )
+    d2_tpl = DecisionTemplate(
+        id="d2",
+        title="Decision 2",
+        description="",
+        issue_id="",
+        question_type="single_choice",
+        options=[],
+        completion_mode="gm_closes",
+    )
+    mode = SimpleCollaborativeMode(
+        decision_sequence=["d1", "d2"],
+        base_decision_time_ms=60_000,
+    )
+    # Advance past d1 so the next call returns d2
+    mode.current_index = 1
+
+    cfg = EngineConfig(
+        exercise_id=1,
+        title="Test",
+        events=[d1_evt, d2_evt],
+        decision_templates=[d1_tpl, d2_tpl],
+        game_mode=mode,
+    )
+    engine = ExerciseEngine(cfg)
+    with patch("engine.time_manager._now_ms", return_value=0.0):
+        engine._time.start()
+        engine._time._paused = False
+
+    changes = engine.force_trigger_next_decision(pt=1000.0)
+
+    # Must contain an event_change for d2
+    event_changes = [c for c in changes if c.get("type") == "event_change"]
+    assert len(event_changes) == 1, (
+        f"Expected exactly 1 event_change, got {len(event_changes)}: {event_changes}"
+    )
+    ec = event_changes[0]
+    assert ec["event_id"] == "d2"
+    assert ec["lifecycle"] == "running"
+    assert ec["target_roles"] == ["nav", "ops"]
+    assert ec["role_descriptions"] == {"nav": "Verify course", "ops": "Scan contacts"}
