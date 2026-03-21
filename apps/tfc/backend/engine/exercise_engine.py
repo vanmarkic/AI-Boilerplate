@@ -430,69 +430,36 @@ class ExerciseEngine:
             self._timeout_task.cancel()
             self._timeout_task = None
 
+    def _is_timed_out(self, decision: object) -> bool:
+        """Check if a decision has exceeded its wall-clock timeout."""
+        now_ms = _time_mod.monotonic() * 1000
+        return (
+            decision.timeout_ms > 0
+            and (now_ms - decision.opened_at_rt_ms) >= decision.timeout_ms
+        )
+
+    def _select_timeout_option(self, decision: object) -> str | None:
+        """Pick the auto-submit option for a timed-out decision."""
+        available = [o for o in decision.options if not self.is_option_exhausted(o)]
+        return self._config.game_mode.on_decision_timeout(
+            decision.id,
+            available or decision.options,
+        )
+
     async def _timeout_loop(self) -> None:
         """Monitor open decisions for wall-clock timeout expiry."""
         try:
             while self._decisions.get_open_decisions():
                 await asyncio.sleep(0.5)
-                now_ms = _time_mod.monotonic() * 1000
-                pt = self._time.play_time_ms
-                all_changes: list[StateChange] = []
                 for d in list(self._decisions.get_open_decisions()):
-                    if d.timeout_ms <= 0:
+                    if not self._is_timed_out(d):
                         continue
-                    if (now_ms - d.opened_at_rt_ms) < d.timeout_ms:
-                        continue
-                    # Filter out exhausted options before auto-selection
-                    available_options = [
-                        o for o in d.options if not self.is_option_exhausted(o)
-                    ]
-                    # Auto-submit worst option via game mode
-                    auto_id = self._config.game_mode.on_decision_timeout(
-                        d.id,
-                        available_options or d.options,
-                    )
-                    selected_ids = [auto_id] if auto_id else []
-                    close_change = self._decisions.close_decision(
-                        d.id,
-                        current_pt_ms=pt,
-                        selected_option_ids=selected_ids,
-                    )
-                    if close_change:
-                        all_changes.append(close_change)
-                    # Apply scoring via v2
-                    selected_opts = [o for o in d.options if o["id"] in selected_ids]
-                    template = self.find_decision_template(d.id)
-                    forced_ids = template.forced_option_ids if template else []
-                    extra = self._config.game_mode.on_decision_closed_v2(
-                        d.id,
-                        selected_opts,
-                        d.options,
-                        forced_option_ids=forced_ids or None,
-                        turn_stress_delta=template.stress_delta if template else 0,
-                    )
-                    all_changes.extend(extra)
-                    # Record plays and apply system effects
-                    self.record_option_plays(selected_opts)
-                    all_changes.extend(self._apply_system_effects(selected_opts))
-                    # Advance to next turn
-                    advance = self.force_trigger_next_decision(pt, d.id)
-                    all_changes.extend(advance)
-                    # Auto-complete if sequence exhausted
-                    if (
-                        not advance
-                        and self._config.game_mode.get_next_decision_id(d.id) is None
-                        and self._phase == EnginePhase.RUNNING
-                    ):
-                        try:
-                            all_changes.append(await self.complete())
-                        except EngineStateError:
-                            pass  # Another path already completed
-                if all_changes and self._on_state_change:
-                    await self._on_state_change(all_changes)
+                    auto_id = self._select_timeout_option(d)
+                    selected = [auto_id] if auto_id else []
+                    changes = await self.close_decision(d.id, selected)
+                    if changes and self._on_state_change:
+                        await self._on_state_change(changes)
                 if not self._decisions.get_open_decisions():
-                    if self._config.game_mode.requires_gm():
-                        await self.resume()
                     break
         except asyncio.CancelledError:
             pass
