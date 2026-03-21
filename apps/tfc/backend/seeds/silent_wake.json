@@ -869,11 +869,11 @@
       "dec-t15"
     ],
     "initial_system_states": [
-      {"system_id": "nav_radar", "operational_state": "green", "power_state": true},
-      {"system_id": "comms", "operational_state": "green", "power_state": true},
-      {"system_id": "aaw_radar", "operational_state": "green", "power_state": true},
-      {"system_id": "ew_suite", "operational_state": "green", "power_state": true},
-      {"system_id": "cic_network", "operational_state": "green", "power_state": true}
+      {"system_id": "nav_radar", "label": "NAV RADAR", "operational_state": "green", "power_state": true},
+      {"system_id": "comms", "label": "COMMS", "operational_state": "green", "power_state": true},
+      {"system_id": "aaw_radar", "label": "AAW RADAR", "operational_state": "green", "power_state": true},
+      {"system_id": "ew_suite", "label": "EW SUITE", "operational_state": "green", "power_state": true},
+      {"system_id": "cic_network", "label": "CIC NETWORK", "operational_state": "green", "power_state": true}
     ]
   }
 }

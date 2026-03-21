@@ -102,6 +102,7 @@ def load_system_states(content: ScenarioContent) -> list[SystemState]:
     return [
         SystemState(
             system_id=s.system_id,
+            label=s.label or s.system_id.upper().replace("_", " "),
             operational=s.operational_state or "green",
             power=s.power_state if s.power_state is not None else False,
         )
