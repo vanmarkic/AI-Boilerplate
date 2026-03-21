@@ -133,12 +133,13 @@ async def test_close_decision_broadcasts_score_change(
         )
         assert resp.status_code == 200
 
-    # Should have broadcast score_change
+    # Should have broadcast score_change (may be in any broadcast call)
     assert mock_broadcast.called
-    call_args = mock_broadcast.call_args
-    msg = call_args[0][1]  # (exercise_id, message)
-    changes = msg["changes"]
-    change_types = [c["type"] for c in changes]
+    all_changes = []
+    for call in mock_broadcast.call_args_list:
+        msg = call[0][1]  # (exercise_id, message)
+        all_changes.extend(msg["changes"])
+    change_types = [c["type"] for c in all_changes]
     assert "score_change" in change_types
 
 

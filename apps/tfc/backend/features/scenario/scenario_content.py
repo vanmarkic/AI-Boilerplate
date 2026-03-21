@@ -6,7 +6,7 @@ bridge between the scenario editor and the exercise engine.
 
 from __future__ import annotations
 
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, Field, model_validator
 
 from core.game_mode_constants import GM_CLASSIC, GM_SIMPLE_COLLABORATIVE
 
@@ -29,7 +29,7 @@ class DecisionOptionDef(BaseModel):
     stress_delta: int = 0
     system_effects: list[SystemEffectDef] = []
     targets_system: bool = False
-    max_plays: int = 1
+    max_plays: int = Field(default=0, ge=0)  # 0 = unlimited, 1+ = explicit limit
 
 
 class DecisionTemplateDef(BaseModel):

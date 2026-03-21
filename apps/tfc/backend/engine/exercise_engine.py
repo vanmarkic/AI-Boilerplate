@@ -274,14 +274,16 @@ class ExerciseEngine:
     def find_decision_template(self, event_id: str) -> DecisionTemplate | None:
         return next((dt for dt in self._config.decision_templates if dt.id == event_id), None)
 
-    def force_trigger_next_decision(self, pt: float) -> list[StateChange]:
+    def force_trigger_next_decision(
+        self, pt: float, closed_decision_id: str = "",
+    ) -> list[StateChange]:
         """Force-trigger the next event in the game mode's decision sequence.
 
         Called after closing a decision (player submission or timeout).
         Returns event_change + decision_opened state changes, or [] if
         the sequence is exhausted or the next event doesn't exist.
         """
-        next_id = self._config.game_mode.get_next_decision_id("")
+        next_id = self._config.game_mode.get_next_decision_id(closed_decision_id)
         if not next_id:
             return []
         event = self._events.events.get(next_id)
@@ -369,7 +371,18 @@ class ExerciseEngine:
                     self.record_option_plays(selected_opts)
                     all_changes.extend(self._apply_system_effects(selected_opts))
                     # Advance to next turn
-                    all_changes.extend(self.force_trigger_next_decision(pt))
+                    advance = self.force_trigger_next_decision(pt, d.id)
+                    all_changes.extend(advance)
+                    # Auto-complete if sequence exhausted
+                    if (
+                        not advance
+                        and self._config.game_mode.get_next_decision_id(d.id) is None
+                        and self._phase == EnginePhase.RUNNING
+                    ):
+                        try:
+                            all_changes.append(await self.complete())
+                        except EngineStateError:
+                            pass  # Another path already completed
                 if all_changes and self._on_state_change:
                     await self._on_state_change(all_changes)
                 if not self._decisions.get_open_decisions():

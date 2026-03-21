@@ -149,7 +149,8 @@ async def test_close_last_decision_no_more_open(
         json={"selected_option_ids": ["good"]},
     )
     decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
-    assert len(decisions.json()) == 0
+    open_decisions = [d for d in decisions.json() if d.get("status") == "open"]
+    assert len(open_decisions) == 0
 
 
 @pytest.mark.asyncio
@@ -168,7 +169,8 @@ async def test_full_chain_advances_through_sequence(
         json={"selected_option_ids": ["good"]},
     )
     decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
-    assert [d["id"] for d in decisions.json()] == ["d2"]
+    open_ids = [d["id"] for d in decisions.json() if d.get("status") == "open"]
+    assert open_ids == ["d2"]
 
     # Close d2 → d3 opens
     await client.post(
@@ -176,7 +178,8 @@ async def test_full_chain_advances_through_sequence(
         json={"selected_option_ids": ["good"]},
     )
     decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
-    assert [d["id"] for d in decisions.json()] == ["d3"]
+    open_ids = [d["id"] for d in decisions.json() if d.get("status") == "open"]
+    assert open_ids == ["d3"]
 
     # Close d3 → sequence exhausted
     await client.post(
@@ -184,7 +187,8 @@ async def test_full_chain_advances_through_sequence(
         json={"selected_option_ids": ["good"]},
     )
     decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
-    assert len(decisions.json()) == 0
+    open_decisions = [d for d in decisions.json() if d.get("status") == "open"]
+    assert len(open_decisions) == 0
 
     # Verify scoring tracked all 3 turns
     engine = session_store.get(eid)

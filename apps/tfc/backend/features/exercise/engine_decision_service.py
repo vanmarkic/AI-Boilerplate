@@ -14,7 +14,7 @@ from __future__ import annotations
 from collections.abc import Awaitable, Callable
 
 from core.exceptions import BadRequestError, NotFoundError
-from engine.exercise_engine import EnginePhase, ExerciseEngine
+from engine.exercise_engine import EnginePhase, EngineStateError, ExerciseEngine
 from engine.state_changes import DecisionClosed, StateChange
 
 
@@ -81,16 +81,19 @@ class EngineDecisionService:
         await broadcast(close_and_score)
 
         # Advance to next turn: force-trigger next event in sequence
-        advance_changes = engine.force_trigger_next_decision(pt)
+        advance_changes = engine.force_trigger_next_decision(pt, decision_id)
         if advance_changes:
             await broadcast(advance_changes)
         elif (
-            engine.game_mode.get_next_decision_id("") is None
+            engine.game_mode.get_next_decision_id(decision_id) is None
             and engine.phase == EnginePhase.RUNNING
         ):
             # Decision sequence exhausted — auto-complete the exercise
-            phase_change = await engine.complete()
-            await broadcast([phase_change])
+            try:
+                phase_change = await engine.complete()
+                await broadcast([phase_change])
+            except EngineStateError:
+                pass  # Another path (e.g. timeout) already completed
 
         # Auto-resume if GM mode and no more open decisions
         if engine.game_mode.requires_gm():
