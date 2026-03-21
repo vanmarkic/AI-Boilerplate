@@ -111,6 +111,22 @@ def load_system_states(content: ScenarioContent) -> list[SystemState]:
     ]
 
 
+def _compute_max_possible_score(content: ScenarioContent) -> float:
+    """Sum the best achievable score across all decision templates in the sequence."""
+    seq_ids = set(content.decision_sequence)
+    total = 0.0
+    for dt in content.decision_templates:
+        if seq_ids and dt.id not in seq_ids:
+            continue
+        scores = sorted((o.score for o in dt.options), reverse=True)
+        if dt.question_type == "single_choice":
+            total += scores[0] if scores else 0.0
+        else:
+            n = dt.max_selections or len(scores)
+            total += sum(scores[:n])
+    return total
+
+
 def build_engine_config(
     exercise_id: int,
     title: str,
@@ -126,10 +142,17 @@ def build_engine_config(
         objectives=list(content.objectives),
         rules=list(content.rules),
         roles=[RoleInfo(id=r.id, label=r.label, player_type=r.player_type) for r in content.roles],
+        score_tier_thresholds=dict(content.score_tier_thresholds),
     )
     mode_config = dict(content.game_mode_config)
     if content.decision_sequence:
         mode_config.setdefault("decision_sequence", list(content.decision_sequence))
+    if content.score_tier_thresholds:
+        mode_config.setdefault("score_tier_thresholds", dict(content.score_tier_thresholds))
+    mode_config.setdefault(
+        "max_possible_score",
+        _compute_max_possible_score(content),
+    )
     game_mode = create_game_mode(content.game_mode, mode_config)
     return EngineConfig(
         exercise_id=exercise_id,

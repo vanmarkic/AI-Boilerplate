@@ -11,10 +11,10 @@ import { AnimationService } from "../core/animation.service";
 import { StressBarComponent } from "./stress-bar.component";
 
 export interface ScoreState {
-  totalScore: number;
   turnNumber: number;
   nextDecisionTimeMs: number;
   stress: number;
+  scoreTier: string | null;
 }
 
 @Component({
@@ -30,10 +30,6 @@ export interface ScoreState {
       <span class="text-xs text-primary uppercase tracking-wide font-semibold"
         >Turn {{ score()?.turnNumber }}</span
       >
-      <span class="text-xs text-muted-foreground uppercase tracking-wide"
-        >Score</span
-      >
-      <span class="score-bar__value">{{ displayScore }}</span>
       <tfc-stress-bar [stress]="score()?.stress ?? 0" />
       <span class="flex-1"></span>
       @if (countdownMs() !== null && countdownMs()! > 0) {
@@ -54,9 +50,7 @@ export class ScoreBarComponent implements AfterViewInit, OnChanges {
   private readonly anim = inject(AnimationService);
   private readonly el = inject(ElementRef);
   private initialized = false;
-  private prevScore = 0;
   private prevStress = 0;
-  protected displayScore = 0;
   protected stressFlash = false;
 
   protected get formattedCountdown(): string {
@@ -69,8 +63,6 @@ export class ScoreBarComponent implements AfterViewInit, OnChanges {
 
   ngAfterViewInit(): void {
     this.initialized = true;
-    this.displayScore = this.score()?.totalScore ?? 0;
-    this.prevScore = this.displayScore;
     this.prevStress = this.score()?.stress ?? 0;
   }
 
@@ -78,13 +70,6 @@ export class ScoreBarComponent implements AfterViewInit, OnChanges {
     if (!this.initialized) return;
     const s = this.score();
     if (!s) return;
-
-    if (s.totalScore !== this.prevScore) {
-      this.anim.counter(this.prevScore, s.totalScore, (v) => {
-        this.displayScore = v;
-      });
-      this.prevScore = s.totalScore;
-    }
 
     if (s.stress > this.prevStress) {
       this.stressFlash = true;

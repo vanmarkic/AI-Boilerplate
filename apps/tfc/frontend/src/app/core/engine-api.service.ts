@@ -25,6 +25,7 @@ export interface ScoreSnapshot {
   stress: number;
   turn_number: number;
   next_decision_time_ms: number;
+  score_tier: string | null;
 }
 
 /** EngineSnapshot with typed score for frontend consumption */

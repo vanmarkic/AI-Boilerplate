@@ -24,10 +24,10 @@ export interface ParticipantPresence {
 }
 
 interface ScoreState {
-  totalScore: number;
   turnNumber: number;
   nextDecisionTimeMs: number;
   stress: number;
+  scoreTier: string | null;
 }
 
 interface ExerciseState {
@@ -193,10 +193,10 @@ export const ExerciseStore = signalStore(
         decisions: snapshot.decisions ?? store.decisions(),
         score: snapshot.score
           ? {
-              totalScore: snapshot.score.total_score,
               stress: snapshot.score.stress,
               turnNumber: snapshot.score.turn_number,
               nextDecisionTimeMs: snapshot.score.next_decision_time_ms,
+              scoreTier: snapshot.score.score_tier ?? null,
             }
           : store.score(),
         loading: false,
@@ -303,10 +303,10 @@ export const ExerciseStore = signalStore(
     applyScoreChange(change: Pick<ScoreChange, "total_score" | "stress" | "next_decision_time_ms" | "turn_number">): void {
       patchState(store, {
         score: {
-          totalScore: change.total_score,
           stress: change.stress,
           nextDecisionTimeMs: change.next_decision_time_ms,
           turnNumber: change.turn_number,
+          scoreTier: store.score()?.scoreTier ?? null,
         },
       });
     },
