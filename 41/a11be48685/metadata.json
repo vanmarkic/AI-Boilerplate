@@ -3,8 +3,12 @@
   "checkpoint_id": "41a11be48685",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 5,
+  "checkpoints_count": 12,
   "files_touched": [
+    "apps/tfc/backend/features/scenario/scenario_content.py",
+    "apps/tfc/backend/features/scenario/scenario_loader.py",
+    "apps/tfc/backend/seeds/silent_wake.json",
+    "apps/tfc/backend/seeds/silent_wake_tutorial.json",
     "docs/plans/2026-03-21-player-view-property-tests-design.md"
   ],
   "sessions": [
@@ -19,13 +23,19 @@
       "transcript": "/41/a11be48685/1/full.jsonl",
       "content_hash": "/41/a11be48685/1/content_hash.txt",
       "prompt": "/41/a11be48685/1/prompt.txt"
+    },
+    {
+      "metadata": "/41/a11be48685/2/metadata.json",
+      "transcript": "/41/a11be48685/2/full.jsonl",
+      "content_hash": "/41/a11be48685/2/content_hash.txt",
+      "prompt": "/41/a11be48685/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 768,
-    "cache_creation_tokens": 559130,
-    "cache_read_tokens": 44833434,
-    "output_tokens": 126942,
-    "api_call_count": 418
+    "input_tokens": 3062,
+    "cache_creation_tokens": 825761,
+    "cache_read_tokens": 62190306,
+    "output_tokens": 180697,
+    "api_call_count": 576
   }
 }
