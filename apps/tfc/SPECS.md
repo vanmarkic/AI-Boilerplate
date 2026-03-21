@@ -122,10 +122,14 @@ Score tracking with contextual per-option scores and tiered end-of-exercise summ
 - Tier thresholds defined in `ScenarioContent.score_tier_thresholds` (e.g., `{"lo": 0.33, "mid": 0.66}`).
 - No negative wording — all feedback is encouraging and praises effort, even if score is low.
 
+- Numeric score hidden from player UI — `totalScore` removed from frontend `ScoreState`, `ScoreBarComponent` shows only stress/turn/timer.
+- End-of-exercise tier display via `CompletionOverlayComponent` — shows Lo/Mid/Hi with encouraging messaging.
+- Tier computed on backend: `ratio = total_score / max_possible_score` mapped via `score_tier_thresholds`.
+- `score_tier` included in engine snapshot and `ScoreChange` WS messages.
+- All tier messages use positive-only wording (Lo: "Solid Effort", Mid: "Great Performance", Hi: "Outstanding").
+
 **Planned:**
-- [ ] Hide score from player UI — currently visible in player header, must be removed → `player-view.html`, `exercise.store.ts`
-- [ ] End-of-exercise tier display (Lo/Mid/Hi with encouraging messaging)
-- [ ] Positive-only feedback wording for all tier levels
+- [ ] Completion overlay WS delivery — `exercise_stopped` races `close_all`; overlay may not render if server closes WS before message arrives (see `docs/plans/2026-03-21-scoring-tiers-design.md`)
 
 ### Feature: systems · backend + frontend
 
