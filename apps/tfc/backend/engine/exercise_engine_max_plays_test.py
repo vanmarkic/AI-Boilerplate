@@ -83,15 +83,11 @@ class TestMaxPlaysTracking:
             engine.record_option_plays([opt])
         assert not engine.is_option_exhausted(opt)
 
-    def test_reset_clears_play_counts(self) -> None:
+    @pytest.mark.asyncio
+    async def test_reset_clears_play_counts(self) -> None:
         engine = ExerciseEngine(_config())
         engine.record_option_plays([_option("a")])
         assert engine.option_play_counts["a"] == 1
-
-    @pytest.mark.asyncio
-    async def test_reset_clears_counts(self) -> None:
-        engine = ExerciseEngine(_config())
-        engine.record_option_plays([_option("a")])
         await engine.reset()
         assert engine.option_play_counts == {}
 

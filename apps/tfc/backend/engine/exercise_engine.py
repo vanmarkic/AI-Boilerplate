@@ -109,7 +109,7 @@ class ExerciseEngine:
 
     def is_option_exhausted(self, option: DecisionOptionSnapshot) -> bool:
         """Check if an option has reached its max_plays limit."""
-        max_plays = option.get("max_plays", 1)
+        max_plays = option["max_plays"]
         if max_plays == 0:
             return False  # unlimited
         return self._option_play_counts.get(option["id"], 0) >= max_plays
@@ -183,9 +183,10 @@ class ExerciseEngine:
         event_changes = self._events.tick(pt)
         changes.extend(event_changes)
 
-        # Apply system effects from events that just started or were force-triggered
+        # Apply system effects from events that just started
+        # (force-triggered events are handled in force_trigger_next_decision)
         for change in event_changes:
-            if change.get("action") in ("started", "force_triggered"):
+            if change.get("action") == "started":
                 event = self._events.events.get(change["event_id"])
                 if event and event.system_effects:
                     changes.extend(self._apply_event_system_effects(event.system_effects))
@@ -400,7 +401,8 @@ class ExerciseEngine:
         out: list[SystemStateChange] = []
         for fx in effects:
             if fx.get("set_all_power"):
-                out.extend(self._systems.set_all_power(fx["power_state"] or True))
+                on = fx["power_state"] if fx["power_state"] is not None else True
+                out.extend(self._systems.set_all_power(on))
                 continue
             if fx["power_state"] is not None:
                 if c := self._systems.set_power(fx["system_id"], fx["power_state"]):
