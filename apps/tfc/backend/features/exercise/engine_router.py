@@ -242,7 +242,7 @@ async def close_decision(
         body.selected_option_ids,
         broadcast=_broadcast,
     )
-    await _log_to_audit(exercise_id, [result, *all_changes])
+    await _log_to_audit(exercise_id, all_changes)
     return result
 
 

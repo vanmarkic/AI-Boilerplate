@@ -9,7 +9,6 @@ import {
 import type {
   EventSnapshot,
   IssueSnapshot,
-  ScoreSnapshot,
   SnapshotWithScore,
   TimeSnapshot,
 } from "./engine-api.service";
@@ -103,10 +102,8 @@ export const ExerciseStore = signalStore(
         .decisions()
         .find((d) => d.status === "open" && d.timeout_ms > 0);
       if (!decision) return null;
-      const factor = store.speedFactor() || 1;
-      const openedAtRt = decision.opened_at_pt_ms / factor;
-      const elapsed = store.realTimeMs() - openedAtRt;
-      return Math.max(0, decision.timeout_ms - elapsed);
+      const deadline = decision.opened_at_pt_ms + decision.timeout_ms;
+      return Math.max(0, deadline - store.playTimeMs());
     }),
     /** Countdown clock: decision timer when a decision is open, otherwise time to next event. */
     turnCountdownClock: computed(() => {
@@ -115,10 +112,8 @@ export const ExerciseStore = signalStore(
         .decisions()
         .find((d) => d.status === "open" && d.timeout_ms > 0);
       if (decision) {
-        const factor = store.speedFactor() || 1;
-        const openedAtRt = decision.opened_at_pt_ms / factor;
-        const elapsed = store.realTimeMs() - openedAtRt;
-        return formatTimeMs(Math.max(0, decision.timeout_ms - elapsed));
+        const deadline = decision.opened_at_pt_ms + decision.timeout_ms;
+        return formatTimeMs(Math.max(0, deadline - store.playTimeMs()));
       }
       const pt = store.playTimeMs();
       const nextEvent = store

@@ -76,8 +76,8 @@ class EngineDecisionService:
         # Apply system effects from selected options
         sys_changes = engine._apply_system_effects(selected_options)
 
-        if score_changes or sys_changes:
-            await broadcast(score_changes + sys_changes)
+        close_and_score: list[StateChange] = [result, *score_changes, *sys_changes]
+        await broadcast(close_and_score)
 
         # Advance to next turn: force-trigger next event in sequence
         advance_changes = engine.force_trigger_next_decision(pt)
