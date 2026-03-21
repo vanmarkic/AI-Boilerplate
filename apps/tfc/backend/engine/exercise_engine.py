@@ -64,6 +64,8 @@ class ExerciseEngine:
         self._timeout_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._on_state_change = on_state_change
 
+        self._option_play_counts: dict[str, int] = {}
+
         self._events.load_events(config.events)
         self._issues.load_issues(config.issues)
         self._systems.load_systems(list(config.initial_system_states))
@@ -95,6 +97,22 @@ class ExerciseEngine:
     @property
     def config(self) -> EngineConfig:
         return self._config
+
+    @property
+    def option_play_counts(self) -> dict[str, int]:
+        return dict(self._option_play_counts)
+
+    def record_option_plays(self, options: list[DecisionOptionSnapshot]) -> None:
+        """Increment play count for each selected option."""
+        for opt in options:
+            self._option_play_counts[opt["id"]] = self._option_play_counts.get(opt["id"], 0) + 1
+
+    def is_option_exhausted(self, option: DecisionOptionSnapshot) -> bool:
+        """Check if an option has reached its max_plays limit."""
+        max_plays = option.get("max_plays", 1)
+        if max_plays == 0:
+            return False  # unlimited
+        return self._option_play_counts.get(option["id"], 0) >= max_plays
 
     @property
     def game_mode(self) -> GameMode:
@@ -149,6 +167,7 @@ class ExerciseEngine:
         self._issues.load_issues(self._config.issues)
         self._systems.load_systems(list(self._config.initial_system_states))
         self._decisions.clear()
+        self._option_play_counts.clear()
         return self._phase_change("reset")
 
     def set_speed(self, factor: float) -> StateChange:
@@ -313,10 +332,14 @@ class ExerciseEngine:
                         continue
                     if (now_ms - d.opened_at_rt_ms) < d.timeout_ms:
                         continue
+                    # Filter out exhausted options before auto-selection
+                    available_options = [
+                        o for o in d.options if not self.is_option_exhausted(o)
+                    ]
                     # Auto-submit worst option via game mode
                     auto_id = self._config.game_mode.on_decision_timeout(
                         d.id,
-                        d.options,
+                        available_options or d.options,
                     )
                     selected_ids = [auto_id] if auto_id else []
                     close_change = self._decisions.close_decision(
@@ -338,7 +361,8 @@ class ExerciseEngine:
                         turn_stress_delta=template.stress_delta if template else 0,
                     )
                     all_changes.extend(extra)
-                    # Apply system effects from selected options
+                    # Record plays and apply system effects
+                    self.record_option_plays(selected_opts)
                     all_changes.extend(self._apply_system_effects(selected_opts))
                     # Advance to next turn
                     all_changes.extend(self.force_trigger_next_decision(pt))
