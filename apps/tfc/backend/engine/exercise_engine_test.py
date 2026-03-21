@@ -7,12 +7,14 @@ import pytest
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import EngineConfig, EnginePhase, EngineStateError, ExerciseEngine
 from engine.issue_manager import TrackedIssue, TriggerMode
+from engine.system_manager import SystemState
 
 
 def _config(
     events: list[ScheduledEvent] | None = None,
     issues: list[TrackedIssue] | None = None,
     factor: float = 1.0,
+    initial_system_states: list[SystemState] | None = None,
 ) -> EngineConfig:
     return EngineConfig(
         exercise_id=1,
@@ -20,6 +22,7 @@ def _config(
         time_factor=factor,
         events=events or [],
         issues=issues or [],
+        initial_system_states=initial_system_states or [],
     )
 
 
@@ -161,6 +164,15 @@ def test_snapshot_returns_full_state() -> None:
     assert "time" in snap
     assert "events" in snap
     assert "issues" in snap
+
+
+def test_snapshot_includes_systems() -> None:
+    systems = [SystemState(system_id="nav", label="NAV", power=True)]
+    engine = ExerciseEngine(_config(initial_system_states=systems))
+    snap = engine.snapshot()
+    assert "systems" in snap
+    assert len(snap["systems"]) == 1
+    assert snap["systems"][0]["system_id"] == "nav"
 
 
 # ── Decision integration tests ───────────────────────────────────────────
