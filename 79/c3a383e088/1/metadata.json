@@ -1,9 +1,11 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "79c3a383e088",
+  "session_id": "7da4169e-1e47-44f6-b566-9935660534aa",
   "strategy": "manual-commit",
+  "created_at": "2026-03-21T11:50:20.183921Z",
   "branch": "master",
-  "checkpoints_count": 2,
+  "checkpoints_count": 1,
   "files_touched": [
     ".claude/settings.json",
     ".playwright-mcp/console-2026-03-21T07-39-37-166Z.log",
@@ -24,25 +26,26 @@
     "apps/tfc/frontend/src/app/shared/components-player-view.css",
     "apps/tfc/frontend/src/app/shared/logs-drawer.component.ts"
   ],
-  "sessions": [
-    {
-      "metadata": "/79/c3a383e088/0/metadata.json",
-      "transcript": "/79/c3a383e088/0/full.jsonl",
-      "content_hash": "/79/c3a383e088/0/content_hash.txt",
-      "prompt": "/79/c3a383e088/0/prompt.txt"
-    },
-    {
-      "metadata": "/79/c3a383e088/1/metadata.json",
-      "transcript": "/79/c3a383e088/1/full.jsonl",
-      "content_hash": "/79/c3a383e088/1/content_hash.txt",
-      "prompt": "/79/c3a383e088/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-6",
+  "turn_id": "087a8d4dc35e",
   "token_usage": {
-    "input_tokens": 712,
-    "cache_creation_tokens": 622778,
-    "cache_read_tokens": 37482513,
-    "output_tokens": 95885,
-    "api_call_count": 369
+    "input_tokens": 26,
+    "cache_creation_tokens": 133767,
+    "cache_read_tokens": 1312849,
+    "output_tokens": 1611,
+    "api_call_count": 23
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T11:50:20.106142Z",
+    "agent_lines": 254,
+    "human_added": 567,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 821,
+    "agent_percentage": 30.937880633373933
   }
 }
