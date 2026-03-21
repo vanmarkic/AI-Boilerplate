@@ -21,7 +21,6 @@ import {
 } from "./player-decision-handlers";
 import { LogsDrawerComponent } from "../../shared/logs-drawer.component";
 import { StressBarComponent } from "../../shared/stress-bar.component";
-import { AuditApiService, type AuditEntry } from "../../core/audit-api.service";
 import { DomainService } from "../../core/domain.service";
 import { EngineApiService } from "../../core/engine-api.service";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
@@ -57,9 +56,7 @@ export class PlayerView implements OnInit, OnDestroy {
   protected readonly domain = inject(DomainService);
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
-  private readonly auditApi = inject(AuditApiService);
   protected readonly logsOpen = signal(false);
-  protected readonly auditLog = signal<AuditEntry[]>([]);
   private readonly ws = inject(ExerciseWsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -165,10 +162,6 @@ export class PlayerView implements OnInit, OnDestroy {
       },
       error: () => this.store.setError("Failed to load snapshot"),
     });
-    this.auditApi.getLog(exerciseId).subscribe({
-      next: (log) => this.auditLog.set(log),
-      error: (e) => console.warn("Failed to fetch audit log", e),
-    });
   }
 
   protected onBeginExercise(): void {
@@ -215,7 +208,6 @@ export class PlayerView implements OnInit, OnDestroy {
         this.store,
         this.exerciseId(),
         decision,
-        this.participantId(),
         submission,
       );
     } else {

@@ -76,17 +76,8 @@ export function submitDecision(
   store: InstanceType<typeof ExerciseStore>,
   exerciseId: number,
   decision: ActiveDecision,
-  participantId: string,
   event: SubmitEvent,
 ): void {
-  api
-    .submitResponse(Number(decision.id), {
-      participant_id: participantId,
-      participant_name: participantId,
-      selected_options: event.selectedOptions,
-      free_text: event.freeText || null,
-    })
-    .subscribe();
   api
     .closeEngineDecision(exerciseId, decision.id, event.selectedOptions)
     .subscribe({

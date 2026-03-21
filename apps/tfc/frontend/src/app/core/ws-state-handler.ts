@@ -25,6 +25,7 @@ export function toActiveDecision(c: DecisionOpened): ActiveDecision {
     opened_at_pt_ms: c.opened_at_pt_ms,
     closed_at_pt_ms: null,
     recommendations: c.recommendations ?? {},
+    selected_option_ids: [],
   };
 }
 
@@ -51,7 +52,7 @@ export function handleStateChange(
       ]);
       break;
     case "decision_closed":
-      store.closeDecision(change.decision_id);
+      store.closeDecision(change.decision_id, change.selected_option_ids);
       break;
     case "score_change":
       store.applyScoreChange(change);

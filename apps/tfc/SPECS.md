@@ -108,6 +108,7 @@ Decision CRUD — questions, responses, outcomes.
 - Timeout auto-submits the worst option (lowest `score`).
 - `forced_option_ids` on a decision template causes auto-inclusion with penalty when omitted.
 - `max_selections` caps how many options can be selected in a `multi_choice` decision (`null` = unlimited).
+- **Two decision APIs exist:** The DB-backed CRUD API (`/api/decisions/...`) uses numeric IDs and is for GM observation/reporting. The engine API (`/api/exercises/{id}/engine/decisions/...`) uses string IDs (e.g., `evt-t1`) and is used by players during gameplay. Player submission flow uses only the engine close endpoint — never the DB response endpoint.
 
 **API:** `POST /api/decisions` · `GET /api/decisions` · `GET /api/decisions/{id}` · `POST /api/decisions/{id}/respond` · `POST /api/decisions/{id}/close`
 
@@ -182,6 +183,7 @@ Player-facing exercise UI with real-time state display.
 
 - **Turn countdown clock:** Decision countdown when open (timeout > 0), otherwise time to next scheduled event. Falls back to real-time clock.
 - **Logs drawer:** Right-side drawer with audit trail — previous turns for all roles (inject + decision log). Decision entries show selected option IDs inline.
+- **Decision submission:** Decision-maker submits via engine close endpoint (`closeEngineDecision`). Advisors submit via engine recommend endpoint (`submitRecommendation`). Neither path uses the DB decision CRUD API.
 
 ### Feature: health · backend
 

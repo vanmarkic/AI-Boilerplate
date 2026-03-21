@@ -29,6 +29,7 @@ export interface ActiveDecision {
   opened_at_pt_ms: number;
   closed_at_pt_ms: number | null;
   recommendations: Record<string, string>;
+  selected_option_ids: string[];
 }
 
 export interface DecisionSubmission {
