@@ -42,16 +42,15 @@ def _or_404[T: StateChange](result: T | None, detail: str) -> T:
 @router.post("/events/{event_id}/trigger", operation_id="triggerEvent")
 async def trigger_event(exercise_id: int, event_id: str) -> EventChange:
     engine = _get_engine(exercise_id)
-    pt = engine.time_manager.play_time_ms
-    change = _or_404(
-        engine.event_scheduler.force_trigger(event_id, pt),
-        f"Event {event_id} not found or not triggerable",
-    )
-    # Open decisions for force-triggered decision-type events
-    decision_changes = engine._handle_decision_events([change], pt)
-    if decision_changes and engine._on_state_change:
-        await engine._on_state_change([change] + decision_changes)
-    return change
+    try:
+        changes = engine.trigger_event(event_id)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc),
+        ) from exc
+    if changes and engine._on_state_change:
+        await engine._on_state_change(changes)
+    return changes[0]  # EventChange is always first
 
 
 @router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
