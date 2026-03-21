@@ -1,0 +1,12 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/SPECS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+how can we automate the bug discovery the same way we did with chrome devtools ?
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/SPECS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+make a full plan to make all of this. 
+#3 might exist already
+
+---
+
+go implement in subagents

@@ -1,0 +1,40 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "d25b099dcffc",
+  "session_id": "8e345b8c-dd3b-4bb1-bd2d-ac84987ff616",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-21T12:58:24.5672Z",
+  "branch": "master",
+  "checkpoints_count": 4,
+  "files_touched": [
+    "apps/tfc/SPECS.md",
+    "apps/tfc/backend/engine/exercise_engine.py",
+    "apps/tfc/backend/engine/exercise_engine_full_sequence_prop_test.py",
+    "apps/tfc/backend/features/exercise/engine_decision_chain_test.py",
+    "apps/tfc/backend/features/exercise/engine_decision_service.py",
+    "apps/tfc/frontend/src/app/features/player/player-view.ts"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "efb5ddf8e404",
+  "checkpoint_transcript_start": 1136,
+  "transcript_lines_at_start": 1136,
+  "token_usage": {
+    "input_tokens": 224,
+    "cache_creation_tokens": 97575,
+    "cache_read_tokens": 54218036,
+    "output_tokens": 32418,
+    "api_call_count": 176
+  },
+  "session_metrics": {
+    "turn_count": 12
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-21T12:58:23.817201Z",
+    "agent_lines": 552,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 552,
+    "agent_percentage": 100
+  }
+}
