@@ -249,3 +249,72 @@ def test_snapshot_after_decisions() -> None:
     assert snap is not None
     assert snap["total_score"] == 10.0
     assert snap["turn_number"] == 2
+
+
+# -- Tier calculation -------------------------------------------------------
+
+
+def test_compute_tier_no_thresholds() -> None:
+    """No thresholds configured -> None."""
+    mode = _mode()
+    assert mode.compute_tier() is None
+
+
+def test_compute_tier_no_max_score() -> None:
+    """max_possible_score=0 -> None (avoid division by zero)."""
+    mode = _mode(score_tier_thresholds={"lo": 0.33, "mid": 0.66}, max_possible_score=0.0)
+    assert mode.compute_tier() is None
+
+
+def test_compute_tier_lo() -> None:
+    """Score below lo threshold -> 'lo'."""
+    mode = _mode(score_tier_thresholds={"lo": 0.33, "mid": 0.66}, max_possible_score=100.0)
+    mode.total_score = 20.0  # 0.20 < 0.33
+    assert mode.compute_tier() == "lo"
+
+
+def test_compute_tier_mid() -> None:
+    """Score between lo and mid threshold -> 'mid'."""
+    mode = _mode(score_tier_thresholds={"lo": 0.33, "mid": 0.66}, max_possible_score=100.0)
+    mode.total_score = 50.0  # 0.50 >= 0.33 and < 0.66
+    assert mode.compute_tier() == "mid"
+
+
+def test_compute_tier_hi() -> None:
+    """Score at or above mid threshold -> 'hi'."""
+    mode = _mode(score_tier_thresholds={"lo": 0.33, "mid": 0.66}, max_possible_score=100.0)
+    mode.total_score = 80.0  # 0.80 >= 0.66
+    assert mode.compute_tier() == "hi"
+
+
+def test_compute_tier_exact_boundaries() -> None:
+    """Exact boundary values: lo boundary -> 'mid', mid boundary -> 'hi'."""
+    mode = _mode(score_tier_thresholds={"lo": 0.33, "mid": 0.66}, max_possible_score=100.0)
+    mode.total_score = 33.0  # 0.33 — exactly at lo boundary
+    assert mode.compute_tier() == "mid"
+    mode.total_score = 66.0  # 0.66 — exactly at mid boundary
+    assert mode.compute_tier() == "hi"
+
+
+def test_compute_tier_negative_score() -> None:
+    """Negative score -> 'lo'."""
+    mode = _mode(score_tier_thresholds={"lo": 0.33, "mid": 0.66}, max_possible_score=100.0)
+    mode.total_score = -10.0
+    assert mode.compute_tier() == "lo"
+
+
+def test_snapshot_includes_score_tier() -> None:
+    """Snapshot includes score_tier field."""
+    mode = _mode(score_tier_thresholds={"lo": 0.33, "mid": 0.66}, max_possible_score=100.0)
+    mode.total_score = 80.0
+    snap = mode.snapshot()
+    assert snap is not None
+    assert snap["score_tier"] == "hi"
+
+
+def test_snapshot_score_tier_none_without_thresholds() -> None:
+    """Snapshot score_tier is None when no thresholds configured."""
+    mode = _mode()
+    snap = mode.snapshot()
+    assert snap is not None
+    assert snap["score_tier"] is None
