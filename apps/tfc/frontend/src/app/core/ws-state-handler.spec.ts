@@ -79,6 +79,35 @@ describe("ws-state-handler", () => {
       expect(store.openDecisions()[0].id).toBe("d1");
     });
 
+    it("preserves closed decisions when new one opens", () => {
+      store.applyDecisions([
+        { id: "d1", title: "T1", status: "closed", opened_at_pt_ms: 0 } as any,
+      ]);
+      const change: DecisionOpened = {
+        type: "decision_opened",
+        id: "d2",
+        decision_id: "d2",
+        event_id: null,
+        issue_id: null,
+        title: "T2",
+        description: "",
+        question_type: "single_choice",
+        options: [],
+        completion_mode: "first_response",
+        target_roles: [],
+        timeout_ms: 0,
+        max_selections: null,
+        status: "open",
+        opened_at_pt_ms: 1000,
+        closed_at_pt_ms: null,
+        recommendations: {},
+      };
+      handleStateChange(change, store);
+      expect(store.decisions().length).toBe(2);
+      expect(store.decisions()[0].status).toBe("closed");
+      expect(store.decisions()[1].status).toBe("open");
+    });
+
     it("closes decision on decision_closed", () => {
       store.applyDecisions([
         { id: "d1", title: "T", status: "open" } as any,

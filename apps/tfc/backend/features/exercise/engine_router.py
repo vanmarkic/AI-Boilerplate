@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from core.dependencies import get_exercise_service, get_scenario_service
 from engine.exercise_engine import EngineConfig, EnginePhase, EngineStateError, ExerciseEngine
 from engine.session_store import session_store
-from engine.state_changes import EngineSnapshot, PhaseChange, StateChange
+from engine.state_changes import DecisionSnapshot, EngineSnapshot, PhaseChange, StateChange
 from features.audit.audit_repository import AuditRepository
 from features.audit.audit_service import AuditService
 from features.exercise.adapters.connection_manager import connection_manager
@@ -213,6 +213,12 @@ async def set_engine_speed(exercise_id: int, body: SpeedRequest) -> StateChange:
 @router.get("/snapshot", operation_id="getEngineSnapshot")
 async def get_engine_snapshot(exercise_id: int) -> EngineSnapshot:
     return _get_engine(exercise_id).snapshot()
+
+
+@router.get("/decisions", operation_id="getEngineDecisions")
+async def get_engine_decisions(exercise_id: int) -> list[DecisionSnapshot]:
+    """Return all decisions (open and closed) from the running engine."""
+    return _get_engine(exercise_id).decision_manager.snapshot()
 
 
 @router.post("/decisions/{decision_id}/close", operation_id="closeDecision")

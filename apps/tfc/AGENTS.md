@@ -95,6 +95,7 @@ src/app/
     components-decision.css     # decision panel styles
     components-exercise-layout.css  # exercise layout primitives
     *.service.ts  # engine-api, exercise-ws, scenario-api, audit-api, decision-api, domain
+    logs-drawer.component.ts  # decision log drawer — uses store.decisions() + roles, not audit API
     exercise.store.ts  # central NgRx Signal Store for exercise state
     format-time.ts
   features/
