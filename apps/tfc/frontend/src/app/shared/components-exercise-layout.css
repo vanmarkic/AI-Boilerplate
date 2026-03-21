@@ -258,4 +258,60 @@
     padding: var(--spacing-lg) var(--spacing-xl);
     border-top: 1px solid var(--color-border);
   }
+
+  /* ── Completion Overlay ──────────────────────────────────────── */
+
+  .completion-overlay__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: oklch(8% 0.008 250 / 85%);
+  }
+
+  .completion-overlay__panel {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    display: flex;
+    flex-direction: column;
+    max-width: 36rem;
+    max-height: 60dvh;
+    margin: auto;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-card);
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .completion-overlay__header {
+    padding: var(--spacing-xl) var(--spacing-xl) var(--spacing-md);
+  }
+
+  .completion-overlay__title {
+    font-size: var(--font-size-2xl, 1.5rem);
+    font-weight: 700;
+    color: var(--color-primary);
+    margin: 0;
+  }
+
+  .completion-overlay__body {
+    flex: 1;
+    overflow: auto;
+    padding: 0 var(--spacing-xl) var(--spacing-lg);
+  }
+
+  .completion-overlay__message {
+    font-size: var(--font-size-base);
+    color: var(--color-foreground);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  .completion-overlay__footer {
+    display: flex;
+    justify-content: center;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-top: 1px solid var(--color-border);
+  }
 }

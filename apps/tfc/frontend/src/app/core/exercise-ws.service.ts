@@ -49,6 +49,7 @@ export interface WsWaitingRoomUpdate {
 
 export interface WsSimpleMessage {
   type: "exercise_stopped" | "pong";
+  reason?: string;
 }
 
 export type WsMessage =

@@ -54,6 +54,13 @@
     />
   }
 
+  @if (store.phase() === 'completed') {
+    <tfc-completion-overlay
+      [tier]="store.score()?.scoreTier ?? null"
+      (closed)="onExerciseStopped()"
+    />
+  }
+
   <footer class="player-footer">
     <div class="player-footer__group">
       <p class="text-sm text-muted-foreground">

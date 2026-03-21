@@ -192,8 +192,8 @@ async def complete_engine(exercise_id: int) -> PhaseChange:
         result = await engine.complete()
     except EngineStateError as exc:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    svc = ExerciseSessionService(session_store, connection_manager, waiting_room_store)
-    await svc.stop(exercise_id, reason="completed")
+    await broadcast_changes(connection_manager, exercise_id, [result])
+    await _log_to_audit(exercise_id, [result])
     return result
 
 
@@ -284,4 +284,5 @@ async def get_engine_context(exercise_id: int) -> dict[str, object]:
         "rules": ctx.rules,
         "default_time_factor": engine.config.time_factor,
         "roles": [{"id": r.id, "label": r.label, "player_type": r.player_type} for r in ctx.roles],
+        "score_tier_thresholds": ctx.score_tier_thresholds,
     }
