@@ -1,0 +1,316 @@
+<task-notification>
+<task-id>a7244947cd8be1632</task-id>
+<tool-use-id>toolu_01E6GtsUiK4Q9GB2fGpy9gsL</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/25148e72-d4d7-4b42-a026-81b0088ca133/tasks/a7244947cd8be1632.output</output-file>
+<status>completed</status>
+<summary>Agent "Review Phase 4 changes" completed</summary>
+<result>Now I have a thorough picture of the entire change set. Let me compile the review.
+
+---
+
+## Phase 4 Code Review — Codegen + Frontend State
+
+### Summary
+
+The implementation is solid overall. Types are correctly codegen'd from Python, the store logic is immutable, and the `penalty_ms → stress` migration is done in the backend and core frontend. However there are several issues worth addressing: one blocker (dead field in `ScoreState` causing a misleading interface), one important issue (stale `penalty_ms` in E2E fixtures), and a handful of suggestions.
+
+---
+
+### BLOCKER
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/exercise.store.ts:31`
+
+**Issue:** `ScoreState.penaltyMs` is always written as `0` — hardcoded in both `applySnapshot` (line 182) and `applyScoreChange` (line 289) — and never updated by any incoming change. The field appears to have been kept as a structural placeholder, but it actively misleads: the `ScoreBarComponent.ScoreState` interface (in `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/score-bar.component.ts:16`) declares `penaltyMs?: number` and at line 84 triggers a UI shake animation `if (s.penaltyMs && s.penaltyMs > 0)`. Because the store always writes `0`, that animation path is permanently dead. Either:
+
+- Remove `penaltyMs` from `ScoreState` (store) and from `ScoreBarComponent.ScoreState` (component), and delete the animation branch, _or_
+- Wire `stress` or a derived "stress delta" to `penaltyMs` if the shake-on-stress-increase animation is still desired under the new model.
+
+As written, the component-level `ScoreState` interface (`score-bar.component.ts`) and the store-level `ScoreState` (`exercise.store.ts`) are **two separate, incompatible interfaces** with the same name. The store's `ScoreState` has `stress: number` (not optional); the component's `ScoreState` has no `stress` field at all and `penaltyMs` is optional. This silent interface split is a latent bug waiting to surface when a consumer passes the store's score signal directly to the score-bar input.
+
+---
+
+### IMPORTANT
+
+**Files:**
+- `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/e2e/tests/two-player-mode.spec.ts:64`
+- `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/e2e/tests/player-view-states.spec.ts:37,310`
+- `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/e2e/tests/player-gaps.spec.ts:32`
+
+**Issue:** All four E2E fixture `SCORE` objects still use `penalty_ms` instead of `stress`. These objects mock backend API responses, so they must match the real `ScoreSnapshot`/`ScoreChange` wire format. Since the backend's `ScoreChange` now emits `stress: int` (not `penalty_ms`), these fixture objects will silently send wrong data to the components under test. If any E2E test checks that the score bar renders correctly from a snapshot with a score, the `stress` field will be `undefined`, not `0`.
+
+**Fix:** Replace every `penalty_ms:` key with `stress:` in all four E2E fixture score objects.
+
+---
+
+### SUGGESTIONS
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/exercise.store.ts:316-323`
+
+**Observation:** `applySystemChange` does a silent no-op when `system_id` is not found in the current `systems` array — the map just returns an unchanged list. This is correct behavior for production, but it makes the method harder to debug when a `system_state_change` arrives before the snapshot has populated systems (a real race condition on reconnect). Consider adding a dev-mode guard or at minimum a log:
+
+```typescript
+applySystemChange(...): void {
+  const found = store.systems().some(s => s.system_id === change.system_id);
+  if (!found) {
+    console.warn('[ExerciseStore] system_state_change for unknown system:', change.system_id);
+    return;
+  }
+  ...
+}
+```
+
+---
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/exercise.store.spec.ts`
+
+**Observation:** The test "should update system state on applySystemChange" at line 42 changes `operational` to `"red"` and asserts `systems()[0].operational === "red"` — good. But no test covers `applySystemChange` when the `system_id` is not in the store (the silent no-op path). Given the reconnect race risk noted above, a test for the unknown-system edge case would be valuable:
+
+```typescript
+it("should not throw when system_id is unknown", () => {
+  store.applySnapshot({ ...minimalSnapshot, systems: [] });
+  expect(() => store.applySystemChange({
+    system_id: "unknown",
+    action: "power_changed",
+    power: false,
+    operational: "red",
+  })).not.toThrow();
+  expect(store.systems().length).toBe(0);
+});
+```
+
+---
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/exercise.store.ts:285`
+
+**Observation:** The `applyScoreChange` parameter type is `Pick<ScoreChange, "total_score" | "stress" | "next_decision_time_ms" | "turn_number">`. This is accurate and defensive — it strips the `type` discriminator so callers cannot pass the wrong union member. Good pattern, but since `ScoreChange` has exactly those four payload fields plus `type`, you could alternatively write `Omit<ScoreChange, "type">` which is self-documenting and won't silently drift if new fields are added to `ScoreChange` later.
+
+---
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/engine/exercise_engine_test.py:169-175`
+
+**Observation:** `test_snapshot_includes_systems` only asserts that `systems` is present and has length 1, and checks `system_id`. It does not verify that `label`, `power`, or `operational` fields are serialised correctly. A one-liner extension would close this gap:
+
+```python
+assert snap["systems"][0]["power"] is True
+assert snap["systems"][0]["operational"] == "green"
+```
+
+---
+
+### POSITIVE
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/generated/state-changes.types.ts`
+
+The codegen file is clean. The discriminated union `StateChange` includes `SystemStateChange`, so TypeScript's exhaustive narrowing in `ws-state-handler.ts` works correctly — the `switch` over `change.type` covers every member without a default branch and the compiler will catch any future additions. This is the right approach.
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/exercise.store.ts:177`
+
+`systems: snapshot.systems ?? store.systems()` correctly falls back to existing state when the snapshot omits the field. Same pattern for `decisions`. This protects against partial snapshots during reconnect, which is important in a WebSocket-driven app.
+
+**File:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/engine/system_manager.py`
+
+`set_power` and `set_operational` return `None` when the value is already the target state, avoiding spurious `system_state_change` broadcasts. Correct and efficient.
+
+---
+
+### Checklist
+
+| Item | Status |
+|---|---|
+| Python `ScoreChange` has `stress` (not `penalty_ms`) | Confirmed |
+| TS generated types match Python source | Confirmed |
+| `applySystemChange` immutability | Correct (spread + map) |
+| `applySnapshot` systems fallback | Correct |
+| `penalty_ms` in `exercise.store.ts` / `engine-api.service.ts` core | Removed |
+| `penalty_ms` in E2E fixtures | **NOT removed — 4 occurrences** |
+| `ScoreState.penaltyMs` dead field | **Still present in store and component** |
+| Unknown system silent no-op test | Missing |
+| Backend test for system field values | Partial |</result>
+<usage><total_tokens>49803</total_tokens><tool_uses>23</tool_uses><duration_ms>79265</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/25148e72-d4d7-4b42-a026-81b0088ca133/tasks/a7244947cd8be1632.output
+
+---
+
+<task-notification>
+<task-id>a926d9d0313cb214c</task-id>
+<tool-use-id>toolu_01AbNqPbcDE61PhGjUxVnePA</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/25148e72-d4d7-4b42-a026-81b0088ca133/tasks/a926d9d0313cb214c.output</output-file>
+<status>completed</status>
+<summary>Agent "Review Phase 5 implementation" completed</summary>
+<result>Now I have everything I need for a complete review.
+
+---
+
+## Code Review
+
+### New Angular Components
+
+**`/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/stress-bar.component.ts`**
+
+✅ Correct conventions throughout: `ChangeDetectionStrategy.OnPush`, signal input, computed signals, `host` binding for `data-severity` (variant via `data-*` attribute), no zone dependencies.
+
+✅ Tests in `stress-bar.component.spec.ts` use a signal-based test host — correct for zoneless CD. All boundary conditions covered (severity thresholds, fill width, clamping at 100% is handled by `Math.min`).
+
+One minor observation: the severity boundary at `<= 3` maps stress=3 to "low" but the test description says "stress 0-3" maps to low. The test checks `stress=2` for low and `stress=5` for medium. The test at line 40 says "stress 4-6" but the implementation boundary is `s <= 6` meaning 4, 5, 6 are all medium. These are consistent — no bug.
+
+---
+
+**`/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/system-status-board.component.ts`**
+
+✅ Signal input with default, `ChangeDetectionStrategy.OnPush`, `data-*` attributes for CSS styling.
+
+🟠 **`[attr.data-power]` binds a boolean, producing the string `"false"` or `"true"`** — the CSS at line 27 of `components-systems.css` correctly targets `[data-power="false"]`, so this works. However `[attr.data-operational]` binds `sys.operational` which is a string enum (`"green"` / `"yellow"` / `"red"`). No issue there. Worth noting for future maintainers that `[attr.data-power]` with a boolean renders as the string `"false"`, which is a non-obvious Angular behavior.
+
+🟡 The `system-row__status` dot (line 20) is an empty `<span>` — no text, no ARIA label. It is purely a color indicator with no accessible fallback. For a screen-reader context this is invisible. If accessibility matters here, a `<span aria-hidden="true">` or a visually-hidden text alternative would be appropriate.
+
+---
+
+**`/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/components-systems.css`**
+
+✅ Correctly inside `@layer components`. Uses design token variables. `data-*` attribute selectors for variants — matches the project convention.
+
+🟡 **Missing `data-power="true"` state styling.** There is a rule for `[data-power="false"]` (opacity: 0.5) but no positive state for `data-power="true"`. This is fine as a design choice (powered-on is the default), but there is no visual distinction for the `.system-row__power` text ("ON" vs "OFF") beyond the opacity dimming. The `system-row__power` span shows "ON"/"OFF" as text, which does cover the state — acceptable.
+
+🟡 **`border-radius` on `stress-bar__fill` (line 79)**: the fill div is clipped by `overflow: hidden` on the track, so `border-radius` on the fill has no visible effect on the right edge. The left edge radius also won't show once the fill goes above ~5%. Not a bug, just dead CSS.
+
+---
+
+### CSS in `styles.css`
+
+✅ The `@import "./app/shared/components-systems.css"` is appended at the end, after all other component imports. `@layer` order is declared at the top of `styles.css` so ordering of `@import` lines within the same layer doesn't matter for specificity. No issue.
+
+---
+
+### `score-bar.component.ts` changes
+
+The `ScoreState` interface in `score-bar.component.ts` defines `stress?: number` (optional), while the internal `ScoreState` in `exercise.store.ts` defines `stress: number` (required, always present once score is set). The player view passes `store.score()` (from the store) directly to `[score]` on `<tfc-score-bar>`. TypeScript will accept this because the store's type is structurally a subtype of the component's interface (a required field satisfies an optional field).
+
+🟡 **The `@if (score()?.stress != null)` guard in the score-bar template** is unnecessary given that `StressBarComponent` already handles `stress=0` gracefully and `stress` is always present on the store's `ScoreState`. The guard is benign but adds noise — it exists to handle the `stress?: number` optionality in the component's own interface, which was presumably added to remain backward-compatible. This is fine as-is, just slightly defensive.
+
+---
+
+### `game-master-view.ts` wiring
+
+✅ `SystemStatusBoardComponent` and `StressBarComponent` correctly imported and listed in `imports[]`.
+
+🟠 **`<tfc-stress-bar [stress]="store.score()?.stress ?? 0" />` has no `@if` guard.** It sits inside the `@else` branch (exerciseId is set) but renders at stress=0 during the `setup` phase before any score exists. This means the GM sidebar always shows a stress bar reading "0 / empty track" when the exercise is in setup. Whether that is intentional UX or a placeholder that should be gated behind `store.phase() !== 'setup'` is a product decision, but it may confuse facilitators before the exercise starts. The player view avoids this by embedding stress only inside `<tfc-score-bar>` which itself is gated on `store.phase() !== 'briefing' && store.score()`.
+
+🟡 **Audit log error handler is silently swallowed** (`error: () => {}`):
+
+```typescript
+this.auditApi.getLog(id).subscribe({
+  next: (log) => this.auditLog.set(log),
+  error: () => {},
+});
+```
+
+This is present in both `game-master-view.ts` (line 321) and `player-view.ts` (line 168). A failed audit fetch leaves `auditLog` as an empty array with no user feedback. If the Logs drawer opens empty, the user has no indication whether logs are genuinely absent or whether the fetch failed. Consider at minimum logging to console, or setting a flag to show an error state in the drawer.
+
+---
+
+### `player-view.ts` / `player-view.html` wiring
+
+✅ `SystemStatusBoardComponent` and `LogsDrawerComponent` imported correctly.
+
+🔴 **`StressBarComponent` is NOT imported in `player-view.ts`**, but `score-bar.component.ts` imports it internally. The stress bar in the player view is rendered via `<tfc-score-bar>` (which internally uses `<tfc-stress-bar>`), so this is not a runtime bug — it's working correctly. However, if you ever need to use `<tfc-stress-bar>` directly in the player view template, you'd hit an error. No action needed unless direct usage is planned.
+
+🟡 **`player-footer__actions`** is a new wrapper `<div>` added in `player-view.html` (line 80), but there is no corresponding `.player-footer__actions` rule in `components-player-view.css`. The div exists purely to group the Logs button with the Stop button. Without styles, it inherits the `player-footer__group`'s flexbox from the parent but has no gap or alignment of its own. This will likely render fine due to inheritance, but the class name implies a BEM element that should be styled. Either add a CSS rule or use the existing `player-footer__group` class instead.
+
+---
+
+### Seed data changes
+
+**`silent_wake.json`**
+
+✅ `initial_system_states` array added with 5 systems, all starting `"green"` and powered on. This is a complete, sensible baseline.
+
+✅ `system_effects` added to `SWB15` (repair → comms green) and `SWB10` (isolate → cic_network powered off). These are the only two options modified in the diff.
+
+**`silent_wake_tutorial.json`**
+
+✅ `initial_system_states` added with 3 systems (nav_radar, comms, aaw_radar).
+
+🟡 **`system_effects` options in the tutorial don't have `stress_delta` fields**, but this is intentional — `DecisionOptionDef` in `scenario_content.py` doesn't have a `stress_delta` field at all (line 22–31). The `stress_delta=0` hardcoding in `scenario_loader.py` (line 79) means all scenario-loaded options have zero stress delta regardless of the JSON. This is a pre-existing architecture choice, not a bug introduced here.
+
+🟡 The `aaw_radar` system appears in `initial_system_states` for both seeds but no decision option references `aaw_radar` in system effects. It's initialized but never mutated. This is fine — it shows up on the board as always-green, which is valid scenario design.
+
+---
+
+### Backend test fixes
+
+✅ All test fixes are mechanical: adding the four new required fields (`stress_delta`, `system_effects`, `targets_system`, `max_plays`, `role`) to every inline option dict to match the now-complete `DecisionOptionSnapshot` TypedDict. This is correct and consistent across all 9 affected test files.
+
+✅ The `simple_collaborative_prop_test.py` and the Hypothesis strategies in `strategies.py` both already include all required fields, so property-based tests remain coherent.
+
+✅ `game-master-view.spec.ts` — the `afterEach` now flushes pending `/api/audit/` requests to prevent `httpTesting.verify()` failures. This is the right fix.
+
+---
+
+### Summary of items requiring action
+
+| Priority | File | Issue |
+|---|---|---|
+| 🟠 | `game-master-view.ts:180` | `<tfc-stress-bar>` renders stress=0 during setup phase with no guard — confirm intentional |
+| 🟠 | `game-master-view.ts:321`, `player-view.ts:168` | Silent `error: () => {}` on audit log fetch — no user feedback on failure |
+| 🟡 | `player-view.html:80` | `player-footer__actions` div uses an unstyled BEM class — use existing class or add CSS rule |
+| 🟡 | `components-systems.css:79` | `border-radius` on `stress-bar__fill` is a no-op (clipped by `overflow: hidden` on parent) |
+
+Everything else — signal usage, zoneless CD compliance, `@layer` CSS, `data-*` variant pattern, test host signal usage, TypeScript types — is correct.</result>
+<usage><total_tokens>42209</total_tokens><tool_uses>60</tool_uses><duration_ms>201869</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/25148e72-d4d7-4b42-a026-81b0088ca133/tasks/a926d9d0313cb214c.output
+
+---
+
+what kind of tests did you write ?
+
+---
+
+add tests and run them. also add one playwright test that goes through the new feature and verifies
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/package.json in the IDE. This may or may not be related to the current task.</ide_opened_file>
+what's next?
+
+---
+
+one commit
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/.worktrees/turn-structure-stress-systems/.entire/metadata/398a966c-a017-44c1-b699-71e9465cbdc4/full.jsonl in the IDE. This may or may not be related to the current task.</ide_opened_file>
+so we finished it all ?
+
+---
+
+I thught you had added more phases at the end
+
+---
+
+yes
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/package.json in the IDE. This may or may not be related to the current task.</ide_opened_file>
+run the project and check everything works fine
+
+---
+
+<task-notification>
+<task-id>b8nwsh69c</task-id>
+<tool-use-id>toolu_01CJDb9XngmAEbkAa7XA8uu2</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/25148e72-d4d7-4b42-a026-81b0088ca133/tasks/b8nwsh69c.output</output-file>
+<status>failed</status>
+<summary>Background command "Start TFC backend (Docker) + frontend (native)" failed with exit code 2</summary>
+</task-notification>
+Read the output file to retrieve the result: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/25148e72-d4d7-4b42-a026-81b0088ca133/tasks/b8nwsh69c.output
+
+---
+
+I don't see "Turn 0" in here http://localhost:4201/player?exerciseId=2&participantId=ba5289a8-bb63-4bf2-aed1-2924072717b4&role=all_roles&gameMode=simple_collaborative&practiceMode=true
+
+---
+
+ok. I don't see system names in here http://localhost:4201/player?exerciseId=3&participantId=35772093-741c-419a-870f-2a6d61dac5e4&role=all_roles&gameMode=simple_collaborative&practiceMode=true
