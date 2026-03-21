@@ -2,8 +2,9 @@
 
 ## First Steps
 Before writing any code:
-1. Check if `SPECS.md` exists and is filled in. If it is empty or missing, ask the user questions to gather the required information (domain, users, business rules, API endpoints) and fill in `SPECS.md` on their behalf before writing any code.
-2. Read the relevant subdirectory AGENTS.md for the area you are working in: `frontend/AGENTS.md` for frontend work, `backend/AGENTS.md` for backend work.
+1. Determine which app you are working on: `apps/main/` or `apps/tfc/`.
+2. Read the app-level AGENTS.md: `apps/main/AGENTS.md` or `apps/tfc/AGENTS.md`.
+3. Read the relevant subdirectory AGENTS.md for the layer: `backend/AGENTS.md` for backend work, `frontend/AGENTS.md` for frontend work.
 
 `SPECS.md` describes WHAT the software does (domain, business rules, glossary).
 This file describes HOW to write code (conventions, architecture, constraints).
@@ -32,34 +33,9 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 9. Each feature has a `manifest.yaml` describing its capabilities and dependencies.
 10. Run `make validate` before committing (runs architecture linter + all linters + all tests).
 
-## Feature Tiering
-11. Every feature MUST have a `tier` field in its `manifest.yaml` (1, 2, or 3).
-12. Tier 1 = base features included in all builds.
-13. Features must NOT import from a higher tier (tier-1 cannot import tier-2 code).
-14. Use `make build-tier-N` to build Docker images for a specific tier.
-15. Runtime feature flags (`core/feature_flags.py`, `feature-flag.service.ts`) toggle features WITHIN the shipped tier.
-16. Scaffold new features with tier: `make new-feature name=analytics tier=2`.
-
-## Feature Workflow
-
-**STOP — Do NOT create feature files manually.** Always use the scaffold script first.
-
-```
-make spec name=<name> tier=<N>        # 1. Generate SPECS.md section template, fill it in
-make new-feature name=<name> tier=<N> # 2. Generates 12+ skeleton files (backend + frontend)
-                                       # 3. Fill in the TODO markers in the generated files
-make generate                          # 4. Extract OpenAPI spec, regenerate TypeScript client
-make validate                          # 5. Run all linters + tests
-git commit                             # 6. Commit
-```
-
-Router registration and dependency wiring are automatic — no manual edits to `main.py` or `dependencies.py` needed. See `docs/conventions/feature-workflow.md` for full details.
-
 ## Common Pitfalls
-- Do NOT create feature files manually — always run `make new-feature name=<name> tier=<N>` first.
-- Do NOT write CSS in Angular component `styles` arrays or `frontend/src/styles/` — add styles to `packages/design-system/components.css` instead.
+- Do NOT write CSS in Angular component `styles` arrays — add styles to `packages/design-system/components.css` instead.
 - Do NOT hardcode colors, spacing, or font sizes — use design tokens (`var(--color-primary)`, `var(--spacing-md)`, etc.).
-- Do NOT import across tiers (tier-1 code must not import from tier-2 or tier-3).
 - Do NOT create a feature without a `manifest.yaml`.
 - Do NOT use barrel exports (`index.ts` re-exports).
 - Do NOT modify the database schema without an Alembic migration.
@@ -67,7 +43,6 @@ Router registration and dependency wiring are automatic — no manual edits to `
 - Do NOT bypass Keycloak auth — all protected endpoints must use `Depends(get_current_user)`.
 - Do NOT use `app-` prefix for UI component selectors — use `ui-` prefix (e.g., `ui-button`, `ui-card`). Button directive selector is `uiButton`.
 - Do NOT add app-specific or domain-specific components to `packages/ui/`. The shared UI library is for generic building blocks only. If a component is only meaningful within a single app (e.g., an exercise-specific panel), it belongs in that app's `features/` folder.
-- Do NOT edit generated API client files in `frontend/src/app/shared/api/generated/` — run `make generate` instead.
 - When using gh CLI, always pass `-R vanmarkic/AI-Boilerplate` explicitly.
 
 ## LLM Context Scoping
