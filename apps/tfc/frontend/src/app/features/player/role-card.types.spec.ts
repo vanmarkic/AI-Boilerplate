@@ -49,6 +49,7 @@ function makeDecision(overrides: Partial<ActiveDecision> = {}): ActiveDecision {
     opened_at_pt_ms: 1000,
     closed_at_pt_ms: null,
     recommendations: {},
+    selected_option_ids: [],
     ...overrides,
   };
 }

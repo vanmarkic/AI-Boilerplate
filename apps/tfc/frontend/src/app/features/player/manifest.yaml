@@ -13,5 +13,7 @@ business_rules:
   - "Player sees active events and their descriptions"
   - "Player responds to decisions via the decision panel"
   - "In collaborative mode, advisors submit recommendations; decision-maker submits rulings"
+  - "Decision-maker submits via engine close endpoint (closeEngineDecision), not DB decision API"
+  - "Advisors submit via engine recommend endpoint (submitRecommendation)"
   - "Player role (advisor/decision-maker) is resolved from scenario context on init"
   - "participant_id and role are passed from waiting room via route query params"

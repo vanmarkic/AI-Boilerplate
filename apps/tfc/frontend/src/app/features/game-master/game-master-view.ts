@@ -20,7 +20,6 @@ import { DomainSelectorComponent } from "../../shared/domain-selector.component"
 import { PresenceIndicatorComponent } from "../../shared/presence-indicator.component";
 import { LogsDrawerComponent } from "../../shared/logs-drawer.component";
 import { EngineApiService } from "../../core/engine-api.service";
-import { AuditApiService, type AuditEntry } from "../../core/audit-api.service";
 import { DecisionApiService } from "../../core/decision-api.service";
 import type { DecisionDetail } from "../../core/decision-api.service";
 import { DomainService } from "../../core/domain.service";
@@ -219,7 +218,7 @@ import { Subscription } from "rxjs";
             />
           </tfc-speed-display>
         </footer>
-      <tfc-logs-drawer [(open)]="logsOpen" [logs]="auditLog()" />
+      <tfc-logs-drawer [(open)]="logsOpen" [decisions]="store.decisions()" [roles]="store.context()?.roles ?? []" />
       </div>
     }
   `,
@@ -233,11 +232,9 @@ export class GameMasterView implements OnInit, OnDestroy {
   private readonly ws = inject(ExerciseWsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
-  private readonly auditApi = inject(AuditApiService);
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
   protected readonly exerciseId = signal<number | null>(null);
   protected readonly logsOpen = signal(false);
-  protected readonly auditLog = signal<AuditEntry[]>([]);
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
   private readonly tick = inject(TickService);
@@ -319,10 +316,6 @@ export class GameMasterView implements OnInit, OnDestroy {
     this.api.snapshot(id).subscribe({
       next: (snap) => this.store.applySnapshot(snap),
       error: () => this.store.setError("Failed to load snapshot"),
-    });
-    this.auditApi.getLog(id).subscribe({
-      next: (log) => this.auditLog.set(log),
-      error: (e) => console.warn("Failed to fetch audit log", e),
     });
   }
 

@@ -79,5 +79,5 @@
       </div>
     </div>
   </footer>
-  <tfc-logs-drawer [(open)]="logsOpen" [logs]="auditLog()" />
+  <tfc-logs-drawer [(open)]="logsOpen" [decisions]="store.decisions()" [roles]="store.context()?.roles ?? []" />
 </div>

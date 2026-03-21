@@ -274,10 +274,14 @@ export const ExerciseStore = signalStore(
       patchState(store, { playerRole: role });
     },
 
-    closeDecision(decisionId: string): void {
+    closeDecision(decisionId: string, selectedOptionIds?: string[]): void {
       const decisions = store
         .decisions()
-        .map((d) => (d.id === decisionId ? { ...d, status: "closed" } : d));
+        .map((d) =>
+          d.id === decisionId
+            ? { ...d, status: "closed", selected_option_ids: selectedOptionIds ?? d.selected_option_ids }
+            : d,
+        );
       patchState(store, { decisions });
     },
 
