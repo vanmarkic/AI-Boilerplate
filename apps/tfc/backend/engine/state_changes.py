@@ -33,6 +33,7 @@ class EventSnapshot(TypedDict):
     completed_at_pt_ms: float | None
     target_roles: list[str]
     role_descriptions: dict[str, str]
+    system_effects: list[SystemEffect]
 
 
 class IssueSnapshot(TypedDict):
@@ -51,6 +52,7 @@ class SystemEffect(TypedDict):
     system_id: str
     operational_state: str | None
     power_state: bool | None
+    set_all_power: bool
 
 
 class DecisionOptionSnapshot(TypedDict):

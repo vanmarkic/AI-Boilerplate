@@ -140,10 +140,14 @@ Ship/facility systems displayed for all roles and players with power (ON/OFF) an
 - **Event-triggered degradation:** Injects (events) can degrade system states (power off, operational → red/yellow).
 - **General Quarters:** Certain forced cards turn all systems ON via `SystemManager.set_all_power(True)`.
 
-**Planned:**
-- [ ] Event-triggered system degradation — events need `system_effects` field + engine logic → `event_scheduler.py`, `exercise_engine.py`
-- [ ] General Quarters seed data — wire `system_effects` to `set_all_power(True)` → `seeds/silent_wake.json`
-- [ ] `targets_system` / `max_plays` submission data plumbing → `exercise_engine.py:348`
+**Completed:**
+- [x] Event-triggered system degradation — events carry `system_effects`, applied on event start (RUNNING)
+- [x] General Quarters seed data — `set_all_power: true` flag on SystemEffect, SWB20 updated
+- [x] `max_plays` enforcement — play counts tracked per option per session, exhausted options excluded from timeout auto-selection
+- [x] Full system catalog in Silent Wake seed (13 systems/weapons matching game mechanics doc)
+
+**Remaining:**
+- [ ] `targets_system` — system picker UI (player chooses which system a card targets) — deferred, field flows through to frontend
 
 ### Feature: waiting_room · backend + frontend
 
