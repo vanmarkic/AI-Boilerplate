@@ -23,6 +23,9 @@ import type { AuditEntry } from "../core/audit-api.service";
             @if (entry.target_id) {
               <span class="log-target">{{ entry.target_id }}</span>
             }
+            @if (decisionSummary(entry); as summary) {
+              <span class="log-detail">{{ summary }}</span>
+            }
           </div>
         } @empty {
           <p class="logs-empty">No events yet.</p>
@@ -43,5 +46,12 @@ export class LogsDrawerComponent {
     const s = Math.floor(ms / 1000);
     const m = Math.floor(s / 60);
     return `${m}:${String(s % 60).padStart(2, "0")}`;
+  }
+
+  protected decisionSummary(entry: AuditEntry): string | null {
+    if (entry.entry_type !== "decision_closed" || !entry.details) return null;
+    const ids = entry.details["selected_option_ids"] as string[] | undefined;
+    if (!ids?.length) return null;
+    return ids.join(", ");
   }
 }

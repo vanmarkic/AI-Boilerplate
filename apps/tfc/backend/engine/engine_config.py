@@ -31,6 +31,7 @@ class DecisionTemplate:
     timeout_ms: float = 0.0
     forced_option_ids: list[str] = field(default_factory=list)
     max_selections: int | None = None  # None = unlimited
+    stress_delta: int = 0  # turn-level stress applied regardless of card choice
 
 
 @dataclass

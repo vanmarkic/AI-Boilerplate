@@ -7,7 +7,11 @@
     >
     <tfc-stress-bar [stress]="store.score()?.stress ?? 0" />
     <div class="player-header__clocks">
-      <tfc-clock-display label="RT" [value]="store.rtClock()" />
+      @if (store.turnCountdownClock(); as countdown) {
+        <tfc-clock-display label="Turn" [value]="countdown" />
+      } @else {
+        <tfc-clock-display label="RT" [value]="store.rtClock()" />
+      }
       <tfc-phase-badge [phase]="store.phase()" />
     </div>
   </header>

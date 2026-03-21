@@ -1,7 +1,8 @@
-"""Integration tests for decision chaining and scoring through the HTTP API.
+"""Integration tests for decision scoring through the HTTP API.
 
-Tests the collaborative game mode flow: close decision D1 → D2 auto-opens
-with scoring penalties applied, forced cards enforced, and timeout adjusted.
+Tests the collaborative game mode flow: close decision → scoring applied,
+forced cards enforced. Decision sequencing is driven by event triggers
+(tick loop or practice auto-advance), not direct chaining.
 """
 
 from __future__ import annotations
@@ -100,9 +101,10 @@ def _template(tid: str, opts: list[dict] | None = None) -> DecisionTemplate:
 
 
 @pytest.mark.asyncio
-async def test_close_decision_opens_next_in_chain(
+async def test_close_decision_does_not_chain_directly(
     client: AsyncClient,
 ) -> None:
+    """Closing d1 should NOT auto-open d2 — event triggers handle sequencing."""
     eid = await _create_exercise(client)
     t1, t2 = _template("d1"), _template("d2")
     _make_engine(eid, [t1, t2])
@@ -114,11 +116,11 @@ async def test_close_decision_opens_next_in_chain(
     )
     assert resp.status_code == 200
 
-    # D2 should now be open
+    # D2 should NOT be auto-opened — events drive sequencing
     decisions = await client.get(f"/api/exercises/{eid}/engine/decisions")
     assert decisions.status_code == 200
     open_ids = [d["id"] for d in decisions.json()]
-    assert "d2" in open_ids
+    assert "d2" not in open_ids
 
 
 @pytest.mark.asyncio

@@ -27,6 +27,7 @@ class ClassicMode:
         selected_options: list[DecisionOptionSnapshot],
         all_options: list[DecisionOptionSnapshot],
         forced_option_ids: list[str] | None = None,
+        turn_stress_delta: int = 0,
     ) -> list[StateChange]:
         return []
 

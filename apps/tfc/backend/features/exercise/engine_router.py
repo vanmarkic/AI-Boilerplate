@@ -32,20 +32,27 @@ async def _log_to_audit(
     changes: list[StateChange],
 ) -> None:
     """Persist state changes to the audit trail in a dedicated session."""
+    import logging
+
     from core.database import async_session_factory
 
     engine = session_store.get(exercise_id)
     if not engine:
         return
-    async with async_session_factory() as session:
-        async with session.begin():
-            audit = AuditService(AuditRepository(session))
-            await audit.log_engine_changes(
-                exercise_id,
-                changes,
-                play_time_ms=engine.time_manager.play_time_ms,
-                real_time_ms=engine.time_manager.real_time_ms,
-            )
+    try:
+        async with async_session_factory() as session:
+            async with session.begin():
+                audit = AuditService(AuditRepository(session))
+                await audit.log_engine_changes(
+                    exercise_id,
+                    changes,
+                    play_time_ms=engine.time_manager.play_time_ms,
+                    real_time_ms=engine.time_manager.real_time_ms,
+                )
+    except Exception:
+        logging.getLogger(__name__).warning(
+            "Failed to write audit log for exercise %s", exercise_id, exc_info=True,
+        )
 
 
 class SpeedRequest(BaseModel):

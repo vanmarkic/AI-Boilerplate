@@ -108,6 +108,27 @@ export const ExerciseStore = signalStore(
       const elapsed = store.realTimeMs() - openedAtRt;
       return Math.max(0, decision.timeout_ms - elapsed);
     }),
+    /** Countdown clock: decision timer when a decision is open, otherwise time to next event. */
+    turnCountdownClock: computed(() => {
+      // Prefer decision countdown when an open decision has a timeout
+      const decision = store
+        .decisions()
+        .find((d) => d.status === "open" && d.timeout_ms > 0);
+      if (decision) {
+        const factor = store.speedFactor() || 1;
+        const openedAtRt = decision.opened_at_pt_ms / factor;
+        const elapsed = store.realTimeMs() - openedAtRt;
+        return formatTimeMs(Math.max(0, decision.timeout_ms - elapsed));
+      }
+      const pt = store.playTimeMs();
+      const nextEvent = store
+        .events()
+        .filter((e) => e.lifecycle === "scheduled" && e.scheduled_pt_ms > pt)
+        .sort((a, b) => a.scheduled_pt_ms - b.scheduled_pt_ms)[0];
+      if (!nextEvent) return null;
+      const remaining = Math.max(0, nextEvent.scheduled_pt_ms - pt);
+      return formatTimeMs(remaining);
+    }),
     issuesWithCountdown: computed(() => {
       const pt = store.playTimeMs();
       return store

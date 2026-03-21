@@ -33,6 +33,7 @@ class GameMode(Protocol):
         selected_options: list[DecisionOptionSnapshot],
         all_options: list[DecisionOptionSnapshot],
         forced_option_ids: list[str] | None = None,
+        turn_stress_delta: int = 0,
     ) -> list[StateChange]:
         """Score from full option lists. Enforces forced cards."""
         ...

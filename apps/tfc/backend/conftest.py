@@ -8,6 +8,7 @@ from sqlalchemy.pool import StaticPool
 
 import core.database as db_module
 from core.database import Base, get_session
+from features.audit.audit_model import AuditEntry  # noqa: F401 — register before create_all
 from main import app
 
 # Use PostgreSQL in CI, SQLite locally

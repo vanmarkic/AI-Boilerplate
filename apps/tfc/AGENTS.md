@@ -4,7 +4,7 @@
 Before writing any code:
 1. Read the root `AGENTS.md` — all universal rules (350-line limit, strict types, no barrel exports, feature manifests, `make validate`) apply here.
 2. Read `apps/main/backend/AGENTS.md` for backend conventions (FastAPI patterns, testing, SQL) and `apps/main/frontend/AGENTS.md` for frontend conventions (Angular patterns, signals, stores) — TFC follows the same stack patterns.
-3. Read `apps/tfc/SPECS.md` for TFC domain model, business rules, API surface, and glossary. If a feature's `manifest.yaml` exists, read it for feature-specific context.
+3. Read `apps/tfc/SPECS.md` — it is the **single source of truth** for TFC domain model, business rules, API surface, game modes, scoring, systems, backlog, and glossary. It must be kept up to date with every feature or business-rule change. If a feature's `manifest.yaml` exists, read it for feature-specific context.
 
 ## What TFC Is
 TFC is a domain-agnostic exercise simulation platform. A Game Master (GM) loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
@@ -31,107 +31,11 @@ The exercise simulation domain uses specific terms. The codebase uses generic eq
 
 ### Silent Wake Scenario Reference
 
-The "Silent Wake" scenario is a multi-domain naval cyber wargame. These terms appear in scenario packs, briefing docs, and seed data.
-
-#### Teams
-| Term | Meaning |
-|------|---------|
-| **WHITE/RED TEAM** | Facilitator (Game Master) |
-| **BLUE TEAM** | Ship crew (Players) |
-
-#### Roles
-| Role | Abbreviation | Responsibility |
-|------|-------------|----------------|
-| Commanding Officer | **CO** | Decision-maker — receives advisor input, makes final calls |
-| Operations Officer | **OPS** | Mission planning, intelligence, MTC liaison |
-| Principal Warfare Officer | **PWO** | Surface picture, ESM, engagement coordination |
-| Anti-Air Warfare Officer | **AAWO** | Air surveillance radar, air threat assessment |
-| Cyber Operator | **CyOp** | Network monitoring, cyber threat detection, IBMS analysis |
-| Navigator | **NAV** | Navigation systems, AIS, WECDIS, route management |
-| Engineering Officer | **EO** | System health, repairs, ETBOL estimates |
-
-#### Ship Systems (ON/OFF + Operational State)
-| System | Description |
-|--------|-------------|
-| **NAV RADAR** | Navigation radar |
-| **IBMS / INS** | Integrated Bridge Management System / Inertial Navigation System (incl. WECDIS) |
-| **NAV SENSORS** | Navigation sensors (GPS, speed log, compasses) |
-| **ASUW TRACKING RADAR** | Anti-Surface Warfare tracking radar |
-| **COMMS** | Communications (SATCOM, HF, UHF) |
-| **AAW RADAR** | Anti-Air Warfare surveillance radar |
-
-#### Weapons (OK/Damaged + ON/OFF)
-| Weapon | Description |
-|--------|-------------|
-| **CIWS FWD / AFT** | Close-In Weapon System (last-line missile defence) |
-| **Missile Launcher** | Primary anti-ship / anti-air missile system |
-| **Gun** | Naval gun for surface engagement |
-| **Decoys** | Deceptive countermeasures against incoming missiles |
-
-#### Operational State (3-tier traffic-light)
-
-**Systems:**
-| Color | Label | Meaning |
-|-------|-------|---------|
-| Green | OK | Fully operational |
-| Yellow | Degraded | Reduced capability |
-| Red | Critical/Disabled | Non-functional or critically impaired |
-
-**Warfare Domains:**
-| Color | Label | Meaning |
-|-------|-------|---------|
-| Green | No threat | No detected threat in this domain |
-| Yellow | Possible threat | Suspicious activity, unconfirmed |
-| Red | Actual threat | Confirmed hostile activity |
-
-#### Stress Mechanic
-| Term | Meaning |
-|------|---------|
-| **Stress** | Team-level counter (0–10), increases/decreases based on blue card choices and inject consequences |
-| **Stress to Decision Time** | Stress 0 = 5:00, Stress 10 = 3:00 (non-linear decay). Updated by Facilitator in tabletop; auto-calculated in digital |
-
-#### Game Components
-| Term | Meaning |
-|------|---------|
-| **Blue Card** (SWBxx) | Decision option — a response action the CO can play (up to 2 per turn) |
-| **Inject Card** | Role-targeted event card delivered per turn |
-| **Briefing Card** | Context/background card for pre-mission briefing |
-| **Game Board** | Central display: systems ON/OFF, operational states, warfare domains, stress, notes |
-
-#### Key Abbreviations
-| Abbr | Meaning |
-|------|---------|
-| **ETBOL** | Estimated Time Back On-Line (repair duration) |
-| **SITREP** | Situational Report — CO or Facilitator calls for all roles to report status |
-| **SOG / STW** | Speed Over Ground / Speed Through Water |
-| **EMCON** | Emissions Control (radar silence posture) |
-| **ROE** | Rules of Engagement |
-| **MTC** | Maritime Tactical Center (shore-side C2) |
-| **AIS** | Automatic Identification System |
-| **WECDIS** | Warship Electronic Chart Display and Information System |
-| **ESM** | Electronic Support Measures (passive radar detection) |
-| **General Quarters** | Full combat readiness — all systems and weapons ON |
-
-#### Turn Structure (Silent Wake)
-- **Turn 0**: Pre-Sail Briefing — role-targeted briefing injects, no blue cards, 15-minute preparation
-- **Turns 1–15**: Execution — each turn has role-targeted injects + up to 2 blue cards chosen by CO
-- **Hot Wash-up**: Post-exercise internal debrief (not a game turn)
+See `docs/SILENT-WAKE-GAME-MECHANICS.md` for the full Silent Wake domain reference (roles, systems, weapons, stress, turn structure, blue card catalog, abbreviations).
 
 ## Domain Model
 
-```
-Scenario  ──loads──▶  Exercise  ──runs──▶  Engine
-                         │                    │
-                         │               ┌────┴─────┐
-                      Participants    TimeManager
-                      (GM + Players)  EventScheduler
-                                      IssueManager
-                                      DecisionManager
-```
-
-- **Scenario**: a reusable template (title, briefing, objectives, events, issues, decision templates).
-- **Exercise**: a running instance of a scenario with participants.
-- **Engine** (`engine/`): the tick-based runtime that advances time, triggers events, surfaces issues, and pauses for decisions.
+See `SPECS.md` § Domain Model for entity relationships and the full domain diagram.
 
 ## Stack (same as root, with TFC-specific additions)
 - Backend: FastAPI (`apps/tfc/backend/`), port 8001
@@ -203,15 +107,11 @@ src/app/
 ```
 
 ## Engine Concepts
-- **Tick loop**: 250ms interval. Each tick advances play time, checks event triggers, transitions issue lifecycles, and broadcasts state changes via WebSocket.
-- **Play time vs real time**: `TimeManager` supports a speed factor (e.g., 2× = 2 minutes of play time per 1 real minute).
-- **Engine phases**: `setup → running → paused → completed`. Decision events auto-pause the engine.
-- **Events**: scheduled occurrences with lifecycle `pending → active → completed`. Types: `NARRATIVE`, `DECISION`, `INJECT`. Events support `target_roles` (role visibility filter, empty = all) and `role_descriptions` (per-role text override). Role-targeted events are broadcast only to matching roles + GMs.
-- **Issues**: problems surfaced by events, with lifecycle `dormant → active → mitigated → resolved`. Can auto-resolve after a countdown.
-- **Decisions**: questions posed to players when a DECISION event fires. Engine pauses until resolved.
-- **Forced cards**: `forced_option_ids` on `DecisionTemplate`. If a player omits a forced card, it is auto-included with a penalty and a `ForcedCardApplied` state change is emitted.
-- **Per-card scoring**: Each option has a `score: float` (+/0/-). Selected score = sum of chosen cards. Penalty = `(max - selected) * factor * 1000` ms off next decision timer.
-- **2-player mode**: `SimpleCollaborativeMode` supports a 2-player variant where both players act as combined advisor/decision-maker.
+
+See `SPECS.md` for full business rules (features, game modes, stress model, decision timer, scoring, systems). Key implementation notes for agents:
+
+- **Engine phases**: `setup → briefing → running → paused → completed`.
+- **Tick loop**: 250ms interval — see `SPECS.md` § exercise feature for details.
 - **Scenario validation**: JSON seed files are validated at Docker build time, seed time, and in the builder UI before saving.
 
 ## Development Commands
@@ -328,12 +228,13 @@ When adding a new migration:
 ### Before starting any TFC task
 1. Read the feature's `manifest.yaml` for API surface, dependencies, and business rules.
 2. Read `apps/tfc/SPECS.md` for the full domain model and glossary — use domain terms consistently.
-3. Check `docs/plans/2026-03-18-tfc-gaps-deferred-opens.md` for open gaps and deferred items before implementing related features.
+3. Check `SPECS.md` § Backlog and § Implementation Status for open gaps and deferred items before implementing related features.
 
 ### Specification hygiene
 4. When adding a new feature: create `manifest.yaml` first, then code. The manifest is the contract.
 5. When changing business rules or API endpoints: update `apps/tfc/SPECS.md` and the feature's `manifest.yaml` in the same commit as the code change. Stale specs cause agents to generate wrong code.
-6. When a gap or deferred item is resolved: update its status in the gaps doc immediately. Contradictory statuses across docs cause agents to re-fix resolved issues.
+6. When a gap or deferred item is resolved: update its status in `SPECS.md` § Implementation Status immediately. Contradictory statuses across docs cause agents to re-fix resolved issues.
+7. `SPECS.md` is the single source of truth for all TFC specs. Do NOT duplicate business rules, game mechanics, or domain definitions in other docs (AGENTS.md, README.md). Reference `SPECS.md` instead.
 
 ### Type safety across the stack
 7. **Backend Python types are the single source of truth.** Engine state changes and snapshots (`backend/engine/state_changes.py`) are codegen'd to TypeScript via `apps/tfc/codegen/generate-types.py`. When you change a TypedDict, run `npm run generate:types` from `apps/tfc/frontend/`. Never hand-write frontend types that duplicate backend TypedDicts.
@@ -350,3 +251,28 @@ When adding a new migration:
 14. Engine changes require: unit tests + property tests (Hypothesis). Use existing strategies from `engine/strategies.py`.
 15. Frontend feature changes require: component spec files colocated with the component.
 16. API changes require: router tests in the feature's `*_test.py` file.
+
+## Visual Regression Testing
+
+### Round-trip screenshot workflow
+After making visual changes to the TFC frontend (HTML, CSS, component templates):
+
+1. **Make the change** — edit view files as needed
+2. **Run visual snapshots** — `npm run e2e:visual` from `apps/tfc/frontend/`
+3. **Review diffs** — if snapshots fail, inspect the HTML report (`npx playwright show-report`)
+4. **Fix or update** — fix regressions, or `npm run e2e:visual:update` if the change is intentional
+5. **Commit baselines** — updated `.png` snapshots in `e2e/tests/player-view-snapshots.spec.ts-snapshots/` must be committed with the code change
+
+### Using Chrome DevTools MCP for live verification
+When the dev server is running (`npm start` at `localhost:4201`):
+- `mcp__chrome-devtools__navigate_page` → open the player view with query params
+- `mcp__chrome-devtools__take_screenshot` → capture current state
+- `mcp__chrome-devtools__take_snapshot` → inspect DOM structure and element UIDs
+- Compare screenshots against design intent or previous state
+
+### Visual test conventions
+- All visual snapshot tests are tagged `@visual` — run with `npm run e2e:visual`
+- Mask time-dependent elements: `tfc-ambient-background`, `tfc-clock-display`
+- Max diff pixel ratio: `0.02` (2% tolerance for anti-aliasing)
+- Baselines stored in `e2e/tests/player-view-snapshots.spec.ts-snapshots/`
+- A PostToolUse hook prints a reminder when frontend view files are edited
