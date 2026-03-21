@@ -43,10 +43,15 @@ def _or_404[T: StateChange](result: T | None, detail: str) -> T:
 async def trigger_event(exercise_id: int, event_id: str) -> EventChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.event_scheduler.force_trigger(event_id, pt),
         f"Event {event_id} not found or not triggerable",
     )
+    # Open decisions for force-triggered decision-type events
+    decision_changes = engine._handle_decision_events([change], pt)
+    if decision_changes and engine._on_state_change:
+        await engine._on_state_change([change] + decision_changes)
+    return change
 
 
 @router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
@@ -183,5 +188,9 @@ async def get_engine_context(exercise_id: int) -> dict[str, object]:
         "briefing": ctx.briefing,
         "objectives": ctx.objectives,
         "rules": ctx.rules,
+        "roles": [
+            {"id": r.id, "label": r.label, "player_type": r.player_type}
+            for r in ctx.roles
+        ],
         "default_time_factor": engine.config.time_factor,
     }

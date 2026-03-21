@@ -51,6 +51,7 @@ class SimpleCollaborativeMode:
         selected_options: list[DecisionOptionSnapshot],
         all_options: list[DecisionOptionSnapshot],
         forced_option_ids: list[str] | None = None,
+        turn_stress_delta: int = 0,
     ) -> list[StateChange]:
         """Score using full option lists. Enforces forced cards."""
         changes: list[StateChange] = []
@@ -80,8 +81,9 @@ class SimpleCollaborativeMode:
         # Compute scores
         selected_score = sum(o.get("score", 0) for o in effective_options)
 
-        # Compute stress delta from selected options
-        stress_delta = sum(o.get("stress_delta", 0) for o in effective_options)
+        # Compute stress delta: turn-level + per-card
+        card_stress = sum(o.get("stress_delta", 0) for o in effective_options)
+        stress_delta = turn_stress_delta + card_stress
 
         # Score the decision, apply stress, advance turn
         self.turn_number += 1

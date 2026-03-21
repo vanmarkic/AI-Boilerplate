@@ -25,6 +25,7 @@ class DecisionOptionDef(BaseModel):
     id: str
     label: str
     score: float = 0.0
+    stress_delta: int = 0
     system_effects: list[SystemEffectDef] = []
     targets_system: bool = False
     max_plays: int = 1
@@ -44,6 +45,7 @@ class DecisionTemplateDef(BaseModel):
     target_roles: list[str] = []
     forced_option_ids: list[str] = []
     max_selections: int | None = None  # None = unlimited
+    stress_delta: int = 0  # turn-level stress applied regardless of card choice
 
 
 class ScenarioEventDef(BaseModel):

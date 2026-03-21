@@ -6,8 +6,7 @@ for after-action review and scoring.
 
 from datetime import datetime
 
-from sqlalchemy import Integer, String, func
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import JSON, Integer, String, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from core.database import Base

@@ -119,6 +119,24 @@ export class PlayerView implements OnInit, OnDestroy {
     }
   });
 
+  /** In practice mode, skip ahead to the next turn as soon as a decision is resolved. */
+  private _prevHadDecision = false;
+  private readonly practiceAutoAdvanceEffect = effect(() => {
+    if (!this.store.isPracticeMode()) return;
+    if (this.store.phase() !== "running") return;
+    const hasDecision = this.activeDecisions().length > 0;
+    // Detect transition from having a decision to having none (= decision just resolved)
+    if (this._prevHadDecision && !hasDecision) {
+      const nextEvent = this.store
+        .scheduledEvents()
+        .sort((a, b) => a.scheduled_pt_ms - b.scheduled_pt_ms)[0];
+      if (nextEvent) {
+        this.api.triggerEvent(this.exerciseId(), nextEvent.id).subscribe();
+      }
+    }
+    this._prevHadDecision = hasDecision;
+  });
+
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
     const id = Number(params["exerciseId"] ?? 1);

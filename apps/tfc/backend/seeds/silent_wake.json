@@ -455,18 +455,11 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
-        "target_roles": [],
+        "target_roles": ["co"],
+        "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0
-          },
-          {
-            "id": "SWB03",
-            "label": "Internal Sync (60 s)",
-            "score": 10.0
-          }
+          { "id": "SWB01", "label": "Continue Mission", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB03", "label": "Internal Sync (60 s)", "score": 10.0, "stress_delta": 0 }
         ]
       },
       {
@@ -478,17 +471,10 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "nav", "pwo"],
+        "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0
-          },
-          {
-            "id": "SWB07",
-            "label": "Start Investigation",
-            "score": 10.0
-          }
+          { "id": "SWB01", "label": "Continue Mission", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB07", "label": "Start Investigation", "score": 10.0, "stress_delta": 0 }
         ]
       },
       {
@@ -500,23 +486,11 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "eo", "nav"],
+        "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB05",
-            "label": "Increase Lookouts / Visual Confirm",
-            "score": 10.0
-          },
-          {
-            "id": "SWB15",
-            "label": "Repair Component",
-            "score": 10.0,
-            "system_effects": [{"system_id": "comms", "operational_state": "green"}]
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 6.0
-          }
+          { "id": "SWB05", "label": "Increase Lookouts / Visual Confirm", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB15", "label": "Repair Component", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "comms", "operational_state": "green"}] },
+          { "id": "SWB01", "label": "Continue Mission", "score": 6.0, "stress_delta": 1 }
         ]
       },
       {
@@ -528,27 +502,12 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "nav", "eo"],
+        "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB09",
-            "label": "AIS Tracks Re-evaluation",
-            "score": 10.0
-          },
-          {
-            "id": "SWB08",
-            "label": "Start In-Depth Investigation",
-            "score": 10.0
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 6.0
-          },
-          {
-            "id": "SWB29",
-            "label": "Decoy Deployment",
-            "score": -5.0
-          }
+          { "id": "SWB09", "label": "AIS Tracks Re-evaluation", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB08", "label": "Start In-Depth Investigation", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB01", "label": "Continue Mission", "score": 6.0, "stress_delta": 1 },
+          { "id": "SWB29", "label": "Decoy Deployment", "score": -5.0, "stress_delta": 1 }
         ]
       },
       {
@@ -560,17 +519,10 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "cyop", "eo"],
+        "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB07",
-            "label": "Start Investigation",
-            "score": 10.0
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 6.0
-          }
+          { "id": "SWB07", "label": "Start Investigation", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB01", "label": "Continue Mission", "score": 6.0, "stress_delta": 1 }
         ]
       },
       {
@@ -583,22 +535,11 @@
         "max_selections": 2,
         "target_roles": ["co", "cyop", "nav", "pwo"],
         "forced_option_ids": ["SWB20"],
+        "stress_delta": 1,
         "options": [
-          {
-            "id": "SWB08",
-            "label": "Start In-Depth Investigation",
-            "score": 10.0
-          },
-          {
-            "id": "SWB20",
-            "label": "General Quarters",
-            "score": 10.0
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 6.0
-          }
+          { "id": "SWB08", "label": "Start In-Depth Investigation", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB20", "label": "General Quarters", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB01", "label": "Continue Mission", "score": 6.0, "stress_delta": 1 }
         ]
       },
       {
@@ -610,22 +551,11 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "aawo"],
+        "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0
-          },
-          {
-            "id": "SWB14",
-            "label": "Reboot Affected System",
-            "score": 10.0
-          },
-          {
-            "id": "SWB08",
-            "label": "Start In-Depth Investigation",
-            "score": 6.0
-          }
+          { "id": "SWB01", "label": "Continue Mission", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB14", "label": "Reboot Affected System", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB08", "label": "Start In-Depth Investigation", "score": 6.0, "stress_delta": 0 }
         ]
       },
       {
@@ -637,22 +567,11 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "aawo", "eo"],
+        "stress_delta": 1,
         "options": [
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0
-          },
-          {
-            "id": "SWB21",
-            "label": "Prepare Target",
-            "score": 10.0
-          },
-          {
-            "id": "SWB14",
-            "label": "Reboot Affected System",
-            "score": 6.0
-          }
+          { "id": "SWB01", "label": "Continue Mission", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB21", "label": "Prepare Target", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB14", "label": "Reboot Affected System", "score": 6.0, "stress_delta": 0 }
         ]
       },
       {
@@ -664,22 +583,11 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "nav", "eo", "pwo"],
+        "stress_delta": 2,
         "options": [
-          {
-            "id": "SWB29",
-            "label": "Decoy Deployment",
-            "score": 10.0
-          },
-          {
-            "id": "SWB27",
-            "label": "Fire Missile Counterattack",
-            "score": 10.0
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 6.0
-          }
+          { "id": "SWB29", "label": "Decoy Deployment", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB27", "label": "Fire Missile Counterattack", "score": 10.0, "stress_delta": 1 },
+          { "id": "SWB01", "label": "Continue Mission", "score": 6.0, "stress_delta": 1 }
         ]
       },
       {
@@ -691,27 +599,12 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "eo", "pwo", "nav"],
+        "stress_delta": 2,
         "options": [
-          {
-            "id": "SWB18",
-            "label": "Damage Control Focus",
-            "score": 10.0
-          },
-          {
-            "id": "SWB04",
-            "label": "Increase Speed",
-            "score": 10.0
-          },
-          {
-            "id": "SWB26",
-            "label": "Shift to Gun Focus",
-            "score": 6.0
-          },
-          {
-            "id": "SWB28",
-            "label": "Engage Target with Guns",
-            "score": -3.0
-          }
+          { "id": "SWB18", "label": "Damage Control Focus", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB04", "label": "Increase Speed", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB26", "label": "Shift to Gun Focus", "score": 6.0, "stress_delta": 0 },
+          { "id": "SWB28", "label": "Engage Target with Guns", "score": -3.0, "stress_delta": 1 }
         ]
       },
       {
@@ -723,28 +616,12 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "cyop", "pwo"],
+        "stress_delta": 1,
         "options": [
-          {
-            "id": "SWB10",
-            "label": "Isolate System",
-            "score": 10.0,
-            "system_effects": [{"system_id": "cic_network", "power_state": false}]
-          },
-          {
-            "id": "SWB23",
-            "label": "Close Range to Compensate",
-            "score": 10.0
-          },
-          {
-            "id": "SWB30",
-            "label": "Approach Land (Emergency Concealment)",
-            "score": 6.0
-          },
-          {
-            "id": "SWB24",
-            "label": "Approach Target",
-            "score": -5.0
-          }
+          { "id": "SWB10", "label": "Isolate System", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "cic_network", "power_state": false}] },
+          { "id": "SWB23", "label": "Close Range to Compensate", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB30", "label": "Approach Land (Emergency Concealment)", "score": 6.0, "stress_delta": 0 },
+          { "id": "SWB24", "label": "Approach Target", "score": -5.0, "stress_delta": 1 }
         ]
       },
       {
@@ -756,22 +633,11 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "cyop", "aawo", "pwo", "eo"],
+        "stress_delta": 1,
         "options": [
-          {
-            "id": "SWB08",
-            "label": "Start In-Depth Investigation",
-            "score": 10.0
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0
-          },
-          {
-            "id": "SWB23",
-            "label": "Close Range to Compensate",
-            "score": 6.0
-          }
+          { "id": "SWB08", "label": "Start In-Depth Investigation", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB01", "label": "Continue Mission", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB23", "label": "Close Range to Compensate", "score": 6.0, "stress_delta": 0 }
         ]
       },
       {
@@ -783,22 +649,11 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "cyop", "aawo"],
+        "stress_delta": 1,
         "options": [
-          {
-            "id": "SWB10",
-            "label": "Isolate System",
-            "score": 10.0
-          },
-          {
-            "id": "SWB28",
-            "label": "Engage Target with Guns",
-            "score": 10.0
-          },
-          {
-            "id": "SWB23",
-            "label": "Close Range to Compensate",
-            "score": 6.0
-          }
+          { "id": "SWB10", "label": "Isolate System", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB28", "label": "Engage Target with Guns", "score": 10.0, "stress_delta": 1 },
+          { "id": "SWB23", "label": "Close Range to Compensate", "score": 6.0, "stress_delta": 0 }
         ]
       },
       {
@@ -810,22 +665,11 @@
         "completion_mode": "consensus",
         "max_selections": 2,
         "target_roles": ["co", "nav", "pwo"],
+        "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB16",
-            "label": "Reconnect System",
-            "score": 10.0
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0
-          },
-          {
-            "id": "SWB08",
-            "label": "Start In-Depth Investigation",
-            "score": 6.0
-          }
+          { "id": "SWB16", "label": "Reconnect System", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB01", "label": "Continue Mission", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB08", "label": "Start In-Depth Investigation", "score": 6.0, "stress_delta": 0 }
         ]
       },
       {
@@ -836,18 +680,11 @@
         "question_type": "multi_choice",
         "completion_mode": "consensus",
         "max_selections": 2,
-        "target_roles": [],
+        "target_roles": ["co"],
+        "stress_delta": -1,
         "options": [
-          {
-            "id": "SWB03",
-            "label": "Internal Sync (60 s)",
-            "score": 10.0
-          },
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0
-          }
+          { "id": "SWB03", "label": "Internal Sync (60 s)", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB01", "label": "Continue Mission", "score": 10.0, "stress_delta": 0 }
         ]
       }
     ],

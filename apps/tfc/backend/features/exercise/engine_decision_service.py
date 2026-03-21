@@ -66,6 +66,7 @@ class EngineDecisionService:
             selected_options,
             all_options,
             forced_option_ids=forced_ids or None,
+            turn_stress_delta=template.stress_delta if template else 0,
         )
 
         # Apply system effects from selected options
@@ -74,29 +75,10 @@ class EngineDecisionService:
         if extra or sys_changes:
             await broadcast(extra + sys_changes)
 
-        # Chain to next decision in sequence
-        next_id = engine.game_mode.get_next_decision_id(decision_id)
-        if next_id:
-            next_template = engine.find_decision_template(next_id)
-            if next_template:
-                timeout_ms = engine.game_mode.get_decision_time_ms(
-                    int(next_template.timeout_ms),
-                )
-                opened = engine.decision_manager.open_decision(
-                    id=next_template.id,
-                    event_id=next_template.id,
-                    issue_id=next_template.issue_id,
-                    title=next_template.title,
-                    description=next_template.description,
-                    question_type=next_template.question_type,
-                    options=next_template.options,
-                    completion_mode=next_template.completion_mode,
-                    target_roles=next_template.target_roles,
-                    timeout_ms=timeout_ms,
-                    max_selections=next_template.max_selections,
-                    current_pt_ms=pt,
-                )
-                await broadcast([opened])
+        # Decision chaining is handled by event triggers:
+        # - Practice mode: frontend practiceAutoAdvanceEffect force-triggers the next event
+        # - Normal mode: tick loop fires events on schedule
+        # Direct chaining here would create duplicate decisions.
 
         # Auto-resume if GM mode and no more open decisions
         if engine.game_mode.requires_gm():

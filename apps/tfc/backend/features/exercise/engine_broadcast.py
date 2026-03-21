@@ -29,12 +29,16 @@ async def broadcast_to_roles(
     roles: list[str],
     changes: list[StateChange],
 ) -> None:
-    """Broadcast changes to specific roles + always to gm."""
+    """Broadcast changes to specific roles + always to gm and player connections."""
     msg: dict[str, object] = {"type": "state_changes", "changes": changes}
     for role in roles:
         await mgr.broadcast_to_role(exercise_id, role, msg)
     if "gm" not in roles:
         await mgr.broadcast_to_role(exercise_id, "gm", msg)
+    # Players connect with ws_role="player" but need all role-targeted changes
+    # (e.g. solo/practice mode plays all roles via a single "player" connection)
+    if "player" not in roles:
+        await mgr.broadcast_to_role(exercise_id, "player", msg)
 
 
 async def broadcast_changes(

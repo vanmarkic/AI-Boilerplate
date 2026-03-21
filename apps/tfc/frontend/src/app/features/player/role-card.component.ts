@@ -65,7 +65,6 @@ export interface RoleCardSubmission {
       <!-- Decision Form (active only) -->
       @if (card().decision && card().status === 'active') {
         <div class="role-card__decision">
-          <div class="role-card__decision-question">{{ card().decision!.description }}</div>
           @if (questionType() === 'single_choice' || questionType() === 'multi_choice') {
             @for (option of filteredOptions(); track option.id) {
               <label class="role-card__option" [class.role-card__option--selected]="isSelected(option.id)">

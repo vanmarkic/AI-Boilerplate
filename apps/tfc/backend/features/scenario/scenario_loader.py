@@ -76,7 +76,7 @@ def load_decision_templates(
                     id=o.id,
                     label=o.label,
                     score=o.score,
-                    stress_delta=0,
+                    stress_delta=o.stress_delta,
                     system_effects=[
                         {"system_id": e.system_id, "operational_state": e.operational_state, "power_state": e.power_state}
                         for e in o.system_effects
@@ -92,6 +92,7 @@ def load_decision_templates(
             target_roles=list(dt.target_roles),
             forced_option_ids=list(dt.forced_option_ids),
             max_selections=dt.max_selections,
+            stress_delta=dt.stress_delta,
         )
         for dt in content.decision_templates
     ]

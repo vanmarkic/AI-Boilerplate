@@ -53,6 +53,11 @@
     font-style: italic;
   }
 
+  .log-detail {
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
   .logs-empty {
     color: var(--color-muted-foreground);
     text-align: center;

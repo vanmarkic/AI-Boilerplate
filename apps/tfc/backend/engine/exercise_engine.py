@@ -206,14 +206,19 @@ class ExerciseEngine:
     ) -> list[DecisionOpened]:
         changes: list[DecisionOpened] = []
         for change in event_changes:
-            if change.get("action") != "started":
+            if change.get("action") not in ("started", "force_triggered"):
                 continue
             event_id = change["event_id"]
             event = self._events.events.get(event_id)
             if event is None or event.event_type != EventType.DECISION:
                 continue
+            # Skip if there's already an open decision (prevent tick-loop pile-up)
+            if self._decisions.get_open_decisions():
+                continue
             t = self.find_decision_template(event_id)
-            timeout_ms = t.timeout_ms if t else 0.0
+            template_timeout = t.timeout_ms if t else 0.0
+            # If template has no timeout, use game mode's stress-based timer
+            timeout_ms = template_timeout or self._config.game_mode.get_decision_time_ms(0)
             changes.append(
                 self._decisions.open_decision(
                     id=t.id if t else event_id,
@@ -302,33 +307,12 @@ class ExerciseEngine:
                         selected_opts,
                         d.options,
                         forced_option_ids=forced_ids or None,
+                        turn_stress_delta=template.stress_delta if template else 0,
                     )
                     all_changes.extend(extra)
                     # Apply system effects from selected options
                     all_changes.extend(self._apply_system_effects(selected_opts))
-                    # Chain to next decision
-                    next_id = self._config.game_mode.get_next_decision_id(d.id)
-                    if next_id:
-                        nt = self.find_decision_template(next_id)
-                        if nt:
-                            timeout_ms = self._config.game_mode.get_decision_time_ms(
-                                int(nt.timeout_ms),
-                            )
-                            opened = self._decisions.open_decision(
-                                id=nt.id,
-                                event_id=None,
-                                issue_id=nt.issue_id,
-                                title=nt.title,
-                                description=nt.description,
-                                question_type=nt.question_type,
-                                options=nt.options,
-                                completion_mode=nt.completion_mode,
-                                target_roles=nt.target_roles,
-                                timeout_ms=timeout_ms,
-                                max_selections=nt.max_selections,
-                                current_pt_ms=pt,
-                            )
-                            all_changes.append(opened)
+                    # Decision chaining handled by event triggers (tick loop / practice auto-advance)
                 if all_changes and self._on_state_change:
                     await self._on_state_change(all_changes)
                 if not self._decisions.get_open_decisions():

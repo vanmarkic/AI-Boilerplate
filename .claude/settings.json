@@ -18,6 +18,15 @@
             "command": "entire hooks claude-code post-todo"
           }
         ]
+      },
+      {
+        "matcher": "Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash shared/scripts/visual-edit-reminder.sh"
+          }
+        ]
       }
     ],
     "PreToolUse": [
