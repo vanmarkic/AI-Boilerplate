@@ -1,0 +1,258 @@
+<ide_selection>The user selected the lines 201 to 400 from /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/seeds/silent_wake.json:
+          "pwo": "ESM detects non-commercial radar emissions at bearing 052. Emission profile not consistent with merchant vessels."
+        }
+      },
+      {
+        "id": "evt-t7",
+        "title": "Turn 7 \u2014 AAW Radar Malfunction",
+        "description": "AAWO: Air surveillance radar online. Multiple tracks flickering \u2014 same symptom as pre-departure maintenance issue.\nNote: Reboot will trigger silent privilege escalation in AAW radar component. No visible immediate consequence. Move AAW RADAR \u2192 Yellow.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 1800000,
+        "triggered_issues": [
+          "iss-aaw-malfunction"
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "aawo": "Air surveillance radar online. Multiple tracks are flickering like last time."
+        }
+      },
+      {
+        "id": "evt-t8",
+        "title": "Turn 8 \u2014 Air Threat Warning",
+        "description": "AAWO: Report via MTC (C2): Hostile aircraft approaching area \u2014 ETA 15 min.\nEO: Reboot could fix AAW issue (1 min ETBOL) \u2014 provide card only if not proposed last turn.\nNote: Distribute white injects in correct order this turn \u2014 sequencing matters.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 2100000,
+        "triggered_issues": [
+          "iss-air-threat"
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "aawo": "Report via MTC (C2 system): Hostile aircraft approaching area (ETA: 15 min).",
+          "eo": "Reboot could fix the AAW issue (1 min ETBOL)."
+        }
+      },
+      {
+        "id": "evt-t9",
+        "title": "Turn 9 \u2014 Hostile Salvo",
+        "description": "NAV: 3 incoming missiles visually detected.\nEO: AAW radar is back online.\nPWO: Target is out of gun range.\nNote: WECDIS attack unresolved \u2014 that drives missile counterattack failure.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 2400000,
+        "triggered_issues": [
+          "iss-under-attack"
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "nav": "3 incoming missiles visually detected.",
+          "eo": "AAW radar is back online.",
+          "pwo": "Target is out of gun range."
+        }
+      },
+      {
+        "id": "evt-t10",
+        "title": "Turn 10 \u2014 First Blood",
+        "description": "FACILITATOR: One inbound missile intercepted by CIWS. Two detonated in close proximity \u2014 shockwave and fragmentation effects.\nEO: FWD CIWS non-operational (ETBOL: 2 hrs). Missile Launcher non-operational (ETBOL: 5 hrs). 1 HF antenna disabled (unable to repair).\nPWO: Target now in gun range. NAV: Counterattack missiles missed target.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 2700000,
+        "triggered_issues": [
+          "iss-damage-first-hit"
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "eo": "FWD CIWS: non-operational (ETBOL: 2 hours). Missiles launcher: non-operational (ETBOL: 5 hours). 1 HF antenna was disabled (unable to repair).",
+          "pwo": "Target now in gun range.",
+          "nav": "Missiles (counterattack) missed the target. No evidence of hostile manoeuvre to evade."
+        }
+      },
+      {
+        "id": "evt-t11",
+        "title": "Turn 11 \u2014 Cyber Analysis & Surface Tracking Malfunction",
+        "description": "CyOp: Cyber-attack vector confirmed \u2014 all systems fed wrong speed value. Option 1: Disconnect WECDIS + restart INS (1 min, WECDIS unavailable). Option 2: Restore WECDIS + restart INS (30 min, WECDIS available).\nPWO: Surface tracking radar unable to achieve stable lock. Manual targeting reduces effective gun range. Target within effective gun range.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 3000000,
+        "triggered_issues": [
+          "iss-cyber-confirmed",
+          "iss-surface-tracking-degraded"
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "Analysis indicates a cyber-attack vector resulting in feeding all systems with wrong speed value. Option 1: Disconnect WECDIS and restart INS (ETBOL: 1 min) \u2014 WECDIS not available. Option 2: Restore WECDIS and restart INS (ETBOL 30 min) \u2014 WECDIS available.",
+          "pwo": "Target within the effective gun range. Surface tracking radar is unable to achieve a stable lock. Manual targeting reduces effective engagement envelope (reduced gun effective range)."
+        }
+      },
+      {
+        "id": "evt-t12",
+        "title": "Turn 12 \u2014 New Cyber Alert",
+        "description": "CyOp: Malicious activity confirmed from AAW radar processing module towards surface tracking radar. Originated from 'faulty' AAW radar component.\nAAWO: Hostile aircraft approaching \u2014 ETA 10 min.\nPWO: Target still out of effective gun range with manual tracking. 10 min to be in range.\nEO: INS functioning correctly. Speed inputs verified.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 3300000,
+        "triggered_issues": [
+          "iss-aaw-attack-source"
+        ],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "Malicious activity confirmed originating from AAW radar processing module toward surface tracking radar. Can affect tracking capability. Originated by the 'faulty' AAW radar component.",
+          "aawo": "Report via MTC (C2 system): Hostile aircraft approaching area (ETA: 10 min).",
+          "pwo": "Target is still out of effective gun range with manual tracking. 10 min to be in range.",
+          "eo": "INS functioning correctly. Speed inputs verified across systems."
+        }
+      },
+      {
+        "id": "evt-t13",
+        "title": "Turn 13 \u2014 Hard Choices",
+        "description": "CyOp: AAW attack resolution \u2014 Option 1: Restore from backup (30 min). Option 2: Isolate AAW radar (<1 min, AAW unavailable, surface tracking restored immediately).\nAAWO: Hostile aircraft \u2014 ETA 8 min.\nSurface threat must be neutralised before incoming air threat.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 3600000,
+        "triggered_issues": [],
+        "target_roles": [],
+        "role_descriptions": {
+          "cyop": "AAW originated attack resolution options: Option 1: Restore AAW radar from backup (ETBOL: 30 min). Full recovery by replacing the component from storage and flashing clean firmware. Option 2: Isolate AAW radar: ETBOL < 1 min. AAW radar unavailable while isolated. Surface tracking stability restored immediately.",
+          "aawo": "Report via MTC (C2 system): Hostile aircraft approaching area (ETA: 8 min)."
+        }
+      },
+      {
+        "id": "evt-t14",
+        "title": "Turn 14 \u2014 Ship Neutralised \u2014 AAW Threat Focus",
+        "description": "NAV: Gun engagement achieved effective impact on hostile vessel. Target exhibiting loss of maneuverability.\nPWO: No further ESM emissions from hostile unit. Surface threat assessed as neutralised.\nAir threat unresolved. AAW radar reconnection restores organic air picture.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 3900000,
+        "triggered_issues": [],
+        "target_roles": [],
+        "role_descriptions": {
+          "nav": "Gun engagement achieved effective impact on hostile vessel. Target exhibiting loss of manoeuvrability.",
+          "pwo": "No further ESM emissions detected from hostile unit. Surface threat assessed as neutralised."
+        }
+      },
+      {
+        "id": "evt-t15",
+        "title": "Turn 15 \u2014 Happy Ending",
+        "description": "FACILITATOR: Hostile aircraft intercepted by friendly forces. Immediate threat neutralised.\nThis concludes the wargame. 15 turns of escalating pressure \u2014 from ambiguous sensor anomalies through confirmed cyber attack and live combat \u2014 under degraded conditions and real-time constraints. Debrief to follow.",
+        "event_type": "decision",
+        "scheduled_pt_ms": 4200000,
+        "triggered_issues": [],
+        "target_roles": [],
+        "role_descriptions": {}
+      }
+    ],
+    "issues": [
+      {
+        "id": "iss-transit-nominal",
+        "title": "Transit \u2014 All Systems Nominal",
+        "description": "All systems Green. NAV RADAR, IBMS/INS, COMMS ON. Weapons OFF.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t1",
+        "auto_resolve_ms": 0
+      },
+      {
+        "id": "iss-sensor-anomaly",
+        "title": "Speed Discrepancy + Ghost AIS Contact",
+        "description": "SOG vs STW mismatch. AIS contact bearing 035 / 18 nm with no radar echo.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t2",
+        "auto_resolve_ms": 0
+      },
+      {
+        "id": "iss-faulty-component",
+        "title": "Faulty Speed Sensor Component",
+        "description": "Faulty component identified. Restart ETBOL 5 min.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t3",
+        "auto_resolve_ms": 600000
+      },
+      {
+        "id": "iss-ais-spoofing",
+        "title": "AIS Spoofing Detected",
+        "description": "AIS contact bearing 041 / 11 nm \u2014 no vessel at that position. Trust in AIS picture degrading.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t4",
+        "auto_resolve_ms": 0
+      },
+      {
+        "id": "iss-cyber-alert",
+        "title": "IBMS Anomaly \u2014 Possible Cyber Intrusion",
+        "description": "Anomalous data flow detected in IBMS. Scope ambiguous.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t5",
+        "auto_resolve_ms": 0
+      },
+      {
+        "id": "iss-comms-degraded",
+        "title": "COMMS Degraded (Yellow)",
+        "description": "SATCOM reduced bandwidth. HF signal inconsistent. UHF range-limited. COMMS \u2192 Yellow.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t5",
+        "auto_resolve_ms": 0
+      },
+      {
+        "id": "iss-hostile-contact",
+        "title": "Hostile Warship Contact \u2014 Bearing 052",
+        "description": "Visual warship profile at bearing 052 / 12 nm. ESM confirms non-commercial radar emissions. WECDIS \u2192 INS anomalous data flow detected.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t6",
+        "auto_resolve_ms": 0
+      },
+      {
+        "id": "iss-aaw-malfunction",
+        "title": "AAW RADAR Flickering (Yellow)",
+        "description": "Air surveillance radar online but multiple tracks flickering. Same symptom as pre-departure maintenance issue. AAW RADAR \u2192 Yellow.",
+        "trigger_mode": "event-based",
+        "trigger_event_id": "evt-t7",
+        "auto_resolve_ms": 0
+      },
+
+
+This may or may not be related to the current task.</ide_selection>
+this is taking up to much space:
+http://localhost:4201/player?exerciseId=6&participantId=91e53f61-fdf3-40fe-89ab-dee9b4a839a3&role=all_roles&gameMode=simple_collaborative&practiceMode=true
+
+make it way more compact
+
+---
+
+<ide_selection>The user selected the lines 449 to 449 from /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/seeds/silent_wake.json:
+dec
+
+This may or may not be related to the current task.</ide_selection>
+systems are still eating up a lot of space
+
+---
+
+we're also missing system degrdation status.
+
+---
+
+i want see horizintal traffic light indicator
+
+---
+
+be more explicit about on/off. if all are on, there's no hint glow and dim are for on off
+
+---
+
+do flex space around to separate systems more
+
+---
+
+"SYSTEMS" should be separate and stay at initial position. systems themeselves should be in a separete flex space around
+
+---
+
+"SYSTEMS" is stuck to left edege of browser
+
+---
+
+remove score from all player views
+http://localhost:4201/player?exerciseId=11&participantId=c3ccc80c-d1cf-4db8-941e-ef25c1279664&role=all_roles&gameMode=simple_collaborative&practiceMode=true
+
+make sure stress bar is displayed @apps/tfc/frontend/src/app/shared/stress-bar.component.ts
+
+---
+
+where is the stress bar ? http://localhost:4201/player?exerciseId=14&participantId=a28b62bb-ed37-480f-90c8-80b2796a3382&role=all_roles&gameMode=simple_collaborative&practiceMode=true
+
+---
+
+stress is related to time . put here in the middle
+
+---
+
+it should indicate "stress"
