@@ -100,6 +100,7 @@ class SimpleCollaborativeMode:
                 self.base_decision_time_ms,
             ),
             "turn_number": self.turn_number,
+            "score_tier": self.compute_tier(),
         }
         changes.append(score_change)
         return changes
