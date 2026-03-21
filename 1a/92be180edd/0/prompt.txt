@@ -1,0 +1,24 @@
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (6m4hux) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+add parts of this where it belongs among @apps/tfc/AGENTS.md  @apps/tfc/README.md   @apps/tfc/SPECS.md  
+
+
+
+Quality Bar For TFC
+In this project, “quality” is not mainly style or elegance. It is whether the simulation state machine is path-independent and trustworthy.
+
+The bar I’m applying is:
+
+Same business event, same outcome regardless of entry path.
+Player submit, timeout, scheduled tick, force-trigger, and GM trigger must converge on the same engine truth.
+
+Consequences must stay aligned.
+If a card affects score, forced-card state, systems, and completion flow, those effects must all happen together.
+
+Engine is the canonical source of runtime truth.
+Frontend and router layers may orchestrate transport and validation, but they should not create alternate simulation semantics.
+
+Scenario-driven behavior must remain stable.
+Schema/default changes are only quality improvements if they preserve authored intent.
+
+Tests should target state transitions, not only helpers.
+The most valuable tests in TFC are cross-path regressions.
