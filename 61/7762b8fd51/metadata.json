@@ -3,21 +3,29 @@
   "checkpoint_id": "617762b8fd51",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 2,
-  "files_touched": null,
+  "checkpoints_count": 11,
+  "files_touched": [
+    "docs/plans/2026-03-21-tfc-phases-3-4-5.md"
+  ],
   "sessions": [
     {
       "metadata": "/61/7762b8fd51/0/metadata.json",
       "transcript": "/61/7762b8fd51/0/full.jsonl",
       "content_hash": "/61/7762b8fd51/0/content_hash.txt",
       "prompt": "/61/7762b8fd51/0/prompt.txt"
+    },
+    {
+      "metadata": "/61/7762b8fd51/1/metadata.json",
+      "transcript": "/61/7762b8fd51/1/full.jsonl",
+      "content_hash": "/61/7762b8fd51/1/content_hash.txt",
+      "prompt": "/61/7762b8fd51/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 11,
-    "cache_creation_tokens": 16338,
-    "cache_read_tokens": 119784,
-    "output_tokens": 988,
-    "api_call_count": 5
+    "input_tokens": 5696,
+    "cache_creation_tokens": 364821,
+    "cache_read_tokens": 12468608,
+    "output_tokens": 36647,
+    "api_call_count": 140
   }
 }
