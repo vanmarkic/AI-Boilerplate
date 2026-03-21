@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   inject,
-  input,
   signal,
 } from "@angular/core";
 import { FormsModule } from "@angular/forms";
@@ -28,7 +27,7 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
   template: `
     <ui-card title="Events">
       @for (event of store.content().events; track event.id) {
-        <div class="flex flex-col gap-xs p-sm border-b">
+        <div [id]="'event-' + event.id" class="flex flex-col gap-xs p-sm border-b">
           @if (editingId() === event.id) {
             <div class="flex flex-col gap-xs">
               <ui-input
@@ -102,6 +101,13 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                 <span class="text-xs text-muted-foreground ml-sm">
                   @ {{ event.scheduled_pt_ms / 1000 }}s
                 </span>
+                @for (issueId of event.triggered_issues; track issueId) {
+                  <span
+                    class="text-xs cursor-pointer"
+                    style="text-decoration: underline dotted; color: var(--color-primary)"
+                    (click)="scrollTo('issue-' + issueId); $event.stopPropagation()"
+                  >{{ issueId }}</span>
+                }
               </div>
               <div class="flex gap-xs">
                 <button
@@ -206,6 +212,10 @@ export class ScenarioEventEditorComponent {
     this.editPt.set(event.scheduled_pt_ms);
     this.editDur.set(event.duration_ms);
     this.editTargetRoles.set((event.target_roles ?? []).join(", "));
+  }
+
+  protected scrollTo(elementId: string): void {
+    document.getElementById(elementId)?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   protected save(eventId: string): void {
