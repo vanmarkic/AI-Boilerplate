@@ -147,9 +147,9 @@
     ],
     "decision_sequence": ["dec-tut1", "dec-tut2", "dec-tut3"],
     "initial_system_states": [
-      {"system_id": "nav_radar", "operational_state": "green", "power_state": true},
-      {"system_id": "comms", "operational_state": "green", "power_state": true},
-      {"system_id": "aaw_radar", "operational_state": "green", "power_state": true}
+      {"system_id": "nav_radar", "label": "NAV RADAR", "operational_state": "green", "power_state": true},
+      {"system_id": "comms", "label": "COMMS", "operational_state": "green", "power_state": true},
+      {"system_id": "aaw_radar", "label": "AAW RADAR", "operational_state": "green", "power_state": true}
     ],
     "rules": [
       "Up to 2 Blue cards per turn. Normally different.",

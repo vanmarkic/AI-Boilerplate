@@ -87,6 +87,7 @@ class SystemStateDef(BaseModel):
     """Initial or expected system state in scenario definition."""
 
     system_id: str
+    label: str = ""
     operational_state: str | None = None  # "green"|"yellow"|"red"
     power_state: bool | None = None
 
