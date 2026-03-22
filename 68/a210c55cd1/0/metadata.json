@@ -1,0 +1,34 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "68a210c55cd1",
+  "session_id": "496a0d33-687e-4dc9-ad60-2281e5030ca3",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-22T23:43:38.555345Z",
+  "branch": "master",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "apps/tfc/frontend/src/app/features/home/sea-backdrop.ts",
+    "apps/tfc/frontend/src/app/features/scenario-builder/scenario-export.ts"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "9c6e7931bc6e",
+  "token_usage": {
+    "input_tokens": 576,
+    "cache_creation_tokens": 844556,
+    "cache_read_tokens": 71232214,
+    "output_tokens": 122601,
+    "api_call_count": 415
+  },
+  "session_metrics": {
+    "turn_count": 58
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T23:43:37.557554Z",
+    "agent_lines": 57,
+    "human_added": 795,
+    "human_modified": 1,
+    "human_removed": 0,
+    "total_committed": 853,
+    "agent_percentage": 6.682297772567409
+  }
+}
