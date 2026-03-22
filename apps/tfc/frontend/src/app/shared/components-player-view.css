@@ -276,32 +276,30 @@
 
   .board-turn-banner {
     display: flex;
-    align-items: baseline;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-lg);
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-lg);
     border-bottom: 1px solid var(--color-border);
-    flex-wrap: wrap;
   }
   .board-turn-banner__turn {
     font-family: var(--font-mono);
-    font-size: var(--font-size-base);
+    font-size: var(--font-size-lg);
     font-weight: 700;
     color: var(--color-accent);
     letter-spacing: 0.05em;
     flex-shrink: 0;
   }
   .board-turn-banner__title {
-    font-size: var(--font-size-base);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
     color: var(--color-foreground);
   }
-  .board-turn-banner__desc {
-    font-family: var(--font-mono);
-    font-size: var(--font-size-sm);
-    color: var(--color-accent);
-    line-height: 1.4;
-  }
   .board-turn-banner__title::after {
-    content: " — ";
+    content: none;
+  }
+  .board-turn-banner__desc {
+    display: none;
   }
 
   .board-grid {
@@ -309,6 +307,111 @@
     flex-wrap: wrap;
     gap: var(--spacing-md);
     padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  /* ── Board Columns (3-column fixed layout) ─────────── */
+
+  .board-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    flex: 1;
+    min-height: 0;
+    transition: grid-template-columns 200ms ease;
+  }
+
+  /* Focus mode — expand one column, shrink others */
+  .board-columns[data-focus="0"] { grid-template-columns: 2fr 0.5fr 0.5fr; }
+  .board-columns[data-focus="1"] { grid-template-columns: 0.5fr 2fr 0.5fr; }
+  .board-columns[data-focus="2"] { grid-template-columns: 0.5fr 0.5fr 2fr; }
+
+  /* ── Board Column (single role column) ──────────────── */
+
+  .board-column {
+    display: grid;
+    grid-template-rows: auto 2fr 3fr;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 2px;
+    background: var(--color-card);
+  }
+
+  .board-column__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .board-column__header:hover {
+    background: var(--color-secondary);
+  }
+
+  .board-column__role-id {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+    color: var(--color-primary);
+  }
+
+  .board-column__role-label {
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    font-style: italic;
+  }
+
+  .board-column__intel {
+    overflow-y: auto;
+    padding: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .board-column__decision {
+    overflow-y: auto;
+    padding: var(--spacing-md);
+  }
+
+  /* Empty state text for zones */
+  .board-column__empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--color-muted-foreground);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* Shrunk column in focus mode — hide role label, truncate intel */
+  .board-columns[data-focus] .board-column .board-column__role-label {
+    display: none;
+  }
+
+  .board-columns[data-focus="0"] .board-column:nth-child(1) .board-column__role-label,
+  .board-columns[data-focus="1"] .board-column:nth-child(2) .board-column__role-label,
+  .board-columns[data-focus="2"] .board-column:nth-child(3) .board-column__role-label {
+    display: block;
+  }
+
+  .board-columns[data-focus] .board-column .board-column__intel {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* Restore scroll on the focused column */
+  .board-columns[data-focus="0"] .board-column:nth-child(1) .board-column__intel,
+  .board-columns[data-focus="1"] .board-column:nth-child(2) .board-column__intel,
+  .board-columns[data-focus="2"] .board-column:nth-child(3) .board-column__intel {
+    overflow-y: auto;
+    white-space: normal;
   }
 
   /* ── Role Card ─────────────────────────────────────── */
