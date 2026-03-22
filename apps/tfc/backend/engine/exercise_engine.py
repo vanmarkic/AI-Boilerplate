@@ -174,6 +174,135 @@ class ExerciseEngine:
         self._time.factor = factor
         return {"type": "speed_change", "factor": factor}
 
+    # ── Canonical decision close ─────────────────────────────────────────
+
+    async def close_decision(
+        self,
+        decision_id: str,
+        selected_option_ids: list[str],
+    ) -> list[StateChange]:
+        """Single canonical path for closing a decision.
+
+        Handles: validate → close → score → resolve forced cards →
+        record plays → system effects → advance turn → auto-complete.
+
+        Raises ValueError if decision missing/closed or max_selections violated.
+        """
+        pt = self._time.play_time_ms
+
+        decision = self._decisions.get_decision(decision_id)
+        if decision is None or decision.status != "open":
+            raise ValueError(f"Decision {decision_id} not found or already closed")
+
+        template = self.find_decision_template(decision_id)
+
+        # Validate max_selections
+        if template and template.max_selections is not None:
+            if len(selected_option_ids) > template.max_selections:
+                raise ValueError(
+                    f"Decision {decision_id} allows at most "
+                    f"{template.max_selections} selections, "
+                    f"got {len(selected_option_ids)}"
+                )
+
+        # 1. Close
+        close_change = self._decisions.close_decision(
+            decision_id, current_pt_ms=pt, selected_option_ids=selected_option_ids,
+        )
+        if not close_change:
+            raise ValueError(f"Decision {decision_id} not found or already closed")
+        changes: list[StateChange] = [close_change]
+
+        # 2. Score (forced cards handled inside game mode)
+        selected_opts = [o for o in decision.options if o["id"] in selected_option_ids]
+        forced_ids = template.forced_option_ids if template else []
+        score_changes = self._config.game_mode.on_decision_closed_v2(
+            decision_id,
+            selected_opts,
+            decision.options,
+            forced_option_ids=forced_ids or None,
+            turn_stress_delta=template.stress_delta if template else 0,
+        )
+        changes.extend(score_changes)
+
+        # 3. Resolve effective options (selected + auto-added forced cards)
+        effective_opts = self._resolve_effective_options(
+            selected_opts, decision.options, forced_ids,
+        )
+
+        # 4. Record plays + system effects on effective options
+        self.record_option_plays(effective_opts)
+        changes.extend(self._apply_system_effects(effective_opts))
+
+        # 5. Advance to next turn (or auto-complete if exhausted)
+        advance = await self._advance_to_next_turn(decision_id, pt)
+        changes.extend(advance)
+
+        # 6. Auto-resume for GM mode
+        if self._config.game_mode.requires_gm():
+            if not self._decisions.get_open_decisions():
+                changes.append(await self.resume())
+
+        return changes
+
+    def _resolve_effective_options(
+        self,
+        selected: list[DecisionOptionSnapshot],
+        all_options: list[DecisionOptionSnapshot],
+        forced_ids: list[str],
+    ) -> list[DecisionOptionSnapshot]:
+        """Return selected + auto-added forced card options."""
+        selected_ids = {o["id"] for o in selected}
+        effective = list(selected)
+        for fid in forced_ids or []:
+            if fid not in selected_ids:
+                forced_opt = next((o for o in all_options if o["id"] == fid), None)
+                if forced_opt is not None:
+                    effective.append(forced_opt)
+        return effective
+
+    async def _advance_to_next_turn(
+        self, closed_decision_id: str, pt: float,
+    ) -> list[StateChange]:
+        """Advance to next decision in sequence, or auto-complete if exhausted."""
+        advance = self.force_trigger_next_decision(pt, closed_decision_id)
+        if advance:
+            return advance
+        # Sequence exhausted — auto-complete if still running
+        if (
+            self._config.game_mode.get_next_decision_id(closed_decision_id) is None
+            and self._phase == EnginePhase.RUNNING
+        ):
+            try:
+                return [await self.complete()]
+            except EngineStateError:
+                pass  # Another path already completed
+        return []
+
+    # ── Canonical event trigger ────────────────────────────────────────
+
+    def trigger_event(self, event_id: str) -> list[StateChange]:
+        """Single canonical path for triggering an event.
+
+        Handles: force-trigger → event system effects → open decision (if applicable).
+
+        Raises ValueError if event missing or not triggerable.
+        """
+        pt = self._time.play_time_ms
+        event = self._events.events.get(event_id)
+        if not event:
+            raise ValueError(f"Event {event_id} not found")
+        event_change = self._events.force_trigger(event_id, pt)
+        if not event_change:
+            raise ValueError(f"Event {event_id} not triggerable")
+        changes: list[StateChange] = [event_change]
+        # Apply system effects
+        if event.system_effects:
+            changes.extend(self._apply_event_system_effects(event.system_effects))
+        # Open decision if applicable
+        changes.extend(self._handle_decision_events([event_change], pt))
+        return changes
+
     async def tick(self) -> list[StateChange]:
         """Advance time, check triggers, return state changes."""
         changes: list[StateChange] = []
@@ -325,69 +454,36 @@ class ExerciseEngine:
             self._timeout_task.cancel()
             self._timeout_task = None
 
+    def _is_timed_out(self, decision: object) -> bool:
+        """Check if a decision has exceeded its wall-clock timeout."""
+        now_ms = _time_mod.monotonic() * 1000
+        return (
+            decision.timeout_ms > 0
+            and (now_ms - decision.opened_at_rt_ms) >= decision.timeout_ms
+        )
+
+    def _select_timeout_option(self, decision: object) -> str | None:
+        """Pick the auto-submit option for a timed-out decision."""
+        available = [o for o in decision.options if not self.is_option_exhausted(o)]
+        return self._config.game_mode.on_decision_timeout(
+            decision.id,
+            available or decision.options,
+        )
+
     async def _timeout_loop(self) -> None:
         """Monitor open decisions for wall-clock timeout expiry."""
         try:
             while self._decisions.get_open_decisions():
                 await asyncio.sleep(0.5)
-                now_ms = _time_mod.monotonic() * 1000
-                pt = self._time.play_time_ms
-                all_changes: list[StateChange] = []
                 for d in list(self._decisions.get_open_decisions()):
-                    if d.timeout_ms <= 0:
+                    if not self._is_timed_out(d):
                         continue
-                    if (now_ms - d.opened_at_rt_ms) < d.timeout_ms:
-                        continue
-                    # Filter out exhausted options before auto-selection
-                    available_options = [
-                        o for o in d.options if not self.is_option_exhausted(o)
-                    ]
-                    # Auto-submit worst option via game mode
-                    auto_id = self._config.game_mode.on_decision_timeout(
-                        d.id,
-                        available_options or d.options,
-                    )
-                    selected_ids = [auto_id] if auto_id else []
-                    close_change = self._decisions.close_decision(
-                        d.id,
-                        current_pt_ms=pt,
-                        selected_option_ids=selected_ids,
-                    )
-                    if close_change:
-                        all_changes.append(close_change)
-                    # Apply scoring via v2
-                    selected_opts = [o for o in d.options if o["id"] in selected_ids]
-                    template = self.find_decision_template(d.id)
-                    forced_ids = template.forced_option_ids if template else []
-                    extra = self._config.game_mode.on_decision_closed_v2(
-                        d.id,
-                        selected_opts,
-                        d.options,
-                        forced_option_ids=forced_ids or None,
-                        turn_stress_delta=template.stress_delta if template else 0,
-                    )
-                    all_changes.extend(extra)
-                    # Record plays and apply system effects
-                    self.record_option_plays(selected_opts)
-                    all_changes.extend(self._apply_system_effects(selected_opts))
-                    # Advance to next turn
-                    advance = self.force_trigger_next_decision(pt, d.id)
-                    all_changes.extend(advance)
-                    # Auto-complete if sequence exhausted
-                    if (
-                        not advance
-                        and self._config.game_mode.get_next_decision_id(d.id) is None
-                        and self._phase == EnginePhase.RUNNING
-                    ):
-                        try:
-                            all_changes.append(await self.complete())
-                        except EngineStateError:
-                            pass  # Another path already completed
-                if all_changes and self._on_state_change:
-                    await self._on_state_change(all_changes)
+                    auto_id = self._select_timeout_option(d)
+                    selected = [auto_id] if auto_id else []
+                    changes = await self.close_decision(d.id, selected)
+                    if changes and self._on_state_change:
+                        await self._on_state_change(changes)
                 if not self._decisions.get_open_decisions():
-                    if self._config.game_mode.requires_gm():
-                        await self.resume()
                     break
         except asyncio.CancelledError:
             pass
