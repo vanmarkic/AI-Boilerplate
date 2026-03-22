@@ -363,6 +363,7 @@ def build_engine_config(
         rules=list(content.rules),
         roles=[RoleInfo(id=r.id, label=r.label, player_type=r.player_type) for r in content.roles],
         score_tier_thresholds=dict(content.score_tier_thresholds),
+        stress_effect_preset=content.stress_effect_preset,
     )
     mode_config = dict(content.game_mode_config)
     if content.decision_sequence:
