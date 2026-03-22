@@ -11,12 +11,14 @@ import {
 import { UpperCasePipe } from "@angular/common";
 import { BadgeComponent, ButtonDirective } from "@aspect/ui";
 import type { DecisionOption } from "../../core/decision-api.service";
+import type { SystemSnapshot } from "../../core/generated/state-changes.types";
 import { extractRecRoleId, type RoleCard } from "./role-card.types";
 
 export interface RoleCardSubmission {
   roleId: string;
   selectedOptions: string[];
   freeText: string;
+  targetSystemSelections: Record<string, string>;
 }
 
 @Component({
@@ -93,6 +95,18 @@ export interface RoleCardSubmission {
                   (change)="toggleOption(option)"
                 />
                 <span>{{ option.label }}</span>
+                @if (option.targets_system && isSelected(option.id)) {
+                  <select
+                    class="role-card__system-picker"
+                    [value]="targetSystemSelections()[option.id] || ''"
+                    (change)="onSystemSelect(option.id, $event)"
+                  >
+                    <option value="">Select system...</option>
+                    @for (sys of systems(); track sys.system_id) {
+                      <option [value]="sys.system_id">{{ sys.label }}</option>
+                    }
+                  </select>
+                }
               </label>
             }
           }
@@ -127,16 +141,19 @@ export interface RoleCardSubmission {
 })
 export class RoleCardComponent {
   readonly card = input.required<RoleCard>();
+  readonly systems = input<SystemSnapshot[]>([]);
   readonly submitted = output<RoleCardSubmission>();
 
   readonly selectedOptions = signal<string[]>([]);
   readonly freeText = signal("");
+  readonly targetSystemSelections = signal<Record<string, string>>({});
 
   private readonly resetOnCardChange = effect(() => {
     this.card();
     untracked(() => {
       this.selectedOptions.set([]);
       this.freeText.set("");
+      this.targetSystemSelections.set({});
     });
   });
 
@@ -183,7 +200,15 @@ export class RoleCardComponent {
     if (this.questionType() === "free_text") {
       return this.freeText().trim().length > 0;
     }
-    return this.selectedOptions().length > 0;
+    if (this.selectedOptions().length === 0) return false;
+    const opts = this.filteredOptions();
+    for (const optId of this.selectedOptions()) {
+      const opt = opts.find((o) => o.id === optId);
+      if (opt?.targets_system && !this.targetSystemSelections()[optId]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   protected toggleOption(option: DecisionOption): void {
@@ -199,6 +224,15 @@ export class RoleCardComponent {
     }
   }
 
+  protected onSystemSelect(optionId: string, event: Event): void {
+    const select = event.target;
+    if (!(select instanceof HTMLSelectElement)) return;
+    this.targetSystemSelections.update((prev) => ({
+      ...prev,
+      [optionId]: select.value,
+    }));
+  }
+
   protected onTextInput(event: Event): void {
     if (!(event.target instanceof HTMLTextAreaElement)) return;
     const textarea = event.target;
@@ -210,6 +244,7 @@ export class RoleCardComponent {
       roleId: this.card().roleId,
       selectedOptions: this.selectedOptions(),
       freeText: this.freeText(),
+      targetSystemSelections: this.targetSystemSelections(),
     });
   }
 }
