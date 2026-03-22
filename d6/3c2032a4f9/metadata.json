@@ -3,7 +3,7 @@
   "checkpoint_id": "d63c2032a4f9",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 10,
+  "checkpoints_count": 14,
   "files_touched": [
     "apps/tfc/frontend/src/app/core/domain-config-api.service.ts"
   ],
@@ -13,13 +13,19 @@
       "transcript": "/d6/3c2032a4f9/0/full.jsonl",
       "content_hash": "/d6/3c2032a4f9/0/content_hash.txt",
       "prompt": "/d6/3c2032a4f9/0/prompt.txt"
+    },
+    {
+      "metadata": "/d6/3c2032a4f9/1/metadata.json",
+      "transcript": "/d6/3c2032a4f9/1/full.jsonl",
+      "content_hash": "/d6/3c2032a4f9/1/content_hash.txt",
+      "prompt": "/d6/3c2032a4f9/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 180,
-    "cache_creation_tokens": 102330,
-    "cache_read_tokens": 8967718,
-    "output_tokens": 34505,
-    "api_call_count": 129
+    "input_tokens": 330,
+    "cache_creation_tokens": 417284,
+    "cache_read_tokens": 19035583,
+    "output_tokens": 88929,
+    "api_call_count": 211
   }
 }
