@@ -308,6 +308,12 @@ export const ScenarioBuilderStore = signalStore(
       });
     },
 
+    setStressEffectPreset(stress_effect_preset: 'off' | 'mild' | 'standard' | 'intense'): void {
+      patchState(store, {
+        content: { ...store.content(), stress_effect_preset },
+      });
+    },
+
     setScoreTierThresholds(score_tier_thresholds: Record<string, number>): void {
       patchState(store, {
         content: { ...store.content(), score_tier_thresholds },
