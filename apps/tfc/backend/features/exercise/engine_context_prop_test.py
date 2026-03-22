@@ -14,7 +14,7 @@ from hypothesis import strategies as st
 
 from engine.engine_config import RoleInfo, ScenarioContext
 
-REQUIRED_CONTEXT_KEYS = {"title", "description", "briefing", "objectives", "rules", "roles"}
+REQUIRED_CONTEXT_KEYS = {"title", "description", "briefing", "objectives", "rules", "roles", "stress_effect_preset"}
 
 
 @st.composite
@@ -40,6 +40,7 @@ def scenario_contexts(draw: st.DrawFn) -> ScenarioContext:
         objectives=draw(st.lists(st.text(min_size=1, max_size=50), max_size=5)),
         rules=draw(st.lists(st.text(min_size=1, max_size=50), max_size=5)),
         roles=roles,
+        stress_effect_preset=draw(st.sampled_from(["off", "mild", "standard", "intense"])),
     )
 
 
@@ -53,6 +54,7 @@ def build_context_response(ctx: ScenarioContext, time_factor: float = 1.0) -> di
         "rules": ctx.rules,
         "roles": [{"id": r.id, "label": r.label, "player_type": r.player_type} for r in ctx.roles],
         "default_time_factor": time_factor,
+        "stress_effect_preset": ctx.stress_effect_preset,
     }
 
 
