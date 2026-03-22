@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  OnDestroy,
   OnInit,
   signal,
 } from "@angular/core";
@@ -16,6 +17,7 @@ import {
   DomainConfigApiService,
   type DomainConfigResponse,
 } from "../../core/domain-config-api.service";
+import { StressOverlayComponent } from "../../shared/stress-overlay.component";
 import { ScenarioBuilderStore } from "./scenario-builder.store";
 import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-editor";
 
@@ -28,6 +30,7 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
     CollapsiblePanelComponent,
     RouterLink,
     ScenarioInitialStatesEditorComponent,
+    StressOverlayComponent,
   ],
   template: `
     <!-- Section 1: Foundation Summary -->
@@ -184,6 +187,34 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
               style="width: 5rem" [value]="store.content().default_time_factor"
               (change)="onTimeFactorChange($event)" />
           </div>
+
+          <!-- Stress Effect Preset -->
+          <div class="flex flex-col gap-xs">
+            <span class="text-sm font-medium">Stress Effect</span>
+            <p class="text-xs text-muted-foreground">
+              Visual overlay intensity when stress approaches 10
+            </p>
+            <div class="flex gap-sm">
+              @for (opt of stressPresetOptions; track opt.value) {
+                <button uiButton size="sm"
+                  [variant]="stressEffectPreset() === opt.value ? 'default' : 'outline'"
+                  (click)="store.setStressEffectPreset(opt.value)">
+                  {{ opt.label }}
+                </button>
+              }
+            </div>
+            <button uiButton variant="outline" size="sm"
+              [disabled]="stressEffectPreset() === 'off' || previewing()"
+              (click)="startPreview()">
+              {{ previewing() ? 'Previewing...' : 'Preview' }}
+            </button>
+            @if (previewing()) {
+              <tfc-stress-overlay
+                [stress]="previewStress()"
+                [preset]="stressEffectPreset()"
+              />
+            }
+          </div>
         </div>
       </ui-card>
     </section>
@@ -194,7 +225,7 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
     </section>
   `,
 })
-export class ScenarioSetupTabComponent implements OnInit {
+export class ScenarioSetupTabComponent implements OnInit, OnDestroy {
   protected readonly store = inject(ScenarioBuilderStore);
   private readonly domainConfigApi = inject(DomainConfigApiService);
 
@@ -215,6 +246,21 @@ export class ScenarioSetupTabComponent implements OnInit {
   protected readonly thresholdMid = computed(
     () => this.store.content().score_tier_thresholds?.["mid"] ?? 0,
   );
+
+  protected readonly stressEffectPreset = computed(
+    () => this.store.content().stress_effect_preset ?? 'standard',
+  );
+
+  protected readonly stressPresetOptions = [
+    { value: 'off' as const, label: 'Off' },
+    { value: 'mild' as const, label: 'Mild' },
+    { value: 'standard' as const, label: 'Standard' },
+    { value: 'intense' as const, label: 'Intense' },
+  ];
+
+  protected readonly previewStress = signal(0);
+  protected readonly previewing = signal(false);
+  private previewTimer: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
     this.domainConfigApi.getBySlug("silent-wake").subscribe({
@@ -284,5 +330,33 @@ export class ScenarioSetupTabComponent implements OnInit {
     if (!(target instanceof HTMLInputElement)) return;
     const val = parseFloat(target.value);
     if (val > 0) this.store.setTimeFactor(val);
+  }
+
+  protected startPreview(): void {
+    if (this.previewing()) return;
+    this.previewing.set(true);
+    this.previewStress.set(0);
+    const steps = 50;
+    let step = 0;
+    this.previewTimer = setInterval(() => {
+      step++;
+      this.previewStress.set((step / steps) * 10);
+      if (step >= steps) {
+        this.stopPreview();
+      }
+    }, 100);
+  }
+
+  private stopPreview(): void {
+    if (this.previewTimer) {
+      clearInterval(this.previewTimer);
+      this.previewTimer = null;
+    }
+    this.previewing.set(false);
+    this.previewStress.set(0);
+  }
+
+  ngOnDestroy(): void {
+    this.stopPreview();
   }
 }
