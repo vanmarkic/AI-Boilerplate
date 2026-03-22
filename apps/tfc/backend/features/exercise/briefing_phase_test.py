@@ -26,7 +26,7 @@ def _config(
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)
@@ -209,9 +209,7 @@ class TestBriefingPhaseHTTP:
         assert resp.status_code == 404
 
     @pytest.mark.asyncio
-    async def test_snapshot_shows_briefing_after_start(
-        self, client: AsyncClient
-    ) -> None:
+    async def test_snapshot_shows_briefing_after_start(self, client: AsyncClient) -> None:
         """GET /engine/snapshot after start should show phase=briefing."""
         eid = await _create_exercise_with_scenario(client)
         await client.post(f"/api/exercises/{eid}/engine/start")

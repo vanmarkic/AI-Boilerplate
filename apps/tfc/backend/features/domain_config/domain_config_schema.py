@@ -75,6 +75,6 @@ class DomainConfigResponse(ResponseBase):
     theme: ThemePayload
     roles: list[RolePayload]
     severity_levels: list[SeverityLevelPayload]
-    systems: list[SystemDefPayload] = []
+    systems: list[SystemDefPayload] = []  # noqa: RUF012
     created_at: datetime
     updated_at: datetime

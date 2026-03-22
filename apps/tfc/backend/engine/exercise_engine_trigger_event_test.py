@@ -17,8 +17,14 @@ from engine.system_manager import SystemState
 
 def _option(id: str, *, score: float = 0.0) -> DecisionOptionSnapshot:
     return DecisionOptionSnapshot(
-        id=id, label=f"Option {id}", score=score, stress_delta=0,
-        system_effects=[], targets_system=False, max_plays=0, role=None,
+        id=id,
+        label=f"Option {id}",
+        score=score,
+        stress_delta=0,
+        system_effects=[],
+        targets_system=False,
+        max_plays=0,
+        role=None,
     )
 
 
@@ -28,11 +34,16 @@ class TestTriggerEventBasic:
     @pytest.mark.asyncio
     async def test_returns_event_change(self) -> None:
         evt = ScheduledEvent(
-            id="e1", title="Info Event", description="",
-            event_type=EventType.INFORMATIONAL, scheduled_pt_ms=999_999,
+            id="e1",
+            title="Info Event",
+            description="",
+            event_type=EventType.INFORMATIONAL,
+            scheduled_pt_ms=999_999,
         )
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[evt],
+            exercise_id=1,
+            title="Test",
+            events=[evt],
             context=ScenarioContext(),
         )
         engine = ExerciseEngine(config)
@@ -48,12 +59,14 @@ class TestTriggerEventBasic:
     @pytest.mark.asyncio
     async def test_raises_on_unknown_event(self) -> None:
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[],
+            exercise_id=1,
+            title="Test",
+            events=[],
             context=ScenarioContext(),
         )
         engine = ExerciseEngine(config)
 
-        with pytest.raises(ValueError):
+        with pytest.raises(ValueError, match="nonexistent"):
             engine.trigger_event("nonexistent")
 
 
@@ -63,12 +76,17 @@ class TestTriggerEventSystemEffects:
     @pytest.mark.asyncio
     async def test_applies_event_system_effects(self) -> None:
         evt = ScheduledEvent(
-            id="e1", title="Degrade COMMS", description="",
-            event_type=EventType.INFORMATIONAL, scheduled_pt_ms=999_999,
+            id="e1",
+            title="Degrade COMMS",
+            description="",
+            event_type=EventType.INFORMATIONAL,
+            scheduled_pt_ms=999_999,
             system_effects=[
                 SystemEffect(
-                    system_id="comms", power_state=None,
-                    operational_state="yellow", set_all_power=False,
+                    system_id="comms",
+                    power_state=None,
+                    operational_state="yellow",
+                    set_all_power=False,
                 ),
             ],
         )
@@ -76,8 +94,11 @@ class TestTriggerEventSystemEffects:
             SystemState(system_id="comms", label="COMMS", power=True, operational="green"),
         ]
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[evt],
-            context=ScenarioContext(), initial_system_states=systems,
+            exercise_id=1,
+            title="Test",
+            events=[evt],
+            context=ScenarioContext(),
+            initial_system_states=systems,
         )
         engine = ExerciseEngine(config)
         await engine.start()
@@ -98,19 +119,29 @@ class TestTriggerEventDecision:
         from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 
         evt = ScheduledEvent(
-            id="d1", title="Decision Event", description="",
-            event_type=EventType.DECISION, scheduled_pt_ms=999_999,
+            id="d1",
+            title="Decision Event",
+            description="",
+            event_type=EventType.DECISION,
+            scheduled_pt_ms=999_999,
         )
         dt = DecisionTemplate(
-            id="d1", title="Pick", description="", issue_id="i1",
+            id="d1",
+            title="Pick",
+            description="",
+            issue_id="i1",
             question_type="single_choice",
             options=[_option("a", score=10.0)],
-            completion_mode="consensus", target_roles=["co"],
+            completion_mode="consensus",
+            target_roles=["co"],
         )
         mode = SimpleCollaborativeMode(decision_sequence=["d1"])
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[evt],
-            decision_templates=[dt], context=ScenarioContext(),
+            exercise_id=1,
+            title="Test",
+            events=[evt],
+            decision_templates=[dt],
+            context=ScenarioContext(),
             game_mode=mode,
         )
         engine = ExerciseEngine(config)

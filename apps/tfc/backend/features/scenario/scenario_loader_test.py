@@ -277,7 +277,10 @@ def test_max_possible_score_multi_choice_unlimited() -> None:
 def test_max_possible_score_multiple_decisions() -> None:
     """Sum across multiple decisions in sequence."""
     dt1 = DecisionTemplateDef(
-        id="dt1", title="T1", description="", issue_id="",
+        id="dt1",
+        title="T1",
+        description="",
+        issue_id="",
         question_type="single_choice",
         options=[
             DecisionOptionDef(id="a", label="A", score=10.0),
@@ -286,7 +289,10 @@ def test_max_possible_score_multiple_decisions() -> None:
         completion_mode="first_response",
     )
     dt2 = DecisionTemplateDef(
-        id="dt2", title="T2", description="", issue_id="",
+        id="dt2",
+        title="T2",
+        description="",
+        issue_id="",
         question_type="multi_choice",
         options=[
             DecisionOptionDef(id="c", label="C", score=20.0),
@@ -306,13 +312,19 @@ def test_max_possible_score_multiple_decisions() -> None:
 def test_max_possible_score_ignores_non_sequenced_templates() -> None:
     """Templates not in decision_sequence are excluded."""
     dt1 = DecisionTemplateDef(
-        id="dt1", title="T1", description="", issue_id="",
+        id="dt1",
+        title="T1",
+        description="",
+        issue_id="",
         question_type="single_choice",
         options=[DecisionOptionDef(id="a", label="A", score=10.0)],
         completion_mode="first_response",
     )
     dt_extra = DecisionTemplateDef(
-        id="dt-extra", title="Extra", description="", issue_id="",
+        id="dt-extra",
+        title="Extra",
+        description="",
+        issue_id="",
         question_type="single_choice",
         options=[DecisionOptionDef(id="x", label="X", score=99.0)],
         completion_mode="first_response",

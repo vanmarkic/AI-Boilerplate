@@ -152,7 +152,9 @@ class TestEventSystemEffects:
         systems = [SystemState(system_id="comms", label="COMMS", power=True, operational="green")]
         # Only need one event with system_effects — test force_trigger directly
         evt = ScheduledEvent(
-            id="evt-t2", title="Turn 2", description="Comms degrade",
+            id="evt-t2",
+            title="Turn 2",
+            description="Comms degrade",
             event_type=EventType.INFORMATIONAL,  # non-decision to avoid timeout monitor
             scheduled_pt_ms=300000.0,
             system_effects=[

@@ -41,7 +41,9 @@ class EngineDecisionService:
                 )
 
         try:
-            changes = await engine.close_decision(decision_id, selected_option_ids, target_system_selections)
+            changes = await engine.close_decision(
+                decision_id, selected_option_ids, target_system_selections
+            )
         except ValueError as exc:
             msg = str(exc)
             if "not found" in msg or "already closed" in msg:

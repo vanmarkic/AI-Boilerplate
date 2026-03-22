@@ -12,13 +12,35 @@ def test_should_pause_on_decision() -> None:
 
 def test_on_decision_timeout_returns_none() -> None:
     mode = ClassicMode()
-    options = [{"id": "o1", "label": "Yes", "score": 1.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}]
+    options = [
+        {
+            "id": "o1",
+            "label": "Yes",
+            "score": 1.0,
+            "stress_delta": 0,
+            "system_effects": [],
+            "targets_system": False,
+            "max_plays": 1,
+            "role": None,
+        }
+    ]
     assert mode.on_decision_timeout("d1", options) is None
 
 
 def test_on_decision_closed_v2_returns_empty() -> None:
     mode = ClassicMode()
-    opts = [{"id": "o1", "label": "Yes", "score": 1.0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}]
+    opts = [
+        {
+            "id": "o1",
+            "label": "Yes",
+            "score": 1.0,
+            "stress_delta": 0,
+            "system_effects": [],
+            "targets_system": False,
+            "max_plays": 1,
+            "role": None,
+        }
+    ]
     assert mode.on_decision_closed_v2("d1", opts, opts) == []
 
 
