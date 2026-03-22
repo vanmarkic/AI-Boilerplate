@@ -190,6 +190,7 @@ class ExerciseEngine:
         self,
         decision_id: str,
         selected_option_ids: list[str],
+        target_system_selections: dict[str, str] | None = None,
     ) -> list[StateChange]:
         """Single canonical path for closing a decision.
 
@@ -242,7 +243,7 @@ class ExerciseEngine:
 
         # 4. Record plays + system effects on effective options
         self.record_option_plays(effective_opts)
-        changes.extend(self._apply_system_effects(effective_opts))
+        changes.extend(self._apply_system_effects(effective_opts, target_system_selections))
 
         # 5. Advance to next turn (or auto-complete if exhausted)
         advance = await self._advance_to_next_turn(decision_id, pt)
@@ -508,12 +509,32 @@ class ExerciseEngine:
             pass
 
     def _apply_system_effects(
-        self, selected_options: list[DecisionOptionSnapshot],
+        self,
+        selected_options: list[DecisionOptionSnapshot],
+        target_system_selections: dict[str, str] | None = None,
     ) -> list[SystemStateChange]:
         """Apply system_effects from selected decision options via SystemManager."""
         out: list[SystemStateChange] = []
         for opt in selected_options:
-            out.extend(self._apply_effects_list(opt["system_effects"]))
+            effects = opt["system_effects"]
+            if opt["targets_system"]:
+                sel = (target_system_selections or {}).get(opt["id"])
+                if sel is None:
+                    raise ValueError(
+                        f"Option {opt['id']} requires a target system selection"
+                    )
+                if sel not in self._systems.systems:
+                    raise ValueError(f"Target system '{sel}' not found")
+                effects = [
+                    SystemEffect(
+                        system_id=sel,
+                        operational_state=fx["operational_state"],
+                        power_state=fx["power_state"],
+                        set_all_power=fx["set_all_power"],
+                    )
+                    for fx in effects
+                ]
+            out.extend(self._apply_effects_list(effects))
         return out
 
     def _apply_event_system_effects(
