@@ -36,7 +36,7 @@
 
     <div class="board-grid">
       @for (card of roleCards(); track card.roleId) {
-      <tfc-role-card [card]="card" (submitted)="onRoleCardSubmitted($event)" />
+      <tfc-role-card [card]="card" [systems]="store.systems()" (submitted)="onRoleCardSubmitted($event)" />
       }
     </div>
   </main>
