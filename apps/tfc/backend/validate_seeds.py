@@ -20,7 +20,9 @@ SEEDS_DIR = Path(__file__).parent / "seeds"
 def validate_all_seeds() -> list[str]:
     """Return a list of error messages (empty = all valid)."""
     errors: list[str] = []
-    seed_files = sorted(SEEDS_DIR.glob("*.json"))
+    all_json = set(SEEDS_DIR.glob("*.json"))
+    dc_files = set(SEEDS_DIR.glob("*_domain_config.json"))
+    seed_files = sorted(all_json - dc_files)
     if not seed_files:
         return errors
 

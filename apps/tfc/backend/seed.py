@@ -150,10 +150,14 @@ async def seed_scenarios() -> None:
             logger.info("Seeded scenario '%s' from %s", title, path.name)
 
 
+async def _run_all() -> None:
+    await seed_domain_configs()
+    await seed_scenarios()
+
+
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(message)s")
-    asyncio.run(seed_domain_configs())
-    asyncio.run(seed_scenarios())
+    asyncio.run(_run_all())
 
 
 if __name__ == "__main__":
