@@ -3,7 +3,7 @@
   "checkpoint_id": "a65904be437c",
   "strategy": "manual-commit",
   "branch": "refactor/canonicalization-round-2",
-  "checkpoints_count": 0,
+  "checkpoints_count": 1,
   "files_touched": [
     "apps/tfc/backend/features/exercise/engine_router.py",
     "apps/tfc/backend/features/exercise/exercise_session_service.py"
@@ -14,13 +14,19 @@
       "transcript": "/a6/5904be437c/0/full.jsonl",
       "content_hash": "/a6/5904be437c/0/content_hash.txt",
       "prompt": "/a6/5904be437c/0/prompt.txt"
+    },
+    {
+      "metadata": "/a6/5904be437c/1/metadata.json",
+      "transcript": "/a6/5904be437c/1/full.jsonl",
+      "content_hash": "/a6/5904be437c/1/content_hash.txt",
+      "prompt": "/a6/5904be437c/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 9,
-    "cache_creation_tokens": 60960,
-    "cache_read_tokens": 122473,
-    "output_tokens": 987,
-    "api_call_count": 6
+    "input_tokens": 6086,
+    "cache_creation_tokens": 420049,
+    "cache_read_tokens": 63527510,
+    "output_tokens": 92981,
+    "api_call_count": 360
   }
 }
