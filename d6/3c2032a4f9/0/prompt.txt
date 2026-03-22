@@ -107,3 +107,7 @@ i want it to follow the line not the intersections
 ---
 
 also toake diagonals
+
+---
+
+can you add  a travelling glowing light that leaves the reminiscence
