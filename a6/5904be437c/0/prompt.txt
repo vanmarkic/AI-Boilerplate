@@ -1,0 +1,21 @@
+<ide_selection>The user selected the lines 1 to 15 from /Users/dragan/.claude/projects/-Users-dragan-Documents-AI-Boilerplate/memory/project_canonicalization_priorities.md:
+---
+name: TFC canonicalization priorities
+description: Ranked list of remaining canonicalization candidates for the TFC engine, agreed 2026-03-22 after completing decision close + event trigger unification
+type: project
+---
+
+Canonical decision close (`engine.close_decision()`) and event trigger (`engine.trigger_event()`) are done (PR #197, merged 2026-03-22).
+
+Remaining candidates, in priority order:
+
+1. **Recommendation submission** — only uncanonical decision-related mutation path. Still inline in `engine_router.py:250`, bypasses `broadcast_changes` and `_log_to_audit`. Best next small cleanup (~15 LOC).
+
+2. **Session start/stop/completion semantics** — `start` (creates engine, wires callbacks, broadcasts participants), `complete` (doesn't tear down, for overlay), `stop` (full teardown via `ExerciseSessionService`). Three different shapes for session lifecycle. Frontend navigation, teardown, and completion semantics cross too many boundaries. Worth watching as the next lifecycle consolidation area.
+
+3. **Frontend completion handling** — completion detectable through two transport shapes (`exercise_stopped` with reason=completed, `phase_change(completed)` in state_changes). Only act if a third completion path appears.
+
+This may or may not be related to the current task.</ide_selection>
+update smoke test tfc skill:
+use plain python for backend, no docker
+use playwright and chrome devtools, one for each player in the 2-player mode
