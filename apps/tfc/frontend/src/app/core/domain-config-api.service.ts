@@ -36,6 +36,26 @@ export interface ThemeConfig {
   density: string;
 }
 
+export interface SystemDef {
+  id: string;
+  label: string;
+  description?: string;
+  category: string;
+}
+
+export interface WarfareDomainDef {
+  id: string;
+  label: string;
+  description?: string;
+}
+
+export interface BlueCardDef {
+  id: string;
+  title: string;
+  description?: string;
+  targets_system: boolean;
+}
+
 export interface DomainConfigResponse {
   id: number;
   slug: string;
@@ -45,6 +65,9 @@ export interface DomainConfigResponse {
   theme: ThemeConfig;
   roles: DomainRole[];
   severity_levels: SeverityLevel[];
+  systems: SystemDef[];
+  warfare_domains: WarfareDomainDef[];
+  blue_card_catalog: BlueCardDef[];
   created_at: string;
   updated_at: string;
 }
