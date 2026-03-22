@@ -10,7 +10,7 @@ import pytest
 
 from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
-from engine.exercise_engine import EnginePhase, EngineStateError, ExerciseEngine
+from engine.exercise_engine import EnginePhase, ExerciseEngine
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.state_changes import DecisionOptionSnapshot, SystemEffect
 from engine.system_manager import SystemState

@@ -14,7 +14,6 @@ from hypothesis import strategies as st
 
 from engine.engine_config import RoleInfo, ScenarioContext
 
-
 REQUIRED_CONTEXT_KEYS = {"title", "description", "briefing", "objectives", "rules", "roles"}
 
 

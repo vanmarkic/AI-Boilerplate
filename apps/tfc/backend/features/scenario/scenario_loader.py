@@ -14,7 +14,6 @@ from engine.exercise_engine import (
     ScenarioContext,
 )
 from engine.game_modes import create_game_mode
-from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.issue_manager import TrackedIssue, TriggerMode
 from engine.state_changes import DecisionOptionSnapshot, DomainEffect, SystemEffect
 from engine.system_manager import SystemState

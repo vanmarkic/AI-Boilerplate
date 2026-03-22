@@ -15,8 +15,7 @@ import asyncio
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from engine.decision_manager import DecisionManager
-from engine.engine_config import DecisionTemplate, EngineConfig, RoleInfo, ScenarioContext
+from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import ExerciseEngine
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode

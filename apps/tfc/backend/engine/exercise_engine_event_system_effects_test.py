@@ -11,7 +11,7 @@ import pytest
 from engine.engine_config import EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import ExerciseEngine
-from engine.state_changes import DecisionOptionSnapshot, SystemEffect
+from engine.state_changes import SystemEffect
 from engine.system_manager import SystemState
 
 

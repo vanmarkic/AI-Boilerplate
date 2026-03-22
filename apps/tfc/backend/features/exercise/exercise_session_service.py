@@ -7,7 +7,6 @@ and session store removal into a single use-case method.
 from __future__ import annotations
 
 import logging
-
 from collections.abc import Awaitable, Callable
 
 from engine.exercise_engine import EnginePhase, EngineStateError
