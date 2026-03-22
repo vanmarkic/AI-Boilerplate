@@ -1,0 +1,28 @@
+do these in sub agents:
+200	Install ruff locally	Tooling
+161	Refactor waiting room double DB query	Tech debt
+
+is 172 going to require rewriting scenario ?
+
+---
+
+<task-notification>
+<task-id>a98f696eaf65fac87</task-id>
+<tool-use-id>toolu_01SD2aZcbFwseSBZAAS65sRs</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a98f696eaf65fac87.output</output-file>
+<status>completed</status>
+<summary>Agent "Refactor waiting room double query #161" completed</summary>
+<result>All 112 waiting room tests pass.
+
+Here is a summary of what was done:
+
+**Problem:** In `join_waiting_room`, the helper `_get_scenario_roles()` called `exercise_service.get_exercise(exercise_id)` to fetch the exercise, and then immediately after, line 77 called `exercise_service.get_exercise(exercise_id)` again to check `practice_mode`. This was a redundant DB query on every join request.
+
+**Fix:** Renamed `_get_scenario_roles` to `_get_exercise_and_scenario_roles` and changed its return type from `list[dict] | None` to `tuple[object, list[dict] | None]`. It now returns both the exercise object and the roles in a single call. The `join_waiting_room` endpoint destructures the tuple as `exercise_obj, roles` and reuses the exercise object directly -- no second query needed. The `update_participant_role` endpoint, which only needs roles, uses `_, roles` to discard the exercise object.
+
+**File changed:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/features/waiting_room/waiting_room_router.py`
+
+**Tests:** All 112 waiting room tests pass with no regressions.</result>
+<usage><total_tokens>25759</total_tokens><tool_uses>12</tool_uses><duration_ms>71428</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a98f696eaf65fac87.output

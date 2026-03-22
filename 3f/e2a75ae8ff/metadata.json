@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "3fe2a75ae8ff",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "apps/tfc/backend/features/waiting_room/waiting_room_router.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/3f/e2a75ae8ff/0/metadata.json",
+      "transcript": "/3f/e2a75ae8ff/0/full.jsonl",
+      "content_hash": "/3f/e2a75ae8ff/0/content_hash.txt",
+      "prompt": "/3f/e2a75ae8ff/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 13,
+    "cache_creation_tokens": 3493,
+    "cache_read_tokens": 510919,
+    "output_tokens": 2049,
+    "api_call_count": 7
+  }
+}
