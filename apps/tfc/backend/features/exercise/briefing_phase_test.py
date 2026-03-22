@@ -8,7 +8,7 @@ import pytest
 from httpx import AsyncClient
 
 from engine.engine_config import EngineConfig, ScenarioContext
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.event_scheduler import ScheduledEvent
 from engine.exercise_engine import EnginePhase, EngineStateError, ExerciseEngine
 from engine.session_store import session_store
 
