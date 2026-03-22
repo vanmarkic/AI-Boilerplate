@@ -5,7 +5,11 @@ import type {
   ScenarioIssueDef,
   DecisionTemplateDef,
   RoleDef,
+  TurnDefinition,
+  TurnInjectDef,
+  TurnCardConfig,
 } from "../../core/scenario-api.service";
+import * as turnMut from "./domain/turn-mutations";
 
 interface ScenarioBuilderState {
   scenarioId: number | null;
@@ -223,6 +227,58 @@ export const ScenarioBuilderStore = signalStore(
           ),
         },
       });
+    },
+
+    addTurn(turn: TurnDefinition): void {
+      patchState(store, { content: turnMut.addTurn(store.content(), turn) });
+    },
+
+    removeTurn(turnIndex: number): void {
+      patchState(store, { content: turnMut.removeTurn(store.content(), turnIndex) });
+    },
+
+    updateTurn(turnIndex: number, updates: Partial<TurnDefinition>): void {
+      patchState(store, { content: turnMut.updateTurn(store.content(), turnIndex, updates) });
+    },
+
+    reorderTurns(fromIndex: number, toIndex: number): void {
+      patchState(store, { content: turnMut.reorderTurns(store.content(), fromIndex, toIndex) });
+    },
+
+    duplicateTurn(turnIndex: number): void {
+      patchState(store, { content: turnMut.duplicateTurn(store.content(), turnIndex) });
+    },
+
+    addInjectToTurn(turnIndex: number, inject: TurnInjectDef): void {
+      patchState(store, { content: turnMut.addInjectToTurn(store.content(), turnIndex, inject) });
+    },
+
+    removeInjectFromTurn(turnIndex: number, injectIndex: number): void {
+      patchState(store, { content: turnMut.removeInjectFromTurn(store.content(), turnIndex, injectIndex) });
+    },
+
+    updateInjectInTurn(
+      turnIndex: number,
+      injectIndex: number,
+      updates: Partial<TurnInjectDef>,
+    ): void {
+      patchState(store, { content: turnMut.updateInjectInTurn(store.content(), turnIndex, injectIndex, updates) });
+    },
+
+    addCardToTurn(turnIndex: number, cardConfig: TurnCardConfig): void {
+      patchState(store, { content: turnMut.addCardToTurn(store.content(), turnIndex, cardConfig) });
+    },
+
+    removeCardFromTurn(turnIndex: number, cardId: string): void {
+      patchState(store, { content: turnMut.removeCardFromTurn(store.content(), turnIndex, cardId) });
+    },
+
+    updateCardInTurn(
+      turnIndex: number,
+      cardId: string,
+      updates: Partial<TurnCardConfig>,
+    ): void {
+      patchState(store, { content: turnMut.updateCardInTurn(store.content(), turnIndex, cardId, updates) });
     },
 
     setBriefing(briefing: string): void {

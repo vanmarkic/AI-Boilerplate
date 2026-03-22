@@ -44,6 +44,9 @@ describe("DomainConfigApiService", () => {
       },
     ],
     severity_levels: [{ id: "low", label: "Low", color: "#22c55e", order: 1 }],
+    systems: [],
+    warfare_domains: [],
+    blue_card_catalog: [],
     created_at: "2026-03-17T00:00:00Z",
     updated_at: "2026-03-17T00:00:00Z",
   };
