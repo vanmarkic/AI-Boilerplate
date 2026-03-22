@@ -70,9 +70,7 @@ import { Subscription } from "rxjs";
   template: `
     @if (!exerciseId()) {
       <div class="flex flex-col gap-lg p-lg">
-        <tfc-exercise-list
-          (exerciseSelected)="onExerciseSelected($event)"
-        />
+        <tfc-exercise-list (exerciseSelected)="onExerciseSelected($event)" />
         <tfc-scenario-picker (scenarioSelected)="onScenarioSelected($event)" />
       </div>
     } @else {
@@ -205,7 +203,14 @@ import { Subscription } from "rxjs";
               Reset
             </button>
           </div>
-          <button class="btn" data-variant="ghost" data-size="sm" (click)="logsOpen.set(true)">Logs</button>
+          <button
+            class="btn"
+            data-variant="ghost"
+            data-size="sm"
+            (click)="logsOpen.set(true)"
+          >
+            Logs
+          </button>
           <div class="exercise-controls__spacer"></div>
           <tfc-speed-display [value]="store.speedFactor()">
             <input
@@ -218,7 +223,11 @@ import { Subscription } from "rxjs";
             />
           </tfc-speed-display>
         </footer>
-      <tfc-logs-drawer [(open)]="logsOpen" [decisions]="store.decisions()" [roles]="store.context()?.roles ?? []" />
+        <tfc-logs-drawer
+          [(open)]="logsOpen"
+          [decisions]="store.decisions()"
+          [roles]="store.context()?.roles ?? []"
+        />
       </div>
     }
   `,
@@ -353,9 +362,7 @@ export class GameMasterView implements OnInit, OnDestroy {
   protected onSpeedChange(e: Event): void {
     const target = e.target;
     if (!(target instanceof HTMLInputElement)) return;
-    this.api
-      .setSpeed(this.exerciseId()!, parseFloat(target.value))
-      .subscribe();
+    this.api.setSpeed(this.exerciseId()!, parseFloat(target.value)).subscribe();
   }
 
   private eid(): number {

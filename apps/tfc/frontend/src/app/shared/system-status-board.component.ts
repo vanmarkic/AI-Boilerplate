@@ -16,7 +16,9 @@ import type { SystemSnapshot } from "../core/generated/state-changes.types";
               [attr.data-operational]="sys.operational"
             >
               <span class="system-chip__label">{{ sys.label }}</span>
-              <span class="system-chip__power">{{ sys.power ? 'ON' : 'OFF' }}</span>
+              <span class="system-chip__power">{{
+                sys.power ? "ON" : "OFF"
+              }}</span>
               <span class="system-chip__traffic">
                 <span class="system-chip__light" data-color="red"></span>
                 <span class="system-chip__light" data-color="yellow"></span>

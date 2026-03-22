@@ -33,7 +33,11 @@ describe("exportScenarioToJson", () => {
 
 describe("parseScenarioImport", () => {
   it("round-trips through export and import", () => {
-    const json = JSON.stringify({ title: "Test", description: "Desc", content: sampleContent }, null, 2);
+    const json = JSON.stringify(
+      { title: "Test", description: "Desc", content: sampleContent },
+      null,
+      2,
+    );
     const result = parseScenarioImport(json);
     expect(result).not.toBeNull();
     expect(result!.title).toBe("Test");

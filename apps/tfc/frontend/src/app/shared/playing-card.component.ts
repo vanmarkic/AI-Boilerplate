@@ -28,11 +28,9 @@ import type { DecisionOption } from "../core/decision-api.service";
       }
       <span class="playing-card__code">{{ option().id }}</span>
       <span class="playing-card__label">{{ option().label }}</span>
-      <span
-        class="playing-card__score"
-        [attr.data-sign]="scoreSign()"
-        >{{ scoreDisplay() }}</span
-      >
+      <span class="playing-card__score" [attr.data-sign]="scoreSign()">{{
+        scoreDisplay()
+      }}</span>
       @if (recommended()) {
         <span class="playing-card__rec-badge">REC</span>
       }

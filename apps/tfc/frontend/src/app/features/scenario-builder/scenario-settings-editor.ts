@@ -1,8 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-} from "@angular/core";
+import { ChangeDetectionStrategy, Component, inject } from "@angular/core";
 import { CardComponent } from "@aspect/ui";
 import { ScenarioBuilderStore } from "./scenario-builder.store";
 

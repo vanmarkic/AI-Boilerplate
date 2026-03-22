@@ -70,9 +70,7 @@ import type { DecisionOption } from "../core/decision-api.service";
       </div>
 
       <div class="decision-panel__actions">
-        <ui-button variant="outline" (clicked)="closed.emit()"
-          >Skip</ui-button
-        >
+        <ui-button variant="outline" (clicked)="closed.emit()">Skip</ui-button>
         <ui-button
           variant="default"
           (clicked)="onSubmit()"

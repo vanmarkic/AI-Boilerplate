@@ -24,15 +24,18 @@ export interface RoleCardSubmission {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [UpperCasePipe, BadgeComponent, ButtonDirective],
   template: `
-    <div class="role-card"
+    <div
+      class="role-card"
       [class.role-card--intel]="card().status === 'intel'"
       [class.role-card--active]="card().status === 'active'"
-      [class.role-card--done]="card().status === 'done'">
-
+      [class.role-card--done]="card().status === 'done'"
+    >
       <!-- Header -->
       <div class="role-card__header">
         <span class="role-card__role-id">{{ card().roleId | uppercase }}</span>
-        <ui-badge [variant]="card().status === 'active' ? 'default' : 'secondary'">
+        <ui-badge
+          [variant]="card().status === 'active' ? 'default' : 'secondary'"
+        >
           {{ badgeLabel() }}
         </ui-badge>
       </div>
@@ -42,7 +45,9 @@ export interface RoleCardSubmission {
       @if (card().intel) {
         <div class="role-card__intel">{{ card().intel }}</div>
       } @else if (card().decision) {
-        <div class="role-card__intel role-card__intel--empty">No role-specific intel this turn</div>
+        <div class="role-card__intel role-card__intel--empty">
+          No role-specific intel this turn
+        </div>
       }
 
       <!-- Advisor Recs (CO card only) -->
@@ -50,10 +55,15 @@ export interface RoleCardSubmission {
         <div class="role-card__recs">
           <div class="role-card__recs-title">Advisor Recommendations</div>
           @for (rec of card().advisorRecs; track rec.roleId) {
-            <div class="role-card__rec" [class.role-card__rec--pending]="!rec.selection">
+            <div
+              class="role-card__rec"
+              [class.role-card__rec--pending]="!rec.selection"
+            >
               <span class="role-card__rec-role">{{ rec.roleLabel }}:</span>
               @if (rec.selection) {
-                <span class="role-card__rec-selection">{{ rec.selection }}</span>
+                <span class="role-card__rec-selection">{{
+                  rec.selection
+                }}</span>
               } @else {
                 <span class="role-card__rec-pending">pending...</span>
               }
@@ -63,13 +73,21 @@ export interface RoleCardSubmission {
       }
 
       <!-- Decision Form (active only) -->
-      @if (card().decision && card().status === 'active') {
+      @if (card().decision && card().status === "active") {
         <div class="role-card__decision">
-          @if (questionType() === 'single_choice' || questionType() === 'multi_choice') {
+          @if (
+            questionType() === "single_choice" ||
+            questionType() === "multi_choice"
+          ) {
             @for (option of filteredOptions(); track option.id) {
-              <label class="role-card__option" [class.role-card__option--selected]="isSelected(option.id)">
+              <label
+                class="role-card__option"
+                [class.role-card__option--selected]="isSelected(option.id)"
+              >
                 <input
-                  [type]="questionType() === 'single_choice' ? 'radio' : 'checkbox'"
+                  [type]="
+                    questionType() === 'single_choice' ? 'radio' : 'checkbox'
+                  "
                   [name]="'role-decision-' + card().roleId"
                   [checked]="isSelected(option.id)"
                   (change)="toggleOption(option)"
@@ -78,14 +96,22 @@ export interface RoleCardSubmission {
               </label>
             }
           }
-          @if (questionType() === 'free_text') {
-            <textarea class="role-card__textarea"
+          @if (questionType() === "free_text") {
+            <textarea
+              class="role-card__textarea"
               [value]="freeText()"
               (input)="onTextInput($event)"
-              placeholder="Enter your response..."></textarea>
+              placeholder="Enter your response..."
+            ></textarea>
           }
           <div class="role-card__actions">
-            <button uiButton variant="default" size="sm" (click)="onSubmit()" [disabled]="!canSubmit()">
+            <button
+              uiButton
+              variant="default"
+              size="sm"
+              (click)="onSubmit()"
+              [disabled]="!canSubmit()"
+            >
               Submit
             </button>
           </div>
@@ -93,7 +119,7 @@ export interface RoleCardSubmission {
       }
 
       <!-- Done State -->
-      @if (card().status === 'done') {
+      @if (card().status === "done") {
         <div class="role-card__done">Selected: {{ doneLabel() }}</div>
       }
     </div>
@@ -123,9 +149,7 @@ export class RoleCardComponent {
       return decision.options;
     }
     // advisor: COMMON options (no role) + own-role options
-    return decision.options.filter(
-      (o) => !o.role || o.role === roleId,
-    );
+    return decision.options.filter((o) => !o.role || o.role === roleId);
   });
 
   readonly badgeLabel = computed<string>(() => {
@@ -176,7 +200,8 @@ export class RoleCardComponent {
   }
 
   protected onTextInput(event: Event): void {
-    const textarea = event.target as HTMLTextAreaElement;
+    if (!(event.target instanceof HTMLTextAreaElement)) return;
+    const textarea = event.target;
     this.freeText.set(textarea.value);
   }
 

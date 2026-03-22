@@ -19,15 +19,22 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
         <p class="text-muted-foreground">No events to walk through.</p>
       </div>
     } @else {
-      <div class="flex flex-col items-center gap-lg p-lg" style="max-width: 40rem; margin: 0 auto">
+      <div
+        class="flex flex-col items-center gap-lg p-lg"
+        style="max-width: 40rem; margin: 0 auto"
+      >
         @let event = sortedEvents()[safeIndex()];
         <ui-card [title]="event.title" style="width: 100%">
           <div class="flex flex-col gap-sm p-sm">
             <div class="flex gap-sm items-center">
               <ui-badge variant="secondary">{{ event.event_type }}</ui-badge>
-              <span class="text-sm text-muted-foreground">{{ formatTime(event.scheduled_pt_ms) }}</span>
+              <span class="text-sm text-muted-foreground">{{
+                formatTime(event.scheduled_pt_ms)
+              }}</span>
               @if (event.duration_ms) {
-                <span class="text-xs text-muted-foreground">duration: {{ formatTime(event.duration_ms) }}</span>
+                <span class="text-xs text-muted-foreground"
+                  >duration: {{ formatTime(event.duration_ms) }}</span
+                >
               }
             </div>
             @if (event.description) {
@@ -58,17 +65,21 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
             variant="outline"
             [disabled]="safeIndex() === 0"
             (click)="currentIndex.set(safeIndex() - 1)"
-          >Previous</button>
+          >
+            Previous
+          </button>
           <span class="text-sm text-muted-foreground">
-            Event {{ safeIndex() + 1 }} of {{ sortedEvents().length }}
-            — {{ formatTime(event.scheduled_pt_ms) }}
+            Event {{ safeIndex() + 1 }} of {{ sortedEvents().length }} —
+            {{ formatTime(event.scheduled_pt_ms) }}
           </span>
           <button
             uiButton
             variant="outline"
             [disabled]="safeIndex() >= sortedEvents().length - 1"
             (click)="currentIndex.set(safeIndex() + 1)"
-          >Next</button>
+          >
+            Next
+          </button>
         </div>
       </div>
     }

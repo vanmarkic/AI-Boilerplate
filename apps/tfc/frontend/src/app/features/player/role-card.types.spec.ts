@@ -25,6 +25,7 @@ function makeEvent(overrides: Partial<EventSnapshot> = {}): EventSnapshot {
     completed_at_pt_ms: null,
     target_roles: [],
     role_descriptions: {},
+    system_effects: [],
     ...overrides,
   };
 }
@@ -80,7 +81,9 @@ describe("buildRoleCards", () => {
 
   it("builds intel-only card from event role_descriptions", () => {
     const roles = [makeRole({ id: "ops", label: "OPS" })];
-    const event = makeEvent({ role_descriptions: { ops: "Coordinate logistics" } });
+    const event = makeEvent({
+      role_descriptions: { ops: "Coordinate logistics" },
+    });
     const cards = buildRoleCards(roles, event, null, new Set(), true);
 
     expect(cards).toHaveLength(1);
@@ -214,13 +217,24 @@ describe("buildRoleCards", () => {
     const allRoles = [
       makeRole({ id: "co", label: "CO", player_type: "decision_maker" }),
       makeRole({ id: "nav", label: "Navigator", player_type: "advisor" }),
-      makeRole({ id: "pwo", label: "Principal Warfare Officer", player_type: "advisor" }),
+      makeRole({
+        id: "pwo",
+        label: "Principal Warfare Officer",
+        player_type: "advisor",
+      }),
     ];
     const decision = makeDecision({
       target_roles: ["co", "nav", "pwo"],
       recommendations: { "p1:nav": "o1" },
     });
-    const cards = buildRoleCards(coOnly, null, decision, new Set(), true, allRoles);
+    const cards = buildRoleCards(
+      coOnly,
+      null,
+      decision,
+      new Set(),
+      true,
+      allRoles,
+    );
     const coCard = cards.find((c) => c.roleId === "co")!;
 
     expect(coCard.advisorRecs).toHaveLength(2);

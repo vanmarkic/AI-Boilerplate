@@ -90,9 +90,7 @@ describe("ExerciseListComponent", () => {
     const buttons: HTMLButtonElement[] = Array.from(
       fixture.nativeElement.querySelectorAll("button[uibutton]"),
     );
-    const deleteBtn = buttons.find(
-      (b) => b.textContent?.trim() === "Delete",
-    );
+    const deleteBtn = buttons.find((b) => b.textContent?.trim() === "Delete");
     deleteBtn!.click();
 
     const deleteReq = httpTesting.expectOne(`${base}/api/exercises/1`);

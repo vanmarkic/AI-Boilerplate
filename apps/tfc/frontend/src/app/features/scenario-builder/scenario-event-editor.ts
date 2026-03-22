@@ -27,7 +27,10 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
   template: `
     <ui-card title="Events">
       @for (event of store.content().events; track event.id) {
-        <div [id]="'event-' + event.id" class="flex flex-col gap-xs p-sm border-b">
+        <div
+          [id]="'event-' + event.id"
+          class="flex flex-col gap-xs p-sm border-b"
+        >
           @if (editingId() === event.id) {
             <div class="flex flex-col gap-xs">
               <ui-input
@@ -105,8 +108,11 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                   <span
                     class="text-xs cursor-pointer"
                     style="text-decoration: underline dotted; color: var(--color-primary)"
-                    (click)="scrollTo('issue-' + issueId); $event.stopPropagation()"
-                  >{{ issueId }}</span>
+                    (click)="
+                      scrollTo('issue-' + issueId); $event.stopPropagation()
+                    "
+                    >{{ issueId }}</span
+                  >
                 }
               </div>
               <div class="flex gap-xs">
@@ -215,15 +221,22 @@ export class ScenarioEventEditorComponent {
   }
 
   protected scrollTo(elementId: string): void {
-    document.getElementById(elementId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(elementId)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   protected save(eventId: string): void {
     const rolesStr = this.editTargetRoles().trim();
     const target_roles = rolesStr
-      ? rolesStr.split(",").map((r: string) => r.trim()).filter(Boolean)
+      ? rolesStr
+          .split(",")
+          .map((r: string) => r.trim())
+          .filter(Boolean)
       : [];
-    const existing = this.store.content().events.find((e: ScenarioEventDef) => e.id === eventId);
+    const existing = this.store
+      .content()
+      .events.find((e: ScenarioEventDef) => e.id === eventId);
     this.store.updateEvent(eventId, {
       title: this.editTitle(),
       description: this.editDesc(),
