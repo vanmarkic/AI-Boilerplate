@@ -93,6 +93,23 @@ class SystemSnapshot(TypedDict):
     operational: str
 
 
+class WarfareDomainSnapshot(TypedDict):
+    domain_id: str
+    label: str
+    threat_level: str  # "green" | "yellow" | "red"
+
+
+class WarfareDomainChange(TypedDict):
+    type: str  # "warfare_domain_change"
+    domain_id: str
+    threat_level: str
+
+
+class DomainEffect(TypedDict):
+    domain_id: str
+    threat_level: str
+
+
 class EngineSnapshot(TypedDict):
     exercise_id: int
     title: str
@@ -103,6 +120,7 @@ class EngineSnapshot(TypedDict):
     decisions: list[DecisionSnapshot]
     score: dict[str, object] | None
     systems: list[SystemSnapshot]
+    warfare_domains: list[WarfareDomainSnapshot]
 
 
 class PresenceEntry(TypedDict):
@@ -220,4 +238,5 @@ StateChange = (
     | RecommendationSubmitted
     | ForcedCardApplied
     | SystemStateChange
+    | WarfareDomainChange
 )
