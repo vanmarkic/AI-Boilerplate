@@ -232,9 +232,6 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   }
 
-  // Turn advancement is backend-driven: closing a decision triggers the
-  // next event in sequence automatically via engine.force_trigger_next_decision.
-
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
     const id = Number(params["exerciseId"] ?? 1);
