@@ -56,9 +56,7 @@ def scheduled_events(
         deps = draw(st.lists(event_ids(), max_size=3, unique=True))
         deps = [d for d in deps if d != eid]
     target_roles: list[str] = draw(st.lists(event_ids(prefix="role"), max_size=3, unique=True))
-    role_descs: dict[str, str] = {
-        r: f"Info for {r}" for r in target_roles if draw(st.booleans())
-    }
+    role_descs: dict[str, str] = {r: f"Info for {r}" for r in target_roles if draw(st.booleans())}
     return ScheduledEvent(
         id=eid,
         title=f"Event {eid}",
@@ -114,7 +112,8 @@ def system_states(draw: st.DrawFn) -> SystemState:
 
 
 def system_state_lists(
-    min_size: int = 0, max_size: int = 10,
+    min_size: int = 0,
+    max_size: int = 10,
 ) -> SearchStrategy[list[SystemState]]:
     """Generate a list of SystemState with unique system_ids."""
     return st.lists(

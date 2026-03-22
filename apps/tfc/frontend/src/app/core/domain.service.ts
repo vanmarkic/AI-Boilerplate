@@ -33,6 +33,9 @@ const FALLBACK_DOMAIN: DomainConfigResponse = {
   },
   roles: [],
   severity_levels: [],
+  systems: [],
+  warfare_domains: [],
+  blue_card_catalog: [],
   created_at: "",
   updated_at: "",
 };

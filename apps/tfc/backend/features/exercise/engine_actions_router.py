@@ -46,7 +46,8 @@ async def trigger_event(exercise_id: int, event_id: str) -> EventChange:
         changes = engine.trigger_event(event_id)
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail=str(exc),
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
         ) from exc
     if changes and engine._on_state_change:
         await engine._on_state_change(changes)
@@ -187,10 +188,7 @@ async def get_engine_context(exercise_id: int) -> dict[str, object]:
         "briefing": ctx.briefing,
         "objectives": ctx.objectives,
         "rules": ctx.rules,
-        "roles": [
-            {"id": r.id, "label": r.label, "player_type": r.player_type}
-            for r in ctx.roles
-        ],
+        "roles": [{"id": r.id, "label": r.label, "player_type": r.player_type} for r in ctx.roles],
         "default_time_factor": engine.config.time_factor,
         "score_tier_thresholds": ctx.score_tier_thresholds,
     }

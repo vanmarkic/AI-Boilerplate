@@ -21,13 +21,21 @@ from engine.system_manager import SystemState
 
 
 def _option(
-    id: str, *, score: float = 0.0, stress_delta: int = 0,
+    id: str,
+    *,
+    score: float = 0.0,
+    stress_delta: int = 0,
     system_effects: list[SystemEffect] | None = None,
 ) -> DecisionOptionSnapshot:
     return DecisionOptionSnapshot(
-        id=id, label=f"Option {id}", score=score, stress_delta=stress_delta,
-        system_effects=system_effects or [], targets_system=False,
-        max_plays=0, role=None,
+        id=id,
+        label=f"Option {id}",
+        score=score,
+        stress_delta=stress_delta,
+        system_effects=system_effects or [],
+        targets_system=False,
+        max_plays=0,
+        role=None,
     )
 
 
@@ -35,20 +43,34 @@ def _single_turn_engine() -> ExerciseEngine:
     """Build a 1-turn collaborative engine ready to close d1."""
     opts = [_option("good", score=10.0), _option("bad", score=0.0, stress_delta=1)]
     dt = DecisionTemplate(
-        id="d1", title="D1", description="", issue_id="i1",
-        question_type="single_choice", options=opts,
-        completion_mode="consensus", target_roles=["co"], max_selections=1,
+        id="d1",
+        title="D1",
+        description="",
+        issue_id="i1",
+        question_type="single_choice",
+        options=opts,
+        completion_mode="consensus",
+        target_roles=["co"],
+        max_selections=1,
     )
     evt = ScheduledEvent(
-        id="d1", title="Evt d1", description="",
-        event_type=EventType.DECISION, scheduled_pt_ms=999_999,
+        id="d1",
+        title="Evt d1",
+        description="",
+        event_type=EventType.DECISION,
+        scheduled_pt_ms=999_999,
     )
     mode = SimpleCollaborativeMode(
-        decision_sequence=["d1"], base_decision_time_ms=300_000,
+        decision_sequence=["d1"],
+        base_decision_time_ms=300_000,
     )
     config = EngineConfig(
-        exercise_id=1, title="Test", events=[evt],
-        decision_templates=[dt], context=ScenarioContext(), game_mode=mode,
+        exercise_id=1,
+        title="Test",
+        events=[evt],
+        decision_templates=[dt],
+        context=ScenarioContext(),
+        game_mode=mode,
     )
     return ExerciseEngine(config)
 
@@ -72,7 +94,8 @@ class TestDecisionCloseEquivalence:
         await engine_b.begin()
         engine_b.force_trigger_next_decision(0.0, "")
         auto_id = engine_b.game_mode.on_decision_timeout(
-            "d1", engine_b.decision_manager.get_decision("d1").options,
+            "d1",
+            engine_b.decision_manager.get_decision("d1").options,
         )
         await engine_b.close_decision("d1", [auto_id])
 
@@ -106,28 +129,52 @@ class TestDecisionCloseEquivalence:
         """Closing a non-final decision keeps engine RUNNING."""
         opts = [_option("good", score=10.0), _option("bad", score=0.0)]
         dt1 = DecisionTemplate(
-            id="d1", title="D1", description="", issue_id="i1",
-            question_type="single_choice", options=opts,
-            completion_mode="consensus", target_roles=["co"],
+            id="d1",
+            title="D1",
+            description="",
+            issue_id="i1",
+            question_type="single_choice",
+            options=opts,
+            completion_mode="consensus",
+            target_roles=["co"],
         )
         dt2 = DecisionTemplate(
-            id="d2", title="D2", description="", issue_id="i2",
-            question_type="single_choice", options=opts,
-            completion_mode="consensus", target_roles=["co"],
+            id="d2",
+            title="D2",
+            description="",
+            issue_id="i2",
+            question_type="single_choice",
+            options=opts,
+            completion_mode="consensus",
+            target_roles=["co"],
         )
         events = [
-            ScheduledEvent(id="d1", title="E1", description="",
-                           event_type=EventType.DECISION, scheduled_pt_ms=999_999),
-            ScheduledEvent(id="d2", title="E2", description="",
-                           event_type=EventType.DECISION, scheduled_pt_ms=999_999,
-                           dependencies=["d1"]),
+            ScheduledEvent(
+                id="d1",
+                title="E1",
+                description="",
+                event_type=EventType.DECISION,
+                scheduled_pt_ms=999_999,
+            ),
+            ScheduledEvent(
+                id="d2",
+                title="E2",
+                description="",
+                event_type=EventType.DECISION,
+                scheduled_pt_ms=999_999,
+                dependencies=["d1"],
+            ),
         ]
         mode = SimpleCollaborativeMode(
-            decision_sequence=["d1", "d2"], base_decision_time_ms=300_000,
+            decision_sequence=["d1", "d2"],
+            base_decision_time_ms=300_000,
         )
         config = EngineConfig(
-            exercise_id=1, title="Test", events=events,
-            decision_templates=[dt1, dt2], context=ScenarioContext(),
+            exercise_id=1,
+            title="Test",
+            events=events,
+            decision_templates=[dt1, dt2],
+            context=ScenarioContext(),
             game_mode=mode,
         )
         engine = ExerciseEngine(config)
@@ -146,18 +193,28 @@ class TestDecisionCloseEquivalence:
         """Classic mode (GM-driven) must NOT auto-complete on sequence exhaustion."""
         opts = [_option("a", score=0.0)]
         dt = DecisionTemplate(
-            id="d1", title="D1", description="", issue_id="i1",
-            question_type="single_choice", options=opts,
+            id="d1",
+            title="D1",
+            description="",
+            issue_id="i1",
+            question_type="single_choice",
+            options=opts,
             completion_mode="first_response",
         )
         evt = ScheduledEvent(
-            id="d1", title="E1", description="",
-            event_type=EventType.DECISION, scheduled_pt_ms=999_999,
+            id="d1",
+            title="E1",
+            description="",
+            event_type=EventType.DECISION,
+            scheduled_pt_ms=999_999,
         )
         mode = ClassicMode()
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[evt],
-            decision_templates=[dt], context=ScenarioContext(),
+            exercise_id=1,
+            title="Test",
+            events=[evt],
+            decision_templates=[dt],
+            context=ScenarioContext(),
             game_mode=mode,
         )
         engine = ExerciseEngine(config)
@@ -182,12 +239,17 @@ class TestEventTriggerEquivalence:
     async def test_manual_trigger_applies_system_effects(self) -> None:
         """GM manual trigger applies event system_effects (the audit-reported bug)."""
         evt = ScheduledEvent(
-            id="e1", title="Degrade", description="",
-            event_type=EventType.INFORMATIONAL, scheduled_pt_ms=999_999,
+            id="e1",
+            title="Degrade",
+            description="",
+            event_type=EventType.INFORMATIONAL,
+            scheduled_pt_ms=999_999,
             system_effects=[
                 SystemEffect(
-                    system_id="comms", power_state=None,
-                    operational_state="yellow", set_all_power=False,
+                    system_id="comms",
+                    power_state=None,
+                    operational_state="yellow",
+                    set_all_power=False,
                 ),
             ],
         )
@@ -195,8 +257,11 @@ class TestEventTriggerEquivalence:
             SystemState(system_id="comms", label="COMMS", power=True, operational="green"),
         ]
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[evt],
-            context=ScenarioContext(), initial_system_states=systems,
+            exercise_id=1,
+            title="Test",
+            events=[evt],
+            context=ScenarioContext(),
+            initial_system_states=systems,
         )
         engine = ExerciseEngine(config)
         await engine.start()
@@ -213,17 +278,27 @@ class TestEventTriggerEquivalence:
         """A DECISION event with system_effects does both: opens decision AND mutates systems."""
         opts = [_option("a", score=10.0)]
         dt = DecisionTemplate(
-            id="d1", title="D1", description="", issue_id="i1",
-            question_type="single_choice", options=opts,
-            completion_mode="consensus", target_roles=["co"],
+            id="d1",
+            title="D1",
+            description="",
+            issue_id="i1",
+            question_type="single_choice",
+            options=opts,
+            completion_mode="consensus",
+            target_roles=["co"],
         )
         evt = ScheduledEvent(
-            id="d1", title="Decision+Effects", description="",
-            event_type=EventType.DECISION, scheduled_pt_ms=999_999,
+            id="d1",
+            title="Decision+Effects",
+            description="",
+            event_type=EventType.DECISION,
+            scheduled_pt_ms=999_999,
             system_effects=[
                 SystemEffect(
-                    system_id="nav", power_state=False,
-                    operational_state=None, set_all_power=False,
+                    system_id="nav",
+                    power_state=False,
+                    operational_state=None,
+                    set_all_power=False,
                 ),
             ],
         )
@@ -232,9 +307,13 @@ class TestEventTriggerEquivalence:
         ]
         mode = SimpleCollaborativeMode(decision_sequence=["d1"])
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[evt],
-            decision_templates=[dt], context=ScenarioContext(),
-            initial_system_states=systems, game_mode=mode,
+            exercise_id=1,
+            title="Test",
+            events=[evt],
+            decision_templates=[dt],
+            context=ScenarioContext(),
+            initial_system_states=systems,
+            game_mode=mode,
         )
         engine = ExerciseEngine(config)
         await engine.start()
@@ -258,33 +337,48 @@ class TestForcedCardSystemEffects:
         opts = [
             _option("normal", score=5.0),
             _option(
-                "forced", score=-2.0,
+                "forced",
+                score=-2.0,
                 system_effects=[
                     SystemEffect(
-                        system_id="comms", power_state=None,
-                        operational_state="red", set_all_power=False,
+                        system_id="comms",
+                        power_state=None,
+                        operational_state="red",
+                        set_all_power=False,
                     ),
                 ],
             ),
         ]
         dt = DecisionTemplate(
-            id="d1", title="D1", description="", issue_id="i1",
-            question_type="single_choice", options=opts,
-            completion_mode="consensus", target_roles=["co"],
+            id="d1",
+            title="D1",
+            description="",
+            issue_id="i1",
+            question_type="single_choice",
+            options=opts,
+            completion_mode="consensus",
+            target_roles=["co"],
             forced_option_ids=["forced"],
         )
         evt = ScheduledEvent(
-            id="d1", title="E1", description="",
-            event_type=EventType.DECISION, scheduled_pt_ms=999_999,
+            id="d1",
+            title="E1",
+            description="",
+            event_type=EventType.DECISION,
+            scheduled_pt_ms=999_999,
         )
         systems = [
             SystemState(system_id="comms", label="COMMS", power=True, operational="green"),
         ]
         mode = SimpleCollaborativeMode(decision_sequence=["d1"])
         config = EngineConfig(
-            exercise_id=1, title="Test", events=[evt],
-            decision_templates=[dt], context=ScenarioContext(),
-            initial_system_states=systems, game_mode=mode,
+            exercise_id=1,
+            title="Test",
+            events=[evt],
+            decision_templates=[dt],
+            context=ScenarioContext(),
+            initial_system_states=systems,
+            game_mode=mode,
         )
         engine = ExerciseEngine(config)
         await engine.start()

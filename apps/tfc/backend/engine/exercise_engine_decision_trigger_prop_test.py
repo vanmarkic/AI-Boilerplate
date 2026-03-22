@@ -15,8 +15,7 @@ import asyncio
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
-from engine.decision_manager import DecisionManager
-from engine.engine_config import DecisionTemplate, EngineConfig, RoleInfo, ScenarioContext
+from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import ExerciseEngine
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
@@ -43,10 +42,19 @@ def decision_event_changes(draw: st.DrawFn) -> tuple[dict, str]:
 @st.composite
 def non_decision_actions(draw: st.DrawFn) -> str:
     """Actions that must NOT open decisions."""
-    return draw(st.sampled_from([
-        "activated", "completed", "cancelled", "paused",
-        "resumed", "delayed", "skipped",
-    ]))
+    return draw(
+        st.sampled_from(
+            [
+                "activated",
+                "completed",
+                "cancelled",
+                "paused",
+                "resumed",
+                "delayed",
+                "skipped",
+            ]
+        )
+    )
 
 
 class TestForceTriggeredOpenDecisions:
@@ -136,8 +144,16 @@ class TestForceTriggeredOpenDecisions:
             decision_sequence=[event_id],
             base_decision_time_ms=300000,
         )
-        opt = {"id": "a", "label": "A", "score": 10, "stress_delta": 0,
-               "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}
+        opt = {
+            "id": "a",
+            "label": "A",
+            "score": 10,
+            "stress_delta": 0,
+            "system_effects": [],
+            "targets_system": False,
+            "max_plays": 1,
+            "role": None,
+        }
         config = EngineConfig(
             exercise_id=1,
             title="Test",
@@ -181,9 +197,7 @@ class TestForceTriggeredOpenDecisions:
 
         decision_changes = engine._handle_decision_events([change], pt)
 
-        assert len(decision_changes) == 0, (
-            f"action={action!r} must NOT open decisions"
-        )
+        assert len(decision_changes) == 0, f"action={action!r} must NOT open decisions"
 
     @given(
         action=st.sampled_from(["started", "force_triggered"]),

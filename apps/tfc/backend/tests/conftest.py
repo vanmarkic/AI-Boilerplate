@@ -12,6 +12,6 @@ import pytest
 
 
 @pytest.fixture(autouse=True)
-async def setup_db() -> AsyncGenerator[None]:  # noqa: RUF029
+async def setup_db() -> AsyncGenerator[None]:
     """No-op override: migration tests use Alembic directly."""
-    yield
+    return
