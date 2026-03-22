@@ -21,8 +21,26 @@ def _mock_decision(**overrides) -> MagicMock:  # noqa: ANN003
         "description": "desc",
         "question_type": "single_choice",
         "options": [
-            {"id": "a", "label": "Isolate", "score": 10, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
-            {"id": "b", "label": "Ignore", "score": 0, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+            {
+                "id": "a",
+                "label": "Isolate",
+                "score": 10,
+                "stress_delta": 0,
+                "system_effects": [],
+                "targets_system": False,
+                "max_plays": 1,
+                "role": None,
+            },
+            {
+                "id": "b",
+                "label": "Ignore",
+                "score": 0,
+                "stress_delta": 0,
+                "system_effects": [],
+                "targets_system": False,
+                "max_plays": 1,
+                "role": None,
+            },
         ],
         "completion_mode": "first_response",
         "status": "open",
@@ -71,7 +89,18 @@ class TestCreateDecision:
                 exercise_id=42,
                 issue_id="issue-1",
                 question_type="single_choice",
-                options=[{"id": "a", "label": "Isolate", "score": 10, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None}],
+                options=[
+                    {
+                        "id": "a",
+                        "label": "Isolate",
+                        "score": 10,
+                        "stress_delta": 0,
+                        "system_effects": [],
+                        "targets_system": False,
+                        "max_plays": 1,
+                        "role": None,
+                    }
+                ],
                 completion_mode="first_response",
             )
         )

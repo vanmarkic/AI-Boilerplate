@@ -10,7 +10,7 @@ import pytest
 
 from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
-from engine.exercise_engine import EnginePhase, EngineStateError, ExerciseEngine
+from engine.exercise_engine import EnginePhase, ExerciseEngine
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.state_changes import DecisionOptionSnapshot, SystemEffect
 from engine.system_manager import SystemState
@@ -146,7 +146,7 @@ class TestCloseDecisionBasic:
         await engine.start()
         await engine.begin()
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError, match="not found"):
             await engine.close_decision("nonexistent", ["good"])
 
     @pytest.mark.asyncio
@@ -160,7 +160,7 @@ class TestCloseDecisionBasic:
 
         await engine.close_decision("d1", ["good"])
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError, match="already closed"):
             await engine.close_decision("d1", ["good"])
 
     @pytest.mark.asyncio
@@ -172,7 +172,7 @@ class TestCloseDecisionBasic:
         pt = engine.time_manager.play_time_ms
         engine.force_trigger_next_decision(pt, "")
 
-        with pytest.raises(Exception):
+        with pytest.raises(ValueError, match="at most 1 selections"):
             await engine.close_decision("d1", ["good", "bad"])
 
 
@@ -246,7 +246,7 @@ class TestCloseDecisionForcedCards:
         engine.force_trigger_next_decision(pt, "")
 
         # Player selects "normal" only — "forced" should be auto-added
-        changes = await engine.close_decision("d1", ["normal"])
+        await engine.close_decision("d1", ["normal"])
 
         # Forced card's system effect must be applied
         assert engine.system_manager.systems["comms"].operational == "yellow"
@@ -285,8 +285,10 @@ class TestCloseDecisionTargetSystem:
         pt = engine.time_manager.play_time_ms
         engine.force_trigger_next_decision(pt, "")
 
-        changes = await engine.close_decision(
-            "d1", ["reboot"], target_system_selections={"reboot": "aaw"},
+        await engine.close_decision(
+            "d1",
+            ["reboot"],
+            target_system_selections={"reboot": "aaw"},
         )
 
         assert engine.system_manager.systems["aaw"].operational == "green"
@@ -380,7 +382,9 @@ class TestCloseDecisionTargetSystem:
 
         with pytest.raises(ValueError, match="not found"):
             await engine.close_decision(
-                "d1", ["reboot"], target_system_selections={"reboot": "nonexistent"},
+                "d1",
+                ["reboot"],
+                target_system_selections={"reboot": "nonexistent"},
             )
 
     @pytest.mark.asyncio

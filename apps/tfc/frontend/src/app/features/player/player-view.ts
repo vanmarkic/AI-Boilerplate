@@ -34,6 +34,10 @@ import { RoleCardComponent } from "./role-card.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
 import type { RoleCardSubmission } from "./role-card.component";
+import {
+  CoDecisionBarComponent,
+  type CoDecisionConfirmation,
+} from "./co-decision-bar.component";
 import { buildRoleCards } from "./role-card.types";
 
 @Component({
@@ -50,6 +54,7 @@ import { buildRoleCards } from "./role-card.types";
     StressBarComponent,
     ButtonDirective,
     RoleCardComponent,
+    CoDecisionBarComponent,
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
   ],
@@ -148,8 +153,62 @@ export class PlayerView implements OnInit, OnDestroy {
     }
   });
 
-  // Turn advancement is backend-driven: closing a decision triggers the
-  // next event in sequence automatically via engine.force_trigger_next_decision.
+  protected readonly advisorRoleCards = computed(() => {
+    const allRoles = this.store.context()?.roles ?? [];
+    const advisors = allRoles.filter((r) => r.player_type === "advisor");
+    const activeCards = this.roleCards().filter(
+      (c) => c.playerType === "advisor",
+    );
+    const activeMap = new Map(activeCards.map((c) => [c.roleId, c]));
+    return advisors.map(
+      (role) =>
+        activeMap.get(role.id) ?? {
+          roleId: role.id,
+          roleLabel: role.label,
+          playerType: "advisor" as const,
+          intel: null,
+          decision: null,
+          status: "intel" as const,
+          advisorRecs: [],
+        },
+    );
+  });
+
+  protected readonly isDecisionMaker = computed(() => {
+    const role = this.store.playerRole();
+    const allRoles = this.store.context()?.roles ?? [];
+    const playerRoleDef = allRoles.find((r) => r.id === role);
+    return (
+      role === "decision_maker" || playerRoleDef?.player_type === "decision_maker"
+    );
+  });
+
+  protected readonly coRoleId = computed(() => {
+    const allRoles = this.store.context()?.roles ?? [];
+    return allRoles.find((r) => r.player_type === "decision_maker")?.id ?? null;
+  });
+
+  protected readonly coIntel = computed(() => {
+    const event = this.currentTurnEvent();
+    const id = this.coRoleId();
+    if (!event || !id) return null;
+    return event.role_descriptions?.[id] ?? null;
+  });
+
+  protected readonly advisorRoles = computed(() => {
+    const allRoles = this.store.context()?.roles ?? [];
+    return allRoles.filter((r) => r.player_type === "advisor");
+  });
+
+  protected onCoDecisionConfirmed(confirmation: CoDecisionConfirmation): void {
+    const decision = this.activeDecisions()[0];
+    if (!decision) return;
+    submitDecision(this.decisionApi, this.store, this.exerciseId(), decision, {
+      selectedOptions: confirmation.selectedOptionIds,
+      freeText: "",
+      targetSystemSelections: confirmation.targetSystemSelections,
+    });
+  }
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;

@@ -18,6 +18,9 @@ class DomainConfig(Base):
     theme: Mapped[dict] = mapped_column(JSON, nullable=False)
     roles: Mapped[list] = mapped_column(JSON, nullable=False)
     severity_levels: Mapped[list] = mapped_column(JSON, nullable=False)
+    systems: Mapped[list] = mapped_column(JSON, nullable=False, server_default="[]")
+    warfare_domains: Mapped[list] = mapped_column(JSON, nullable=False, server_default="[]")
+    blue_card_catalog: Mapped[list] = mapped_column(JSON, nullable=False, server_default="[]")
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         server_default=func.now(),

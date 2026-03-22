@@ -11,7 +11,7 @@ import pytest
 from engine.engine_config import EngineConfig, ScenarioContext
 from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import ExerciseEngine
-from engine.state_changes import DecisionOptionSnapshot, SystemEffect
+from engine.state_changes import SystemEffect
 from engine.system_manager import SystemState
 
 
@@ -152,7 +152,9 @@ class TestEventSystemEffects:
         systems = [SystemState(system_id="comms", label="COMMS", power=True, operational="green")]
         # Only need one event with system_effects — test force_trigger directly
         evt = ScheduledEvent(
-            id="evt-t2", title="Turn 2", description="Comms degrade",
+            id="evt-t2",
+            title="Turn 2",
+            description="Comms degrade",
             event_type=EventType.INFORMATIONAL,  # non-decision to avoid timeout monitor
             scheduled_pt_ms=300000.0,
             system_effects=[

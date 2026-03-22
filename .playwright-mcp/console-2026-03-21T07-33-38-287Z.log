@@ -1,4 +1,0 @@
-[     136ms] [ERROR] Error: <path> attribute d: Expected number, "…1440 55\n        C1620 50 1800 70…". @ http://localhost:4201/@fs/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/.angular/cache/21.2.2/tfc/vite/deps/chunk-YZ7XY5KL.js?v=682cd2f8:572
-[     153ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/1/engine/snapshot:0
-[     161ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/1/engine/context:0
-[     162ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/1/engine/decisions:0

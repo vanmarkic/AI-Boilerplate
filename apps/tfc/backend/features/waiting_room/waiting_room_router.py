@@ -42,22 +42,27 @@ def _participants_payload(exercise_id: int) -> dict:
     }
 
 
-async def _get_scenario_roles(
+async def _get_exercise_and_scenario_roles(
     exercise_id: int,
     exercise_service: ExerciseService,
     scenario_service: ScenarioService,
-) -> list[dict] | None:
-    """Return scenario roles for the exercise, or None if no scenario."""
+) -> tuple[object, list[dict] | None]:
+    """Return (exercise, scenario_roles) for the exercise.
+
+    The exercise object is always returned so callers can inspect it
+    without issuing a second DB query. Roles are ``None`` when the
+    exercise has no linked scenario or the scenario defines no roles.
+    """
     exercise = await exercise_service.get_exercise(exercise_id)
     if exercise.scenario_id is None:
-        return None
+        return exercise, None
     scenario = await scenario_service.get_scenario(exercise.scenario_id)
     if scenario.content is None:
-        return None
+        return exercise, None
     content = ScenarioContent.model_validate(scenario.content)
     if not content.roles:
-        return None
-    return [r.model_dump() for r in content.roles]
+        return exercise, None
+    return exercise, [r.model_dump() for r in content.roles]
 
 
 @router.post("/join", response_model=ParticipantResponse)
@@ -68,13 +73,12 @@ async def join_waiting_room(
     scenario_service: ScenarioService = Depends(get_scenario_service),
 ) -> ParticipantResponse:
     """Join the waiting room for an exercise."""
-    roles = await _get_scenario_roles(
+    exercise_obj, roles = await _get_exercise_and_scenario_roles(
         exercise_id,
         exercise_service,
         scenario_service,
     )
     if roles is not None:
-        exercise_obj = await exercise_service.get_exercise(exercise_id)
         if exercise_obj.practice_mode:
             max_players = 1
         else:
@@ -128,7 +132,7 @@ async def update_participant_role(
     scenario_service: ScenarioService = Depends(get_scenario_service),
 ) -> ParticipantResponse:
     """Change a participant's role in the waiting room."""
-    roles = await _get_scenario_roles(
+    _, roles = await _get_exercise_and_scenario_roles(
         exercise_id,
         exercise_service,
         scenario_service,

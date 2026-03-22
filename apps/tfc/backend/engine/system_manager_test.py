@@ -131,6 +131,51 @@ class TestSetAllPower:
         assert mgr.set_all_power(True) == []
 
 
+class TestWeaponTwoTierState:
+    """Weapons use binary OK (green) / non-operational (red), no yellow."""
+
+    def test_set_operational_yellow_on_weapon_returns_none(self) -> None:
+        mgr = SystemManager()
+        mgr.load_systems([_system("w1", category="weapon", operational="green")])
+        assert mgr.set_operational("w1", "yellow") is None
+        assert mgr.systems["w1"].operational == "green"
+
+    def test_set_operational_red_on_weapon_works(self) -> None:
+        mgr = SystemManager()
+        mgr.load_systems([_system("w1", category="weapon", operational="green")])
+        change = mgr.set_operational("w1", "red")
+        assert change is not None
+        assert mgr.systems["w1"].operational == "red"
+
+    def test_set_operational_green_on_weapon_works(self) -> None:
+        mgr = SystemManager()
+        mgr.load_systems([_system("w1", category="weapon", operational="red")])
+        change = mgr.set_operational("w1", "green")
+        assert change is not None
+        assert mgr.systems["w1"].operational == "green"
+
+    def test_increment_operational_weapon_skips_yellow(self) -> None:
+        """red -> green in one step (no yellow for weapons)."""
+        mgr = SystemManager()
+        mgr.load_systems([_system("w1", category="weapon", operational="red")])
+        change = mgr.increment_operational("w1")
+        assert change is not None
+        assert mgr.systems["w1"].operational == "green"
+
+    def test_increment_operational_weapon_already_green(self) -> None:
+        mgr = SystemManager()
+        mgr.load_systems([_system("w1", category="weapon", operational="green")])
+        assert mgr.increment_operational("w1") is None
+
+    def test_system_still_allows_yellow(self) -> None:
+        """Ensure regular systems are unaffected."""
+        mgr = SystemManager()
+        mgr.load_systems([_system("s1", category="system", operational="green")])
+        change = mgr.set_operational("s1", "yellow")
+        assert change is not None
+        assert mgr.systems["s1"].operational == "yellow"
+
+
 class TestSnapshot:
     def test_snapshot_returns_all_systems(self) -> None:
         mgr = SystemManager()

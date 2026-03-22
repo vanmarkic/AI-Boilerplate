@@ -62,6 +62,7 @@ function makeSystems(): SystemSnapshot[] {
     <tfc-role-card
       [card]="card()"
       [systems]="systems()"
+      [readonly]="readonly()"
       (submitted)="onSubmit($event)"
     />
   `,
@@ -69,6 +70,7 @@ function makeSystems(): SystemSnapshot[] {
 class TestHost {
   readonly card = signal(makeCard());
   readonly systems = signal<SystemSnapshot[]>([]);
+  readonly readonly = signal(false);
   lastSubmission: RoleCardSubmission | null = null;
   onSubmit(s: RoleCardSubmission): void {
     this.lastSubmission = s;
@@ -222,6 +224,79 @@ describe("RoleCardComponent", () => {
 
       // Select should now be visible
       expect(fixture.nativeElement.querySelector("select")).toBeTruthy();
+    });
+  });
+
+  describe("readonly mode (CO mirror)", () => {
+    it("hides submit button when readonly is true", () => {
+      host.readonly.set(true);
+      host.card.set(makeCard({ status: "active" }));
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector("button")).toBeNull();
+    });
+
+    it("shows options as plain text without radio inputs when readonly", () => {
+      host.readonly.set(true);
+      host.card.set(makeCard({ status: "active" }));
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector("input[type='radio']")).toBeNull();
+      const options = fixture.nativeElement.querySelectorAll(".role-card__option");
+      expect(options.length).toBeGreaterThan(0);
+    });
+
+    it("highlights the recommended option with selected class", () => {
+      host.readonly.set(true);
+      host.card.set(
+        makeCard({
+          status: "active",
+          decision: {
+            ...makeCard().decision!,
+            recommendations: { "p1:co": "opt1" },
+          },
+        }),
+      );
+      fixture.detectChanges();
+
+      const selected = fixture.nativeElement.querySelectorAll(
+        ".role-card__option--selected",
+      );
+      expect(selected.length).toBe(1);
+    });
+
+    it("shows pending label when no recommendation for this role", () => {
+      host.readonly.set(true);
+      host.card.set(
+        makeCard({
+          roleId: "co",
+          status: "active",
+          decision: {
+            ...makeCard().decision!,
+            recommendations: {},
+          },
+        }),
+      );
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain("pending...");
+    });
+
+    it("hides pending label when recommendation exists for this role", () => {
+      host.readonly.set(true);
+      host.card.set(
+        makeCard({
+          roleId: "co",
+          status: "active",
+          decision: {
+            ...makeCard().decision!,
+            recommendations: { "p1:co": "opt1" },
+          },
+        }),
+      );
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).not.toContain("pending...");
     });
   });
 });

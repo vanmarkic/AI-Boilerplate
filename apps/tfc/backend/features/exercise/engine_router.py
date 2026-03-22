@@ -51,7 +51,9 @@ async def _log_to_audit(
                 )
     except Exception:
         logging.getLogger(__name__).warning(
-            "Failed to write audit log for exercise %s", exercise_id, exc_info=True,
+            "Failed to write audit log for exercise %s",
+            exercise_id,
+            exc_info=True,
         )
 
 

@@ -50,11 +50,16 @@ class SystemManager:
         s = self._systems.get(system_id)
         if s is None or s.operational == state:
             return None
+        if s.category == "weapon" and state == "yellow":
+            return None
         s.operational = state
         return self._change(s, "operational_changed")
 
     def increment_operational(self, system_id: str) -> SystemStateChange | None:
-        """red -> yellow -> green. Returns None if already green or unknown system."""
+        """red -> yellow -> green (systems) or red -> green (weapons).
+
+        Returns None if already green or unknown system.
+        """
         s = self._systems.get(system_id)
         if s is None:
             return None
@@ -64,7 +69,10 @@ class SystemManager:
             return None
         if idx >= len(OPERATIONAL_ORDER) - 1:
             return None  # already green
-        s.operational = OPERATIONAL_ORDER[idx + 1]
+        if s.category == "weapon":
+            s.operational = "green"  # skip yellow
+        else:
+            s.operational = OPERATIONAL_ORDER[idx + 1]
         return self._change(s, "operational_changed")
 
     def set_all_power(self, on: bool) -> list[SystemStateChange]:

@@ -16,7 +16,7 @@ from alembic import command
 @pytest.fixture(autouse=True)
 async def setup_db() -> AsyncGenerator[None]:
     """Override the autouse setup_db — migration tests manage their own schema."""
-    yield
+    return
 
 
 def get_alembic_config() -> Config:

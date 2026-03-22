@@ -29,6 +29,19 @@ class SystemDefPayload(BaseModel):
     category: str = "system"  # "system" | "weapon"
 
 
+class WarfareDomainPayload(BaseModel):
+    id: str
+    label: str
+    description: str = ""
+
+
+class BlueCardPayload(BaseModel):
+    id: str
+    title: str
+    description: str = ""
+    targets_system: bool = False
+
+
 class RolePayload(BaseModel):
     id: str
     label: str
@@ -54,6 +67,8 @@ class CreateDomainConfigRequest(BaseModel):
     roles: list[RolePayload]
     severity_levels: list[SeverityLevelPayload]
     systems: list[SystemDefPayload] = []
+    warfare_domains: list[WarfareDomainPayload] = []
+    blue_card_catalog: list[BlueCardPayload] = []
 
 
 class UpdateDomainConfigRequest(BaseModel):
@@ -64,6 +79,8 @@ class UpdateDomainConfigRequest(BaseModel):
     roles: list[RolePayload] | None = None
     severity_levels: list[SeverityLevelPayload] | None = None
     systems: list[SystemDefPayload] | None = None
+    warfare_domains: list[WarfareDomainPayload] | None = None
+    blue_card_catalog: list[BlueCardPayload] | None = None
 
 
 class DomainConfigResponse(ResponseBase):
@@ -75,6 +92,8 @@ class DomainConfigResponse(ResponseBase):
     theme: ThemePayload
     roles: list[RolePayload]
     severity_levels: list[SeverityLevelPayload]
-    systems: list[SystemDefPayload] = []
+    systems: list[SystemDefPayload] = []  # noqa: RUF012
+    warfare_domains: list[WarfareDomainPayload] = []  # noqa: RUF012
+    blue_card_catalog: list[BlueCardPayload] = []  # noqa: RUF012
     created_at: datetime
     updated_at: datetime

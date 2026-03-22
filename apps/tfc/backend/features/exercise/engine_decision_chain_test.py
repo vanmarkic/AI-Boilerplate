@@ -17,14 +17,59 @@ from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.session_store import session_store
 
 OPTIONS = [
-    {"id": "good", "label": "Good", "score": 10, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
-    {"id": "bad", "label": "Bad", "score": 0, "stress_delta": 1, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+    {
+        "id": "good",
+        "label": "Good",
+        "score": 10,
+        "stress_delta": 0,
+        "system_effects": [],
+        "targets_system": False,
+        "max_plays": 1,
+        "role": None,
+    },
+    {
+        "id": "bad",
+        "label": "Bad",
+        "score": 0,
+        "stress_delta": 1,
+        "system_effects": [],
+        "targets_system": False,
+        "max_plays": 1,
+        "role": None,
+    },
 ]
 
 FORCED_OPTIONS = [
-    {"id": "good", "label": "Good", "score": 10, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
-    {"id": "forced", "label": "Forced", "score": -5, "stress_delta": 0, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
-    {"id": "bad", "label": "Bad", "score": 0, "stress_delta": 1, "system_effects": [], "targets_system": False, "max_plays": 1, "role": None},
+    {
+        "id": "good",
+        "label": "Good",
+        "score": 10,
+        "stress_delta": 0,
+        "system_effects": [],
+        "targets_system": False,
+        "max_plays": 1,
+        "role": None,
+    },
+    {
+        "id": "forced",
+        "label": "Forced",
+        "score": -5,
+        "stress_delta": 0,
+        "system_effects": [],
+        "targets_system": False,
+        "max_plays": 1,
+        "role": None,
+    },
+    {
+        "id": "bad",
+        "label": "Bad",
+        "score": 0,
+        "stress_delta": 1,
+        "system_effects": [],
+        "targets_system": False,
+        "max_plays": 1,
+        "role": None,
+    },
 ]
 
 

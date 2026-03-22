@@ -13,8 +13,17 @@ from dataclasses import dataclass, field
 from engine.state_changes import DecisionOptionSnapshot, ForcedCardApplied, ScoreChange, StateChange
 
 STRESS_TIME_TABLE: dict[int, int] = {
-    0: 300_000, 1: 290_000, 2: 280_000, 3: 270_000, 4: 260_000,
-    5: 250_000, 6: 240_000, 7: 230_000, 8: 210_000, 9: 190_000, 10: 180_000,
+    0: 300_000,
+    1: 290_000,
+    2: 280_000,
+    3: 270_000,
+    4: 260_000,
+    5: 250_000,
+    6: 240_000,
+    7: 230_000,
+    8: 210_000,
+    9: 190_000,
+    10: 180_000,
 }
 
 
