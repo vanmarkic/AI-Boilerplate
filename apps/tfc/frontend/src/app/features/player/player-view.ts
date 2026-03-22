@@ -34,7 +34,12 @@ import { RoleCardComponent } from "./role-card.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
 import type { RoleCardSubmission } from "./role-card.component";
-import { buildRoleCards } from "./role-card.types";
+import { BoardColumnComponent } from "./board-column.component";
+import {
+  CoDecisionBarComponent,
+  type CoDecisionConfirmation,
+} from "./co-decision-bar.component";
+import { buildRoleCards, extractRecRoleId, type RoleCard } from "./role-card.types";
 
 @Component({
   selector: "tfc-player-view",
@@ -50,6 +55,8 @@ import { buildRoleCards } from "./role-card.types";
     StressBarComponent,
     ButtonDirective,
     RoleCardComponent,
+    BoardColumnComponent,
+    CoDecisionBarComponent,
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
   ],
@@ -147,6 +154,80 @@ export class PlayerView implements OnInit, OnDestroy {
       this.submittedRoles.set(new Set());
     }
   });
+
+  protected readonly focusedColumn = signal<number | null>(null);
+
+  protected toggleFocus(index: number): void {
+    this.focusedColumn.update((current) => (current === index ? null : index));
+  }
+
+  protected readonly advisorRoleCards = computed(() => {
+    return this.roleCards().filter((c) => c.playerType === "advisor");
+  });
+
+  protected readonly isDecisionMaker = computed(() => {
+    const role = this.store.playerRole();
+    const allRoles = this.store.context()?.roles ?? [];
+    const playerRoleDef = allRoles.find((r) => r.id === role);
+    return (
+      role === "decision_maker" || playerRoleDef?.player_type === "decision_maker"
+    );
+  });
+
+  protected readonly coRoleId = computed(() => {
+    const allRoles = this.store.context()?.roles ?? [];
+    return allRoles.find((r) => r.player_type === "decision_maker")?.id ?? null;
+  });
+
+  protected readonly coIntel = computed(() => {
+    const event = this.currentTurnEvent();
+    const id = this.coRoleId();
+    if (!event || !id) return null;
+    return event.role_descriptions?.[id] ?? null;
+  });
+
+  protected readonly advisorRoles = computed(() => {
+    const allRoles = this.store.context()?.roles ?? [];
+    return allRoles.filter((r) => r.player_type === "advisor");
+  });
+
+  protected readonly mirrorRoleCards = computed(() => {
+    const allRoles = this.store.context()?.roles ?? [];
+    const advisorRolesList = allRoles.filter(
+      (r) => r.player_type === "advisor",
+    );
+    const event = this.currentTurnEvent();
+    const decision = this.activeDecisions()[0] ?? null;
+    return buildRoleCards(
+      advisorRolesList,
+      event,
+      decision,
+      this.submittedRoles(),
+      false,
+      allRoles,
+    );
+  });
+
+  protected getDoneLabel(card: RoleCard): string {
+    const decision = card.decision;
+    if (!decision) return "";
+    const recEntry = Object.entries(decision.recommendations).find(
+      ([key]) => extractRecRoleId(key) === card.roleId,
+    );
+    const optionId = recEntry?.[1];
+    if (!optionId) return "";
+    return decision.options.find((o) => o.id === optionId)?.label ?? optionId;
+  }
+
+  protected onCoDecisionConfirmed(confirmation: CoDecisionConfirmation): void {
+    const decision = this.activeDecisions()[0];
+    if (!decision) return;
+    submitDecision(this.decisionApi, this.store, this.exerciseId(), decision, {
+      selectedOptions: confirmation.selectedOptionIds,
+      freeText: "",
+      targetSystemSelections: confirmation.targetSystemSelections,
+    });
+  }
 
   // Turn advancement is backend-driven: closing a decision triggers the
   // next event in sequence automatically via engine.force_trigger_next_decision.
