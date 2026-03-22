@@ -141,6 +141,7 @@ export interface ScenarioContent {
   initial_system_states?: SystemStateDef[];
   initial_warfare_domains?: ScenarioWarfareDomainDef[];
   score_tier_thresholds?: Record<string, number>;
+  stress_effect_preset?: 'off' | 'mild' | 'standard' | 'intense';
 }
 
 export interface ScenarioResponse {

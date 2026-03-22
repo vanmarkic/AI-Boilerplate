@@ -72,6 +72,7 @@ export interface ScenarioContext {
   rules: string[];
   roles: RoleDef[];
   score_tier_thresholds?: Record<string, number>;
+  stress_effect_preset?: 'off' | 'mild' | 'standard' | 'intense';
 }
 
 @Injectable({ providedIn: "root" })
