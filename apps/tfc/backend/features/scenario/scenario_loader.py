@@ -352,6 +352,7 @@ def build_engine_config(
     content: ScenarioContent,
     *,
     practice_mode: bool = False,
+    blue_card_catalog: list[dict] | None = None,
 ) -> EngineConfig:
     """Build a full EngineConfig from a validated ScenarioContent."""
     context = ScenarioContext(
@@ -382,7 +383,7 @@ def build_engine_config(
     if use_turns:
         # Generate events/decisions from turns, then convert via existing loaders
         turn_event_defs = generate_events_from_turns(content.turns)
-        turn_decision_defs = generate_decisions_from_turns(content.turns)
+        turn_decision_defs = generate_decisions_from_turns(content.turns, blue_card_catalog=blue_card_catalog)
 
         # Build synthetic issues for each decision turn
         turn_issue_defs: list[ScenarioIssueDef] = []
@@ -410,7 +411,7 @@ def build_engine_config(
         # Update decision_sequence from generated decisions
         decision_sequence = [dt.id for dt in turn_decision_defs]
         if decision_sequence:
-            mode_config.setdefault("decision_sequence", decision_sequence)
+            mode_config["decision_sequence"] = decision_sequence
             mode_config["max_possible_score"] = _compute_max_possible_score(turn_content)
             game_mode = create_game_mode(content.game_mode, mode_config)
     else:

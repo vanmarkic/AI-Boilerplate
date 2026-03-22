@@ -478,6 +478,9 @@ def test_build_engine_config_uses_turns_when_present() -> None:
     assert len(config.issues) == 1
     assert config.issues[0].id == "turn-0-issue"
 
+    # Verify synthetic issue linkage on decision template
+    assert config.decision_templates[0].issue_id == "turn-0-issue"
+
 
 def test_build_engine_config_falls_back_to_legacy_events() -> None:
     """When turns are empty, legacy events/decisions are used."""
@@ -577,6 +580,19 @@ def test_merge_warfare_domains_with_overrides() -> None:
     surface = next(wd for wd in result if wd.domain_id == "surface")
     assert surface.label == "Surface"
     assert surface.initial_threat_level == "green"
+
+
+def test_merge_warfare_domains_no_overrides() -> None:
+    """Without overrides, domain defaults are used as-is."""
+    domain_wds = [
+        {"domain_id": "air", "label": "Air", "initial_threat_level": "yellow"},
+    ]
+    result = merge_warfare_domains(domain_wds, [])
+
+    assert len(result) == 1
+    assert result[0].domain_id == "air"
+    assert result[0].label == "Air"
+    assert result[0].initial_threat_level == "yellow"
 
 
 # -- Task 7: card label resolution from catalog ------------------------------
