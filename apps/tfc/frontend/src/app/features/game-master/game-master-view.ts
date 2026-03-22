@@ -41,6 +41,7 @@ import { EventTimelineComponent } from "./event-timeline.component";
 import { ExerciseListComponent } from "./exercise-list.component";
 import { GmItemActionsComponent } from "./gm-item-actions.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
+import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
 import { StressBarComponent } from "../../shared/stress-bar.component";
 import type { ExerciseResponse } from "../../core/exercise-api.service";
 import { Subscription } from "rxjs";
@@ -65,6 +66,7 @@ import { Subscription } from "rxjs";
     GmItemActionsComponent,
     LogsDrawerComponent,
     SystemStatusBoardComponent,
+    WarfareDomainBoardComponent,
     StressBarComponent,
   ],
   template: `
@@ -173,6 +175,7 @@ import { Subscription } from "rxjs";
               [rules]="ctx.rules"
             />
           }
+          <tfc-warfare-domain-board [domains]="store.warfareDomains()" />
           <tfc-system-status-board [systems]="store.systems()" />
           @if (store.score(); as score) {
             <tfc-stress-bar [stress]="score.stress" />
