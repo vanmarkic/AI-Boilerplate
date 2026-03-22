@@ -74,8 +74,8 @@ export interface RoleCardSubmission {
         </div>
       }
 
-      <!-- Decision Form (active only) -->
-      @if (card().decision && card().status === "active") {
+      <!-- Decision Form (active only, interactive) -->
+      @if (card().decision && card().status === "active" && !readonly()) {
         <div class="role-card__decision">
           @if (
             questionType() === "single_choice" ||
@@ -132,6 +132,28 @@ export interface RoleCardSubmission {
         </div>
       }
 
+      <!-- Decision Mirror (readonly, CO view) -->
+      @if (card().decision && card().status === "active" && readonly()) {
+        <div class="role-card__decision">
+          @for (option of filteredOptions(); track option.id) {
+            <div
+              class="role-card__option"
+              [class.role-card__option--selected]="isRecommended(option.id)"
+            >
+              <span>{{ option.label }}</span>
+              @if (isRecommended(option.id)) {
+                <span class="role-card__rec-check">✓</span>
+              }
+            </div>
+          }
+          @if (pendingLabel()) {
+            <div class="role-card__done" style="font-style: italic;">
+              {{ pendingLabel() }}
+            </div>
+          }
+        </div>
+      }
+
       <!-- Done State -->
       @if (card().status === "done") {
         <div class="role-card__done">Selected: {{ doneLabel() }}</div>
@@ -142,6 +164,7 @@ export interface RoleCardSubmission {
 export class RoleCardComponent {
   readonly card = input.required<RoleCard>();
   readonly systems = input<SystemSnapshot[]>([]);
+  readonly readonly = input(false);
   readonly submitted = output<RoleCardSubmission>();
 
   readonly selectedOptions = signal<string[]>([]);
@@ -191,6 +214,21 @@ export class RoleCardComponent {
     if (!optionId) return "";
     return decision.options.find((o) => o.id === optionId)?.label ?? optionId;
   });
+
+  readonly pendingLabel = computed(() => {
+    if (!this.readonly()) return null;
+    const recs = this.card().decision?.recommendations ?? {};
+    const roleId = this.card().roleId;
+    const hasRec = Object.keys(recs).some(
+      (key) => extractRecRoleId(key) === roleId,
+    );
+    return hasRec ? null : "pending...";
+  });
+
+  protected isRecommended(optionId: string): boolean {
+    const recs = this.card().decision?.recommendations ?? {};
+    return Object.values(recs).includes(optionId);
+  }
 
   protected isSelected(optionId: string): boolean {
     return this.selectedOptions().includes(optionId);
