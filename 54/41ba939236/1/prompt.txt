@@ -1,0 +1,647 @@
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (kudf42) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+on merge scoring systems branch I want you to audit and review code quality of the commits made today. take your time to plan out and define what 'quality' means in tfc project
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Library/Application Support/Code/User/workspaceStorage/e5fe6b78a34690516dd35293d0d47170/GitHub.copilot-chat/chat-session-resources/9b06bc66-2452-4ebf-9a46-dad84ed19dde/REDACTED/content.txt in the IDE. This may or may not be related to the current task.</ide_opened_file>
+here's the GPT 5.4 version, review and integrate
+Findings
+
+High: The final-decision timeout path never completes the exercise.
+The branch adds auto-complete only in the player-close service path at engine_decision_service.py:84, engine_decision_service.py:87, and engine_decision_service.py:92.
+The engine timeout path still just advances to the next decision and exits when none remain at exercise_engine.py:326, exercise_engine.py:372, and exercise_engine.py:375.
+I reproduced this directly against the worktree engine: after the only decision timed out, the engine remained in running phase with zero open decisions and no next decision id. That is a real behavioral regression, not just a test gap.
+Why this matters in TFC: completion semantics are part of the game loop contract. If the last turn times out, the player should still get the same completed state, overlay, and audit trail as the happy path.
+
+Medium-High: Manual GM event triggering bypasses the new event-driven system-effects behavior, and for non-decision events it also skips normal broadcast and audit flow.
+The new system degradation feature is applied in the scheduled tick path at exercise_engine.py:189 and exercise_engine.py:191, and in the sequence-advance force-trigger path at exercise_engine.py:277 and exercise_engine.py:295.
+But the explicit GM trigger endpoint at engine_actions_router.py:43, engine_actions_router.py:47, engine_actions_router.py:51, and engine_actions_router.py:52 only force-triggers the event and opens a decision if relevant. It does not apply event system effects there, and it only emits through the engine callback when decision changes exist.
+That means a GM-triggered informational event with system degradation can silently miss the new systems behavior and can also miss the usual WS and audit path.
+Why this matters in TFC: event semantics should not depend on whether the inject fired via schedule, sequence chaining, or the GM trigger button. Simulation correctness has to be path-independent.
+
+Medium: The max-possible-score logic is defensible, but it encodes a product assumption that is not yet fully guarded by tests or docs.
+At scenario_loader.py:129 and scenario_loader.py:146, unlimited multi-choice turns ignore all negative options when computing the denominator for score tiers. That matches the commit rationale of rational play, but it becomes questionable if a scenario ever presents only negative or mandatory trade-off options.
+I would not call this a bug yet. I would call it a product-coupled scoring assumption that needs to stay explicit, because score tiers are now player-facing outcome messaging.
+
+What Quality Means In TFC
+For this project, I used a stricter bar than normal CRUD-app quality. In TFC, quality means:
+
+Simulation invariants hold across every entry path.
+Scheduled tick, timeout, GM-trigger, player-close, and forced-card flows must converge on the same engine truth.
+
+Engine state is the single source of truth.
+Phase, turn, score tier, systems, and decision lifecycle must be consistent from backend engine to WS messages to frontend store.
+
+Behavior is path-independent.
+A feature like system degradation or completion cannot work only on the happy path and fail on timeout or manual trigger.
+
+The engine remains pure and deterministic.
+Feature routers and services can orchestrate, but they should not rely on scattered private-engine behavior in ways that create hidden alternate flows.
+
+Tests cover the real state machine, not only isolated functions.
+In TFC, the highest-value tests are cross-path state transition tests: close vs timeout, scheduled vs force-triggered, completed vs stopped.
+
+Player UX correctness matters as much as backend correctness.
+If the engine completes but the player never sees completed, that is still low quality. The completion overlay work is directionally right because it treats UX as a contract, not decoration.
+
+Specs and implementation must stay aligned.
+This branch did good work here overall: the scoring and systems changes were documented, and most of the design decisions were explicit.
+
+Assessment Of Today’s Work
+Overall quality is decent and trending upward, but it is not release-grade yet because the core state machine still has one confirmed blocker and one likely regression around alternate execution paths.
+
+What is strong:
+
+The branch is trying to solve the right problem at the right layer.
+Scoring tier logic lives in the backend, and the frontend mostly consumes derived state. That is the correct ownership model for TFC.
+
+The completion UX changes are mostly coherent.
+The move away from immediate stop-on-complete toward phase-driven completion is consistent with the product requirement to show the overlay.
+
+The documentation discipline is better than average.
+The decision log and scoring design docs make the reasoning inspectable, which is useful in a game engine with many interacting rules.
+
+What is weaker:
+
+The implementation quality is uneven across paths.
+The player-close flow got the completion fix, but the timeout flow did not.
+
+The new system-effects behavior is still too distributed.
+Right now it is split across tick handling, force-trigger-next-decision, and the manual trigger route. That is fragile.
+
+Test coverage follows the fixes, but not the state machine.
+There is explicit coverage for player-close completion at engine_decision_service_test.py:182, engine_decision_service_test.py:242, and engine_decision_service_test.py:265, but I found no corresponding trigger-event endpoint tests and no timeout-completion test.
+
+Validation Notes
+I attempted a focused pytest run from the worktree, but that environment did not have pytest available through its uv-created environment, so I could not rely on the normal test runner there.
+I did validate the highest-risk issue by executing a direct runtime reproduction against the branch code, and that reproduction confirmed the timeout completion bug.
+
+Bottom Line
+The branch shows solid product thinking and better-than-average documentation, but the code quality is currently limited by state-machine asymmetry. In TFC, that is the kind of defect that matters most.
+
+Natural next steps:
+
+Fix the timeout path so sequence exhaustion completes the engine exactly the same way as player-close.
+Unify event system-effects application so scheduled, chained, and GM-triggered events all use one path.
+Add two regression tests: timeout-on-final-decision completion, and manual trigger applying system effects plus broadcast/audit behavior.
+
+---
+
+how can we solve this deeply :
+
+GPT's "quality definition" section is stronger than ours. The framing around path independence and simulation invariants is the right lens for a game engine:
+
+"A feature like system degradation or completion cannot work only on the happy path and fail on timeout or manual trigger."
+
+---
+
+reaction of gpt :
+
+
+I’m reading the planning skill first, then I’ll evaluate this proposal as an architectural fix rather than as another patch-level workaround.
+
+Read skill [spec-workflow](file:///Users/dragan/.claude/skills/spec-workflow/SKILL.md?vscodeLinkType%3Dskill)
+
+I think the diagnosis is mostly right.
+
+The strongest part of this writeup is the shift from bug list to system explanation: path drift is the root problem. That matches what the branch is showing. New side effects are being added to one close path, then missed in the others. In TFC, that is exactly how correctness decays.
+
+What I agree with:
+
+1. One canonical close-decision path is the right direction.
+A public engine-level method for “close decision and apply all consequences” would remove the current duplication across:
+engine_decision_service.py,
+exercise_engine.py,
+and engine_actions_router.py.
+
+2. One canonical event-trigger path is also right.
+The event system-effects bug exists because trigger semantics are split between tick handling, force-trigger-next-decision, and the router trigger path. That should converge.
+
+3. Path-equivalence tests are exactly the right kind of tests for this codebase.
+In TFC, high-value tests are not “helper works in isolation”. They are “same business event, different entry path, identical engine state”.
+
+4. The proposal improves architecture, not just correctness.
+Right now callers are reaching into engine internals inconsistently. That is a real design smell, not merely a style preference.
+
+Where I would tighten or change the proposal:
+
+1. Do not put too much orchestration directly into ExerciseEngine if it pushes the file further past policy limits.
+The concept is right, but I would probably implement:
+`ExerciseEngine.close_decision(...) -> list[StateChange]`
+and have it delegate to a pure-Python helper like `DecisionLifecycleCoordinator` or similar under `engine/`.
+That preserves the “single public engine entry point” without turning exercise_engine.py into a 500-line god object.
+
+2. Domain invariants should live in the engine, not only in the service.
+The proposal says max_selections can stay request validation in the service. I would not do that. It is a game rule, so the engine public method should enforce it too. HTTP can prevalidate for nicer errors, but the engine still has to defend its own invariants.
+
+3. I would not return empty lists for “not found / invalid state”.
+For a public engine API, `[]` is too lossy. It makes misuse easy to ignore.
+Better options:
+- raise domain errors like `NotFoundError` / `BadRequestError` / `EngineStateError`
+- or return a small explicit result type
+For this codebase, raising domain errors is probably the cleaner fit.
+
+4. The canonical trigger path should cover scheduled starts too, not just GM/manual trigger.
+If you add `engine.trigger_event()` but scheduled events still go through ad hoc logic in `tick()`, you still have two semantics. I would unify around an internal helper used by both `tick()` and manual trigger, or make `tick()` call the same transition method.
+
+5. The AST enforcement test is directionally good but a bit brittle.
+The goal is correct: stop services/routers from calling `engine._private_methods`.
+But raw AST policing can create maintenance noise. I’d still do it if needed, but preferably as:
+- a narrow architecture test for engine_decision_service.py and engine_actions_router.py
+- or an extension of the repo’s existing architecture lint
+The intent is worth enforcing. The exact mechanism can be pragmatic.
+
+What I think is especially strong in the proposal:
+
+1. The forced-card fix is structurally correct.
+Resolving “effective options” after forced-card insertion and using those for both scoring and system effects is the right model.
+
+2. Passing the real `decision_id` into `get_next_decision_id` is correct.
+That fixes the current accidental coupling to `SimpleCollaborativeMode`.
+
+3. Thinning the router and service is the right boundary.
+Routers should parse/return HTTP.
+Services can coordinate app-level concerns.
+The engine should own simulation transitions.
+
+My overall verdict:
+
+This is the right architectural direction, and it is better than continuing to patch the three paths independently.
+
+If I had to sharpen it into a TFC-specific principle, it would be:
+
+1. Every simulation transition gets one public engine entry point.
+2. Every caller uses that entry point.
+3. Every entry path is tested for state equivalence.
+
+That is the real fix.
+
+The only thing I would resist is implementing it as a large in-place refactor inside exercise_engine.py without a spec and task split. This is exactly the kind of change that should be done in small, reviewable steps.
+
+If you want, I can turn this into a concrete refactor plan with:
+1. acceptance criteria
+2. task breakdown
+3. proposed public engine API
+4. exact test matrix for path equivalence
+
+
+Refactor Plan
+The right next step is a spec-first refactor that introduces two canonical engine transitions:
+
+engine.close_decision(...)
+engine.trigger_event(...)
+Everything else should become a thin shell around those transitions.
+
+This is the smallest architecture change that fixes the actual class of bugs you found without rewriting the engine.
+
+Specification
+
+Problem
+Decision lifecycle behavior is currently scattered across multiple paths:
+engine_decision_service.py,
+exercise_engine.py,
+and engine_actions_router.py.
+
+That causes path drift:
+
+timeout completion missing
+forced-card system effects missing
+manual trigger semantics inconsistent
+callers reaching into private engine methods
+Goal
+Make the engine the single owner of simulation transitions so all entry paths converge on the same state machine.
+
+Non-goals
+
+No redesign of game-mode scoring formulas
+No frontend feature changes beyond tests if existing payloads stay stable
+No large router/service restructuring outside the exercise lifecycle
+No speculative new abstractions unless they directly reduce duplication
+Acceptance Criteria
+
+Closing a decision through player submit and timeout goes through the same engine method and yields equivalent end state.
+Forced cards affect score, play counts, and system effects consistently.
+Final-decision timeout completes the exercise exactly like manual/player close.
+Manual GM event trigger applies the same event side effects as scheduled/sequence-triggered events.
+Services and routers no longer call private engine methods.
+Existing WS and audit behavior remains intact or improves, with no lost broadcasts for non-decision event triggers.
+New regression tests cover path equivalence for decision close and event trigger.
+The refactor remains reviewable in small tasks.
+Architecture Decision
+Keep the public boundary on ExerciseEngine, but move the heavy workflow logic into engine-owned helpers if needed.
+
+That means:
+
+Public API on exercise_engine.py
+Thin orchestration in engine_decision_service.py
+Thin orchestration in engine_actions_router.py
+I would not let the router or service keep any logic that mutates simulation state beyond request validation and error translation.
+
+Proposed Public Engine API
+Add these public methods to exercise_engine.py:
+
+async close_decision(decision_id: str, selected_option_ids: list[str]) -> list[StateChange]
+Responsibility:
+close, score, resolve forced options, record plays, apply system effects, advance turn, auto-complete, auto-resume
+
+trigger_event(event_id: str) -> list[StateChange] or async trigger_event(...) -> list[StateChange]
+Responsibility:
+force-trigger event, apply event system effects, open decision if applicable
+
+Internal helper:
+_resolve_effective_options(selected_opts, all_opts, forced_ids) -> list[DecisionOptionSnapshot]
+Responsibility:
+selected plus auto-added forced options, used for both scoring consequences and system effects
+
+I would also move timeout-option selection into engine helpers:
+
+_is_timed_out(decision) -> bool
+_select_timeout_option(decision) -> str | None
+Important Design Constraints
+
+The engine must still enforce business invariants itself.
+max_selections should not live only in the service. The service can prevalidate, but the engine method must defend the rule too.
+
+Do not return silent [] for invalid engine usage unless there is already a strong convention for that.
+Prefer domain exceptions for:
+
+missing decision
+
+already closed decision
+
+invalid selections
+
+invalid engine phase
+
+Pass the actual decision_id into get_next_decision_id(...).
+The current empty-string usage is accidental compatibility with SimpleCollaborativeMode.
+
+Task Breakdown
+
+Task 1: Introduce canonical decision-close path
+Files:
+
+exercise_engine.py
+engine_decision_service.py
+relevant decision-close tests under exercise
+Changes:
+
+Add public engine.close_decision(...)
+Move player-close workflow into engine
+Make service validate request shape only, then delegate
+Acceptance:
+
+player-close behavior unchanged externally
+service no longer calls _apply_system_effects
+final player-close auto-complete still works
+Task 2: Move timeout path onto canonical decision-close path
+Files:
+
+exercise_engine.py
+timeout-related tests in engine
+Changes:
+
+_timeout_loop() delegates to engine.close_decision(...)
+final timeout path completes exercise
+forced-card effects and play counts use effective options
+Acceptance:
+
+last-decision timeout completes exercise
+timeout and player-close produce equivalent state for same effective choice
+Task 3: Introduce canonical event-trigger path
+Files:
+
+exercise_engine.py
+engine_actions_router.py
+event-system-effects tests
+Changes:
+
+Add public engine.trigger_event(...)
+Route GM manual trigger through engine
+Ensure non-decision events also emit the correct state changes
+Acceptance:
+
+GM trigger applies event system effects
+GM trigger broadcasts changes even for non-decision events
+no router call to _handle_decision_events
+Task 4: Add path-equivalence regression tests
+Files:
+
+new engine-level test file under engine
+possibly one router/service architecture test file
+Changes:
+
+player-close vs timeout equivalence test
+scheduled event vs GM trigger equivalence test
+forced-card system-effects regression test
+Acceptance:
+
+core invariants are asserted through engine state equality or equivalent snapshots
+Task 5: Add architecture guardrails
+Files:
+
+new architecture test file under tests or colocated engine/exercise tests
+Changes:
+
+prevent service/router access to private engine methods
+keep this narrow to the exercise boundary
+Acceptance:
+
+future drift is caught automatically
+Test Matrix
+
+Decision Path Equivalence
+
+single-turn exercise: player close vs timeout
+multi-turn exercise: intermediate close vs final close
+final-decision timeout completes exercise
+forced card omitted by player still affects score and systems
+exhausted option plus forced card still applies forced system effects
+GM mode path still resumes correctly when not sequence-complete
+Event Path Equivalence
+
+scheduled tick start vs manual GM trigger for same event
+sequence-advance force-trigger vs manual trigger for decision event
+non-decision event with system effects broadcasts correctly
+decision event with system effects opens decision and mutates systems exactly once
+Boundary Tests
+
+invalid decision id
+already closed decision
+too many selections
+concurrent completion race does not explode
+get_next_decision_id(decision_id) is called with real id
+Suggested Public Behavior Assertions
+For equivalent paths, compare:
+
+engine.phase
+engine.snapshot()["systems"]
+engine.snapshot()["score"]
+decision snapshot status
+emitted StateChange types, allowing expected timing differences only where intentional
+Implementation Notes
+
+If exercise_engine.py grows too far past policy, extract the workflow into an engine-owned helper, not back into service/router code.
+Keep audit and WS broadcasting outside the pure engine mutation logic where possible, but make sure callers broadcast the full returned change list.
+The engine should return all state changes for a transition; callers should not reconstruct them.
+Recommended Order
+
+canonical close_decision
+timeout migration
+canonical trigger_event
+path-equivalence tests
+architecture guard tests
+Why This Plan Is Better Than More Hotfixes
+
+It fixes the known bugs and the mechanism that produced them.
+It matches TFC’s actual quality bar: path-independent simulation behavior.
+It reduces future regression risk when adding new consequences like scoring, systems, or completion rules.
+
+---
+
+yes plan the merge first approach. document decision in md file
+
+---
+
+ok
+
+---
+
+is there a risk it breaks frontend integration ?
+
+---
+
+ok proceed
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (we8vav) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+proceed
+
+---
+
+ok we're good, proceed
+
+---
+
+remove
+
+---
+
+what's next ?
+
+---
+
+I think #1 are all done
+
+---
+
+when where they created ?
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Bash tool output (6m4hux) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+close them all
+
+---
+
+phase 2
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/AGENTS.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+all test passing ? can you run 3 step tutorio scenario with smoke test tfc skill ?
+
+---
+
+<task-notification>
+<task-id>bvnm5ppmp</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/79dedc55-78a0-4b5f-98d9-1bc1ab78e937/tasks/bvnm5ppmp.output</output-file>
+<status>completed</status>
+<summary>Background command "Start TFC backend" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/79dedc55-78a0-4b5f-98d9-1bc1ab78e937/tasks/bvnm5ppmp.output
+
+---
+
+<task-notification>
+<task-id>bq5ln6ex5</task-id>
+<tool-use-id>toolu_01JgKD2cjSf1TY4wKKqBBDGU</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/79dedc55-78a0-4b5f-98d9-1bc1ab78e937/tasks/bq5ln6ex5.output</output-file>
+<status>completed</status>
+<summary>Background command "Start backend in foreground to see errors" completed (exit code 0)</summary>
+</task-notification>
+Read the output file to retrieve the result: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/79dedc55-78a0-4b5f-98d9-1bc1ab78e937/tasks/bq5ln6ex5.output
+
+---
+
+yes
+
+---
+
+merge it
+
+---
+
+assess these candidates for canonicalization:
+
+Exercise phase transitions
+The backend repeats the same engine call → broadcast → audit pattern across start, begin, pause, resume, reset, and complete in engine_router.py:97, engine_router.py:140, engine_router.py:151, engine_router.py:161, engine_router.py:172, and engine_router.py:188.
+On the frontend, the same phase can arrive via snapshot load or via WS phase changes, and gets applied differently in player-view.ts:158, player-view.ts:170, and ws-state-handler.ts:32.
+This is a good canonicalization candidate, but I’d rank it below decision close and event trigger because it is more “orchestration duplication” than “simulation correctness bug.”
+
+Manual event actions as a family
+Not just trigger. Pause, resume, delay, skip, complete, cancel, and activate issue all follow the same shape in engine_actions_router.py:43, engine_actions_router.py:56, engine_actions_router.py:64, engine_actions_router.py:72, engine_actions_router.py:86, engine_actions_router.py:99, and engine_actions_router.py:111.
+Right now they are endpoint-specific wrappers over scheduler/manager calls. If you introduce more event-side consequences later, this file will drift the same way decision close drifted.
+I would absolutely make “event action execution” more canonical after the merge patch.
+
+Frontend exercise-state application
+There are effectively three state-application paths:
+snapshot bulk apply in exercise.store.ts:160,
+WS change-by-change apply in ws-state-handler.ts:30,
+and direct imperative updates from view code in player-view.ts:170.
+This is the frontend analogue of the backend path-drift problem. It is not as dangerous as engine drift, but it is why completion and reconnect behavior became fragile.
+If you want a canonical frontend path, I’d aim for “all server-originated changes go through one reducer-like apply layer.”
+
+Waiting room participant mutation and participant broadcast shape
+Join, role update, and leave all mutate waiting-room state and then build/broadcast the same payload in waiting_room_router.py:30, waiting_room_router.py:56, waiting_room_router.py:107, and waiting_room_router.py:146.
+Separately, engine start emits a different participant-related payload from engine_router.py:131.
+This is a good candidate for a canonical “participant-state broadcast” path, especially if you keep adding lobby/session transitions.
+
+Recommendation submission
+Decision close got a service. Recommendation submission is still inline in engine_router.py:250.
+That means one decision-related mutation path is orchestrated through a dedicated application service, while the other remains router-owned. If recommendation behavior ever gains side effects beyond a single manager call plus broadcast, it will drift fast.
+I would not refactor this before merge, but it is a clear next candidate.
+
+Issue lifecycle, but lower priority
+Issue transitions are partly engine-driven and partly router-driven:
+manual activation in engine_actions_router.py:111,
+while auto-activation/auto-resolve live inside the engine tick in issue manager integration paths.
+That does resemble the same pattern, but right now the issue lifecycle looks more centralized than decisions/events because the transition rules themselves still live in the manager. I’d call this a second-wave candidate, not an immediate one.
+
+---
+
+proceed
+
+---
+
+Mostly yes. This ranking is substantially better calibrated than the earlier broader list.
+
+My take, item by item:
+
+Exercise phase transitions: agree, skip
+Your reasoning is right. In engine_router.py, the duplication is shallow and explicit, not semantically divergent. The start path is already structurally different enough that a generic helper would likely make the code less legible, not more correct.
+This is boilerplate, not path drift.
+
+Manual event actions: agree, low priority
+I agree with the distinction you made between trigger_event and the rest.
+The real bug class was on the trigger path because it had extra consequences. The others in engine_actions_router.py are mostly thin scheduler wrappers. Canonicalizing those now would be speculative.
+So yes: only escalate them when one of those actions gains more side effects than just scheduler mutation.
+
+Frontend exercise-state application: agree, watch but do not refactor now
+This is the right call.
+The frontend layering is not actually bad:
+
+message routing in player-ws-handler
+change reduction in ws-state-handler.ts
+state mutation in exercise.store.ts
+The fragile part is not “too many state paths” in general. It is completion semantics being detectable through more than one transport shape.
+So I agree with your narrower conclusion: if another completion-like path appears, extract a dedicated completion handler. Until then, watch it.
+
+Waiting room participant mutation: agree, good candidate but defer
+Yes.
+waiting_room_router.py is repetitive, but still stable and low-risk. This is the right kind of thing to defer until the lobby grows more behavior.
+
+Recommendation submission: agree, this is the next small canonicalization win
+I think this is the sharpest item in your list.
+It is decision-related behavior, but unlike close_decision it is still router-owned in engine_router.py:250. That makes it the most obvious remaining “same domain, different orchestration model” inconsistency.
+I would not call it urgent for correctness today, but I would call it the best next small cleanup once the higher-risk engine fixes are done.
+
+Issue lifecycle: agree, skip
+Yes.
+The actual transition rules are still centralized in the manager, which is the important part. I do not currently see the same degree of multi-path semantic drift there.
+
+Where I would add one missing candidate:
+
+Exercise session start/stop semantics
+Not phase transitions broadly, but session lifecycle specifically.
+The interplay between:
+engine_router.py for start, complete, stop
+exercise_session_service.py
+frontend handling of exercise_started and exercise_stopped
+is still a little too distributed for a flow that decides whether clients navigate, disconnect, or keep rendering completion state.
+
+I would not rank it above recommendation submission right now, but I do think it is more structurally important than waiting-room canonicalization.
+
+So my final ranking would be:
+
+Decision close and trigger_event canonicalization
+Already the right priority.
+
+Recommendation submission
+Best next small canonicalization.
+
+Session start/stop/completion semantics
+Worth watching as the next lifecycle consolidation area.
+
+Frontend completion handling
+Only if more transport paths appear.
+
+Waiting room participant mutation
+Defer.
+
+Phase endpoint boilerplate
+Ignore.
+
+Issue lifecycle
+Ignore for now.
+
+So overall: your ranked assessment is good, and I would adopt it with only one addition: keep an eye on session lifecycle as a separate canonicalization target, because that is where frontend navigation, teardown, and completion semantics still cross too many boundaries.
+
+---
+
+<ide_selection>The user selected the lines 1 to 15 from /Users/dragan/.claude/projects/-Users-dragan-Documents-AI-Boilerplate/memory/project_canonicalization_priorities.md:
+---
+name: TFC canonicalization priorities
+description: Ranked list of remaining canonicalization candidates for the TFC engine, agreed 2026-03-22 after completing decision close + event trigger unification
+type: project
+---
+
+Canonical decision close (`engine.close_decision()`) and event trigger (`engine.trigger_event()`) are done (PR #197, merged 2026-03-22).
+
+Remaining candidates, in priority order:
+
+1. **Recommendation submission** — only uncanonical decision-related mutation path. Still inline in `engine_router.py:250`, bypasses `broadcast_changes` and `_log_to_audit`. Best next small cleanup (~15 LOC).
+
+2. **Session start/stop/completion semantics** — `start` (creates engine, wires callbacks, broadcasts participants), `complete` (doesn't tear down, for overlay), `stop` (full teardown via `ExerciseSessionService`). Three different shapes for session lifecycle. Frontend navigation, teardown, and completion semantics cross too many boundaries. Worth watching as the next lifecycle consolidation area.
+
+3. **Frontend completion handling** — completion detectable through two transport shapes (`exercise_stopped` with reason=completed, `phase_change(completed)` in state_changes). Only act if a third completion path appears.
+
+This may or may not be related to the current task.</ide_selection>
+do the first 3
+
+---
+name: TFC canonicalization priorities
+description: Ranked list of remaining canonicalization candidates for the TFC engine, agreed 2026-03-22 after completing decision close + event trigger unification
+type: project
+---
+
+Canonical decision close (`engine.close_decision()`) and event trigger (`engine.trigger_event()`) are done (PR #197, merged 2026-03-22).
+
+Remaining candidates, in priority order:
+
+1. **Recommendation submission** — only uncanonical decision-related mutation path. Still inline in `engine_router.py:250`, bypasses `broadcast_changes` and `_log_to_audit`. Best next small cleanup (~15 LOC).
+
+2. **Session start/stop/completion semantics** — `start` (creates engine, wires callbacks, broadcasts participants), `complete` (doesn't tear down, for overlay), `stop` (full teardown via `ExerciseSessionService`). Three different shapes for session lifecycle. Frontend navigation, teardown, and completion semantics cross too many boundaries. Worth watching as the next lifecycle consolidation area.
+
+3. **Frontend completion handling** — completion detectable through two transport shapes (`exercise_stopped` with reason=completed, `phase_change(completed)` in state_changes). Only act if a third completion path appears.
+
+---
+
+1
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/.claude/skills/smoke-test-tfc/SKILL.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+did you run all tests, smoke included ?

@@ -3,7 +3,7 @@
   "checkpoint_id": "5441ba939236",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 2,
+  "checkpoints_count": 3,
   "files_touched": [
     "apps/main/backend/tests/migration_rollback_test.py",
     "apps/tfc/backend/engine/exercise_engine_close_decision_test.py",
@@ -23,13 +23,19 @@
       "transcript": "/54/41ba939236/0/full.jsonl",
       "content_hash": "/54/41ba939236/0/content_hash.txt",
       "prompt": "/54/41ba939236/0/prompt.txt"
+    },
+    {
+      "metadata": "/54/41ba939236/1/metadata.json",
+      "transcript": "/54/41ba939236/1/full.jsonl",
+      "content_hash": "/54/41ba939236/1/content_hash.txt",
+      "prompt": "/54/41ba939236/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 338,
-    "cache_creation_tokens": 122392,
-    "cache_read_tokens": 2673246,
-    "output_tokens": 15057,
-    "api_call_count": 48
+    "input_tokens": 6479,
+    "cache_creation_tokens": 504630,
+    "cache_read_tokens": 82075893,
+    "output_tokens": 115311,
+    "api_call_count": 454
   }
 }
