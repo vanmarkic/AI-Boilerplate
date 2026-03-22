@@ -67,14 +67,48 @@ export interface DecisionOptionDef {
   max_plays: number;
 }
 
+export interface TurnInjectDef {
+  target_roles: string[];
+  text: string;
+  role_descriptions: Record<string, string>;
+}
+
+export interface TurnCardConfig {
+  card_id: string;
+  score: number;
+  stress_delta: number;
+  system_effects: SystemEffectDef[];
+  domain_effects: DomainEffectDef[];
+  max_plays: number;
+}
+
+export interface PathNoteDef {
+  card_ids: string[];
+  notes: string;
+}
+
+export interface DomainEffectDef {
+  domain_id: string;
+  threat_level: string;
+}
+
 export interface TurnDefinition {
   turn_index: number;
   title: string;
   facilitator_prompt: string | null;
   has_decisions: boolean;
+  duration_ms: number | null;
   inject_ids: string[];
   decision_template_id: string | null;
+  injects: TurnInjectDef[];
+  available_cards: TurnCardConfig[];
+  max_selections: number;
   base_stress_delta: number;
+  system_effects_on_start: SystemEffectDef[];
+  domain_effects_on_start: DomainEffectDef[];
+  best_path: PathNoteDef | null;
+  acceptable_path: PathNoteDef | null;
+  design_notes: string;
 }
 
 export interface ScenarioContent {
