@@ -23,14 +23,17 @@ from engine.issue_manager import IssueManager
 from engine.state_changes import (
     DecisionOpened,
     DecisionOptionSnapshot,
+    DomainEffect,
     EngineSnapshot,
     PhaseChange,
     StateChange,
     SystemEffect,
     SystemStateChange,
+    WarfareDomainChange,
 )
 from engine.system_manager import SystemManager
 from engine.time_manager import TimeManager
+from engine.warfare_domain_manager import WarfareDomainManager
 
 
 class EngineStateError(RuntimeError):
@@ -59,6 +62,7 @@ class ExerciseEngine:
         self._events = EventScheduler()
         self._issues = IssueManager()
         self._systems = SystemManager()
+        self._warfare_domains = WarfareDomainManager()
         self._decisions = DecisionManager()
         self._tick_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._timeout_task: asyncio.Task | None = None  # type: ignore[type-arg]
@@ -69,6 +73,7 @@ class ExerciseEngine:
         self._events.load_events(config.events)
         self._issues.load_issues(config.issues)
         self._systems.load_systems(list(config.initial_system_states))
+        self._warfare_domains.load_domains(list(config.initial_warfare_domains))
 
     @property
     def phase(self) -> EnginePhase:
@@ -89,6 +94,10 @@ class ExerciseEngine:
     @property
     def system_manager(self) -> SystemManager:
         return self._systems
+
+    @property
+    def warfare_domain_manager(self) -> WarfareDomainManager:
+        return self._warfare_domains
 
     @property
     def decision_manager(self) -> DecisionManager:
@@ -166,6 +175,7 @@ class ExerciseEngine:
         self._events.load_events(self._config.events)
         self._issues.load_issues(self._config.issues)
         self._systems.load_systems(list(self._config.initial_system_states))
+        self._warfare_domains.load_domains(list(self._config.initial_warfare_domains))
         self._decisions.clear()
         self._option_play_counts.clear()
         return self._phase_change("reset")
@@ -299,6 +309,9 @@ class ExerciseEngine:
         # Apply system effects
         if event.system_effects:
             changes.extend(self._apply_event_system_effects(event.system_effects))
+        # Apply domain effects
+        if event.domain_effects:
+            changes.extend(self._apply_event_domain_effects(event.domain_effects))
         # Open decision if applicable
         changes.extend(self._handle_decision_events([event_change], pt))
         return changes
@@ -319,6 +332,8 @@ class ExerciseEngine:
                 event = self._events.events.get(change["event_id"])
                 if event and event.system_effects:
                     changes.extend(self._apply_event_system_effects(event.system_effects))
+                if event and event.domain_effects:
+                    changes.extend(self._apply_event_domain_effects(event.domain_effects))
 
         decision_changes = self._handle_decision_events(event_changes, pt)
         changes.extend(decision_changes)
@@ -354,6 +369,7 @@ class ExerciseEngine:
             decisions=self._decisions.snapshot(),
             score=self._config.game_mode.snapshot(),
             systems=self._systems.snapshot(),
+            warfare_domains=self._warfare_domains.snapshot(),
         )
 
     def _handle_decision_events(
@@ -425,6 +441,9 @@ class ExerciseEngine:
         # Apply system effects from force-triggered event
         if event and event.system_effects:
             changes.extend(self._apply_event_system_effects(event.system_effects))
+        # Apply domain effects from force-triggered event
+        if event and event.domain_effects:
+            changes.extend(self._apply_event_domain_effects(event.domain_effects))
         changes.extend(self._handle_decision_events([event_change], pt))
         return changes
 
@@ -502,6 +521,16 @@ class ExerciseEngine:
     ) -> list[SystemStateChange]:
         """Apply system_effects from an event (inject) via SystemManager."""
         return self._apply_effects_list(effects)
+
+    def _apply_event_domain_effects(
+        self, effects: list[DomainEffect],
+    ) -> list[WarfareDomainChange]:
+        """Apply domain_effects from an event (inject) via WarfareDomainManager."""
+        out: list[WarfareDomainChange] = []
+        for fx in effects:
+            if c := self._warfare_domains.set_threat_level(fx["domain_id"], fx["threat_level"]):
+                out.append(c)
+        return out
 
     def _apply_effects_list(
         self, effects: list[SystemEffect],
