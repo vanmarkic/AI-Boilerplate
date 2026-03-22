@@ -1,0 +1,6 @@
+what can we add to commit hooks ?
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/player/player-view.html in the IDE. This may or may not be related to the current task.</ide_opened_file>
+yes

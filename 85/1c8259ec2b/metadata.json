@@ -3,7 +3,7 @@
   "checkpoint_id": "851c8259ec2b",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 12,
+  "checkpoints_count": 13,
   "files_touched": [
     "apps/tfc/codegen/check-freshness.sh",
     "apps/tfc/docs/blue-card-catalog.json",
@@ -22,13 +22,19 @@
       "transcript": "/85/1c8259ec2b/1/full.jsonl",
       "content_hash": "/85/1c8259ec2b/1/content_hash.txt",
       "prompt": "/85/1c8259ec2b/1/prompt.txt"
+    },
+    {
+      "metadata": "/85/1c8259ec2b/2/metadata.json",
+      "transcript": "/85/1c8259ec2b/2/full.jsonl",
+      "content_hash": "/85/1c8259ec2b/2/content_hash.txt",
+      "prompt": "/85/1c8259ec2b/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 927,
-    "cache_creation_tokens": 347772,
-    "cache_read_tokens": 7608741,
-    "output_tokens": 36470,
-    "api_call_count": 86
+    "input_tokens": 952,
+    "cache_creation_tokens": 416621,
+    "cache_read_tokens": 9280348,
+    "output_tokens": 42194,
+    "api_call_count": 107
   }
 }
