@@ -3,7 +3,7 @@
   "checkpoint_id": "3a1407b866e3",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 16,
+  "checkpoints_count": 17,
   "files_touched": [
     "apps/tfc/frontend/src/app/features/foundation/foundation-catalog-section.ts",
     "apps/tfc/frontend/src/app/features/foundation/foundation-view.ts"
@@ -20,13 +20,19 @@
       "transcript": "/3a/1407b866e3/1/full.jsonl",
       "content_hash": "/3a/1407b866e3/1/content_hash.txt",
       "prompt": "/3a/1407b866e3/1/prompt.txt"
+    },
+    {
+      "metadata": "/3a/1407b866e3/2/metadata.json",
+      "transcript": "/3a/1407b866e3/2/full.jsonl",
+      "content_hash": "/3a/1407b866e3/2/content_hash.txt",
+      "prompt": "/3a/1407b866e3/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 422,
-    "cache_creation_tokens": 268525,
-    "cache_read_tokens": 34620686,
-    "output_tokens": 105290,
-    "api_call_count": 313
+    "input_tokens": 580,
+    "cache_creation_tokens": 586218,
+    "cache_read_tokens": 45786561,
+    "output_tokens": 162076,
+    "api_call_count": 401
   }
 }
