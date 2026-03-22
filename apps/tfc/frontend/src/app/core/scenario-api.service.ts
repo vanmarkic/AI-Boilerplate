@@ -92,6 +92,12 @@ export interface DomainEffectDef {
   threat_level: string;
 }
 
+export interface ScenarioWarfareDomainDef {
+  domain_id: string;
+  label: string;
+  initial_threat_level: string;
+}
+
 export interface TurnDefinition {
   turn_index: number;
   title: string;
@@ -133,6 +139,7 @@ export interface ScenarioContent {
   decision_sequence?: string[];
   turns?: TurnDefinition[];
   initial_system_states?: SystemStateDef[];
+  initial_warfare_domains?: ScenarioWarfareDomainDef[];
   score_tier_thresholds?: Record<string, number>;
 }
 

@@ -17,6 +17,7 @@ const minimalContent: ScenarioContent = {
   game_mode: "classic",
   turns: [],
   initial_system_states: [],
+  initial_warfare_domains: [],
 };
 
 @Component({
@@ -30,7 +31,7 @@ const minimalContent: ScenarioContent = {
   />`,
 })
 class TestHost {
-  mode = signal<"global" | "walkthrough">("global");
+  mode = signal<"setup" | "turns">("setup");
   dirty = signal(false);
   saved = false;
   copied = false;
@@ -119,14 +120,14 @@ describe("ScenarioBuilderActionsComponent", () => {
     expect(revertBtn).toBeTruthy();
   });
 
-  it("shows Walkthrough text when viewMode is global", () => {
-    host.mode.set("global");
+  it("shows Turns text when viewMode is setup", () => {
+    host.mode.set("setup");
     fixture.detectChanges();
     const buttons: HTMLButtonElement[] = Array.from(
       fixture.nativeElement.querySelectorAll("button"),
     );
     const toggleBtn = buttons.find(
-      (b) => b.textContent?.trim() === "Walkthrough",
+      (b) => b.textContent?.trim() === "Turns",
     );
     expect(toggleBtn).toBeTruthy();
   });
@@ -143,13 +144,13 @@ describe("ScenarioBuilderActionsComponent", () => {
   });
 
   it("view toggle button click emits onToggleView", () => {
-    host.mode.set("global");
+    host.mode.set("setup");
     fixture.detectChanges();
     const buttons: HTMLButtonElement[] = Array.from(
       fixture.nativeElement.querySelectorAll("button"),
     );
     const toggleBtn = buttons.find(
-      (b) => b.textContent?.trim() === "Walkthrough",
+      (b) => b.textContent?.trim() === "Turns",
     );
     toggleBtn!.click();
     expect(host.toggled).toBe(true);

@@ -1,7 +1,9 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { provideRouter } from "@angular/router";
 import { of } from "rxjs";
 import { ScenarioBuilderView } from "./scenario-builder-view";
 import { ScenarioApiService } from "../../core/scenario-api.service";
+import { DomainConfigApiService } from "../../core/domain-config-api.service";
 import { DomainService } from "../../core/domain.service";
 
 describe("ScenarioBuilderView", () => {
@@ -15,6 +17,26 @@ describe("ScenarioBuilderView", () => {
     update: vi.fn(),
     delete: vi.fn(),
     clone: vi.fn(),
+  };
+
+  const mockDomainConfigApi = {
+    getBySlug: vi.fn().mockReturnValue(
+      of({
+        id: 1,
+        slug: "silent-wake",
+        name: "Silent Wake",
+        description: "",
+        terminology: {},
+        theme: {},
+        roles: [],
+        severity_levels: [],
+        systems: [],
+        warfare_domains: [],
+        blue_card_catalog: [],
+        created_at: "",
+        updated_at: "",
+      }),
+    ),
   };
 
   const mockDomain = {
@@ -32,8 +54,12 @@ describe("ScenarioBuilderView", () => {
 
     await TestBed.configureTestingModule({
       imports: [ScenarioBuilderView],
+      providers: [provideRouter([])],
     })
       .overrideProvider(ScenarioApiService, { useValue: mockApi })
+      .overrideProvider(DomainConfigApiService, {
+        useValue: mockDomainConfigApi,
+      })
       .overrideProvider(DomainService, { useValue: mockDomain })
       .compileComponents();
 
@@ -59,15 +85,12 @@ describe("ScenarioBuilderView", () => {
     expect(sidebar).toBeTruthy();
   });
 
-  it("shows global view by default with all sections", () => {
+  it("shows setup tab by default with foundation, metadata, and initial states sections", () => {
     fixture.detectChanges();
     const el = fixture.nativeElement;
-    expect(el.querySelector("#section-roles")).toBeTruthy();
-    expect(el.querySelector("#section-events")).toBeTruthy();
-    expect(el.querySelector("#section-issues")).toBeTruthy();
-    expect(el.querySelector("#section-decisions")).toBeTruthy();
-    expect(el.querySelector("#section-turns")).toBeTruthy();
-    expect(el.querySelector("#section-settings")).toBeTruthy();
+    expect(el.querySelector("#section-foundation")).toBeTruthy();
+    expect(el.querySelector("#section-metadata")).toBeTruthy();
+    expect(el.querySelector("#section-initial-states")).toBeTruthy();
   });
 
   it("shows No scenarios found when list is empty", () => {
