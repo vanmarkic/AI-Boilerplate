@@ -32,6 +32,7 @@ import { Subscription } from "rxjs";
 import { handlePlayerWsMessage } from "./player-ws-handler";
 import { RoleCardComponent } from "./role-card.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
+import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
 import type { RoleCardSubmission } from "./role-card.component";
 import { buildRoleCards } from "./role-card.types";
 
@@ -50,6 +51,7 @@ import { buildRoleCards } from "./role-card.types";
     ButtonDirective,
     RoleCardComponent,
     SystemStatusBoardComponent,
+    WarfareDomainBoardComponent,
   ],
   templateUrl: "./player-view.html",
 })
