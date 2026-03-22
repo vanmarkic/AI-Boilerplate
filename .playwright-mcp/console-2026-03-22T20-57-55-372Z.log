@@ -1,0 +1,6 @@
+[     144ms] [ERROR] Access to XMLHttpRequest at 'http://localhost:8001/api/exercises/joinable' from origin 'http://localhost:4201' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:4201/home:0
+[     144ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8001/api/exercises/joinable:0
+[   26647ms] [ERROR] Access to XMLHttpRequest at 'http://localhost:8001/api/exercises/joinable' from origin 'http://localhost:4201' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:4201/home:0
+[   26648ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8001/api/exercises/joinable:0
+[   33544ms] [ERROR] Access to XMLHttpRequest at 'http://localhost:8001/api/exercises/joinable' from origin 'http://localhost:4201' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. @ http://localhost:4201/home:0
+[   33544ms] [ERROR] Failed to load resource: net::ERR_FAILED @ http://localhost:8001/api/exercises/joinable:0
