@@ -3,6 +3,7 @@
   "description": "Naval cyber-kinetic escalation \u2014 15-turn simple collaborative exercise. Naval Group, February 2026.",
   "content": {
     "game_mode": "simple_collaborative",
+    "stress_effect_preset": "standard",
     "game_mode_config": {
       "base_decision_time_ms": 300000
     },
