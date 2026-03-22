@@ -264,10 +264,8 @@ async def submit_recommendation(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Decision {body.decision_id} not found or already closed",
         )
-    await connection_manager.broadcast(
-        exercise_id,
-        {"type": "state_changes", "changes": [result]},
-    )
+    await broadcast_changes(connection_manager, exercise_id, [result])
+    await _log_to_audit(exercise_id, [result])
     return result
 
 
