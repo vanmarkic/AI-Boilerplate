@@ -80,7 +80,8 @@ export class PlayerView implements OnInit, OnDestroy {
       if (
         role === "all_roles" ||
         role === "all_advisors" ||
-        role === "solo_player"
+        role === "solo_player" ||
+        role === "decision_maker"
       )
         return true;
       return d.target_roles.includes(role);
@@ -114,10 +115,19 @@ export class PlayerView implements OnInit, OnDestroy {
     const showDecisionMaker =
       role === "all_roles" ||
       role === "solo_player" ||
+      role === "decision_maker" ||
       this.store.isPracticeMode() ||
       playerRoleDef?.player_type === "decision_maker";
-    // Single-role players see only their own role card
-    const roles = multiRole ? allRoles : allRoles.filter((r) => r.id === role);
+    // Single-role players see only their own role card.
+    // "decision_maker" URL param maps to the CO role (player_type === "decision_maker").
+    let roles: typeof allRoles;
+    if (multiRole) {
+      roles = allRoles;
+    } else if (role === "decision_maker") {
+      roles = allRoles.filter((r) => r.player_type === "decision_maker");
+    } else {
+      roles = allRoles.filter((r) => r.id === role);
+    }
     return buildRoleCards(
       roles,
       event,
