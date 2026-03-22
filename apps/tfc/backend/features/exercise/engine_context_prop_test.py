@@ -51,10 +51,7 @@ def build_context_response(ctx: ScenarioContext, time_factor: float = 1.0) -> di
         "briefing": ctx.briefing,
         "objectives": ctx.objectives,
         "rules": ctx.rules,
-        "roles": [
-            {"id": r.id, "label": r.label, "player_type": r.player_type}
-            for r in ctx.roles
-        ],
+        "roles": [{"id": r.id, "label": r.label, "player_type": r.player_type} for r in ctx.roles],
         "default_time_factor": time_factor,
     }
 
@@ -92,9 +89,7 @@ class TestContextResponseCompleteness:
         response = build_context_response(ctx)
         input_ids = {r.id for r in ctx.roles}
         output_ids = {r["id"] for r in response["roles"]}
-        assert input_ids == output_ids, (
-            f"Role IDs changed: input={input_ids}, output={output_ids}"
-        )
+        assert input_ids == output_ids, f"Role IDs changed: input={input_ids}, output={output_ids}"
 
     @given(ctx=scenario_contexts())
     @settings(max_examples=500)

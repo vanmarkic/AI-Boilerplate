@@ -225,7 +225,9 @@ class ExerciseEngine:
 
         # 1. Close
         close_change = self._decisions.close_decision(
-            decision_id, current_pt_ms=pt, selected_option_ids=selected_option_ids,
+            decision_id,
+            current_pt_ms=pt,
+            selected_option_ids=selected_option_ids,
         )
         if not close_change:
             raise ValueError(f"Decision {decision_id} not found or already closed")
@@ -245,7 +247,9 @@ class ExerciseEngine:
 
         # 3. Resolve effective options (selected + auto-added forced cards)
         effective_opts = self._resolve_effective_options(
-            selected_opts, decision.options, forced_ids,
+            selected_opts,
+            decision.options,
+            forced_ids,
         )
 
         # 4. Record plays + system effects on effective options
@@ -280,7 +284,9 @@ class ExerciseEngine:
         return effective
 
     async def _advance_to_next_turn(
-        self, closed_decision_id: str, pt: float,
+        self,
+        closed_decision_id: str,
+        pt: float,
     ) -> list[StateChange]:
         """Advance to next decision in sequence, or auto-complete if exhausted."""
         advance = self.force_trigger_next_decision(pt, closed_decision_id)
@@ -429,7 +435,9 @@ class ExerciseEngine:
         return next((dt for dt in self._config.decision_templates if dt.id == event_id), None)
 
     def force_trigger_next_decision(
-        self, pt: float, closed_decision_id: str = "",
+        self,
+        pt: float,
+        closed_decision_id: str = "",
     ) -> list[StateChange]:
         """Force-trigger the next event in the game mode's decision sequence.
 
@@ -486,8 +494,7 @@ class ExerciseEngine:
         """Check if a decision has exceeded its wall-clock timeout."""
         now_ms = _time_mod.monotonic() * 1000
         return (
-            decision.timeout_ms > 0
-            and (now_ms - decision.opened_at_rt_ms) >= decision.timeout_ms
+            decision.timeout_ms > 0 and (now_ms - decision.opened_at_rt_ms) >= decision.timeout_ms
         )
 
     def _select_timeout_option(self, decision: object) -> str | None:
@@ -529,9 +536,7 @@ class ExerciseEngine:
                 sel = (target_system_selections or {}).get(opt["id"])
                 if sel is None:
                     if target_system_selections is not None:
-                        raise ValueError(
-                            f"Option {opt['id']} requires a target system selection"
-                        )
+                        raise ValueError(f"Option {opt['id']} requires a target system selection")
                     # No selections at all (e.g. timeout) — skip effect
                     continue
                 if sel not in self._systems.systems:
@@ -549,13 +554,15 @@ class ExerciseEngine:
         return out
 
     def _apply_event_system_effects(
-        self, effects: list[SystemEffect],
+        self,
+        effects: list[SystemEffect],
     ) -> list[SystemStateChange]:
         """Apply system_effects from an event (inject) via SystemManager."""
         return self._apply_effects_list(effects)
 
     def _apply_event_domain_effects(
-        self, effects: list[DomainEffect],
+        self,
+        effects: list[DomainEffect],
     ) -> list[WarfareDomainChange]:
         """Apply domain_effects from an event (inject) via WarfareDomainManager."""
         out: list[WarfareDomainChange] = []
@@ -565,7 +572,8 @@ class ExerciseEngine:
         return out
 
     def _apply_effects_list(
-        self, effects: list[SystemEffect],
+        self,
+        effects: list[SystemEffect],
     ) -> list[SystemStateChange]:
         """Shared logic for applying a list of SystemEffect dicts."""
         out: list[SystemStateChange] = []

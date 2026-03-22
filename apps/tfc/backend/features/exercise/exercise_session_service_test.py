@@ -41,7 +41,7 @@ def _config(exercise_id: int = 1) -> EngineConfig:
 
 
 @pytest.fixture(autouse=True)
-def _cleanup_sessions():
+def _cleanup_sessions() -> None:
     yield
     for eid in list(session_store._sessions.keys()):
         engine = session_store.get(eid)

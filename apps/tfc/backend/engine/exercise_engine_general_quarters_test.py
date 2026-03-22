@@ -48,7 +48,12 @@ class TestGeneralQuartersDecisionOption:
                 score=10.0,
                 stress_delta=0,
                 system_effects=[
-                    SystemEffect(system_id="__all__", power_state=True, operational_state=None, set_all_power=True),
+                    SystemEffect(
+                        system_id="__all__",
+                        power_state=True,
+                        operational_state=None,
+                        set_all_power=True,
+                    ),
                 ],
                 targets_system=False,
                 max_plays=1,
@@ -77,15 +82,25 @@ class TestGeneralQuartersDecisionOption:
                 score=10.0,
                 stress_delta=0,
                 system_effects=[
-                    SystemEffect(system_id="__all__", power_state=True, operational_state=None, set_all_power=True),
-                    SystemEffect(system_id="s1", power_state=None, operational_state="green", set_all_power=False),
+                    SystemEffect(
+                        system_id="__all__",
+                        power_state=True,
+                        operational_state=None,
+                        set_all_power=True,
+                    ),
+                    SystemEffect(
+                        system_id="s1",
+                        power_state=None,
+                        operational_state="green",
+                        set_all_power=False,
+                    ),
                 ],
                 targets_system=False,
                 max_plays=1,
                 role=None,
             ),
         ]
-        changes = engine._apply_system_effects(opts)
+        engine._apply_system_effects(opts)
         assert engine.system_manager.systems["s1"].power is True
         assert engine.system_manager.systems["s1"].operational == "green"
         assert engine.system_manager.systems["s2"].power is True
@@ -102,7 +117,9 @@ class TestGeneralQuartersEventEffect:
         ]
         engine = ExerciseEngine(_config(initial_system_states=systems))
         effects = [
-            SystemEffect(system_id="__all__", power_state=True, operational_state=None, set_all_power=True),
+            SystemEffect(
+                system_id="__all__", power_state=True, operational_state=None, set_all_power=True
+            ),
         ]
         changes = engine._apply_event_system_effects(effects)
         assert len(changes) == 2
@@ -125,7 +142,12 @@ class TestGeneralQuartersEventEffect:
             event_type=EventType.INFORMATIONAL,
             scheduled_pt_ms=0.0,
             system_effects=[
-                SystemEffect(system_id="__all__", power_state=True, operational_state=None, set_all_power=True),
+                SystemEffect(
+                    system_id="__all__",
+                    power_state=True,
+                    operational_state=None,
+                    set_all_power=True,
+                ),
             ],
         )
         callback = AsyncMock()

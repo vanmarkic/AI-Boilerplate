@@ -96,7 +96,7 @@ class TestFullDecisionSequencePipeline:
             first_id = seq[0]
             first_event = engine.event_scheduler.events[first_id]
             first_event.lifecycle = "pending"  # type: ignore[assignment]
-            changes = engine.force_trigger_next_decision(pt)
+            engine.force_trigger_next_decision(pt)
 
             # The first decision must now be open
             open_decisions = engine.decision_manager.get_open_decisions()
@@ -127,7 +127,6 @@ class TestFullDecisionSequencePipeline:
                 )
 
                 turn_before = mode.turn_number
-                stress_before = mode.stress
                 score_before = mode.total_score
 
                 # Select options: pick a subset (1 to max_selections)
@@ -154,7 +153,8 @@ class TestFullDecisionSequencePipeline:
 
                 # Compute expected score delta before calling on_decision_closed_v2
                 forced_opts = [
-                    o for o in active.options
+                    o
+                    for o in active.options
                     if o["id"] in forced_ids and o["id"] not in selected_ids
                 ]
                 effective_options = selected + forced_opts
@@ -196,7 +196,7 @@ class TestFullDecisionSequencePipeline:
                     f"got {len(open_after_close)}"
                 )
 
-                is_last = (step == len(seq) - 1)
+                is_last = step == len(seq) - 1
 
                 if not is_last:
                     # Advance to next decision

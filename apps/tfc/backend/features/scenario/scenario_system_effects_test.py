@@ -40,9 +40,7 @@ class TestSystemEffectDef:
         assert effect.power_state is False
 
     def test_both_fields_set(self) -> None:
-        effect = SystemEffectDef(
-            system_id="comms", operational_state="yellow", power_state=True
-        )
+        effect = SystemEffectDef(system_id="comms", operational_state="yellow", power_state=True)
         assert effect.operational_state == "yellow"
         assert effect.power_state is True
 
@@ -51,9 +49,7 @@ class TestSystemEffectDef:
             SystemEffectDef.model_validate({"operational_state": "red"})
 
     def test_model_validate_from_dict(self) -> None:
-        effect = SystemEffectDef.model_validate(
-            {"system_id": "radar", "power_state": True}
-        )
+        effect = SystemEffectDef.model_validate({"system_id": "radar", "power_state": True})
         assert effect.system_id == "radar"
         assert effect.power_state is True
         assert effect.operational_state is None
@@ -187,7 +183,13 @@ class TestLoaderPropagatesNewFields:
         templates = load_decision_templates(content)
         snap = templates[0].options[0]
         required_keys = {
-            "id", "label", "score", "stress_delta", "role",
-            "system_effects", "targets_system", "max_plays",
+            "id",
+            "label",
+            "score",
+            "stress_delta",
+            "role",
+            "system_effects",
+            "targets_system",
+            "max_plays",
         }
         assert required_keys.issubset(snap.keys())

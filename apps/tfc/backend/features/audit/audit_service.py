@@ -59,8 +59,12 @@ class AuditService:
                 exercise_id=exercise_id,
                 entry_type=change_type,
                 action=action,
-                target_type=change_type.replace("_change", "").replace("_closed", "").replace("_opened", ""),
-                target_id=change.get("decision_id") or change.get("event_id") or change.get("issue_id"),
+                target_type=change_type.replace("_change", "")
+                .replace("_closed", "")
+                .replace("_opened", ""),
+                target_id=change.get("decision_id")
+                or change.get("event_id")
+                or change.get("issue_id"),
                 play_time_ms=play_time_ms,
                 real_time_ms=real_time_ms,
                 details=change,
