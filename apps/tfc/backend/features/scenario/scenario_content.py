@@ -203,6 +203,7 @@ class ScenarioContent(BaseModel):
     initial_system_states: list[SystemStateDef] = []
     initial_warfare_domains: list[WarfareDomainDef] = []
     score_tier_thresholds: dict[str, float] = {}  # {"lo": 0.33, "mid": 0.66}
+    stress_effect_preset: str = "standard"  # "off" | "mild" | "standard" | "intense"
 
     @model_validator(mode="after")
     def validate_roles(self) -> ScenarioContent:
