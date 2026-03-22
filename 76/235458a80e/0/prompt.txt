@@ -1,0 +1,113 @@
+do these in sub agents:
+200	Install ruff locally	Tooling
+161	Refactor waiting room double DB query	Tech debt
+
+is 172 going to require rewriting scenario ?
+
+---
+
+<task-notification>
+<task-id>a98f696eaf65fac87</task-id>
+<tool-use-id>toolu_01SD2aZcbFwseSBZAAS65sRs</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a98f696eaf65fac87.output</output-file>
+<status>completed</status>
+<summary>Agent "Refactor waiting room double query #161" completed</summary>
+<result>All 112 waiting room tests pass.
+
+Here is a summary of what was done:
+
+**Problem:** In `join_waiting_room`, the helper `_get_scenario_roles()` called `exercise_service.get_exercise(exercise_id)` to fetch the exercise, and then immediately after, line 77 called `exercise_service.get_exercise(exercise_id)` again to check `practice_mode`. This was a redundant DB query on every join request.
+
+**Fix:** Renamed `_get_scenario_roles` to `_get_exercise_and_scenario_roles` and changed its return type from `list[dict] | None` to `tuple[object, list[dict] | None]`. It now returns both the exercise object and the roles in a single call. The `join_waiting_room` endpoint destructures the tuple as `exercise_obj, roles` and reuses the exercise object directly -- no second query needed. The `update_participant_role` endpoint, which only needs roles, uses `_, roles` to discard the exercise object.
+
+**File changed:** `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/features/waiting_room/waiting_room_router.py`
+
+**Tests:** All 112 waiting room tests pass with no regressions.</result>
+<usage><total_tokens>25759</total_tokens><tool_uses>12</tool_uses><duration_ms>71428</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a98f696eaf65fac87.output
+
+---
+
+proceed. but I don't see much added value
+
+---
+
+<task-notification>
+<task-id>ac152469e1f3a8fc8</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/ac152469e1f3a8fc8.output</output-file>
+<status>completed</status>
+<summary>Agent "Install ruff locally #200" completed</summary>
+<result>Here is a summary of what I found and did:
+
+**Ruff was already installed.** Both backends already had ruff configured:
+
+- **Dependency**: `ruff>=0.8.0` in `[project.optional-dependencies] dev` in both `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/pyproject.toml` and `/Users/dragan/Documents/AI-Boilerplate/apps/main/backend/pyproject.toml`
+- **Config**: `[tool.ruff]`, `[tool.ruff.lint]`, and `[tool.ruff.lint.per-file-ignores]` sections already exist in both pyproject.toml files
+- **Binary**: ruff 0.15.7 is installed in the TFC backend venv at `apps/tfc/backend/.venv/bin/ruff`
+
+**Auto-fixes applied by `ruff check --fix`:**
+
+- **TFC backend** (12 fixes): Removed unused imports (`EngineStateError`, `DecisionManager`, `DecisionOptionSnapshot`, `EventType`, `SystemState`, `SimpleCollaborativeMode`, `patch`), removed extra blank lines, replaced `yield` with `return` in a no-op fixture, removed a stale `noqa` comment, and refactored `waiting_room_router.py` to combine two queries into one function.
+- **Main backend** (1 fix): Replaced `yield` with `return` in a no-op fixture in `tests/migration_rollback_test.py`.
+
+**Remaining 62 errors in TFC backend (not auto-fixable):**
+- 50 line-too-long (E501) -- mostly in test data literals
+- 5 unused variable assignments (F841) -- `changes` variables
+- 4 overly broad `pytest.raises(Exception)` (PT011)
+- 2 missing return type annotations on private functions (ANN202)
+- 1 mutable class default (RUF012)
+
+Since ruff was already fully set up, there is nothing new to install or configure. The issue may have been about ensuring it runs locally -- and it does, via the venv. No commit made per your instructions.</result>
+<usage><total_tokens>27252</total_tokens><tool_uses>22</tool_uses><duration_ms>93167</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/ac152469e1f3a8fc8.output
+
+---
+
+172  I don't see much added value for this one
+
+---
+
+<ide_selection>The user selected the lines 1 to 5 from /git-error-1774200925507:
+> git push origin master:master
+[entire] Pushing entire/checkpoints/v1 to origin...... done
+.git/hooks/pre-push.pre-entire: line 57: ruff: command not found
+error: failed to push some refs to 'github.com:vanmarkic/AI-Boilerplate.git'
+
+
+This may or may not be related to the current task.</ide_selection>
+> git push origin master:master
+[entire] Pushing entire/checkpoints/v1 to origin...... done
+.git/hooks/pre-push.pre-entire: line 57: ruff: command not found
+error: failed to push some refs to 'github.com:vanmarkic/AI-Boilerplate.git'
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/.git/hooks/pre-push.pre-entire in the IDE. This may or may not be related to the current task.</ide_opened_file>
+is it how it should be ?
+
+---
+
+<ide_selection>The user selected the lines 1 to 3 from /git-error-1774202046633:
+> git push origin master:master
+error: failed to push some refs to 'github.com:vanmarkic/AI-Boilerplate.git'
+
+
+This may or may not be related to the current task.</ide_selection>
+> git push origin master:master
+error: failed to push some refs to 'github.com:vanmarkic/AI-Boilerplate.git'
+
+---
+
+list gh issues
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Agent tool input (hve3ae) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+do this 87	Weapon 2-tier state (binary OK/non-operational)	S–M
+
+---
+
+yes
