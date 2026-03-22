@@ -14,6 +14,7 @@ from engine.game_modes.protocol import GameMode
 from engine.issue_manager import TrackedIssue
 from engine.state_changes import DecisionOptionSnapshot
 from engine.system_manager import SystemState
+from engine.warfare_domain_manager import WarfareDomainState
 
 TICK_INTERVAL_S = 0.25
 
@@ -63,3 +64,4 @@ class EngineConfig:
     context: ScenarioContext = field(default_factory=ScenarioContext)
     game_mode: GameMode = field(default_factory=ClassicMode)
     initial_system_states: list[SystemState] = field(default_factory=list)
+    initial_warfare_domains: list[WarfareDomainState] = field(default_factory=list)
