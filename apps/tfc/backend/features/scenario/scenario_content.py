@@ -113,6 +113,41 @@ class WarfareDomainDef(BaseModel):
     initial_threat_level: str = "green"
 
 
+class BlueCardDef(BaseModel):
+    """A card in the global catalog, independent of any turn."""
+
+    id: str
+    title: str
+    description: str = ""
+    targets_system: bool = False
+
+
+class TurnInjectDef(BaseModel):
+    """Per-role inject text within a turn."""
+
+    target_roles: list[str] = []
+    text: str
+    role_descriptions: dict[str, str] = {}
+
+
+class TurnCardConfig(BaseModel):
+    """Per-turn configuration for an available blue card."""
+
+    card_id: str
+    score: float = 0.0
+    stress_delta: int = 0
+    system_effects: list[SystemEffectDef] = []
+    domain_effects: list[DomainEffectDef] = []
+    max_plays: int = Field(default=0, ge=0)
+
+
+class PathNoteDef(BaseModel):
+    """Facilitator notes for best/acceptable play paths."""
+
+    card_ids: list[str] = []
+    notes: str = ""
+
+
 class TurnDefinition(BaseModel):
     """Groups injects and a decision template into a turn."""
 
@@ -120,9 +155,20 @@ class TurnDefinition(BaseModel):
     title: str = ""
     facilitator_prompt: str | None = None
     has_decisions: bool = True
+    duration_ms: float | None = None
+    # Legacy fields (kept for backward compat with existing seeds)
     inject_ids: list[str] = []
     decision_template_id: str | None = None
+    # New turn-authoring fields
+    injects: list[TurnInjectDef] = []
+    available_cards: list[TurnCardConfig] = []
+    max_selections: int = 2
     base_stress_delta: int = 0
+    system_effects_on_start: list[SystemEffectDef] = []
+    domain_effects_on_start: list[DomainEffectDef] = []
+    best_path: PathNoteDef | None = None
+    acceptable_path: PathNoteDef | None = None
+    design_notes: str = ""
 
 
 class RoleDef(BaseModel):
