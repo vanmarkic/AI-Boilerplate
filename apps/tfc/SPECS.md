@@ -22,6 +22,15 @@ A domain-agnostic exercise simulation platform. A Game Master (GM) loads a scena
 - No competitive scoring between teams — score is internal, never shown as numbers.
 - Not a content authoring tool beyond the scenario builder — bulk content authored as JSON seeds.
 
+## Design Invariants (Quality Bar)
+
+These invariants define what "correct" means for TFC. Every change must preserve them.
+
+1. **Path-independence.** Same business event, same outcome regardless of entry path. Player submit, timeout, scheduled tick, force-trigger, and GM trigger must converge on the same engine truth.
+2. **Atomic consequences.** If a card affects score, forced-card state, systems, and completion flow, those effects must all happen together — never partially applied.
+3. **Engine is canonical.** The engine is the single source of runtime truth. Frontend and router layers orchestrate transport and validation but must not create alternate simulation semantics.
+4. **Scenario stability.** Schema or default changes are only quality improvements if they preserve authored intent. Seed scenarios must produce identical exercise behaviour before and after.
+
 ## Domain Model
 
 ```
