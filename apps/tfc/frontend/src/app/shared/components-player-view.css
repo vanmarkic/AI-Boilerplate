@@ -531,4 +531,43 @@
     color: var(--color-muted-foreground);
   }
 
+  /* ── Stress Overlay ──────────────────────────────────── */
+
+  .stress-overlay-host {
+    display: contents;
+  }
+  .stress-overlay {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    background: radial-gradient(
+      ellipse at center,
+      transparent calc(100% - 100% * var(--stress-vignette-max) * var(--stress-severity)),
+      oklch(0% 0 0 / calc(0.7 * var(--stress-severity))) 100%
+    );
+    animation:
+      stress-pulse var(--stress-pulse-duration) ease-in-out infinite,
+      stress-shake 0.08s linear infinite;
+    animation-play-state: running;
+  }
+
+  @keyframes stress-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: calc(0.5 + 0.5 * (1 - var(--stress-severity))); }
+  }
+
+  @keyframes stress-shake {
+    0%  { translate: 0 0; }
+    25% { translate: var(--stress-shake) calc(-1 * var(--stress-shake)); }
+    50% { translate: calc(-1 * var(--stress-shake)) var(--stress-shake); }
+    75% { translate: var(--stress-shake) var(--stress-shake); }
+    100% { translate: calc(-0.5 * var(--stress-shake)) calc(-0.5 * var(--stress-shake)); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stress-overlay {
+      animation: none;
+    }
+  }
 }
