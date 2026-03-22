@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "e28ced4a7fb2",
+  "strategy": "manual-commit",
+  "branch": "refactor/canonicalization-round-2",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "apps/tfc/backend/features/exercise/engine_router.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/e2/8ced4a7fb2/0/metadata.json",
+      "transcript": "/e2/8ced4a7fb2/0/full.jsonl",
+      "content_hash": "/e2/8ced4a7fb2/0/content_hash.txt",
+      "prompt": "/e2/8ced4a7fb2/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 6074,
+    "cache_creation_tokens": 357256,
+    "cache_read_tokens": 62525851,
+    "output_tokens": 90599,
+    "api_call_count": 351
+  }
+}
