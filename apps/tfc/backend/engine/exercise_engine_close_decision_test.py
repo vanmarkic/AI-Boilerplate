@@ -293,7 +293,40 @@ class TestCloseDecisionTargetSystem:
         assert engine.system_manager.systems["nav"].operational == "red"  # unchanged
 
     @pytest.mark.asyncio
-    async def test_missing_target_raises(self) -> None:
+    async def test_missing_target_skips_on_timeout(self) -> None:
+        """When target_system_selections is None (timeout path), skip effects."""
+        opts = [
+            _option(
+                "reboot",
+                score=1.0,
+                targets_system=True,
+                system_effects=[
+                    SystemEffect(
+                        system_id="placeholder",
+                        operational_state="green",
+                        power_state=None,
+                        set_all_power=False,
+                    ),
+                ],
+            ),
+        ]
+        dt = _single_turn_template(options=opts)
+        systems = [SystemState(system_id="nav", label="NAV", power=True, operational="red")]
+        engine = _build_engine([dt], initial_systems=systems)
+        await engine.start()
+        await engine.begin()
+        pt = engine.time_manager.play_time_ms
+        engine.force_trigger_next_decision(pt, "")
+
+        # None = timeout path — skips system effects, no crash
+        changes = await engine.close_decision("d1", ["reboot"])
+        assert any(c.get("type") == "decision_closed" for c in changes)
+        # System unchanged because effect was skipped
+        assert engine.system_manager.systems["nav"].operational == "red"
+
+    @pytest.mark.asyncio
+    async def test_missing_target_raises_when_selections_provided(self) -> None:
+        """When target_system_selections is {} (player path), raise ValueError."""
         opts = [
             _option(
                 "reboot",
@@ -318,7 +351,7 @@ class TestCloseDecisionTargetSystem:
         engine.force_trigger_next_decision(pt, "")
 
         with pytest.raises(ValueError, match="target system"):
-            await engine.close_decision("d1", ["reboot"])
+            await engine.close_decision("d1", ["reboot"], target_system_selections={})
 
     @pytest.mark.asyncio
     async def test_invalid_target_system_raises(self) -> None:

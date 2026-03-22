@@ -195,9 +195,16 @@ class ExerciseEngine:
         """Single canonical path for closing a decision.
 
         Handles: validate → close → score → resolve forced cards →
-        record plays → system effects → advance turn → auto-complete.
+        record plays → system effects (with optional target overrides) →
+        advance turn → auto-complete.
 
-        Raises ValueError if decision missing/closed or max_selections violated.
+        Args:
+            target_system_selections: map of option_id → system_id for
+                options with targets_system=True. Pass None on timeout
+                to skip target-system effects.
+
+        Raises ValueError if decision missing/closed, max_selections
+        violated, or a required target system selection is missing/invalid.
         """
         pt = self._time.play_time_ms
 
@@ -295,7 +302,8 @@ class ExerciseEngine:
     def trigger_event(self, event_id: str) -> list[StateChange]:
         """Single canonical path for triggering an event.
 
-        Handles: force-trigger → event system effects → open decision (if applicable).
+        Handles: force-trigger → event system effects →
+        event domain effects → open decision (if applicable).
 
         Raises ValueError if event missing or not triggerable.
         """
@@ -520,9 +528,12 @@ class ExerciseEngine:
             if opt["targets_system"]:
                 sel = (target_system_selections or {}).get(opt["id"])
                 if sel is None:
-                    raise ValueError(
-                        f"Option {opt['id']} requires a target system selection"
-                    )
+                    if target_system_selections is not None:
+                        raise ValueError(
+                            f"Option {opt['id']} requires a target system selection"
+                        )
+                    # No selections at all (e.g. timeout) — skip effect
+                    continue
                 if sel not in self._systems.systems:
                     raise ValueError(f"Target system '{sel}' not found")
                 effects = [
