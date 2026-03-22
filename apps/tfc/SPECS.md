@@ -156,7 +156,7 @@ Ship/facility systems displayed for all roles and players with power (ON/OFF) an
 - [x] Full system catalog in Silent Wake seed (13 systems/weapons matching game mechanics doc)
 
 **Remaining:**
-- [ ] `targets_system` — system picker UI (player chooses which system a card targets) — deferred, field flows through to frontend
+- [x] `targets_system` — system picker UI (player chooses which system a card targets) + backend `target_system_selections` override
 
 ### Feature: warfare_domains · backend + frontend
 
