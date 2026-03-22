@@ -1,0 +1,36 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/home/sea-lightning.ts in the IDE. This may or may not be related to the current task.</ide_opened_file>
+add troubled view  in exercise as stress approaches 10. (like when wounded in pov fps)
+
+---
+
+B
+
+---
+
+C) allow for setup and preview in under development scenario editor
+
+---
+
+B
+
+---
+
+A
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/command (g0xo0s) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+yes
+
+---
+
+yes
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/docs/plans/2026-03-22-troubled-view-stress-overlay-design.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+yes go
+
+---
+
+1
