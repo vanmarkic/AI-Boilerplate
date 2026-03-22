@@ -22,6 +22,7 @@ def _option(
     score: float = 0.0,
     stress_delta: int = 0,
     system_effects: list[SystemEffect] | None = None,
+    targets_system: bool = False,
     max_plays: int = 0,
 ) -> DecisionOptionSnapshot:
     return DecisionOptionSnapshot(
@@ -30,7 +31,7 @@ def _option(
         score=score,
         stress_delta=stress_delta,
         system_effects=system_effects or [],
-        targets_system=False,
+        targets_system=targets_system,
         max_plays=max_plays,
         role=None,
     )
@@ -251,3 +252,128 @@ class TestCloseDecisionForcedCards:
         assert engine.system_manager.systems["comms"].operational == "yellow"
         # Score should include both normal (5) + forced (-2) = 3
         assert engine.game_mode.total_score == 3.0
+
+
+class TestCloseDecisionTargetSystem:
+    """When targets_system=True, player-chosen system_id overrides hardcoded one."""
+
+    @pytest.mark.asyncio
+    async def test_target_system_override(self) -> None:
+        opts = [
+            _option(
+                "reboot",
+                score=1.0,
+                targets_system=True,
+                system_effects=[
+                    SystemEffect(
+                        system_id="placeholder",
+                        operational_state="green",
+                        power_state=None,
+                        set_all_power=False,
+                    ),
+                ],
+            ),
+        ]
+        dt = _single_turn_template(options=opts)
+        systems = [
+            SystemState(system_id="nav", label="NAV", power=True, operational="red"),
+            SystemState(system_id="aaw", label="AAW", power=True, operational="yellow"),
+        ]
+        engine = _build_engine([dt], initial_systems=systems)
+        await engine.start()
+        await engine.begin()
+        pt = engine.time_manager.play_time_ms
+        engine.force_trigger_next_decision(pt, "")
+
+        changes = await engine.close_decision(
+            "d1", ["reboot"], target_system_selections={"reboot": "aaw"},
+        )
+
+        assert engine.system_manager.systems["aaw"].operational == "green"
+        assert engine.system_manager.systems["nav"].operational == "red"  # unchanged
+
+    @pytest.mark.asyncio
+    async def test_missing_target_raises(self) -> None:
+        opts = [
+            _option(
+                "reboot",
+                score=1.0,
+                targets_system=True,
+                system_effects=[
+                    SystemEffect(
+                        system_id="placeholder",
+                        operational_state="green",
+                        power_state=None,
+                        set_all_power=False,
+                    ),
+                ],
+            ),
+        ]
+        dt = _single_turn_template(options=opts)
+        systems = [SystemState(system_id="nav", label="NAV", power=True, operational="red")]
+        engine = _build_engine([dt], initial_systems=systems)
+        await engine.start()
+        await engine.begin()
+        pt = engine.time_manager.play_time_ms
+        engine.force_trigger_next_decision(pt, "")
+
+        with pytest.raises(ValueError, match="target system"):
+            await engine.close_decision("d1", ["reboot"])
+
+    @pytest.mark.asyncio
+    async def test_invalid_target_system_raises(self) -> None:
+        opts = [
+            _option(
+                "reboot",
+                score=1.0,
+                targets_system=True,
+                system_effects=[
+                    SystemEffect(
+                        system_id="placeholder",
+                        operational_state="green",
+                        power_state=None,
+                        set_all_power=False,
+                    ),
+                ],
+            ),
+        ]
+        dt = _single_turn_template(options=opts)
+        systems = [SystemState(system_id="nav", label="NAV", power=True, operational="red")]
+        engine = _build_engine([dt], initial_systems=systems)
+        await engine.start()
+        await engine.begin()
+        pt = engine.time_manager.play_time_ms
+        engine.force_trigger_next_decision(pt, "")
+
+        with pytest.raises(ValueError, match="not found"):
+            await engine.close_decision(
+                "d1", ["reboot"], target_system_selections={"reboot": "nonexistent"},
+            )
+
+    @pytest.mark.asyncio
+    async def test_non_targeting_option_ignores_selections(self) -> None:
+        """Options without targets_system=True use hardcoded system_effects."""
+        opts = [
+            _option(
+                "shutdown",
+                score=1.0,
+                system_effects=[
+                    SystemEffect(
+                        system_id="nav",
+                        power_state=False,
+                        operational_state=None,
+                        set_all_power=False,
+                    ),
+                ],
+            ),
+        ]
+        dt = _single_turn_template(options=opts)
+        systems = [SystemState(system_id="nav", label="NAV", power=True, operational="green")]
+        engine = _build_engine([dt], initial_systems=systems)
+        await engine.start()
+        await engine.begin()
+        pt = engine.time_manager.play_time_ms
+        engine.force_trigger_next_decision(pt, "")
+
+        await engine.close_decision("d1", ["shutdown"])
+        assert engine.system_manager.systems["nav"].power is False
