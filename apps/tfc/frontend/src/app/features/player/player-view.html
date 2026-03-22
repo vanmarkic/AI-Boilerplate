@@ -8,9 +8,9 @@
     <tfc-stress-bar [stress]="store.score()?.stress ?? 0" />
     <div class="player-header__clocks">
       @if (store.turnCountdownClock(); as countdown) {
-        <tfc-clock-display label="Turn" [value]="countdown" />
+      <tfc-clock-display label="Turn" [value]="countdown" />
       } @else {
-        <tfc-clock-display label="RT" [value]="store.rtClock()" />
+      <tfc-clock-display label="RT" [value]="store.rtClock()" />
       }
       <tfc-phase-badge [phase]="store.phase()" />
     </div>
@@ -18,73 +18,71 @@
 
   <main class="player-main player-main--board">
     @if (currentTurnEvent(); as event) {
-      <div class="board-turn-banner">
-        @if (store.score(); as score) {
-          <span class="board-turn-banner__turn">TURN {{ score.turnNumber }}</span>
-        }
-        <span class="board-turn-banner__title">{{ event.title }}</span>
-        <span class="board-turn-banner__desc">{{ event.description }}</span>
-      </div>
+    <div class="board-turn-banner">
+      @if (store.score(); as score) {
+      <span class="board-turn-banner__turn">TURN {{ score.turnNumber }}</span>
+      }
+      <span class="board-turn-banner__title">{{ event.title }}</span>
+      <span class="board-turn-banner__desc">{{ event.description }}</span>
+    </div>
     } @else {
-      <div class="board-turn-banner">
-        <span class="board-turn-banner__title">Waiting for next turn...</span>
-      </div>
+    <div class="board-turn-banner">
+      <span class="board-turn-banner__title">Waiting for next turn...</span>
+    </div>
     }
 
+    <tfc-warfare-domain-board [domains]="store.warfareDomains()" />
     <tfc-system-status-board [systems]="store.systems()" />
 
     <div class="board-grid">
       @for (card of roleCards(); track card.roleId) {
-        <tfc-role-card
-          [card]="card"
-          (submitted)="onRoleCardSubmitted($event)"
-        />
+      <tfc-role-card [card]="card" [systems]="store.systems()" (submitted)="onRoleCardSubmitted($event)" />
       }
     </div>
   </main>
 
   @if (store.phase() === 'briefing' && store.context(); as ctx) {
-    <tfc-briefing-overlay
-      [title]="ctx.title"
-      [briefing]="ctx.briefing"
-      [objectives]="ctx.objectives"
-      [roles]="ctx.roles"
-      [starting]="beginningExercise()"
-      (begun)="onBeginExercise()"
-    />
-  }
-
-  @if (store.phase() === 'completed') {
-    <tfc-completion-overlay
-      [tier]="store.score()?.scoreTier ?? null"
-      (closed)="onExerciseStopped()"
-    />
+  <tfc-briefing-overlay
+    [title]="ctx.title"
+    [briefing]="ctx.briefing"
+    [objectives]="ctx.objectives"
+    [roles]="ctx.roles"
+    [starting]="beginningExercise()"
+    (begun)="onBeginExercise()"
+  />
+  } @if (store.phase() === 'completed') {
+  <tfc-completion-overlay
+    [tier]="store.score()?.scoreTier ?? null"
+    (closed)="onExerciseStopped()"
+  />
   }
 
   <footer class="player-footer">
     <div class="player-footer__group">
       <p class="text-sm text-muted-foreground">
-        @if (store.isPracticeMode()) {
-          Practice Mode — playing all roles
-        } @else if (store.isCollaborative()) {
-          @if (store.isAllAdvisors()) {
-            You are the All Advisors player
-          } @else {
-            You are the {{ roleLabel() }}
-          }
-        } @else {
-          Waiting for {{ domain.term('gameMaster') }} actions...
-        }
+        <!-- prettier-ignore -->
+        @if (store.isPracticeMode()) { Practice Mode — playing all roles } @else if (store.isCollaborative()) { @if (store.isAllAdvisors()) { You are the All Advisors player } @else { You are the {{ roleLabel() }} } } @else { Waiting for {{ domain.term('gameMaster') }} actions... }
       </p>
       <div class="player-footer__actions">
-        <button class="btn" data-variant="ghost" data-size="sm" (click)="logsOpen.set(true)">Logs</button>
+        <button
+          class="btn"
+          data-variant="ghost"
+          data-size="sm"
+          (click)="logsOpen.set(true)"
+        >
+          Logs
+        </button>
         @if (store.isPracticeMode() && store.phase() !== 'setup') {
-          <button uiButton variant="destructive" size="sm" (click)="onStop()">
-            Stop Exercise
-          </button>
+        <button uiButton variant="destructive" size="sm" (click)="onStop()">
+          Stop Exercise
+        </button>
         }
       </div>
     </div>
   </footer>
-  <tfc-logs-drawer [(open)]="logsOpen" [decisions]="store.decisions()" [roles]="store.context()?.roles ?? []" />
+  <tfc-logs-drawer
+    [(open)]="logsOpen"
+    [decisions]="store.decisions()"
+    [roles]="store.context()?.roles ?? []"
+  />
 </div>

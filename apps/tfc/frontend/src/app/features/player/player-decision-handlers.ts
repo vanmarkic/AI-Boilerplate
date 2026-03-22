@@ -9,7 +9,11 @@ import type { RoleDef } from "../../core/scenario-api.service";
 import { ExerciseStore } from "../../core/exercise.store";
 import type { RoleRecommendation } from "../../shared/all-advisors-panel.component";
 
-type SubmitEvent = { selectedOptions: string[]; freeText: string };
+type SubmitEvent = {
+  selectedOptions: string[];
+  freeText: string;
+  targetSystemSelections: Record<string, string>;
+};
 
 export function buildAdvisorRecs(
   decision: ActiveDecision,
@@ -79,7 +83,12 @@ export function submitDecision(
   event: SubmitEvent,
 ): void {
   api
-    .closeEngineDecision(exerciseId, decision.id, event.selectedOptions)
+    .closeEngineDecision(
+      exerciseId,
+      decision.id,
+      event.selectedOptions,
+      event.targetSystemSelections,
+    )
     .subscribe({
       next: () => store.closeDecision(decision.id),
     });

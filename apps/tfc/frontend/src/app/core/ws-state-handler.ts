@@ -46,10 +46,7 @@ export function handleStateChange(
       store.updateIssue(change.issue_id, change.lifecycle, change.released);
       break;
     case "decision_opened":
-      store.applyDecisions([
-        ...store.decisions(),
-        toActiveDecision(change),
-      ]);
+      store.applyDecisions([...store.decisions(), toActiveDecision(change)]);
       break;
     case "decision_closed":
       store.closeDecision(change.decision_id, change.selected_option_ids);
@@ -72,6 +69,9 @@ export function handleStateChange(
       break;
     case "system_state_change":
       store.applySystemChange(change);
+      break;
+    case "warfare_domain_change":
+      store.applyWarfareDomainChange(change);
       break;
   }
 }

@@ -41,7 +41,12 @@ describe("handlePlayerWsMessage", () => {
       {
         type: "state_changes",
         changes: [
-          { type: "phase_change", phase: "completed", action: "completed", time: {} },
+          {
+            type: "phase_change",
+            phase: "completed",
+            action: "completed",
+            time: {},
+          },
         ],
       } as never,
       mockStore as never,

@@ -10,6 +10,7 @@ const minimalSnapshot: SnapshotWithScore = {
   events: [],
   issues: [],
   systems: [],
+  warfare_domains: [],
   score: null,
 };
 
@@ -32,7 +33,13 @@ describe("ExerciseStore", () => {
       store.applySnapshot({
         ...minimalSnapshot,
         systems: [
-          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
+          {
+            system_id: "nav",
+            label: "NAV",
+            category: "sensor",
+            power: true,
+            operational: "green",
+          },
         ],
       });
       expect(store.systems().length).toBe(1);
@@ -43,7 +50,13 @@ describe("ExerciseStore", () => {
       store.applySnapshot({
         ...minimalSnapshot,
         systems: [
-          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
+          {
+            system_id: "nav",
+            label: "NAV",
+            category: "sensor",
+            power: true,
+            operational: "green",
+          },
         ],
       });
       store.applySystemChange({
@@ -60,7 +73,13 @@ describe("ExerciseStore", () => {
       store.applySnapshot({
         ...minimalSnapshot,
         systems: [
-          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
+          {
+            system_id: "nav",
+            label: "NAV",
+            category: "sensor",
+            power: true,
+            operational: "green",
+          },
         ],
       });
       store.applySystemChange({
@@ -76,8 +95,20 @@ describe("ExerciseStore", () => {
       store.applySnapshot({
         ...minimalSnapshot,
         systems: [
-          { system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" },
-          { system_id: "comms", label: "COMMS", category: "comms", power: true, operational: "green" },
+          {
+            system_id: "nav",
+            label: "NAV",
+            category: "sensor",
+            power: true,
+            operational: "green",
+          },
+          {
+            system_id: "comms",
+            label: "COMMS",
+            category: "comms",
+            power: true,
+            operational: "green",
+          },
         ],
       });
       store.applySystemChange({
@@ -99,7 +130,12 @@ describe("ExerciseStore", () => {
     it("calculates remaining time for active issues with auto-resolve", () => {
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 5000,
+          real_time_ms: 5000,
+          factor: 1,
+          paused: false,
+        },
         issues: [
           {
             id: "i1",
@@ -123,7 +159,12 @@ describe("ExerciseStore", () => {
     it("returns 0 remaining when past auto-resolve time", () => {
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 15000, real_time_ms: 15000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 15000,
+          real_time_ms: 15000,
+          factor: 1,
+          paused: false,
+        },
         issues: [
           {
             id: "i1",
@@ -145,7 +186,12 @@ describe("ExerciseStore", () => {
     it("excludes issues without auto_resolve_ms", () => {
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 5000,
+          real_time_ms: 5000,
+          factor: 1,
+          paused: false,
+        },
         issues: [
           {
             id: "i1",
@@ -166,7 +212,12 @@ describe("ExerciseStore", () => {
     it("excludes inactive issues", () => {
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 5000,
+          real_time_ms: 5000,
+          factor: 1,
+          paused: false,
+        },
         issues: [
           {
             id: "i1",
@@ -192,9 +243,10 @@ describe("ExerciseStore", () => {
         stress: 3,
         turn_number: 2,
         next_decision_time_ms: 270000,
+        score_tier: null,
       });
       expect(store.score()?.stress).toBe(3);
-      expect(store.score()?.totalScore).toBe(5.0);
+      expect(store.score()?.scoreTier).toBe(null);
       expect(store.score()?.turnNumber).toBe(2);
     });
   });
@@ -226,7 +278,12 @@ describe("ExerciseStore", () => {
     it("computes remaining time from play-time coordinates", () => {
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 60000, real_time_ms: 60000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 60000,
+          real_time_ms: 60000,
+          factor: 1,
+          paused: false,
+        },
         decisions: [
           {
             id: "d1",
@@ -245,7 +302,12 @@ describe("ExerciseStore", () => {
       // Simulate Turn 1: decision opened at pt=60000, timeout 300000ms
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 70000, real_time_ms: 70000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 70000,
+          real_time_ms: 70000,
+          factor: 1,
+          paused: false,
+        },
         decisions: [
           {
             id: "d1",
@@ -284,7 +346,12 @@ describe("ExerciseStore", () => {
       // At 2x speed: play time advances twice as fast as real time
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 120000, real_time_ms: 60000, factor: 2, paused: false },
+        time: {
+          play_time_ms: 120000,
+          real_time_ms: 60000,
+          factor: 2,
+          paused: false,
+        },
         decisions: [
           {
             id: "d1",
@@ -302,7 +369,12 @@ describe("ExerciseStore", () => {
     it("clamps to zero when past deadline", () => {
       store.applySnapshot({
         ...minimalSnapshot,
-        time: { play_time_ms: 400000, real_time_ms: 400000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 400000,
+          real_time_ms: 400000,
+          factor: 1,
+          paused: false,
+        },
         decisions: [
           {
             id: "d1",

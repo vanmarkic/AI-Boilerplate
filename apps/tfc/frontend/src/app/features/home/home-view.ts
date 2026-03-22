@@ -34,7 +34,9 @@ import { switchMap } from "rxjs";
 
       @if (pendingScenario()) {
         <div class="picker-grid">
-          <span class="back-link" (click)="pendingScenario.set(null)">Back</span>
+          <span class="back-link" (click)="pendingScenario.set(null)"
+            >Back</span
+          >
           <p class="mode-heading">Select Operation Type</p>
           <div class="mode-options">
             <div class="tac-panel" (click)="createMultiplayer('full')">
@@ -92,11 +94,7 @@ import { switchMap } from "rxjs";
           </a>
 
           @if (lobbyData().length) {
-            <a
-              class="tac-panel"
-              data-primary
-              (click)="joinExercise()"
-            >
+            <a class="tac-panel" data-primary (click)="joinExercise()">
               <span class="tac-panel__indicator">JON</span>
               <span class="tac-panel__label">Join Exercise</span>
               <span class="tac-panel__desc">
@@ -162,26 +160,24 @@ export class HomeView implements OnInit {
       })
       .pipe(
         switchMap((exercise) =>
-          this.waitingRoomApi
-            .join(exercise.id, "Player", "all_roles")
-            .pipe(
-              switchMap((participant) =>
-                this.engineApi.start(exercise.id).pipe(
-                  switchMap(() => {
-                    this.router.navigate(["/player"], {
-                      queryParams: {
-                        exerciseId: exercise.id,
-                        participantId: participant.id,
-                        role: "all_roles",
-                        gameMode: "simple_collaborative",
-                        practiceMode: true,
-                      },
-                    });
-                    return [];
-                  }),
-                ),
+          this.waitingRoomApi.join(exercise.id, "Player", "all_roles").pipe(
+            switchMap((participant) =>
+              this.engineApi.start(exercise.id).pipe(
+                switchMap(() => {
+                  this.router.navigate(["/player"], {
+                    queryParams: {
+                      exerciseId: exercise.id,
+                      participantId: participant.id,
+                      role: "all_roles",
+                      gameMode: "simple_collaborative",
+                      practiceMode: true,
+                    },
+                  });
+                  return [];
+                }),
               ),
             ),
+          ),
         ),
       )
       .subscribe();

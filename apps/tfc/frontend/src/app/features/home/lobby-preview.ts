@@ -46,10 +46,7 @@ export interface JoinableExercise {
       <div class="crew-stations">
         @for (role of data().roles; track role.id) {
           @let holder = holderOf(role.id);
-          <div
-            class="crew-station"
-            [attr.data-filled]="holder ? '' : null"
-          >
+          <div class="crew-station" [attr.data-filled]="holder ? '' : null">
             <div class="crew-station__info">
               <span
                 class="crew-station__light"
@@ -57,9 +54,7 @@ export interface JoinableExercise {
               ></span>
               <span class="crew-station__role">{{ role.label }}</span>
               <span class="crew-station__type">
-                {{
-                  role.player_type === "decision_maker" ? "CMD" : "ADV"
-                }}
+                {{ role.player_type === "decision_maker" ? "CMD" : "ADV" }}
               </span>
             </div>
             @if (holder) {
@@ -72,10 +67,7 @@ export interface JoinableExercise {
 
         @if (data().requires_gm) {
           @let gmHolder = holderOf("game-master");
-          <div
-            class="crew-station"
-            [attr.data-filled]="gmHolder ? '' : null"
-          >
+          <div class="crew-station" [attr.data-filled]="gmHolder ? '' : null">
             <div class="crew-station__info">
               <span
                 class="crew-station__light"

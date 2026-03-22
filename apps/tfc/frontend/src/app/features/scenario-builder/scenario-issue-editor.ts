@@ -27,7 +27,10 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
   template: `
     <ui-card title="Issues">
       @for (issue of store.content().issues; track issue.id) {
-        <div [id]="'issue-' + issue.id" class="flex flex-col gap-xs p-sm border-b">
+        <div
+          [id]="'issue-' + issue.id"
+          class="flex flex-col gap-xs p-sm border-b"
+        >
           @if (editingId() === issue.id) {
             <div class="flex flex-col gap-xs">
               <ui-input
@@ -97,8 +100,12 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                   <span
                     class="text-xs cursor-pointer"
                     style="text-decoration: underline dotted; color: var(--color-primary)"
-                    (click)="scrollTo('event-' + issue.trigger_event_id); $event.stopPropagation()"
-                  >{{ issue.trigger_event_id }}</span>
+                    (click)="
+                      scrollTo('event-' + issue.trigger_event_id);
+                      $event.stopPropagation()
+                    "
+                    >{{ issue.trigger_event_id }}</span
+                  >
                 }
               </div>
               <div class="flex gap-xs">
@@ -191,7 +198,9 @@ export class ScenarioIssueEditorComponent {
   }
 
   protected scrollTo(elementId: string): void {
-    document.getElementById(elementId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(elementId)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   protected save(issueId: string): void {

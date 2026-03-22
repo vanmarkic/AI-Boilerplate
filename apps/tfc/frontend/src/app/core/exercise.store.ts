@@ -13,7 +13,13 @@ import type {
   TimeSnapshot,
 } from "./engine-api.service";
 import type { ActiveDecision, ScenarioContext } from "./decision-api.service";
-import type { ScoreChange, SystemSnapshot, SystemStateChange } from "./generated/state-changes.types";
+import type {
+  ScoreChange,
+  SystemSnapshot,
+  SystemStateChange,
+  WarfareDomainChange,
+  WarfareDomainSnapshot,
+} from "./generated/state-changes.types";
 import { formatTimeMs } from "./format-time";
 
 export interface ParticipantPresence {
@@ -44,6 +50,7 @@ interface ExerciseState {
   issues: IssueSnapshot[]; // domain: "defects"
   decisions: ActiveDecision[];
   systems: SystemSnapshot[];
+  warfareDomains: WarfareDomainSnapshot[];
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
   participantId: string;
@@ -68,6 +75,7 @@ const initialState: ExerciseState = {
   issues: [],
   decisions: [],
   systems: [],
+  warfareDomains: [],
   participants: [],
   context: null,
   participantId: "",
@@ -190,6 +198,7 @@ export const ExerciseStore = signalStore(
         events: snapshot.events,
         issues: snapshot.issues,
         systems: snapshot.systems ?? store.systems(),
+        warfareDomains: snapshot.warfare_domains ?? store.warfareDomains(),
         decisions: snapshot.decisions ?? store.decisions(),
         score: snapshot.score
           ? {
@@ -270,13 +279,15 @@ export const ExerciseStore = signalStore(
     },
 
     closeDecision(decisionId: string, selectedOptionIds?: string[]): void {
-      const decisions = store
-        .decisions()
-        .map((d) =>
-          d.id === decisionId
-            ? { ...d, status: "closed", selected_option_ids: selectedOptionIds ?? d.selected_option_ids }
-            : d,
-        );
+      const decisions = store.decisions().map((d) =>
+        d.id === decisionId
+          ? {
+              ...d,
+              status: "closed",
+              selected_option_ids: selectedOptionIds ?? d.selected_option_ids,
+            }
+          : d,
+      );
       patchState(store, { decisions });
     },
 
@@ -300,7 +311,16 @@ export const ExerciseStore = signalStore(
       patchState(store, { speedFactor: factor });
     },
 
-    applyScoreChange(change: Pick<ScoreChange, "total_score" | "stress" | "next_decision_time_ms" | "turn_number" | "score_tier">): void {
+    applyScoreChange(
+      change: Pick<
+        ScoreChange,
+        | "total_score"
+        | "stress"
+        | "next_decision_time_ms"
+        | "turn_number"
+        | "score_tier"
+      >,
+    ): void {
       patchState(store, {
         score: {
           stress: change.stress,
@@ -330,13 +350,33 @@ export const ExerciseStore = signalStore(
       patchState(store, { decisions });
     },
 
-    applySystemChange(change: Pick<SystemStateChange, "system_id" | "action" | "power" | "operational">): void {
-      const systems = store.systems().map((s) =>
-        s.system_id === change.system_id
-          ? { ...s, power: change.power, operational: change.operational }
-          : s,
-      );
+    applySystemChange(
+      change: Pick<
+        SystemStateChange,
+        "system_id" | "action" | "power" | "operational"
+      >,
+    ): void {
+      const systems = store
+        .systems()
+        .map((s) =>
+          s.system_id === change.system_id
+            ? { ...s, power: change.power, operational: change.operational }
+            : s,
+        );
       patchState(store, { systems });
+    },
+
+    applyWarfareDomainChange(
+      change: Pick<WarfareDomainChange, "domain_id" | "threat_level">,
+    ): void {
+      const warfareDomains = store
+        .warfareDomains()
+        .map((d) =>
+          d.domain_id === change.domain_id
+            ? { ...d, threat_level: change.threat_level }
+            : d,
+        );
+      patchState(store, { warfareDomains });
     },
   })),
 );

@@ -26,9 +26,14 @@ const TIER_CONFIG: Record<ScoreTier, { heading: string; message: string }> = {
   },
 };
 
+function isScoreTier(value: string): value is ScoreTier {
+  return value in TIER_CONFIG;
+}
+
 const FALLBACK = {
   heading: "Exercise Complete",
-  message: "Well done — the exercise has concluded. Thank you for your participation and effort.",
+  message:
+    "Well done — the exercise has concluded. Thank you for your participation and effort.",
 };
 
 @Component({
@@ -48,12 +53,7 @@ const FALLBACK = {
       </div>
 
       <footer class="completion-overlay__footer">
-        <button
-          uiButton
-          variant="default"
-          size="lg"
-          (click)="closed.emit()"
-        >
+        <button uiButton variant="default" size="lg" (click)="closed.emit()">
           Return to Home
         </button>
       </footer>
@@ -66,8 +66,8 @@ export class CompletionOverlayComponent {
 
   protected get config(): { heading: string; message: string } {
     const t = this.tier();
-    if (t && t in TIER_CONFIG) {
-      return TIER_CONFIG[t as ScoreTier];
+    if (t && isScoreTier(t)) {
+      return TIER_CONFIG[t];
     }
     return FALLBACK;
   }

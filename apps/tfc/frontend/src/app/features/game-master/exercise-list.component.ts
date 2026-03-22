@@ -15,7 +15,12 @@ import { PhaseBadgeComponent } from "../../shared/phase-badge.component";
 @Component({
   selector: "tfc-exercise-list",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CardComponent, ButtonDirective, BadgeComponent, PhaseBadgeComponent],
+  imports: [
+    CardComponent,
+    ButtonDirective,
+    BadgeComponent,
+    PhaseBadgeComponent,
+  ],
   template: `
     <div class="flex flex-col gap-md">
       <h2 class="text-lg font-semibold">

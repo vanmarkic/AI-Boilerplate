@@ -1,7 +1,11 @@
 import { TestBed } from "@angular/core/testing";
 import { ExerciseStore } from "./exercise.store";
 import { handleStateChange, toActiveDecision } from "./ws-state-handler";
-import type { DecisionOpened, PhaseChange, SystemStateChange } from "./generated/state-changes.types";
+import type {
+  DecisionOpened,
+  PhaseChange,
+  SystemStateChange,
+} from "./generated/state-changes.types";
 
 describe("ws-state-handler", () => {
   let store: InstanceType<typeof ExerciseStore>;
@@ -22,7 +26,18 @@ describe("ws-state-handler", () => {
         title: "Fix the bug?",
         description: "Choose wisely",
         question_type: "single_choice",
-        options: [{ id: "o1", label: "Yes", score: 10, stress_delta: 0, system_effects: [], targets_system: false, max_plays: 1, role: null }],
+        options: [
+          {
+            id: "o1",
+            label: "Yes",
+            score: 10,
+            stress_delta: 0,
+            system_effects: [],
+            targets_system: false,
+            max_plays: 1,
+            role: null,
+          },
+        ],
         completion_mode: "first_response",
         target_roles: ["advisor"],
         timeout_ms: 30000,
@@ -47,7 +62,12 @@ describe("ws-state-handler", () => {
         type: "phase_change",
         action: "started",
         phase: "running",
-        time: { play_time_ms: 1000, real_time_ms: 1000, factor: 1, paused: false },
+        time: {
+          play_time_ms: 1000,
+          real_time_ms: 1000,
+          factor: 1,
+          paused: false,
+        },
       };
       handleStateChange(change, store);
       expect(store.phase()).toBe("running");
@@ -109,11 +129,14 @@ describe("ws-state-handler", () => {
     });
 
     it("closes decision on decision_closed", () => {
-      store.applyDecisions([
-        { id: "d1", title: "T", status: "open" } as any,
-      ]);
+      store.applyDecisions([{ id: "d1", title: "T", status: "open" } as any]);
       handleStateChange(
-        { type: "decision_closed", decision_id: "d1", title: "T", selected_option_ids: [] },
+        {
+          type: "decision_closed",
+          decision_id: "d1",
+          title: "T",
+          selected_option_ids: [],
+        },
         store,
       );
       expect(store.openDecisions().length).toBe(0);
@@ -128,7 +151,16 @@ describe("ws-state-handler", () => {
         time: { play_time_ms: 0, real_time_ms: 0, factor: 1, paused: false },
         events: [],
         issues: [],
-        systems: [{ system_id: "nav", label: "NAV", category: "sensor", power: true, operational: "green" }],
+        systems: [
+          {
+            system_id: "nav",
+            label: "NAV",
+            category: "sensor",
+            power: true,
+            operational: "green",
+          },
+        ],
+        warfare_domains: [],
         score: null,
       });
       const change: SystemStateChange = {

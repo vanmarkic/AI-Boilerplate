@@ -27,8 +27,8 @@
     --shadow-lg: 0 4px 16px oklch(0% 0 0 / 60%);
 
     /* Emboss tokens (inset highlights + shadows) */
-    --emboss-inset: inset 0 1px 0 oklch(100% 0 0 / 6%),
-                    inset 0 -1px 0 oklch(0% 0 0 / 20%);
+    --emboss-inset:
+      inset 0 1px 0 oklch(100% 0 0 / 6%), inset 0 -1px 0 oklch(0% 0 0 / 20%);
     --emboss-border: 2px solid oklch(28% 0.03 55);
   }
 }
@@ -39,8 +39,7 @@
      Uses an inline SVG feTurbulence filter for subtle grain. */
   [data-theme="tfc-hoi"] body {
     background-color: var(--color-background);
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
   }
 
   /* Embossed card panels — inset highlight + shadow */
@@ -52,24 +51,22 @@
   /* Exercise header — heavier bottom border + subtle gradient */
   [data-theme="tfc-hoi"] .exercise-header {
     border-bottom: 2px solid oklch(32% 0.03 55);
-    background:
-      linear-gradient(
-        180deg,
-        oklch(22% 0.025 50) 0%,
-        oklch(18% 0.025 50) 100%
-      );
+    background: linear-gradient(
+      180deg,
+      oklch(22% 0.025 50) 0%,
+      oklch(18% 0.025 50) 100%
+    );
     box-shadow: var(--emboss-inset);
   }
 
   /* Exercise controls bar — same treatment */
   [data-theme="tfc-hoi"] .exercise-controls {
     border-top: 2px solid oklch(32% 0.03 55);
-    background:
-      linear-gradient(
-        0deg,
-        oklch(22% 0.025 50) 0%,
-        oklch(18% 0.025 50) 100%
-      );
+    background: linear-gradient(
+      0deg,
+      oklch(22% 0.025 50) 0%,
+      oklch(18% 0.025 50) 100%
+    );
     box-shadow: var(--emboss-inset);
   }
 

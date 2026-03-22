@@ -7,7 +7,11 @@ import type { RoleDef } from "../core/scenario-api.service";
 @Component({
   selector: "test-host",
   imports: [LogsDrawerComponent],
-  template: `<tfc-logs-drawer [(open)]="open" [decisions]="decisions()" [roles]="roles()" />`,
+  template: `<tfc-logs-drawer
+    [(open)]="open"
+    [decisions]="decisions()"
+    [roles]="roles()"
+  />`,
 })
 class TestHost {
   open = signal(true);
@@ -64,10 +68,16 @@ describe("LogsDrawerComponent", () => {
   it("should render decision entries with turn numbers", () => {
     host.decisions.set([
       makeDecision({ id: "d1", title: "First Decision", opened_at_pt_ms: 0 }),
-      makeDecision({ id: "d2", title: "Second Decision", opened_at_pt_ms: 5000 }),
+      makeDecision({
+        id: "d2",
+        title: "Second Decision",
+        opened_at_pt_ms: 5000,
+      }),
     ]);
     fixture.detectChanges();
-    const entries = fixture.nativeElement.querySelectorAll('[data-testid="decision-entry"]');
+    const entries = fixture.nativeElement.querySelectorAll(
+      '[data-testid="decision-entry"]',
+    );
     expect(entries.length).toBe(2);
     expect(entries[0].textContent).toContain("Turn 1");
     expect(entries[0].textContent).toContain("First Decision");
@@ -81,7 +91,9 @@ describe("LogsDrawerComponent", () => {
       makeDecision({ id: "d1", title: "Earlier", opened_at_pt_ms: 1000 }),
     ]);
     fixture.detectChanges();
-    const entries = fixture.nativeElement.querySelectorAll('[data-testid="decision-entry"]');
+    const entries = fixture.nativeElement.querySelectorAll(
+      '[data-testid="decision-entry"]',
+    );
     expect(entries[0].textContent).toContain("Earlier");
     expect(entries[1].textContent).toContain("Later");
   });
@@ -97,7 +109,9 @@ describe("LogsDrawerComponent", () => {
       }),
     ]);
     fixture.detectChanges();
-    const recs = fixture.nativeElement.querySelectorAll('[data-testid="recommendation"]');
+    const recs = fixture.nativeElement.querySelectorAll(
+      '[data-testid="recommendation"]',
+    );
     expect(recs.length).toBe(2);
     expect(recs[0].textContent).toContain("Engineer");
     expect(recs[0].textContent).toContain("Option A");
@@ -114,7 +128,9 @@ describe("LogsDrawerComponent", () => {
       }),
     ]);
     fixture.detectChanges();
-    const final = fixture.nativeElement.querySelector('[data-testid="final-decision"]');
+    const final = fixture.nativeElement.querySelector(
+      '[data-testid="final-decision"]',
+    );
     expect(final).toBeTruthy();
     expect(final.textContent).toContain("Final");
     expect(final.textContent).toContain("Option A");
@@ -131,7 +147,9 @@ describe("LogsDrawerComponent", () => {
       makeDecision({ recommendations: { "unknown-role": "o1" } }),
     ]);
     fixture.detectChanges();
-    const rec = fixture.nativeElement.querySelector('[data-testid="recommendation"]');
+    const rec = fixture.nativeElement.querySelector(
+      '[data-testid="recommendation"]',
+    );
     expect(rec.textContent).toContain("unknown-role");
   });
 });

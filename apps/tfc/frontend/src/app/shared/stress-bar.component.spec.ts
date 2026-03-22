@@ -27,7 +27,9 @@ describe("StressBarComponent", () => {
   });
 
   function severity(): string | null {
-    return el.querySelector("[data-severity]")?.getAttribute("data-severity") ?? null;
+    return (
+      el.querySelector("[data-severity]")?.getAttribute("data-severity") ?? null
+    );
   }
 
   function fillWidth(): string {

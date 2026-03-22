@@ -22,7 +22,11 @@ export interface SidebarSection {
         <a
           class="flex items-center justify-between p-xs rounded text-sm cursor-pointer"
           [class.font-medium]="activeSection() === section.id"
-          [style.background-color]="activeSection() === section.id ? 'var(--color-muted)' : 'transparent'"
+          [style.background-color]="
+            activeSection() === section.id
+              ? 'var(--color-muted)'
+              : 'transparent'
+          "
           (click)="onSectionClick(section.id)"
         >
           {{ section.label }}
