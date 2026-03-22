@@ -82,6 +82,23 @@ export interface SystemSnapshot {
   operational: string;
 }
 
+export interface WarfareDomainSnapshot {
+  domain_id: string;
+  label: string;
+  threat_level: string;
+}
+
+export interface WarfareDomainChange {
+  type: "warfare_domain_change";
+  domain_id: string;
+  threat_level: string;
+}
+
+export interface DomainEffect {
+  domain_id: string;
+  threat_level: string;
+}
+
 export interface EngineSnapshot {
   exercise_id: number;
   title: string;
@@ -92,6 +109,7 @@ export interface EngineSnapshot {
   decisions: DecisionSnapshot[];
   score: Record<string, object> | null;
   systems: SystemSnapshot[];
+  warfare_domains: WarfareDomainSnapshot[];
 }
 
 export interface PresenceEntry {
@@ -193,7 +211,7 @@ export interface SystemStateChange {
 }
 
 export type StateChange =
-  | PhaseChange
+  PhaseChange
   | EventChange
   | IssueChange
   | DecisionOpened
@@ -202,4 +220,5 @@ export type StateChange =
   | ScoreChange
   | RecommendationSubmitted
   | ForcedCardApplied
-  | SystemStateChange;
+  | SystemStateChange
+  | WarfareDomainChange;
