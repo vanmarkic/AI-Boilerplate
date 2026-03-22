@@ -1,0 +1,17 @@
+name: foundation
+tier: 2
+description: Foundation editor for DomainConfig catalogs (roles, systems, warfare domains, blue cards)
+version: 0.1.0
+dependencies:
+  internal: [shared, scenario-builder]
+  external: []
+api_endpoints:
+  - GET /api/domain-configs/by-slug/{slug}
+  - PUT /api/domain-configs/{id}
+models: []
+events_emitted: []
+events_consumed: []
+business_rules:
+  - "Loads DomainConfig by slug and displays catalog counts"
+  - "Supports CRUD for roles, systems, warfare domains, and blue cards"
+  - "Saves updated config via PUT endpoint"
