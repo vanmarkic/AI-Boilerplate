@@ -44,8 +44,15 @@ import { validateScenarioContent } from "./validate-scenario-content";
     ScenarioWalkthroughComponent,
   ],
   template: `
-    <ui-sidebar-layout side="left" style="--sidebar-width: 14rem; height: 100dvh">
-      <div sidebar class="flex flex-col gap-md p-sm" style="height: 100%; overflow-y: auto">
+    <ui-sidebar-layout
+      side="left"
+      style="--sidebar-width: 14rem; height: 100dvh"
+    >
+      <div
+        sidebar
+        class="flex flex-col gap-md p-sm"
+        style="height: 100%; overflow-y: auto"
+      >
         <tfc-scenario-sidebar-nav
           [sections]="sidebarSections()"
           [activeSection]="''"
@@ -54,15 +61,25 @@ import { validateScenarioContent } from "./validate-scenario-content";
           <span panelTitle>Existing Scenarios</span>
           @for (s of scenarios(); track s.id) {
             <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm font-medium cursor-pointer" (click)="loadScenario(s.id)">
+              <span
+                class="text-sm font-medium cursor-pointer"
+                (click)="loadScenario(s.id)"
+              >
                 {{ s.title }}
               </span>
-              <button uiButton variant="destructive" size="sm" (click)="deleteScenario(s.id)">
+              <button
+                uiButton
+                variant="destructive"
+                size="sm"
+                (click)="deleteScenario(s.id)"
+              >
                 Delete
               </button>
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No scenarios found.</p>
+            <p class="text-muted-foreground text-sm p-sm">
+              No scenarios found.
+            </p>
           }
         </ui-collapsible-panel>
       </div>
@@ -73,37 +90,60 @@ import { validateScenarioContent } from "./validate-scenario-content";
           [isDirty]="isDirty()"
           (onSave)="save()"
           (onSaveAsCopy)="saveAsCopy()"
-          (onToggleView)="viewMode.set(viewMode() === 'global' ? 'walkthrough' : 'global')"
+          (onToggleView)="
+            viewMode.set(viewMode() === 'global' ? 'walkthrough' : 'global')
+          "
         />
 
         @if (store.error()) {
-          <div class="p-sm border border-destructive bg-destructive/10 text-destructive text-sm rounded" role="alert">
+          <div
+            class="p-sm border border-destructive bg-destructive/10 text-destructive text-sm rounded"
+            role="alert"
+          >
             <strong>Validation errors:</strong>
             <ul class="mt-xs ml-md list-disc">
-              @for (err of store.error()!.split('\\n'); track err) {
+              @for (err of store.error()!.split("\\n"); track err) {
                 <li>{{ err }}</li>
               }
             </ul>
           </div>
         }
 
-        @if (viewMode() === 'global') {
-          <section id="section-roles" style="scroll-margin-top: var(--spacing-xl)">
+        @if (viewMode() === "global") {
+          <section
+            id="section-roles"
+            style="scroll-margin-top: var(--spacing-xl)"
+          >
             <tfc-scenario-roles-editor />
           </section>
-          <section id="section-events" style="scroll-margin-top: var(--spacing-xl)">
+          <section
+            id="section-events"
+            style="scroll-margin-top: var(--spacing-xl)"
+          >
             <tfc-scenario-event-editor />
           </section>
-          <section id="section-issues" style="scroll-margin-top: var(--spacing-xl)">
+          <section
+            id="section-issues"
+            style="scroll-margin-top: var(--spacing-xl)"
+          >
             <tfc-scenario-issue-editor />
           </section>
-          <section id="section-decisions" style="scroll-margin-top: var(--spacing-xl)">
+          <section
+            id="section-decisions"
+            style="scroll-margin-top: var(--spacing-xl)"
+          >
             <tfc-scenario-decision-editor />
           </section>
-          <section id="section-turns" style="scroll-margin-top: var(--spacing-xl)">
+          <section
+            id="section-turns"
+            style="scroll-margin-top: var(--spacing-xl)"
+          >
             <tfc-scenario-turns-placeholder />
           </section>
-          <section id="section-settings" style="scroll-margin-top: var(--spacing-xl)">
+          <section
+            id="section-settings"
+            style="scroll-margin-top: var(--spacing-xl)"
+          >
             <tfc-scenario-settings-editor />
           </section>
         } @else {
@@ -137,7 +177,11 @@ export class ScenarioBuilderView implements OnInit {
       { id: "roles", label: "Roles", count: (c.roles ?? []).length },
       { id: "events", label: "Events", count: c.events.length },
       { id: "issues", label: "Issues", count: c.issues.length },
-      { id: "decisions", label: "Decisions", count: c.decision_templates.length },
+      {
+        id: "decisions",
+        label: "Decisions",
+        count: c.decision_templates.length,
+      },
       { id: "turns", label: "Turns", count: (c.turns ?? []).length },
       { id: "settings", label: "Settings", count: 0 },
     ];
@@ -149,13 +193,15 @@ export class ScenarioBuilderView implements OnInit {
 
   private loadList(): void {
     this.api.list().subscribe({
-      next: (list) => this.scenarios.set(list.map((s) => ({ id: s.id, title: s.title }))),
+      next: (list) =>
+        this.scenarios.set(list.map((s) => ({ id: s.id, title: s.title }))),
     });
   }
 
   protected loadScenario(id: number): void {
     this.api.get(id).subscribe({
-      next: (s) => this.store.loadScenario(s.id, s.title, s.description, s.content),
+      next: (s) =>
+        this.store.loadScenario(s.id, s.title, s.description, s.content),
     });
   }
 
@@ -169,7 +215,11 @@ export class ScenarioBuilderView implements OnInit {
       return;
     }
     this.store.setSaving(true);
-    const payload = { title: this.store.title(), description: this.store.description(), content };
+    const payload = {
+      title: this.store.title(),
+      description: this.store.description(),
+      content,
+    };
     const id = this.store.scenarioId();
     const req = id ? this.api.update(id, payload) : this.api.create(payload);
     req.subscribe({
@@ -178,7 +228,8 @@ export class ScenarioBuilderView implements OnInit {
         this.store.setSaving(false);
         this.loadList();
       },
-      error: () => this.store.setError("Save failed — server rejected the scenario."),
+      error: () =>
+        this.store.setError("Save failed — server rejected the scenario."),
     });
   }
 

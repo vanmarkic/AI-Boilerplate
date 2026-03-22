@@ -17,9 +17,7 @@ export function exportScenarioToJson(
   });
 }
 
-export function parseScenarioImport(
-  jsonString: string,
-): ScenarioExport | null {
+export function parseScenarioImport(jsonString: string): ScenarioExport | null {
   let parsed: unknown;
   try {
     parsed = JSON.parse(jsonString);
@@ -27,12 +25,16 @@ export function parseScenarioImport(
     return null;
   }
   if (typeof parsed !== "object" || parsed === null) return null;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- narrowed by typeof check above
   const obj = parsed as Record<string, unknown>;
   if (typeof obj["title"] !== "string") return null;
-  if (typeof obj["content"] !== "object" || obj["content"] === null) return null;
+  if (typeof obj["content"] !== "object" || obj["content"] === null)
+    return null;
   return {
     title: obj["title"],
-    description: typeof obj["description"] === "string" ? obj["description"] : "",
+    description:
+      typeof obj["description"] === "string" ? obj["description"] : "",
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- validated above
     content: obj["content"] as ScenarioContent,
   };
 }

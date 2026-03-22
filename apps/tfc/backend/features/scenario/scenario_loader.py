@@ -16,8 +16,9 @@ from engine.exercise_engine import (
 from engine.game_modes import create_game_mode
 from engine.game_modes.simple_collaborative import SimpleCollaborativeMode
 from engine.issue_manager import TrackedIssue, TriggerMode
-from engine.state_changes import DecisionOptionSnapshot, SystemEffect
+from engine.state_changes import DecisionOptionSnapshot, DomainEffect, SystemEffect
 from engine.system_manager import SystemState
+from engine.warfare_domain_manager import WarfareDomainState
 from features.scenario.scenario_content import ScenarioContent
 
 
@@ -45,6 +46,10 @@ def load_scenario_events(content: ScenarioContent) -> list[ScheduledEvent]:
                         set_all_power=e.set_all_power,
                     )
                     for e in evt.system_effects
+                ],
+                domain_effects=[
+                    DomainEffect(domain_id=de.domain_id, threat_level=de.threat_level)
+                    for de in evt.domain_effects
                 ],
             ),
         )
@@ -126,6 +131,18 @@ def load_system_states(content: ScenarioContent) -> list[SystemState]:
     ]
 
 
+def load_warfare_domains(content: ScenarioContent) -> list[WarfareDomainState]:
+    """Convert scenario warfare domain definitions to engine WarfareDomainState objects."""
+    return [
+        WarfareDomainState(
+            domain_id=d.domain_id,
+            label=d.label or d.domain_id.upper(),
+            threat_level=d.initial_threat_level,
+        )
+        for d in content.initial_warfare_domains
+    ]
+
+
 def _compute_max_possible_score(content: ScenarioContent) -> float:
     """Sum the best achievable score across all decision templates in the sequence.
 
@@ -184,4 +201,5 @@ def build_engine_config(
         context=context,
         game_mode=game_mode,
         initial_system_states=load_system_states(content),
+        initial_warfare_domains=load_warfare_domains(content),
     )

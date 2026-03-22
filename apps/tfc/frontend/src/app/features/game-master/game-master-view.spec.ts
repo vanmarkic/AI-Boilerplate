@@ -91,7 +91,9 @@ describe("GameMasterView", () => {
 
   afterEach(() => {
     httpTesting.match(`${base}/api/domain-configs`).forEach((r) => r.flush([]));
-    httpTesting.match((req) => req.url.includes("/api/audit/")).forEach((r) => r.flush([]));
+    httpTesting
+      .match((req) => req.url.includes("/api/audit/"))
+      .forEach((r) => r.flush([]));
     httpTesting.verify();
   });
 
@@ -206,9 +208,7 @@ describe("GameMasterView", () => {
         score: null,
       });
       httpTesting
-        .expectOne(
-          (r) => r.url === `${base}/api/exercises/99/engine/context`,
-        )
+        .expectOne((r) => r.url === `${base}/api/exercises/99/engine/context`)
         .flush({ title: "Test", briefing: "", objectives: [], rules: [] });
 
       fixture.detectChanges();

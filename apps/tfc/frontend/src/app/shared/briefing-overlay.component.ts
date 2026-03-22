@@ -44,7 +44,9 @@ import { ButtonDirective } from "@aspect/ui";
               @for (role of roles(); track role.id) {
                 <span class="briefing-overlay__role">
                   {{ role.label }}
-                  <span class="briefing-overlay__role-type">{{ role.player_type }}</span>
+                  <span class="briefing-overlay__role-type">{{
+                    role.player_type
+                  }}</span>
                 </span>
               }
             </div>
@@ -60,7 +62,7 @@ import { ButtonDirective } from "@aspect/ui";
           [disabled]="starting()"
           (click)="begun.emit()"
         >
-          {{ starting() ? 'Starting...' : 'Begin Exercise' }}
+          {{ starting() ? "Starting..." : "Begin Exercise" }}
         </button>
       </footer>
     </div>

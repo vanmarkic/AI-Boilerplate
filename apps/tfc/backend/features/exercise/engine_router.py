@@ -61,6 +61,7 @@ class SpeedRequest(BaseModel):
 
 class CloseDecisionRequest(BaseModel):
     selected_option_ids: list[str] = Field(default_factory=list)
+    target_system_selections: dict[str, str] = Field(default_factory=dict)
 
 
 class RecommendRequest(BaseModel):
@@ -245,6 +246,7 @@ async def close_decision(
         decision_id,
         body.selected_option_ids,
         broadcast=_broadcast,
+        target_system_selections=body.target_system_selections or None,
     )
     await _log_to_audit(exercise_id, all_changes)
     return result

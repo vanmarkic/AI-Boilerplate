@@ -33,7 +33,10 @@ export interface ScoreState {
       <tfc-stress-bar [stress]="score()?.stress ?? 0" />
       <span class="flex-1"></span>
       @if (countdownMs() !== null && countdownMs()! > 0) {
-        <span class="score-bar__countdown" [class.score-bar__countdown--urgent]="countdownMs()! < 30000">
+        <span
+          class="score-bar__countdown"
+          [class.score-bar__countdown--urgent]="countdownMs()! < 30000"
+        >
           {{ formattedCountdown }}
         </span>
       } @else if (score()?.nextDecisionTimeMs; as ms) {

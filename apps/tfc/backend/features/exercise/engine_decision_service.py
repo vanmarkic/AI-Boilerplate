@@ -22,6 +22,7 @@ class EngineDecisionService:
         decision_id: str,
         selected_option_ids: list[str],
         broadcast: Callable[[list[StateChange]], Awaitable[None]],
+        target_system_selections: dict[str, str] | None = None,
     ) -> DecisionClosed:
         """Validate request shape, delegate to engine, broadcast changes."""
         # Pre-validate for nicer HTTP errors (engine also enforces)
@@ -40,9 +41,12 @@ class EngineDecisionService:
                 )
 
         try:
-            changes = await engine.close_decision(decision_id, selected_option_ids)
+            changes = await engine.close_decision(decision_id, selected_option_ids, target_system_selections)
         except ValueError as exc:
-            raise NotFoundError(str(exc)) from exc
+            msg = str(exc)
+            if "not found" in msg or "already closed" in msg:
+                raise NotFoundError(msg) from exc
+            raise BadRequestError(msg) from exc
 
         await broadcast(changes)
 

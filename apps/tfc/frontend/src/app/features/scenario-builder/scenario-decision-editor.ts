@@ -57,8 +57,22 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                 </div>
               </div>
               <div class="flex gap-sm">
-                <button uiButton variant="default" size="sm" (click)="save(dt.id)">Save</button>
-                <button uiButton variant="outline" size="sm" (click)="editingId.set(null)">Cancel</button>
+                <button
+                  uiButton
+                  variant="default"
+                  size="sm"
+                  (click)="save(dt.id)"
+                >
+                  Save
+                </button>
+                <button
+                  uiButton
+                  variant="outline"
+                  size="sm"
+                  (click)="editingId.set(null)"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           } @else {
@@ -71,23 +85,47 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                     class="text-xs text-muted-foreground ml-sm cursor-pointer"
                     style="text-decoration: underline dotted"
                     (click)="scrollTo('issue-' + dt.issue_id)"
-                  >issue: {{ dt.issue_id }}</span>
+                    >issue: {{ dt.issue_id }}</span
+                  >
                 }
               </div>
               <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm" (click)="edit(dt)">Edit</button>
-                <button uiButton variant="destructive" size="sm" (click)="store.removeDecisionTemplate(dt.id)">Remove</button>
+                <button uiButton variant="outline" size="sm" (click)="edit(dt)">
+                  Edit
+                </button>
+                <button
+                  uiButton
+                  variant="destructive"
+                  size="sm"
+                  (click)="store.removeDecisionTemplate(dt.id)"
+                >
+                  Remove
+                </button>
               </div>
             </div>
           }
         </div>
       } @empty {
-        <p class="text-muted-foreground text-sm p-sm">No decision templates yet.</p>
+        <p class="text-muted-foreground text-sm p-sm">
+          No decision templates yet.
+        </p>
       }
       <div class="flex gap-sm p-sm border-t">
-        <ui-input id="dt-title" label="" placeholder="Decision title" [(value)]="newTitle" />
-        <ui-input id="dt-issue" label="" placeholder="Issue ID" [(value)]="newIssueId" />
-        <button uiButton variant="outline" size="sm" (click)="add()">Add</button>
+        <ui-input
+          id="dt-title"
+          label=""
+          placeholder="Decision title"
+          [(value)]="newTitle"
+        />
+        <ui-input
+          id="dt-issue"
+          label=""
+          placeholder="Issue ID"
+          [(value)]="newIssueId"
+        />
+        <button uiButton variant="outline" size="sm" (click)="add()">
+          Add
+        </button>
       </div>
     </ui-card>
   `,
@@ -112,7 +150,9 @@ export class ScenarioDecisionEditorComponent {
   }
 
   protected scrollTo(elementId: string): void {
-    document.getElementById(elementId)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document
+      .getElementById(elementId)
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   protected add(): void {

@@ -29,6 +29,7 @@ describe("GmItemActionsComponent", () => {
       completed_at_pt_ms: null,
       target_roles: [],
       role_descriptions: {},
+      system_effects: [],
     },
     {
       id: "e2",
@@ -44,6 +45,7 @@ describe("GmItemActionsComponent", () => {
       completed_at_pt_ms: null,
       target_roles: [],
       role_descriptions: {},
+      system_effects: [],
     },
   ];
 

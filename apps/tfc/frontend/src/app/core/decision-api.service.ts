@@ -11,6 +11,7 @@ export interface DecisionOption {
   label: string;
   score?: number;
   role?: string | null;
+  targets_system?: boolean;
 }
 
 export interface ActiveDecision {
@@ -144,10 +145,14 @@ export class DecisionApiService {
     exerciseId: number,
     decisionId: string,
     selectedOptionIds: string[] = [],
+    targetSystemSelections: Record<string, string> = {},
   ): Observable<unknown> {
     return this.http.post(
       `${this.base}/api/exercises/${exerciseId}/engine/decisions/${decisionId}/close`,
-      { selected_option_ids: selectedOptionIds },
+      {
+        selected_option_ids: selectedOptionIds,
+        target_system_selections: targetSystemSelections,
+      },
     );
   }
 

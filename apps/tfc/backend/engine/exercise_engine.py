@@ -23,14 +23,17 @@ from engine.issue_manager import IssueManager
 from engine.state_changes import (
     DecisionOpened,
     DecisionOptionSnapshot,
+    DomainEffect,
     EngineSnapshot,
     PhaseChange,
     StateChange,
     SystemEffect,
     SystemStateChange,
+    WarfareDomainChange,
 )
 from engine.system_manager import SystemManager
 from engine.time_manager import TimeManager
+from engine.warfare_domain_manager import WarfareDomainManager
 
 
 class EngineStateError(RuntimeError):
@@ -59,6 +62,7 @@ class ExerciseEngine:
         self._events = EventScheduler()
         self._issues = IssueManager()
         self._systems = SystemManager()
+        self._warfare_domains = WarfareDomainManager()
         self._decisions = DecisionManager()
         self._tick_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._timeout_task: asyncio.Task | None = None  # type: ignore[type-arg]
@@ -69,6 +73,7 @@ class ExerciseEngine:
         self._events.load_events(config.events)
         self._issues.load_issues(config.issues)
         self._systems.load_systems(list(config.initial_system_states))
+        self._warfare_domains.load_domains(list(config.initial_warfare_domains))
 
     @property
     def phase(self) -> EnginePhase:
@@ -89,6 +94,10 @@ class ExerciseEngine:
     @property
     def system_manager(self) -> SystemManager:
         return self._systems
+
+    @property
+    def warfare_domain_manager(self) -> WarfareDomainManager:
+        return self._warfare_domains
 
     @property
     def decision_manager(self) -> DecisionManager:
@@ -166,6 +175,7 @@ class ExerciseEngine:
         self._events.load_events(self._config.events)
         self._issues.load_issues(self._config.issues)
         self._systems.load_systems(list(self._config.initial_system_states))
+        self._warfare_domains.load_domains(list(self._config.initial_warfare_domains))
         self._decisions.clear()
         self._option_play_counts.clear()
         return self._phase_change("reset")
@@ -180,13 +190,21 @@ class ExerciseEngine:
         self,
         decision_id: str,
         selected_option_ids: list[str],
+        target_system_selections: dict[str, str] | None = None,
     ) -> list[StateChange]:
         """Single canonical path for closing a decision.
 
         Handles: validate → close → score → resolve forced cards →
-        record plays → system effects → advance turn → auto-complete.
+        record plays → system effects (with optional target overrides) →
+        advance turn → auto-complete.
 
-        Raises ValueError if decision missing/closed or max_selections violated.
+        Args:
+            target_system_selections: map of option_id → system_id for
+                options with targets_system=True. Pass None on timeout
+                to skip target-system effects.
+
+        Raises ValueError if decision missing/closed, max_selections
+        violated, or a required target system selection is missing/invalid.
         """
         pt = self._time.play_time_ms
 
@@ -232,7 +250,7 @@ class ExerciseEngine:
 
         # 4. Record plays + system effects on effective options
         self.record_option_plays(effective_opts)
-        changes.extend(self._apply_system_effects(effective_opts))
+        changes.extend(self._apply_system_effects(effective_opts, target_system_selections))
 
         # 5. Advance to next turn (or auto-complete if exhausted)
         advance = await self._advance_to_next_turn(decision_id, pt)
@@ -284,7 +302,8 @@ class ExerciseEngine:
     def trigger_event(self, event_id: str) -> list[StateChange]:
         """Single canonical path for triggering an event.
 
-        Handles: force-trigger → event system effects → open decision (if applicable).
+        Handles: force-trigger → event system effects →
+        event domain effects → open decision (if applicable).
 
         Raises ValueError if event missing or not triggerable.
         """
@@ -299,6 +318,9 @@ class ExerciseEngine:
         # Apply system effects
         if event.system_effects:
             changes.extend(self._apply_event_system_effects(event.system_effects))
+        # Apply domain effects
+        if event.domain_effects:
+            changes.extend(self._apply_event_domain_effects(event.domain_effects))
         # Open decision if applicable
         changes.extend(self._handle_decision_events([event_change], pt))
         return changes
@@ -319,6 +341,8 @@ class ExerciseEngine:
                 event = self._events.events.get(change["event_id"])
                 if event and event.system_effects:
                     changes.extend(self._apply_event_system_effects(event.system_effects))
+                if event and event.domain_effects:
+                    changes.extend(self._apply_event_domain_effects(event.domain_effects))
 
         decision_changes = self._handle_decision_events(event_changes, pt)
         changes.extend(decision_changes)
@@ -354,6 +378,7 @@ class ExerciseEngine:
             decisions=self._decisions.snapshot(),
             score=self._config.game_mode.snapshot(),
             systems=self._systems.snapshot(),
+            warfare_domains=self._warfare_domains.snapshot(),
         )
 
     def _handle_decision_events(
@@ -425,6 +450,9 @@ class ExerciseEngine:
         # Apply system effects from force-triggered event
         if event and event.system_effects:
             changes.extend(self._apply_event_system_effects(event.system_effects))
+        # Apply domain effects from force-triggered event
+        if event and event.domain_effects:
+            changes.extend(self._apply_event_domain_effects(event.domain_effects))
         changes.extend(self._handle_decision_events([event_change], pt))
         return changes
 
@@ -489,12 +517,35 @@ class ExerciseEngine:
             pass
 
     def _apply_system_effects(
-        self, selected_options: list[DecisionOptionSnapshot],
+        self,
+        selected_options: list[DecisionOptionSnapshot],
+        target_system_selections: dict[str, str] | None = None,
     ) -> list[SystemStateChange]:
         """Apply system_effects from selected decision options via SystemManager."""
         out: list[SystemStateChange] = []
         for opt in selected_options:
-            out.extend(self._apply_effects_list(opt["system_effects"]))
+            effects = opt["system_effects"]
+            if opt["targets_system"]:
+                sel = (target_system_selections or {}).get(opt["id"])
+                if sel is None:
+                    if target_system_selections is not None:
+                        raise ValueError(
+                            f"Option {opt['id']} requires a target system selection"
+                        )
+                    # No selections at all (e.g. timeout) — skip effect
+                    continue
+                if sel not in self._systems.systems:
+                    raise ValueError(f"Target system '{sel}' not found")
+                effects = [
+                    SystemEffect(
+                        system_id=sel,
+                        operational_state=fx["operational_state"],
+                        power_state=fx["power_state"],
+                        set_all_power=fx["set_all_power"],
+                    )
+                    for fx in effects
+                ]
+            out.extend(self._apply_effects_list(effects))
         return out
 
     def _apply_event_system_effects(
@@ -502,6 +553,16 @@ class ExerciseEngine:
     ) -> list[SystemStateChange]:
         """Apply system_effects from an event (inject) via SystemManager."""
         return self._apply_effects_list(effects)
+
+    def _apply_event_domain_effects(
+        self, effects: list[DomainEffect],
+    ) -> list[WarfareDomainChange]:
+        """Apply domain_effects from an event (inject) via WarfareDomainManager."""
+        out: list[WarfareDomainChange] = []
+        for fx in effects:
+            if c := self._warfare_domains.set_threat_level(fx["domain_id"], fx["threat_level"]):
+                out.append(c)
+        return out
 
     def _apply_effects_list(
         self, effects: list[SystemEffect],

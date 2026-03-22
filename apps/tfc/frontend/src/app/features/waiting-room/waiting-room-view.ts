@@ -50,16 +50,22 @@ type PlayerCountMode = "full" | "two_player" | "practice";
         <aside class="wr-sidebar">
           <div class="wr-sidebar__header">
             <span class="cmd-panel__title">Active Operations</span>
-            <span class="wr-sidebar__count">{{ joinableExercises().length }}</span>
+            <span class="wr-sidebar__count">{{
+              joinableExercises().length
+            }}</span>
           </div>
           <div class="wr-sidebar__list">
             @for (lobby of joinableExercises(); track lobby.exercise.id) {
               <button
                 class="wr-sidebar__item"
-                [attr.data-active]="exerciseId() === lobby.exercise.id ? '' : null"
+                [attr.data-active]="
+                  exerciseId() === lobby.exercise.id ? '' : null
+                "
                 (click)="selectExercise(lobby)"
               >
-                <span class="wr-sidebar__item-title">{{ lobby.exercise.title }}</span>
+                <span class="wr-sidebar__item-title">{{
+                  lobby.exercise.title
+                }}</span>
                 <span class="wr-sidebar__item-meta">
                   {{ lobby.participants.length }}/{{ lobby.max_players }} crew
                 </span>
@@ -81,7 +87,9 @@ type PlayerCountMode = "full" | "two_player" | "practice";
       <div class="wr-main">
         @if (!exerciseId()) {
           <div class="wr-empty-state">
-            <p class="wr-join__prompt">// Select an operation from the sidebar</p>
+            <p class="wr-join__prompt">
+              // Select an operation from the sidebar
+            </p>
           </div>
         } @else {
           <div class="cmd-panel">
@@ -92,7 +100,9 @@ type PlayerCountMode = "full" | "two_player" | "practice";
             <div class="cmd-panel__body flex flex-col gap-md">
               @if (!participantId()) {
                 <div class="flex flex-col gap-sm">
-                  <p class="wr-join__prompt">// Enter callsign to join operations</p>
+                  <p class="wr-join__prompt">
+                    // Enter callsign to join operations
+                  </p>
                   <div class="flex gap-sm items-end">
                     <ui-input
                       id="wr-name"
@@ -102,7 +112,8 @@ type PlayerCountMode = "full" | "two_player" | "practice";
                       style="flex: 1;"
                     />
                     <button
-                      uiButton variant="default"
+                      uiButton
+                      variant="default"
                       [disabled]="!displayName().trim() || joining()"
                       (click)="onJoin()"
                     >
@@ -136,12 +147,16 @@ type PlayerCountMode = "full" | "two_player" | "practice";
 
               @if (practiceMode()) {
                 <div class="crew-stations">
-                  <p class="wr-join__prompt">// Solo simulation — all stations active</p>
+                  <p class="wr-join__prompt">
+                    // Solo simulation — all stations active
+                  </p>
                   @if (participants().length) {
                     <div class="crew-station" data-filled data-self>
                       <div class="crew-station__info">
                         <span class="crew-station__light" data-active></span>
-                        <span class="crew-station__role">{{ participants()[0].display_name }}</span>
+                        <span class="crew-station__role">{{
+                          participants()[0].display_name
+                        }}</span>
                         <ui-badge variant="secondary">You</ui-badge>
                       </div>
                       <span class="crew-station__type">ALL</span>
@@ -173,17 +188,25 @@ type PlayerCountMode = "full" | "two_player" | "practice";
                 <div class="readiness-gauge">
                   <span class="readiness-gauge__label">Readiness</span>
                   <div class="readiness-gauge__track">
-                    <div class="readiness-gauge__fill"
-                      [style.width.%]="readinessPercent()"></div>
+                    <div
+                      class="readiness-gauge__fill"
+                      [style.width.%]="readinessPercent()"
+                    ></div>
                   </div>
                   <span class="readiness-gauge__label">
                     {{ participants().length }}/{{ maxSlots() }}
                   </span>
                 </div>
                 <div class="wr-actions">
-                  <button uiButton variant="outline" (click)="onLeave()">Leave</button>
-                  <button uiButton variant="default"
-                    [disabled]="!canStart()" (click)="onStartExercise()">
+                  <button uiButton variant="outline" (click)="onLeave()">
+                    Leave
+                  </button>
+                  <button
+                    uiButton
+                    variant="default"
+                    [disabled]="!canStart()"
+                    (click)="onStartExercise()"
+                  >
                     Deploy ({{ participants().length }})
                   </button>
                 </div>
@@ -228,8 +251,11 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   );
   protected readonly activeModeName = computed(() => {
     const mode = this.playerCountMode();
-    return mode === "practice" ? "Practice (Solo)" :
-           mode === "two_player" ? "2 Players" : "Full Team";
+    return mode === "practice"
+      ? "Practice (Solo)"
+      : mode === "two_player"
+        ? "2 Players"
+        : "Full Team";
   });
 
   protected readonly maxSlots = computed(() => {
@@ -265,7 +291,11 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     const pId = String(params["participantId"] ?? "");
     const browse = params["browse"] === "true";
 
-    const pcm = params["playerCountMode"] as PlayerCountMode | undefined;
+    const rawPcm = params["playerCountMode"];
+    const pcm: PlayerCountMode | undefined =
+      rawPcm === "full" || rawPcm === "two_player" || rawPcm === "practice"
+        ? rawPcm
+        : undefined;
     if (pcm) {
       this.playerCountMode.set(pcm);
     }
@@ -317,7 +347,10 @@ export class WaitingRoomView implements OnInit, OnDestroy {
       .subscribe();
   }
 
-  protected onTwoPlayerRoleChange(ev: { targetId: string; roleId: string }): void {
+  protected onTwoPlayerRoleChange(ev: {
+    targetId: string;
+    roleId: string;
+  }): void {
     this.api.updateRole(this.exerciseId(), ev.targetId, ev.roleId).subscribe();
   }
 
@@ -374,9 +407,9 @@ export class WaitingRoomView implements OnInit, OnDestroy {
 
   private loadJoinableExercises(): void {
     this.http
-      .get<JoinableExercise[]>(
-        `${environment.apiBaseUrl}/api/exercises/joinable`,
-      )
+      .get<
+        JoinableExercise[]
+      >(`${environment.apiBaseUrl}/api/exercises/joinable`)
       .subscribe({
         next: (data) => this.joinableExercises.set(data),
         error: () => this.joinableExercises.set([]),

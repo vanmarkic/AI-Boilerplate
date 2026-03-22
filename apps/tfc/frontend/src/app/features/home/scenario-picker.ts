@@ -40,7 +40,9 @@ import {
             @if (s.content?.game_mode; as gm) {
               <span class="dossier-card__meta-item">
                 <span class="dossier-card__meta-dot"></span>
-                {{ gm === "simple_collaborative" ? "Collaborative" : "Classic" }}
+                {{
+                  gm === "simple_collaborative" ? "Collaborative" : "Classic"
+                }}
               </span>
             }
           </div>

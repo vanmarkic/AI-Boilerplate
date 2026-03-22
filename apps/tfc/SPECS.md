@@ -156,7 +156,25 @@ Ship/facility systems displayed for all roles and players with power (ON/OFF) an
 - [x] Full system catalog in Silent Wake seed (13 systems/weapons matching game mechanics doc)
 
 **Remaining:**
-- [ ] `targets_system` — system picker UI (player chooses which system a card targets) — deferred, field flows through to frontend
+- [x] `targets_system` — system picker UI (player chooses which system a card targets) + backend `target_system_selections` override
+
+### Feature: warfare_domains · backend + frontend
+
+Warfare domain threat-level board showing ASUW, ASW, AAW, CYBER domains with Green/Yellow/Red states meaning threat level (No threat / Possible / Actual), separate from system operational states.
+
+- Each domain has: `domain_id`, `label`, `threat_level` (green | yellow | red).
+- Domains are visible to all players and roles at all times.
+- **Event-triggered changes:** Injects carry `domain_effects`, applied on event start (RUNNING).
+- Domain order matches physical board: ASUW, ASW, AAW, CYBER.
+
+**Completed:**
+- [x] WarfareDomainManager engine module — parallel to SystemManager
+- [x] Scenario content models + loader (initial_warfare_domains, domain_effects)
+- [x] Engine integration — tick loop + trigger_event apply domain effects
+- [x] Silent Wake seed data — 4 domains, 6 events with domain_effects
+- [x] Frontend store + WS handler — warfare_domain_change state change
+- [x] WarfareDomainBoardComponent — threat-level traffic lights
+- [x] Player and GM views render warfare domain board
 
 ### Feature: waiting_room · backend + frontend
 
@@ -250,11 +268,6 @@ Identified from domain reference docs, PM questions, and known gaps. Items gradu
 #### Manual GM stress override
 - **Problem:** In Classic mode, the facilitator sets stress directly. No endpoint exists.
 - **Solution:** `PUT .../engine/stress` endpoint + `SystemManager.set_stress()` method.
-
-#### Warfare domains
-- **Problem:** Separate board section from systems with own Green/Yellow/Red states meaning threat level (No threat / Possible / Actual), not operational status. Currently not modelled.
-- **Solution:** New `WarfareDomainManager` in engine, separate from `SystemManager`. Frontend `WarfareDomainBoardComponent`.
-- **No-gos:** Do not merge with system operational states — semantics are different.
 
 ### Raw (ideas, not yet shaped)
 

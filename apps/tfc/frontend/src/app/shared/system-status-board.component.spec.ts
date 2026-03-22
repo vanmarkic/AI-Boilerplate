@@ -134,12 +134,16 @@ describe("SystemStatusBoardComponent", () => {
   // ── Reactivity ──
 
   it("should update when systems signal changes", () => {
-    host.systems.set([makeSys({ system_id: "nav", power: true, operational: "green" })]);
+    host.systems.set([
+      makeSys({ system_id: "nav", power: true, operational: "green" }),
+    ]);
     fixture.detectChanges();
     expect(rows()[0].getAttribute("data-power")).toBe("true");
     expect(rows()[0].getAttribute("data-operational")).toBe("green");
 
-    host.systems.set([makeSys({ system_id: "nav", power: false, operational: "red" })]);
+    host.systems.set([
+      makeSys({ system_id: "nav", power: false, operational: "red" }),
+    ]);
     fixture.detectChanges();
     expect(rows()[0].getAttribute("data-power")).toBe("false");
     expect(rows()[0].getAttribute("data-operational")).toBe("red");
