@@ -3,7 +3,7 @@
   "checkpoint_id": "062391442998",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 1,
+  "checkpoints_count": 2,
   "files_touched": [
     "apps/tfc/backend/features/scenario/scenario_loader.py"
   ],
@@ -13,13 +13,19 @@
       "transcript": "/06/2391442998/0/full.jsonl",
       "content_hash": "/06/2391442998/0/content_hash.txt",
       "prompt": "/06/2391442998/0/prompt.txt"
+    },
+    {
+      "metadata": "/06/2391442998/1/metadata.json",
+      "transcript": "/06/2391442998/1/full.jsonl",
+      "content_hash": "/06/2391442998/1/content_hash.txt",
+      "prompt": "/06/2391442998/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 9,
-    "cache_creation_tokens": 1092,
-    "cache_read_tokens": 157222,
-    "output_tokens": 891,
-    "api_call_count": 3
+    "input_tokens": 99,
+    "cache_creation_tokens": 144461,
+    "cache_read_tokens": 4369900,
+    "output_tokens": 36046,
+    "api_call_count": 47
   }
 }
