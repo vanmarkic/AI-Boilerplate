@@ -4,6 +4,12 @@ import { handleStateChange } from "../../core/ws-state-handler";
 
 type StoreInstance = InstanceType<typeof ExerciseStore>;
 
+/** Canonical completion handler — one path for all completion detection. */
+function handleCompletion(store: StoreInstance, ws?: ExerciseWsService): void {
+  store.applyPhaseChange("completed");
+  ws?.disconnect();
+}
+
 export function handlePlayerWsMessage(
   msg: WsMessage,
   store: StoreInstance,
@@ -13,8 +19,7 @@ export function handlePlayerWsMessage(
   switch (msg.type) {
     case "exercise_stopped":
       if (msg.reason === "completed") {
-        store.applyPhaseChange("completed");
-        ws?.disconnect();
+        handleCompletion(store, ws);
       } else {
         onStopped?.();
       }
@@ -25,9 +30,8 @@ export function handlePlayerWsMessage(
     case "state_changes":
       for (const change of msg.changes) {
         handleStateChange(change, store);
-        // On phase=completed via state_changes, disconnect WS to prevent reconnect attempts
         if (change.type === "phase_change" && change.phase === "completed") {
-          ws?.disconnect();
+          handleCompletion(store, ws);
         }
       }
       break;
