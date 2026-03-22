@@ -8,8 +8,11 @@ from __future__ import annotations
 
 import logging
 
+from collections.abc import Awaitable, Callable
+
 from engine.exercise_engine import EnginePhase, EngineStateError
 from engine.session_store import SessionStore
+from engine.state_changes import PhaseChange
 from features.exercise.adapters.connection_manager import ConnectionManager
 from features.waiting_room.waiting_room_store import WaitingRoomStore
 
@@ -73,3 +76,32 @@ class ExerciseSessionService:
 
         self._waiting_room.clear(exercise_id)
         self._sessions.remove(exercise_id)
+
+    async def complete(
+        self,
+        exercise_id: int,
+        broadcast_fn: Callable[[list], Awaitable[None]] | None = None,
+        audit_fn: Callable[[int, list], Awaitable[None]] | None = None,
+    ) -> PhaseChange | None:
+        """Complete the engine without teardown (for completion overlay).
+
+        Unlike stop(), this keeps the engine alive and WS connections open
+        so clients can render the completion overlay.
+        """
+        engine = self._sessions.get(exercise_id)
+        if engine is None:
+            return None
+        try:
+            result = await engine.complete()
+        except EngineStateError:
+            logger.warning(
+                "Could not complete engine for exercise=%d (phase=%s)",
+                exercise_id,
+                engine.phase,
+            )
+            return None
+        if broadcast_fn:
+            await broadcast_fn([result])
+        if audit_fn:
+            await audit_fn(exercise_id, [result])
+        return result

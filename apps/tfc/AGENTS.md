@@ -252,6 +252,8 @@ When adding a new migration:
 14. Engine changes require: unit tests + property tests (Hypothesis). Use existing strategies from `engine/strategies.py`.
 15. Frontend feature changes require: component spec files colocated with the component.
 16. API changes require: router tests in the feature's `*_test.py` file.
+17. **Cross-path regression tests are the highest-value tests in TFC.** Prefer tests that verify state transitions produce identical outcomes regardless of entry path (player submit vs timeout vs force-trigger vs GM trigger) over tests that only exercise helper functions in isolation.
+18. When a bug is fixed, write a regression test that exercises the same business event through multiple entry paths to confirm convergence. See `SPECS.md` § Design Invariants.
 
 ## Visual Regression Testing
 
