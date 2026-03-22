@@ -34,12 +34,11 @@ import { RoleCardComponent } from "./role-card.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
 import type { RoleCardSubmission } from "./role-card.component";
-import { BoardColumnComponent } from "./board-column.component";
 import {
   CoDecisionBarComponent,
   type CoDecisionConfirmation,
 } from "./co-decision-bar.component";
-import { buildRoleCards, extractRecRoleId, type RoleCard } from "./role-card.types";
+import { buildRoleCards } from "./role-card.types";
 
 @Component({
   selector: "tfc-player-view",
@@ -55,15 +54,11 @@ import { buildRoleCards, extractRecRoleId, type RoleCard } from "./role-card.typ
     StressBarComponent,
     ButtonDirective,
     RoleCardComponent,
-    BoardColumnComponent,
     CoDecisionBarComponent,
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
   ],
   templateUrl: "./player-view.html",
-  host: {
-    '(document:keydown.escape)': 'focusedColumn.set(null)',
-  },
 })
 export class PlayerView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
@@ -158,14 +153,25 @@ export class PlayerView implements OnInit, OnDestroy {
     }
   });
 
-  protected readonly focusedColumn = signal<number | null>(null);
-
-  protected toggleFocus(index: number): void {
-    this.focusedColumn.update((current) => (current === index ? null : index));
-  }
-
   protected readonly advisorRoleCards = computed(() => {
-    return this.roleCards().filter((c) => c.playerType === "advisor");
+    const allRoles = this.store.context()?.roles ?? [];
+    const advisors = allRoles.filter((r) => r.player_type === "advisor");
+    const activeCards = this.roleCards().filter(
+      (c) => c.playerType === "advisor",
+    );
+    const activeMap = new Map(activeCards.map((c) => [c.roleId, c]));
+    return advisors.map(
+      (role) =>
+        activeMap.get(role.id) ?? {
+          roleId: role.id,
+          roleLabel: role.label,
+          playerType: "advisor" as const,
+          intel: null,
+          decision: null,
+          status: "intel" as const,
+          advisorRecs: [],
+        },
+    );
   });
 
   protected readonly isDecisionMaker = computed(() => {
@@ -196,31 +202,31 @@ export class PlayerView implements OnInit, OnDestroy {
 
   protected readonly mirrorRoleCards = computed(() => {
     const allRoles = this.store.context()?.roles ?? [];
-    const advisorRolesList = allRoles.filter(
-      (r) => r.player_type === "advisor",
-    );
+    const advisors = allRoles.filter((r) => r.player_type === "advisor");
     const event = this.currentTurnEvent();
     const decision = this.activeDecisions()[0] ?? null;
-    return buildRoleCards(
-      advisorRolesList,
+    const activeCards = buildRoleCards(
+      advisors,
       event,
       decision,
       this.submittedRoles(),
       false,
       allRoles,
     );
-  });
-
-  protected getDoneLabel(card: RoleCard): string {
-    const decision = card.decision;
-    if (!decision) return "";
-    const recEntry = Object.entries(decision.recommendations).find(
-      ([key]) => extractRecRoleId(key) === card.roleId,
+    const activeMap = new Map(activeCards.map((c) => [c.roleId, c]));
+    return advisors.map(
+      (role) =>
+        activeMap.get(role.id) ?? {
+          roleId: role.id,
+          roleLabel: role.label,
+          playerType: "advisor" as const,
+          intel: null,
+          decision: null,
+          status: "intel" as const,
+          advisorRecs: [],
+        },
     );
-    const optionId = recEntry?.[1];
-    if (!optionId) return "";
-    return decision.options.find((o) => o.id === optionId)?.label ?? optionId;
-  }
+  });
 
   protected onCoDecisionConfirmed(confirmation: CoDecisionConfirmation): void {
     const decision = this.activeDecisions()[0];

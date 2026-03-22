@@ -34,64 +34,17 @@
     <tfc-system-status-board [systems]="store.systems()" />
 
     @if (isMultiRole() && !isDecisionMaker()) {
-      <!-- Crew (all_advisors) layout: 3 fixed columns -->
-      <div class="board-columns"
-           [attr.data-focus]="focusedColumn()">
-        @for (card of advisorRoleCards(); track card.roleId; let i = $index) {
-          <tfc-board-column
-            [roleId]="card.roleId"
-            [roleLabel]="card.roleLabel"
-            [intel]="card.intel"
-            [status]="card.status"
-            (headerClicked)="toggleFocus(i)"
-          >
-            <ng-template #decisionZone>
-              @if (card.decision && card.status === 'active') {
-                <tfc-role-card
-                  [card]="card"
-                  [systems]="store.systems()"
-                  (submitted)="onRoleCardSubmitted($event)"
-                />
-              } @else if (card.status === 'done') {
-                <div class="board-column__empty">
-                  Selected: {{ getDoneLabel(card) }}
-                </div>
-              } @else {
-                <div class="board-column__empty">No active decision</div>
-              }
-            </ng-template>
-          </tfc-board-column>
+      <!-- Crew (all_advisors) layout: equal columns -->
+      <div class="board-columns">
+        @for (card of advisorRoleCards(); track card.roleId) {
+          <tfc-role-card [card]="card" [systems]="store.systems()" (submitted)="onRoleCardSubmitted($event)" />
         }
       </div>
     } @else if (isDecisionMaker()) {
-      <!-- CO layout: 3 read-only mirrors + decision bar -->
-      <div class="board-columns"
-           [attr.data-focus]="focusedColumn()">
-        @for (card of mirrorRoleCards(); track card.roleId; let i = $index) {
-          <tfc-board-column
-            [roleId]="card.roleId"
-            [roleLabel]="card.roleLabel"
-            [intel]="card.intel"
-            [status]="card.status"
-            (headerClicked)="toggleFocus(i)"
-          >
-            <ng-template #decisionZone>
-              @if (card.decision && card.status !== 'done') {
-                <tfc-role-card
-                  [card]="card"
-                  [systems]="store.systems()"
-                  [readonly]="true"
-                  (submitted)="onRoleCardSubmitted($event)"
-                />
-              } @else if (card.status === 'done') {
-                <div class="board-column__empty">
-                  Selected: {{ getDoneLabel(card) }}
-                </div>
-              } @else {
-                <div class="board-column__empty">No active decision</div>
-              }
-            </ng-template>
-          </tfc-board-column>
+      <!-- CO layout: read-only mirrors + decision bar -->
+      <div class="board-columns">
+        @for (card of mirrorRoleCards(); track card.roleId) {
+          <tfc-role-card [card]="card" [systems]="store.systems()" [readonly]="true" (submitted)="onRoleCardSubmitted($event)" />
         }
       </div>
       <tfc-co-decision-bar
