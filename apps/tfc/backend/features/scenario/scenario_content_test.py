@@ -7,11 +7,18 @@ from engine.event_scheduler import EventType, ScheduledEvent
 from engine.exercise_engine import EngineConfig, ExerciseEngine
 from engine.issue_manager import TrackedIssue, TriggerMode
 from features.scenario.scenario_content import (
+    BlueCardDef,
     DecisionTemplateDef,
+    DomainEffectDef,
+    PathNoteDef,
     RoleDef,
     ScenarioContent,
     ScenarioEventDef,
     ScenarioIssueDef,
+    SystemEffectDef,
+    TurnCardConfig,
+    TurnDefinition,
+    TurnInjectDef,
 )
 from features.scenario.scenario_loader import (
     build_engine_config,
@@ -446,3 +453,115 @@ class TestCollaborativeRoleMinimum:
             roles=[RoleDef(id="co", label="CO", player_type="decision_maker")],
         )
         assert len(sc.roles) == 1
+
+
+# ── Blue-card / turn-authoring model tests ──────────────────────────────
+
+
+class TestBlueCardDef:
+    def test_blue_card_def_minimal(self) -> None:
+        """Create with just id+title, verify defaults."""
+        card = BlueCardDef(id="bc-1", title="Fire Suppression")
+        assert card.id == "bc-1"
+        assert card.title == "Fire Suppression"
+        assert card.description == ""
+        assert card.targets_system is False
+
+
+class TestTurnInjectDef:
+    def test_turn_inject_def(self) -> None:
+        """Create with just text, verify defaults."""
+        inject = TurnInjectDef(text="Sonar contact bearing 045")
+        assert inject.text == "Sonar contact bearing 045"
+        assert inject.target_roles == []
+        assert inject.role_descriptions == {}
+
+
+class TestTurnCardConfig:
+    def test_turn_card_config(self) -> None:
+        """Create with card_id+score+stress_delta, verify defaults."""
+        cfg = TurnCardConfig(card_id="bc-1", score=5.0, stress_delta=2)
+        assert cfg.card_id == "bc-1"
+        assert cfg.score == 5.0
+        assert cfg.stress_delta == 2
+        assert cfg.system_effects == []
+        assert cfg.domain_effects == []
+        assert cfg.max_plays == 0
+
+
+class TestPathNoteDef:
+    def test_path_note_def(self) -> None:
+        """Create with card_ids+notes."""
+        note = PathNoteDef(card_ids=["bc-1", "bc-2"], notes="Play both cards")
+        assert note.card_ids == ["bc-1", "bc-2"]
+        assert note.notes == "Play both cards"
+
+
+class TestTurnDefinitionExpanded:
+    def test_turn_definition_expanded(self) -> None:
+        """Create with all new fields populated, verify they round-trip."""
+        td = TurnDefinition(
+            turn_index=0,
+            title="Turn 1",
+            facilitator_prompt="Brief the crew",
+            has_decisions=True,
+            duration_ms=120_000,
+            # Legacy fields
+            inject_ids=["evt-1"],
+            decision_template_id="dec-1",
+            # New fields
+            injects=[TurnInjectDef(text="Incoming fire", target_roles=["co"])],
+            available_cards=[
+                TurnCardConfig(
+                    card_id="bc-1",
+                    score=5.0,
+                    stress_delta=1,
+                    system_effects=[
+                        SystemEffectDef(system_id="radar", operational_state="yellow"),
+                    ],
+                    domain_effects=[
+                        DomainEffectDef(domain_id="asw", threat_level="red"),
+                    ],
+                    max_plays=1,
+                ),
+            ],
+            max_selections=3,
+            base_stress_delta=2,
+            system_effects_on_start=[
+                SystemEffectDef(system_id="sonar", power_state=False),
+            ],
+            domain_effects_on_start=[
+                DomainEffectDef(domain_id="aaw", threat_level="yellow"),
+            ],
+            best_path=PathNoteDef(card_ids=["bc-1"], notes="Best play"),
+            acceptable_path=PathNoteDef(card_ids=["bc-2"], notes="OK play"),
+            design_notes="Testing all fields",
+        )
+
+        # Round-trip through model_dump / model_validate
+        data = td.model_dump()
+        restored = TurnDefinition.model_validate(data)
+
+        assert restored.turn_index == 0
+        assert restored.title == "Turn 1"
+        assert restored.facilitator_prompt == "Brief the crew"
+        assert restored.duration_ms == 120_000
+        # Legacy
+        assert restored.inject_ids == ["evt-1"]
+        assert restored.decision_template_id == "dec-1"
+        # New
+        assert len(restored.injects) == 1
+        assert restored.injects[0].text == "Incoming fire"
+        assert len(restored.available_cards) == 1
+        assert restored.available_cards[0].card_id == "bc-1"
+        assert restored.available_cards[0].system_effects[0].system_id == "radar"
+        assert restored.available_cards[0].domain_effects[0].domain_id == "asw"
+        assert restored.max_selections == 3
+        assert restored.base_stress_delta == 2
+        assert len(restored.system_effects_on_start) == 1
+        assert len(restored.domain_effects_on_start) == 1
+        assert restored.best_path is not None
+        assert restored.best_path.card_ids == ["bc-1"]
+        assert restored.acceptable_path is not None
+        assert restored.acceptable_path.notes == "OK play"
+        assert restored.design_notes == "Testing all fields"
