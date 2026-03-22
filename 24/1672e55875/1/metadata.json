@@ -1,9 +1,11 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "241672e55875",
+  "session_id": "a60dfdd1-f237-4557-978c-924936a3d885",
   "strategy": "manual-commit",
+  "created_at": "2026-03-22T00:53:49.501674Z",
   "branch": "master",
-  "checkpoints_count": 2,
+  "checkpoints_count": 1,
   "files_touched": [
     "apps/tfc/frontend/src/app/core/exercise.store.spec.ts",
     "apps/tfc/frontend/src/app/core/exercise.store.ts",
@@ -62,25 +64,25 @@
     "apps/tfc/frontend/src/main.ts",
     "docs/plans/2026-03-22-targets-system-and-warfare-domains-spec.md"
   ],
-  "sessions": [
-    {
-      "metadata": "/24/1672e55875/0/metadata.json",
-      "transcript": "/24/1672e55875/0/full.jsonl",
-      "content_hash": "/24/1672e55875/0/content_hash.txt",
-      "prompt": "/24/1672e55875/0/prompt.txt"
-    },
-    {
-      "metadata": "/24/1672e55875/1/metadata.json",
-      "transcript": "/24/1672e55875/1/full.jsonl",
-      "content_hash": "/24/1672e55875/1/content_hash.txt",
-      "prompt": "/24/1672e55875/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "turn_id": "61d1a745b27f",
   "token_usage": {
-    "input_tokens": 99,
-    "cache_creation_tokens": 184794,
-    "cache_read_tokens": 3927887,
-    "output_tokens": 24371,
-    "api_call_count": 78
+    "input_tokens": 31,
+    "cache_creation_tokens": 93833,
+    "cache_read_tokens": 1010453,
+    "output_tokens": 9088,
+    "api_call_count": 20
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T00:53:49.239398Z",
+    "agent_lines": 1193,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1193,
+    "agent_percentage": 100
   }
 }

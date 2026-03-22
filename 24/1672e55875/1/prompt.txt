@@ -1,0 +1,18 @@
+<ide_opened_file>The user opened the file /Users/dragan/.claude/skills/smoke-test-tfc/SKILL.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+show TFC gh issues and specs.md todos
+
+---
+
+<ide_selection>The user selected the lines 254 to 257 from /Users/dragan/Documents/AI-Boilerplate/apps/tfc/SPECS.md:
+#### Warfare domains
+- **Problem:** Separate board section from systems with own Green/Yellow/Red states meaning threat level (No threat / Possible / Actual), not operational status. Currently not modelled.
+- **Solution:** New `WarfareDomainManager` in engine, separate from `SystemManager`. Frontend `WarfareDomainBoardComponent`.
+- **No-gos:** Do not merge with system operational states — semantics are different.
+
+This may or may not be related to the current task.</ide_selection>
+do target system and this 
+
+#### Warfare domains
+- **Problem:** Separate board section from systems with own Green/Yellow/Red states meaning threat level (No threat / Possible / Actual), not operational status. Currently not modelled.
+- **Solution:** New `WarfareDomainManager` in engine, separate from `SystemManager`. Frontend `WarfareDomainBoardComponent`.
+- **No-gos:** Do not merge with system operational states — semantics are different.
