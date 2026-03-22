@@ -14,12 +14,11 @@ import {
   },
   template: `
     <span class="stress-bar__title">Stress</span>
-    <span class="stress-bar__label" data-testid="stress-bar">{{ stress() }}</span>
+    <span class="stress-bar__label" data-testid="stress-bar">{{
+      stress()
+    }}</span>
     <div class="stress-bar__track">
-      <div
-        class="stress-bar__fill"
-        [style.width.%]="fillPercent()"
-      ></div>
+      <div class="stress-bar__fill" [style.width.%]="fillPercent()"></div>
     </div>
   `,
 })

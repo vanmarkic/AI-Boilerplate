@@ -75,14 +75,21 @@ export class PlayerView implements OnInit, OnDestroy {
     const role = this.store.playerRole();
     return this.store.openDecisions().filter((d) => {
       if (!d.target_roles || d.target_roles.length === 0) return true;
-      if (role === "all_roles" || role === "all_advisors" || role === "solo_player") return true;
+      if (
+        role === "all_roles" ||
+        role === "all_advisors" ||
+        role === "solo_player"
+      )
+        return true;
       return d.target_roles.includes(role);
     });
   });
 
   protected readonly isMultiRole = computed(() => {
     const role = this.store.playerRole();
-    return role === "all_advisors" || role === "solo_player" || role === "all_roles";
+    return (
+      role === "all_advisors" || role === "solo_player" || role === "all_roles"
+    );
   });
 
   protected readonly submittedRoles = signal<Set<string>>(new Set());
@@ -103,11 +110,20 @@ export class PlayerView implements OnInit, OnDestroy {
     const multiRole = this.isMultiRole();
     const playerRoleDef = allRoles.find((r) => r.id === role);
     const showDecisionMaker =
-      role === "all_roles" || role === "solo_player" || this.store.isPracticeMode()
-      || playerRoleDef?.player_type === "decision_maker";
+      role === "all_roles" ||
+      role === "solo_player" ||
+      this.store.isPracticeMode() ||
+      playerRoleDef?.player_type === "decision_maker";
     // Single-role players see only their own role card
     const roles = multiRole ? allRoles : allRoles.filter((r) => r.id === role);
-    return buildRoleCards(roles, event, decision, this.submittedRoles(), showDecisionMaker, allRoles);
+    return buildRoleCards(
+      roles,
+      event,
+      decision,
+      this.submittedRoles(),
+      showDecisionMaker,
+      allRoles,
+    );
   });
 
   private _lastDecisionId: string | null = null;
@@ -140,7 +156,12 @@ export class PlayerView implements OnInit, OnDestroy {
     this.store.setPracticeMode(practiceMode);
     this.ws.connect(id, "player", pId || undefined);
     this.sub = this.ws.messages$.subscribe((msg) =>
-      handlePlayerWsMessage(msg, this.store, () => this.onExerciseStopped(), this.ws),
+      handlePlayerWsMessage(
+        msg,
+        this.store,
+        () => this.onExerciseStopped(),
+        this.ws,
+      ),
     );
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
@@ -203,9 +224,9 @@ export class PlayerView implements OnInit, OnDestroy {
   protected onRoleCardSubmitted(submission: RoleCardSubmission): void {
     const decision = this.activeDecisions()[0];
     if (!decision) return;
-    const role = this.store.context()?.roles?.find(
-      (r) => r.id === submission.roleId,
-    );
+    const role = this.store
+      .context()
+      ?.roles?.find((r) => r.id === submission.roleId);
     if (role?.player_type === "decision_maker") {
       submitDecision(
         this.decisionApi,
@@ -220,7 +241,11 @@ export class PlayerView implements OnInit, OnDestroy {
         this.exerciseId(),
         decision,
         this.participantId(),
-        { roleId: submission.roleId, selectedOptions: submission.selectedOptions, freeText: submission.freeText },
+        {
+          roleId: submission.roleId,
+          selectedOptions: submission.selectedOptions,
+          freeText: submission.freeText,
+        },
       );
     }
     const updated = new Set(this.submittedRoles());

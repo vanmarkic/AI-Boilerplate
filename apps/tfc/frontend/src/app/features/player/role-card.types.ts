@@ -56,12 +56,13 @@ export function buildRoleCards(
         const advisorTargets = targetRoles.filter((rid) => rid !== role.id);
         for (const advisorRoleId of advisorTargets) {
           const advisorRole = roleLookup.find((r) => r.id === advisorRoleId);
-          const recEntry = Object.entries(
-            decision.recommendations || {},
-          ).find(([key]) => extractRecRoleId(key) === advisorRoleId);
+          const recEntry = Object.entries(decision.recommendations || {}).find(
+            ([key]) => extractRecRoleId(key) === advisorRoleId,
+          );
           const optionId = recEntry?.[1] ?? null;
           const optionLabel = optionId
-            ? (decision.options.find((o) => o.id === optionId)?.label ?? optionId)
+            ? (decision.options.find((o) => o.id === optionId)?.label ??
+              optionId)
             : null;
           advisorRecs.push({
             roleId: advisorRoleId,

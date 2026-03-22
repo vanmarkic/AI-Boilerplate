@@ -1,4 +1,7 @@
-import type { ExerciseWsService, WsMessage } from "../../core/exercise-ws.service";
+import type {
+  ExerciseWsService,
+  WsMessage,
+} from "../../core/exercise-ws.service";
 import type { ExerciseStore } from "../../core/exercise.store";
 import { handleStateChange } from "../../core/ws-state-handler";
 

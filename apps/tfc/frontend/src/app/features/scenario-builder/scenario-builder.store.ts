@@ -79,6 +79,7 @@ export const ScenarioBuilderStore = signalStore(
     revert(): void {
       const snap = store.loadedSnapshot();
       if (!snap) return;
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- JSON boundary
       const { title, description, content } = JSON.parse(snap) as {
         title: string;
         description: string;

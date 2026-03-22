@@ -49,9 +49,7 @@ describe("ScenarioSettingsEditorComponent", () => {
   });
 
   it("should display current time factor value", () => {
-    const input = el.querySelector(
-      'input[type="number"]',
-    ) as HTMLInputElement;
+    const input = el.querySelector('input[type="number"]') as HTMLInputElement;
     expect(input.value).toBe("2.5");
   });
 
@@ -61,9 +59,7 @@ describe("ScenarioSettingsEditorComponent", () => {
   });
 
   it("should call store.setTimeFactor on time factor change", () => {
-    const input = el.querySelector(
-      'input[type="number"]',
-    ) as HTMLInputElement;
+    const input = el.querySelector('input[type="number"]') as HTMLInputElement;
     input.value = "3";
     input.dispatchEvent(new Event("change"));
     fixture.detectChanges();

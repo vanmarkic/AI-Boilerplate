@@ -20,21 +20,52 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
   template: `
     <ui-card title="Roles">
       @for (role of store.content().roles ?? []; track role.id) {
-        <div class="flex flex-col gap-xs p-sm border-b" [id]="'role-' + role.id">
+        <div
+          class="flex flex-col gap-xs p-sm border-b"
+          [id]="'role-' + role.id"
+        >
           @if (editingId() === role.id) {
             <div class="flex flex-col gap-xs">
-              <ui-input id="edit-role-id" label="ID" [value]="editId()" (valueChange)="editId.set($event)" />
-              <ui-input id="edit-role-label" label="Label" [value]="editLabel()" (valueChange)="editLabel.set($event)" />
+              <ui-input
+                id="edit-role-id"
+                label="ID"
+                [value]="editId()"
+                (valueChange)="editId.set($event)"
+              />
+              <ui-input
+                id="edit-role-label"
+                label="Label"
+                [value]="editLabel()"
+                (valueChange)="editLabel.set($event)"
+              />
               <div class="flex flex-col gap-xs" style="flex:1">
                 <label class="text-xs">Player Type</label>
-                <select class="input-base" [value]="editPlayerType()" (change)="editPlayerType.set(sel($event))">
+                <select
+                  class="input-base"
+                  [value]="editPlayerType()"
+                  (change)="editPlayerType.set(sel($event))"
+                >
                   <option value="decision_maker">Decision Maker</option>
                   <option value="advisor">Advisor</option>
                 </select>
               </div>
               <div class="flex gap-sm">
-                <button uiButton variant="default" size="sm" (click)="save(role.id)">Save</button>
-                <button uiButton variant="outline" size="sm" (click)="editingId.set(null)">Cancel</button>
+                <button
+                  uiButton
+                  variant="default"
+                  size="sm"
+                  (click)="save(role.id)"
+                >
+                  Save
+                </button>
+                <button
+                  uiButton
+                  variant="outline"
+                  size="sm"
+                  (click)="editingId.set(null)"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           } @else {
@@ -42,11 +73,27 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
               <div>
                 <span class="text-sm font-medium">{{ role.label }}</span>
                 <ui-badge variant="secondary">{{ role.player_type }}</ui-badge>
-                <span class="text-xs text-muted-foreground ml-sm">{{ role.id }}</span>
+                <span class="text-xs text-muted-foreground ml-sm">{{
+                  role.id
+                }}</span>
               </div>
               <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm" (click)="edit(role)">Edit</button>
-                <button uiButton variant="destructive" size="sm" (click)="store.removeRole(role.id)">Remove</button>
+                <button
+                  uiButton
+                  variant="outline"
+                  size="sm"
+                  (click)="edit(role)"
+                >
+                  Edit
+                </button>
+                <button
+                  uiButton
+                  variant="destructive"
+                  size="sm"
+                  (click)="store.removeRole(role.id)"
+                >
+                  Remove
+                </button>
               </div>
             </div>
           }
@@ -55,9 +102,21 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
         <p class="text-muted-foreground text-sm p-sm">No roles yet.</p>
       }
       <div class="flex gap-sm p-sm border-t">
-        <ui-input id="role-id" label="" placeholder="Role ID" [(value)]="newId" />
-        <ui-input id="role-label" label="" placeholder="Label" [(value)]="newLabel" />
-        <button uiButton variant="outline" size="sm" (click)="add()">Add</button>
+        <ui-input
+          id="role-id"
+          label=""
+          placeholder="Role ID"
+          [(value)]="newId"
+        />
+        <ui-input
+          id="role-label"
+          label=""
+          placeholder="Label"
+          [(value)]="newLabel"
+        />
+        <button uiButton variant="outline" size="sm" (click)="add()">
+          Add
+        </button>
       </div>
     </ui-card>
   `,

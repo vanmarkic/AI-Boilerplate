@@ -93,7 +93,9 @@
     border-radius: 2px;
     background: var(--color-card);
     box-shadow: var(--glow-sm);
-    transition: box-shadow 200ms ease, border-color 200ms ease;
+    transition:
+      box-shadow 200ms ease,
+      border-color 200ms ease;
   }
   .event-tile:hover {
     border-color: var(--color-primary);
@@ -115,7 +117,10 @@
     font-weight: 700;
     text-transform: uppercase;
   }
-  .event-tile__body { flex: 1; min-width: 0; }
+  .event-tile__body {
+    flex: 1;
+    min-width: 0;
+  }
   .event-tile__title {
     font-family: var(--font-mono);
     font-size: var(--font-size-sm);
@@ -146,7 +151,9 @@
     border-radius: 2px;
     background: var(--color-card);
     cursor: pointer;
-    transition: box-shadow 200ms ease, border-color 200ms ease;
+    transition:
+      box-shadow 200ms ease,
+      border-color 200ms ease;
   }
   .issue-tile:hover {
     border-color: var(--color-primary);
@@ -154,7 +161,9 @@
   }
   .issue-tile[data-lifecycle="active"] {
     border-left-color: var(--color-destructive);
-    box-shadow: inset 0 0 12px oklch(65% 0.25 25 / 8%), var(--glow-sm);
+    box-shadow:
+      inset 0 0 12px oklch(65% 0.25 25 / 8%),
+      var(--glow-sm);
     animation: threat-pulse 1.5s ease-in-out infinite;
   }
   .issue-tile[data-lifecycle="mitigated"] {
@@ -165,17 +174,24 @@
     opacity: 0.5;
   }
   @keyframes threat-pulse {
-    0%, 100% {
+    0%,
+    100% {
       border-left-color: var(--color-destructive);
-      box-shadow: inset 0 0 12px oklch(65% 0.25 25 / 8%), var(--glow-sm);
+      box-shadow:
+        inset 0 0 12px oklch(65% 0.25 25 / 8%),
+        var(--glow-sm);
     }
     50% {
       border-left-color: oklch(70% 0.28 25);
-      box-shadow: inset 0 0 20px oklch(65% 0.25 25 / 15%),
+      box-shadow:
+        inset 0 0 20px oklch(65% 0.25 25 / 15%),
         0 0 18px oklch(65% 0.25 25 / 30%);
     }
   }
-  .issue-tile__body { flex: 1; min-width: 0; }
+  .issue-tile__body {
+    flex: 1;
+    min-width: 0;
+  }
   .issue-tile__title {
     font-family: var(--font-mono);
     font-size: var(--font-size-sm);
@@ -199,8 +215,13 @@
     animation: countdown-blink 1s step-end infinite;
   }
   @keyframes countdown-blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.4; }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.4;
+    }
   }
   .issue-detail {
     padding: var(--spacing-md);
@@ -238,8 +259,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .issue-tile[data-lifecycle="active"] { animation: none; }
-    .issue-tile__countdown { animation: none; }
+    .issue-tile[data-lifecycle="active"] {
+      animation: none;
+    }
+    .issue-tile__countdown {
+      animation: none;
+    }
   }
 
   /* ── Board Layout ──────────────────────────────────── */
@@ -297,14 +322,21 @@
     border-radius: 2px;
     background: var(--color-card);
     border: 1px solid var(--color-border);
-    transition: box-shadow 200ms ease, border-color 200ms ease, opacity 200ms ease;
+    transition:
+      box-shadow 200ms ease,
+      border-color 200ms ease,
+      opacity 200ms ease;
   }
   .role-card--intel {
     border-left: 3px solid var(--color-primary);
   }
   .role-card--active {
     border: 2px solid var(--color-success);
-    background: color-mix(in oklch, var(--color-success) 10%, var(--color-card));
+    background: color-mix(
+      in oklch,
+      var(--color-success) 10%,
+      var(--color-card)
+    );
   }
   .role-card--done {
     border: 1px solid var(--color-muted);

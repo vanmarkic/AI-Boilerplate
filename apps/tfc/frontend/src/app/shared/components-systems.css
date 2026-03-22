@@ -66,18 +66,22 @@
     border-radius: 50%;
     background: oklch(25% 0 0);
     flex-shrink: 0;
-    transition: background 200ms ease, box-shadow 200ms ease;
+    transition:
+      background 200ms ease,
+      box-shadow 200ms ease;
   }
 
   /* Active lights */
-  .system-chip[data-operational="green"] .system-chip__light[data-color="green"] {
+  .system-chip[data-operational="green"]
+    .system-chip__light[data-color="green"] {
     background: var(--color-success, oklch(0.72 0.19 142));
     box-shadow: 0 0 4px var(--color-success, oklch(0.72 0.19 142));
   }
 
-  .system-chip[data-operational="yellow"] .system-chip__light[data-color="yellow"] {
-    background: var(--color-warning, oklch(0.80 0.18 84));
-    box-shadow: 0 0 4px var(--color-warning, oklch(0.80 0.18 84));
+  .system-chip[data-operational="yellow"]
+    .system-chip__light[data-color="yellow"] {
+    background: var(--color-warning, oklch(0.8 0.18 84));
+    box-shadow: 0 0 4px var(--color-warning, oklch(0.8 0.18 84));
   }
 
   .system-chip[data-operational="red"] .system-chip__light[data-color="red"] {
@@ -121,7 +125,7 @@
   }
 
   .stress-bar[data-severity="medium"] .stress-bar__fill {
-    background: var(--color-warning, oklch(0.80 0.18 84));
+    background: var(--color-warning, oklch(0.8 0.18 84));
   }
 
   .stress-bar[data-severity="high"] .stress-bar__fill {

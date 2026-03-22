@@ -31,22 +31,30 @@ import { exportScenarioToJson, parseScenarioImport } from "./scenario-export";
           style="flex: 1; min-width: 12rem"
         />
         <button uiButton (click)="onSave.emit()">
-          {{ store.scenarioId() ? 'Update' : 'Create' }}
+          {{ store.scenarioId() ? "Update" : "Create" }}
         </button>
         @if (store.scenarioId()) {
-          <button uiButton variant="outline" (click)="onSaveAsCopy.emit()">Save as Copy</button>
-          <button uiButton variant="outline" (click)="store.reset()">New</button>
+          <button uiButton variant="outline" (click)="onSaveAsCopy.emit()">
+            Save as Copy
+          </button>
+          <button uiButton variant="outline" (click)="store.reset()">
+            New
+          </button>
         }
-        <button uiButton variant="outline" (click)="exportJson()">Export</button>
-        <button uiButton variant="outline" (click)="triggerFileInput()">Import</button>
+        <button uiButton variant="outline" (click)="exportJson()">
+          Export
+        </button>
+        <button uiButton variant="outline" (click)="triggerFileInput()">
+          Import
+        </button>
         @if (isDirty()) {
-          <button uiButton variant="outline" (click)="store.revert()">Revert</button>
+          <button uiButton variant="outline" (click)="store.revert()">
+            Revert
+          </button>
         }
-        <button
-          uiButton
-          variant="outline"
-          (click)="onToggleView.emit()"
-        >{{ viewMode() === 'global' ? 'Walkthrough' : 'Global' }}</button>
+        <button uiButton variant="outline" (click)="onToggleView.emit()">
+          {{ viewMode() === "global" ? "Walkthrough" : "Global" }}
+        </button>
       </div>
 
       <ui-collapsible-panel>
@@ -60,15 +68,22 @@ import { exportScenarioToJson, parseScenarioImport } from "./scenario-export";
         />
       </ui-collapsible-panel>
 
-      <input #fileInput type="file" accept=".json" style="display: none" (change)="onFileSelected($event)" />
+      <input
+        #fileInput
+        type="file"
+        accept=".json"
+        style="display: none"
+        (change)="onFileSelected($event)"
+      />
     </div>
   `,
 })
 export class ScenarioBuilderActionsComponent {
   protected readonly store = inject(ScenarioBuilderStore);
-  protected readonly fileInput = viewChild<ElementRef<HTMLInputElement>>('fileInput');
+  protected readonly fileInput =
+    viewChild<ElementRef<HTMLInputElement>>("fileInput");
 
-  readonly viewMode = input.required<'global' | 'walkthrough'>();
+  readonly viewMode = input.required<"global" | "walkthrough">();
   readonly isDirty = input(false);
 
   readonly onSave = output<void>();
@@ -80,15 +95,15 @@ export class ScenarioBuilderActionsComponent {
   }
 
   protected exportJson(): void {
-    const title = this.store.title() || 'scenario';
-    const safeTitle = title.replace(/[^a-zA-Z0-9_-]/g, '_');
+    const title = this.store.title() || "scenario";
+    const safeTitle = title.replace(/[^a-zA-Z0-9_-]/g, "_");
     const blob = exportScenarioToJson(
       this.store.title(),
       this.store.description(),
       this.store.content(),
     );
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `${safeTitle}.json`;
     a.click();

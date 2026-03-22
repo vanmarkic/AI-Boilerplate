@@ -26,7 +26,11 @@ interface DecisionLogEntry {
       <h2 drawerTitle>Decision Log</h2>
       <div class="decision-log">
         @for (entry of decisionLog(); track entry.turnNumber) {
-          <div class="decision-entry" [attr.data-status]="entry.status" data-testid="decision-entry">
+          <div
+            class="decision-entry"
+            [attr.data-status]="entry.status"
+            data-testid="decision-entry"
+          >
             <div class="decision-header">
               <span class="decision-turn">Turn {{ entry.turnNumber }}</span>
               <span class="decision-title">{{ entry.title }}</span>
@@ -37,7 +41,9 @@ interface DecisionLogEntry {
                   <div class="decision-rec" data-testid="recommendation">
                     <span class="decision-rec__role">{{ rec.roleLabel }}</span>
                     <span class="decision-rec__arrow">&rarr;</span>
-                    <span class="decision-rec__option">{{ rec.optionLabel }}</span>
+                    <span class="decision-rec__option">{{
+                      rec.optionLabel
+                    }}</span>
                   </div>
                 }
               </div>
@@ -46,7 +52,9 @@ interface DecisionLogEntry {
               <div class="decision-final" data-testid="final-decision">
                 <span class="decision-final__label">Final</span>
                 <span class="decision-final__arrow">&rarr;</span>
-                <span class="decision-final__option">{{ entry.finalDecision.join(', ') }}</span>
+                <span class="decision-final__option">{{
+                  entry.finalDecision.join(", ")
+                }}</span>
               </div>
             } @else {
               <div class="decision-pending">Awaiting decision...</div>
@@ -80,9 +88,7 @@ export class LogsDrawerComponent {
     turnNumber: number,
     roleMap: Map<string, string>,
   ): DecisionLogEntry {
-    const optionMap = new Map(
-      d.options.map((o) => [o.id, o.label]),
-    );
+    const optionMap = new Map(d.options.map((o) => [o.id, o.label]));
 
     const recommendations = Object.entries(d.recommendations).map(
       ([key, optionId]) => {
