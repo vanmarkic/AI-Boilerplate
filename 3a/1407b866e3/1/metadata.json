@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "3a1407b866e3",
+  "session_id": "496a0d33-687e-4dc9-ad60-2281e5030ca3",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-22T21:48:17.736682Z",
+  "branch": "master",
+  "checkpoints_count": 12,
+  "files_touched": [
+    "apps/tfc/frontend/src/app/features/foundation/foundation-catalog-section.ts",
+    "apps/tfc/frontend/src/app/features/foundation/foundation-view.ts"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "0cab4a62230f",
+  "checkpoint_transcript_start": 232,
+  "transcript_lines_at_start": 232,
+  "token_usage": {
+    "input_tokens": 222,
+    "cache_creation_tokens": 152009,
+    "cache_read_tokens": 23967317,
+    "output_tokens": 63911,
+    "api_call_count": 170
+  },
+  "session_metrics": {
+    "turn_count": 25
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T21:48:17.125742Z",
+    "agent_lines": 467,
+    "human_added": 586,
+    "human_modified": 196,
+    "human_removed": 0,
+    "total_committed": 1249,
+    "agent_percentage": 37.389911929543636
+  }
+}
