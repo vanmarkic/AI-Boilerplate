@@ -157,6 +157,7 @@ Ship/facility systems displayed for all roles and players with power (ON/OFF) an
 
 **Remaining:**
 - [x] `targets_system` — system picker UI (player chooses which system a card targets) + backend `target_system_selections` override
+- [x] Weapon 2-tier state — weapons use binary OK (green) / non-operational (red), no yellow. `set_operational` rejects yellow for weapons; `increment_operational` skips yellow (red → green). Frontend renders 2-light indicator for weapons vs 3-light for systems.
 
 ### Feature: warfare_domains · backend + frontend
 
@@ -284,7 +285,7 @@ Identified from domain reference docs, PM questions, and known gaps. Items gradu
 
 **Systems:**
 - Cascading system effects — system-to-system propagation (WECDIS → INS → speed feed; AAW → ASUW).
-- Weapon 2-tier state — weapons use OK/Damaged (binary), not Green/Yellow/Red.
+- ~~Weapon 2-tier state~~ — implemented (see Systems feature).
 - Cyber propagation paths — scenario-defined attack chains evaluated by engine.
 
 **Stress & scoring:**

@@ -154,4 +154,32 @@ describe("SystemStatusBoardComponent", () => {
     fixture.detectChanges();
     expect(el.textContent).toContain("Systems");
   });
+
+  // ── Weapon 2-tier state ──
+
+  it("should render two lights for weapons (OK / non-op)", () => {
+    host.systems.set([makeSys({ category: "weapon" })]);
+    fixture.detectChanges();
+    const lights = rows()[0].querySelectorAll(".system-chip__light");
+    expect(lights.length).toBe(2);
+    expect(lights[0].getAttribute("data-color")).toBe("red");
+    expect(lights[1].getAttribute("data-color")).toBe("green");
+  });
+
+  it("should render three lights for non-weapon systems", () => {
+    host.systems.set([makeSys({ category: "system" })]);
+    fixture.detectChanges();
+    const lights = rows()[0].querySelectorAll(".system-chip__light");
+    expect(lights.length).toBe(3);
+  });
+
+  it("should set data-category attribute on chip", () => {
+    host.systems.set([
+      makeSys({ system_id: "s1", category: "system" }),
+      makeSys({ system_id: "w1", category: "weapon" }),
+    ]);
+    fixture.detectChanges();
+    expect(rows()[0].getAttribute("data-category")).toBe("system");
+    expect(rows()[1].getAttribute("data-category")).toBe("weapon");
+  });
 });
