@@ -253,7 +253,7 @@ describe("RoleCardComponent", () => {
           status: "active",
           decision: {
             ...makeCard().decision!,
-            recommendations: { "p1:ops": "opt1" },
+            recommendations: { "p1:co": "opt1" },
           },
         }),
       );

@@ -7,6 +7,7 @@
 @import "./app/shared/components-exercise-layout.css";
 @import "./app/shared/components-animations.css";
 @import "./app/shared/components-player-view.css";
+@import "./app/shared/components-two-player.css";
 @import "./app/shared/components-home.css";
 @import "./app/shared/components-waiting-room.css";
 @import "./app/shared/components-scenario-picker.css";

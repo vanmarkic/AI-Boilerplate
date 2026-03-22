@@ -200,34 +200,6 @@ export class PlayerView implements OnInit, OnDestroy {
     return allRoles.filter((r) => r.player_type === "advisor");
   });
 
-  protected readonly mirrorRoleCards = computed(() => {
-    const allRoles = this.store.context()?.roles ?? [];
-    const advisors = allRoles.filter((r) => r.player_type === "advisor");
-    const event = this.currentTurnEvent();
-    const decision = this.activeDecisions()[0] ?? null;
-    const activeCards = buildRoleCards(
-      advisors,
-      event,
-      decision,
-      this.submittedRoles(),
-      false,
-      allRoles,
-    );
-    const activeMap = new Map(activeCards.map((c) => [c.roleId, c]));
-    return advisors.map(
-      (role) =>
-        activeMap.get(role.id) ?? {
-          roleId: role.id,
-          roleLabel: role.label,
-          playerType: "advisor" as const,
-          intel: null,
-          decision: null,
-          status: "intel" as const,
-          advisorRecs: [],
-        },
-    );
-  });
-
   protected onCoDecisionConfirmed(confirmation: CoDecisionConfirmation): void {
     const decision = this.activeDecisions()[0];
     if (!decision) return;

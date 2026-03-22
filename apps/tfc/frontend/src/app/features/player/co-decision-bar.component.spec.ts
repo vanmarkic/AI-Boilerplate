@@ -152,4 +152,55 @@ describe("CoDecisionBarComponent", () => {
     expect(host.lastConfirm).toBeTruthy();
     expect(host.lastConfirm!.selectedOptionIds).toEqual(["opt1"]);
   });
+
+  it("supports multi-choice toggle (select and deselect)", () => {
+    host.decision.set(
+      makeDecision({ question_type: "multi_choice" }),
+    );
+    fixture.detectChanges();
+
+    const options = fixture.nativeElement.querySelectorAll(
+      ".co-decision-bar__option",
+    ) as NodeListOf<HTMLElement>;
+    // Select first two
+    options[0].click();
+    options[1].click();
+    fixture.detectChanges();
+
+    const btn = fixture.nativeElement.querySelector(
+      ".co-decision-bar__confirm",
+    ) as HTMLButtonElement;
+    btn.click();
+    fixture.detectChanges();
+
+    expect(host.lastConfirm!.selectedOptionIds).toEqual(["opt1", "opt2"]);
+
+    // Deselect first
+    host.lastConfirm = null;
+    options[0].click();
+    fixture.detectChanges();
+    btn.click();
+    fixture.detectChanges();
+
+    expect(host.lastConfirm!.selectedOptionIds).toEqual(["opt2"]);
+  });
+
+  it("resets selection when decision changes", () => {
+    const firstOption = fixture.nativeElement.querySelector(
+      ".co-decision-bar__option",
+    ) as HTMLElement;
+    firstOption.click();
+    fixture.detectChanges();
+
+    // Change the decision
+    host.decision.set(
+      makeDecision({ id: "d2", title: "New decision" }),
+    );
+    fixture.detectChanges();
+
+    const btn = fixture.nativeElement.querySelector(
+      ".co-decision-bar__confirm",
+    ) as HTMLButtonElement;
+    expect(btn.disabled).toBe(true);
+  });
 });

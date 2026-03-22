@@ -147,7 +147,7 @@ export interface RoleCardSubmission {
             </div>
           }
           @if (pendingLabel()) {
-            <div class="role-card__done" style="font-style: italic;">
+            <div class="role-card__done role-card__done--pending">
               {{ pendingLabel() }}
             </div>
           }
@@ -227,7 +227,10 @@ export class RoleCardComponent {
 
   protected isRecommended(optionId: string): boolean {
     const recs = this.card().decision?.recommendations ?? {};
-    return Object.values(recs).includes(optionId);
+    const roleId = this.card().roleId;
+    return Object.entries(recs).some(
+      ([key, val]) => extractRecRoleId(key) === roleId && val === optionId,
+    );
   }
 
   protected isSelected(optionId: string): boolean {
