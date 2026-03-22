@@ -3,7 +3,7 @@
   "checkpoint_id": "3f31a1151bcd",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 6,
+  "checkpoints_count": 7,
   "files_touched": [
     "apps/tfc/frontend/src/app/core/scenario-api.service.ts",
     "apps/tfc/frontend/src/app/features/scenario-builder/scenario-builder-view-actions.spec.ts",
@@ -26,13 +26,19 @@
       "transcript": "/3f/31a1151bcd/1/full.jsonl",
       "content_hash": "/3f/31a1151bcd/1/content_hash.txt",
       "prompt": "/3f/31a1151bcd/1/prompt.txt"
+    },
+    {
+      "metadata": "/3f/31a1151bcd/2/metadata.json",
+      "transcript": "/3f/31a1151bcd/2/full.jsonl",
+      "content_hash": "/3f/31a1151bcd/2/content_hash.txt",
+      "prompt": "/3f/31a1151bcd/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 496,
-    "cache_creation_tokens": 327284,
-    "cache_read_tokens": 38548643,
-    "output_tokens": 121515,
-    "api_call_count": 351
+    "input_tokens": 662,
+    "cache_creation_tokens": 648738,
+    "cache_read_tokens": 50833238,
+    "output_tokens": 180724,
+    "api_call_count": 445
   }
 }
