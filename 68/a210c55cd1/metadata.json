@@ -3,7 +3,7 @@
   "checkpoint_id": "68a210c55cd1",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 5,
+  "checkpoints_count": 6,
   "files_touched": [
     "apps/tfc/frontend/src/app/features/home/sea-backdrop.ts",
     "apps/tfc/frontend/src/app/features/scenario-builder/scenario-export.ts"
@@ -20,13 +20,19 @@
       "transcript": "/68/a210c55cd1/1/full.jsonl",
       "content_hash": "/68/a210c55cd1/1/content_hash.txt",
       "prompt": "/68/a210c55cd1/1/prompt.txt"
+    },
+    {
+      "metadata": "/68/a210c55cd1/2/metadata.json",
+      "transcript": "/68/a210c55cd1/2/full.jsonl",
+      "content_hash": "/68/a210c55cd1/2/content_hash.txt",
+      "prompt": "/68/a210c55cd1/2/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 581,
-    "cache_creation_tokens": 929475,
-    "cache_read_tokens": 71455225,
-    "output_tokens": 123400,
-    "api_call_count": 418
+    "input_tokens": 612,
+    "cache_creation_tokens": 984022,
+    "cache_read_tokens": 72810847,
+    "output_tokens": 132442,
+    "api_call_count": 443
   }
 }

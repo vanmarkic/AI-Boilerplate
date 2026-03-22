@@ -1,0 +1,9 @@
+how well is the llm directed scenario schema designed ? will it actaully help ?
+
+---
+
+I mean in the json export
+
+---
+
+ok do it. log the former analysis in a gh issue
