@@ -187,3 +187,43 @@ async def test_severity_levels_roundtrip(client: AsyncClient) -> None:
     created = await _create(client, slug="sev-rt")
     fetched = await client.get(f"/api/domain-configs/{created['id']}")
     assert fetched.json()["severity_levels"] == VALID_PAYLOAD["severity_levels"]
+
+
+@pytest.mark.asyncio
+async def test_create_domain_config_with_catalogs(client: AsyncClient) -> None:
+    """DomainConfig with systems, warfare_domains, and blue_card_catalog."""
+    payload = {
+        **VALID_PAYLOAD,
+        "slug": "catalogs",
+        "systems": [
+            {"id": "nav-radar", "label": "NAV RADAR", "category": "system"},
+        ],
+        "warfare_domains": [
+            {"id": "aaw", "label": "AAW"},
+        ],
+        "blue_card_catalog": [
+            {"id": "SWB01", "title": "Continue Mission"},
+        ],
+    }
+    resp = await client.post("/api/domain-configs", json=payload)
+    assert resp.status_code == 201
+    data = resp.json()
+    assert len(data["systems"]) == 1
+    assert len(data["warfare_domains"]) == 1
+    assert len(data["blue_card_catalog"]) == 1
+
+
+@pytest.mark.asyncio
+async def test_update_domain_config_catalogs(client: AsyncClient) -> None:
+    """Update warfare_domains and blue_card_catalog."""
+    resp = await client.post("/api/domain-configs", json=VALID_PAYLOAD)
+    config_id = resp.json()["id"]
+    update = {
+        "warfare_domains": [{"id": "cyber", "label": "CYBER"}],
+        "blue_card_catalog": [{"id": "SWB01", "title": "Continue Mission"}],
+    }
+    resp = await client.put(f"/api/domain-configs/{config_id}", json=update)
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["warfare_domains"]) == 1
+    assert len(data["blue_card_catalog"]) == 1

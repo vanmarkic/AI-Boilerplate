@@ -33,6 +33,9 @@ class DomainConfigService:
             theme=request.theme.model_dump(),
             roles=[r.model_dump() for r in request.roles],
             severity_levels=[s.model_dump() for s in request.severity_levels],
+            systems=[s.model_dump() for s in request.systems],
+            warfare_domains=[w.model_dump() for w in request.warfare_domains],
+            blue_card_catalog=[c.model_dump() for c in request.blue_card_catalog],
         )
         created = await self.repository.create(entity)
         return DomainConfigResponse.model_validate(created)
@@ -78,6 +81,12 @@ class DomainConfigService:
                 entity.roles = value
             elif field == "severity_levels":
                 entity.severity_levels = value
+            elif field == "systems":
+                entity.systems = value
+            elif field == "warfare_domains":
+                entity.warfare_domains = value
+            elif field == "blue_card_catalog":
+                entity.blue_card_catalog = value
             else:
                 setattr(entity, field, value)
         updated = await self.repository.update(entity)
