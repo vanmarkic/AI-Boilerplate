@@ -1,0 +1,82 @@
+{
+  "slug": "silent-wake",
+  "name": "Silent Wake",
+  "description": "Naval cyber-kinetic exercise domain — systems, weapons, warfare domains, and blue card catalog for Silent Wake scenarios.",
+  "terminology": {
+    "event": "Inject",
+    "issue": "Defect",
+    "player": "Crew Member",
+    "gameMaster": "Exercise Controller",
+    "exercise": "Exercise",
+    "scenario": "Scenario",
+    "decision": "Command Decision"
+  },
+  "theme": {
+    "colorPrimary": "#65a30d",
+    "colorSecondary": "#ca8a04",
+    "colorBackground": "#1a1a1a",
+    "colorForeground": "#d4d4d4",
+    "fontFamily": "system-ui, sans-serif",
+    "fontFamilyMono": "ui-monospace, monospace",
+    "density": "compact"
+  },
+  "roles": [
+    {"id": "co", "label": "Commanding Officer", "description": "Final decision authority"},
+    {"id": "ops", "label": "Operations Officer", "description": "Operational coordination"},
+    {"id": "nav", "label": "Navigator", "description": "Navigation and manoeuvring"},
+    {"id": "eo", "label": "Engineering Officer", "description": "Engineering and damage control"},
+    {"id": "cyop", "label": "Cyber Operations Officer", "description": "Cyber defence and network security"},
+    {"id": "aawo", "label": "Anti-Air Warfare Officer", "description": "Air defence coordination"},
+    {"id": "pwo", "label": "Principal Warfare Officer", "description": "Surface and subsurface warfare"}
+  ],
+  "severity_levels": [
+    {"id": "routine", "label": "Routine", "color": "#22c55e", "order": 1},
+    {"id": "priority", "label": "Priority", "color": "#f59e0b", "order": 2},
+    {"id": "immediate", "label": "Immediate", "color": "#ef4444", "order": 3},
+    {"id": "flash", "label": "Flash", "color": "#dc2626", "order": 4}
+  ],
+  "systems": [
+    {"id": "nav_radar", "label": "NAV RADAR", "category": "system"},
+    {"id": "ibms_ins", "label": "IBMS / INS (incl. WECDIS)", "category": "system"},
+    {"id": "nav_sensors", "label": "NAV SENSORS", "category": "system"},
+    {"id": "asuw_tracking", "label": "ASUW TRACKING RADAR", "category": "system"},
+    {"id": "comms", "label": "COMMS", "category": "system"},
+    {"id": "aaw_radar", "label": "AAW RADAR", "category": "system"},
+    {"id": "ciws_fwd", "label": "CIWS FWD", "category": "weapon"},
+    {"id": "ciws_aft", "label": "CIWS AFT", "category": "weapon"},
+    {"id": "missile_launcher", "label": "Missile Launcher", "category": "weapon"},
+    {"id": "gun", "label": "Gun", "category": "weapon"},
+    {"id": "decoys", "label": "Decoys", "category": "weapon"}
+  ],
+  "warfare_domains": [
+    {"id": "aaw", "label": "AAW"},
+    {"id": "asuw", "label": "ASUW"},
+    {"id": "asw", "label": "ASW"},
+    {"id": "cyber", "label": "CYBER"}
+  ],
+  "blue_card_catalog": [
+    {"id": "SWB01", "title": "Continue Mission"},
+    {"id": "SWB02", "title": "Reduce Speed / Safer Nav"},
+    {"id": "SWB03", "title": "Internal Sync (60 seconds)"},
+    {"id": "SWB04", "title": "Increase Speed"},
+    {"id": "SWB05", "title": "Increase Lookouts / Visual Confirm"},
+    {"id": "SWB07", "title": "Start Investigation"},
+    {"id": "SWB08", "title": "Start In-Depth Investigation"},
+    {"id": "SWB09", "title": "AIS Tracks Re-evaluation"},
+    {"id": "SWB10", "title": "Isolate System", "targets_system": true},
+    {"id": "SWB14", "title": "Reboot Affected System", "targets_system": true},
+    {"id": "SWB15", "title": "Repair Component"},
+    {"id": "SWB16", "title": "Reconnect System", "targets_system": true},
+    {"id": "SWB18", "title": "Damage Control Focus"},
+    {"id": "SWB19", "title": "Correct Course"},
+    {"id": "SWB20", "title": "General Quarters"},
+    {"id": "SWB21", "title": "Prepare Target"},
+    {"id": "SWB23", "title": "Close Range to Compensate"},
+    {"id": "SWB24", "title": "Approach Target"},
+    {"id": "SWB26", "title": "Shift to Gun Focus"},
+    {"id": "SWB27", "title": "Fire Missile Counterattack"},
+    {"id": "SWB28", "title": "Engage Target with Guns"},
+    {"id": "SWB29", "title": "Decoy Deployment"},
+    {"id": "SWB30", "title": "Approach Land (Emergency Concealment)"}
+  ]
+}
