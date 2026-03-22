@@ -97,7 +97,7 @@
     ],
     "decision_templates": [
       {
-        "id": "dec-tut1",
+        "id": "evt-tut1",
         "title": "Turn 1 — Steady Approach",
         "description": "All systems nominal. Port approach in progress. What actions do you take?",
         "issue_id": "iss-tut-approach",
@@ -112,7 +112,7 @@
         "forced_option_ids": []
       },
       {
-        "id": "dec-tut2",
+        "id": "evt-tut2",
         "title": "Turn 2 — Unexpected Current",
         "description": "Navigation offset and COMMS congestion detected. What actions do you take?",
         "issue_id": "iss-tut-nav-offset",
@@ -128,7 +128,7 @@
         "forced_option_ids": []
       },
       {
-        "id": "dec-tut3",
+        "id": "evt-tut3",
         "title": "Turn 3 — Narrowing Window",
         "description": "Tidal current confirmed. Tide window closing. Choose your approach strategy.",
         "issue_id": "iss-tut-nav-offset",
@@ -145,7 +145,7 @@
         "forced_option_ids": []
       }
     ],
-    "decision_sequence": ["dec-tut1", "dec-tut2", "dec-tut3"],
+    "decision_sequence": ["evt-tut1", "evt-tut2", "evt-tut3"],
     "initial_system_states": [
       {"system_id": "nav_radar", "label": "NAV RADAR", "operational_state": "green", "power_state": true},
       {"system_id": "comms", "label": "COMMS", "operational_state": "green", "power_state": true},
