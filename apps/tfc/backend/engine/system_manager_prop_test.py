@@ -90,7 +90,8 @@ class TestOperationalSet:
         mgr.load_systems([state])
         original_op = state.operational
         result = mgr.set_operational(state.system_id, target)
-        if target == original_op:
+        weapon_yellow = state.category == "weapon" and target == "yellow"
+        if target == original_op or weapon_yellow:
             assert result is None
         else:
             assert result is not None
@@ -126,8 +127,11 @@ class TestIncrementOperational:
         mgr.load_systems([state])
         result = mgr.increment_operational(state.system_id)
         assert result is not None
-        expected_idx = OPERATIONAL_ORDER.index(op) + 1
-        assert result["operational"] == OPERATIONAL_ORDER[expected_idx]
+        if state.category == "weapon":
+            assert result["operational"] == "green"  # weapons skip yellow
+        else:
+            expected_idx = OPERATIONAL_ORDER.index(op) + 1
+            assert result["operational"] == OPERATIONAL_ORDER[expected_idx]
 
 
 class TestSetAllPower:

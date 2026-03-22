@@ -14,6 +14,7 @@ import type { SystemSnapshot } from "../core/generated/state-changes.types";
               data-testid="system-row"
               [attr.data-power]="sys.power"
               [attr.data-operational]="sys.operational"
+              [attr.data-category]="sys.category"
             >
               <span class="system-chip__label">{{ sys.label }}</span>
               <span class="system-chip__power">{{
@@ -21,7 +22,9 @@ import type { SystemSnapshot } from "../core/generated/state-changes.types";
               }}</span>
               <span class="system-chip__traffic">
                 <span class="system-chip__light" data-color="red"></span>
-                <span class="system-chip__light" data-color="yellow"></span>
+                @if (sys.category !== 'weapon') {
+                  <span class="system-chip__light" data-color="yellow"></span>
+                }
                 <span class="system-chip__light" data-color="green"></span>
               </span>
             </span>
