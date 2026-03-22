@@ -12,6 +12,7 @@ import {
   InputComponent,
   CollapsiblePanelComponent,
 } from "@aspect/ui";
+import type { DomainConfigResponse } from "../../core/domain-config-api.service";
 import { ScenarioBuilderStore } from "./scenario-builder.store";
 import { exportScenarioToJson, parseScenarioImport } from "./scenario-export";
 
@@ -85,6 +86,7 @@ export class ScenarioBuilderActionsComponent {
 
   readonly viewMode = input.required<"setup" | "turns">();
   readonly isDirty = input(false);
+  readonly domainConfig = input<DomainConfigResponse | null>(null);
 
   readonly onSave = output<void>();
   readonly onSaveAsCopy = output<void>();
@@ -101,6 +103,7 @@ export class ScenarioBuilderActionsComponent {
       this.store.title(),
       this.store.description(),
       this.store.content(),
+      this.domainConfig() ?? undefined,
     );
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

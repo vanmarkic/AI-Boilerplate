@@ -12,6 +12,10 @@ import {
   SidebarLayoutComponent,
 } from "@aspect/ui";
 import { ScenarioApiService } from "../../core/scenario-api.service";
+import {
+  DomainConfigApiService,
+  type DomainConfigResponse,
+} from "../../core/domain-config-api.service";
 import { ScenarioBuilderStore } from "./scenario-builder.store";
 import { ScenarioBuilderActionsComponent } from "./scenario-builder-view-actions";
 import { ScenarioSidebarNavComponent } from "./scenario-sidebar-nav";
@@ -78,6 +82,7 @@ import { validateScenarioContent } from "./validate-scenario-content";
         <tfc-scenario-builder-actions
           [viewMode]="viewMode()"
           [isDirty]="isDirty()"
+          [domainConfig]="domainConfig()"
           (onSave)="save()"
           (onSaveAsCopy)="saveAsCopy()"
           (onToggleView)="
@@ -111,7 +116,9 @@ import { validateScenarioContent } from "./validate-scenario-content";
 export class ScenarioBuilderView implements OnInit {
   protected readonly store = inject(ScenarioBuilderStore);
   private readonly api = inject(ScenarioApiService);
+  private readonly domainApi = inject(DomainConfigApiService);
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
+  protected readonly domainConfig = signal<DomainConfigResponse | null>(null);
 
   protected readonly viewMode = signal<"setup" | "turns">("setup");
 
@@ -134,6 +141,9 @@ export class ScenarioBuilderView implements OnInit {
 
   ngOnInit(): void {
     this.loadList();
+    this.domainApi
+      .getBySlug("silent-wake")
+      .subscribe({ next: (c) => this.domainConfig.set(c) });
   }
 
   private loadList(): void {
