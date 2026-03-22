@@ -10,6 +10,7 @@ const minimalSnapshot: SnapshotWithScore = {
   events: [],
   issues: [],
   systems: [],
+  warfare_domains: [],
   score: null,
 };
 

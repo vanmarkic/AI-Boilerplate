@@ -70,5 +70,8 @@ export function handleStateChange(
     case "system_state_change":
       store.applySystemChange(change);
       break;
+    case "warfare_domain_change":
+      store.applyWarfareDomainChange(change);
+      break;
   }
 }

@@ -17,6 +17,8 @@ import type {
   ScoreChange,
   SystemSnapshot,
   SystemStateChange,
+  WarfareDomainChange,
+  WarfareDomainSnapshot,
 } from "./generated/state-changes.types";
 import { formatTimeMs } from "./format-time";
 
@@ -48,6 +50,7 @@ interface ExerciseState {
   issues: IssueSnapshot[]; // domain: "defects"
   decisions: ActiveDecision[];
   systems: SystemSnapshot[];
+  warfareDomains: WarfareDomainSnapshot[];
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
   participantId: string;
@@ -72,6 +75,7 @@ const initialState: ExerciseState = {
   issues: [],
   decisions: [],
   systems: [],
+  warfareDomains: [],
   participants: [],
   context: null,
   participantId: "",
@@ -194,6 +198,7 @@ export const ExerciseStore = signalStore(
         events: snapshot.events,
         issues: snapshot.issues,
         systems: snapshot.systems ?? store.systems(),
+        warfareDomains: snapshot.warfare_domains ?? store.warfareDomains(),
         decisions: snapshot.decisions ?? store.decisions(),
         score: snapshot.score
           ? {
@@ -359,6 +364,19 @@ export const ExerciseStore = signalStore(
             : s,
         );
       patchState(store, { systems });
+    },
+
+    applyWarfareDomainChange(
+      change: Pick<WarfareDomainChange, "domain_id" | "threat_level">,
+    ): void {
+      const warfareDomains = store
+        .warfareDomains()
+        .map((d) =>
+          d.domain_id === change.domain_id
+            ? { ...d, threat_level: change.threat_level }
+            : d,
+        );
+      patchState(store, { warfareDomains });
     },
   })),
 );

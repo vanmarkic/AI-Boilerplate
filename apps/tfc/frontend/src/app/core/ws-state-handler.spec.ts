@@ -160,6 +160,7 @@ describe("ws-state-handler", () => {
             operational: "green",
           },
         ],
+        warfare_domains: [],
         score: null,
       });
       const change: SystemStateChange = {
