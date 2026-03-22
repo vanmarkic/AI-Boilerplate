@@ -1,6 +1,7 @@
 @import "@aspect/design-system";
 @import "./app/shared/themes-tfc-domains.css";
 @import "./app/shared/themes-tfc-hoi-extras.css";
+@import "./app/shared/themes-tfc-builder.css";
 @import "./app/shared/components-presence.css";
 @import "./app/shared/components-timeline.css";
 @import "./app/shared/components-decision.css";
