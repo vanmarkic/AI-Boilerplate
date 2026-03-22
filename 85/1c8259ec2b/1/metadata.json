@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "851c8259ec2b",
+  "session_id": "5e2207db-56c8-465f-b621-6e7f26b09b8d",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-22T01:29:28.296985Z",
+  "branch": "master",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "apps/tfc/codegen/check-freshness.sh",
+    "apps/tfc/docs/blue-card-catalog.json",
+    "docs/plans/2026-03-22-targets-system-and-warfare-domains-spec.md",
+    "shared/scripts/pre-push.sh"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "1d5604374214",
+  "token_usage": {
+    "input_tokens": 828,
+    "cache_creation_tokens": 235480,
+    "cache_read_tokens": 827321,
+    "output_tokens": 8504,
+    "api_call_count": 12
+  },
+  "session_metrics": {
+    "turn_count": 3
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T01:29:13.303904Z",
+    "agent_lines": 457,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 7,
+    "total_committed": 457,
+    "agent_percentage": 100
+  }
+}
