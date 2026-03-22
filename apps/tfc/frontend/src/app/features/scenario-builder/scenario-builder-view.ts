@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  OnDestroy,
   OnInit,
   signal,
 } from "@angular/core";
@@ -23,6 +24,7 @@ import type { SidebarSection } from "./scenario-sidebar-nav";
 import { ScenarioSetupTabComponent } from "./scenario-setup-tab";
 import { ScenarioTurnsTabComponent } from "./scenario-turns-tab";
 import { validateScenarioContent } from "./validate-scenario-content";
+import { useBuilderTheme } from "../../shared/builder-theme";
 
 @Component({
   selector: "tfc-scenario-builder-view",
@@ -113,10 +115,11 @@ import { validateScenarioContent } from "./validate-scenario-content";
     </ui-sidebar-layout>
   `,
 })
-export class ScenarioBuilderView implements OnInit {
+export class ScenarioBuilderView implements OnInit, OnDestroy {
   protected readonly store = inject(ScenarioBuilderStore);
   private readonly api = inject(ScenarioApiService);
   private readonly domainApi = inject(DomainConfigApiService);
+  private readonly themeGuard = useBuilderTheme();
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
   protected readonly domainConfig = signal<DomainConfigResponse | null>(null);
 
@@ -140,10 +143,15 @@ export class ScenarioBuilderView implements OnInit {
   ]);
 
   ngOnInit(): void {
+    this.themeGuard.apply();
     this.loadList();
     this.domainApi
       .getBySlug("silent-wake")
       .subscribe({ next: (c) => this.domainConfig.set(c) });
+  }
+
+  ngOnDestroy(): void {
+    this.themeGuard.restore();
   }
 
   private loadList(): void {

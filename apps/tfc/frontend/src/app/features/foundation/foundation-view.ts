@@ -3,6 +3,7 @@ import {
   Component,
   computed,
   inject,
+  OnDestroy,
   OnInit,
 } from "@angular/core";
 import { RouterLink } from "@angular/router";
@@ -15,6 +16,7 @@ import {
   type BlueCardDef,
 } from "../../core/domain-config-api.service";
 import { FoundationStore } from "./foundation.store";
+import { useBuilderTheme } from "../../shared/builder-theme";
 import { ScenarioSidebarNavComponent } from "../scenario-builder/scenario-sidebar-nav";
 import type { SidebarSection } from "../scenario-builder/scenario-sidebar-nav";
 import {
@@ -153,9 +155,10 @@ import {
     </ui-sidebar-layout>
   `,
 })
-export class FoundationView implements OnInit {
+export class FoundationView implements OnInit, OnDestroy {
   protected readonly store = inject(FoundationStore);
   private readonly api = inject(DomainConfigApiService);
+  private readonly themeGuard = useBuilderTheme();
 
   readonly roleFields: FieldDef[] = [
     { key: "id", label: "ID", type: "text", readOnlyAfterCreate: true },
@@ -217,7 +220,12 @@ export class FoundationView implements OnInit {
   });
 
   ngOnInit(): void {
+    this.themeGuard.apply();
     this.loadBySlug("silent-wake");
+  }
+
+  ngOnDestroy(): void {
+    this.themeGuard.restore();
   }
 
   private loadBySlug(slug: string): void {
