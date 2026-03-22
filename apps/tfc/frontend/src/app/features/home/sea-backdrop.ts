@@ -16,6 +16,13 @@ import {
   updateConvergence,
 } from "./sea-convergence";
 import {
+  Lightning,
+  LIGHTNING_INTERVAL,
+  createLightning,
+  disposeLightning,
+  updateLightning,
+} from "./sea-lightning";
+import {
   createGlowTexture,
   MAX_SIGNALS,
   Signal,
@@ -65,6 +72,9 @@ export class SeaBackdrop implements OnDestroy {
   private convergences: Convergence[] = [];
   private nextConvergence = 2;
 
+  private lightnings: Lightning[] = [];
+  private nextLightning = 3;
+
   private get themeColor(): THREE.Color {
     const raw = getComputedStyle(document.documentElement)
       .getPropertyValue("--color-primary")
@@ -94,6 +104,9 @@ export class SeaBackdrop implements OnDestroy {
     }
     for (const c of this.convergences) {
       disposeConvergence(this.scene, c);
+    }
+    for (const l of this.lightnings) {
+      disposeLightning(this.scene, l);
     }
   }
 
@@ -229,6 +242,23 @@ export class SeaBackdrop implements OnDestroy {
     }
   }
 
+  // ── Lightnings ──────────────────────────────────────────
+
+  private updateLightnings(t: number): void {
+    if (t >= this.nextLightning) {
+      this.lightnings.push(
+        createLightning(this.scene, this.plane.geometry, t),
+      );
+      this.nextLightning = t + LIGHTNING_INTERVAL + Math.random() * 2;
+    }
+    for (let i = this.lightnings.length - 1; i >= 0; i--) {
+      if (!updateLightning(this.lightnings[i], t)) {
+        disposeLightning(this.scene, this.lightnings[i]);
+        this.lightnings.splice(i, 1);
+      }
+    }
+  }
+
   // ── Core loop ──────────────────────────────────────────
 
   private handleResize(): void {
@@ -258,6 +288,7 @@ export class SeaBackdrop implements OnDestroy {
 
     this.updateSignals(t);
     this.updateConvergences(t);
+    this.updateLightnings(t);
     this.renderer.render(this.scene, this.camera);
   }
 }
