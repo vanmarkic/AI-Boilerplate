@@ -22,6 +22,7 @@ import {
 } from "./player-decision-handlers";
 import { LogsDrawerComponent } from "../../shared/logs-drawer.component";
 import { StressBarComponent } from "../../shared/stress-bar.component";
+import { StressOverlayComponent } from "../../shared/stress-overlay.component";
 import { DomainService } from "../../core/domain.service";
 import { EngineApiService } from "../../core/engine-api.service";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
@@ -52,6 +53,7 @@ import { buildRoleCards } from "./role-card.types";
     CompletionOverlayComponent,
     LogsDrawerComponent,
     StressBarComponent,
+    StressOverlayComponent,
     ButtonDirective,
     RoleCardComponent,
     CoDecisionBarComponent,
@@ -77,6 +79,10 @@ export class PlayerView implements OnInit, OnDestroy {
   private snapshotLoaded = false;
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
+
+  protected readonly stressEffectPreset = computed(
+    () => this.store.context()?.stress_effect_preset ?? 'standard',
+  );
 
   protected readonly activeDecisions = computed(() => {
     const role = this.store.playerRole();
