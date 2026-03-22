@@ -2,8 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  effect,
+  inject,
   input,
 } from "@angular/core";
+import { DOCUMENT } from "@angular/common";
 
 type StressPreset = 'off' | 'mild' | 'standard' | 'intense';
 
@@ -34,7 +38,6 @@ const PRESETS: Record<Exclude<StressPreset, 'off'>, PresetConfig> = {
         [style.--stress-severity]="severity()"
         [style.--stress-vignette-max]="vignetteMax()"
         [style.--stress-pulse-duration]="pulseDuration()"
-        [style.--stress-shake]="shakeMag()"
       ></div>
     }
   `,
@@ -42,6 +45,28 @@ const PRESETS: Record<Exclude<StressPreset, 'off'>, PresetConfig> = {
 export class StressOverlayComponent {
   readonly stress = input(0);
   readonly preset = input<StressPreset>("standard");
+
+  private readonly doc = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private readonly shakeEffect = effect(() => {
+    const mag = this.shakeMag();
+    const body = this.doc.body;
+    if (mag === "0px") {
+      body.classList.remove("stress-shaking");
+      body.style.removeProperty("--stress-shake");
+    } else {
+      body.style.setProperty("--stress-shake", mag);
+      body.classList.add("stress-shaking");
+    }
+  });
+
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.doc.body.classList.remove("stress-shaking");
+      this.doc.body.style.removeProperty("--stress-shake");
+    });
+  }
 
   protected readonly severity = computed(() => {
     if (this.preset() === "off") return 0;
