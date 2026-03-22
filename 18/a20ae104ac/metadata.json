@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "18a20ae104ac",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 14,
+  "files_touched": [
+    "apps/tfc/frontend/src/app/features/waiting-room/practice-redirect.guard.spec.ts",
+    "apps/tfc/frontend/src/app/features/waiting-room/practice-redirect.guard.ts",
+    "apps/tfc/frontend/src/app/features/waiting-room/waiting-room.routes.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/18/a20ae104ac/0/metadata.json",
+      "transcript": "/18/a20ae104ac/0/full.jsonl",
+      "content_hash": "/18/a20ae104ac/0/content_hash.txt",
+      "prompt": "/18/a20ae104ac/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 320,
+    "cache_creation_tokens": 116710,
+    "cache_read_tokens": 1935559,
+    "output_tokens": 12536,
+    "api_call_count": 38
+  }
+}

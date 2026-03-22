@@ -1,0 +1,667 @@
+open gh issues and specs gaps ?
+
+---
+
+scan whether this is all uptodate or stale ?
+
+---
+
+<task-notification>
+<task-id>aa6830a0689410683</task-id>
+<tool-use-id>toolu_01AtR1JuhQAknTMuAdXyBti8</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/aa6830a0689410683.output</output-file>
+<status>completed</status>
+<summary>Agent "Check if issue #138 stress dimension is stale" completed</summary>
+<result>Perfect! Let me create a comprehensive final report:
+
+## Summary: Issue #138 Status
+
+**Issue #138 "Design and implement stress dimension" is COMPLETE and SHOULD BE CLOSED.**
+
+### Verification Against Acceptance Criteria
+
+All acceptance criteria have been satisfied:
+
+| Criterion | Status | Evidence |
+|-----------|--------|----------|
+| PM defines stress formula and mechanics | ✅ DONE | SPECS.md §234-245: Stress model fully spec'd—independent from score, clamped [0,10], reduces timer per table |
+| Add `stress: float` to `SimpleCollaborativeMode` state | ✅ DONE | `simple_collaborative.py` L31: `stress: int = 0` field present |
+| Stress included in engine snapshot | ✅ DONE | `simple_collaborative.py` L121-131: `snapshot()` returns `stress` field |
+| Frontend stress indicator (UI component) | ✅ DONE | `stress-bar.component.ts`: Full component with severity levels (low/medium/high) and visual fill |
+| Stress affects gameplay per PM-defined rules | ✅ DONE | `simple_collaborative.py` L139-145: `get_decision_time_ms()` applies `STRESS_TIME_TABLE` lookup (300s→180s) |
+| Property tests for stress invariants | ✅ DONE | `simple_collaborative_prop_test.py`: 11 test suites covering monotonicity, clamping, timer bounds, turn counting, etc. |
+| Update Silent Wake scenario with stress deltas | ✅ DONE | `silent_wake.json`: 16+ stress_delta entries across decision options |
+
+### Implementation Details Found
+
+**Backend (Python):**
+- `apps/tfc/backend/engine/game_modes/simple_collaborative.py`
+  - `STRESS_TIME_TABLE` dict mapping stress levels 0-10 to decision times (300s→180s)
+  - `stress` field initialized at 0, clamped to [0,10]
+  - `on_decision_closed_v2()` sums `stress_delta` from selected options + turn-level stress
+  - `get_decision_time_ms()` performs stress table lookup
+  - `snapshot()` includes stress in score state
+
+**Frontend (TypeScript/Angular):**
+- `apps/tfc/frontend/src/app/shared/stress-bar.component.ts`
+  - Renders numeric stress value + visual progress bar
+  - Dynamic `data-severity` attribute (low/medium/high)
+  - Fill percent computed as `stress / 10 * 100`
+  - Integrated into `score-bar.component.ts`
+
+- `apps/tfc/frontend/src/app/core/generated/state-changes.types.ts`
+  - `DecisionOptionSnapshot` has `stress_delta: number` field
+  - `ScoreChange` state change includes `stress` field
+  - Full type codegen from backend `state_changes.py`
+
+**Tests:**
+- `simple_collaborative_test.py`: 8 unit tests (accumulation, clamping, table lookup)
+- `simple_collaborative_prop_test.py`: Hypothesis property tests (11 invariants)
+- `systems-stress.spec.ts`: 10 E2E tests (severity levels, bar visibility, GM view)
+
+**Data:**
+- `silent_wake.json`: Stress deltas on all decision options (0, ±1 values)
+
+### Questions from Issue Answered
+
+All PM questions have been addressed in the implementation:
+
+| Question | Answer | Implementation |
+|----------|--------|-----------------|
+| How does stress accumulate? | **Independent per-card stress deltas** (not derived from score) | Option-level `stress_delta` + per-turn stress deltas |
+| Can stress decrease? | **Yes** — good decisions with negative `stress_delta` reduce stress | `stress_delta` can be -1, 0, or +1; clamped [0,10] |
+| What does stress affect? | **Timer reduction** (primary gameplay effect per spec) | `STRESS_TIME_TABLE` maps stress→milliseconds |
+| Per-player or per-team? | **Per-team** (team-level counter in game mode) | Single `stress` field on `SimpleCollaborativeMode` |
+
+### No Open Work Remaining
+
+- **No TODOs/FIXMEs** related to stress in codebase
+- **No open comments** on the issue (0 comments)
+- **Backlog items** are future enhancements (Manual GM stress override, latent/conditional stress), not blockers for issue closure
+- **All AC checkboxes** can be ticked (though issue shows them unchecked—this appears to be a template artifact)
+
+### Recommendation
+
+**Close issue #138 as COMPLETED.** The stress dimension has been fully designed, implemented, tested (unit + property + E2E), and integrated into Silent Wake scenario. The feature is production-ready.</result>
+<usage><total_tokens>54163</total_tokens><tool_uses>29</tool_uses><duration_ms>53075</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/aa6830a0689410683.output
+
+---
+
+<task-notification>
+<task-id>a91375a3d886052ad</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a91375a3d886052ad.output</output-file>
+<status>completed</status>
+<summary>Agent "Check if issue #136 max_selections is stale" completed</summary>
+<result>Based on my comprehensive search of the codebase, I can now provide you with a detailed assessment of GitHub issue #136 "Add max_selections field to DecisionTemplateDef":
+
+## Assessment: Issue #136 is DONE ✅
+
+### Summary of Implementation Status
+
+**The `max_selections` field has been fully implemented in all layers:**
+
+### Backend Implementation
+
+1. **Model Definition** (`scenario_content.py:55`):
+   - `DecisionTemplateDef.max_selections: int | None = None` — fully defined with proper type hints
+
+2. **Engine Runtime** (`engine_config.py:34`):
+   - `DecisionTemplate.max_selections: int | None = None` — propagated to engine
+
+3. **Decision Manager** (`decision_manager.py:35, 97`):
+   - Field is tracked and carried through decision lifecycle
+   - Passed to all snapshots sent to frontend
+
+4. **Validation Logic** (`exercise_engine.py:217-224`):
+   ```python
+   if template and template.max_selections is not None:
+       if len(selected_option_ids) > template.max_selections:
+           raise ValueError(...)
+   ```
+   - Enforces the constraint during `close_decision()`
+   - Raises `ValueError` if player submits more selections than allowed
+
+5. **Tests** (`exercise_engine_close_decision_test.py:167-176`):
+   - `test_raises_on_too_many_selections()` validates enforcement
+   - Test confirms backend rejects violations
+
+### Frontend Implementation
+
+1. **Type Definition** (`decision-api.service.ts:28`):
+   - `max_selections: number | null` in `ActiveDecision` interface
+
+2. **Generated Types** (`state-changes.types.ts:69`):
+   - `max_selections: number | null` in `DecisionSnapshot`
+
+3. **Component Access**:
+   - `role-card.component.ts` receives `max_selections` through the decision object
+   - Available for UI validation
+
+### Spec Documentation
+
+- **SPECS.md (line 78)**: "Decision templates support an optional `max_selections` field to cap multi-choice selections (`null` = unlimited)."
+- **SPECS.md (line 119)**: "`max_selections` caps how many options can be selected in a `multi_choice` decision (`null` = unlimited)."
+- **SPECS.md (line 148)**: "**Multi-system repair cap:** A card that can repair multiple systems is limited to `max_selections` on the decision template."
+
+### What Could Still Be Open (if anything)
+
+The only potential gap would be **frontend-side UI enforcement** — the component doesn't currently disable checkboxes after max_selections is reached. However:
+- The backend enforces the constraint server-side (safe design)
+- The component allows selecting beyond the limit, but the backend will reject it on submission
+- This is technically acceptable since validation happens at the API boundary
+
+## Conclusion
+
+**Issue #136 should be CLOSED** — the feature is complete:
+- ✅ Database schema accepts `max_selections`
+- ✅ Backend models define the field
+- ✅ Engine validates it on decision close
+- ✅ Tests verify enforcement
+- ✅ Frontend types expose it
+- ✅ SPECS.md documents it
+
+The implementation is production-ready and being used in scenarios (particularly for multi-system repair mechanics as documented in SPECS.md).</result>
+<usage><total_tokens>57728</total_tokens><tool_uses>33</tool_uses><duration_ms>58457</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a91375a3d886052ad.output
+
+---
+
+<task-notification>
+<task-id>a3354451c1df08388</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a3354451c1df08388.output</output-file>
+<status>completed</status>
+<summary>Agent "Check if issue #182 warfare domains is stale" completed</summary>
+<result>I have a bash restriction. Let me create a comprehensive summary based on what I've found by reading the source code directly:
+
+## Summary: GitHub Issue #182 "Warfare domains board section (threat tracking)" Status
+
+Based on a thorough code inspection of the repository, **Issue #182 is COMPLETE and should be closed.** Here's the evidence:
+
+### 1. **SPECS.md Confirms Full Completion**
+The feature in `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/SPECS.md` shows all checkboxes ticked:
+```
+### Feature: warfare_domains · backend + frontend
+
+Warfare domain threat-level board showing ASUW, ASW, AAW, CYBER domains with Green/Yellow/Red states...
+
+**Completed:**
+- [x] WarfareDomainManager engine module — parallel to SystemManager
+- [x] Scenario content models + loader (initial_warfare_domains, domain_effects)
+- [x] Engine integration — tick loop + trigger_event apply domain effects
+- [x] Silent Wake seed data — 4 domains, 6 events with domain_effects
+- [x] Frontend store + WS handler — warfare_domain_change state change
+- [x] WarfareDomainBoardComponent — threat-level traffic lights
+- [x] Player and GM views render warfare domain board
+```
+
+### 2. **Backend Implementation Complete**
+
+**WarfareDomainManager:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/engine/warfare_domain_manager.py`
+- Full state management for threat levels (green/yellow/red)
+- Methods: `load_domains()`, `set_threat_level()`, `snapshot()`
+- Tests: 9 unit tests in `warfare_domain_manager_test.py` covering all methods
+
+**Engine Integration:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/engine/exercise_engine.py`
+- WarfareDomainManager initialized and managed by ExerciseEngine
+- Domain effects applied on tick (event starts) via `_apply_event_domain_effects()`
+- Domain effects applied on manual `trigger_event()` calls
+- Engine snapshot includes `warfare_domains` field
+
+**Integration Tests:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/engine/warfare_domain_engine_test.py`
+- 9 tests covering:
+  - Snapshot includes domains
+  - Event domain effects applied on tick
+  - Trigger event applies domain effects
+  - Multiple effects handled
+  - No-ops when same level
+
+**Scenario Loader:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/features/scenario/scenario_loader.py`
+- Function: `load_warfare_domains()` extracts from scenario content
+- Domain effects loaded from event definitions
+- Passed to EngineConfig on line 204
+
+**Seed Data:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/seeds/silent_wake.json`
+- Contains `initial_warfare_domains` with 4 domains (ASUW, ASW, AAW, CYBER)
+- 6 events with `domain_effects` defined
+
+### 3. **Frontend Implementation Complete**
+
+**WarfareDomainBoardComponent:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/shared/warfare-domain-board.component.ts`
+- Renders threat-level traffic lights (red, yellow, green)
+- Displays domain labels and threat levels
+- OnPush change detection
+- Tests: 9 spec tests covering rendering, data binding, and reactivity
+
+**Store Integration:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/exercise.store.ts`
+- Signal: `warfareDomains()` tracks state
+- Method: `applyWarfareDomainChange()` updates threat levels reactively
+- Included in snapshot application
+
+**WebSocket Handler:**
+- Location: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/core/ws-state-handler.ts`
+- Case handler: `"warfare_domain_change"` routes to `store.applyWarfareDomainChange()`
+- Fully integrated into message dispatch
+
+**Views:**
+- Player view: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/player/player-view.html` (line 34)
+  - `<tfc-warfare-domain-board [domains]="store.warfareDomains()" />`
+- Game Master view: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/features/game-master/game-master-view.ts` (line 178)
+  - `<tfc-warfare-domain-board [domains]="store.warfareDomains()" />`
+
+### 4. **No TODO/FIXME Comments**
+Grep search found zero TODO or FIXME comments in warfare domain files.
+
+### 5. **Recent Commits Confirm Delivery**
+- Commit `32dd0b0`: "feat(tfc): implement system targeting + warfare domains (#199)" — merged to master
+- Feature delivered as part of PR #199 implementing both system targeting and warfare domains
+
+### Recommendation
+**Close Issue #182 as COMPLETED** — all acceptance criteria from SPECS.md are met and tested. The warfare domain board is fully functional in both player and GM views, with backend domain effect application working correctly on event triggers.</result>
+<usage><total_tokens>63371</total_tokens><tool_uses>30</tool_uses><duration_ms>73092</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a3354451c1df08388.output
+
+---
+
+<task-notification>
+<task-id>aa46ce021dc795cf7</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/aa46ce021dc795cf7.output</output-file>
+<status>completed</status>
+<summary>Agent "Check if issues #137 #189 are current" completed</summary>
+<result>Perfect! Now I have comprehensive information. Let me verify the current state by checking what has been implemented. Based on what I've found, let me analyze the evidence:
+
+## Summary of Findings
+
+Based on my thorough search of the codebase, here are the findings for each issue:
+
+---
+
+### **Issue #137 - Wire domain terminology DB to scenario loading**
+
+**Status: STILL OPEN (work needed)**
+
+**Evidence:**
+
+1. **DomainConfig exists but is not connected to scenario loading:**
+   - `Scenario` model has a `domain_id` FK reference to `DomainConfig` (in `/apps/tfc/backend/features/scenario/scenario_model.py`, line 16-20)
+   - `DomainConfig` contains a `terminology` field mapping domain-specific labels (see `/apps/tfc/backend/features/domain_config/domain_config_model.py`, line 17)
+   
+2. **Scenario loader does NOT use domain terminology:**
+   - In `/apps/tfc/backend/features/scenario/scenario_loader.py`, the `build_engine_config()` function (lines 167-205) builds the `EngineConfig` with scenario content, title, and context — but:
+     - Never fetches the associated `DomainConfig` by `scenario.domain_id`
+     - Never retrieves or applies `terminology` from the domain config to the engine context
+     - The `ScenarioContext` (lines 175-183) is built directly from scenario fields without domain terminology injection
+
+3. **Frontend: No terminology customization in player views:**
+   - The entire TFC frontend uses hardcoded English labels ("Event", "Issue", "Player", "Game Master", "Exercise", "Scenario", "Decision")
+   - Searching for terminology usage in player/GM views yields no results — no dynamic label lookup
+
+4. **SPECS.md acknowledges the feature exists but doesn't mandate runtime usage:**
+   - Line 195-197: "Terminology maps generic code terms to domain-specific labels (e.g., 'Event' → 'Inject')"
+   - But the Glossary (lines 298-326) uses hardcoded English code-to-domain mappings, not runtime-driven lookups
+
+**Work needed:**
+- Modify `_build_config()` in engine_router.py to fetch the associated DomainConfig
+- Pass terminology through `ScenarioContext` to the frontend
+- Update frontend components to use terminology from the domain config instead of hardcoded labels
+- Wire the terminology through WebSocket context broadcasts
+
+---
+
+### **Issue #189 - Scenario Editor Enhancements: Non-destructive editing, Global View, Walkthrough**
+
+**Status: PARTIALLY DONE (most features implemented, needs verification)**
+
+**Evidence of completed features:**
+
+1. **Walkthrough View: IMPLEMENTED**
+   - `ScenarioWalkthroughComponent` exists and is fully functional (at `/apps/tfc/frontend/src/app/features/scenario-builder/scenario-walkthrough.ts`)
+   - Displays events in chronological order with navigation (Previous/Next buttons)
+   - Integrated into the main builder view as a toggle option (line 94 in `scenario-builder-view.ts`: toggle between 'global' and 'walkthrough' modes)
+
+2. **Global View: IMPLEMENTED**
+   - The default editor view shows all events, issues, decisions, roles, and settings simultaneously
+   - Multiple editor components (`ScenarioEventEditorComponent`, `ScenarioIssueEditorComponent`, `ScenarioDecisionEditorComponent`, etc.) are displayed side-by-side
+   - Tabs/sections in sidebar nav allow switching between sections
+
+3. **Non-destructive editing: IMPLEMENTED**
+   - **Revert button:** Present in actions bar (line 40-53 in `scenario-builder-view-actions.ts`)
+   - **Save as Copy:** Button available (line 37-39 in `scenario-builder-view-actions.ts`) to clone scenarios without overwriting
+   - **Store snapshot on load:** The store captures a `loadedSnapshot` (line 54 in `scenario-builder.store.ts`) containing the last saved state
+   - **Revert implementation:** Restores from `loadedSnapshot` (lines 79-89 in `scenario-builder.store.ts`)
+
+4. **Export/Import: IMPLEMENTED**
+   - Export to JSON: Button present (line 44-45 in `scenario-builder-view-actions.ts`)
+   - Import from JSON: Button present (line 47-49) with file parser
+
+**Minor gaps to verify:**
+- The revert button only appears when `isDirty()` is true — need to verify `isDirty()` computation is correct
+- No undo/redo history (only single-level revert to last saved state)
+- This appears to be as-designed (simplicity over full undo/redo stack)
+
+---
+
+## Recommendations
+
+**#137 - Domain Terminology:** This feature is marked as OPEN because the infrastructure (DomainConfig table, API, CRUD) exists but is never used at exercise runtime. The scenario loader should fetch and inject terminology before the engine starts.
+
+**#189 - Scenario Editor Enhancements:** This feature appears to be DONE. All three requested enhancements (non-destructive editing, global view, walkthrough) are implemented and integrated. Consider marking closed unless there are specific UX refinements needed.</result>
+<usage><total_tokens>63226</total_tokens><tool_uses>38</tool_uses><duration_ms>58522</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/aa46ce021dc795cf7.output
+
+---
+
+<task-notification>
+<task-id>a08ee1af8cac044bf</task-id>
+<tool-use-id>toolu_01F7313qS1uustTy4BQVzUNj</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a08ee1af8cac044bf.output</output-file>
+<status>completed</status>
+<summary>Agent "Check if issues #172 #164 #163 #162 are current" completed</summary>
+<result>Let me now create a comprehensive summary by examining what each issue asks for and what the current state is:
+
+Based on my search through the codebase and recent git history, here's my assessment of each issue:
+
+## Issue Status Report
+
+### **#172 - event→decision coupling broken — add decision_template_ids to events**
+
+**Status: STILL OPEN (by design, but working)**
+
+Currently, the coupling uses ID matching: the engine finds decision templates by matching `event_id` with `decision_template.id`. This is visible in `exercise_engine.py::find_decision_template()`:
+
+```python
+def find_decision_template(self, event_id: str) -> DecisionTemplate | None:
+    return next((dt for dt in self._config.decision_templates if dt.id == event_id), None)
+```
+
+The issue asks for explicit `decision_template_ids` on events. While not implemented as a formal field on `ScenarioEventDef`, the coupling works through ID alignment. However, there is a related field `decision_template_id` in `TurnDefinition` (part of the turn structure), not events directly. **This is a design gap** but the current workaround works (commit f6dc31a had to fix misaligned IDs). The issue is still open because the formal field hasn't been added to events.
+
+---
+
+### **#164 - decisions not showing in practice mode — incomplete WS DecisionOpened payload**
+
+**Status: DONE - FIXED**
+
+Commit `afd2213` (dated 2026-03-19) explicitly fixes this with two bugs:
+1. **WS broadcast routing gap**: `broadcast_to_roles` only sent to role-matched connections, but practice players connect as "player". Fixed by always delivering to "player" connections.
+2. **Incomplete REST payload**: GET `/engine/decisions` returned only 6 fields instead of full `DecisionSnapshot`. Fixed to return complete snapshots.
+
+Tests added for both bugs. Issue is resolved.
+
+---
+
+### **#163 - Auto-join waiting room when Practice mode selected**
+
+**Status: STILL OPEN (no auto-join logic found)**
+
+Searched the codebase for auto-join mechanisms when practice_mode is enabled:
+- Waiting room tests show practice mode allows single player (`test_practice_mode_allows_single_player`)
+- Practice mode validates participant capacity (line 78-82 in `waiting_room_router.py`)
+- **BUT**: No auto-join logic exists. Players still manually call POST `/waiting-room/join`
+- No change in `engine_router.py::start_engine()` to auto-join
+
+**This feature is NOT implemented.**
+
+---
+
+### **#162 - Add practice_mode check to update_participant_role endpoint**
+
+**Status: STILL OPEN (no practice_mode validation in endpoint)**
+
+Examined `update_participant_role()` in `waiting_room_router.py` (lines 123-161):
+- Checks if roles are taken (line 137-145)
+- **Does NOT check `practice_mode`**
+- No validation preventing role changes in practice mode
+- In practice mode with a single player, changing roles should probably be blocked or have special handling
+
+**This validation is missing.**
+
+---
+
+## Summary Table
+
+| Issue | Status | Notes |
+|-------|--------|-------|
+| #172 | STILL OPEN | Design gap: events lack formal `decision_template_id` field; currently uses ID matching as workaround |
+| #164 | DONE | Fixed in commit afd2213 (2026-03-19); both WS routing and REST payload issues resolved |
+| #163 | STILL OPEN | No auto-join logic when practice_mode is enabled |
+| #162 | STILL OPEN | `update_participant_role` lacks practice_mode validation |</result>
+<usage><total_tokens>58715</total_tokens><tool_uses>42</tool_uses><duration_ms>74373</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/a08ee1af8cac044bf.output
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Agent tool input (qv1xea) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+close what should be closed
+
+---
+
+liste them out
+
+---
+
+explain shortly these and estimate complexity of each
+
+#	Title	Notes
+137	Wire domain terminology DB to scenario loading	CRUD exists, runtime wiring missing
+
+187	Weapon 2-tier state (binary OK/non-operational)	Raw backlog
+
+172	Event→decision coupling — add decision_template_ids	ID-matching workaround in place, needs formal field
+163	Auto-join waiting room in practice mode	No auto-join logic exists
+162	Practice mode check on update_participant_role	Missing validation
+
+---
+
+137. we'll drop terminology flexibility altogethr.
+187 give those weapons their own dedicated OP/nonOP.  
+172 I'm a bit preoccupied with this one
+163 there should not be a waiting room for single player/practce, there's no one to wait for
+162 I guess it's related to 163
+
+---
+
+go
+
+---
+
+work on 163 in a subagent. in the meanwhile show me the 15 remaining ones in 2 cats : 
+1 functional and feature oriented 
+2 non functional and bugs
+
+---
+
+<task-notification>
+<task-id>adde3d06cb51f8d48</task-id>
+<tool-use-id>toolu_019WkL1boo6S5FBwDa8KKukr</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/adde3d06cb51f8d48.output</output-file>
+<status>completed</status>
+<summary>Agent "Implement #163 practice skip waiting room" completed</summary>
+<result>I need write permissions to create the new files. Let me explain what I'm trying to do:
+
+I need to create two new files and modify one existing file to implement this feature:
+
+**1. New file: `practice-redirect.guard.spec.ts`** (test first, per TDD)
+**2. New file: `practice-redirect.guard.ts`** (the guard implementation)
+**3. Edit: `waiting-room.routes.ts`** (wire the guard into the route)
+
+Could you grant me permission to write files and run bash commands so I can create these? Alternatively, I can provide you with the exact file contents and edits needed, and you can apply them manually.
+
+Here's what each file should contain:
+
+---
+
+**File 1: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/waiting-room/practice-redirect.guard.spec.ts`**
+
+```typescript
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { TestBed } from "@angular/core/testing";
+import { Router, type ActivatedRouteSnapshot } from "@angular/router";
+import { of, throwError } from "rxjs";
+import { practiceRedirectGuard } from "./practice-redirect.guard";
+import { ExerciseApiService } from "../../core/exercise-api.service";
+
+describe("practiceRedirectGuard", () => {
+  let exerciseApi: { get: ReturnType<typeof vi.fn> };
+  let router: { createUrlTree: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    exerciseApi = { get: vi.fn() };
+    router = { createUrlTree: vi.fn().mockReturnValue("/player-url-tree") };
+
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: ExerciseApiService, useValue: exerciseApi },
+        { provide: Router, useValue: router },
+      ],
+    });
+  });
+
+  function runGuard(queryParams: Record<string, string>): unknown {
+    const route = { queryParams } as unknown as ActivatedRouteSnapshot;
+    return TestBed.runInInjectionContext(() => practiceRedirectGuard(route));
+  }
+
+  it("should allow navigation when no exerciseId is present", () => {
+    const result = runGuard({});
+    expect(result).toBe(true);
+  });
+
+  it("should allow navigation for non-practice exercises", (done) => {
+    exerciseApi.get.mockReturnValue(
+      of({ id: 1, practice_mode: false, game_mode: "classic" }),
+    );
+
+    const result$ = runGuard({ exerciseId: "1" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result$ as any).subscribe((val: unknown) => {
+      expect(val).toBe(true);
+      done();
+    });
+  });
+
+  it("should redirect to /player for practice exercises", (done) => {
+    exerciseApi.get.mockReturnValue(
+      of({
+        id: 42,
+        practice_mode: true,
+        game_mode: "simple_collaborative",
+      }),
+    );
+
+    const result$ = runGuard({ exerciseId: "42" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result$ as any).subscribe((val: unknown) => {
+      expect(router.createUrlTree).toHaveBeenCalledWith(["/player"], {
+        queryParams: {
+          exerciseId: 42,
+          role: "all_roles",
+          gameMode: "simple_collaborative",
+          practiceMode: true,
+        },
+      });
+      expect(val).toBe("/player-url-tree");
+      done();
+    });
+  });
+
+  it("should allow navigation when exercise fetch fails", (done) => {
+    exerciseApi.get.mockReturnValue(throwError(() => new Error("Not found")));
+
+    const result$ = runGuard({ exerciseId: "99" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (result$ as any).subscribe((val: unknown) => {
+      expect(val).toBe(true);
+      done();
+    });
+  });
+});
+```
+
+---
+
+**File 2: `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/waiting-room/practice-redirect.guard.ts`**
+
+```typescript
+import { inject } from "@angular/core";
+import { type ActivatedRouteSnapshot, Router } from "@angular/router";
+import { catchError, map, of } from "rxjs";
+import { ExerciseApiService } from "../../core/exercise-api.service";
+
+/**
+ * Route guard that redirects practice-mode exercises away from the waiting room
+ * directly to the player view. Practice (solo) mode has no one to wait for.
+ */
+export function practiceRedirectGuard(
+  route: ActivatedRouteSnapshot,
+): boolean | ReturnType<typeof of> {
+  const exerciseId = Number(route.queryParams["exerciseId"] ?? 0);
+  if (!exerciseId) return true;
+
+  const exerciseApi = inject(ExerciseApiService);
+  const router = inject(Router);
+
+  return exerciseApi.get(exerciseId).pipe(
+    map((exercise) => {
+      if (!exercise.practice_mode) return true;
+      return router.createUrlTree(["/player"], {
+        queryParams: {
+          exerciseId: exercise.id,
+          role: "all_roles",
+          gameMode: exercise.game_mode,
+          practiceMode: true,
+        },
+      });
+    }),
+    catchError(() => of(true)),
+  );
+}
+```
+
+---
+
+**File 3: Edit `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/waiting-room/waiting-room.routes.ts`**
+
+Replace the entire contents with:
+
+```typescript
+import { Routes } from "@angular/router";
+import { WaitingRoomView } from "./waiting-room-view";
+import { practiceRedirectGuard } from "./practice-redirect.guard";
+
+export const WAITING_ROOM_ROUTES: Routes = [
+  {
+    path: "",
+    component: WaitingRoomView,
+    canActivate: [practiceRedirectGuard],
+  },
+];
+```
+
+---
+
+**Summary of the approach:**
+
+- A functional `canActivate` guard (`practiceRedirectGuard`) checks the `exerciseId` query param, fetches the exercise from the API, and if `practice_mode` is true, redirects to `/player` with the appropriate query params (role=all_roles, gameMode, practiceMode=true).
+- Non-practice exercises pass through normally (`return true`).
+- If no `exerciseId` is present or the API call fails, navigation proceeds normally (graceful fallback).
+- The guard is wired into `WAITING_ROOM_ROUTES` via `canActivate`.
+- 4 test cases cover: no exerciseId, non-practice exercise, practice exercise redirect, and API error fallback.</result>
+<usage><total_tokens>34111</total_tokens><tool_uses>18</tool_uses><duration_ms>79794</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/0a3eebe1-ace1-4704-9b05-36dc15d1115d/tasks/adde3d06cb51f8d48.output
