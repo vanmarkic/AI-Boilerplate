@@ -43,7 +43,7 @@
     } @else if (isDecisionMaker()) {
       <!-- CO layout: read-only mirrors + decision bar -->
       <div class="board-columns">
-        @for (card of mirrorRoleCards(); track card.roleId) {
+        @for (card of advisorRoleCards(); track card.roleId) {
           <tfc-role-card [card]="card" [systems]="store.systems()" [readonly]="true" (submitted)="onRoleCardSubmitted($event)" />
         }
       </div>
