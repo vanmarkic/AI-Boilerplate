@@ -1,4 +1,8 @@
 <tfc-ambient-background />
+<tfc-stress-overlay
+  [stress]="store.score()?.stress ?? 0"
+  [preset]="stressEffectPreset()"
+/>
 
 <div class="player-layout">
   <header class="player-header">
