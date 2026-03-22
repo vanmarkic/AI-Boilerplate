@@ -1,0 +1,48 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "178c67cc44d6",
+  "session_id": "0a3eebe1-ace1-4704-9b05-36dc15d1115d",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-22T17:35:10.302424Z",
+  "branch": "master",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".playwright-mcp/console-2026-03-21T07-32-48-814Z.log",
+    ".playwright-mcp/console-2026-03-21T07-33-38-287Z.log",
+    ".playwright-mcp/console-2026-03-21T07-34-19-431Z.log",
+    ".playwright-mcp/console-2026-03-21T07-38-26-072Z.log",
+    ".playwright-mcp/console-2026-03-21T07-39-37-166Z.log",
+    ".playwright-mcp/console-2026-03-21T15-01-47-721Z.log",
+    ".playwright-mcp/console-2026-03-21T15-22-49-376Z.log",
+    ".playwright-mcp/console-2026-03-21T16-38-07-238Z.log",
+    ".playwright-mcp/console-2026-03-21T16-41-48-617Z.log",
+    ".playwright-mcp/console-2026-03-21T16-46-27-969Z.log",
+    ".playwright-mcp/page-2026-03-21T15-01-57-620Z.png",
+    ".playwright-mcp/page-2026-03-21T15-03-32-535Z.png",
+    ".playwright-mcp/page-2026-03-21T15-27-55-525Z.png",
+    ".playwright-mcp/page-2026-03-21T15-34-00-721Z.png",
+    ".playwright-mcp/page-2026-03-21T16-11-46-645Z.png",
+    ".playwright-mcp/page-2026-03-21T16-13-46-860Z.png"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "217855350844",
+  "token_usage": {
+    "input_tokens": 343,
+    "cache_creation_tokens": 123210,
+    "cache_read_tokens": 2905895,
+    "output_tokens": 15280,
+    "api_call_count": 51
+  },
+  "session_metrics": {
+    "turn_count": 19
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T17:35:10.129473Z",
+    "agent_lines": 0,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 0,
+    "agent_percentage": 0
+  }
+}
