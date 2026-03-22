@@ -7,10 +7,20 @@ import {
 } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { ButtonDirective, SidebarLayoutComponent } from "@aspect/ui";
-import { DomainConfigApiService } from "../../core/domain-config-api.service";
+import {
+  DomainConfigApiService,
+  type DomainRole,
+  type SystemDef,
+  type WarfareDomainDef,
+  type BlueCardDef,
+} from "../../core/domain-config-api.service";
 import { FoundationStore } from "./foundation.store";
 import { ScenarioSidebarNavComponent } from "../scenario-builder/scenario-sidebar-nav";
 import type { SidebarSection } from "../scenario-builder/scenario-sidebar-nav";
+import {
+  FoundationCatalogSectionComponent,
+  type FieldDef,
+} from "./foundation-catalog-section";
 
 @Component({
   selector: "tfc-foundation-view",
@@ -21,6 +31,7 @@ import type { SidebarSection } from "../scenario-builder/scenario-sidebar-nav";
     ButtonDirective,
     SidebarLayoutComponent,
     ScenarioSidebarNavComponent,
+    FoundationCatalogSectionComponent,
   ],
   template: `
     <ui-sidebar-layout
@@ -74,44 +85,68 @@ import type { SidebarSection } from "../scenario-builder/scenario-sidebar-nav";
             id="section-roles"
             style="scroll-margin-top: var(--spacing-xl)"
           >
-            <h2 class="text-lg font-semibold">Roles</h2>
-            <p class="text-muted-foreground text-sm">
-              {{ config.roles.length }} roles defined. Editor coming in Task
-              11b.
-            </p>
+            <tfc-foundation-catalog-section
+              title="Roles"
+              sectionId="roles"
+              [items]="asRecords(config.roles)"
+              [fields]="roleFields"
+              idField="id"
+              labelField="label"
+              (onAdd)="addRole($event)"
+              (onUpdate)="updateRole($event)"
+              (onRemove)="store.removeRole($event)"
+            />
           </section>
 
           <section
             id="section-systems"
             style="scroll-margin-top: var(--spacing-xl)"
           >
-            <h2 class="text-lg font-semibold">Systems</h2>
-            <p class="text-muted-foreground text-sm">
-              {{ config.systems.length }} systems defined. Editor coming in Task
-              11b.
-            </p>
+            <tfc-foundation-catalog-section
+              title="Systems"
+              sectionId="systems"
+              [items]="asRecords(config.systems)"
+              [fields]="systemFields"
+              idField="id"
+              labelField="label"
+              (onAdd)="addSystem($event)"
+              (onUpdate)="updateSystem($event)"
+              (onRemove)="store.removeSystem($event)"
+            />
           </section>
 
           <section
             id="section-warfare-domains"
             style="scroll-margin-top: var(--spacing-xl)"
           >
-            <h2 class="text-lg font-semibold">Warfare Domains</h2>
-            <p class="text-muted-foreground text-sm">
-              {{ config.warfare_domains.length }} warfare domains defined.
-              Editor coming in Task 11b.
-            </p>
+            <tfc-foundation-catalog-section
+              title="Warfare Domains"
+              sectionId="warfare-domains"
+              [items]="asRecords(config.warfare_domains)"
+              [fields]="warfareDomainFields"
+              idField="id"
+              labelField="label"
+              (onAdd)="addWarfareDomain($event)"
+              (onUpdate)="updateWarfareDomain($event)"
+              (onRemove)="store.removeWarfareDomain($event)"
+            />
           </section>
 
           <section
             id="section-blue-cards"
             style="scroll-margin-top: var(--spacing-xl)"
           >
-            <h2 class="text-lg font-semibold">Blue Cards</h2>
-            <p class="text-muted-foreground text-sm">
-              {{ config.blue_card_catalog.length }} blue cards defined. Editor
-              coming in Task 11b.
-            </p>
+            <tfc-foundation-catalog-section
+              title="Blue Cards"
+              sectionId="blue-cards"
+              [items]="asRecords(config.blue_card_catalog)"
+              [fields]="blueCardFields"
+              idField="id"
+              labelField="title"
+              (onAdd)="addBlueCard($event)"
+              (onUpdate)="updateBlueCard($event)"
+              (onRemove)="store.removeBlueCard($event)"
+            />
           </section>
         }
       </div>
@@ -121,6 +156,42 @@ import type { SidebarSection } from "../scenario-builder/scenario-sidebar-nav";
 export class FoundationView implements OnInit {
   protected readonly store = inject(FoundationStore);
   private readonly api = inject(DomainConfigApiService);
+
+  readonly roleFields: FieldDef[] = [
+    { key: "id", label: "ID", type: "text", readOnlyAfterCreate: true },
+    { key: "label", label: "Label", type: "text" },
+    { key: "description", label: "Description", type: "textarea" },
+  ];
+
+  readonly systemFields: FieldDef[] = [
+    { key: "id", label: "ID", type: "text", readOnlyAfterCreate: true },
+    { key: "label", label: "Label", type: "text" },
+    {
+      key: "category",
+      label: "Category",
+      type: "select",
+      options: ["system", "weapon"],
+    },
+    { key: "description", label: "Description", type: "textarea" },
+  ];
+
+  readonly warfareDomainFields: FieldDef[] = [
+    { key: "id", label: "ID", type: "text", readOnlyAfterCreate: true },
+    { key: "label", label: "Label", type: "text" },
+    { key: "description", label: "Description", type: "textarea" },
+  ];
+
+  readonly blueCardFields: FieldDef[] = [
+    { key: "id", label: "ID", type: "text", readOnlyAfterCreate: true },
+    { key: "title", label: "Title", type: "text" },
+    { key: "description", label: "Description", type: "textarea" },
+    { key: "targets_system", label: "Targets System", type: "checkbox" },
+  ];
+
+  /** Spread each item so TS sees a fresh Record<string, unknown> type. */
+  protected asRecords(items: object[]): Record<string, unknown>[] {
+    return items.map((item) => ({ ...item }));
+  }
 
   protected readonly configName = computed(
     () => this.store.config()?.name ?? "",
@@ -155,6 +226,92 @@ export class FoundationView implements OnInit {
       next: (config) => this.store.setConfig(config),
       error: () => this.store.setError("Failed to load domain configuration."),
     });
+  }
+
+  // ── Catalog adapters (Record<string,unknown> → typed store calls) ──
+
+  protected addRole(r: Record<string, unknown>): void {
+    this.store.addRole({
+      id: String(r["id"] ?? ""),
+      label: String(r["label"] ?? ""),
+      description: String(r["description"] ?? ""),
+    });
+  }
+
+  protected updateRole(e: {
+    id: string;
+    updates: Record<string, unknown>;
+  }): void {
+    const u = e.updates;
+    this.store.updateRole(e.id, {
+      id: String(u["id"] ?? ""),
+      label: String(u["label"] ?? ""),
+      description: String(u["description"] ?? ""),
+    } satisfies Partial<DomainRole>);
+  }
+
+  protected addSystem(r: Record<string, unknown>): void {
+    this.store.addSystem({
+      id: String(r["id"] ?? ""),
+      label: String(r["label"] ?? ""),
+      category: String(r["category"] ?? "system"),
+      description: String(r["description"] ?? ""),
+    });
+  }
+
+  protected updateSystem(e: {
+    id: string;
+    updates: Record<string, unknown>;
+  }): void {
+    const u = e.updates;
+    this.store.updateSystem(e.id, {
+      id: String(u["id"] ?? ""),
+      label: String(u["label"] ?? ""),
+      category: String(u["category"] ?? "system"),
+      description: String(u["description"] ?? ""),
+    } satisfies Partial<SystemDef>);
+  }
+
+  protected addWarfareDomain(r: Record<string, unknown>): void {
+    this.store.addWarfareDomain({
+      id: String(r["id"] ?? ""),
+      label: String(r["label"] ?? ""),
+      description: String(r["description"] ?? ""),
+    });
+  }
+
+  protected updateWarfareDomain(e: {
+    id: string;
+    updates: Record<string, unknown>;
+  }): void {
+    const u = e.updates;
+    this.store.updateWarfareDomain(e.id, {
+      id: String(u["id"] ?? ""),
+      label: String(u["label"] ?? ""),
+      description: String(u["description"] ?? ""),
+    } satisfies Partial<WarfareDomainDef>);
+  }
+
+  protected addBlueCard(r: Record<string, unknown>): void {
+    this.store.addBlueCard({
+      id: String(r["id"] ?? ""),
+      title: String(r["title"] ?? ""),
+      description: String(r["description"] ?? ""),
+      targets_system: Boolean(r["targets_system"]),
+    });
+  }
+
+  protected updateBlueCard(e: {
+    id: string;
+    updates: Record<string, unknown>;
+  }): void {
+    const u = e.updates;
+    this.store.updateBlueCard(e.id, {
+      id: String(u["id"] ?? ""),
+      title: String(u["title"] ?? ""),
+      description: String(u["description"] ?? ""),
+      targets_system: Boolean(u["targets_system"]),
+    } satisfies Partial<BlueCardDef>);
   }
 
   protected save(): void {
