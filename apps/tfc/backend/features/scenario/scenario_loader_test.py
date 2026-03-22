@@ -5,13 +5,23 @@ from __future__ import annotations
 from features.scenario.scenario_content import (
     DecisionOptionDef,
     DecisionTemplateDef,
+    DomainEffectDef,
     ScenarioContent,
     SystemEffectDef,
+    SystemStateDef,
+    TurnCardConfig,
+    TurnDefinition,
+    TurnInjectDef,
+    WarfareDomainDef,
 )
 from features.scenario.scenario_loader import (
     _compute_max_possible_score,
     build_engine_config,
+    generate_decisions_from_turns,
+    generate_events_from_turns,
     load_decision_templates,
+    merge_system_states,
+    merge_warfare_domains,
 )
 
 
@@ -343,3 +353,281 @@ def test_build_engine_config_passes_score_tier_thresholds() -> None:
     )
     config = build_engine_config(exercise_id=1, title="Test", content=content)
     assert config.context.score_tier_thresholds == {"lo": 0.33, "mid": 0.66}
+
+
+# -- Task 4: generate_events_from_turns / generate_decisions_from_turns ------
+
+
+def test_generate_events_from_turn_with_injects() -> None:
+    """Each inject becomes a ScenarioEventDef; first inject of decision turn is 'decision'."""
+    turns = [
+        TurnDefinition(
+            turn_index=0,
+            title="Turn 0",
+            has_decisions=True,
+            injects=[
+                TurnInjectDef(text="Enemy spotted", target_roles=["co"]),
+                TurnInjectDef(text="Radar contact", target_roles=["tao"]),
+            ],
+        ),
+    ]
+    events = generate_events_from_turns(turns)
+
+    assert len(events) == 2
+    assert events[0].id == "turn-0-inject-0"
+    assert events[0].event_type == "decision"
+    assert events[0].description == "Enemy spotted"
+    assert events[0].target_roles == ["co"]
+
+    assert events[1].id == "turn-0-inject-1"
+    assert events[1].event_type == "informational"
+    assert events[1].description == "Radar contact"
+
+
+def test_generate_events_with_system_effects_on_start() -> None:
+    """Turn-level system/domain effects attach to first event only."""
+    turns = [
+        TurnDefinition(
+            turn_index=1,
+            title="Turn 1",
+            has_decisions=False,
+            injects=[
+                TurnInjectDef(text="First inject"),
+                TurnInjectDef(text="Second inject"),
+            ],
+            system_effects_on_start=[
+                SystemEffectDef(system_id="radar", operational_state="red"),
+            ],
+            domain_effects_on_start=[
+                DomainEffectDef(domain_id="air", threat_level="yellow"),
+            ],
+        ),
+    ]
+    events = generate_events_from_turns(turns)
+
+    assert len(events) == 2
+    # First event gets the effects
+    assert len(events[0].system_effects) == 1
+    assert events[0].system_effects[0].system_id == "radar"
+    assert len(events[0].domain_effects) == 1
+    assert events[0].domain_effects[0].domain_id == "air"
+    # Second event does not
+    assert events[1].system_effects == []
+    assert events[1].domain_effects == []
+
+
+def test_generate_events_no_injects_but_effects_creates_marker() -> None:
+    """Turn with no injects but effects creates a marker event."""
+    turns = [
+        TurnDefinition(
+            turn_index=2,
+            title="Effects Only",
+            has_decisions=False,
+            injects=[],
+            system_effects_on_start=[
+                SystemEffectDef(system_id="sonar", power_state=True),
+            ],
+        ),
+    ]
+    events = generate_events_from_turns(turns)
+
+    assert len(events) == 1
+    assert events[0].id == "turn-2-marker"
+    assert events[0].event_type == "informational"
+    assert len(events[0].system_effects) == 1
+    assert events[0].system_effects[0].system_id == "sonar"
+
+
+# -- Task 5: build_engine_config turn integration ----------------------------
+
+
+def test_build_engine_config_uses_turns_when_present() -> None:
+    """When turns have authored injects/cards, build_engine_config uses them."""
+    content = _minimal_content(
+        turns=[
+            TurnDefinition(
+                turn_index=0,
+                title="Turn 0",
+                has_decisions=True,
+                injects=[TurnInjectDef(text="Incoming threat")],
+                available_cards=[
+                    TurnCardConfig(card_id="card-a", score=5.0),
+                    TurnCardConfig(card_id="card-b", score=3.0),
+                ],
+                max_selections=1,
+                base_stress_delta=2,
+            ),
+        ],
+    )
+    config = build_engine_config(exercise_id=1, title="Turn Test", content=content)
+
+    # Events generated from turns
+    assert len(config.events) == 1
+    assert config.events[0].id == "turn-0-inject-0"
+
+    # Decision templates generated from turns
+    assert len(config.decision_templates) == 1
+    dt = config.decision_templates[0]
+    assert dt.id == "turn-0-decision"
+    assert dt.max_selections == 1
+    assert dt.stress_delta == 2
+    assert len(dt.options) == 2
+    assert dt.options[0]["id"] == "card-a"
+
+    # Synthetic issue created
+    assert len(config.issues) == 1
+    assert config.issues[0].id == "turn-0-issue"
+
+
+def test_build_engine_config_falls_back_to_legacy_events() -> None:
+    """When turns are empty, legacy events/decisions are used."""
+    from features.scenario.scenario_content import ScenarioEventDef, ScenarioIssueDef
+
+    content = _minimal_content(
+        events=[
+            ScenarioEventDef(
+                id="evt-legacy",
+                title="Legacy Event",
+                event_type="informational",
+                scheduled_pt_ms=1000,
+            ),
+        ],
+        issues=[
+            ScenarioIssueDef(
+                id="iss-legacy",
+                title="Legacy Issue",
+                trigger_mode="manual",
+            ),
+        ],
+        turns=[],
+    )
+    config = build_engine_config(exercise_id=2, title="Legacy Test", content=content)
+
+    assert len(config.events) == 1
+    assert config.events[0].id == "evt-legacy"
+    assert len(config.issues) == 1
+    assert config.issues[0].id == "iss-legacy"
+
+
+# -- Task 6: merge functions -------------------------------------------------
+
+
+def test_merge_system_states_with_overrides() -> None:
+    """Scenario overrides replace matching systems from domain config."""
+    domain_systems = [
+        {"system_id": "radar", "label": "Radar", "category": "system"},
+        {"system_id": "sonar", "label": "Sonar", "category": "system"},
+    ]
+    overrides = [
+        SystemStateDef(
+            system_id="radar",
+            label="Radar Override",
+            operational_state="red",
+            power_state=True,
+        ),
+    ]
+    result = merge_system_states(domain_systems, overrides)
+
+    assert len(result) == 2
+    radar = next(s for s in result if s.system_id == "radar")
+    assert radar.label == "Radar Override"
+    assert radar.operational_state == "red"
+    assert radar.power_state is True
+
+    sonar = next(s for s in result if s.system_id == "sonar")
+    assert sonar.label == "Sonar"
+    assert sonar.operational_state == "green"  # default
+    assert sonar.power_state is False  # default
+
+
+def test_merge_system_states_no_overrides() -> None:
+    """Without overrides, domain defaults are used as-is."""
+    domain_systems = [
+        {"system_id": "radar", "label": "Radar", "category": "weapon"},
+    ]
+    result = merge_system_states(domain_systems, [])
+
+    assert len(result) == 1
+    assert result[0].system_id == "radar"
+    assert result[0].label == "Radar"
+    assert result[0].category == "weapon"
+    assert result[0].operational_state == "green"
+
+
+def test_merge_warfare_domains_with_overrides() -> None:
+    """Scenario overrides replace matching warfare domains."""
+    domain_wds = [
+        {"domain_id": "air", "label": "Air", "initial_threat_level": "green"},
+        {"domain_id": "surface", "label": "Surface", "initial_threat_level": "green"},
+    ]
+    overrides = [
+        WarfareDomainDef(
+            domain_id="air",
+            label="Air Domain",
+            initial_threat_level="red",
+        ),
+    ]
+    result = merge_warfare_domains(domain_wds, overrides)
+
+    assert len(result) == 2
+    air = next(wd for wd in result if wd.domain_id == "air")
+    assert air.label == "Air Domain"
+    assert air.initial_threat_level == "red"
+
+    surface = next(wd for wd in result if wd.domain_id == "surface")
+    assert surface.label == "Surface"
+    assert surface.initial_threat_level == "green"
+
+
+# -- Task 7: card label resolution from catalog ------------------------------
+
+
+def test_resolve_card_labels_from_catalog() -> None:
+    """When blue_card_catalog is provided, labels and targets_system resolve from it."""
+    turns = [
+        TurnDefinition(
+            turn_index=0,
+            title="Turn 0",
+            has_decisions=True,
+            available_cards=[
+                TurnCardConfig(card_id="bc-01", score=5.0),
+                TurnCardConfig(card_id="bc-02", score=3.0),
+            ],
+        ),
+    ]
+    catalog = [
+        {"id": "bc-01", "title": "Deploy Chaff", "targets_system": True},
+        {"id": "bc-02", "title": "Activate CIWS", "targets_system": False},
+    ]
+    decisions = generate_decisions_from_turns(turns, blue_card_catalog=catalog)
+
+    assert len(decisions) == 1
+    opts = decisions[0].options
+    assert opts[0].id == "bc-01"
+    assert opts[0].label == "Deploy Chaff"
+    assert opts[0].targets_system is True
+
+    assert opts[1].id == "bc-02"
+    assert opts[1].label == "Activate CIWS"
+    assert opts[1].targets_system is False
+
+
+def test_resolve_card_labels_no_catalog_uses_card_id() -> None:
+    """Without catalog, card_id is used as label and targets_system defaults False."""
+    turns = [
+        TurnDefinition(
+            turn_index=0,
+            title="Turn 0",
+            has_decisions=True,
+            available_cards=[
+                TurnCardConfig(card_id="bc-99", score=1.0),
+            ],
+        ),
+    ]
+    decisions = generate_decisions_from_turns(turns, blue_card_catalog=None)
+
+    assert len(decisions) == 1
+    opt = decisions[0].options[0]
+    assert opt.id == "bc-99"
+    assert opt.label == "bc-99"
+    assert opt.targets_system is False
