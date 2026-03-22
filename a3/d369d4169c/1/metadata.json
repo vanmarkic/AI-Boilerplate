@@ -1,9 +1,11 @@
 {
   "cli_version": "0.5.1",
   "checkpoint_id": "a3d369d4169c",
+  "session_id": "496a0d33-687e-4dc9-ad60-2281e5030ca3",
   "strategy": "manual-commit",
+  "created_at": "2026-03-22T23:13:38.641227Z",
   "branch": "master",
-  "checkpoints_count": 3,
+  "checkpoints_count": 2,
   "files_touched": [
     ".playwright-mcp/console-2026-03-22T20-56-13-063Z.log",
     ".playwright-mcp/console-2026-03-22T20-57-55-372Z.log",
@@ -26,29 +28,27 @@
     "docs/plans/2026-03-22-scenario-creation-flow-plan.md",
     "docs/plans/2026-03-22-scenario-creation-ui-plan.md",
     "docs/plans/2026-03-22-scenario-creation-ui-spec.md",
-    "docs/plans/2026-03-22-troubled-view-stress-overlay-design.md",
-    "docs/plans/2026-03-22-troubled-view-stress-overlay-plan.md",
     "docs/plans/2026-03-22-two-player-layout-design.md"
   ],
-  "sessions": [
-    {
-      "metadata": "/a3/d369d4169c/0/metadata.json",
-      "transcript": "/a3/d369d4169c/0/full.jsonl",
-      "content_hash": "/a3/d369d4169c/0/content_hash.txt",
-      "prompt": "/a3/d369d4169c/0/prompt.txt"
-    },
-    {
-      "metadata": "/a3/d369d4169c/1/metadata.json",
-      "transcript": "/a3/d369d4169c/1/full.jsonl",
-      "content_hash": "/a3/d369d4169c/1/content_hash.txt",
-      "prompt": "/a3/d369d4169c/1/prompt.txt"
-    }
-  ],
+  "agent": "Claude Code",
+  "turn_id": "b9adacc29a26",
   "token_usage": {
-    "input_tokens": 610,
-    "cache_creation_tokens": 833495,
-    "cache_read_tokens": 69155978,
-    "output_tokens": 148960,
-    "api_call_count": 430
+    "input_tokens": 450,
+    "cache_creation_tokens": 679613,
+    "cache_read_tokens": 57740061,
+    "output_tokens": 109909,
+    "api_call_count": 321
+  },
+  "session_metrics": {
+    "turn_count": 44
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-22T23:13:37.798017Z",
+    "agent_lines": 2688,
+    "human_added": 625,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 3313,
+    "agent_percentage": 81.13492303048596
   }
 }
