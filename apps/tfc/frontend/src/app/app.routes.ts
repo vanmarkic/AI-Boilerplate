@@ -42,4 +42,11 @@ export const routes: Routes = [
     loadChildren: () =>
       import("./features/review/review.routes").then((m) => m.REVIEW_ROUTES),
   },
+  {
+    path: "foundation",
+    loadChildren: () =>
+      import("./features/foundation/foundation.routes").then(
+        (m) => m.FOUNDATION_ROUTES,
+      ),
+  },
 ];

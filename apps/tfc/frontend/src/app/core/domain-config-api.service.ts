@@ -94,4 +94,14 @@ export class DomainConfigApiService {
       `${this.base}/api/domain-configs/by-slug/${slug}`,
     );
   }
+
+  update(
+    id: number,
+    request: Partial<DomainConfigResponse>,
+  ): Observable<DomainConfigResponse> {
+    return this.http.put<DomainConfigResponse>(
+      `${this.base}/api/domain-configs/${id}`,
+      request,
+    );
+  }
 }
