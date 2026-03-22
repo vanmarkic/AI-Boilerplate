@@ -187,13 +187,17 @@ async def reset_engine(exercise_id: int) -> PhaseChange:
 
 @router.post("/complete", operation_id="completeEngine")
 async def complete_engine(exercise_id: int) -> PhaseChange:
-    engine = _get_engine(exercise_id)
-    try:
-        result = await engine.complete()
-    except EngineStateError as exc:
-        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
-    await broadcast_changes(connection_manager, exercise_id, [result])
-    await _log_to_audit(exercise_id, [result])
+    svc = ExerciseSessionService(session_store, connection_manager, waiting_room_store)
+    result = await svc.complete(
+        exercise_id,
+        broadcast_fn=lambda changes: broadcast_changes(connection_manager, exercise_id, changes),
+        audit_fn=_log_to_audit,
+    )
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Cannot complete exercise",
+        )
     return result
 
 
