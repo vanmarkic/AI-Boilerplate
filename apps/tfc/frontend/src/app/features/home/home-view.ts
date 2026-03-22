@@ -93,6 +93,14 @@ import { switchMap } from "rxjs";
             >
           </a>
 
+          <a class="tac-panel" routerLink="/foundation">
+            <span class="tac-panel__indicator">FND</span>
+            <span class="tac-panel__label">Foundation</span>
+            <span class="tac-panel__desc"
+              >Manage roles, systems, and blue cards</span
+            >
+          </a>
+
           @if (lobbyData().length) {
             <a class="tac-panel" data-primary (click)="joinExercise()">
               <span class="tac-panel__indicator">JON</span>
@@ -109,6 +117,12 @@ import { switchMap } from "rxjs";
             </a>
           }
         </nav>
+
+        <div style="margin-top: var(--spacing-lg); text-align: center">
+          <a routerLink="/foundation" class="text-sm text-muted-foreground" style="margin-right: var(--spacing-md)">Foundation</a>
+          <span class="text-sm text-muted-foreground">&middot;</span>
+          <a routerLink="/gm" class="text-sm text-muted-foreground" style="margin-left: var(--spacing-md)">Game Master</a>
+        </div>
       }
     </div>
   `,
