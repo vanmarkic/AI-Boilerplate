@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "e89ce2870ce0",
+  "strategy": "manual-commit",
+  "branch": "refactor/canonicalization-round-2",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "apps/tfc/frontend/src/app/features/player/player-ws-handler.spec.ts",
+    "apps/tfc/frontend/src/app/features/player/player-ws-handler.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/e8/9ce2870ce0/0/metadata.json",
+      "transcript": "/e8/9ce2870ce0/0/full.jsonl",
+      "content_hash": "/e8/9ce2870ce0/0/content_hash.txt",
+      "prompt": "/e8/9ce2870ce0/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 4,
+    "cache_creation_tokens": 5979,
+    "cache_read_tokens": 68534,
+    "output_tokens": 6240,
+    "api_call_count": 2
+  }
+}
