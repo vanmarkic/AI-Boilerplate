@@ -53,7 +53,7 @@ import { exportScenarioToJson, parseScenarioImport } from "./scenario-export";
           </button>
         }
         <button uiButton variant="outline" (click)="onToggleView.emit()">
-          {{ viewMode() === "global" ? "Walkthrough" : "Global" }}
+          {{ viewMode() === "setup" ? "Turns" : "Setup" }}
         </button>
       </div>
 
@@ -83,7 +83,7 @@ export class ScenarioBuilderActionsComponent {
   protected readonly fileInput =
     viewChild<ElementRef<HTMLInputElement>>("fileInput");
 
-  readonly viewMode = input.required<"global" | "walkthrough">();
+  readonly viewMode = input.required<"setup" | "turns">();
   readonly isDirty = input(false);
 
   readonly onSave = output<void>();

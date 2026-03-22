@@ -14,15 +14,9 @@ import {
 import { ScenarioApiService } from "../../core/scenario-api.service";
 import { ScenarioBuilderStore } from "./scenario-builder.store";
 import { ScenarioBuilderActionsComponent } from "./scenario-builder-view-actions";
-import { ScenarioEventEditorComponent } from "./scenario-event-editor";
-import { ScenarioIssueEditorComponent } from "./scenario-issue-editor";
-import { ScenarioDecisionEditorComponent } from "./scenario-decision-editor";
-import { ScenarioRolesEditorComponent } from "./scenario-roles-editor";
-import { ScenarioSettingsEditorComponent } from "./scenario-settings-editor";
 import { ScenarioSidebarNavComponent } from "./scenario-sidebar-nav";
 import type { SidebarSection } from "./scenario-sidebar-nav";
-import { ScenarioTurnsPlaceholderComponent } from "./scenario-turns-placeholder";
-import { ScenarioWalkthroughComponent } from "./scenario-walkthrough";
+import { ScenarioSetupTabComponent } from "./scenario-setup-tab";
 import { validateScenarioContent } from "./validate-scenario-content";
 
 @Component({
@@ -34,14 +28,8 @@ import { validateScenarioContent } from "./validate-scenario-content";
     CollapsiblePanelComponent,
     SidebarLayoutComponent,
     ScenarioBuilderActionsComponent,
-    ScenarioEventEditorComponent,
-    ScenarioIssueEditorComponent,
-    ScenarioDecisionEditorComponent,
-    ScenarioRolesEditorComponent,
-    ScenarioSettingsEditorComponent,
     ScenarioSidebarNavComponent,
-    ScenarioTurnsPlaceholderComponent,
-    ScenarioWalkthroughComponent,
+    ScenarioSetupTabComponent,
   ],
   template: `
     <ui-sidebar-layout
@@ -91,7 +79,7 @@ import { validateScenarioContent } from "./validate-scenario-content";
           (onSave)="save()"
           (onSaveAsCopy)="saveAsCopy()"
           (onToggleView)="
-            viewMode.set(viewMode() === 'global' ? 'walkthrough' : 'global')
+            viewMode.set(viewMode() === 'setup' ? 'turns' : 'setup')
           "
         />
 
@@ -109,45 +97,12 @@ import { validateScenarioContent } from "./validate-scenario-content";
           </div>
         }
 
-        @if (viewMode() === "global") {
-          <section
-            id="section-roles"
-            style="scroll-margin-top: var(--spacing-xl)"
-          >
-            <tfc-scenario-roles-editor />
-          </section>
-          <section
-            id="section-events"
-            style="scroll-margin-top: var(--spacing-xl)"
-          >
-            <tfc-scenario-event-editor />
-          </section>
-          <section
-            id="section-issues"
-            style="scroll-margin-top: var(--spacing-xl)"
-          >
-            <tfc-scenario-issue-editor />
-          </section>
-          <section
-            id="section-decisions"
-            style="scroll-margin-top: var(--spacing-xl)"
-          >
-            <tfc-scenario-decision-editor />
-          </section>
-          <section
-            id="section-turns"
-            style="scroll-margin-top: var(--spacing-xl)"
-          >
-            <tfc-scenario-turns-placeholder />
-          </section>
-          <section
-            id="section-settings"
-            style="scroll-margin-top: var(--spacing-xl)"
-          >
-            <tfc-scenario-settings-editor />
-          </section>
+        @if (viewMode() === "setup") {
+          <tfc-scenario-setup-tab />
         } @else {
-          <tfc-scenario-walkthrough />
+          <p class="text-muted-foreground text-sm p-lg">
+            Turns editor coming soon...
+          </p>
         }
       </div>
     </ui-sidebar-layout>
@@ -158,7 +113,7 @@ export class ScenarioBuilderView implements OnInit {
   private readonly api = inject(ScenarioApiService);
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
 
-  protected readonly viewMode = signal<"global" | "walkthrough">("global");
+  protected readonly viewMode = signal<"setup" | "turns">("setup");
 
   protected readonly isDirty = computed(() => {
     const snap = this.store.loadedSnapshot();
@@ -171,21 +126,11 @@ export class ScenarioBuilderView implements OnInit {
     return current !== snap;
   });
 
-  protected readonly sidebarSections = computed<SidebarSection[]>(() => {
-    const c = this.store.content();
-    return [
-      { id: "roles", label: "Roles", count: (c.roles ?? []).length },
-      { id: "events", label: "Events", count: c.events.length },
-      { id: "issues", label: "Issues", count: c.issues.length },
-      {
-        id: "decisions",
-        label: "Decisions",
-        count: c.decision_templates.length,
-      },
-      { id: "turns", label: "Turns", count: (c.turns ?? []).length },
-      { id: "settings", label: "Settings", count: 0 },
-    ];
-  });
+  protected readonly sidebarSections = computed<SidebarSection[]>(() => [
+    { id: "foundation", label: "Foundation", count: 0 },
+    { id: "metadata", label: "Metadata", count: 0 },
+    { id: "initial-states", label: "Initial States", count: 0 },
+  ]);
 
   ngOnInit(): void {
     this.loadList();

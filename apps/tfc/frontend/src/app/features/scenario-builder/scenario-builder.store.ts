@@ -8,6 +8,8 @@ import type {
   TurnDefinition,
   TurnInjectDef,
   TurnCardConfig,
+  SystemStateDef,
+  ScenarioWarfareDomainDef,
 } from "../../core/scenario-api.service";
 import * as turnMut from "./domain/turn-mutations";
 
@@ -34,6 +36,7 @@ const emptyContent: ScenarioContent = {
   game_mode: "classic",
   turns: [],
   initial_system_states: [],
+  initial_warfare_domains: [],
 };
 
 export const ScenarioBuilderStore = signalStore(
@@ -284,6 +287,42 @@ export const ScenarioBuilderStore = signalStore(
     setBriefing(briefing: string): void {
       patchState(store, {
         content: { ...store.content(), briefing },
+      });
+    },
+
+    setObjectives(objectives: string[]): void {
+      patchState(store, {
+        content: { ...store.content(), objectives },
+      });
+    },
+
+    setRules(rules: string[]): void {
+      patchState(store, {
+        content: { ...store.content(), rules },
+      });
+    },
+
+    setGameMode(game_mode: string): void {
+      patchState(store, {
+        content: { ...store.content(), game_mode },
+      });
+    },
+
+    setScoreTierThresholds(score_tier_thresholds: Record<string, number>): void {
+      patchState(store, {
+        content: { ...store.content(), score_tier_thresholds },
+      });
+    },
+
+    setInitialSystemStates(initial_system_states: SystemStateDef[]): void {
+      patchState(store, {
+        content: { ...store.content(), initial_system_states },
+      });
+    },
+
+    setInitialWarfareDomains(initial_warfare_domains: ScenarioWarfareDomainDef[]): void {
+      patchState(store, {
+        content: { ...store.content(), initial_warfare_domains },
       });
     },
 
