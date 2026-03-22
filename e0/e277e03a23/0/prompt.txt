@@ -636,3 +636,7 @@ Remaining candidates, in priority order:
 2. **Session start/stop/completion semantics** — `start` (creates engine, wires callbacks, broadcasts participants), `complete` (doesn't tear down, for overlay), `stop` (full teardown via `ExerciseSessionService`). Three different shapes for session lifecycle. Frontend navigation, teardown, and completion semantics cross too many boundaries. Worth watching as the next lifecycle consolidation area.
 
 3. **Frontend completion handling** — completion detectable through two transport shapes (`exercise_stopped` with reason=completed, `phase_change(completed)` in state_changes). Only act if a third completion path appears.
+
+---
+
+1
