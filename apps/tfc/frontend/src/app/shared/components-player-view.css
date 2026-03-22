@@ -272,6 +272,7 @@
   .player-main--board {
     padding: 0;
     gap: 0;
+    overflow: hidden;
   }
 
   .board-turn-banner {
@@ -313,18 +314,19 @@
 
   .board-columns {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
     gap: var(--spacing-md);
     padding: var(--spacing-md) var(--spacing-lg);
     flex: 1;
     min-height: 0;
-    transition: grid-template-columns 200ms ease;
+    align-items: stretch;
   }
 
-  /* Focus mode — expand one column, shrink others */
-  .board-columns[data-focus="0"] { grid-template-columns: 2fr 0.5fr 0.5fr; }
-  .board-columns[data-focus="1"] { grid-template-columns: 0.5fr 2fr 0.5fr; }
-  .board-columns[data-focus="2"] { grid-template-columns: 0.5fr 0.5fr 2fr; }
+  /* Role cards inside board-columns fill the cell and remove max-width */
+  .board-columns > .role-card {
+    max-width: none;
+    height: 100%;
+  }
 
   /* ── Board Column (single role column) ──────────────── */
 
@@ -537,17 +539,26 @@
   .role-card__option {
     display: flex;
     align-items: center;
-    gap: var(--spacing-xs);
-    padding: var(--spacing-xs) var(--spacing-sm);
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    min-height: 2.75rem;
     border: 1px solid var(--color-border);
     border-radius: 2px;
     cursor: pointer;
-    font-size: var(--font-size-xs);
+    font-size: var(--font-size-sm);
     color: var(--color-foreground);
-    transition: background 150ms ease;
+    transition: background 150ms ease, border-color 150ms ease;
+  }
+  .role-card__option input[type="radio"],
+  .role-card__option input[type="checkbox"] {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: var(--color-success);
+    flex-shrink: 0;
   }
   .role-card__option:hover {
     background: var(--color-secondary);
+    border-color: var(--color-muted-foreground);
   }
   .role-card__option--selected {
     background: var(--color-secondary);
@@ -561,12 +572,22 @@
     border-radius: 2px;
     background: var(--color-input);
     color: var(--color-foreground);
+    color-scheme: dark;
     font-size: var(--font-size-xs);
     font-family: var(--font-mono);
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23888' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right var(--spacing-xs) center;
+    padding-right: var(--spacing-lg);
   }
   .role-card__system-picker:focus {
     outline: 2px solid var(--color-ring);
     outline-offset: 1px;
+  }
+  .role-card__system-picker option {
+    background: var(--color-card);
+    color: var(--color-foreground);
   }
   .role-card__textarea {
     width: 100%;
