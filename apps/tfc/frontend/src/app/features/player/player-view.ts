@@ -61,6 +61,9 @@ import { buildRoleCards, extractRecRoleId, type RoleCard } from "./role-card.typ
     WarfareDomainBoardComponent,
   ],
   templateUrl: "./player-view.html",
+  host: {
+    '(document:keydown.escape)': 'focusedColumn.set(null)',
+  },
 })
 export class PlayerView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
