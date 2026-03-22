@@ -17,6 +17,7 @@ import { ScenarioBuilderActionsComponent } from "./scenario-builder-view-actions
 import { ScenarioSidebarNavComponent } from "./scenario-sidebar-nav";
 import type { SidebarSection } from "./scenario-sidebar-nav";
 import { ScenarioSetupTabComponent } from "./scenario-setup-tab";
+import { ScenarioTurnsTabComponent } from "./scenario-turns-tab";
 import { validateScenarioContent } from "./validate-scenario-content";
 
 @Component({
@@ -30,6 +31,7 @@ import { validateScenarioContent } from "./validate-scenario-content";
     ScenarioBuilderActionsComponent,
     ScenarioSidebarNavComponent,
     ScenarioSetupTabComponent,
+    ScenarioTurnsTabComponent,
   ],
   template: `
     <ui-sidebar-layout
@@ -100,9 +102,7 @@ import { validateScenarioContent } from "./validate-scenario-content";
         @if (viewMode() === "setup") {
           <tfc-scenario-setup-tab />
         } @else {
-          <p class="text-muted-foreground text-sm p-lg">
-            Turns editor coming soon...
-          </p>
+          <tfc-scenario-turns-tab />
         }
       </div>
     </ui-sidebar-layout>
