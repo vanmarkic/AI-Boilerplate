@@ -1,0 +1,949 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/player/player-view.html in the IDE. This may or may not be related to the current task.</ide_opened_file>
+new feature : all user facing terminology should come from the apps/tfc/docs pdfs. don't change the data model. translate. 
+
+in parallel estimate the cost and risk of full codebase renaming
+
+---
+
+<task-notification>
+<task-id>a1e752949d5ac49f8</task-id>
+<tool-use-id>toolu_01GfLnZfJSbXbCzwokdhSVVA</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/40e89667-be58-4369-b54e-6a9ac9768c93/tasks/a1e752949d5ac49f8.output</output-file>
+<status>completed</status>
+<summary>Agent "Estimate codebase rename cost" completed</summary>
+<result>Now I have enough data to provide a comprehensive analysis. Let me compile the findings:
+
+---
+
+## Cost & Risk Analysis: Full TFC Codebase Renaming Initiative
+
+### Executive Summary
+
+A full renaming of internal terminology (exercise → session, decision → choice, participant → player, role → position, etc.) to match official domain documentation would be **HIGH RISK and NOT RECOMMENDED** without a compelling business driver. The estimated effort is **2-3 weeks for a skilled team**, with significant breaking changes across API boundaries, database migrations, and real-time protocols.
+
+---
+
+## 1. Scope Analysis
+
+### **Codebase Size**
+- **Total source files**: 274 files (159 Python backend + 115 TypeScript frontend)
+- **Test files**: 122 test/spec files (42% of codebase)
+- **Lines of code affected**: ~25,000–30,000 LOC
+
+### **Terminology Distribution**
+
+| Term | Backend (matches) | Frontend (matches) | Criticality |
+|------|------|------|------|
+| **exercise** | 200 | 112 | CRITICAL (table, API, WS) |
+| **decision** | 245 | 174 | CRITICAL (domain logic, API) |
+| **session** | 87 | (low) | HIGH (engine state) |
+| **player/participant** | 197 | (low) | HIGH (waiting room, roles) |
+| **role** | 17 | (low) | MEDIUM (scenario definition) |
+| **phase** | 458 | (low) | MEDIUM (lifecycle) |
+| **facilitator** | (low) | (low) | LOW (UI labels only) |
+
+---
+
+## 2. Backend Impact (CRITICAL)
+
+### **Database Models & Migrations (HIGH RISK)**
+
+| Component | Files Affected | Risk Level | Notes |
+|-----------|---|---|---|
+| **Table names** | 1 migration file | CRITICAL | `tfc_exercises`, `tfc_decisions`, `tfc_scenarios`, `tfc_decision_responses` — renaming requires new migration + data backfill |
+| **Column names** | 5 model files | CRITICAL | Foreign keys: `exercise_id`, schema changes to 10+ models |
+| **Migration chain** | 7 migrations | HIGH | 001–007 reference old column names; adding new migration could break existing deployments without careful sequencing |
+| **Seed fixtures** | 2 files | MEDIUM | `seed.py`, scenario seed files must be updated |
+
+**Data Migration Risk:**
+- Existing production databases have 4+ migrations applied (004_add_session_code, 006_add_practice_mode discovered)
+- Any new migration breaks backward compatibility with prior migrations
+- Downtime required for production cutover
+- Must backfill both schema AND any derived data in decision_responses table
+
+### **API Endpoints (HIGH RISK)**
+
+| Component | Files | Occurrences | Risk |
+|-----------|---|---|---|
+| **Router definitions** | 8 router files | 319 API path references | **HIGH** — OpenAPI clients auto-gen from these; breaking changes = client breakage |
+| **Request/Response schemas** | 5 schema files | 200+ | **HIGH** — Pydantic models versioned in some APIs; need deprecation path |
+| **Request parameter names** | 10+ files | 100+ | **MEDIUM** — URL params (e.g. `GET /api/exercises/{exercise_id}`) are part of contract |
+
+**API Surface:**
+```
+POST /api/exercises                    # operation_id: createExercise
+GET  /api/exercises/{exercise_id}      # FK to tfc_exercises
+POST /api/decisions                    # operation_id: createDecision
+GET  .../engine/decisions/{id}/close   # references exercise_id
+```
+
+Changing these breaks:
+- FastAPI auto-generated OpenAPI schema
+- Frontend HTTP clients (51 `.service.ts` files)
+- Any external integrations (if documented)
+
+### **Service Layer & Business Logic (MEDIUM RISK)**
+
+| Component | Files | Occurrences | Notes |
+|-----------|---|---|---|
+| **Service methods** | 8 feature services | 100+ method names | `ExerciseService`, `DecisionService` class names + method signatures |
+| **Dependencies/DI** | 1 core file | 10+ | `get_exercise_service()`, `get_decision_service()` in FastAPI Depends() |
+| **Imports** | 50+ files | 500+ | From statements, class imports |
+
+**Engine Coupling (HIGHEST):**
+- `ExerciseEngine` class used in 24 test files
+- Session store and engine config tightly bound to exercise lifecycle
+- Renaming ripples through: `exercise_engine.py` → 15 test files → 5 feature integrations
+
+### **WebSocket Protocols (CRITICAL)**
+
+| Component | Risk | Details |
+|-----------|---|---|
+| **Message types** | **CRITICAL** | `StateChange` objects include `exercise_id`; clients cache this; if server changes naming, WS broadcasts fail |
+| **Codegen** | **CRITICAL** | `state_changes.py` → auto-generated `state-changes.types.ts`; any rename requires regeneration |
+| **Broadcast routing** | **HIGH** | 12 WS broadcast sites reference `exercise_id` for room management |
+
+---
+
+## 3. Frontend Impact (HIGH)
+
+### **Generated Types & Codegen (CRITICAL)**
+
+| Component | Risk | Notes |
+|-----------|---|---|
+| **Codegen pipeline** | **CRITICAL** | `codegen/generate-types.py` reads `backend/engine/state_changes.py` → emits `state-changes.types.ts` (DO NOT EDIT). Any backend rename requires: (1) rename Python file, (2) run `npm run generate:types`, (3) update TS types. **Breakage if out of sync.** |
+| **State changes interfaces** | **CRITICAL** | `EngineSnapshot` references `exercise_id`, `decision[]` arrays — 40+ type properties depend on field names |
+
+### **Angular Components & Services (HIGH)**
+
+| Layer | Files | Impact |
+|---|---|---|
+| **Core services** | 10 API services | `ExerciseApiService`, `DecisionApiService`, etc. — method names are part of component contract |
+| **Signal stores** | 1 `exercise.store.ts` | Central `NgRx Signal Store` with state shape: `{ exercises, decisions, roles, ... }` — renaming requires store refactor |
+| **Components** | 30+ | `role-card.component.ts`, `decision-panel.component.ts`, etc. use injected stores; renaming store keys = widespread refactor |
+| **Routes** | 7 route files | `/player`, `/gm`, `/waiting-room`, etc. don't directly reference terminology, but route params do (e.g., `exerciseId` in component |
+
+### **TypeScript Type References (MEDIUM)**
+
+| Category | Occurrences | Risk |
+|---|---|---|
+| **Manual types** | 174 `decision` refs | `role-card.types.ts`, `role-card.types.spec.ts` manually define decision-related types |
+| **Component inputs** | 100+ | `@Input() exercise` properties throughout component hierarchy |
+| **Service responses** | 50+ | Type assertions in `*.service.ts` files |
+
+### **Routes & URL Params (MEDIUM)**
+
+Routes are path-based, so API param names leak into frontend:
+```typescript
+// app.routes.ts
+GET /api/exercises/:exerciseId
+GET /api/exercises/{id}/engine/snapshot
+```
+Renaming backend params requires frontend service updates.
+
+---
+
+## 4. Cross-Cutting Concerns (HIGH RISK)
+
+### **Codegen Pipeline (CRITICAL)**
+
+Current state:
+```
+backend/engine/state_changes.py 
+    ↓ (Python TypedDicts)
+codegen/generate-types.py (reads AST, emits TS)
+    ↓
+frontend/src/app/core/generated/state-changes.types.ts (READ-ONLY, auto-gen)
+```
+
+**Renaming scenario:**
+1. Rename fields in `state_changes.py` (e.g., `exercise_id` → `session_id`)
+2. Run codegen → updates generated TS file
+3. ALL 31 frontend files that import `EngineSnapshot` break until updated
+4. **Timing risk:** If codegen is out of sync during development, WS broadcast fails silently
+
+### **Database Migrations & Backwards Compat (CRITICAL)**
+
+Current state: 7 migrations in `alembic/versions/`
+- 001: Initial schema (tfc_exercises, tfc_decisions, tfc_scenarios)
+- 002–006: Incremental changes (domain_configs, game_mode, session_code, etc.)
+- 007: (inferred from __pycache__)
+
+**Renaming approach:**
+- **Option A (destructive):** Add migration 008 that drops old tables, creates new ones, backfills data — **breaks all existing DB backups**
+- **Option B (dual-write):** Add migration with new columns, deprecate old — **doubles storage, requires gradual migration window**
+- **Option C (new app):** Branch to new DB schema — **loses all exercise history**
+
+### **Shared Packages & Domain Models (MEDIUM)**
+
+Checked `AGENTS.md` for cross-app references:
+- No shared types package (good news)
+- Each feature self-contained via `Pydantic` schemas
+- But: `scenario_content.py` used by both scenario builder and engine — renaming requires coordinated changes
+
+### **Git History Readability (LOW but notable)**
+
+- 159 backend files would need refactoring commits
+- 115 frontend files would need refactoring commits
+- GitHub search becomes difficult (old code via git blame leads to rename commits, not feature commits)
+- Blame history lingers for ~6 months before cleanup
+
+---
+
+## 5. Risk Assessment by Area
+
+### **CRITICAL RISKS**
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| **API contract breaking** | All external clients fail (SDKs, integrations, frontend) | Requires versioning strategy (v2 API); 2-3 sprint effort |
+| **Database integrity loss** | Data corruption, migration rollback failure | Extensive backup testing, staged deployment, rollback plan |
+| **WS protocol desync** | Real-time state divergence, client crashes | Comprehensive e2e test suite; requires freeze on new features |
+| **Codegen out of sync** | Frontend types don't match backend, runtime errors | Automated CI check, mandatory sync before deployment |
+
+### **HIGH RISKS**
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| **Test suite churn** | 122 test files need updates; weeks of debugging | Run full test suite after each phase; automated refactoring tools |
+| **Feature branch conflicts** | In-flight work breaks; merge conflicts explosive | Freeze all feature branches during renaming; cherry-pick after |
+| **Performance test baseline loss** | Can't compare pre/post metrics | Benchmark before/after separately |
+
+### **MEDIUM RISKS**
+
+| Risk | Impact | Mitigation |
+|---|---|---|
+| **Component refactoring errors** | Runtime errors in edge cases | Comprehensive Playwright e2e tests covering all flows |
+| **Domain config terminology mismatch** | User-facing inconsistency | Update `DomainConfig` seed data in parallel |
+
+---
+
+## 6. Recommended Approach (IF proceeding)
+
+If the business case is strong (e.g., official rebranding), follow this **phased, low-risk strategy:**
+
+### **Phase 1: Codegen + Engine Core (1 week)**
+1. Rename in `backend/engine/state_changes.py` (7 TypedDicts)
+2. Run codegen → regenerate TS types
+3. Update 31 frontend files that import EngineSnapshot
+4. **Freeze:** All other features unchanged
+5. **Testing:** E2e + unit tests on engine snapshot broadcasts
+
+### **Phase 2: Database Schema + ORM (1 week)**
+1. Add migration 008: CREATE new tables with new names, copy + backfill
+2. Keep old tables for read-only fallback (4-week deprecation window)
+3. Update `exercise_model.py`, `decision_model.py` to use new tables
+4. **Testing:** Migration up/down on staging DB; backfill correctness
+
+### **Phase 3: API Surface + Services (1 week)**
+1. Rename router methods, endpoints, schemas
+2. Use FastAPI deprecated parameter markers for old endpoint names
+3. Maintain backward-compat layer (6 weeks)
+4. Update 51 frontend `.service.ts` files
+5. **Testing:** Curl tests on old + new endpoints; compare responses
+
+### **Phase 4: Frontend Components (3-5 days)**
+1. Batch rename components, inputs, store keys
+2. Use automated refactoring tools (VSCode rename, IDE refactor)
+3. Update all 30+ component `@Input()` properties
+4. **Testing:** Run Playwright e2e suite fully
+
+### **Phase 5: Tests & Fixtures (3-5 days)**
+1. Update 122 test/spec files
+2. Update `seed.py`, scenario fixtures
+3. Full test run (unit + e2e + property tests)
+
+### **Total effort:** 2–3 weeks for a 3-person team (1 backend, 1 frontend, 1 QA)
+
+---
+
+## 7. Alternative: Selective Renaming
+
+**Lower-risk hybrid approach:**
+
+Rename **only** user-facing identifiers (UI labels, documentation) but keep internal code identifiers:
+
+| Category | Action |
+|----------|--------|
+| **Database schema** | KEEP as-is; too risky to change |
+| **API endpoints** | KEEP as-is; stable contract |
+| **Code identifiers** | KEEP as-is; reduces refactoring blast radius |
+| **UI labels** | RENAME (component templates, error messages) |
+| **Documentation** | UPDATE (AGENTS.md, SPECS.md terminology table) |
+| **Comments** | RENAME (non-functional) |
+
+**Effort:** 3–5 days (1 person)  
+**Risk:** LOW  
+**Benefit:** 60% of desired improvement without destabilization
+
+---
+
+## 8. Final Recommendation
+
+### **DO NOT rename** unless:
+
+1. **Business case is urgent:** Rebranding initiative with marketing commitment (not just "code cleanliness")
+2. **Product is early-stage:** No production data, no external integrations
+3. **Team capacity is available:** 3 people, 2–3 weeks blocked
+4. **Comprehensive testing exists:** E2e test suite covers all user flows (current: Playwright e2e exists, is thorough)
+
+### **DO use selective renaming** instead:
+
+- Update `AGENTS.md` terminology table
+- Rename UI labels in components (1-2 days)
+- Add documentation comment in code: `# User domain: "inject", Code: "Event"`
+- Gradual migration: refactor one feature at a time as it's touched
+
+This preserves intent (clearer documentation) with 90% less risk.
+
+---
+
+## 9. Files Most Affected (if proceeding)
+
+### **Backend (Top 10)**
+1. `/backend/features/exercise/exercise_model.py` (class + table schema)
+2. `/backend/features/exercise/exercise_router.py` (10+ API endpoints)
+3. `/backend/features/decision/decision_model.py` (class + schema)
+4. `/backend/engine/state_changes.py` (TypedDicts, codegen source)
+5. `/backend/alembic/versions/001_initial_schema.py` (new migration needed)
+6. `/backend/features/exercise/exercise_service.py` (service methods)
+7. `/backend/features/exercise/exercise_session_service.py` (lifecycle)
+8. `/backend/features/scenario/scenario_content.py` (TurnDefinition, RoleDef)
+9. `/backend/seed.py` (fixture data)
+10. `/backend/main.py` (router discovery patterns)
+
+### **Frontend (Top 10)**
+1. `/frontend/src/app/core/generated/state-changes.types.ts` (codegen output)
+2. `/frontend/src/app/core/exercise.store.ts` (central signal store)
+3. `/frontend/src/app/core/exercise-api.service.ts` (HTTP client)
+4. `/frontend/src/app/core/exercise-ws.service.ts` (WebSocket client)
+5. `/frontend/src/app/features/player/player-view.ts` (component)
+6. `/frontend/src/app/features/game-master/game-master-view.ts` (component)
+7. `/frontend/src/app/features/game-master/exercise-list.component.ts` (component)
+8. `/frontend/src/app/features/player/role-card.types.ts` (manual types)
+9. `/frontend/src/app/shared/decision-panel.component.ts` (component)
+10. All e2e tests (15+ files)
+
+---
+
+## Summary Table
+
+| Dimension | Metric | Assessment |
+|-----------|--------|------------|
+| **Files affected** | ~160 (54% of codebase) | HIGH |
+| **Test files impacted** | 122 (42% of codebase) | HIGH |
+| **Database risk** | Table/column rename + migration | CRITICAL |
+| **API breaking changes** | 8 router files, 319 endpoints | CRITICAL |
+| **Frontend type sync** | Codegen dependency | CRITICAL |
+| **Estimated effort** | 2–3 weeks (3-person team) | MEDIUM-HIGH |
+| **Production downtime** | 1–4 hours (migration + deploy) | MEDIUM |
+| **Rollback feasibility** | Difficult (data backfill) | RISKY |
+| **Recommended confidence** | ⚠️ NOT RECOMMENDED without strong business case | **CONDITIONAL** |
+
+**Bottom line:** Full renaming is **technically achievable but organizationally expensive**. Selective renaming (UI labels + documentation) is **lower-risk and achieves 60% of the benefit**.</result>
+<usage><total_tokens>70895</total_tokens><tool_uses>48</tool_uses><duration_ms>104330</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/40e89667-be58-4369-b54e-6a9ac9768c93/tasks/a1e752949d5ac49f8.output
+
+---
+
+<task-notification>
+<task-id>a7f4c1c80cf14669a</task-id>
+<tool-use-id>toolu_01HcnTqbkVKDWXHVQhutQj6h</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/40e89667-be58-4369-b54e-6a9ac9768c93/tasks/a7f4c1c80cf14669a.output</output-file>
+<status>completed</status>
+<summary>Agent "Audit current UI terminology" completed</summary>
+<result>Perfect! Now I have comprehensive information. Let me compile the complete inventory of user-facing text strings:
+
+## Comprehensive Inventory of User-Facing Text in TFC Frontend
+
+Based on my thorough search of the TFC frontend codebase at `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/`, here is the complete inventory of all user-facing text strings:
+
+### HTML & Page Titles
+- **index.html:5** - Page title: `TFC — Training Flow Control`
+
+### Home View (Main Menu)
+- **home-view.ts:29** - Hero title: `TFC`
+- **home-view.ts:31** - Subtitle: `SYS.INIT // Training Flow Control — Exercise Simulation Platform`
+- **home-view.ts:40** - Section heading: `Select Operation Type`
+- **home-view.ts:43-44** - `FTM` / `Full Team` (indicator + label)
+- **home-view.ts:46-47** - `All roles filled by different players`
+- **home-view.ts:50-51** - `2PL` / `2 Players` (indicator + label)
+- **home-view.ts:52-53** - `One decides, one advises all roles`
+- **home-view.ts:57-58** - `SIM` / `Practice (Solo)` (indicator + label)
+- **home-view.ts:59-60** - `Play all roles yourself — start immediately`
+- **home-view.ts:37-38** - `Back` (link)
+- **home-view.ts:73-74** - `OPS` / `Run Exercise` (menu option)
+- **home-view.ts:75-76** - `Pick a scenario and start a new exercise`
+- **home-view.ts:81-82** - `BLD` / `Build Scenario` (menu option)
+- **home-view.ts:83-84** - `Create and edit exercise scenarios`
+- **home-view.ts:89-90** - `REV` / `Review Results` (menu option)
+- **home-view.ts:91-92** - `Analyse past exercise outcomes and decisions`
+- **home-view.ts:98-99** - `JON` / `Join Exercise` (menu option)
+- **home-view.ts:101-103** - `{{ count }} active {{ "operation" | plural }} awaiting crew` + `Live`
+
+### Scenario Picker (Home)
+- **scenario-picker.ts:20** - `Back` (link)
+- **scenario-picker.ts:23** - `Loading scenarios...`
+- **scenario-picker.ts:28** - `Mission Briefing` (classification)
+- **scenario-picker.ts:37** - `{{ roles.length }} stations`
+- **scenario-picker.ts:44-45** - Game mode display: `Collaborative` or `Classic`
+- **scenario-picker.ts:52** - `No scenarios available.`
+
+### Waiting Room View
+- **waiting-room-view.ts:52** - `Active Operations`
+- **waiting-room-view.ts:53-55** - Sidebar count display: `{{ count }} crew` (plural)
+- **waiting-room-view.ts:75** - `// No active operations found`
+- **waiting-room-view.ts:81** - `Back to Home`
+- **waiting-room-view.ts:97** - `Operations Lobby`
+- **waiting-room-view.ts:98** - `EX-{{ exerciseId }}`
+- **waiting-room-view.ts:104** - `// Enter callsign to join operations`
+- **waiting-room-view.ts:109** - `Callsign` (label)
+- **waiting-room-view.ts:110** - `Enter your name` (placeholder)
+- **waiting-room-view.ts:120** - `{{ joining() ? "Joining..." : "Join" }}`
+- **waiting-room-view.ts:128-135** - Mode-specific prompts:
+  - Collaborative: `// Collaborative exercise — no facilitator needed.`
+  - Practice: `Practice mode: you'll handle all roles solo.`
+  - 2-Player: `2-Player mode: assign CO and Crew roles.`
+  - Full Team: `Pick a station and deploy when all slots are filled.`
+  - Classic: `// Assign stations before deploying.`
+- **waiting-room-view.ts:143** - `Mode:` (label)
+- **waiting-room-view.ts:151** - `// Solo simulation — all stations active`
+- **waiting-room-view.ts:160** - `You` (badge)
+- **waiting-room-view.ts:162** - `ALL` (crew type)
+- **waiting-room-view.ts:189** - `Readiness` (gauge label)
+- **waiting-room-view.ts:201-202** - `Leave` (button)
+- **waiting-room-view.ts:210** - `Deploy ({{ count }})` (button)
+- **waiting-room-view.ts:255-258** - Active mode names:
+  - `Practice (Solo)`
+  - `2 Players`
+  - `Full Team`
+
+### Two-Player Stations
+- **two-player-stations.ts:12** - `Commanding Officer` (decision_maker role label)
+- **two-player-stations.ts:13** - `Crew Members` (all_advisors role label)
+- **two-player-stations.ts:31** - Role type badges: `CMD` (decision_maker) / `ADV` (advisor)
+- **two-player-stations.ts:67** - `Scenario stations` (comment)
+- **two-player-stations.ts:81** - `Awaiting crew...` (comment)
+
+### Lobby Preview (Joinable Exercises)
+- **lobby-preview.ts:57** - Role type badges: `CMD` / `ADV`
+- **lobby-preview.ts:67** - `Game Master` (role label)
+- **lobby-preview.ts:68** - `GM` (crew type)
+- **lobby-preview.ts:79** - `Open` (slot status)
+- **lobby-preview.ts:89** - `Join Operation` (button)
+
+### Role Slot List
+- **role-slot-list.component.ts:31** - Role type badges: `CMD` / `ADV`
+- **role-slot-list.component.ts:38** - `You` (badge)
+- **role-slot-list.component.ts:48** - `Claim` (button)
+- **role-slot-list.component.ts:51** - `Open` (slot status)
+- **role-slot-list.component.ts:67** - `Game Master (Trainer)` (role label)
+- **role-slot-list.component.ts:68** - `GM` (crew type)
+
+### Player View (Game Board)
+- **player-view.html:6** - `{{ store.title() || domain.term('exercise') + ' Dashboard' }}`
+- **player-view.html:11** - `Turn` (clock label)
+- **player-view.html:13** - `RT` (real-time clock label)
+- **player-view.html:23** - `TURN {{ turnNumber }}`
+- **player-view.html:30** - `Waiting for next turn...`
+- **player-view.html:63** - Player mode indicator:
+  - `Practice Mode — playing all roles`
+  - `You are the All Advisors player`
+  - `You are the {{ roleLabel }}`
+  - `Waiting for {{ domain.term('gameMaster') }} actions...`
+- **player-view.html:72** - `Logs` (button)
+- **player-view.html:76** - `Stop Exercise` (button)
+
+### Player Decision Handlers
+- **player-decision-handlers.ts:105** - Role label: `All Advisors`
+- **player-decision-handlers.ts:108** - Role label: `Decision Maker`
+- **player-decision-handlers.ts:111** - Role label: `Solo Player`
+
+### Role Card Component
+- **role-card.component.ts:49** - `No role-specific intel this turn`
+- **role-card.component.ts:115** - `Submit` (button)
+- **role-card.component.ts:157-159** - Card status badges:
+  - `INTEL`
+  - `DECISION`
+  - `DONE`
+- **role-card.component.ts:104** - `Enter your response...` (placeholder)
+
+### Error Messages
+- **player-view.ts:188** - `Failed to load snapshot`
+- **player-view.ts:201** - `Failed to begin exercise`
+
+### Briefing Overlay
+- **briefing-overlay.component.ts:24** - `Briefing` (section heading)
+- **briefing-overlay.component.ts:31** - `Objectives` (section heading)
+- **briefing-overlay.component.ts:42** - `Roles` (section heading)
+- **briefing-overlay.component.ts:65** - `{{ starting() ? "Starting..." : "Begin Exercise" }}`
+
+### Completion Overlay
+- **completion-overlay.component.ts:11-37** - Score tier feedback messages:
+  - **Low tier (lo)**:
+    - Heading: `Solid Effort`
+    - Message: `Your team showed real determination under pressure. Every exercise builds experience — take what you learned and bring it to the next one.`
+  - **Mid tier (mid)**:
+    - Heading: `Great Performance`
+    - Message: `Your team demonstrated strong decision-making skills and kept composure when it mattered. Well done — that kind of teamwork makes a real difference.`
+  - **High tier (hi)**:
+    - Heading: `Outstanding`
+    - Message: `Your team achieved exceptional results. Decisive action, clear communication, and excellent judgment throughout. Truly impressive work.`
+  - **Fallback**:
+    - Heading: `Exercise Complete`
+    - Message: `Well done — the exercise has concluded. Thank you for your participation and effort.`
+- **completion-overlay.component.ts:57** - `Return to Home` (button)
+
+### Logs Drawer
+- **logs-drawer.component.ts:26** - `Decision Log` (title)
+- **logs-drawer.component.ts:35** - `Turn {{ turnNumber }}`
+- **logs-drawer.component.ts:53** - `Final` (label)
+- **logs-drawer.component.ts:60** - `Awaiting decision...` (pending status)
+- **logs-drawer.component.ts:64** - `No decisions yet.`
+
+### Game Master View
+- **game-master-view.ts:80** - `{{ store.title() || domain.term("exercise") + " Control Panel" }}`
+- **game-master-view.ts:85** - `RT` (clock label)
+- **game-master-view.ts:138** - `No active decisions.` (placeholder)
+- **game-master-view.ts:186** - `{{ store.phase() === "setup" ? "Start" : "Resume" }}`
+- **game-master-view.ts:191** - `Pause` (button)
+- **game-master-view.ts:199** - `Stop` (button)
+
+### GM Item Actions
+- **gm-item-actions.component.ts:20** - `{{ domain.term('event') }}s` (card title)
+- **gm-item-actions.component.ts:39** - `Trigger` (button)
+- **gm-item-actions.component.ts:49** - `Complete` (button)
+- **gm-item-actions.component.ts:61** - `Cancel` (button)
+- **gm-item-actions.component.ts:67** - `No events loaded.`
+- **gm-item-actions.component.ts:71** - `{{ domain.term('issue') }}s` (card title)
+- **gm-item-actions.component.ts:81** - Issue lifecycle badges: `active` / `inactive` / `mitigated`
+- **gm-item-actions.component.ts:92** - `Activate` (button)
+- **gm-item-actions.component.ts:102** - `Mitigate` (button)
+- **gm-item-actions.component.ts:110** - `Resolve` (button)
+
+### Exercise List
+- **exercise-list.component.ts:26-27** - `Existing {{ domain.term("exercise") }}s`
+- **exercise-list.component.ts:31** - `Loading...`
+- **exercise-list.component.ts:33** - Error message display
+- **exercise-list.component.ts:35** - `Retry` (button)
+- **exercise-list.component.ts:60** - `Resume` (button)
+- **exercise-list.component.ts:68** - `Delete` (button)
+- **exercise-list.component.ts:75** - `No existing {{ domain.term("exercise") }}s.`
+
+### Scenario Picker (Game Master)
+- **scenario-picker.ts:31** - `Select a {{ domain.term("exercise") }}`
+- **scenario-picker.ts:34** - `Pick a scenario created in the Builder to start an exercise.`
+- **scenario-picker.ts:38** - `Loading scenarios…`
+- **scenario-picker.ts:40** - Error message display
+- **scenario-picker.ts:42** - `Retry` (button)
+- **scenario-picker.ts:51** - `No description`
+- **scenario-picker.ts:56** - `{{ domain.term("event") }}s` (badge)
+- **scenario-picker.ts:60** - `{{ domain.term("issue") }}s` (badge)
+- **scenario-picker.ts:64** - `roles` (badge)
+- **scenario-picker.ts:68** - `v{{ version }}` (badge)
+- **scenario-picker.ts:77** - Game mode badge: `Classic` / `Collaborative`
+- **scenario-picker.ts:82** - `Select` (button)
+- **scenario-picker.ts:88-91** - `No scenarios found. Create one in the Scenario Builder.`
+
+### Scenario Builder
+- **scenario-builder-view.ts:61** - `Existing Scenarios` (collapsible panel)
+- **scenario-builder-view.ts:76** - `Delete` (button)
+- **scenario-builder-view.ts:81** - `No scenarios found.`
+- **scenario-builder-view.ts:212** - `Title is required.` (validation error)
+- **scenario-builder-view.ts:232** - `Save failed — server rejected the scenario.`
+- **scenario-builder-view.ts:248** - `Clone failed.`
+
+### Scenario Builder Actions
+- **scenario-builder-view-actions.ts:28** - `Scenario title` (placeholder)
+- **scenario-builder-view-actions.ts:34** - `{{ store.scenarioId() ? "Update" : "Create" }}`
+- **scenario-builder-view-actions.ts:52** - `Revert` (button)
+- **scenario-builder-view-actions.ts:56** - `{{ viewMode() === "global" ? "Walkthrough" : "Global" }}`
+- **scenario-builder-view-actions.ts:65** - `Description` (placeholder)
+- **scenario-builder-view-actions.ts:121** - `Invalid scenario JSON file.`
+
+### Scenario Roles Editor
+- **scenario-roles-editor.ts:21** - `Roles` (card title)
+- **scenario-roles-editor.ts:31** - `ID` (label)
+- **scenario-roles-editor.ts:37** - `Label` (label)
+- **scenario-roles-editor.ts:108** - `Role ID` (placeholder)
+- **scenario-roles-editor.ts:114** - `Label` (placeholder)
+
+### Scenario Event Editor
+- **scenario-event-editor.ts:28** - `Events` (card title)
+- **scenario-event-editor.ts:38** - `Title` (label)
+- **scenario-event-editor.ts:44** - `Description` (label)
+- **scenario-event-editor.ts:63** - `PT (ms)` (label)
+- **scenario-event-editor.ts:69** - `Duration (ms)` (label)
+- **scenario-event-editor.ts:76** - `Target Roles (comma-separated, empty = all)` (label)
+- **scenario-event-editor.ts:146** - `Event title` (placeholder)
+- **scenario-event-editor.ts:152** - `PT (ms)` (placeholder)
+
+### Scenario Issue Editor
+- **scenario-issue-editor.ts:28** - `Issues` (card title)
+- **scenario-issue-editor.ts:38** - `Title` (label)
+- **scenario-issue-editor.ts:44** - `Description` (label)
+- **scenario-issue-editor.ts:63** - `Auto-resolve (ms)` (label)
+- **scenario-issue-editor.ts:139** - `Issue title` (placeholder)
+
+### Scenario Decision Editor
+- **scenario-decision-editor.ts:29** - `Title` (label)
+- **scenario-decision-editor.ts:35** - `Description` (label)
+- **scenario-decision-editor.ts:42** - `Issue ID` (label)
+- **scenario-decision-editor.ts:117** - `Decision title` (placeholder)
+- **scenario-decision-editor.ts:123** - `Issue ID` (placeholder)
+
+### Scenario Turns Placeholder
+- **scenario-turns-placeholder.ts:10** - `Turns` (card title)
+- **scenario-turns-placeholder.ts:16** - `Turn {{ turn_index }}` (fallback title)
+- **scenario-turns-placeholder.ts:31** - `No turns defined. Turns group injects and decisions into sequential...`
+
+### Scenario Walkthrough
+- **scenario-walkthrough.ts:19** - `No events to walk through.`
+- **scenario-walkthrough.ts:72** - `Event {{ index + 1 }} of {{ total }} — {{ time }}`
+- **scenario-walkthrough.ts:69** - `Previous` (button)
+- **scenario-walkthrough.ts:81** - `Next` (button)
+
+### Scenario Settings Editor
+- **scenario-settings-editor.ts:10** - `Settings` (card title)
+
+### Review View
+- **review-view.ts:31** - `Exercise Review` (page header)
+- **review-view.ts:34** - `Timeline Replay` (card title)
+- **review-view.ts:44** - `Prev` (button)
+- **review-view.ts:52** - `{{ playing() ? "Pause" : "Play" }}`
+- **review-view.ts:61** - `Next` (button)
+- **review-view.ts:69** - `Reset` (button)
+- **review-view.ts:75** - `Speed:` (label)
+- **review-view.ts:122** - `Visible Timeline` (card title)
+- **review-view.ts:138** - `No audit entries. Run an exercise first.`
+- **review-view.ts:143** - `Event Summary` (card title)
+- **review-view.ts:160** - `Decision Analysis` (card title)
+
+### Domain-Specific Terminology (Fallback - Customizable)
+From **domain.service.ts:9-17**:
+- `event: "Event"` (customizable per domain)
+- `issue: "Issue"` (customizable per domain)
+- `player: "Player"` (customizable per domain)
+- `gameMaster: "Game Master"` (customizable per domain)
+- `exercise: "Exercise"` (customizable per domain)
+- `scenario: "Scenario"` (customizable per domain)
+- `decision: "Decision"` (customizable per domain)
+
+### Internal/Code Terminology Exposed to Users
+
+**Key mappings where internal terms are displayed:**
+
+1. **Game Modes** (internal → user-facing):
+   - `classic` → `Classic`
+   - `simple_collaborative` → `Collaborative`
+
+2. **Player Types** (internal → user-facing):
+   - `decision_maker` → `CMD` (badge) + `Decision Maker` (role label context)
+   - `advisor` → `ADV` (badge)
+
+3. **Role/Mode Labels** (internal → user-facing):
+   - `all_roles` → `All Advisors` (in multi-role context)
+   - `all_advisors` → `All Advisors`
+   - `solo_player` → `Solo Player`
+   - `decision_maker` → `Decision Maker`
+
+4. **Phase Names** (internal → displayed via phase-badge):
+   - `setup`
+   - `briefing`
+   - `active`
+   - `paused`
+   - `completed`
+
+5. **Event/Issue Lifecycle States** (internal → displayed):
+   - Event: `scheduled`, `pending`, `running`, `completed`, `cancelled`
+   - Issue: `inactive`, `active`, `mitigated`, `resolved`
+
+6. **Card Status** (internal → user-facing):
+   - `intel` → `INTEL`
+   - `active` → `DECISION`
+   - `done` → `DONE`
+
+7. **Menu Indicators** (acronyms used throughout):
+   - `FTM` = Full Team Mode
+   - `2PL` = 2 Player Mode
+   - `SIM` = Simulation (Practice Solo)
+   - `OPS` = Operations (Run Exercise)
+   - `BLD` = Builder (Build Scenario)
+   - `REV` = Review (Review Results)
+   - `JON` = Join (Join Exercise)
+
+### Summary Statistics
+
+- **Total distinct user-facing text strings**: ~180+ unique strings
+- **Primary UI sections**: 8 main feature areas (Home, Waiting Room, Player, Game Master, Scenario Builder, Review, Shared Components, Domain Configuration)
+- **Button labels**: 30+ action buttons (Start, Resume, Pause, Stop, Create, Update, Delete, Submit, Join, Leave, Claim, etc.)
+- **Error messages**: 6+ distinct error messages
+- **Placeholder text**: 15+ input placeholders
+- **Dynamic domain terminology**: 7 customizable terms (fully domain-aware)
+- **Hardcoded terminology**: 8 menu/mode indicators (FTM, 2PL, SIM, OPS, BLD, REV, JON, Mission Briefing)
+
+### Potential Inconsistencies & Terminology Notes
+
+1. **"Trainer" vs "Game Master"**: Role labeled as `Game Master (Trainer)` in role-slot-list but `Game Master` in most other contexts
+2. **Crew terminology**: Uses `crew`, `stations`, `crew members` consistently throughout
+3. **Domain-customizable terms**: `exercise`, `event`, `issue`, `decision`, `gameMaster`, `scenario`, `player` are all customizable per domain configuration but have fallback English values
+4. **Acronym usage**: Heavy use of acronyms (FTM, 2PL, SIM, OPS, BLD, REV, JON) in home menu navigation</result>
+<usage><total_tokens>89830</total_tokens><tool_uses>35</tool_uses><duration_ms>116436</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/40e89667-be58-4369-b54e-6a9ac9768c93/tasks/a7f4c1c80cf14669a.output
+
+---
+
+<task-notification>
+<task-id>affd6514c1ee8f233</task-id>
+<tool-use-id>REDACTED</tool-use-id>
+<output-file>/private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/40e89667-be58-4369-b54e-6a9ac9768c93/tasks/affd6514c1ee8f233.output</output-file>
+<status>completed</status>
+<summary>Agent "Extract PDF terminology" completed</summary>
+<result>Here is the comprehensive glossary extracted from all 11 PDFs in `/Users/dragan/Documents/AI-Boilerplate/apps/tfc/docs/`.
+
+---
+
+## Comprehensive Silent Wake Terminology Glossary
+
+### The Exercise / Game Itself
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **Silent Wake** | The name of the exercise/wargame product. Full title: "Silent Wake -- Multi-Domain Naval Wargame." |
+| **Exercise** | The overall activity. Interchangeable with "wargame." It is explicitly a "Multi-Domain Table-top Naval Exercise." |
+| **Wargame** | Synonym for exercise. Used in "Cyber Security Wargame," "wargame execution," etc. |
+| **Tabletop exercise** | The format: a physical, discussion-based exercise around a game board (not a computer simulation). |
+| **Scenario** | A scripted narrative arc that the exercise follows. Two exist: the **Tutorial Scenario** (3 turns, port approach) and the **Baseline Scenario** (15 turns, open-water transit to patrol sector). |
+| **Scenario Pack** | The document bundling a scenario's outline, initial conditions, per-turn scripts, and card lists. |
+
+### Participants and Roles
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **Facilitator** | The person running the exercise. Operates as **WHITE/RED TEAM**. Controls the scenario, delivers injects, manages the stress timer, resolves actions, and may override player decisions. Also called **Instructor** in the debrief timetable. |
+| **Players** | The participants playing the exercise. They form the **BLUE TEAM** and role-play as the **ship crew** (crew of a Frigate). Also called **Cadets** (specifically HNA cadets -- Hellenic Naval Academy cadets) and **Trainees**. |
+| **Blue Team** | The collective player side representing the friendly ship's crew. |
+| **White/Red Team** | The facilitator side. White = exercise control; Red = simulated adversary actions. Both are run by the same facilitator. |
+| **Group** | A table of players. The exercise runs with up to 5 groups simultaneously, each with their own board. |
+| **NG expert** | Naval Group expert -- one of the facilitator/guidance roles. |
+| **HN expert** | Hellenic Navy expert -- one of the facilitator/guidance roles. |
+
+### Player Roles (Blue Team Crew Positions)
+
+| PDF Term (Abbreviation) | Full Title | Meaning in Context |
+|---|---|---|
+| **CO** | Commanding Officer | The decision-maker. Has final authority on maneuver, posture, and action selection. Chooses 1 or 2 Blue actions per turn. Must justify decisions. |
+| **OPS** | Operations Officer | Provides operational context, mission status, intelligence updates. Reports directly to CO. |
+| **PWO** | Principal Warfare Officer | Manages surface and engagement picture. Oversees AAWO and CyOp. Handles weapons employment decisions. |
+| **AAWO** | Anti-Air Warfare Officer | Manages the air picture and air defense. Tracks air threat timelines and AAW radar state. Reports to PWO. |
+| **CyOp** | Cyber Operator | Interprets cyber signals as operational risk. Differentiates noise vs. compromise. Proposes mitigations (isolate, disconnect, restore, rollback). Reports to PWO. |
+| **NAV** | Navigator | Manages navigation, course, speed, chart position, AIS contacts. |
+| **EO** | Engineering Officer | Manages all technical systems (radar, comms, sensors, weapons). Reports system health and repair timelines. |
+| **COMMON** | (Card label) | Indicates a Blue card playable by any role, not restricted to a specific crew position. |
+
+### Temporal Structure (Rounds / Turns / Phases)
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **Turn** | The primary time unit of the game. The baseline scenario has 15 turns (Turn 0 through Turn 15). The tutorial has 3 turns. Each turn represents a period of escalating narrative. |
+| **Turn 0** | The **Pre-Sail Briefing** / **Preparation phase**. Players receive mission context and prepare a mission briefing for the CO. Not a gameplay turn -- no Blue cards are played. |
+| **Turn Phases** | Each turn has 4 sequential phases (shown on the game board): |
+| **Phase 01: Resolve / Comment** | Facilitator resolves previous turn's actions and provides commentary (up to 30 seconds). |
+| **Phase 02: Inject** | Facilitator delivers new information/events to the team via inject cards (30 seconds). |
+| **Phase 03: Discuss** | Blue Team discusses the situation, constrained by the stress timer. Discussion time is governed by stress level. |
+| **Phase 04: Decide + Justify** | CO selects 1 or 2 Blue actions and justifies the decision (1 minute). |
+| **Preparation phase** | Turn 0; pre-mission briefing. |
+| **Execution phase** | Turns 1-15; the active gameplay. |
+| **Tutorial Scenario** | A 3-turn introductory scenario to teach the turn cycle (inject, discussion, CO decision, resolution). |
+
+### Actions and Decisions
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **Blue card** / **Blue action** | The player team's available actions. Each is a card with a reference number (e.g., SWB01), a title, a description, and role/system tags. The CO selects up to 2 per turn. |
+| **Action** | Synonym for playing a Blue card. "Actions: up to 2/turn; normally different." |
+| **Recommendation** | What each role officer provides to the CO: what to do, expected effect, tradeoff, and time cost. |
+| **Decision** | The CO's final call on which Blue cards to play. Must be justified. |
+| **Tradeoff** | What is sacrificed by choosing a particular action. A core exercise concept. |
+| **Inject** / **Inject Card** | New information/events delivered by the facilitator at Phase 02. Each has a Title, Details, Role tag, and Turn number. Represents situational developments (anomalies, threats, system reports). |
+| **Briefing Card** | Information cards distributed at Turn 0 providing initial mission context, intelligence, and system status. Each is tagged with a Role and has sections like MISSION and INTELLIGENCE. |
+| **Facilitator override** | A special rule where the facilitator cancels the team's chosen actions and forces a specific card (e.g., SWB20 General Quarters at Turn 6). |
+| **Adjudication** | The facilitator's resolution of a played Blue card's outcome (success, partial, fail). |
+| **Penalty** | A stress increase applied when the team misidentifies an event (e.g., treating a non-cyber event as cyber). |
+
+### Complete Blue Card Catalog (Actions)
+
+| Card ID | Title | Meaning |
+|---|---|---|
+| **SWB01** | Continue Mission | Keep pursuing the mission objective. |
+| **SWB02** | Reduce Speed / Safer Nav | Lower speed to reduce navigation risk. |
+| **SWB03** | Internal Sync (60 seconds) | Pause for team coordination. Stress -2. |
+| **SWB04** | Increase Speed | Accelerate to change tactical geometry or reduce exposure. |
+| **SWB05** | Increase Lookouts / Visual Confirm | Improve confidence vs. AIS/radar deception; may reveal spoofing. |
+| **SWB06** | Switch To Passive Picture (ESM/Visual First) | Improve threat attribution without relying on AAW radar. |
+| **SWB07** | Start Investigation | Reveals clues and/or stabilizes one investigated component by facilitator adjudication. Requires declaring a target component. |
+| **SWB08** | Start In-Depth Investigation | Facilitator reveals deeper origin/target/propagation details. Requires prior SWB07 on same component. |
+| **SWB09** | AIS Tracks Re-Evaluation | Reclassifies tracks and removes one deceptive or unreliable AIS track marker. |
+| **SWB10** | Isolate System | Stops propagation from IBMS/INS (incl. WECDIS) to ASUW Tracking Radar. |
+| **SWB11** | Restore System From Backup | On success: NAV improves 1 step. |
+| **SWB12** | Disconnect AAW | Immediately stops further sensor-side escalation this turn; may prevent cascading effects. |
+| **SWB13** | Cyber Containment Posture | Reduces probability of escalation. |
+| **SWB14** | Reboot Affected System | Can clear visible symptom or improve one affected system by +1 on partial/full success. Must declare target component. |
+| **SWB15** | Repair Component | Restores the declared faulty component and clears one related malfunction condition on success. Must declare target component. |
+| **SWB16** | Reconnect AAW | Restores air picture potential. |
+| **SWB17** | Shift To Manual Procedures (Bridge) | Keeps navigation safe even if NAV remains degraded; reduces catastrophic nav outcomes. |
+| **SWB18** | Damage Control Focus | Improves one weapon by 1 level (Disabled to Degraded, or Degraded to OK). |
+| **SWB19** | Correct Course | Alter course to compensate for drift, current, or positional error. |
+| **SWB20** | General Quarters | Raises combat posture and enables immediate readiness handling for kinetic resolution. All systems and weapons ON. |
+| **SWB21** | Prepare Target | Initiate target preparation using passive means only (ESM/visual). |
+| **SWB22** | Conservative Engagement Doctrine | Reduces chance of catastrophic miss / collateral effect. |
+| **SWB23** | Close Range to Compensate | Enables engagement despite degraded tracking / fire control. |
+| **SWB24** | Approach Target | Closes range to enable gun / manual engagement under degraded lock. |
+| **SWB25** | Hold Fire / Delay Engagement | Buys time for validation and recovery actions. |
+| **SWB26** | Shift to Gun Focus | Enables surface engagement without relying on full firing solution. |
+| **SWB27** | Fire Missile Counterattack | Launches missile counter-engagement; on good conditions can reduce surface threat posture. |
+| **SWB28** | Engage Target with Gun | Executes automatic tracking gun engagement to suppress or neutralize a surface threat at facilitator adjudication. |
+| **SWB29** | Decoy Deployment | Improves survivability versus next missile attack by decoy effect. |
+| **SWB30** | Approach Land (Emergency Concealment) | May reduce immediate hostile detectability at facilitator discretion. |
+| **SWB32** | Contact / Query the MTC | Open a topic or query for the MTC. |
+
+### Game Board and Scoring/State
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **Game Board** | The physical play surface tracking all state: systems, warfare domains, stress, weapons/damage, notes, turn phases, and quick reference. |
+| **Stress** | The central pressure mechanic (scale 0-10). Managed exclusively by the facilitator. Higher stress = less discussion time (Stress 0 = 5:00 min, Stress 10 = 3:00 min). Stress increases or decreases based on Blue card choices and scenario events. There is explicitly **no competitive scoring** between groups. |
+| **Stress Timer** | The countdown timer linked to the stress level. Determines how long the Blue Team has to discuss before the CO must decide. |
+| **Operational State** (Systems) | A three-color health indicator for each system: **Green** = OK, **Yellow** = Degraded, **Red** = Critical/Disabled. |
+| **Operational State** (Warfare domains) | A three-color threat indicator: **Green** = No threat, **Yellow** = Possible threat, **Red** = Actual Threat. |
+| **ON / OFF** | Binary power state for each system on the game board. Systems start either ON or OFF depending on initial conditions. |
+| **OK / DEG / DIS** | Weapon condition states: **OK** = operational, **DEG** = Degraded, **DIS** = Disabled. |
+| **Board State** | The complete snapshot of all system states, warfare domain states, weapon conditions, and stress level at any point. Documented as "Board after turn" in the scenario pack. |
+
+### Ship Systems (Board Left Side)
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **NAV RADAR** | Navigation radar. |
+| **IBMS / INS (incl. WECDIS)** | Integrated Bridge Management System / Inertial Navigation System, including WECDIS (Warship Electronic Chart Display and Information System). The central navigation data system. |
+| **NAV SENSORS** | Navigation sensors (GPS, inertia sensors, speed log). |
+| **ASUW TRACKING RADAR** | Anti-Surface Warfare tracking radar. Used for surface target tracking and fire control. |
+| **COMMS** | Communications systems (SATCOM, HF, UHF, VHF). |
+| **AAW RADAR** | Anti-Air Warfare radar / Air Surveillance Radar. Provides the air picture. |
+| **CIWS FWD** | Close-In Weapon System (Forward). Point defense weapon. |
+| **CIWS AFT** | Close-In Weapon System (Aft). Point defense weapon. |
+| **Missile Launcher (S-TO-S)** | Surface-to-Surface missile launcher. |
+| **Gun** | Naval gun for surface engagement. |
+| **Decoys** | Decoy systems for missile defense. |
+
+### Warfare Domains (Board Right Side)
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **ASUW** | Anti-Surface Warfare. The surface threat picture domain. |
+| **ASW** | Anti-Submarine Warfare domain. |
+| **AAW** | Anti-Air Warfare. The air threat picture domain. |
+| **CYBER** | Cyber warfare domain. Tracked on the board alongside kinetic warfare domains. |
+
+### Scenario-Specific / Naval Terminology
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **Frigate** | The type of warship the players crew. "You are a crew of a Frigate." |
+| **Mission** | The operational objective (e.g., "Independent transit to patrol sector Alpha-3"). |
+| **Transit** | The ship moving from one location to another. |
+| **Patrol sector** | The designated area the ship must reach (e.g., "Alpha-3"). |
+| **ETBOL** | Estimated Time Before On Line. The time required for a system to become operational after repair/reboot/restore. |
+| **ROE** | Rules of Engagement. Governs when weapons use is authorized (e.g., "Weapons Tight" = engagement only on confirmed hostile intent or hostile act). |
+| **Weapons Tight** | ROE setting: engagement authorized only in case of confirmed hostile intent or hostile act. |
+| **EMCON** | Emission Control. Restricts which active sensors/transmitters may be used (e.g., "Navigation radar only"). |
+| **MTC** | Maritime Task Commander / Maritime Operations Center. External command authority the ship reports to. Contacted via C2 (Command and Control) system. |
+| **C2** | Command and Control system. The link to the MTC. |
+| **SOC** | Security Operations Center. Explicitly stated as NOT available ("No SOC"). |
+| **CTI** | Cyber Threat Intelligence. Also explicitly not available onboard. |
+| **AIS** | Automatic Identification System. Transponder-based vessel tracking. Can be spoofed (a key scenario element). |
+| **ESM** | Electronic Support Measures. Passive detection of radar emissions. |
+| **AEW** | Airborne Early Warning. Explicitly stated as not available in the transit corridor. |
+| **SATCOM** | Satellite Communications. |
+| **HF / UHF / VHF** | Radio frequency bands used for communications. |
+| **INS** | Inertial Navigation System. Feeds course and speed data to all systems from GPS and inertia sensors. |
+| **WECDIS** | Warship Electronic Chart Display and Information System. Part of the IBMS/INS system. |
+| **Fire Control** | The weapons targeting system linked to tracking radar. |
+| **General Quarters** | Maximum combat readiness state. All systems and weapons ON. A specific Blue card (SWB20). |
+| **Hostile** | An identified enemy entity (ship, aircraft). |
+| **Contact** | A detected entity on sensors (AIS, radar, visual, ESM). |
+| **Track** | A sensor-maintained record of a contact's position over time. Can be "deceptive" (spoofed AIS track). |
+| **Salvo** | A group of missiles fired at once (e.g., "Hostile Salvo" at Turn 9). |
+| **Engagement** | Active weapons use against a target. |
+| **Neutralized** | A threat that has been eliminated or rendered combat-ineffective. |
+| **Surface picture** | The tactical picture of all surface contacts. |
+| **Air picture** | The tactical picture of all air contacts. |
+| **Cyber-attack vector** | The path by which a cyber attack propagates through systems (e.g., WECDIS to INS to tracking radar). |
+| **Propagation** | The spread of a cyber compromise from one system to connected systems. |
+| **Silent privilege escalation** | A hidden cyber escalation triggered by rebooting a compromised component (e.g., rebooting AAW radar at Turn 7). |
+| **Bearing** | Compass direction to a contact (e.g., "bearing 035"). |
+| **Sea state** | A measure of ocean wave conditions (e.g., "Sea state 2-3"). |
+| **nm** | Nautical miles. Distance unit used throughout. |
+| **kts** | Knots. Speed unit (nautical miles per hour). |
+| **SOG** | Speed Over Ground. GPS-derived speed. |
+| **STW** | Speed Through Water. Log-derived speed. Discrepancy between SOG and STW is an anomaly indicator. |
+
+### Exercise Lifecycle / Debrief Terminology
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **Exercise briefing** | The presentation of the wargame to participants before play begins. |
+| **Pre-mission briefing** | Turn 0, where players prepare a mission brief for the CO. |
+| **Wargame execution** | The actual play session (120 minutes). |
+| **Hot wash-up** | An immediate, informal debrief per group right after play ends (30 minutes). "Discuss while fresh." |
+| **Global debrief** | A plenary debrief session with all groups (Part C, 2 hours). |
+| **Lightning Team Report** | A brief (5 minutes per group) presentation to the whole room during global debrief. |
+| **Instructor's debrief** | The facilitator's post-exercise analysis and key lessons (30 minutes). |
+| **After Action Exercise debrief** | Synonym for the overall debrief process to optimize training outcome. |
+| **AAR** (mini-AAR) | After Action Review. Referenced in the tutorial as a brief review after the 3-turn tutorial ends. |
+| **Storyboard** | A visual narrative aid (slides with arrows) used by the facilitator to track scenario progression. Each turn covers specific "storyboard arrows." |
+
+### Card/Component Metadata Tags
+
+| PDF Term | Meaning in Context |
+|---|---|
+| **SWBxx** | Card reference number (e.g., SWB01, SWB29). "SW" = Silent Wake, "B" = Blue card. |
+| **COMMON** | A Blue card label indicating any role can play it (not role-restricted). |
+| **NAV, SENS, FIRE, WPN, COMMS, STRESS, AAW** | System/domain tags on Blue cards indicating which board areas they affect. |
+| **Available Turns** | The specific turns during which a Blue card may be played in a given scenario. |
+| **Best / Acceptable** | Scenario pack labels for the recommended card combinations per turn ("Best path" vs. "Acceptable path"). |
+| **Consequence** | The mechanical outcome of playing a card combination (e.g., "Stress +1, COMMS to Yellow"). |
+
+---
+
+**Key design insight**: Silent Wake is explicitly NOT a competitive exercise -- there is no scoring between teams. The "Stress" mechanic serves as a pacing/pressure tool (reducing discussion time) rather than a score. The focus is on **decision rationale, communication under pressure, and trade-offs**, not on winning or losing.</result>
+<usage><total_tokens>100626</total_tokens><tool_uses>12</tool_uses><duration_ms>224150</duration_ms></usage>
+</task-notification>
+Full transcript available at: /private/tmp/claude-501/-Users-dragan-Documents-AI-Boilerplate/40e89667-be58-4369-b54e-6a9ac9768c93/tasks/affd6514c1ee8f233.output
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/docs/plans/2026-03-22-targets-system-and-warfare-domains-spec.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+yes... but is your approach ?
+
+---
+
+1. FAC
+2. keep decision for now
+3. CREW
+4.only frontend fallback
+
+---
+
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/docs/plans/2026-03-22-targets-system-and-warfare-domains-spec.md in the IDE. This may or may not be related to the current task.</ide_opened_file>
+why no new kyes in terminologymap ?
+
+---
+
+yes
+
+---
+
+yes
