@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "6ae8f924ebbd",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 3,
+  "files_touched": [
+    "apps/tfc/frontend/src/app/features/foundation/foundation-view.ts",
+    "apps/tfc/frontend/src/app/features/scenario-builder/scenario-builder-view.ts",
+    "apps/tfc/frontend/src/styles.css"
+  ],
+  "sessions": [
+    {
+      "metadata": "/6a/e8f924ebbd/0/metadata.json",
+      "transcript": "/6a/e8f924ebbd/0/full.jsonl",
+      "content_hash": "/6a/e8f924ebbd/0/content_hash.txt",
+      "prompt": "/6a/e8f924ebbd/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 160,
+    "cache_creation_tokens": 153882,
+    "cache_read_tokens": 11415917,
+    "output_tokens": 39051,
+    "api_call_count": 109
+  }
+}
