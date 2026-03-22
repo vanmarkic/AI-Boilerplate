@@ -3,21 +3,31 @@
   "checkpoint_id": "76235458a80e",
   "strategy": "manual-commit",
   "branch": "master",
-  "checkpoints_count": 1,
-  "files_touched": null,
+  "checkpoints_count": 2,
+  "files_touched": [
+    "apps/tfc/backend/engine/system_manager.py",
+    "apps/tfc/backend/engine/system_manager_test.py",
+    "apps/tfc/frontend/src/app/shared/system-status-board.component.spec.ts"
+  ],
   "sessions": [
     {
       "metadata": "/76/235458a80e/0/metadata.json",
       "transcript": "/76/235458a80e/0/full.jsonl",
       "content_hash": "/76/235458a80e/0/content_hash.txt",
       "prompt": "/76/235458a80e/0/prompt.txt"
+    },
+    {
+      "metadata": "/76/235458a80e/1/metadata.json",
+      "transcript": "/76/235458a80e/1/full.jsonl",
+      "content_hash": "/76/235458a80e/1/content_hash.txt",
+      "prompt": "/76/235458a80e/1/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 424,
-    "cache_creation_tokens": 169027,
-    "cache_read_tokens": 9679878,
-    "output_tokens": 29996,
-    "api_call_count": 116
+    "input_tokens": 462,
+    "cache_creation_tokens": 249334,
+    "cache_read_tokens": 10554198,
+    "output_tokens": 34617,
+    "api_call_count": 130
   }
 }

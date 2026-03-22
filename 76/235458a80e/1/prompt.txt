@@ -1,0 +1,49 @@
+<ide_selection>The user selected the lines 1 to 3 from /git-error-1774202046633:
+> git push origin master:master
+error: failed to push some refs to 'github.com:vanmarkic/AI-Boilerplate.git'
+
+
+This may or may not be related to the current task.</ide_selection>
+help me design the perfect user flow for creating a scenario tin tfc from scratch. don't look at the current code. look a the specs, the md and pdf docs and the scenario data model.
+
+---
+
+<ide_opened_file>The user opened the file /temp/readonly/Agent tool input (hve3ae) in the IDE. This may or may not be related to the current task.</ide_opened_file>
+1.
+
+---
+
+3.
+
+---
+
+new scenarios reusing mostly the same systems, domains, card catalogs,...
+
+---
+
+and the same roles catalog as well
+
+---
+
+1. Global catalog reusable across scenarios
+
+---
+
+1
+
+---
+
+yes
+
+---
+
+forget about this :
+""Create New Domain" → opens the DomainConfig editor (separate flow, can be deferred to a later iteration)"
+
+out of scope. only one foundation with possibility to add and edit items
+
+yes we need systems, warfare domains, and the card catalog.
+
+---
+
+perfect except taht domains will either be green or red (2 possible states) : under development in a parallel branch
