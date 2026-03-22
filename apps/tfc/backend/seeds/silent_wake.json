@@ -200,6 +200,9 @@
         },
         "system_effects": [
           {"system_id": "comms", "operational_state": "yellow"}
+        ],
+        "domain_effects": [
+          {"domain_id": "cyber", "threat_level": "yellow"}
         ]
       },
       {
@@ -217,7 +220,10 @@
           "cyop": "Analysis indicates anomalous data flow originating from WECDIS towards the INS. Effects are not yet fully determined.",
           "nav": "New AIS contact bearing 052, range 12 nm. Visual silhouette indicates warship profile.",
           "pwo": "ESM detects non-commercial radar emissions at bearing 052. Emission profile not consistent with merchant vessels."
-        }
+        },
+        "domain_effects": [
+          {"domain_id": "asuw", "threat_level": "yellow"}
+        ]
       },
       {
         "id": "evt-t7",
@@ -249,7 +255,10 @@
         "role_descriptions": {
           "aawo": "Report via MTC (C2 system): Hostile aircraft approaching area (ETA: 15 min).",
           "eo": "Reboot could fix the AAW issue (1 min ETBOL)."
-        }
+        },
+        "domain_effects": [
+          {"domain_id": "aaw", "threat_level": "yellow"}
+        ]
       },
       {
         "id": "evt-t9",
@@ -266,7 +275,11 @@
           "nav": "3 incoming missiles visually detected.",
           "eo": "AAW radar is back online.",
           "pwo": "Target is out of gun range."
-        }
+        },
+        "domain_effects": [
+          {"domain_id": "aaw", "threat_level": "red"},
+          {"domain_id": "asuw", "threat_level": "red"}
+        ]
       },
       {
         "id": "evt-t10",
@@ -353,7 +366,10 @@
         "role_descriptions": {
           "nav": "Gun engagement achieved effective impact on hostile vessel. Target exhibiting loss of manoeuvrability.",
           "pwo": "No further ESM emissions detected from hostile unit. Surface threat assessed as neutralised."
-        }
+        },
+        "domain_effects": [
+          {"domain_id": "asuw", "threat_level": "green"}
+        ]
       },
       {
         "id": "evt-t15",
@@ -364,7 +380,11 @@
         "dependencies": ["evt-t14"],
         "triggered_issues": [],
         "target_roles": [],
-        "role_descriptions": {}
+        "role_descriptions": {},
+        "domain_effects": [
+          {"domain_id": "aaw", "threat_level": "green"},
+          {"domain_id": "cyber", "threat_level": "green"}
+        ]
       }
     ],
     "issues": [
@@ -891,6 +911,12 @@
       {"system_id": "missile_launcher", "label": "Missile Launcher", "category": "weapon", "operational_state": "green", "power_state": false},
       {"system_id": "gun", "label": "Gun", "category": "weapon", "operational_state": "green", "power_state": false},
       {"system_id": "decoys", "label": "Decoys", "category": "weapon", "operational_state": "green", "power_state": false}
+    ],
+    "initial_warfare_domains": [
+      {"domain_id": "asuw",  "label": "ASUW",  "initial_threat_level": "green"},
+      {"domain_id": "asw",   "label": "ASW",   "initial_threat_level": "green"},
+      {"domain_id": "aaw",   "label": "AAW",   "initial_threat_level": "green"},
+      {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}
     ],
     "score_tier_thresholds": {
       "lo": 0.33,
