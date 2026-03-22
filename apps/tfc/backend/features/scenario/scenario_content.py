@@ -20,6 +20,13 @@ class SystemEffectDef(BaseModel):
     set_all_power: bool = False  # General Quarters: power all systems ON
 
 
+class DomainEffectDef(BaseModel):
+    """A warfare domain threat-level change triggered by an event."""
+
+    domain_id: str
+    threat_level: str  # "green" | "yellow" | "red"
+
+
 class DecisionOptionDef(BaseModel):
     """A single selectable option within a decision template."""
 
@@ -63,6 +70,7 @@ class ScenarioEventDef(BaseModel):
     target_roles: list[str] = []  # empty = visible to all roles
     role_descriptions: dict[str, str] = {}  # per-role description overrides
     system_effects: list[SystemEffectDef] = []  # system state changes on event start
+    domain_effects: list[DomainEffectDef] = []  # warfare domain changes on event start
 
 
 class ScenarioIssueDef(BaseModel):
@@ -95,6 +103,14 @@ class SystemStateDef(BaseModel):
     category: str = "system"  # "system" | "weapon"
     operational_state: str | None = None  # "green"|"yellow"|"red"
     power_state: bool | None = None
+
+
+class WarfareDomainDef(BaseModel):
+    """Initial warfare domain definition in scenario."""
+
+    domain_id: str
+    label: str = ""
+    initial_threat_level: str = "green"
 
 
 class TurnDefinition(BaseModel):
@@ -139,6 +155,7 @@ class ScenarioContent(BaseModel):
     roles: list[RoleDef] = []
     turns: list[TurnDefinition] = []
     initial_system_states: list[SystemStateDef] = []
+    initial_warfare_domains: list[WarfareDomainDef] = []
     score_tier_thresholds: dict[str, float] = {}  # {"lo": 0.33, "mid": 0.66}
 
     @model_validator(mode="after")
