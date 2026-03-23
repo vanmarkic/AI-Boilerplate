@@ -29,7 +29,7 @@ export const WeatherStore = signalStore(
         if (!response.ok) {
           throw new Error(`Weather API error: ${response.statusText}`);
         }
-        const data = await response.json();
+        const data = (await response.json()) as Weather;
         patchState(store, { weather: data, loading: false });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load weather';
@@ -44,7 +44,7 @@ export const WeatherStore = signalStore(
         if (!response.ok) {
           throw new Error(`Forecast API error: ${response.statusText}`);
         }
-        const data = await response.json();
+        const data = (await response.json()) as Forecast;
         patchState(store, { forecast: data, loading: false });
       } catch (err) {
         const message = err instanceof Error ? err.message : 'Failed to load forecast';
