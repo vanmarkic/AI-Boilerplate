@@ -180,7 +180,7 @@ function collabWaitingRoomUrl(participantId: string): string {
 // ── 1. WAITING ROOM — PRACTICE BUTTON VISIBILITY ─────────────────────
 
 test.describe("Waiting room — Practice (Solo) button @waiting-room @practice", () => {
-  test("Practice button visible in simple_collaborative", async ({
+  test("Practice mode text visible when playerCountMode=practice", async ({
     page,
     mockApi,
   }) => {
@@ -189,11 +189,11 @@ test.describe("Waiting room — Practice (Solo) button @waiting-room @practice",
     seedScenarioWithRoles(mockApi);
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=practice",
+    );
 
-    await expect(
-      page.getByRole("button", { name: "Practice (Solo)" }),
-    ).toBeVisible();
+    await expect(page.getByText("Practice (Solo)")).toBeVisible();
   });
 
   test("Practice button NOT visible in classic mode", async ({
@@ -218,17 +218,18 @@ test.describe("Waiting room — Practice (Solo) button @waiting-room @practice",
 // ── 2. WAITING ROOM — PRACTICE MODE ACTIVATION ──────────────────────
 
 test.describe("Waiting room — practice mode UI @waiting-room @practice", () => {
-  test("clicking Practice shows solo slot text", async ({ page, mockApi }) => {
+  test("practice mode shows solo slot text", async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: "Solo", role: "solo_player" });
     mockApi.seed(EX_ID, [me], "simple_collaborative");
     seedScenarioWithRoles(mockApi);
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
-    await page.getByRole("button", { name: "Practice (Solo)" }).click();
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=practice",
+    );
 
     await expect(
-      page.getByText("Practice mode — you'll play all roles."),
+      page.getByText("Practice mode: you'll handle all roles solo."),
     ).toBeVisible();
   });
 
@@ -241,11 +242,12 @@ test.describe("Waiting room — practice mode UI @waiting-room @practice", () =>
     seedScenarioWithRoles(mockApi);
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
-    await page.getByRole("button", { name: "Practice (Solo)" }).click();
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=practice",
+    );
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeEnabled();
   });
 });

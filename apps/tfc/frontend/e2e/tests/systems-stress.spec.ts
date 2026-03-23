@@ -205,10 +205,7 @@ test.describe("Stress bar — player view", () => {
     await installMocks(page, snapshot({ score: { ...SCORE, stress: 5 } }));
     await page.goto(playerUrl("p1"));
 
-    const scoreBar = page.locator("tfc-score-bar");
-    await expect(scoreBar).toBeVisible();
-
-    const stressBar = scoreBar.locator("tfc-stress-bar");
+    const stressBar = page.locator("tfc-stress-bar");
     await expect(stressBar).toBeVisible();
     await expect(stressBar).toContainText("5");
   });

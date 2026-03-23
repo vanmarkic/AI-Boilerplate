@@ -3,17 +3,17 @@ import { test, expect } from "@playwright/test";
 test.describe("Scenario Builder @scenario-builder", () => {
   test("should display the scenario builder page", async ({ page }) => {
     await page.goto("/builder");
-    await expect(page.locator("body")).toContainText(/scenario builder/i);
+    await expect(
+      page.getByRole("textbox", { name: "Scenario title" }),
+    ).toBeVisible();
   });
 
   test("should have title and description inputs", async ({ page }) => {
     await page.goto("/builder");
-    const titleInput = page.locator("input#scenario-title");
-    const descInput = page.locator(
-      "input#scenario-desc, textarea#scenario-desc",
-    );
-    await expect(titleInput).toBeVisible();
-    await expect(descInput).toBeVisible();
+    await expect(
+      page.getByRole("textbox", { name: "Scenario title" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Create" })).toBeVisible();
   });
 
   test("should have create button", async ({ page }) => {

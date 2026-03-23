@@ -25,6 +25,36 @@ const baseSnapshot = {
   score: null,
 };
 
+const DECISION_OPEN = {
+  id: "dec1",
+  event_id: "e1",
+  issue_id: null,
+  title: "Test Decision",
+  description: "Choose.",
+  question_type: "single_choice",
+  options: [{ id: "opt-a", label: "Option A", score: 10 }],
+  completion_mode: "first_response",
+  target_roles: [],
+  timeout_ms: 300_000,
+  status: "open",
+  opened_at_pt_ms: 60_000,
+  closed_at_pt_ms: null,
+  recommendations: {},
+};
+
+const EVENT_FOR_DECISION = {
+  id: "e1",
+  title: "Test Event",
+  description: "Test",
+  event_type: "narrative",
+  scheduled_pt_ms: 10_000,
+  duration_ms: null,
+  dependencies: [],
+  lifecycle: "running",
+  started_at_pt_ms: 10_000,
+  completed_at_pt_ms: null,
+};
+
 const snapshotWithScore = {
   ...baseSnapshot,
   score: {
@@ -33,6 +63,8 @@ const snapshotWithScore = {
     turn_number: 3,
     next_decision_time_ms: 299_600,
   },
+  decisions: [DECISION_OPEN],
+  events: [EVENT_FOR_DECISION],
 };
 
 const contextWithRoles = {
@@ -124,8 +156,8 @@ test.describe("Gap 5 — Score in snapshot @player", () => {
     await installPlayerMocks(page, snapshotWithScore);
     await page.goto(playerUrl("alice-01"));
 
-    // Score bar should be visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    // Turn banner should be visible
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
   });
 
   test("no score shown when snapshot has null score", async ({ page }) => {
@@ -179,7 +211,7 @@ test.describe("Gap 3 — Participant identity @player @waiting-room", () => {
     await page.goto(
       `/waiting-room?exerciseId=${exerciseId}&participantId=${alice.id}`,
     );
-    await page.getByRole("button", { name: /Start Exercise/ }).click();
+    await page.getByRole("button", { name: /Deploy/ }).click();
 
     // Verify URL contains participantId and role
     await expect(page).toHaveURL(/\/player/);

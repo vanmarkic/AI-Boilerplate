@@ -57,7 +57,7 @@ test.describe("Collaborative waiting room @waiting-room @collaborative", () => {
     await page.goto(collabUrl(alice.id));
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise \(2\)/ }),
+      page.getByRole("button", { name: /Deploy \(2\)/ }),
     ).toBeVisible();
   });
 
@@ -73,7 +73,7 @@ test.describe("Collaborative waiting room @waiting-room @collaborative", () => {
     await page.goto(collabUrl(me.id));
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeEnabled();
   });
 
@@ -86,7 +86,7 @@ test.describe("Collaborative waiting room @waiting-room @collaborative", () => {
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
-    await page.getByRole("button", { name: /Start Exercise/ }).click();
+    await page.getByRole("button", { name: /Deploy/ }).click();
 
     await expect(page).toHaveURL(/\/player/);
     await expect(page).toHaveURL(new RegExp(`exerciseId=${exerciseId}`));
@@ -98,7 +98,7 @@ test.describe("Collaborative waiting room @waiting-room @collaborative", () => {
     await mockApi.install();
 
     await page.goto(collabUrl(me.id));
-    await page.getByRole("button", { name: /Start Exercise/ }).click();
+    await page.getByRole("button", { name: /Deploy/ }).click();
 
     await expect(page).not.toHaveURL(/\/gm/);
   });

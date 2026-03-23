@@ -56,7 +56,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacing-md);
-    padding: var(--spacing-xs) var(--spacing-lg);
+    padding: 0.25rem var(--spacing-lg);
     border-top: 1px solid var(--color-border);
     background: var(--color-card);
     font-family: var(--font-mono);
@@ -71,6 +71,7 @@
     align-items: center;
   }
   .player-main {
+    grid-row: 2 / -2;
     overflow-y: auto;
     padding: var(--spacing-md) var(--spacing-lg);
     display: flex;
@@ -316,7 +317,7 @@
     padding: var(--spacing-md) var(--spacing-lg);
   }
 
-  /* ── Board Columns (3-column fixed layout) ─────────── */
+  /* ── Board Columns (auto-fit grid) ─────────────────── */
 
   .board-columns {
     display: grid;
@@ -332,6 +333,17 @@
   .board-columns > .role-card {
     max-width: none;
     height: 100%;
+  }
+
+  /* ── All-Roles Layout (advisors + CO in one row) ──── */
+
+  .board-columns--all-roles {
+    grid-template-columns: repeat(3, 1fr) minmax(14rem, 1fr);
+  }
+
+  .board-columns--all-roles > * {
+    overflow-y: auto;
+    min-height: 0;
   }
 
   /* ── Role Card ─────────────────────────────────────── */

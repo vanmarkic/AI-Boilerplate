@@ -81,14 +81,14 @@ test.describe("Waiting room view @waiting-room", () => {
     await expect(page.getByText("Observer")).toBeVisible();
   });
 
-  test("shows Waiting Room title", async ({ page, mockApi }) => {
+  test("shows Operations Lobby title", async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: "Alice", role: "player" });
     mockApi.seed(exerciseId, [me]);
     await mockApi.install();
 
     await page.goto(waitingRoomUrl(me.id));
 
-    await expect(page.getByText("Waiting Room")).toBeVisible();
+    await expect(page.getByText("Operations Lobby")).toBeVisible();
   });
 
   test("leave button is always visible", async ({ page, mockApi }) => {
@@ -111,7 +111,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
     return `/waiting-room?exerciseId=${exerciseId}&participantId=${participantId}`;
   }
 
-  test('GM sees "Start Exercise" button', async ({ page, mockApi }) => {
+  test('GM sees "Deploy" button', async ({ page, mockApi }) => {
     const gm = mockParticipant({
       display_name: "Commander",
       role: "game-master",
@@ -126,11 +126,11 @@ test.describe("Game master controls @waiting-room @game-master", () => {
     await page.goto(waitingRoomUrl(gm.id));
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeVisible();
   });
 
-  test("Start Exercise button is disabled when not enough participants", async ({
+  test("Deploy button is disabled when not enough participants", async ({
     page,
     mockApi,
   }) => {
@@ -145,11 +145,11 @@ test.describe("Game master controls @waiting-room @game-master", () => {
     await page.goto(waitingRoomUrl(player.id));
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 
-  test('clicking "Start Exercise" navigates to GM view', async ({
+  test('clicking "Deploy" navigates to GM view', async ({
     page,
     mockApi,
   }) => {
@@ -167,7 +167,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
 
     await page.goto(waitingRoomUrl(gm.id));
 
-    await page.getByRole("button", { name: /Start Exercise/ }).click();
+    await page.getByRole("button", { name: /Deploy/ }).click();
 
     await expect(page).toHaveURL(/\/gm/);
     await expect(page).toHaveURL(/exerciseId=200/);

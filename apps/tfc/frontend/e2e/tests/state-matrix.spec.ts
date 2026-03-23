@@ -122,7 +122,7 @@ test.describe("/home — Picker state @home @scenario-builder", () => {
 
     await page.getByText("Run Exercise").click();
 
-    await expect(page.getByText("2 roles")).toBeVisible();
+    await expect(page.getByText("2 stations")).toBeVisible();
     await expect(
       page.getByText("Collaborative", { exact: true }),
     ).toBeVisible();
@@ -157,7 +157,7 @@ test.describe("/home — Picker state @home @scenario-builder", () => {
 // ═══════════════════════════════════════════════════════════════════════
 
 test.describe("/home — Lobby: empty, collaborative, not joined @home @waiting-room", () => {
-  test("shows role slots as Open and Join Exercise button", async ({
+  test("shows Join Exercise card with active operation count", async ({
     page,
     mockApi,
   }) => {
@@ -165,38 +165,32 @@ test.describe("/home — Lobby: empty, collaborative, not joined @home @waiting-
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("0 / 2 players")).toBeVisible();
-    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
-    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
-    const openSlots = page.getByText("Open", { exact: true });
-    await expect(openSlots).toHaveCount(2);
-    await expect(page.getByRole("button", { name: "Join Exercise" })).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
   });
 
-  test("no GM slot visible", async ({ page, mockApi }) => {
+  test("no Game Master text on home", async ({ page, mockApi }) => {
     mockApi.seedJoinable(joinable());
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Game Master (Trainer)")).not.toBeVisible();
+    await expect(page.getByText("Game Master")).not.toBeVisible();
   });
 });
 
 test.describe("/home — Lobby: empty, classic, not joined @home @waiting-room", () => {
-  test("shows GM slot + role slots, all Open", async ({ page, mockApi }) => {
+  test("shows Join Exercise card for classic mode", async ({ page, mockApi }) => {
     mockApi.seedJoinable(joinable({ game_mode: "classic" }));
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Game Master (Trainer)")).toBeVisible();
-    await expect(page.getByText("0 / 3 players")).toBeVisible();
-    const openSlots = page.getByText("Open", { exact: true });
-    await expect(openSlots).toHaveCount(3); // co + nav + gm
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText(/1 active operations? awaiting crew/)).toBeVisible();
   });
 });
 
 test.describe("/home — Lobby: partial fill (1/2) @home @waiting-room", () => {
-  test("shows 1 participant badge, 1 Open slot, correct counter", async ({
+  test("shows Join Exercise card with active operation count", async ({
     page,
     mockApi,
   }) => {
@@ -205,14 +199,13 @@ test.describe("/home — Lobby: partial fill (1/2) @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("1 / 2 players")).toBeVisible();
-    await expect(page.getByText("Open", { exact: true })).toHaveCount(1);
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
   });
 });
 
 test.describe("/home — Lobby: full (2/2) @home @waiting-room", () => {
-  test("shows all participants, no Open slots, correct counter", async ({
+  test("shows Join Exercise card with active operation count", async ({
     page,
     mockApi,
   }) => {
@@ -222,15 +215,13 @@ test.describe("/home — Lobby: full (2/2) @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("Bob")).toBeVisible();
-    await expect(page.getByText("2 / 2 players")).toBeVisible();
-    await expect(page.getByText("Open", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
   });
 });
 
 test.describe("/home — Lobby: start button logic @home @waiting-room", () => {
-  test("not joined → no start button visible (Join Exercise shown instead)", async ({
+  test("Join Exercise text visible, no Deploy button on home", async ({
     page,
     mockApi,
   }) => {
@@ -238,12 +229,10 @@ test.describe("/home — Lobby: start button logic @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    // Before joining, only the Join Exercise button is visible, not start/leave
+    await expect(page.getByText("Join Exercise")).toBeVisible();
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).not.toBeVisible();
-    await expect(page.getByRole("button", { name: "Leave" })).not.toBeVisible();
-    await expect(page.getByRole("button", { name: "Join Exercise" })).toBeVisible();
   });
 });
 
@@ -252,7 +241,7 @@ test.describe("/home — Lobby: start button logic @home @waiting-room", () => {
 // ═══════════════════════════════════════════════════════════════════════
 
 test.describe("/home — Lobby: 3-role scenario @home @waiting-room", () => {
-  test("shows 3 role slots for a 3-role scenario", async ({
+  test("shows Join Exercise card for a 3-role scenario", async ({
     page,
     mockApi,
   }) => {
@@ -265,12 +254,8 @@ test.describe("/home — Lobby: 3-role scenario @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
-    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
-    await expect(
-      page.getByText("Principal Warfare Officer (PWO)"),
-    ).toBeVisible();
-    await expect(page.getByText("0 / 3 players")).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
   });
 });
 
@@ -332,7 +317,7 @@ test.describe("/waiting-room — with scenario roles @waiting-room", () => {
     await mockApi.install();
     await page.goto(wrUrl(me.id));
 
-    await expect(page.getByText("Assign roles")).toBeVisible();
+    await expect(page.getByText("Assign stations")).toBeVisible();
   });
 
   test("classic mode shows GM slot", async ({ page, mockApi }) => {

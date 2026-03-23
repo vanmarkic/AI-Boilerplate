@@ -37,7 +37,35 @@
     <tfc-warfare-domain-board [domains]="store.warfareDomains()" />
     <tfc-system-status-board [systems]="store.systems()" />
 
-    @if (isMultiRole() && !isDecisionMaker()) {
+    @if (isAllRoles()) {
+    <!-- All-roles / practice: advisor cards + CO card in one row -->
+    <div class="board-columns board-columns--all-roles">
+      @for (card of advisorRoleCards(); track card.roleId) {
+      <tfc-role-card
+        [card]="card"
+        [systems]="store.systems()"
+        (submitted)="onRoleCardSubmitted($event)"
+      />
+      }
+      <div class="co-card">
+        <div class="role-card__header">
+          <span class="role-card__role-id">{{
+            coRoleDef()?.id?.toUpperCase() ?? 'CO'
+          }}</span>
+        </div>
+        <div class="role-card__role-label">
+          {{ coRoleDef()?.label ?? 'Commanding Officer' }}
+        </div>
+        <tfc-co-decision-bar
+          [decision]="activeDecisions()[0] ?? null"
+          [advisorRoles]="advisorRoles()"
+          [systems]="store.systems()"
+          [coIntel]="coIntel()"
+          (confirmed)="onCoDecisionConfirmed($event)"
+        />
+      </div>
+    </div>
+    } @else if (isMultiRole() && !isDecisionMaker()) {
     <!-- Crew (all_advisors) layout: equal columns -->
     <div class="board-columns">
       @for (card of advisorRoleCards(); track card.roleId) {

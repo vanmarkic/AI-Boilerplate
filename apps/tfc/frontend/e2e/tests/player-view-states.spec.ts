@@ -294,14 +294,14 @@ test.describe("Header — always visible @player", () => {
 //    Score bar visible iff score is non-null AND phase is not "briefing".
 
 test.describe("Score display — visible iff score exists and not briefing @player", () => {
-  test("no score bar when score is null", async ({ page }) => {
+  test("no turn banner when score is null", async ({ page }) => {
     await installMocks(page, snapshot({ score: null }));
     await page.goto(playerUrl("p1"));
 
-    await expect(page.locator("tfc-score-bar")).not.toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).not.toBeVisible();
   });
 
-  test("no score bar during briefing phase", async ({ page }) => {
+  test("no turn banner during briefing phase", async ({ page }) => {
     const SCORE_TURN_0 = {
       total_score: 0,
       stress: 0,
@@ -311,24 +311,38 @@ test.describe("Score display — visible iff score exists and not briefing @play
     await installMocks(page, snapshot({ phase: "briefing", score: SCORE_TURN_0 }));
     await page.goto(playerUrl("p1"));
 
-    await expect(page.locator("tfc-score-bar")).not.toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).not.toBeVisible();
   });
 
-  test("score bar visible when score exists", async ({
+  test("turn banner visible when score exists and decision active", async ({
     page,
   }) => {
-    await installMocks(page, snapshot({ score: SCORE_TURN_3 }));
+    await installMocks(
+      page,
+      snapshot({
+        score: SCORE_TURN_3,
+        decisions: [DECISION_OPEN],
+        events: [EVENT_RUNNING],
+      }),
+    );
     await page.goto(playerUrl("p1"));
 
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).toContainText("TURN 3");
   });
 
-  test("score bar shows next decision time", async ({ page }) => {
-    await installMocks(page, snapshot({ score: SCORE_TURN_3 }));
+  test("turn banner shows turn number with active decision", async ({ page }) => {
+    await installMocks(
+      page,
+      snapshot({
+        score: SCORE_TURN_3,
+        decisions: [DECISION_OPEN],
+        events: [EVENT_RUNNING],
+      }),
+    );
     await page.goto(playerUrl("p1"));
 
-    // 299600ms ÷ 1000 = 299.6s
-    await expect(page.locator("tfc-score-bar")).toContainText("299.6");
+    await expect(page.locator(".board-turn-banner__turn")).toContainText("TURN 3");
   });
 });
 
@@ -619,8 +633,8 @@ test.describe("Combined state — all invariants hold together @player", () => {
     await expect(page.locator(".player-header__title")).toBeVisible();
     await expect(page.locator("tfc-phase-badge")).toContainText("running");
 
-    // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    // Turn banner visible
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
 
     // Events: running + completed visible, scheduled hidden
     await expect(page.getByText("NAV Report")).toBeVisible();
@@ -663,8 +677,8 @@ test.describe("Combined state — all invariants hold together @player", () => {
     );
     await page.goto(playerUrl("co-01", "co"));
 
-    // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    // Turn banner visible
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
 
     // Events visible
     await expect(page.getByText("NAV Report")).toBeVisible();
@@ -704,8 +718,8 @@ test.describe("Combined state — all invariants hold together @player", () => {
     // Phase badge shows paused
     await expect(page.locator("tfc-phase-badge")).toContainText("paused");
 
-    // No score elements
-    await expect(page.locator("tfc-score-bar")).not.toBeVisible();
+    // No turn banner
+    await expect(page.locator(".board-turn-banner__turn")).not.toBeVisible();
 
     // Empty states
     await expect(page.getByText("No Events intercepted.")).toBeVisible();

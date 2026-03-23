@@ -66,7 +66,7 @@ test.describe("Scenario picker @home @scenario-builder", () => {
     await page.getByText("Run Exercise").click();
 
     await expect(page.getByText("Hospital MCI")).toBeVisible();
-    await expect(page.getByText("2 roles")).toBeVisible();
+    await expect(page.getByText("2 stations")).toBeVisible();
     await expect(
       page.getByText("Collaborative", { exact: true }),
     ).toBeVisible();
@@ -107,13 +107,13 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Hospital MCI")).toBeVisible();
-    await expect(page.getByText("0 / 2 players")).toBeVisible();
-    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
-    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(
+      page.getByText(/1 active operations? awaiting crew/),
+    ).toBeVisible();
   });
 
-  test("shows Join Exercise button in lobby preview", async ({
+  test("shows Join Exercise link in lobby preview", async ({
     page,
     mockApi,
   }) => {
@@ -132,10 +132,13 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByRole("button", { name: "Join Exercise" })).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
   });
 
-  test("shows existing participants in lobby", async ({ page, mockApi }) => {
+  test("shows active operation count with participants", async ({
+    page,
+    mockApi,
+  }) => {
     const alice = mockParticipant({
       display_name: "Alice",
       role: "co",
@@ -155,8 +158,10 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("1 / 2 players")).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(
+      page.getByText(/1 active operations? awaiting crew/),
+    ).toBeVisible();
   });
 });
 
@@ -181,7 +186,7 @@ test.describe(
       await page.getByText("Hospital MCI").click();
 
       // Step 3: Mode picker should show play-mode options
-      await expect(page.getByText("How do you want to play?")).toBeVisible();
+      await expect(page.getByText("Select Operation Type")).toBeVisible();
       await expect(page.getByText("Full Team")).toBeVisible();
       await expect(page.getByText("2 Players")).toBeVisible();
       await expect(page.getByText("Practice (Solo)")).toBeVisible();
@@ -189,10 +194,13 @@ test.describe(
   },
 );
 
-// ── Role Slot Display ─────────────────────────────────────────────────
+// ── Join Exercise Card Display ────────────────────────────────────────
 
-test.describe("Role slots @home @waiting-room", () => {
-  test('shows open slots as "Open"', async ({ page, mockApi }) => {
+test.describe("Join Exercise card @home @landing", () => {
+  test("shows Join Exercise card with Live badge", async ({
+    page,
+    mockApi,
+  }) => {
     mockApi.seedJoinable({
       exercise: {
         id: 42,
@@ -208,11 +216,14 @@ test.describe("Role slots @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    const openSlots = page.getByText("Open");
-    await expect(openSlots.first()).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 
-  test("shows GM slot when requires_gm is true", async ({ page, mockApi }) => {
+  test("shows Join Exercise card for classic mode", async ({
+    page,
+    mockApi,
+  }) => {
     mockApi.seedJoinable({
       exercise: {
         id: 42,
@@ -228,6 +239,7 @@ test.describe("Role slots @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Game Master (Trainer)")).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 });
