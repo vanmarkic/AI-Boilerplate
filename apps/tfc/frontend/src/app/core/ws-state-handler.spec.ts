@@ -30,6 +30,7 @@ describe("ws-state-handler", () => {
           {
             id: "o1",
             label: "Yes",
+            description: "",
             score: 10,
             stress_delta: 0,
             system_effects: [],
