@@ -125,7 +125,7 @@ test.describe("Gap 5 — Score in snapshot @player", () => {
     await page.goto(playerUrl("alice-01"));
 
     // Score bar should be visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
   });
 
   test("no score shown when snapshot has null score", async ({ page }) => {
@@ -179,7 +179,7 @@ test.describe("Gap 3 — Participant identity @player @waiting-room", () => {
     await page.goto(
       `/waiting-room?exerciseId=${exerciseId}&participantId=${alice.id}`,
     );
-    await page.getByRole("button", { name: /Start Exercise/ }).click();
+    await page.getByRole("button", { name: /Deploy/ }).click();
 
     // Verify URL contains participantId and role
     await expect(page).toHaveURL(/\/player/);

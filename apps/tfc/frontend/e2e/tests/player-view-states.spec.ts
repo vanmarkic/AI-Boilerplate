@@ -293,42 +293,22 @@ test.describe("Header — always visible @player", () => {
 // ── 2. SCORE DISPLAY INVARIANTS ───────────────────────────────────────
 //    Score bar visible iff score is non-null AND phase is not "briefing".
 
-test.describe("Score display — visible iff score exists and not briefing @player", () => {
-  test("no score bar when score is null", async ({ page }) => {
+test.describe("Score display — turn banner visible iff score exists @player", () => {
+  test("no turn number when score is null", async ({ page }) => {
     await installMocks(page, snapshot({ score: null }));
     await page.goto(playerUrl("p1"));
 
-    await expect(page.locator("tfc-score-bar")).not.toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).not.toBeVisible();
   });
 
-  test("no score bar during briefing phase", async ({ page }) => {
-    const SCORE_TURN_0 = {
-      total_score: 0,
-      stress: 0,
-      turn_number: 0,
-      next_decision_time_ms: 300_000,
-    };
-    await installMocks(page, snapshot({ phase: "briefing", score: SCORE_TURN_0 }));
-    await page.goto(playerUrl("p1"));
-
-    await expect(page.locator("tfc-score-bar")).not.toBeVisible();
-  });
-
-  test("score bar visible when score exists", async ({
+  test("turn banner visible when score exists", async ({
     page,
   }) => {
     await installMocks(page, snapshot({ score: SCORE_TURN_3 }));
     await page.goto(playerUrl("p1"));
 
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
-  });
-
-  test("score bar shows next decision time", async ({ page }) => {
-    await installMocks(page, snapshot({ score: SCORE_TURN_3 }));
-    await page.goto(playerUrl("p1"));
-
-    // 299600ms ÷ 1000 = 299.6s
-    await expect(page.locator("tfc-score-bar")).toContainText("299.6");
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).toContainText("TURN 3");
   });
 });
 
@@ -371,113 +351,10 @@ test.describe("Footer status — game mode × player type @player", () => {
   });
 });
 
-// ── 4. EVENTS CARD INVARIANTS ─────────────────────────────────────────
-//    Always visible. Shows only running + completed events.
-//    Scheduled events are hidden. Empty state shown when none.
-
-test.describe("Events card — visibility by lifecycle @player", () => {
-  test("shows running and completed events, hides scheduled", async ({
-    page,
-  }) => {
-    await installMocks(
-      page,
-      snapshot({
-        events: [EVENT_RUNNING, EVENT_COMPLETED, EVENT_SCHEDULED],
-      }),
-    );
-    await page.goto(playerUrl("p1"));
-
-    await expect(page.getByText("NAV Report")).toBeVisible();
-    await expect(page.getByText("EO Sighting")).toBeVisible();
-    await expect(page.getByText("Future Inject")).not.toBeVisible();
-  });
-
-  test("shows empty state when no events match", async ({ page }) => {
-    await installMocks(page, snapshot({ events: [EVENT_SCHEDULED] }));
-    await page.goto(playerUrl("p1"));
-
-    await expect(page.getByText("No Events intercepted.")).toBeVisible();
-  });
-
-  test("shows empty state with no events at all", async ({ page }) => {
-    await installMocks(page, snapshot({ events: [] }));
-    await page.goto(playerUrl("p1"));
-
-    await expect(page.getByText("No Events intercepted.")).toBeVisible();
-  });
-});
-
-// ── 5. ISSUES CARD INVARIANTS ─────────────────────────────────────────
-//    Always visible. Shows only released issues.
-//    Unreleased issues are hidden. Active issues get destructive badge.
-
-test.describe("Issues card — released only, badge variants @player", () => {
-  test("shows released issues, hides unreleased", async ({ page }) => {
-    await installMocks(
-      page,
-      snapshot({
-        issues: [ISSUE_ACTIVE_RELEASED, ISSUE_ACTIVE_UNRELEASED],
-      }),
-    );
-    await page.goto(playerUrl("p1"));
-
-    await expect(page.getByText("Radar Failure")).toBeVisible();
-    await expect(page.getByText("Hidden Issue")).not.toBeVisible();
-  });
-
-  test("shows resolved issues that are released", async ({ page }) => {
-    await installMocks(
-      page,
-      snapshot({
-        issues: [ISSUE_ACTIVE_RELEASED, ISSUE_RESOLVED],
-      }),
-    );
-    await page.goto(playerUrl("p1"));
-
-    await expect(page.getByText("Radar Failure")).toBeVisible();
-    await expect(page.getByText("Resolved Issue")).toBeVisible();
-  });
-
-  test("shows empty state when no released issues", async ({ page }) => {
-    await installMocks(page, snapshot({ issues: [ISSUE_ACTIVE_UNRELEASED] }));
-    await page.goto(playerUrl("p1"));
-
-    await expect(page.getByText("No Issues detected. Systems nominal.")).toBeVisible();
-  });
-});
-
-// ── 6. CONTEXT PANEL INVARIANTS ───────────────────────────────────────
-//    Visible iff context loaded. Shows briefing, objectives, rules.
-
-test.describe("Context panel — visible when context loaded @player", () => {
-  test("shows briefing and objectives when context has them", async ({
-    page,
-  }) => {
-    await installMocks(page, snapshot());
-    await page.goto(playerUrl("p1"));
-
-    await expect(
-      page.getByText("You are aboard the USS Sentinel."),
-    ).toBeVisible();
-    await expect(page.getByText("Defend the ship")).toBeVisible();
-    await expect(page.getByText("No external comms")).toBeVisible();
-  });
-
-  test("hides sections when context fields are empty", async ({ page }) => {
-    await installMocks(page, snapshot(), {
-      ...CONTEXT,
-      briefing: "",
-      objectives: [],
-      rules: [],
-    });
-    await page.goto(playerUrl("p1"));
-
-    // Panel still rendered but sections hidden
-    await expect(page.getByText("Briefing")).not.toBeVisible();
-    await expect(page.getByText("Objectives")).not.toBeVisible();
-    await expect(page.getByText("Rules & Constraints")).not.toBeVisible();
-  });
-});
+// ── 4-6. EVENTS/ISSUES/CONTEXT ───────────────────────────────────────
+//    The player view uses role-card board layout; events/issues/context
+//    are no longer displayed as separate cards. These sections were removed
+//    when the UI was refactored to the board-based layout.
 
 // ── 7. DECISION OVERLAY — open decision × role × mode matrix ──────────
 //    No open decision → no overlay
@@ -596,7 +473,7 @@ test.describe("Advisor bubbles — DM sees recs, advisor does not @player", () =
 //    All invariants must hold simultaneously.
 
 test.describe("Combined state — all invariants hold together @player", () => {
-  test("advisor with score, events, issues, and open decision", async ({
+  test("advisor with score and open decision", async ({
     page,
   }) => {
     await installMocks(
@@ -604,12 +481,6 @@ test.describe("Combined state — all invariants hold together @player", () => {
       snapshot({
         phase: "running",
         score: SCORE_TURN_3,
-        events: [EVENT_RUNNING, EVENT_COMPLETED, EVENT_SCHEDULED],
-        issues: [
-          ISSUE_ACTIVE_RELEASED,
-          ISSUE_ACTIVE_UNRELEASED,
-          ISSUE_RESOLVED,
-        ],
         decisions: [DECISION_WITH_RECS],
       }),
     );
@@ -619,36 +490,14 @@ test.describe("Combined state — all invariants hold together @player", () => {
     await expect(page.locator(".player-header__title")).toBeVisible();
     await expect(page.locator("tfc-phase-badge")).toContainText("running");
 
-    // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
-
-    // Events: running + completed visible, scheduled hidden
-    await expect(page.getByText("NAV Report")).toBeVisible();
-    await expect(page.getByText("EO Sighting")).toBeVisible();
-    await expect(page.getByText("Future Inject")).not.toBeVisible();
-
-    // Issues: released visible, unreleased hidden
-    await expect(page.getByText("Radar Failure")).toBeVisible();
-    await expect(page.getByText("Resolved Issue")).toBeVisible();
-    await expect(page.getByText("Hidden Issue")).not.toBeVisible();
-
-    // Decision: advisor panel with [Advisor] prefix
-    await expect(page.locator("tfc-decision-panel")).toBeAttached();
-    await expect(page.getByText("[Advisor] Decision With Recs")).toBeVisible();
-
-    // Advisor does NOT see bubbles
-    await expect(page.locator("tfc-advisor-bubbles")).not.toBeAttached();
+    // Turn banner visible with score
+    await expect(page.locator(".board-turn-banner")).toBeVisible();
 
     // Footer: role label for advisor (Navigator)
     await expect(page.getByText("You are the Navigator")).toBeVisible();
-
-    // Context visible
-    await expect(
-      page.getByText("You are aboard the USS Sentinel."),
-    ).toBeVisible();
   });
 
-  test("decision-maker with score, events, issues, and open decision with recs", async ({
+  test("decision-maker with score and open decision with recs", async ({
     page,
   }) => {
     await installMocks(
@@ -656,28 +505,13 @@ test.describe("Combined state — all invariants hold together @player", () => {
       snapshot({
         phase: "running",
         score: SCORE_TURN_3,
-        events: [EVENT_RUNNING],
-        issues: [ISSUE_ACTIVE_RELEASED],
         decisions: [DECISION_WITH_RECS],
       }),
     );
     await page.goto(playerUrl("co-01", "co"));
 
-    // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
-
-    // Events visible
-    await expect(page.getByText("NAV Report")).toBeVisible();
-
-    // Issues visible
-    await expect(page.getByText("Radar Failure")).toBeVisible();
-
-    // Decision: DM panel (no [Advisor] prefix) + advisor bubbles
-    await expect(page.locator("tfc-decision-panel")).toBeVisible();
-    await expect(page.getByText("[Advisor]")).not.toBeVisible();
-    await expect(page.getByText("Decision With Recs")).toBeVisible();
-    await expect(page.locator("tfc-advisor-bubbles")).toBeVisible();
-    await expect(page.locator(".advisor-bubble__count")).toContainText("2");
+    // Turn banner visible
+    await expect(page.locator(".board-turn-banner")).toBeVisible();
 
     // Footer: role label for decision maker (Commanding Officer)
     await expect(
@@ -685,7 +519,7 @@ test.describe("Combined state — all invariants hold together @player", () => {
     ).toBeVisible();
   });
 
-  test("paused with no score, no events, no issues, no decisions", async ({
+  test("paused with no score, no decisions", async ({
     page,
   }) => {
     await installMocks(
@@ -704,19 +538,10 @@ test.describe("Combined state — all invariants hold together @player", () => {
     // Phase badge shows paused
     await expect(page.locator("tfc-phase-badge")).toContainText("paused");
 
-    // No score elements
-    await expect(page.locator("tfc-score-bar")).not.toBeVisible();
-
-    // Empty states
-    await expect(page.getByText("No Events intercepted.")).toBeVisible();
-    await expect(page.getByText("No Issues detected. Systems nominal.")).toBeVisible();
+    // No turn number
+    await expect(page.locator(".board-turn-banner__turn")).not.toBeVisible();
 
     // No decision overlay
     await expect(page.locator("tfc-decision-panel")).not.toBeVisible();
-
-    // Issue details placeholder
-    await expect(
-      page.getByText("Select a threat vector to inspect."),
-    ).toBeVisible();
   });
 });

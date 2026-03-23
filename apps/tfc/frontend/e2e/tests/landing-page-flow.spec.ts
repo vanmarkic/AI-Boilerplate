@@ -66,7 +66,7 @@ test.describe("Scenario picker @home @scenario-builder", () => {
     await page.getByText("Run Exercise").click();
 
     await expect(page.getByText("Hospital MCI")).toBeVisible();
-    await expect(page.getByText("2 roles")).toBeVisible();
+    await expect(page.getByText("2 stations")).toBeVisible();
     await expect(
       page.getByText("Collaborative", { exact: true }),
     ).toBeVisible();
@@ -108,7 +108,7 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await page.goto("/home");
 
     await expect(page.getByText("Hospital MCI")).toBeVisible();
-    await expect(page.getByText("0 / 2 players")).toBeVisible();
+    await expect(page.getByText("0 / 2 crew")).toBeVisible();
     await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
     await expect(page.getByText("Navigator (NAV)")).toBeVisible();
   });
@@ -132,7 +132,7 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByRole("button", { name: "Join Exercise" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Join Operation" })).toBeVisible();
   });
 
   test("shows existing participants in lobby", async ({ page, mockApi }) => {
@@ -156,7 +156,7 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await page.goto("/home");
 
     await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("1 / 2 players")).toBeVisible();
+    await expect(page.getByText("1 / 2 crew")).toBeVisible();
   });
 });
 
@@ -181,7 +181,7 @@ test.describe(
       await page.getByText("Hospital MCI").click();
 
       // Step 3: Mode picker should show play-mode options
-      await expect(page.getByText("How do you want to play?")).toBeVisible();
+      await expect(page.getByText("Select Operation Type")).toBeVisible();
       await expect(page.getByText("Full Team")).toBeVisible();
       await expect(page.getByText("2 Players")).toBeVisible();
       await expect(page.getByText("Practice (Solo)")).toBeVisible();
@@ -228,6 +228,6 @@ test.describe("Role slots @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Game Master (Trainer)")).toBeVisible();
+    await expect(page.getByText("Game Master")).toBeVisible();
   });
 });

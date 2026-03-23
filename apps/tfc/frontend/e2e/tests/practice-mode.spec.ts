@@ -228,7 +228,7 @@ test.describe("Waiting room — practice mode UI @waiting-room @practice", () =>
     await page.getByRole("button", { name: "Practice (Solo)" }).click();
 
     await expect(
-      page.getByText("Practice mode — you'll play all roles."),
+      page.getByText("Practice mode: you'll handle all roles solo."),
     ).toBeVisible();
   });
 
@@ -245,7 +245,7 @@ test.describe("Waiting room — practice mode UI @waiting-room @practice", () =>
     await page.getByRole("button", { name: "Practice (Solo)" }).click();
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeEnabled();
   });
 });

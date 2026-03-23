@@ -88,7 +88,7 @@ test.describe("Waiting room view @waiting-room", () => {
 
     await page.goto(waitingRoomUrl(me.id));
 
-    await expect(page.getByText("Waiting Room")).toBeVisible();
+    await expect(page.getByText("Operations Lobby")).toBeVisible();
   });
 
   test("leave button is always visible", async ({ page, mockApi }) => {
@@ -126,7 +126,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
     await page.goto(waitingRoomUrl(gm.id));
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeVisible();
   });
 
@@ -145,7 +145,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
     await page.goto(waitingRoomUrl(player.id));
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 
@@ -167,7 +167,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
 
     await page.goto(waitingRoomUrl(gm.id));
 
-    await page.getByRole("button", { name: /Start Exercise/ }).click();
+    await page.getByRole("button", { name: /Deploy/ }).click();
 
     await expect(page).toHaveURL(/\/gm/);
     await expect(page).toHaveURL(/exerciseId=200/);
