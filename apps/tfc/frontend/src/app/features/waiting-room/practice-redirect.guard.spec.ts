@@ -66,9 +66,7 @@ describe("practiceRedirectGuard", () => {
 
   it("allows navigation when exercise fetch fails", () =>
     new Promise<void>((done) => {
-      exerciseApi.get.mockReturnValue(
-        throwError(() => new Error("Not found")),
-      );
+      exerciseApi.get.mockReturnValue(throwError(() => new Error("Not found")));
 
       const result$ = runGuard({ exerciseId: "99" });
       (result$ as ReturnType<typeof of>).subscribe((val) => {

@@ -6,9 +6,7 @@ import {
 } from "@angular/core";
 import { RouterLink } from "@angular/router";
 import { BadgeComponent } from "@aspect/ui";
-import type {
-  TurnCardConfig,
-} from "../../core/scenario-api.service";
+import type { TurnCardConfig } from "../../core/scenario-api.service";
 import type { BlueCardDef } from "../../core/domain-config-api.service";
 import { ScenarioBuilderStore } from "./scenario-builder.store";
 
@@ -66,9 +64,7 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
           }
         </div>
       } @empty {
-        <p class="text-muted-foreground text-sm">
-          No cards in catalog.
-        </p>
+        <p class="text-muted-foreground text-sm">No cards in catalog.</p>
       }
 
       <a routerLink="/foundation" class="text-sm text-muted-foreground">

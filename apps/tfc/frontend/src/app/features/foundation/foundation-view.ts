@@ -65,7 +65,7 @@ import {
             [disabled]="store.saving()"
             (click)="save()"
           >
-            {{ store.saving() ? "Saving\u2026" : "Save" }}
+            {{ store.saving() ? "Saving…" : "Save" }}
           </button>
         </div>
 

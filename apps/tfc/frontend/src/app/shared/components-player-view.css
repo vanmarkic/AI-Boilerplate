@@ -459,7 +459,9 @@
     cursor: pointer;
     font-size: var(--font-size-sm);
     color: var(--color-foreground);
-    transition: background 150ms ease, border-color 150ms ease;
+    transition:
+      background 150ms ease,
+      border-color 150ms ease;
   }
   .role-card__option input[type="radio"],
   .role-card__option input[type="checkbox"] {
@@ -543,15 +545,21 @@
     z-index: 50;
     background: radial-gradient(
       ellipse at center,
-      transparent calc(100% - 100% * var(--stress-vignette-max) * var(--stress-severity)),
+      transparent
+        calc(100% - 100% * var(--stress-vignette-max) * var(--stress-severity)),
       oklch(0% 0 0 / calc(0.7 * var(--stress-severity))) 100%
     );
     animation: stress-pulse var(--stress-pulse-duration) ease-in-out infinite;
   }
 
   @keyframes stress-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: calc(0.5 + 0.5 * (1 - var(--stress-severity))); }
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: calc(0.5 + 0.5 * (1 - var(--stress-severity)));
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -563,16 +571,27 @@
     }
   }
 
-/* Shake targets the page content, not the overlay */
-body.stress-shaking {
-  animation: stress-shake 0.08s linear infinite;
-}
+  /* Shake targets the page content, not the overlay */
+  body.stress-shaking {
+    animation: stress-shake 0.08s linear infinite;
+  }
 
-@keyframes stress-shake {
-  0%   { translate: 0 0; }
-  25%  { translate: var(--stress-shake) calc(-1 * var(--stress-shake)); }
-  50%  { translate: calc(-1 * var(--stress-shake)) var(--stress-shake); }
-  75%  { translate: var(--stress-shake) var(--stress-shake); }
-  100% { translate: calc(-0.5 * var(--stress-shake)) calc(-0.5 * var(--stress-shake)); }
-}
+  @keyframes stress-shake {
+    0% {
+      translate: 0 0;
+    }
+    25% {
+      translate: var(--stress-shake) calc(-1 * var(--stress-shake));
+    }
+    50% {
+      translate: calc(-1 * var(--stress-shake)) var(--stress-shake);
+    }
+    75% {
+      translate: var(--stress-shake) var(--stress-shake);
+    }
+    100% {
+      translate: calc(-0.5 * var(--stress-shake))
+        calc(-0.5 * var(--stress-shake));
+    }
+  }
 }

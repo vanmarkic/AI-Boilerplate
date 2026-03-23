@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from "@angular/core/testing";
 import { Component, signal } from "@angular/core";
-import { RoleCardComponent, type RoleCardSubmission } from "./role-card.component";
+import {
+  RoleCardComponent,
+  type RoleCardSubmission,
+} from "./role-card.component";
 import type { RoleCard } from "./role-card.types";
 import type { SystemSnapshot } from "../../core/generated/state-changes.types";
 
@@ -96,15 +99,21 @@ describe("RoleCardComponent", () => {
 
   describe("canSubmit", () => {
     it("disables submit when no option is selected", () => {
-      const btn = fixture.nativeElement.querySelector("button") as HTMLButtonElement;
+      const btn = fixture.nativeElement.querySelector(
+        "button",
+      ) as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
     it("enables submit after selecting a regular option", () => {
-      const label = fixture.nativeElement.querySelector(".role-card__option") as HTMLElement;
+      const label = fixture.nativeElement.querySelector(
+        ".role-card__option",
+      ) as HTMLElement;
       label.querySelector("input")!.click();
       fixture.detectChanges();
-      const btn = fixture.nativeElement.querySelector("button") as HTMLButtonElement;
+      const btn = fixture.nativeElement.querySelector(
+        "button",
+      ) as HTMLButtonElement;
       expect(btn.disabled).toBe(false);
     });
 
@@ -122,11 +131,15 @@ describe("RoleCardComponent", () => {
       host.systems.set(makeSystems());
       fixture.detectChanges();
 
-      const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+      const input = fixture.nativeElement.querySelector(
+        "input",
+      ) as HTMLInputElement;
       input.click();
       fixture.detectChanges();
 
-      const btn = fixture.nativeElement.querySelector("button") as HTMLButtonElement;
+      const btn = fixture.nativeElement.querySelector(
+        "button",
+      ) as HTMLButtonElement;
       expect(btn.disabled).toBe(true);
     });
 
@@ -145,17 +158,23 @@ describe("RoleCardComponent", () => {
       fixture.detectChanges();
 
       // Select the option
-      const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+      const input = fixture.nativeElement.querySelector(
+        "input",
+      ) as HTMLInputElement;
       input.click();
       fixture.detectChanges();
 
       // Select a system
-      const select = fixture.nativeElement.querySelector("select") as HTMLSelectElement;
+      const select = fixture.nativeElement.querySelector(
+        "select",
+      ) as HTMLSelectElement;
       select.value = "radar";
       select.dispatchEvent(new Event("change"));
       fixture.detectChanges();
 
-      const btn = fixture.nativeElement.querySelector("button") as HTMLButtonElement;
+      const btn = fixture.nativeElement.querySelector(
+        "button",
+      ) as HTMLButtonElement;
       expect(btn.disabled).toBe(false);
     });
   });
@@ -176,18 +195,24 @@ describe("RoleCardComponent", () => {
       fixture.detectChanges();
 
       // Select the option first
-      const input = fixture.nativeElement.querySelector("input") as HTMLInputElement;
+      const input = fixture.nativeElement.querySelector(
+        "input",
+      ) as HTMLInputElement;
       input.click();
       fixture.detectChanges();
 
       // Pick a system
-      const select = fixture.nativeElement.querySelector("select") as HTMLSelectElement;
+      const select = fixture.nativeElement.querySelector(
+        "select",
+      ) as HTMLSelectElement;
       select.value = "sonar";
       select.dispatchEvent(new Event("change"));
       fixture.detectChanges();
 
       // Submit
-      const btn = fixture.nativeElement.querySelector("button") as HTMLButtonElement;
+      const btn = fixture.nativeElement.querySelector(
+        "button",
+      ) as HTMLButtonElement;
       btn.click();
       fixture.detectChanges();
 
@@ -218,7 +243,8 @@ describe("RoleCardComponent", () => {
       expect(fixture.nativeElement.querySelector("select")).toBeNull();
 
       // Select the targets_system option (second label)
-      const labels = fixture.nativeElement.querySelectorAll(".role-card__option");
+      const labels =
+        fixture.nativeElement.querySelectorAll(".role-card__option");
       labels[1].querySelector("input")!.click();
       fixture.detectChanges();
 
@@ -241,8 +267,11 @@ describe("RoleCardComponent", () => {
       host.card.set(makeCard({ status: "active" }));
       fixture.detectChanges();
 
-      expect(fixture.nativeElement.querySelector("input[type='radio']")).toBeNull();
-      const options = fixture.nativeElement.querySelectorAll(".role-card__option");
+      expect(
+        fixture.nativeElement.querySelector("input[type='radio']"),
+      ).toBeNull();
+      const options =
+        fixture.nativeElement.querySelectorAll(".role-card__option");
       expect(options.length).toBeGreaterThan(0);
     });
 

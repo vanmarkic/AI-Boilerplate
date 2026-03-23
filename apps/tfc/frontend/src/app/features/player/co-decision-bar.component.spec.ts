@@ -8,9 +8,7 @@ import type { ActiveDecision } from "../../core/decision-api.service";
 import type { RoleDef } from "../../core/scenario-api.service";
 import type { SystemSnapshot } from "../../core/generated/state-changes.types";
 
-function makeDecision(
-  overrides: Partial<ActiveDecision> = {},
-): ActiveDecision {
+function makeDecision(overrides: Partial<ActiveDecision> = {}): ActiveDecision {
   return {
     id: "d1",
     event_id: "e1",
@@ -154,9 +152,7 @@ describe("CoDecisionBarComponent", () => {
   });
 
   it("supports multi-choice toggle (select and deselect)", () => {
-    host.decision.set(
-      makeDecision({ question_type: "multi_choice" }),
-    );
+    host.decision.set(makeDecision({ question_type: "multi_choice" }));
     fixture.detectChanges();
 
     const options = fixture.nativeElement.querySelectorAll(
@@ -193,9 +189,7 @@ describe("CoDecisionBarComponent", () => {
     fixture.detectChanges();
 
     // Change the decision
-    host.decision.set(
-      makeDecision({ id: "d2", title: "New decision" }),
-    );
+    host.decision.set(makeDecision({ id: "d2", title: "New decision" }));
     fixture.detectChanges();
 
     const btn = fixture.nativeElement.querySelector(

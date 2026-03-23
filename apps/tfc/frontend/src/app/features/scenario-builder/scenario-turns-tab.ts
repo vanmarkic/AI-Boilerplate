@@ -57,9 +57,7 @@ export class ScenarioTurnsTabComponent implements OnInit {
 
   protected readonly selectedTurn = computed<TurnDefinition | null>(() => {
     const turns = this.store.content().turns ?? [];
-    return (
-      turns.find((t) => t.turn_index === this.selectedTurnIndex()) ?? null
-    );
+    return turns.find((t) => t.turn_index === this.selectedTurnIndex()) ?? null;
   });
 
   ngOnInit(): void {

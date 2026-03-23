@@ -11,7 +11,10 @@ export function addTurn(
   turn: TurnDefinition,
 ): ScenarioContent {
   const turns = content.turns ?? [];
-  return { ...content, turns: [...turns, { ...turn, turn_index: turns.length }] };
+  return {
+    ...content,
+    turns: [...turns, { ...turn, turn_index: turns.length }],
+  };
 }
 
 /** Remove a turn by turn_index and renumber the remaining turns. */
@@ -71,9 +74,7 @@ export function addInjectToTurn(
   inject: TurnInjectDef,
 ): ScenarioContent {
   const turns = (content.turns ?? []).map((t) =>
-    t.turn_index === turnIndex
-      ? { ...t, injects: [...t.injects, inject] }
-      : t,
+    t.turn_index === turnIndex ? { ...t, injects: [...t.injects, inject] } : t,
   );
   return { ...content, turns };
 }

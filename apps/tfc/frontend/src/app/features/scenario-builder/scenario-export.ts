@@ -77,7 +77,8 @@ function buildLlmSchema(domain: DomainConfigResponse): LlmSchema {
         "array of {system_id, label, category, operational_state, power_state} — starting board state; IDs must match foundation.systems",
       initial_warfare_domains:
         "array of {domain_id, label, initial_threat_level} — starting domain state; IDs must match foundation.warfare_domains",
-      turns: "TurnDefinition[] — the primary authored content (see turn_structure)",
+      turns:
+        "TurnDefinition[] — the primary authored content (see turn_structure)",
       score_tier_thresholds:
         '{"lo": number, "mid": number} — fraction thresholds for Lo/Mid/Hi scoring tiers',
     },
@@ -126,20 +127,17 @@ function buildLlmSchema(domain: DomainConfigResponse): LlmSchema {
           card_id: "SWB10",
           score: 8,
           stress_delta: 0,
-          system_effects: [
-            { system_id: "cic_network", power_state: false },
-          ],
+          system_effects: [{ system_id: "cic_network", power_state: false }],
         },
         { card_id: "SWB01", score: 4, stress_delta: 1 },
       ],
       max_selections: 2,
       base_stress_delta: 1,
-      domain_effects_on_start: [
-        { domain_id: "asuw", threat_level: "yellow" },
-      ],
+      domain_effects_on_start: [{ domain_id: "asuw", threat_level: "yellow" }],
       best_path: {
         card_ids: ["SWB20", "SWB10"],
-        notes: "General Quarters + Isolate network to contain lateral movement.",
+        notes:
+          "General Quarters + Isolate network to contain lateral movement.",
       },
       design_notes:
         "Escalation turn — first kinetic threat. Tests whether players prioritise defence posture over investigation.",

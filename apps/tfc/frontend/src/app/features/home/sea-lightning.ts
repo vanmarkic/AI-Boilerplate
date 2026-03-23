@@ -26,8 +26,14 @@ export interface Lightning {
 
 /** Grid-edge neighbours: 4 cardinal + 4 diagonal (follow wireframe lines). */
 const EDGE_DIRS: [number, number][] = [
-  [1, 0], [-1, 0], [0, 1], [0, -1],
-  [1, 1], [1, -1], [-1, 1], [-1, -1],
+  [1, 0],
+  [-1, 0],
+  [0, 1],
+  [0, -1],
+  [1, 1],
+  [1, -1],
+  [-1, 1],
+  [-1, -1],
 ];
 
 function tracePath(
@@ -40,7 +46,8 @@ function tracePath(
   const key = (c: number, r: number) => r * cols + c;
 
   // All 8 directions for varied bolt angles
-  const [headCol, headRow] = EDGE_DIRS[Math.floor(Math.random() * EDGE_DIRS.length)];
+  const [headCol, headRow] =
+    EDGE_DIRS[Math.floor(Math.random() * EDGE_DIRS.length)];
 
   // Start at the opposite edge so the bolt traverses the sea
   let col: number, row: number;
@@ -52,7 +59,10 @@ function tracePath(
   else row = Math.floor(Math.random() * rows);
 
   visited.add(key(col, row));
-  path.push({ x: positions.getX(key(col, row)), z: positions.getZ(key(col, row)) });
+  path.push({
+    x: positions.getX(key(col, row)),
+    z: positions.getZ(key(col, row)),
+  });
 
   for (let i = 0; i < PATH_EDGES; i++) {
     let moved = false;
@@ -60,7 +70,13 @@ function tracePath(
     if (Math.random() < 0.6) {
       const fc = col + headCol;
       const fr = row + headRow;
-      if (fc >= 0 && fc < cols && fr >= 0 && fr < rows && !visited.has(key(fc, fr))) {
+      if (
+        fc >= 0 &&
+        fc < cols &&
+        fr >= 0 &&
+        fr < rows &&
+        !visited.has(key(fc, fr))
+      ) {
         col = fc;
         row = fr;
         moved = true;
@@ -72,7 +88,13 @@ function tracePath(
       for (const [dc, dr] of shuffled) {
         const nc = col + dc;
         const nr = row + dr;
-        if (nc >= 0 && nc < cols && nr >= 0 && nr < rows && !visited.has(key(nc, nr))) {
+        if (
+          nc >= 0 &&
+          nc < cols &&
+          nr >= 0 &&
+          nr < rows &&
+          !visited.has(key(nc, nr))
+        ) {
           col = nc;
           row = nr;
           moved = true;
@@ -87,10 +109,12 @@ function tracePath(
     const vi = key(col, row);
     path.push({ x: positions.getX(vi), z: positions.getZ(vi) });
 
-    if ((headCol === 1 && col >= cols - 2) ||
-        (headCol === -1 && col <= 1) ||
-        (headRow === 1 && row >= rows - 2) ||
-        (headRow === -1 && row <= 1)) {
+    if (
+      (headCol === 1 && col >= cols - 2) ||
+      (headCol === -1 && col <= 1) ||
+      (headRow === 1 && row >= rows - 2) ||
+      (headRow === -1 && row <= 1)
+    ) {
       break;
     }
   }
@@ -179,9 +203,10 @@ export function updateLightning(l: Lightning, t: number): boolean {
 
   // Global opacity: full during travel+trail, then slowly fade entire bolt
   const globalFadeStart = travelDuration + TRAIL_FADE;
-  const globalOpacity = age > globalFadeStart
-    ? Math.max(0, 1 - (age - globalFadeStart) / GLOBAL_FADE)
-    : 1;
+  const globalOpacity =
+    age > globalFadeStart
+      ? Math.max(0, 1 - (age - globalFadeStart) / GLOBAL_FADE)
+      : 1;
 
   // Current head position (fractional index into waypoints)
   const headIdx = Math.min(age * TRAVEL_SPEED, n - 1);
@@ -189,7 +214,9 @@ export function updateLightning(l: Lightning, t: number): boolean {
 
   // Update positions to ride the wave
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- THREE.js geometry attributes
-  const posBuf = l.line.geometry.attributes["position"] as THREE.BufferAttribute;
+  const posBuf = l.line.geometry.attributes[
+    "position"
+  ] as THREE.BufferAttribute;
   for (let i = 0; i < n; i++) {
     const wp = l.waypoints[i];
     const off = i * 3;
@@ -234,7 +261,11 @@ export function updateLightning(l: Lightning, t: number): boolean {
 
   // Head brightness: full while travelling, fade after done
   const headAlive = age < travelDuration;
-  const headOpacity = (headAlive ? 0.4 : Math.max(0, 1 - (age - travelDuration) / TRAIL_FADE) * 0.2) * globalOpacity;
+  const headOpacity =
+    (headAlive
+      ? 0.4
+      : Math.max(0, 1 - (age - travelDuration) / TRAIL_FADE) * 0.2) *
+    globalOpacity;
   (l.head.material as THREE.SpriteMaterial).opacity = headOpacity;
   l.headLight.intensity = (headAlive ? 2 : headOpacity * 2) * globalOpacity;
 

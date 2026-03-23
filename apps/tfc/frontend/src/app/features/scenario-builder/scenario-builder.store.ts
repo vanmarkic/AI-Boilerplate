@@ -237,27 +237,43 @@ export const ScenarioBuilderStore = signalStore(
     },
 
     removeTurn(turnIndex: number): void {
-      patchState(store, { content: turnMut.removeTurn(store.content(), turnIndex) });
+      patchState(store, {
+        content: turnMut.removeTurn(store.content(), turnIndex),
+      });
     },
 
     updateTurn(turnIndex: number, updates: Partial<TurnDefinition>): void {
-      patchState(store, { content: turnMut.updateTurn(store.content(), turnIndex, updates) });
+      patchState(store, {
+        content: turnMut.updateTurn(store.content(), turnIndex, updates),
+      });
     },
 
     reorderTurns(fromIndex: number, toIndex: number): void {
-      patchState(store, { content: turnMut.reorderTurns(store.content(), fromIndex, toIndex) });
+      patchState(store, {
+        content: turnMut.reorderTurns(store.content(), fromIndex, toIndex),
+      });
     },
 
     duplicateTurn(turnIndex: number): void {
-      patchState(store, { content: turnMut.duplicateTurn(store.content(), turnIndex) });
+      patchState(store, {
+        content: turnMut.duplicateTurn(store.content(), turnIndex),
+      });
     },
 
     addInjectToTurn(turnIndex: number, inject: TurnInjectDef): void {
-      patchState(store, { content: turnMut.addInjectToTurn(store.content(), turnIndex, inject) });
+      patchState(store, {
+        content: turnMut.addInjectToTurn(store.content(), turnIndex, inject),
+      });
     },
 
     removeInjectFromTurn(turnIndex: number, injectIndex: number): void {
-      patchState(store, { content: turnMut.removeInjectFromTurn(store.content(), turnIndex, injectIndex) });
+      patchState(store, {
+        content: turnMut.removeInjectFromTurn(
+          store.content(),
+          turnIndex,
+          injectIndex,
+        ),
+      });
     },
 
     updateInjectInTurn(
@@ -265,15 +281,26 @@ export const ScenarioBuilderStore = signalStore(
       injectIndex: number,
       updates: Partial<TurnInjectDef>,
     ): void {
-      patchState(store, { content: turnMut.updateInjectInTurn(store.content(), turnIndex, injectIndex, updates) });
+      patchState(store, {
+        content: turnMut.updateInjectInTurn(
+          store.content(),
+          turnIndex,
+          injectIndex,
+          updates,
+        ),
+      });
     },
 
     addCardToTurn(turnIndex: number, cardConfig: TurnCardConfig): void {
-      patchState(store, { content: turnMut.addCardToTurn(store.content(), turnIndex, cardConfig) });
+      patchState(store, {
+        content: turnMut.addCardToTurn(store.content(), turnIndex, cardConfig),
+      });
     },
 
     removeCardFromTurn(turnIndex: number, cardId: string): void {
-      patchState(store, { content: turnMut.removeCardFromTurn(store.content(), turnIndex, cardId) });
+      patchState(store, {
+        content: turnMut.removeCardFromTurn(store.content(), turnIndex, cardId),
+      });
     },
 
     updateCardInTurn(
@@ -281,7 +308,14 @@ export const ScenarioBuilderStore = signalStore(
       cardId: string,
       updates: Partial<TurnCardConfig>,
     ): void {
-      patchState(store, { content: turnMut.updateCardInTurn(store.content(), turnIndex, cardId, updates) });
+      patchState(store, {
+        content: turnMut.updateCardInTurn(
+          store.content(),
+          turnIndex,
+          cardId,
+          updates,
+        ),
+      });
     },
 
     setBriefing(briefing: string): void {
@@ -308,13 +342,17 @@ export const ScenarioBuilderStore = signalStore(
       });
     },
 
-    setStressEffectPreset(stress_effect_preset: 'off' | 'mild' | 'standard' | 'intense'): void {
+    setStressEffectPreset(
+      stress_effect_preset: "off" | "mild" | "standard" | "intense",
+    ): void {
       patchState(store, {
         content: { ...store.content(), stress_effect_preset },
       });
     },
 
-    setScoreTierThresholds(score_tier_thresholds: Record<string, number>): void {
+    setScoreTierThresholds(
+      score_tier_thresholds: Record<string, number>,
+    ): void {
       patchState(store, {
         content: { ...store.content(), score_tier_thresholds },
       });
@@ -326,7 +364,9 @@ export const ScenarioBuilderStore = signalStore(
       });
     },
 
-    setInitialWarfareDomains(initial_warfare_domains: ScenarioWarfareDomainDef[]): void {
+    setInitialWarfareDomains(
+      initial_warfare_domains: ScenarioWarfareDomainDef[],
+    ): void {
       patchState(store, {
         content: { ...store.content(), initial_warfare_domains },
       });

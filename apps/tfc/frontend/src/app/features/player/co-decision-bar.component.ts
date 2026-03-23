@@ -77,9 +77,7 @@ export interface CoDecisionConfirmation {
       </div>
     } @else {
       <div class="co-decision-bar">
-        <div class="co-decision-bar__empty">
-          Waiting for next decision...
-        </div>
+        <div class="co-decision-bar__empty">Waiting for next decision...</div>
       </div>
     }
   `,

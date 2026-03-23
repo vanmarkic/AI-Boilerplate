@@ -20,9 +20,7 @@ export interface FieldDef {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonDirective, BadgeComponent],
   template: `
-    <h3 class="text-lg font-semibold">
-      {{ title() }} ({{ items().length }})
-    </h3>
+    <h3 class="text-lg font-semibold">{{ title() }} ({{ items().length }})</h3>
 
     @for (item of items(); track item[idField()]) {
       <div
@@ -88,12 +86,7 @@ export interface FieldDef {
               }
             }
             <div class="flex gap-sm">
-              <button
-                uiButton
-                variant="default"
-                size="sm"
-                (click)="saveEdit()"
-              >
+              <button uiButton variant="default" size="sm" (click)="saveEdit()">
                 Save
               </button>
               <button
@@ -110,9 +103,7 @@ export interface FieldDef {
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-xs">
               <ui-badge variant="secondary">{{ item[idField()] }}</ui-badge>
-              <span class="text-sm font-medium">{{
-                item[labelField()]
-              }}</span>
+              <span class="text-sm font-medium">{{ item[labelField()] }}</span>
             </div>
             <div class="flex gap-xs">
               <button
@@ -186,12 +177,7 @@ export interface FieldDef {
           }
         }
         <div class="flex gap-sm">
-          <button
-            uiButton
-            variant="default"
-            size="sm"
-            (click)="confirmAdd()"
-          >
+          <button uiButton variant="default" size="sm" (click)="confirmAdd()">
             Add
           </button>
           <button
@@ -206,12 +192,7 @@ export interface FieldDef {
       </div>
     } @else {
       <div class="p-sm border-t">
-        <button
-          uiButton
-          variant="outline"
-          size="sm"
-          (click)="startAdd()"
-        >
+        <button uiButton variant="outline" size="sm" (click)="startAdd()">
           + Add {{ title() }}
         </button>
       </div>
