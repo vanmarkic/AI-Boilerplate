@@ -41,6 +41,11 @@
     --color-info: oklch(70% 0.08 245);
     --color-info-foreground: oklch(13% 0.008 250);
 
+    /* ── Overlay & effect tokens ─────────────────────── */
+    --overlay-scanline: oklch(0% 0 0 / 0.06);
+    --overlay-vignette: oklch(0% 0 0 / 0.70);
+    --stress-vignette-opacity: 0.7;
+
     /* ── Map surfaces ──────────────────────────────────── */
     --color-map-background: oklch(13% 0.008 250);
     --color-map-land: oklch(15% 0.008 250);
@@ -114,7 +119,7 @@
     /* ── Glow + Glass (off by default) ───────────────── */
     --glow-strength: 0;
     --glass-strength: 0;
-    --glow-color: oklch(62% 0.10 245);
+    --glow-color: var(--color-primary);
     --glow-sm:      0 0 14px oklch(62% 0.10 245 / calc(0.5 * var(--glow-strength)));
     --glow-primary: 0 0 28px oklch(62% 0.10 245 / calc(0.75 * var(--glow-strength)));
     --glow-lg:      0 0 48px oklch(62% 0.10 245 / calc(1.0 * var(--glow-strength)));

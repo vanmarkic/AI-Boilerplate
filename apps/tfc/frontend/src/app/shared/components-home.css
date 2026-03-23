@@ -43,8 +43,8 @@
       0deg,
       transparent,
       transparent 2px,
-      oklch(0% 0 0 / 6%) 2px,
-      oklch(0% 0 0 / 6%) 4px
+      var(--overlay-scanline) 2px,
+      var(--overlay-scanline) 4px
     );
     pointer-events: none;
     border-radius: var(--radius-sm);

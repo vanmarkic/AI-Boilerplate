@@ -29,7 +29,8 @@
     /* Emboss tokens (inset highlights + shadows) */
     --emboss-inset:
       inset 0 1px 0 oklch(100% 0 0 / 6%), inset 0 -1px 0 oklch(0% 0 0 / 20%);
-    --emboss-border: 2px solid oklch(28% 0.03 55);
+    --emboss-border-color: oklch(28% 0.03 55);
+    --emboss-border: 2px solid var(--emboss-border-color);
   }
 }
 
