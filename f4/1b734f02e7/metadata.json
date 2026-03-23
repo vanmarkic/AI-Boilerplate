@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "f41b734f02e7",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "apps/tfc/backend/features/scenario/seed_validation_test.py"
+  ],
+  "sessions": [
+    {
+      "metadata": "/f4/1b734f02e7/0/metadata.json",
+      "transcript": "/f4/1b734f02e7/0/full.jsonl",
+      "content_hash": "/f4/1b734f02e7/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 1,
+    "cache_creation_tokens": 476,
+    "cache_read_tokens": 39346,
+    "output_tokens": 134,
+    "api_call_count": 1
+  }
+}
