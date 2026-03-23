@@ -14,6 +14,9 @@ from fastapi import WebSocket
 logger = logging.getLogger(__name__)
 
 
+LOBBY_CHANNEL = 0  # Sentinel exercise_id for home-page lobby connections
+
+
 class ConnectionManager:
     """Manages WebSocket connections grouped by exercise_id and role."""
 
@@ -113,6 +116,10 @@ class ConnectionManager:
         return [
             pid for _ws, _role, pid in self._connections.get(exercise_id, []) if pid is not None
         ]
+
+    async def broadcast_lobby(self, message: dict[str, object]) -> None:
+        """Send a JSON message to all clients connected to the lobby channel."""
+        await self.broadcast(LOBBY_CHANNEL, message)
 
 
 # Global singleton

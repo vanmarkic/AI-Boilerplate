@@ -107,6 +107,7 @@ async def join_waiting_room(
         exercise_id,
         _participants_payload(exercise_id),
     )
+    await connection_manager.broadcast_lobby({"type": "lobby_update"})
     return ParticipantResponse(**participant.to_dict())
 
 
@@ -181,3 +182,4 @@ async def leave_waiting_room(
         exercise_id,
         _participants_payload(exercise_id),
     )
+    await connection_manager.broadcast_lobby({"type": "lobby_update"})

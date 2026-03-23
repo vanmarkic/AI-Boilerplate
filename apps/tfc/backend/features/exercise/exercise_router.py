@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from core.dependencies import get_exercise_service, get_scenario_service
 from engine.game_modes import GM_CLASSIC
+from features.exercise.adapters.connection_manager import connection_manager
 from features.exercise.exercise_schema import (
     CreateExerciseRequest,
     ExerciseResponse,
@@ -30,7 +31,10 @@ async def create_exercise(
     request: CreateExerciseRequest,
     service: ExerciseService = Depends(get_exercise_service),
 ) -> ExerciseResponse:
-    return await service.create_exercise(request)
+    result = await service.create_exercise(request)
+    if not request.practice_mode:
+        await connection_manager.broadcast_lobby({"type": "lobby_update"})
+    return result
 
 
 @router.get(
