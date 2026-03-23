@@ -108,6 +108,7 @@ export function createLightning(
   const params = planeGeo.parameters;
   const cols = params.widthSegments + 1;
   const rows = params.heightSegments + 1;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- THREE.js geometry attributes are always BufferAttribute
   const positions = planeGeo.attributes["position"] as THREE.BufferAttribute;
   const waypoints = tracePath(positions, cols, rows);
   const n = waypoints.length;
@@ -187,6 +188,7 @@ export function updateLightning(l: Lightning, t: number): boolean {
   const headI = Math.floor(headIdx);
 
   // Update positions to ride the wave
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- THREE.js geometry attributes
   const posBuf = l.line.geometry.attributes["position"] as THREE.BufferAttribute;
   for (let i = 0; i < n; i++) {
     const wp = l.waypoints[i];
@@ -198,6 +200,7 @@ export function updateLightning(l: Lightning, t: number): boolean {
   posBuf.needsUpdate = true;
 
   // Update per-vertex colors: bright at head, fading trail behind
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- THREE.js geometry attributes
   const colBuf = l.line.geometry.attributes["color"] as THREE.BufferAttribute;
   const r = BOLT_COLOR_THREE.r;
   const g = BOLT_COLOR_THREE.g;
@@ -241,6 +244,7 @@ export function updateLightning(l: Lightning, t: number): boolean {
 export function disposeLightning(scene: THREE.Scene, l: Lightning): void {
   scene.remove(l.line);
   l.line.geometry.dispose();
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- Line2 material is always Material
   (l.line.material as THREE.Material).dispose();
   scene.remove(l.head);
   (l.head.material as THREE.SpriteMaterial).dispose();

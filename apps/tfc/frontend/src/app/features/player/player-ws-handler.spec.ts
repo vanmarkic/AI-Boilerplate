@@ -2,9 +2,7 @@ import { describe, it, expect, beforeEach, vi } from "vitest";
 import { handlePlayerWsMessage } from "./player-ws-handler";
 
 describe("handlePlayerWsMessage", () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockStore: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockWs: any;
 
   beforeEach(() => {
