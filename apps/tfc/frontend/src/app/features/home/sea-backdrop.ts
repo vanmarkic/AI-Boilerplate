@@ -9,13 +9,6 @@ import {
 } from "@angular/core";
 import * as THREE from "three";
 import {
-  Convergence,
-  CONVERGENCE_INTERVAL,
-  createConvergence,
-  disposeConvergence,
-  updateConvergence,
-} from "./sea-convergence";
-import {
   Lightning,
   LIGHTNING_INTERVAL,
   createLightning,
@@ -24,12 +17,6 @@ import {
 } from "./sea-lightning";
 import {
   createGlowTexture,
-  MAX_SIGNALS,
-  Signal,
-  SIGNAL_COLORS,
-  SIGNAL_LIFESPAN,
-  SignalType,
-  SPAWN_INTERVAL,
   waveY,
 } from "./sea-signals";
 
@@ -65,12 +52,7 @@ export class SeaBackdrop implements OnDestroy {
   private animationId = 0;
   private resizeObserver!: ResizeObserver;
 
-  private signals: Signal[] = [];
-  private nextSpawn = 0;
   private glowTexture!: THREE.Texture;
-
-  private convergences: Convergence[] = [];
-  private nextConvergence = 2;
 
   private lightnings: Lightning[] = [];
   private nextLightning = 3;
@@ -98,13 +80,6 @@ export class SeaBackdrop implements OnDestroy {
     this.plane?.geometry.dispose();
     this.plane?.material.dispose();
     this.glowTexture?.dispose();
-    for (const s of this.signals) {
-      this.scene.remove(s.light, s.sprite);
-      s.sprite.material.dispose();
-    }
-    for (const c of this.convergences) {
-      disposeConvergence(this.scene, c);
-    }
     for (const l of this.lightnings) {
       disposeLightning(this.scene, l);
     }
@@ -127,7 +102,7 @@ export class SeaBackdrop implements OnDestroy {
     this.scene = new THREE.Scene();
     this.scene.background = bgColor;
     this.camera = new THREE.PerspectiveCamera(27, w / h, 0.1, 100);
-    this.camera.position.set(0, 1.6, 5);
+    this.camera.position.set(0, 6, 5);
     this.camera.lookAt(0, -0.4, -2);
 
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
@@ -142,13 +117,13 @@ export class SeaBackdrop implements OnDestroy {
     pl2.position.set(-4, 1, -2);
     this.scene.add(pl1, pl2);
 
-    const geo = new THREE.PlaneGeometry(24, 14, 18, 12);
+    const geo = new THREE.PlaneGeometry(24, 14, 180, 120);
     geo.rotateX(-Math.PI / 2);
     const mat = new THREE.MeshBasicMaterial({
       color: primary,
       wireframe: true,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.06,
     });
     this.plane = new THREE.Mesh(geo, mat);
     this.plane.position.y = -0.3;
@@ -158,88 +133,6 @@ export class SeaBackdrop implements OnDestroy {
     this.glowTexture = createGlowTexture();
     this.resizeObserver = new ResizeObserver(() => this.handleResize());
     this.resizeObserver.observe(canvas);
-  }
-
-  // ── Signals ────────────────────────────────────────────
-
-  private spawnSignal(t: number): void {
-    const types = [SignalType.Friendly, SignalType.Hostile, SignalType.Neutral];
-    const type = types[Math.floor(Math.random() * types.length)];
-    const color = SIGNAL_COLORS[type];
-    const x = (Math.random() - 0.5) * 14;
-    const z = (Math.random() - 0.5) * 8;
-    const light = new THREE.PointLight(color, 0, 5);
-    light.position.set(x, waveY(x, z, t), z);
-    this.scene.add(light);
-    const mat = new THREE.SpriteMaterial({
-      map: this.glowTexture,
-      color,
-      transparent: true,
-      opacity: 0,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(0.8, 0.8, 1);
-    sprite.position.copy(light.position);
-    this.scene.add(sprite);
-    this.signals.push({ type, x, z, birth: t, light, sprite });
-  }
-
-  private updateSignals(t: number): void {
-    if (t >= this.nextSpawn && this.signals.length < MAX_SIGNALS) {
-      this.spawnSignal(t);
-      this.nextSpawn = t + SPAWN_INTERVAL + Math.random() * SPAWN_INTERVAL;
-    }
-
-    for (let i = this.signals.length - 1; i >= 0; i--) {
-      const s = this.signals[i];
-      const age = t - s.birth;
-      const life = age / SIGNAL_LIFESPAN;
-
-      if (life >= 1) {
-        this.scene.remove(s.light, s.sprite);
-        (s.sprite.material as THREE.SpriteMaterial).dispose();
-        this.signals.splice(i, 1);
-        continue;
-      }
-
-      const fade =
-        life < 0.15 ? life / 0.15 : life > 0.7 ? (1 - life) / 0.3 : 1;
-
-      const pulse = 1 + Math.sin(age * 4) * 0.2;
-      const intensity = fade * pulse;
-
-      const y = waveY(s.x, s.z, t);
-      s.light.position.set(s.x, y + 0.25, s.z);
-      s.light.intensity = intensity * 3;
-      s.sprite.position.set(s.x, y + 0.25, s.z);
-      (s.sprite.material as THREE.SpriteMaterial).opacity = intensity * 0.9;
-      s.sprite.scale.setScalar(0.5 + intensity * 0.4);
-    }
-  }
-
-  // ── Convergences ─────────────────────────────────────────
-
-  private updateConvergences(t: number): void {
-    if (t >= this.nextConvergence) {
-      this.convergences.push(
-        createConvergence(
-          this.scene,
-          this.glowTexture,
-          this.themeColor,
-          this.plane.geometry,
-          t,
-        ),
-      );
-      this.nextConvergence = t + CONVERGENCE_INTERVAL + Math.random() * 2;
-    }
-    for (let i = this.convergences.length - 1; i >= 0; i--) {
-      if (!updateConvergence(this.convergences[i], t)) {
-        disposeConvergence(this.scene, this.convergences[i]);
-        this.convergences.splice(i, 1);
-      }
-    }
   }
 
   // ── Lightnings ──────────────────────────────────────────
@@ -286,8 +179,6 @@ export class SeaBackdrop implements OnDestroy {
     positions.needsUpdate = true;
     this.plane.geometry.computeVertexNormals();
 
-    this.updateSignals(t);
-    this.updateConvergences(t);
     this.updateLightnings(t);
     this.renderer.render(this.scene, this.camera);
   }
