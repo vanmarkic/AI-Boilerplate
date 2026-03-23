@@ -376,16 +376,14 @@ def build_engine_config(
     )
     game_mode = create_game_mode(content.game_mode, mode_config)
     # Detect turn-based authoring: turns with authored injects or cards
-    use_turns = bool(
-        content.turns
-        and any(t.injects or t.available_cards for t in content.turns)
-    )
+    use_turns = bool(content.turns and any(t.injects or t.available_cards for t in content.turns))
 
     if use_turns:
         # Generate events/decisions from turns, then convert via existing loaders
         turn_event_defs = generate_events_from_turns(content.turns)
         turn_decision_defs = generate_decisions_from_turns(
-            content.turns, blue_card_catalog=blue_card_catalog,
+            content.turns,
+            blue_card_catalog=blue_card_catalog,
         )
 
         # Build synthetic issues for each decision turn
