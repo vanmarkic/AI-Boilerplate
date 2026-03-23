@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "64c7e720d705",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "apps/main/frontend/src/app/features/weather/weather.component.ts",
+    "apps/main/frontend/src/app/features/weather/weather.store.ts",
+    "apps/main/frontend/src/app/shared/sse/event-source.service.spec.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/64/c7e720d705/0/metadata.json",
+      "transcript": "/64/c7e720d705/0/full.jsonl",
+      "content_hash": "/64/c7e720d705/0/content_hash.txt",
+      "prompt": "/64/c7e720d705/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 8,
+    "cache_creation_tokens": 4595,
+    "cache_read_tokens": 250551,
+    "output_tokens": 1753,
+    "api_call_count": 6
+  }
+}
