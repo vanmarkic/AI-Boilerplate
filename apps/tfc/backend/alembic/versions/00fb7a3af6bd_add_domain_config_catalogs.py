@@ -5,23 +5,31 @@ Revises: 006_add_practice_mode
 Create Date: 2026-03-22 20:31:48.133680
 
 """
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
+from alembic import op
+
 # revision identifiers, used by Alembic.
 revision: str = '00fb7a3af6bd'
-down_revision: Union[str, None] = '006_add_practice_mode'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | None = '006_add_practice_mode'
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    op.add_column('tfc_domain_configs', sa.Column('systems', postgresql.JSON(astext_type=sa.Text()), server_default='[]', nullable=False))
-    op.add_column('tfc_domain_configs', sa.Column('warfare_domains', postgresql.JSON(astext_type=sa.Text()), server_default='[]', nullable=False))
-    op.add_column('tfc_domain_configs', sa.Column('blue_card_catalog', postgresql.JSON(astext_type=sa.Text()), server_default='[]', nullable=False))
+    json_col = postgresql.JSON(astext_type=sa.Text())
+    op.add_column('tfc_domain_configs', sa.Column(
+        'systems', json_col, server_default='[]', nullable=False,
+    ))
+    op.add_column('tfc_domain_configs', sa.Column(
+        'warfare_domains', json_col, server_default='[]', nullable=False,
+    ))
+    op.add_column('tfc_domain_configs', sa.Column(
+        'blue_card_catalog', json_col, server_default='[]', nullable=False,
+    ))
 
 
 def downgrade() -> None:
