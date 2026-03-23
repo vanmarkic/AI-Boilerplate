@@ -15,7 +15,29 @@ import {
   disposeLightning,
   updateLightning,
 } from "./sea-lightning";
-import { createGlowTexture, waveY } from "./sea-signals";
+import { createGlowTexture } from "./sea-signals";
+
+const FRAME_INTERVAL = 1000 / 30; // 30fps cap
+
+const WAVE_VERTEX_SHADER = `
+uniform float uTime;
+void main() {
+  vec3 pos = position;
+  pos.y = sin(pos.x * 0.4 + uTime * 0.6) * 0.35
+        + sin(pos.z * 0.55 + uTime * 0.45) * 0.25
+        + sin((pos.x + pos.z) * 0.3 + uTime * 0.35) * 0.15
+        + sin(pos.x * 0.9 - uTime * 0.25) * 0.1;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
+}
+`;
+
+const WAVE_FRAGMENT_SHADER = `
+uniform vec3 uColor;
+uniform float uOpacity;
+void main() {
+  gl_FragColor = vec4(uColor, uOpacity);
+}
+`;
 
 @Component({
   selector: "tfc-sea-backdrop",
@@ -45,8 +67,9 @@ export class SeaBackdrop implements OnDestroy {
   private renderer!: THREE.WebGLRenderer;
   private scene!: THREE.Scene;
   private camera!: THREE.PerspectiveCamera;
-  private plane!: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial>;
+  private plane!: THREE.Mesh<THREE.PlaneGeometry, THREE.ShaderMaterial>;
   private animationId = 0;
+  private lastFrameTime = 0;
   private resizeObserver!: ResizeObserver;
 
   private glowTexture!: THREE.Texture;
@@ -116,11 +139,16 @@ export class SeaBackdrop implements OnDestroy {
 
     const geo = new THREE.PlaneGeometry(24, 14, 180, 120);
     geo.rotateX(-Math.PI / 2);
-    const mat = new THREE.MeshBasicMaterial({
-      color: primary,
+    const mat = new THREE.ShaderMaterial({
+      uniforms: {
+        uTime: { value: 0 },
+        uColor: { value: primary },
+        uOpacity: { value: 0.06 },
+      },
+      vertexShader: WAVE_VERTEX_SHADER,
+      fragmentShader: WAVE_FRAGMENT_SHADER,
       wireframe: true,
       transparent: true,
-      opacity: 0.06,
     });
     this.plane = new THREE.Mesh(geo, mat);
     this.plane.position.y = -0.3;
@@ -161,18 +189,11 @@ export class SeaBackdrop implements OnDestroy {
   private animate(time: number): void {
     this.animationId = requestAnimationFrame((t) => this.animate(t));
 
+    if (time - this.lastFrameTime < FRAME_INTERVAL) return;
+    this.lastFrameTime = time;
+
     const t = time * 0.001;
-    const positions = this.plane.geometry.attributes["position"];
-    const count = positions.count;
-
-    for (let i = 0; i < count; i++) {
-      const x = positions.getX(i);
-      const z = positions.getZ(i);
-      positions.setY(i, waveY(x, z, t));
-    }
-
-    positions.needsUpdate = true;
-    this.plane.geometry.computeVertexNormals();
+    this.plane.material.uniforms["uTime"].value = t;
 
     this.updateLightnings(t);
     this.renderer.render(this.scene, this.camera);
