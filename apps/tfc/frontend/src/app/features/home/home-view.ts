@@ -1,10 +1,12 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
   OnInit,
   signal,
 } from "@angular/core";
+import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { HttpClient } from "@angular/common/http";
 import { Router, RouterLink } from "@angular/router";
 import { SeaBackdrop } from "./sea-backdrop";
@@ -12,6 +14,7 @@ import { ScenarioPicker } from "./scenario-picker";
 import type { JoinableExercise } from "./lobby-preview";
 import { ExerciseApiService } from "../../core/exercise-api.service";
 import { EngineApiService } from "../../core/engine-api.service";
+import { LobbyWsService } from "../../core/lobby-ws.service";
 import { WaitingRoomApiService } from "../../core/waiting-room-api.service";
 import type { ScenarioResponse } from "../../core/scenario-api.service";
 import { environment } from "../../core/environment";
@@ -142,7 +145,9 @@ export class HomeView implements OnInit {
   private readonly router = inject(Router);
   private readonly exerciseApi = inject(ExerciseApiService);
   private readonly engineApi = inject(EngineApiService);
+  private readonly lobbyWs = inject(LobbyWsService);
   private readonly waitingRoomApi = inject(WaitingRoomApiService);
+  private readonly destroyRef = inject(DestroyRef);
 
   protected readonly lobbyData = signal<JoinableExercise[]>([]);
   protected readonly showPicker = signal(false);
@@ -150,6 +155,12 @@ export class HomeView implements OnInit {
 
   ngOnInit(): void {
     this.checkForJoinableExercises();
+
+    this.lobbyWs.connect();
+    this.destroyRef.onDestroy(() => this.lobbyWs.disconnect());
+    this.lobbyWs.updates$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.checkForJoinableExercises());
   }
 
   protected onScenarioPicked(scenario: ScenarioResponse): void {
