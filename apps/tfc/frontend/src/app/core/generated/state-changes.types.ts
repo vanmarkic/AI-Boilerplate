@@ -47,6 +47,7 @@ export interface SystemEffect {
 export interface DecisionOptionSnapshot {
   id: string;
   label: string;
+  description: string;
   score: number;
   stress_delta: number;
   system_effects: SystemEffect[];

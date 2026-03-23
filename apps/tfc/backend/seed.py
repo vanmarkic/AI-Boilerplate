@@ -19,6 +19,7 @@ from pathlib import Path
 
 from pydantic import ValidationError
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.database import async_session_factory
 from features.domain_config.domain_config_model import DomainConfig
@@ -95,6 +96,14 @@ async def seed_domain_configs() -> None:
             logger.info("Seeded domain config '%s' from %s", slug, path.name)
 
 
+async def _resolve_domain_id(session: AsyncSession) -> int | None:
+    """Return the id of the 'silent-wake' domain config, if any."""
+    result = await session.execute(
+        select(DomainConfig.id).where(DomainConfig.slug == "silent-wake"),
+    )
+    return result.scalar_one_or_none()
+
+
 async def seed_scenarios() -> None:
     """Load scenario seed files and upsert by title."""
     if not SEEDS_DIR.is_dir():
@@ -110,6 +119,8 @@ async def seed_scenarios() -> None:
         return
 
     async with async_session_factory() as session:
+        domain_id = await _resolve_domain_id(session)
+
         for path in seed_files:
             data = json.loads(path.read_text())
             content_raw = data.get("content")
@@ -132,6 +143,8 @@ async def seed_scenarios() -> None:
             if existing is not None:
                 existing.description = data.get("description", "")
                 existing.content = data.get("content")
+                if domain_id:
+                    existing.domain_id = domain_id
                 await session.commit()
                 logger.info("Updated scenario '%s' from %s", title, path.name)
                 continue
@@ -139,6 +152,7 @@ async def seed_scenarios() -> None:
             scenario = Scenario(
                 title=title,
                 description=data.get("description", ""),
+                domain_id=domain_id,
                 content=data.get("content"),
             )
             session.add(scenario)

@@ -8,7 +8,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
-from core.dependencies import get_exercise_service, get_scenario_service
+from core.dependencies import get_domain_config_service, get_exercise_service, get_scenario_service
 from engine.exercise_engine import EngineConfig, EnginePhase, EngineStateError, ExerciseEngine
 from engine.session_store import session_store
 from engine.state_changes import DecisionSnapshot, EngineSnapshot, PhaseChange, StateChange
@@ -21,6 +21,7 @@ from features.exercise.exercise_service import ExerciseService
 from features.exercise.exercise_session_service import ExerciseSessionService
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_loader import build_engine_config
+from features.domain_config.domain_config_service import DomainConfigService
 from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_store import waiting_room_store
 
@@ -83,6 +84,7 @@ def _get_engine(exercise_id: int) -> ExerciseEngine:
 async def _build_config(
     exercise: object,
     scenario_service: ScenarioService,
+    domain_config_service: DomainConfigService | None = None,
 ) -> EngineConfig:
     """Build EngineConfig from a scenario-linked exercise."""
     if not hasattr(exercise, "scenario_id") or exercise.scenario_id is None:
@@ -97,11 +99,18 @@ async def _build_config(
             detail="Scenario has no content. Add events, roles, and decisions first.",
         )
     content = ScenarioContent.model_validate(scenario.content)
+
+    blue_card_catalog: list[dict] | None = None
+    if scenario.domain_id and domain_config_service:
+        domain_config = await domain_config_service.get(scenario.domain_id)
+        blue_card_catalog = [c.model_dump() for c in domain_config.blue_card_catalog]
+
     return build_engine_config(
         exercise_id=exercise.id,
         title=exercise.title,
         content=content,
         practice_mode=exercise.practice_mode,
+        blue_card_catalog=blue_card_catalog,
     )
 
 
@@ -110,11 +119,12 @@ async def start_engine(
     exercise_id: int,
     service: ExerciseService = Depends(get_exercise_service),
     scenario_service: ScenarioService = Depends(get_scenario_service),
+    domain_config_service: DomainConfigService = Depends(get_domain_config_service),
 ) -> PhaseChange:
     engine = session_store.get(exercise_id)
     if engine is None:
         exercise = await service.get_exercise(exercise_id)
-        config = await _build_config(exercise, scenario_service)
+        config = await _build_config(exercise, scenario_service, domain_config_service)
 
         async def _on_change(changes: list[StateChange]) -> None:
             await broadcast_changes(connection_manager, exercise_id, changes)

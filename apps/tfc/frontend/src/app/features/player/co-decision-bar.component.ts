@@ -42,6 +42,11 @@ export interface CoDecisionConfirmation {
               <span class="co-decision-bar__option-label">{{
                 option.label
               }}</span>
+              @if (option.description) {
+                <span class="co-decision-bar__option-desc">{{
+                  option.description
+                }}</span>
+              }
               @if (getRecommenders(option.id); as recs) {
                 @if (recs.length > 0) {
                   <span class="co-decision-bar__rec-badge"

@@ -71,6 +71,12 @@
   .co-decision-bar__option-label {
     font-weight: 500;
   }
+  .co-decision-bar__option-desc {
+    display: block;
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    font-weight: 400;
+  }
 
   .co-decision-bar__rec-badge {
     font-family: var(--font-mono);

@@ -58,6 +58,7 @@ class SystemEffect(TypedDict):
 class DecisionOptionSnapshot(TypedDict):
     id: str
     label: str
+    description: str
     score: float
     stress_delta: int
     system_effects: list[SystemEffect]
