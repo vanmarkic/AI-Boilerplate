@@ -1,0 +1,62 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "2271f51fe1b1",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "apps/main/frontend/src/app/app.routes.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/admin-permissions.component.spec.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/admin-permissions.component.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/permission-form.component.spec.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/permission-form.component.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/permissions-tab.component.spec.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/permissions-tab.component.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/roles-management.component.spec.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/roles-management.component.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/user-roles-dialog.component.spec.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/user-roles-dialog.component.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/users-tab.component.spec.ts",
+    "apps/main/frontend/src/app/features/admin-permissions/users-tab.component.ts",
+    "apps/main/frontend/src/app/features/dashboard/dashboard.component.ts",
+    "apps/main/frontend/src/app/features/dashboard/dashboard.routes.ts",
+    "apps/main/frontend/src/app/features/landing/landing.component.ts",
+    "apps/main/frontend/src/app/features/landing/landing.routes.ts",
+    "apps/main/frontend/src/app/features/register/register.component.ts",
+    "apps/main/frontend/src/app/features/register/register.routes.ts",
+    "apps/main/frontend/src/app/features/user-profile/user-profile.component.spec.ts",
+    "apps/main/frontend/src/app/features/user-profile/user-profile.routes.ts",
+    "apps/main/frontend/src/app/features/weather/weather.component.spec.ts",
+    "apps/main/frontend/src/app/features/weather/weather.routes.ts",
+    "apps/main/frontend/src/app/shared/api/generated/client.gen.ts",
+    "apps/main/frontend/src/app/shared/api/generated/client/types.gen.ts",
+    "apps/main/frontend/src/app/shared/api/generated/client/utils.gen.ts",
+    "apps/main/frontend/src/app/shared/api/generated/index.ts",
+    "apps/main/frontend/src/app/shared/api/generated/sdk.gen.ts",
+    "apps/main/frontend/src/app/shared/api/generated/types.gen.ts",
+    "apps/main/frontend/src/app/shared/auth/auth.store.ts",
+    "apps/main/frontend/src/app/shared/auth/permissions.store.ts",
+    "apps/main/frontend/src/app/shared/sse/event-source.service.spec.ts",
+    "apps/main/frontend/src/app/shared/sse/event-source.service.ts",
+    "apps/main/frontend/src/app/shared/sse/with-live-events.spec.ts",
+    "apps/main/frontend/src/app/shared/sse/with-live-events.ts",
+    "apps/main/frontend/src/index.html",
+    "apps/main/frontend/src/styles/styles.css",
+    "apps/main/frontend/src/test-setup.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/22/71f51fe1b1/0/metadata.json",
+      "transcript": "/22/71f51fe1b1/0/full.jsonl",
+      "content_hash": "/22/71f51fe1b1/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 3,
+    "cache_creation_tokens": 3295,
+    "cache_read_tokens": 146816,
+    "output_tokens": 293,
+    "api_call_count": 3
+  }
+}
