@@ -14,6 +14,7 @@ from engine.session_store import session_store
 from engine.state_changes import DecisionSnapshot, EngineSnapshot, PhaseChange, StateChange
 from features.audit.audit_repository import AuditRepository
 from features.audit.audit_service import AuditService
+from features.domain_config.domain_config_service import DomainConfigService
 from features.exercise.adapters.connection_manager import connection_manager
 from features.exercise.engine_broadcast import broadcast_changes
 from features.exercise.engine_decision_service import EngineDecisionService
@@ -21,7 +22,6 @@ from features.exercise.exercise_service import ExerciseService
 from features.exercise.exercise_session_service import ExerciseSessionService
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_loader import build_engine_config
-from features.domain_config.domain_config_service import DomainConfigService
 from features.scenario.scenario_service import ScenarioService
 from features.waiting_room.waiting_room_store import waiting_room_store
 
