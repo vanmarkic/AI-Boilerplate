@@ -59,8 +59,16 @@
   }
 
   .co-decision-bar__option--selected {
-    background: var(--color-secondary);
-    border-color: var(--color-success);
+    background: oklch(from var(--color-primary) l c h / 0.15);
+    border-color: var(--color-primary);
+    border-width: 2px;
+    box-shadow: var(--glow-sm), inset 0 0 24px oklch(from var(--color-primary) l c h / 0.10);
+  }
+
+  /* Dim unselected options when a selection exists */
+  .co-decision-bar__options:has(.co-decision-bar__option--selected)
+    .co-decision-bar__option:not(.co-decision-bar__option--selected) {
+    opacity: 0.5;
   }
 
   .co-decision-bar__option[data-recommended] {
