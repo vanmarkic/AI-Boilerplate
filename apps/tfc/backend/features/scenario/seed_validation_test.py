@@ -148,9 +148,7 @@ def test_silent_wake_baseline_structure() -> None:
     assert len(content.initial_warfare_domains) == 4
 
     # Best path documented on all game turns
-    assert all(
-        t.best_path is not None for t in game_turns
-    ), "every game turn has best_path"
+    assert all(t.best_path is not None for t in game_turns), "every game turn has best_path"
 
 
 def test_silent_wake_baseline_system_ids_match_domain_config() -> None:
@@ -161,11 +159,8 @@ def test_silent_wake_baseline_system_ids_match_domain_config() -> None:
 
     sc_path = SEEDS_DIR / "silent_wake_baseline.json"
     sc_data = json.loads(sc_path.read_text())
-    sc_system_ids = {
-        s["system_id"] for s in sc_data["content"]["initial_system_states"]
-    }
+    sc_system_ids = {s["system_id"] for s in sc_data["content"]["initial_system_states"]}
 
     assert sc_system_ids <= dc_system_ids, (
-        f"Scenario has system IDs not in domain config: "
-        f"{sc_system_ids - dc_system_ids}"
+        f"Scenario has system IDs not in domain config: {sc_system_ids - dc_system_ids}"
     )
