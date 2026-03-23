@@ -371,20 +371,27 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   }
 
   protected onStartExercise(): void {
+    if (this.isSimpleCollaborative()) {
+      this.engineApi.start(this.exerciseId()).subscribe({
+        next: () => this.navigateToPlayer(),
+      });
+      return;
+    }
+    this.navigateToPlayer();
+  }
+
+  private navigateToPlayer(): void {
     const me = this.participants().find((p) => p.id === this.participantId());
     const role = me?.role ?? "player";
     if (this.isSimpleCollaborative()) {
-      this.engineApi.start(this.exerciseId()).subscribe({
-        next: () =>
-          this.router.navigate(["/player"], {
-            queryParams: {
-              exerciseId: this.exerciseId(),
-              participantId: this.participantId(),
-              role,
-              gameMode: "simple_collaborative",
-              practiceMode: this.practiceMode(),
-            },
-          }),
+      this.router.navigate(["/player"], {
+        queryParams: {
+          exerciseId: this.exerciseId(),
+          participantId: this.participantId(),
+          role,
+          gameMode: "simple_collaborative",
+          practiceMode: this.practiceMode(),
+        },
       });
       return;
     }
@@ -415,6 +422,8 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     this.sub = this.ws.messages$.subscribe((msg) => {
       if (msg.type === "waiting_room_update") {
         if (msg.participants) this.participants.set(msg.participants);
+      } else if (msg.type === "exercise_started") {
+        this.navigateToPlayer();
       }
     });
     this.api.listParticipants(exerciseId).subscribe({
@@ -439,6 +448,11 @@ export class WaitingRoomView implements OnInit, OnDestroy {
       next: (exercise) => {
         this.gameMode.set(exercise.game_mode);
         this.requiresGm.set(exercise.game_mode === "classic");
+        if (exercise.player_count_mode) {
+          this.playerCountMode.set(
+            exercise.player_count_mode as PlayerCountMode,
+          );
+        }
         if (exercise.scenario_id) {
           this.scenarioApi.get(exercise.scenario_id).subscribe({
             next: (scenario) =>

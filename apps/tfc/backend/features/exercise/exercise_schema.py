@@ -15,6 +15,7 @@ class CreateExerciseRequest(BaseModel):
     time_factor: float = 1.0
     game_mode: str = GM_CLASSIC
     practice_mode: bool = False
+    player_count_mode: str = "full"
 
 
 class UpdateExerciseRequest(BaseModel):
@@ -26,6 +27,7 @@ class UpdateExerciseRequest(BaseModel):
     time_factor: float | None = None
     game_mode: str | None = None
     practice_mode: bool | None = None
+    player_count_mode: str | None = None
 
 
 class ExerciseResponse(ResponseBase):
@@ -38,6 +40,7 @@ class ExerciseResponse(ResponseBase):
     time_factor: float
     game_mode: str
     practice_mode: bool
+    player_count_mode: str
     session_code: str
     created_at: datetime
     updated_at: datetime

@@ -212,7 +212,7 @@ export interface SystemStateChange {
 }
 
 export type StateChange =
-  | PhaseChange
+  PhaseChange
   | EventChange
   | IssueChange
   | DecisionOpened
