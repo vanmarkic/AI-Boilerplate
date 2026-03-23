@@ -334,8 +334,11 @@ export class PlayerView implements OnInit, OnDestroy {
         },
       );
     }
-    const updated = new Set(this.submittedRoles());
-    updated.add(submission.roleId);
-    this.submittedRoles.set(updated);
+    // Only mark decision_maker as done; advisors stay interactive
+    if (role?.player_type === "decision_maker") {
+      const updated = new Set(this.submittedRoles());
+      updated.add(submission.roleId);
+      this.submittedRoles.set(updated);
+    }
   }
 }

@@ -123,7 +123,7 @@ export interface RoleCardSubmission {
               placeholder="Enter your response..."
             ></textarea>
           }
-          @if (questionType() !== 'single_choice') {
+          @if (questionType() !== 'single_choice' && card().playerType === 'decision_maker') {
             <div class="role-card__actions">
               <button
                 uiButton
@@ -178,13 +178,17 @@ export class RoleCardComponent {
   readonly freeText = signal("");
   readonly targetSystemSelections = signal<Record<string, string>>({});
 
+  private _lastDecisionId: string | null = null;
   private readonly resetOnCardChange = effect(() => {
-    this.card();
-    untracked(() => {
-      this.selectedOptions.set([]);
-      this.freeText.set("");
-      this.targetSystemSelections.set({});
-    });
+    const id = this.card().decision?.id ?? null;
+    if (id !== this._lastDecisionId) {
+      this._lastDecisionId = id;
+      untracked(() => {
+        this.selectedOptions.set([]);
+        this.freeText.set("");
+        this.targetSystemSelections.set({});
+      });
+    }
   });
 
   readonly filteredOptions = computed<DecisionOption[]>(() => {
@@ -260,9 +264,11 @@ export class RoleCardComponent {
   }
 
   protected toggleOption(option: DecisionOption): void {
+    const isAdvisor = this.card().playerType === "advisor";
+
     if (this.questionType() === "single_choice") {
       this.selectedOptions.set([option.id]);
-      // Auto-submit recommendation immediately for single-choice
+      // Auto-submit immediately for single-choice (no system target)
       if (!option.targets_system) {
         this.onSubmit();
       }
@@ -272,6 +278,15 @@ export class RoleCardComponent {
         this.selectedOptions.set(current.filter((id) => id !== option.id));
       } else {
         this.selectedOptions.set([...current, option.id]);
+      }
+      // Advisors auto-submit the just-clicked option (API takes single option_id)
+      if (isAdvisor) {
+        this.submitted.emit({
+          roleId: this.card().roleId,
+          selectedOptions: [option.id],
+          freeText: "",
+          targetSystemSelections: this.targetSystemSelections(),
+        });
       }
     }
   }
