@@ -4,3 +4,7 @@ the renders seem slow any way to profile ?
 ---
 
 yes
+
+---
+
+is there uncessary rerenders ? we're not optimizing firt load but rerenders
