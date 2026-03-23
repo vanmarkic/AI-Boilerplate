@@ -14,7 +14,9 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CardComponent],
   template: `
-    <ui-card title="Initial States (select which systems and domains this scenario uses)">
+    <ui-card
+      title="Initial States (select which systems and domains this scenario uses)"
+    >
       <div class="flex flex-col gap-md p-sm">
         @if (domainConfig()) {
           <!-- Systems Table -->
@@ -23,16 +25,32 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
             <table style="width: 100%; border-collapse: collapse">
               <thead>
                 <tr class="border-b">
-                  <th class="text-sm font-medium p-xs" style="text-align: center; width: 2.5rem">Use</th>
-                  <th class="text-sm font-medium p-xs" style="text-align: left">System</th>
-                  <th class="text-sm font-medium p-xs" style="text-align: left">Category</th>
-                  <th class="text-sm font-medium p-xs" style="text-align: left">Operational State</th>
-                  <th class="text-sm font-medium p-xs" style="text-align: left">Power</th>
+                  <th
+                    class="text-sm font-medium p-xs"
+                    style="text-align: center; width: 2.5rem"
+                  >
+                    Use
+                  </th>
+                  <th class="text-sm font-medium p-xs" style="text-align: left">
+                    System
+                  </th>
+                  <th class="text-sm font-medium p-xs" style="text-align: left">
+                    Category
+                  </th>
+                  <th class="text-sm font-medium p-xs" style="text-align: left">
+                    Operational State
+                  </th>
+                  <th class="text-sm font-medium p-xs" style="text-align: left">
+                    Power
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 @for (sys of domainConfig()!.systems; track sys.id) {
-                  <tr class="border-b" [style.opacity]="isSystemIncluded(sys.id) ? '1' : '0.4'">
+                  <tr
+                    class="border-b"
+                    [style.opacity]="isSystemIncluded(sys.id) ? '1' : '0.4'"
+                  >
                     <td class="p-xs" style="text-align: center">
                       <input
                         type="checkbox"
@@ -77,14 +95,26 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
             <table style="width: 100%; border-collapse: collapse">
               <thead>
                 <tr class="border-b">
-                  <th class="text-sm font-medium p-xs" style="text-align: center; width: 2.5rem">Use</th>
-                  <th class="text-sm font-medium p-xs" style="text-align: left">Domain</th>
-                  <th class="text-sm font-medium p-xs" style="text-align: left">Threat Level</th>
+                  <th
+                    class="text-sm font-medium p-xs"
+                    style="text-align: center; width: 2.5rem"
+                  >
+                    Use
+                  </th>
+                  <th class="text-sm font-medium p-xs" style="text-align: left">
+                    Domain
+                  </th>
+                  <th class="text-sm font-medium p-xs" style="text-align: left">
+                    Threat Level
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 @for (dom of domainConfig()!.warfare_domains; track dom.id) {
-                  <tr class="border-b" [style.opacity]="isDomainIncluded(dom.id) ? '1' : '0.4'">
+                  <tr
+                    class="border-b"
+                    [style.opacity]="isDomainIncluded(dom.id) ? '1' : '0.4'"
+                  >
                     <td class="p-xs" style="text-align: center">
                       <input
                         type="checkbox"
@@ -189,9 +219,7 @@ export class ScenarioInitialStatesEditorComponent {
   }
 
   protected toggleDomain(domainId: string, label: string): void {
-    const domains = [
-      ...(this.store.content().initial_warfare_domains ?? []),
-    ];
+    const domains = [...(this.store.content().initial_warfare_domains ?? [])];
     const idx = domains.findIndex((d) => d.domain_id === domainId);
     if (idx >= 0) {
       domains.splice(idx, 1);
@@ -215,9 +243,7 @@ export class ScenarioInitialStatesEditorComponent {
   protected onDomainThreatChange(domainId: string, event: Event): void {
     const target = event.target;
     if (!(target instanceof HTMLSelectElement)) return;
-    const domains = [
-      ...(this.store.content().initial_warfare_domains ?? []),
-    ];
+    const domains = [...(this.store.content().initial_warfare_domains ?? [])];
     const idx = domains.findIndex((d) => d.domain_id === domainId);
     if (idx >= 0) {
       domains[idx] = {

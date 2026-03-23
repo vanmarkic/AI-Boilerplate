@@ -38,33 +38,46 @@
     <tfc-system-status-board [systems]="store.systems()" />
 
     @if (isMultiRole() && !isDecisionMaker()) {
-      <!-- Crew (all_advisors) layout: equal columns -->
-      <div class="board-columns">
-        @for (card of advisorRoleCards(); track card.roleId) {
-          <tfc-role-card [card]="card" [systems]="store.systems()" (submitted)="onRoleCardSubmitted($event)" />
-        }
-      </div>
-    } @else if (isDecisionMaker()) {
-      <!-- CO layout: read-only mirrors + decision bar -->
-      <div class="board-columns">
-        @for (card of advisorRoleCards(); track card.roleId) {
-          <tfc-role-card [card]="card" [systems]="store.systems()" [readonly]="true" (submitted)="onRoleCardSubmitted($event)" />
-        }
-      </div>
-      <tfc-co-decision-bar
-        [decision]="activeDecisions()[0] ?? null"
-        [advisorRoles]="advisorRoles()"
+    <!-- Crew (all_advisors) layout: equal columns -->
+    <div class="board-columns">
+      @for (card of advisorRoleCards(); track card.roleId) {
+      <tfc-role-card
+        [card]="card"
         [systems]="store.systems()"
-        [coIntel]="coIntel()"
-        (confirmed)="onCoDecisionConfirmed($event)"
+        (submitted)="onRoleCardSubmitted($event)"
       />
+      }
+    </div>
+    } @else if (isDecisionMaker()) {
+    <!-- CO layout: read-only mirrors + decision bar -->
+    <div class="board-columns">
+      @for (card of advisorRoleCards(); track card.roleId) {
+      <tfc-role-card
+        [card]="card"
+        [systems]="store.systems()"
+        [readonly]="true"
+        (submitted)="onRoleCardSubmitted($event)"
+      />
+      }
+    </div>
+    <tfc-co-decision-bar
+      [decision]="activeDecisions()[0] ?? null"
+      [advisorRoles]="advisorRoles()"
+      [systems]="store.systems()"
+      [coIntel]="coIntel()"
+      (confirmed)="onCoDecisionConfirmed($event)"
+    />
     } @else {
-      <!-- Single-role or legacy layout -->
-      <div class="board-grid">
-        @for (card of roleCards(); track card.roleId) {
-          <tfc-role-card [card]="card" [systems]="store.systems()" (submitted)="onRoleCardSubmitted($event)" />
-        }
-      </div>
+    <!-- Single-role or legacy layout -->
+    <div class="board-grid">
+      @for (card of roleCards(); track card.roleId) {
+      <tfc-role-card
+        [card]="card"
+        [systems]="store.systems()"
+        (submitted)="onRoleCardSubmitted($event)"
+      />
+      }
+    </div>
     }
   </main>
 

@@ -336,6 +336,9 @@ export class WaitingRoomView implements OnInit, OnDestroy {
       next: (p) => {
         this.participantId.set(p.id);
         this.joining.set(false);
+        if (this.twoPlayerMode()) {
+          this.autoAssignTwoPlayerRole(p.id);
+        }
       },
       error: () => this.joining.set(false),
     });
@@ -388,6 +391,16 @@ export class WaitingRoomView implements OnInit, OnDestroy {
         role,
       },
     });
+  }
+
+  private autoAssignTwoPlayerRole(joinedId: string): void {
+    const taken = this.participants()
+      .filter((p) => p.id !== joinedId)
+      .map((p) => p.role);
+    const role = taken.includes("decision_maker")
+      ? "all_advisors"
+      : "decision_maker";
+    this.api.updateRole(this.exerciseId(), joinedId, role).subscribe();
   }
 
   private initExercise(exerciseId: number, participantId: string): void {

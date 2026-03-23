@@ -31,15 +31,24 @@ import type { TurnDefinition } from "../../core/scenario-api.service";
               [style.background]="stressColor(turn.base_stress_delta)"
             ></span>
             <ui-badge variant="secondary">{{ turn.turn_index }}</ui-badge>
-            <span class="text-sm" style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">
-              {{ turn.title ? truncate(turn.title, 20) : 'Turn ' + turn.turn_index }}
+            <span
+              class="text-sm"
+              style="flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap"
+            >
+              {{
+                turn.title
+                  ? truncate(turn.title, 20)
+                  : "Turn " + turn.turn_index
+              }}
             </span>
             <div class="flex gap-xs">
               <button
                 uiButton
                 variant="outline"
                 size="sm"
-                (click)="onDuplicate.emit(turn.turn_index); $event.stopPropagation()"
+                (click)="
+                  onDuplicate.emit(turn.turn_index); $event.stopPropagation()
+                "
               >
                 Dup
               </button>
@@ -47,7 +56,9 @@ import type { TurnDefinition } from "../../core/scenario-api.service";
                 uiButton
                 variant="destructive"
                 size="sm"
-                (click)="onDelete.emit(turn.turn_index); $event.stopPropagation()"
+                (click)="
+                  onDelete.emit(turn.turn_index); $event.stopPropagation()
+                "
               >
                 Del
               </button>

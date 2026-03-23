@@ -12,39 +12,41 @@
 @layer tokens {
   [data-theme="tfc-builder"] {
     /* ── Surfaces ─────────────────────────────────────────── */
-    --color-background:        oklch(97.5% 0.004 80);   /* warm off-white, not stark */
-    --color-foreground:        oklch(22% 0.010 250);     /* dark slate, readable for hours */
-    --color-card:              oklch(99% 0.002 80);      /* barely-there warm white */
-    --color-card-foreground:   oklch(22% 0.010 250);
-    --color-popover:           oklch(99% 0.002 80);
-    --color-popover-foreground: oklch(22% 0.010 250);
-    --color-muted:             oklch(94% 0.005 80);      /* subtle warm gray */
-    --color-muted-foreground:  oklch(48% 0.010 250);     /* secondary text */
+    --color-background: oklch(97.5% 0.004 80); /* warm off-white, not stark */
+    --color-foreground: oklch(
+      22% 0.01 250
+    ); /* dark slate, readable for hours */
+    --color-card: oklch(99% 0.002 80); /* barely-there warm white */
+    --color-card-foreground: oklch(22% 0.01 250);
+    --color-popover: oklch(99% 0.002 80);
+    --color-popover-foreground: oklch(22% 0.01 250);
+    --color-muted: oklch(94% 0.005 80); /* subtle warm gray */
+    --color-muted-foreground: oklch(48% 0.01 250); /* secondary text */
 
     /* ── Borders & inputs ─────────────────────────────────── */
-    --color-border:            oklch(88% 0.008 80);      /* warm light border */
-    --color-input:             oklch(88% 0.008 80);
-    --color-ring:              oklch(55% 0.12 230);      /* focus ring — teal */
+    --color-border: oklch(88% 0.008 80); /* warm light border */
+    --color-input: oklch(88% 0.008 80);
+    --color-ring: oklch(55% 0.12 230); /* focus ring — teal */
 
     /* ── Accent: calm teal ────────────────────────────────── */
-    --color-primary:           oklch(48% 0.12 230);      /* deep teal */
-    --color-primary-foreground: oklch(98% 0 0);          /* white on teal */
-    --color-accent:            oklch(94% 0.015 230);     /* very light teal tint */
-    --color-accent-foreground: oklch(30% 0.08 230);      /* dark teal text */
+    --color-primary: oklch(48% 0.12 230); /* deep teal */
+    --color-primary-foreground: oklch(98% 0 0); /* white on teal */
+    --color-accent: oklch(94% 0.015 230); /* very light teal tint */
+    --color-accent-foreground: oklch(30% 0.08 230); /* dark teal text */
 
     /* ── Secondary ────────────────────────────────────────── */
-    --color-secondary:         oklch(94% 0.005 80);      /* warm neutral button bg */
-    --color-secondary-foreground: oklch(28% 0.010 250);
+    --color-secondary: oklch(94% 0.005 80); /* warm neutral button bg */
+    --color-secondary-foreground: oklch(28% 0.01 250);
 
     /* ── Semantic ─────────────────────────────────────────── */
-    --color-destructive:       oklch(55% 0.22 25);       /* calm red, not alarming */
+    --color-destructive: oklch(55% 0.22 25); /* calm red, not alarming */
     --color-destructive-foreground: oklch(98% 0 0);
-    --color-warning:           oklch(68% 0.16 70);       /* warm amber */
+    --color-warning: oklch(68% 0.16 70); /* warm amber */
     --color-warning-foreground: oklch(25% 0.04 70);
-    --color-success:           oklch(55% 0.16 155);      /* muted green */
+    --color-success: oklch(55% 0.16 155); /* muted green */
     --color-success-foreground: oklch(98% 0 0);
-    --color-info:              oklch(55% 0.12 230);      /* matches accent */
-    --color-info-foreground:   oklch(98% 0 0);
+    --color-info: oklch(55% 0.12 230); /* matches accent */
+    --color-info-foreground: oklch(98% 0 0);
 
     /* ── Shadows (lighter, warmer) ────────────────────────── */
     --shadow-sm: 0 1px 2px oklch(55% 0.01 80 / 8%);

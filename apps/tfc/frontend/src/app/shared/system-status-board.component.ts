@@ -22,7 +22,7 @@ import type { SystemSnapshot } from "../core/generated/state-changes.types";
               }}</span>
               <span class="system-chip__traffic">
                 <span class="system-chip__light" data-color="red"></span>
-                @if (sys.category !== 'weapon') {
+                @if (sys.category !== "weapon") {
                   <span class="system-chip__light" data-color="yellow"></span>
                 }
                 <span class="system-chip__light" data-color="green"></span>

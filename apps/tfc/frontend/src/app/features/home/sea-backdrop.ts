@@ -15,10 +15,7 @@ import {
   disposeLightning,
   updateLightning,
 } from "./sea-lightning";
-import {
-  createGlowTexture,
-  waveY,
-} from "./sea-signals";
+import { createGlowTexture, waveY } from "./sea-signals";
 
 @Component({
   selector: "tfc-sea-backdrop",
@@ -139,9 +136,7 @@ export class SeaBackdrop implements OnDestroy {
 
   private updateLightnings(t: number): void {
     if (t >= this.nextLightning) {
-      this.lightnings.push(
-        createLightning(this.scene, this.plane.geometry, t),
-      );
+      this.lightnings.push(createLightning(this.scene, this.plane.geometry, t));
       this.nextLightning = t + LIGHTNING_INTERVAL + Math.random() * 2;
     }
     for (let i = this.lightnings.length - 1; i >= 0; i--) {

@@ -49,7 +49,9 @@
     cursor: pointer;
     font-size: var(--font-size-sm);
     color: var(--color-foreground);
-    transition: background 150ms ease, border-color 150ms ease;
+    transition:
+      background 150ms ease,
+      border-color 150ms ease;
   }
 
   .co-decision-bar__option:hover {

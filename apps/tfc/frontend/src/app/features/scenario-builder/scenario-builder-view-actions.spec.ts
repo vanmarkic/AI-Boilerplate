@@ -126,9 +126,7 @@ describe("ScenarioBuilderActionsComponent", () => {
     const buttons: HTMLButtonElement[] = Array.from(
       fixture.nativeElement.querySelectorAll("button"),
     );
-    const toggleBtn = buttons.find(
-      (b) => b.textContent?.trim() === "Turns",
-    );
+    const toggleBtn = buttons.find((b) => b.textContent?.trim() === "Turns");
     expect(toggleBtn).toBeTruthy();
   });
 
@@ -149,9 +147,7 @@ describe("ScenarioBuilderActionsComponent", () => {
     const buttons: HTMLButtonElement[] = Array.from(
       fixture.nativeElement.querySelectorAll("button"),
     );
-    const toggleBtn = buttons.find(
-      (b) => b.textContent?.trim() === "Turns",
-    );
+    const toggleBtn = buttons.find((b) => b.textContent?.trim() === "Turns");
     toggleBtn!.click();
     expect(host.toggled).toBe(true);
   });

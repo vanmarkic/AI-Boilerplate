@@ -81,7 +81,7 @@ export class PlayerView implements OnInit, OnDestroy {
   private connSub: Subscription | null = null;
 
   protected readonly stressEffectPreset = computed(
-    () => this.store.context()?.stress_effect_preset ?? 'standard',
+    () => this.store.context()?.stress_effect_preset ?? "standard",
   );
 
   protected readonly activeDecisions = computed(() => {
@@ -185,7 +185,8 @@ export class PlayerView implements OnInit, OnDestroy {
     const allRoles = this.store.context()?.roles ?? [];
     const playerRoleDef = allRoles.find((r) => r.id === role);
     return (
-      role === "decision_maker" || playerRoleDef?.player_type === "decision_maker"
+      role === "decision_maker" ||
+      playerRoleDef?.player_type === "decision_maker"
     );
   });
 

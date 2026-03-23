@@ -34,15 +34,18 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
   ],
   template: `
     <!-- Section 1: Foundation Summary -->
-    <section id="section-foundation" style="scroll-margin-top: var(--spacing-xl)">
+    <section
+      id="section-foundation"
+      style="scroll-margin-top: var(--spacing-xl)"
+    >
       <ui-card title="Foundation">
         @if (domainConfig()) {
           <div class="flex flex-col gap-sm p-sm">
             <p class="text-sm text-muted-foreground">
               {{ domainConfig()!.roles.length }} roles &middot;
               {{ domainConfig()!.systems.length }} systems &middot;
-              {{ domainConfig()!.warfare_domains.length }} warfare domains &middot;
-              {{ domainConfig()!.blue_card_catalog.length }} blue cards
+              {{ domainConfig()!.warfare_domains.length }} warfare domains
+              &middot; {{ domainConfig()!.blue_card_catalog.length }} blue cards
             </p>
             <a routerLink="/foundation" class="text-sm font-medium">
               Edit Foundation &rarr;
@@ -105,7 +108,10 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
             <span class="text-sm font-medium">Objectives</span>
             @for (obj of objectives(); track $index) {
               <div class="flex items-center gap-sm">
-                <span class="text-sm text-muted-foreground" style="min-width: 1.5rem">
+                <span
+                  class="text-sm text-muted-foreground"
+                  style="min-width: 1.5rem"
+                >
                   {{ $index + 1 }}.
                 </span>
                 <input
@@ -115,12 +121,21 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
                   (input)="onObjectiveChange($index, $event)"
                 />
                 <button
-                  uiButton variant="destructive" size="sm"
+                  uiButton
+                  variant="destructive"
+                  size="sm"
                   (click)="removeObjective($index)"
-                >Remove</button>
+                >
+                  Remove
+                </button>
               </div>
             }
-            <button uiButton variant="outline" size="sm" (click)="addObjective()">
+            <button
+              uiButton
+              variant="outline"
+              size="sm"
+              (click)="addObjective()"
+            >
               Add objective
             </button>
           </div>
@@ -130,7 +145,10 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
             <span class="text-sm font-medium">Rules</span>
             @for (rule of rules(); track $index) {
               <div class="flex items-center gap-sm">
-                <span class="text-sm text-muted-foreground" style="min-width: 1.5rem">
+                <span
+                  class="text-sm text-muted-foreground"
+                  style="min-width: 1.5rem"
+                >
                   {{ $index + 1 }}.
                 </span>
                 <input
@@ -140,9 +158,13 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
                   (input)="onRuleChange($index, $event)"
                 />
                 <button
-                  uiButton variant="destructive" size="sm"
+                  uiButton
+                  variant="destructive"
+                  size="sm"
                   (click)="removeRule($index)"
-                >Remove</button>
+                >
+                  Remove
+                </button>
               </div>
             }
             <button uiButton variant="outline" size="sm" (click)="addRule()">
@@ -154,12 +176,24 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
           <div class="flex flex-col gap-xs">
             <span class="text-sm font-medium">Game Mode</span>
             <div class="flex gap-sm">
-              <button uiButton size="sm"
+              <button
+                uiButton
+                size="sm"
                 [variant]="gameMode() === 'classic' ? 'default' : 'outline'"
-                (click)="store.setGameMode('classic')">Classic</button>
-              <button uiButton size="sm"
-                [variant]="gameMode() === 'collaborative' ? 'default' : 'outline'"
-                (click)="store.setGameMode('collaborative')">Collaborative</button>
+                (click)="store.setGameMode('classic')"
+              >
+                Classic
+              </button>
+              <button
+                uiButton
+                size="sm"
+                [variant]="
+                  gameMode() === 'collaborative' ? 'default' : 'outline'
+                "
+                (click)="store.setGameMode('collaborative')"
+              >
+                Collaborative
+              </button>
             </div>
           </div>
 
@@ -168,13 +202,23 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
             <span class="text-sm font-medium">Score Tier Thresholds</span>
             <div class="flex gap-sm items-center">
               <label class="text-sm" for="threshold-lo">Lo</label>
-              <input id="threshold-lo" type="number" class="input-base"
-                style="width: 5rem" [value]="thresholdLo()"
-                (change)="onThresholdLoChange($event)" />
+              <input
+                id="threshold-lo"
+                type="number"
+                class="input-base"
+                style="width: 5rem"
+                [value]="thresholdLo()"
+                (change)="onThresholdLoChange($event)"
+              />
               <label class="text-sm" for="threshold-mid">Mid</label>
-              <input id="threshold-mid" type="number" class="input-base"
-                style="width: 5rem" [value]="thresholdMid()"
-                (change)="onThresholdMidChange($event)" />
+              <input
+                id="threshold-mid"
+                type="number"
+                class="input-base"
+                style="width: 5rem"
+                [value]="thresholdMid()"
+                (change)="onThresholdMidChange($event)"
+              />
             </div>
           </div>
 
@@ -183,9 +227,14 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
             <label class="text-sm font-medium" for="time-factor">
               Default Time Factor
             </label>
-            <input id="time-factor" type="number" class="input-base"
-              style="width: 5rem" [value]="store.content().default_time_factor"
-              (change)="onTimeFactorChange($event)" />
+            <input
+              id="time-factor"
+              type="number"
+              class="input-base"
+              style="width: 5rem"
+              [value]="store.content().default_time_factor"
+              (change)="onTimeFactorChange($event)"
+            />
           </div>
 
           <!-- Stress Effect Preset -->
@@ -196,17 +245,26 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
             </p>
             <div class="flex gap-sm">
               @for (opt of stressPresetOptions; track opt.value) {
-                <button uiButton size="sm"
-                  [variant]="stressEffectPreset() === opt.value ? 'default' : 'outline'"
-                  (click)="store.setStressEffectPreset(opt.value)">
+                <button
+                  uiButton
+                  size="sm"
+                  [variant]="
+                    stressEffectPreset() === opt.value ? 'default' : 'outline'
+                  "
+                  (click)="store.setStressEffectPreset(opt.value)"
+                >
                   {{ opt.label }}
                 </button>
               }
             </div>
-            <button uiButton variant="outline" size="sm"
+            <button
+              uiButton
+              variant="outline"
+              size="sm"
               [disabled]="stressEffectPreset() === 'off' || previewing()"
-              (click)="startPreview()">
-              {{ previewing() ? 'Previewing...' : 'Preview' }}
+              (click)="startPreview()"
+            >
+              {{ previewing() ? "Previewing..." : "Preview" }}
             </button>
             @if (previewing()) {
               <tfc-stress-overlay
@@ -220,7 +278,10 @@ import { ScenarioInitialStatesEditorComponent } from "./scenario-initial-states-
     </section>
 
     <!-- Section 3: Initial State Overrides -->
-    <section id="section-initial-states" style="scroll-margin-top: var(--spacing-xl)">
+    <section
+      id="section-initial-states"
+      style="scroll-margin-top: var(--spacing-xl)"
+    >
       <tfc-scenario-initial-states-editor [domainConfig]="domainConfig()" />
     </section>
   `,
@@ -234,9 +295,7 @@ export class ScenarioSetupTabComponent implements OnInit, OnDestroy {
   protected readonly objectives = computed(
     () => this.store.content().objectives ?? [],
   );
-  protected readonly rules = computed(
-    () => this.store.content().rules ?? [],
-  );
+  protected readonly rules = computed(() => this.store.content().rules ?? []);
   protected readonly gameMode = computed(
     () => this.store.content().game_mode ?? "classic",
   );
@@ -248,14 +307,14 @@ export class ScenarioSetupTabComponent implements OnInit, OnDestroy {
   );
 
   protected readonly stressEffectPreset = computed(
-    () => this.store.content().stress_effect_preset ?? 'standard',
+    () => this.store.content().stress_effect_preset ?? "standard",
   );
 
   protected readonly stressPresetOptions = [
-    { value: 'off' as const, label: 'Off' },
-    { value: 'mild' as const, label: 'Mild' },
-    { value: 'standard' as const, label: 'Standard' },
-    { value: 'intense' as const, label: 'Intense' },
+    { value: "off" as const, label: "Off" },
+    { value: "mild" as const, label: "Mild" },
+    { value: "standard" as const, label: "Standard" },
+    { value: "intense" as const, label: "Intense" },
   ];
 
   protected readonly previewStress = signal(0);

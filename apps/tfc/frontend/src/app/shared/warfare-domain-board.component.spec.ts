@@ -106,9 +106,7 @@ describe("WarfareDomainBoardComponent", () => {
   // -- Reactivity --
 
   it("should update when domains signal changes", () => {
-    host.domains.set([
-      makeDomain({ domain_id: "air", threat_level: "green" }),
-    ]);
+    host.domains.set([makeDomain({ domain_id: "air", threat_level: "green" })]);
     fixture.detectChanges();
     expect(rows()[0].getAttribute("data-threat")).toBe("green");
 

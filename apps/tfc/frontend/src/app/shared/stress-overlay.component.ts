@@ -9,7 +9,7 @@ import {
 } from "@angular/core";
 import { DOCUMENT } from "@angular/common";
 
-type StressPreset = 'off' | 'mild' | 'standard' | 'intense';
+type StressPreset = "off" | "mild" | "standard" | "intense";
 
 interface PresetConfig {
   vignetteMax: number;
@@ -19,10 +19,28 @@ interface PresetConfig {
   shakeMag: number;
 }
 
-const PRESETS: Record<Exclude<StressPreset, 'off'>, PresetConfig> = {
-  mild:     { vignetteMax: 0.25, bpmLow: 50,  bpmHigh: 80,  shakeOnset: 10, shakeMag: 1   },
-  standard: { vignetteMax: 0.40, bpmLow: 60,  bpmHigh: 120, shakeOnset: 9,  shakeMag: 1.5 },
-  intense:  { vignetteMax: 0.55, bpmLow: 70,  bpmHigh: 160, shakeOnset: 8,  shakeMag: 2.5 },
+const PRESETS: Record<Exclude<StressPreset, "off">, PresetConfig> = {
+  mild: {
+    vignetteMax: 0.25,
+    bpmLow: 50,
+    bpmHigh: 80,
+    shakeOnset: 10,
+    shakeMag: 1,
+  },
+  standard: {
+    vignetteMax: 0.4,
+    bpmLow: 60,
+    bpmHigh: 120,
+    shakeOnset: 9,
+    shakeMag: 1.5,
+  },
+  intense: {
+    vignetteMax: 0.55,
+    bpmLow: 70,
+    bpmHigh: 160,
+    shakeOnset: 8,
+    shakeMag: 2.5,
+  },
 };
 
 @Component({
@@ -81,7 +99,9 @@ export class StressOverlayComponent {
     return PRESETS[p];
   });
 
-  protected readonly vignetteMax = computed(() => this.config()?.vignetteMax ?? 0);
+  protected readonly vignetteMax = computed(
+    () => this.config()?.vignetteMax ?? 0,
+  );
 
   protected readonly pulseDuration = computed(() => {
     const c = this.config();
