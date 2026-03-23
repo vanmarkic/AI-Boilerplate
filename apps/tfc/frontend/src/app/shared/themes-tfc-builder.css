@@ -29,6 +29,8 @@
     --color-ring: oklch(55% 0.12 230); /* focus ring — teal */
 
     /* ── Accent: calm teal ────────────────────────────────── */
+    /* Shifted to teal (hue 230) for better contrast on light backgrounds
+       vs the default dark theme's steel-blue hue 245 */
     --color-primary: oklch(48% 0.12 230); /* deep teal */
     --color-primary-foreground: oklch(98% 0 0); /* white on teal */
     --color-accent: oklch(94% 0.015 230); /* very light teal tint */
