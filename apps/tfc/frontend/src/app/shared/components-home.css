@@ -85,64 +85,75 @@
 
   .home-menu {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-md);
     width: 100%;
-    max-width: 560px;
+    max-width: 720px;
   }
 
   /* ── Tactical Panel Cards ─────────────────────────────── */
 
   .tac-panel {
-    --glass-strength: 2.5;
-    --glow-strength: 1.5;
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-sm);
     padding: var(--spacing-lg);
-    background: var(--glass-bg);
-    backdrop-filter: blur(var(--glass-blur));
-    -webkit-backdrop-filter: blur(var(--glass-blur));
-    border: 1px solid var(--glass-border);
-    border-left: 3px solid var(--color-primary);
-    border-radius: var(--radius-sm);
-    box-shadow: var(--glass-shadow);
+    background: oklch(18% 0.008 250 / 60%);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid oklch(100% 0 0 / 6%);
+    border-left: 3px solid var(--color-muted);
+    border-radius: 0;
     text-decoration: none;
     color: inherit;
+    overflow: hidden;
     transition:
       border-color var(--duration-fast),
       background var(--duration-fast),
-      box-shadow var(--duration-fast);
+      box-shadow var(--duration-fast),
+      transform var(--duration-fast);
     cursor: pointer;
   }
 
-  .tac-panel:hover {
-    border-color: var(--color-primary);
-    background: color-mix(
-      in oklch,
-      var(--glass-bg) 80%,
-      var(--color-primary) 20%
+  .tac-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      oklch(70% 0.15 195 / 8%) 45%,
+      oklch(70% 0.15 195 / 12%) 50%,
+      oklch(70% 0.15 195 / 8%) 55%,
+      transparent 100%
     );
-    box-shadow: var(--glass-shadow), var(--glow-sm);
+    translate: -100% 0;
+    pointer-events: none;
+  }
+
+  .tac-panel:hover::after {
+    translate: 100% 0;
+    transition: translate 0.6s var(--ease-default);
+  }
+
+  .tac-panel:hover {
+    background: oklch(20% 0.02 195 / 65%);
+    border-left-color: var(--color-primary);
+    transform: translateX(4px);
+    box-shadow: -4px 0 12px oklch(70% 0.15 195 / 20%);
   }
 
   .tac-panel[data-primary] {
-    border-color: var(--color-primary);
-    background: color-mix(
-      in oklch,
-      var(--glass-bg) 85%,
-      var(--color-primary) 15%
-    );
-    box-shadow: var(--glass-shadow), var(--glow-sm);
+    grid-column: 1 / -1;
+    border-left-color: var(--color-primary);
+    border-color: oklch(70% 0.15 195 / 30%);
+    background: oklch(18% 0.02 195 / 55%);
+    box-shadow: 0 0 20px oklch(70% 0.15 195 / 12%);
   }
 
-  .tac-panel[data-primary]:hover {
-    background: color-mix(
-      in oklch,
-      var(--glass-bg) 75%,
-      var(--color-primary) 25%
-    );
-    box-shadow: var(--glass-shadow), var(--glow-primary);
+  .tac-panel[data-primary] .tac-panel__label {
+    font-size: var(--font-size-md);
   }
 
   .tac-panel__indicator {
@@ -167,6 +178,11 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.04em;
+    position: relative;
+  }
+
+  .tac-panel:hover .tac-panel__label {
+    animation: tac-glitch 0.3s steps(2) 1;
   }
 
   .tac-panel__desc {
@@ -244,5 +260,40 @@
 
   .back-link:hover {
     color: var(--color-primary);
+  }
+}
+
+@keyframes tac-glitch {
+  0% {
+    transform: translate(0);
+    text-shadow: none;
+  }
+  20% {
+    transform: translate(-2px, 1px);
+    text-shadow:
+      2px 0 var(--color-primary),
+      -2px 0 oklch(65% 0.25 25);
+  }
+  40% {
+    transform: translate(2px, -1px);
+    text-shadow:
+      -2px 0 var(--color-primary),
+      2px 0 oklch(65% 0.25 25);
+  }
+  60% {
+    transform: translate(-1px, 0);
+    text-shadow:
+      1px 0 oklch(65% 0.25 25),
+      -1px 0 var(--color-primary);
+  }
+  80% {
+    transform: translate(1px, 1px);
+    text-shadow:
+      -1px 0 var(--color-primary),
+      1px 0 oklch(65% 0.25 25);
+  }
+  100% {
+    transform: translate(0);
+    text-shadow: none;
   }
 }

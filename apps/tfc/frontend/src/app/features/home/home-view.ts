@@ -70,7 +70,7 @@ import { switchMap } from "rxjs";
       } @else {
         <nav class="home-menu" aria-label="Main menu">
           <a class="tac-panel" data-primary (click)="showPicker.set(true)">
-            <span class="tac-panel__indicator">OPS</span>
+            <span class="tac-panel__indicator">EXE</span>
             <span class="tac-panel__label">Run Exercise</span>
             <span class="tac-panel__desc"
               >Pick a scenario and start a new exercise</span
