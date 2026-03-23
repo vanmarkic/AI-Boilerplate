@@ -2,3 +2,5 @@
 [   27775ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8001/api/scenarios:0
 [  103598ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8001/api/domain-configs/by-slug/silent-wake:0
 [  107439ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:8001/api/exercises/joinable:0
+[  741744ms] [ERROR] WebSocket connection to 'ws://localhost:4201/?token=VyIKlbI9qGe7' failed: Error during WebSocket handshake: Unexpected response code: 400 @ http://localhost:4201/@vite/client:744
+[  929081ms] [ERROR] WebSocket connection to 'ws://localhost:4201/?token=VyIKlbI9qGe7' failed: Error during WebSocket handshake: Unexpected response code: 400 @ http://localhost:4201/@vite/client:744
