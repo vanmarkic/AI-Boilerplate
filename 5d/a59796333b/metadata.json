@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "5da59796333b",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "apps/tfc/frontend/src/app/core/ws-state-handler.spec.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/5d/a59796333b/0/metadata.json",
+      "transcript": "/5d/a59796333b/0/full.jsonl",
+      "content_hash": "/5d/a59796333b/0/content_hash.txt",
+      "prompt": ""
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 1,
+    "cache_creation_tokens": 352,
+    "cache_read_tokens": 39822,
+    "output_tokens": 155,
+    "api_call_count": 1
+  }
+}
