@@ -105,8 +105,13 @@ async function installRoutesOnce(page: Page): Promise<void> {
 
 // ── Helpers ──────────────────────────────────────────────────────────
 
-function shouldShowScore(state: PlayerState): boolean {
-  return state.score !== null && state.phase !== "briefing";
+function shouldShowTurnNumber(state: PlayerState): boolean {
+  if (!state.score || state.phase === "briefing") return false;
+  // Turn number only shows when there's an active decision with a matching event
+  const decision = state.decisions[0];
+  if (!decision) return false;
+  const eventId = decision.event_id;
+  return state.events.some((e) => e.id === eventId);
 }
 
 function stressSeverity(stress: number): string {
@@ -146,17 +151,17 @@ test.describe("Property: player view invariants @property", () => {
   });
 
 
-  test("P4: score bar visible iff score exists and not briefing", async ({ page }) => {
+  test("P4: turn number visible iff score + active decision with event", async ({ page }) => {
     await installRoutesOnce(page);
     await fc.assert(
       fc.asyncProperty(playerStateArb, async (state) => {
         updateMock(state);
         await page.goto(buildPlayerUrl(state));
-        const scoreBar = page.locator("tfc-score-bar");
-        if (shouldShowScore(state)) {
-          await expect(scoreBar).toBeVisible();
+        const turnBanner = page.locator(".board-turn-banner__turn");
+        if (shouldShowTurnNumber(state)) {
+          await expect(turnBanner).toBeVisible();
         } else {
-          await expect(scoreBar).not.toBeVisible();
+          await expect(turnBanner).not.toBeVisible();
         }
       }),
       { numRuns: NUM_RUNS },
@@ -206,8 +211,8 @@ test.describe("Property: player view invariants @property", () => {
       fc.asyncProperty(playerStateArb, async (state) => {
         updateMock(state);
         await page.goto(buildPlayerUrl(state));
-        // The board grid container is always present in the main area
-        await expect(page.locator(".board-grid")).toBeAttached();
+        // The player main container is always present in the main area
+        await expect(page.locator(".player-main")).toBeAttached();
         // The "Waiting for next turn..." banner shows when no current turn event
         const waitingBanner = page.locator(".board-turn-banner");
         await expect(waitingBanner).toBeVisible();

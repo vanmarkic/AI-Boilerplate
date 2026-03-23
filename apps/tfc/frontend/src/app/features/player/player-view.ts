@@ -180,6 +180,11 @@ export class PlayerView implements OnInit, OnDestroy {
     );
   });
 
+  protected readonly isAllRoles = computed(() => {
+    const role = this.store.playerRole();
+    return role === "all_roles" || role === "solo_player";
+  });
+
   protected readonly isDecisionMaker = computed(() => {
     const role = this.store.playerRole();
     const allRoles = this.store.context()?.roles ?? [];
@@ -190,14 +195,14 @@ export class PlayerView implements OnInit, OnDestroy {
     );
   });
 
-  protected readonly coRoleId = computed(() => {
+  protected readonly coRoleDef = computed(() => {
     const allRoles = this.store.context()?.roles ?? [];
-    return allRoles.find((r) => r.player_type === "decision_maker")?.id ?? null;
+    return allRoles.find((r) => r.player_type === "decision_maker") ?? null;
   });
 
   protected readonly coIntel = computed(() => {
     const event = this.currentTurnEvent();
-    const id = this.coRoleId();
+    const id = this.coRoleDef()?.id;
     if (!event || !id) return null;
     return event.role_descriptions?.[id] ?? null;
   });

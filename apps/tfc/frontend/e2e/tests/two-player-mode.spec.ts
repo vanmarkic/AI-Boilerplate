@@ -199,12 +199,12 @@ function collabWaitingRoomUrl(participantId: string): string {
   return `/waiting-room?exerciseId=${EX_ID}&participantId=${participantId}`;
 }
 
-// ── 1. WAITING ROOM — 2 PLAYER MODE TOGGLE ──────────────────────────
-//    Checkbox visible only in simple_collaborative mode.
-//    Hidden in classic mode.
+// ── 1. WAITING ROOM — 2 PLAYER MODE VIA QUERY PARAM ─────────────────
+//    Mode is set via playerCountMode query parameter.
+//    "2 Players" text visible in mode bar when playerCountMode=two_player.
 
-test.describe("Waiting room — 2 Players button visibility @waiting-room @two-player", () => {
-  test("2 Players button visible in simple_collaborative mode", async ({
+test.describe("Waiting room — 2 Players mode bar visibility @waiting-room @two-player", () => {
+  test("2 Players text visible when playerCountMode=two_player", async ({
     page,
     mockApi,
   }) => {
@@ -213,43 +213,40 @@ test.describe("Waiting room — 2 Players button visibility @waiting-room @two-p
     seedScenarioWithRoles(mockApi, "simple_collaborative");
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=two_player",
+    );
 
-    await expect(
-      page.getByRole("button", { name: "2 Players" }),
-    ).toBeVisible();
+    await expect(page.getByText("2 Players")).toBeVisible();
   });
 
-  test("2 Players button NOT visible in classic mode", async ({ page, mockApi }) => {
+  test("2 Players text NOT visible in classic mode", async ({ page, mockApi }) => {
     const me = mockParticipant({ display_name: "Alice", role: "co" });
     mockApi.seed(EX_ID, [me], "classic");
     seedScenarioWithRoles(mockApi, "classic");
     await mockApi.install();
 
-    await page.goto(`/waiting-room?exerciseId=${EX_ID}&participantId=${me.id}`);
+    await page.goto(collabWaitingRoomUrl(me.id));
 
-    await expect(
-      page.getByRole("button", { name: "2 Players" }),
-    ).not.toBeVisible();
+    await expect(page.getByText("2 Players")).not.toBeVisible();
   });
 });
 
 // ── 2. WAITING ROOM — ROLE SELECTOR ACTIVATION ─────────────────────
-//    Toggling checkbox shows role dropdowns with Decision Maker / All Advisors.
-//    Untoggled shows role-slot-list (no dropdowns).
+//    playerCountMode=two_player shows role dropdowns with CO / Crew Members.
+//    Without two_player mode, no dropdowns.
 
-test.describe("Waiting room — role selector after 2 Players click @waiting-room @two-player", () => {
-  test("toggling on shows 2-player role options", async ({ page, mockApi }) => {
+test.describe("Waiting room — role selector in 2-player mode @waiting-room @two-player", () => {
+  test("two_player mode shows 2-player role options", async ({ page, mockApi }) => {
     const alice = mockParticipant({ display_name: "Alice", role: "co" });
     const bob = mockParticipant({ display_name: "Bob", role: "nav" });
     mockApi.seed(EX_ID, [alice, bob], "simple_collaborative");
     seedScenarioWithRoles(mockApi, "simple_collaborative");
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(alice.id));
-
-    // Toggle on
-    await page.getByRole("button", { name: "2 Players" }).click();
+    await page.goto(
+      collabWaitingRoomUrl(alice.id) + "&playerCountMode=two_player",
+    );
 
     // 2-player role dropdowns visible with correct options
     const selects = page.locator("select");
@@ -260,7 +257,7 @@ test.describe("Waiting room — role selector after 2 Players click @waiting-roo
     await expect(options.nth(1)).toHaveText("Crew Members");
   });
 
-  test("clicking Full Team hides 2-player role dropdowns", async ({
+  test("full mode hides 2-player role dropdowns", async ({
     page,
     mockApi,
   }) => {
@@ -269,18 +266,11 @@ test.describe("Waiting room — role selector after 2 Players click @waiting-roo
     seedScenarioWithRoles(mockApi, "simple_collaborative");
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=full",
+    );
 
-    // Select 2 Players — selects visible
-    await page.getByRole("button", { name: "2 Players" }).click();
-    const firstSelect = page.locator("select").first();
-    await expect(firstSelect).toBeVisible();
-    const opts = firstSelect.locator("option");
-    await expect(opts.nth(0)).toHaveText("Commanding Officer");
-
-    // Switch to Full Team — selects gone
-    await page.getByRole("button", { name: "Full Team" }).click();
-    // Select dropdowns should no longer be visible
+    // Select dropdowns should not be visible in full mode
     await expect(page.locator("select")).not.toBeVisible();
   });
 });
@@ -303,11 +293,12 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     seedScenarioWithRoles(mockApi, "simple_collaborative");
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.getByRole("button", { name: "2 Players" }).click();
+    await page.goto(
+      collabWaitingRoomUrl(alice.id) + "&playerCountMode=two_player",
+    );
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 
@@ -324,11 +315,12 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     seedScenarioWithRoles(mockApi, "simple_collaborative");
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.getByRole("button", { name: "2 Players" }).click();
+    await page.goto(
+      collabWaitingRoomUrl(alice.id) + "&playerCountMode=two_player",
+    );
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeEnabled();
   });
 
@@ -344,11 +336,12 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     seedScenarioWithRoles(mockApi, "simple_collaborative");
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
-    await page.getByRole("button", { name: "2 Players" }).click();
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=two_player",
+    );
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 
@@ -369,11 +362,12 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     seedScenarioWithRoles(mockApi, "simple_collaborative");
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(alice.id));
-    await page.getByRole("button", { name: "2 Players" }).click();
+    await page.goto(
+      collabWaitingRoomUrl(alice.id) + "&playerCountMode=two_player",
+    );
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 });
@@ -393,7 +387,9 @@ test.describe("Waiting room — missing roles error state @waiting-room @two-pla
     mockApi.seedExercise(EX_ID, "simple_collaborative", null);
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=two_player",
+    );
 
     await expect(page.getByText("Scenario has no roles defined")).toBeVisible();
   });
@@ -407,10 +403,12 @@ test.describe("Waiting room — missing roles error state @waiting-room @two-pla
     mockApi.seedExercise(EX_ID, "simple_collaborative", null);
     await mockApi.install();
 
-    await page.goto(collabWaitingRoomUrl(me.id));
+    await page.goto(
+      collabWaitingRoomUrl(me.id) + "&playerCountMode=two_player",
+    );
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 });
@@ -569,8 +567,8 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     // Header always visible
     await expect(page.locator(".player-header__title")).toBeVisible();
 
-    // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    // Stress bar visible in header
+    await expect(page.locator("tfc-stress-bar")).toBeVisible();
 
     // All-advisors panel visible with tabs
     await expect(page.locator("tfc-all-advisors-panel")).toBeVisible();
@@ -603,8 +601,8 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     // Header always visible
     await expect(page.locator(".player-header__title")).toBeVisible();
 
-    // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    // Stress bar visible in header
+    await expect(page.locator("tfc-stress-bar")).toBeVisible();
 
     // Decision panel visible (DM style, no [Advisor] prefix)
     await expect(page.locator("tfc-decision-panel")).toBeAttached();

@@ -1,12 +1,29 @@
-// {
-//   "mcpServers": {
-//     "task-orchestrator": {
-//       "command": "docker",
-//       "args": [
-//         "run", "--rm", "-i",
-//         "-v", "mcp-task-data-ai-boilerplate:/app/data",
-//         "ghcr.io/jpicklyk/task-orchestrator:latest"
-//       ]
-//     }
-//   }
-// }
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "/home/dma/.nvm/versions/node/v22.22.0/bin/npx",
+      "args": [
+        "chrome-devtools-mcp@latest",
+        "-e",
+        "/home/dma/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome"
+      ],
+      "env": {
+        "PATH": "/home/dma/.nvm/versions/node/v22.22.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      }
+    },
+    "playwright": {
+      "command": "/home/dma/.nvm/versions/node/v22.22.0/bin/npx",
+      "args": [
+        "@playwright/mcp@latest",
+        "--browser",
+        "chromium",
+        "--executable-path",
+        "/home/dma/.cache/ms-playwright/chromium-1208/chrome-linux64/chrome",
+        "--headless"
+      ],
+      "env": {
+        "PATH": "/home/dma/.nvm/versions/node/v22.22.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+      }
+    }
+  }
+}

@@ -13,6 +13,7 @@ import { BadgeComponent, ButtonDirective, InputComponent } from "@aspect/ui";
 import { FormsModule } from "@angular/forms";
 import { ExerciseWsService } from "../../core/exercise-ws.service";
 import { ExerciseApiService } from "../../core/exercise-api.service";
+import { EngineApiService } from "../../core/engine-api.service";
 import {
   ScenarioApiService,
   type RoleDef,
@@ -225,6 +226,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
   private readonly api = inject(WaitingRoomApiService);
   private readonly ws = inject(ExerciseWsService);
   private readonly exerciseApi = inject(ExerciseApiService);
+  private readonly engineApi = inject(EngineApiService);
   private readonly scenarioApi = inject(ScenarioApiService);
   private sub: Subscription | null = null;
 
@@ -372,14 +374,17 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     const me = this.participants().find((p) => p.id === this.participantId());
     const role = me?.role ?? "player";
     if (this.isSimpleCollaborative()) {
-      this.router.navigate(["/player"], {
-        queryParams: {
-          exerciseId: this.exerciseId(),
-          participantId: this.participantId(),
-          role,
-          gameMode: "simple_collaborative",
-          practiceMode: this.practiceMode(),
-        },
+      this.engineApi.start(this.exerciseId()).subscribe({
+        next: () =>
+          this.router.navigate(["/player"], {
+            queryParams: {
+              exerciseId: this.exerciseId(),
+              participantId: this.participantId(),
+              role,
+              gameMode: "simple_collaborative",
+              practiceMode: this.practiceMode(),
+            },
+          }),
       });
       return;
     }

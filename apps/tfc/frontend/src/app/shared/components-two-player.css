@@ -103,6 +103,61 @@
     border-right: 1px solid var(--color-border);
   }
 
+  /* ── CO Card (role-card chrome for all-roles layout) ── */
+
+  .co-card {
+    display: flex;
+    flex-direction: column;
+    padding: var(--spacing-md);
+    border-radius: 2px;
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--color-accent);
+    background: color-mix(in oklch, var(--color-accent) 3%, var(--color-card));
+  }
+
+  /* Reset horizontal bar styles when nested inside card */
+  .co-card .co-decision-bar {
+    border-top: none;
+    padding: 0;
+    background: transparent;
+    flex-direction: column;
+    align-items: stretch;
+    flex: 1;
+    min-height: 0;
+  }
+
+  .co-card .co-decision-bar__intel {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    padding-right: 0;
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+  }
+
+  .co-card .co-decision-bar__options {
+    flex-direction: column;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  .co-card .co-decision-bar__option {
+    flex: 0 0 auto;
+  }
+
+  .co-card .co-decision-bar__confirm {
+    flex-shrink: 0;
+    width: 100%;
+    margin-top: var(--spacing-sm);
+  }
+
+  .co-card .co-decision-bar__empty {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   /* ── Readonly mirror mode ─────────────────────────── */
 
   .role-card__rec-check {
