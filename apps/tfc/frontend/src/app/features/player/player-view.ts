@@ -34,6 +34,7 @@ import { handlePlayerWsMessage } from "./player-ws-handler";
 import { RoleCardComponent } from "./role-card.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
+import { SeaBackdrop } from "../home/sea-backdrop";
 import type { RoleCardSubmission } from "./role-card.component";
 import {
   CoDecisionBarComponent,
@@ -43,6 +44,7 @@ import { buildRoleCards } from "./role-card.types";
 
 @Component({
   selector: "tfc-player-view",
+  host: { style: "display:block;position:relative;overflow:hidden" },
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore, TickService],
   imports: [
@@ -59,6 +61,7 @@ import { buildRoleCards } from "./role-card.types";
     CoDecisionBarComponent,
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
+    SeaBackdrop,
   ],
   templateUrl: "./player-view.html",
 })

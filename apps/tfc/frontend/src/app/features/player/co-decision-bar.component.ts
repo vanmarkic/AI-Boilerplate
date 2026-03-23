@@ -98,12 +98,16 @@ export class CoDecisionBarComponent {
   readonly selectedOptionIds = signal<string[]>([]);
   readonly targetSystemSelections = signal<Record<string, string>>({});
 
+  private _lastDecisionId: string | null = null;
   private readonly resetOnDecisionChange = effect(() => {
-    this.decision();
-    untracked(() => {
-      this.selectedOptionIds.set([]);
-      this.targetSystemSelections.set({});
-    });
+    const id = this.decision()?.id ?? null;
+    if (id !== this._lastDecisionId) {
+      this._lastDecisionId = id;
+      untracked(() => {
+        this.selectedOptionIds.set([]);
+        this.targetSystemSelections.set({});
+      });
+    }
   });
 
   readonly canConfirm = computed(() => this.selectedOptionIds().length > 0);

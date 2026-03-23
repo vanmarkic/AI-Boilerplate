@@ -123,17 +123,19 @@ export interface RoleCardSubmission {
               placeholder="Enter your response..."
             ></textarea>
           }
-          <div class="role-card__actions">
-            <button
-              uiButton
-              variant="default"
-              size="sm"
-              (click)="onSubmit()"
-              [disabled]="!canSubmit()"
-            >
-              Submit
-            </button>
-          </div>
+          @if (questionType() !== 'single_choice') {
+            <div class="role-card__actions">
+              <button
+                uiButton
+                variant="default"
+                size="sm"
+                (click)="onSubmit()"
+                [disabled]="!canSubmit()"
+              >
+                Submit
+              </button>
+            </div>
+          }
         </div>
       }
 
@@ -260,6 +262,10 @@ export class RoleCardComponent {
   protected toggleOption(option: DecisionOption): void {
     if (this.questionType() === "single_choice") {
       this.selectedOptions.set([option.id]);
+      // Auto-submit recommendation immediately for single-choice
+      if (!option.targets_system) {
+        this.onSubmit();
+      }
     } else {
       const current = this.selectedOptions();
       if (current.includes(option.id)) {
