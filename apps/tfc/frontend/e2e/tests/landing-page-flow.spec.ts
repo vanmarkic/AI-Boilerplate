@@ -107,10 +107,10 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(
-      page.getByText(/1 active operations? awaiting crew/),
-    ).toBeVisible();
+    await expect(page.getByText("Hospital MCI")).toBeVisible();
+    await expect(page.getByText("0 / 2 crew")).toBeVisible();
+    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
+    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
   });
 
   test("shows Join Exercise link in lobby preview", async ({
@@ -132,7 +132,7 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Join Operation" })).toBeVisible();
   });
 
   test("shows active operation count with participants", async ({
@@ -158,10 +158,8 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(
-      page.getByText(/1 active operations? awaiting crew/),
-    ).toBeVisible();
+    await expect(page.getByText("Alice")).toBeVisible();
+    await expect(page.getByText("1 / 2 crew")).toBeVisible();
   });
 });
 
@@ -239,7 +237,6 @@ test.describe("Join Exercise card @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(page.getByText("Live")).toBeVisible();
+    await expect(page.getByText("Game Master")).toBeVisible();
   });
 });

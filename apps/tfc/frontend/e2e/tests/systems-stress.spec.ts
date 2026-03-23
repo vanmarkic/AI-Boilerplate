@@ -201,7 +201,7 @@ test.describe("System status board — player view", () => {
 // ── PLAYER VIEW: Stress Bar ──────────────────────────────────────────
 
 test.describe("Stress bar — player view", () => {
-  test("renders stress bar inside score bar with correct value", async ({ page }) => {
+  test("renders stress bar in header with correct value", async ({ page }) => {
     await installMocks(page, snapshot({ score: { ...SCORE, stress: 5 } }));
     await page.goto(playerUrl("p1"));
 

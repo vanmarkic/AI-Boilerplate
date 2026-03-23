@@ -165,8 +165,12 @@ test.describe("/home — Lobby: empty, collaborative, not joined @home @waiting-
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("0 / 2 crew")).toBeVisible();
+    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
+    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
+    const openSlots = page.getByText("Open", { exact: true });
+    await expect(openSlots).toHaveCount(2);
+    await expect(page.getByRole("button", { name: "Join Operation" })).toBeVisible();
   });
 
   test("no Game Master text on home", async ({ page, mockApi }) => {
@@ -184,8 +188,10 @@ test.describe("/home — Lobby: empty, classic, not joined @home @waiting-room",
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(page.getByText(/1 active operations? awaiting crew/)).toBeVisible();
+    await expect(page.getByText("Game Master")).toBeVisible();
+    await expect(page.getByText("0 / 3 crew")).toBeVisible();
+    const openSlots = page.getByText("Open", { exact: true });
+    await expect(openSlots).toHaveCount(3); // co + nav + gm
   });
 });
 
@@ -199,8 +205,9 @@ test.describe("/home — Lobby: partial fill (1/2) @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Alice")).toBeVisible();
+    await expect(page.getByText("1 / 2 crew")).toBeVisible();
+    await expect(page.getByText("Open", { exact: true })).toHaveCount(1);
   });
 });
 
@@ -215,8 +222,10 @@ test.describe("/home — Lobby: full (2/2) @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Alice")).toBeVisible();
+    await expect(page.getByText("Bob")).toBeVisible();
+    await expect(page.getByText("2 / 2 crew")).toBeVisible();
+    await expect(page.getByText("Open", { exact: true })).toHaveCount(0);
   });
 });
 
@@ -233,6 +242,8 @@ test.describe("/home — Lobby: start button logic @home @waiting-room", () => {
     await expect(
       page.getByRole("button", { name: /Deploy/ }),
     ).not.toBeVisible();
+    await expect(page.getByRole("button", { name: "Leave" })).not.toBeVisible();
+    await expect(page.getByRole("button", { name: "Join Operation" })).toBeVisible();
   });
 });
 
@@ -254,8 +265,12 @@ test.describe("/home — Lobby: 3-role scenario @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Join Exercise")).toBeVisible();
-    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
+    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
+    await expect(
+      page.getByText("Principal Warfare Officer (PWO)"),
+    ).toBeVisible();
+    await expect(page.getByText("0 / 3 crew")).toBeVisible();
   });
 });
 
@@ -332,7 +347,7 @@ test.describe("/waiting-room — with scenario roles @waiting-room", () => {
     await mockApi.install();
     await page.goto(wrUrl(me.id));
 
-    await expect(page.getByText("Game Master (Trainer)")).toBeVisible();
+    await expect(page.getByText("Game Master")).toBeVisible();
   });
 });
 
