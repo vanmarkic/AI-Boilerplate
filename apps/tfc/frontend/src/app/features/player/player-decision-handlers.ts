@@ -91,6 +91,8 @@ export function submitDecision(
     )
     .subscribe({
       next: () => store.closeDecision(decision.id),
+      error: (err) =>
+        console.error("[submitDecision] close failed:", decision.id, err),
     });
 }
 
