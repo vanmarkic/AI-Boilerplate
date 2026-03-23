@@ -1,0 +1,654 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/home/sea-backdrop.ts in the IDE. This may or may not be related to the current task.</ide_opened_file>
+Update Todos
+
+Write silent_wake_baseline.json with turn-based authoring from PDF
+
+Validate new seed passes ScenarioContent validation
+
+Update seed_validation_test.py for new file
+
+File GH issue for conditional injects feature
+Done. Here's what was delivered:
+
+New file: silent_wake_baseline.json
+
+16 turns (Turn 0 briefing + 15 game turns) using new turn-based authoring (injects, available_cards, best_path, acceptable_path, design_notes)
+No legacy events/decision_templates/issues/decision_sequence arrays — everything generated from turns at runtime
+All narrative, role injects, facilitator prompts, and design notes sourced from the PDF baseline
+7 roles, 11 systems, 4 warfare domains matching the PDF's Initial Conditions
+Stress deltas reverse-engineered from PDF's best/acceptable path consequences
+Turn 0 Pre-Sail Briefing added (missing from old seed)
+Tests: seed_validation_test.py — added test_silent_wake_baseline_structure and test_silent_wake_baseline_system_ids_match_domain_config (10/10 passing)
+
+Docker-compose: Already seeds automatically — seed.py picks up all *.json in seeds/ on startup.
+
+GH Issue: #204 — conditional injects (Turn 8 EO: "provide card only if action was not proposed in the previous turn")
+
+reseed
+Bash Reseed TFC database
+IN
+docker compose -f infra/docker-compose.tfc.yml exec tfc-api python seed.py 2>&1
+
+OUT
+2026-03-23 00:51:12,936 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+INFO  select pg_catalog.version()
+2026-03-23 00:51:12,936 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO  [raw sql] ()
+2026-03-23 00:51:12,937 INFO sqlalchemy.engine.Engine select current_schema()
+2026-03-23 00:51:12,937 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO  select current_schema()
+INFO  [raw sql] ()
+2026-03-23 00:51:12,938 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-03-23 00:51:12,938 INFO sqlalchemy.engine.Engine [raw sql] ()
+INFO  show standard_conforming_strings
+INFO  [raw sql] ()
+2026-03-23 00:51:12,938 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO  BEGIN (implicit)
+INFO  SELECT tfc_domain_configs.id, tfc_domain_configs.slug, tfc_domain_configs.name, tfc_domain_configs.description, tfc_domain_configs.terminology, tfc_domain_configs.theme, tfc_domain_configs.roles, tfc_domain_configs.severity_levels, tfc_domain_configs.systems, tfc_domain_configs.warfare_domains, tfc_domain_configs.blue_card_catalog, tfc_domain_configs.created_at, tfc_domain_configs.updated_at 
+FROM tfc_domain_configs 
+WHERE tfc_domain_configs.slug = $1::VARCHAR
+INFO  [generated in 0.00008s] ('silent-wake',)
+2026-03-23 00:51:12,940 INFO sqlalchemy.engine.Engine SELECT tfc_domain_configs.id, tfc_domain_configs.slug, tfc_domain_configs.name, tfc_domain_configs.description, tfc_domain_configs.terminology, tfc_domain_configs.theme, tfc_domain_configs.roles, tfc_domain_configs.severity_levels, tfc_domain_configs.systems, tfc_domain_configs.warfare_domains, tfc_domain_configs.blue_card_catalog, tfc_domain_configs.created_at, tfc_domain_configs.updated_at 
+FROM tfc_domain_configs 
+WHERE tfc_domain_configs.slug = $1::VARCHAR
+2026-03-23 00:51:12,940 INFO sqlalchemy.engine.Engine [generated in 0.00008s] ('silent-wake',)
+INFO  COMMIT
+2026-03-23 00:51:12,946 INFO sqlalchemy.engine.Engine COMMIT
+INFO  Updated domain config 'silent-wake' from silent_wake_domain_config.json
+2026-03-23 00:51:12,951 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO  BEGIN (implicit)
+2026-03-23 00:51:12,952 INFO sqlalchemy.engine.Engine SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+INFO  SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+INFO  [generated in 0.00006s] ('Silent Wake',)
+2026-03-23 00:51:12,952 INFO sqlalchemy.engine.Engine [generated in 0.00006s] ('Silent Wake',)
+2026-03-23 00:51:12,954 INFO sqlalchemy.engine.Engine UPDATE tfc_scenarios SET content=$1::JSON, updated_at=now() WHERE tfc_scenarios.id = $2::INTEGER
+INFO  UPDATE tfc_scenarios SET content=$1::JSON, updated_at=now() WHERE tfc_scenarios.id = $2::INTEGER
+2026-03-23 00:51:12,954 INFO sqlalchemy.engine.Engine [generated in 0.00021s] ('{"game_mode": "simple_collaborative", "stress_effect_preset": "standard", "game_mode_config": {"base_decision_time_ms": 300000}, "default_time_factor ... (35845 characters truncated) ... eat_level": "green"}, {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}], "score_tier_thresholds": {"lo": 0.33, "mid": 0.66}}', 1)
+INFO  [generated in 0.00021s] ('{"game_mode": "simple_collaborative", "stress_effect_preset": "standard", "game_mode_config": {"base_decision_time_ms": 300000}, "default_time_factor ... (35845 characters truncated) ... eat_level": "green"}, {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}], "score_tier_thresholds": {"lo": 0.33, "mid": 0.66}}', 1)
+2026-03-23 00:51:12,959 INFO sqlalchemy.engine.Engine COMMIT
+INFO  COMMIT
+INFO  Updated scenario 'Silent Wake' from silent_wake.json
+2026-03-23 00:51:12,961 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO  BEGIN (implicit)
+2026-03-23 00:51:12,961 INFO sqlalchemy.engine.Engine SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+INFO  SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+INFO  [cached since 0.009776s ago] ('Silent Wake',)
+2026-03-23 00:51:12,961 INFO sqlalchemy.engine.Engine [cached since 0.009776s ago] ('Silent Wake',)
+2026-03-23 00:51:12,962 INFO sqlalchemy.engine.Engine UPDATE tfc_scenarios SET content=$1::JSON, updated_at=now() WHERE tfc_scenarios.id = $2::INTEGER
+INFO  UPDATE tfc_scenarios SET content=$1::JSON, updated_at=now() WHERE tfc_scenarios.id = $2::INTEGER
+2026-03-23 00:51:12,962 INFO sqlalchemy.engine.Engine [cached since 0.007988s ago] ('{"game_mode": "simple_collaborative", "game_mode_config": {"base_decision_time_ms": 300000}, "default_time_factor": 1.0, "briefing": "You are the cre ... (35809 characters truncated) ... eat_level": "green"}, {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}], "score_tier_thresholds": {"lo": 0.33, "mid": 0.66}}', 1)
+INFO  [cached since 0.007988s ago] ('{"game_mode": "simple_collaborative", "game_mode_config": {"base_decision_time_ms": 300000}, "default_time_factor": 1.0, "briefing": "You are the cre ... (35809 characters truncated) ... eat_level": "green"}, {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}], "score_tier_thresholds": {"lo": 0.33, "mid": 0.66}}', 1)
+2026-03-23 00:51:12,963 INFO sqlalchemy.engine.Engine COMMIT
+INFO  COMMIT
+INFO  Updated scenario 'Silent Wake' from silent_wake_backup.json
+2026-03-23 00:51:12,964 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO  BEGIN (implicit)
+INFO  SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+2026-03-23 00:51:12,964 INFO sqlalchemy.engine.Engine SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+2026-03-23 00:51:12,964 INFO sqlalchemy.engine.Engine [cached since 0.01265s ago] ('Silent Wake (Baseline)',)
+INFO  [cached since 0.01265s ago] ('Silent Wake (Baseline)',)
+2026-03-23 00:51:12,965 INFO sqlalchemy.engine.Engine INSERT INTO tfc_scenarios (title, description, domain_id, content, version) VALUES ($1::VARCHAR, $2::VARCHAR, $3::INTEGER, $4::JSON, $5::INTEGER) RETURNING tfc_scenarios.id, tfc_scenarios.created_at, tfc_scenarios.updated_at
+INFO  INSERT INTO tfc_scenarios (title, description, domain_id, content, version) VALUES ($1::VARCHAR, $2::VARCHAR, $3::INTEGER, $4::JSON, $5::INTEGER) RETURNING tfc_scenarios.id, tfc_scenarios.created_at, tfc_scenarios.updated_at
+2026-03-23 00:51:12,965 INFO sqlalchemy.engine.Engine [generated in 0.00018s] ('Silent Wake (Baseline)', 'Naval cyber-kinetic escalation — 15-turn simple collaborative exercise. Scenario Baseline, Naval Group, February 2026.', None, '{"game_mode": "simple_collaborative", "stress_effect_preset": "standard", "game_mode_config": {"base_decision_time_ms": 300000}, "default_time_factor ... (30759 characters truncated) ... eat_level": "green"}, {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}], "score_tier_thresholds": {"lo": 0.33, "mid": 0.66}}', 1)
+INFO  [generated in 0.00018s] ('Silent Wake (Baseline)', 'Naval cyber-kinetic escalation — 15-turn simple collaborative exercise. Scenario Baseline, Naval Group, February 2026.', None, '{"game_mode": "simple_collaborative", "stress_effect_preset": "standard", "game_mode_config": {"base_decision_time_ms": 300000}, "default_time_factor ... (30759 characters truncated) ... eat_level": "green"}, {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}], "score_tier_thresholds": {"lo": 0.33, "mid": 0.66}}', 1)
+2026-03-23 00:51:12,966 INFO sqlalchemy.engine.Engine COMMIT
+INFO  COMMIT
+INFO  Seeded scenario 'Silent Wake (Baseline)' from silent_wake_baseline.json
+2026-03-23 00:51:12,967 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+INFO  BEGIN (implicit)
+2026-03-23 00:51:12,968 INFO sqlalchemy.engine.Engine SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+2026-03-23 00:51:12,968 INFO sqlalchemy.engine.Engine [cached since 0.01596s ago] ('Silent Wake — Tutorial (Port Approach)',)
+INFO  SELECT tfc_scenarios.id, tfc_scenarios.title, tfc_scenarios.description, tfc_scenarios.domain_id, tfc_scenarios.content, tfc_scenarios.version, tfc_scenarios.created_at, tfc_scenarios.updated_at 
+FROM tfc_scenarios 
+WHERE tfc_scenarios.title = $1::VARCHAR
+INFO  [cached since 0.01596s ago] ('Silent Wake — Tutorial (Port Approach)',)
+2026-03-23 00:51:12,968 INFO sqlalchemy.engine.Engine COMMIT
+INFO  COMMIT
+INFO  Updated scenario 'Silent Wake — Tutorial (Port Approach)' from silent_wake_tutorial.json
+Seeded successfully — Silent Wake (Baseline) is now in the database alongside the existing scenarios.
+
+smoke test tct it end to end for 2 players
+
+loop
+if bug:
+solve bug
+then continue
+smoke-test-tfc skill
+Let me start the smoke test. First, prerequisites check.
+
+Bash Check backend is running
+IN
+curl -sf http://localhost:8001/api/scenarios > /dev/null && echo "Backend OK" || echo "Backend DOWN"
+
+OUT
+Backend OK
+Bash Check frontend is running
+IN
+curl -sf http://localhost:4201 > /dev/null && echo "Frontend OK" || echo "Frontend DOWN"
+
+OUT
+Frontend OK
+Good. Now Phase 1: Setup via API using the new baseline scenario.
+
+Bash Setup exercise via API with baseline scenario
+IN
+python3 -c "
+import urllib.request, urllib.parse, json
+
+BASE = 'http://localhost:8001/api'
+
+def api(method, path, data=None):
+    body = json.dumps(data).encode() if data else None
+    req = urllib.request.Request(f'{BASE}{path}', data=body, method=method,
+                                headers={'Content-Type': 'application/json'} if body else {})
+    with urllib.request.urlopen(req) as r:
+        return json.loads(r.read()) if r.status == 200 else None
+
+# 1. Find the Baseline scenario
+scenarios = api('GET', '/scenarios')
+for s in scenarios:
+    print(f'  Scenario: {s[\"title\"]} (id={s[\"id\"]})')
+sid = next(s['id'] for s in scenarios if 'Baseline' in s['title'])
+print(f'Using scenario id={sid}')
+
+# 2. Create exercise
+ex = api('POST', '/exercises', {
+    'title': 'Smoke Test Baseline 2P',
+    'scenario_id': sid,
+    'game_mode': 'simple_collaborative',
+    'practice_mode': False
+})
+eid = ex['id']
+print(f'Exercise id={eid}')
+
+# 3. Join as Decision Maker
+p1 = api('POST', f'/exercises/{eid}/waiting-room/join',
+         {'display_name': 'CO Player'})
+pid_dm = p1['id']
+
+# 4. Join as All Advisors
+p2 = api('POST', f'/exercises/{eid}/waiting-room/join',
+         {'display_name': 'Crew Player'})
+pid_adv = p2['id']
+
+# 5. Assign roles
+api('PUT', f'/exercises/{eid}/waiting-room/participants/{pid_dm}/role',
+    {'role': 'decision_maker'})
+api('PUT', f'/exercises/{eid}/waiting-room/participants/{pid_adv}/role',
+    {'role': 'all_advisors'})
+
+# 6. Start + begin
+api('POST', f'/exercises/{eid}/engine/start')
+api('POST', f'/exercises/{eid}/engine/begin')
+
+print(f'EID={eid}')
+print(f'PID_DM={pid_dm}')
+print(f'PID_ADV={pid_adv}')
+"
+
+OUT
+Exit code 1
+Traceback (most recent call last):
+  File "<string>", line 27, in <module>
+TypeError: 'NoneType' object is not subscriptable
+  Scenario: Silent Wake — Tutorial (Port Approach) (id=2)
+  Scenario: Silent Wake (Copy) (id=34)
+  Scenario: Silent Wake (id=1)
+  Scenario: Silent Wake (Baseline) (id=35)
+Using scenario id=35
+Bash Debug exercise creation
+IN
+python3 -c "
+import urllib.request, json
+
+BASE = 'http://localhost:8001/api'
+
+def api(method, path, data=None):
+    body = json.dumps(data).encode() if data else None
+    req = urllib.request.Request(f'{BASE}{path}', data=body, method=method,
+                                headers={'Content-Type': 'application/json'} if body else {})
+    try:
+        with urllib.request.urlopen(req) as r:
+            resp = json.loads(r.read())
+            return r.status, resp
+    except urllib.error.HTTPError as e:
+        return e.code, e.read().decode()
+
+# Create exercise
+status, resp = api('POST', '/exercises', {
+    'title': 'Smoke Test Baseline 2P',
+    'scenario_id': 35,
+    'game_mode': 'simple_collaborative',
+    'practice_mode': False
+})
+print(f'Status: {status}')
+print(f'Response: {resp}')
+"
+
+OUT
+Status: 201
+Response: {'id': 9, 'title': 'Smoke Test Baseline 2P', 'description': '', 'phase': 'setup', 'scenario_id': 35, 'domain_id': None, 'time_factor': 1.0, 'game_mode': 'simple_collaborative', 'practice_mode': False, 'session_code': 'P4R8VM', 'created_at': '2026-03-23T00:53:47.790384', 'updated_at': '2026-03-23T00:53:47.790384'}
+Status 201 — my API helper only returned for 200. Let me fix and run the full setup.
+
+Bash Complete exercise setup
+IN
+python3 -c "
+import urllib.request, json
+
+BASE = 'http://localhost:8001/api'
+
+def api(method, path, data=None):
+    body = json.dumps(data).encode() if data else None
+    req = urllib.request.Request(f'{BASE}{path}', data=body, method=method,
+                                headers={'Content-Type': 'application/json'} if body else {})
+    try:
+        with urllib.request.urlopen(req) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        print(f'ERROR {e.code} on {method} {path}: {e.read().decode()}')
+        raise
+
+eid = 9
+
+# Join as Decision Maker
+p1 = api('POST', f'/exercises/{eid}/waiting-room/join',
+         {'display_name': 'CO Player'})
+pid_dm = p1['id']
+
+# Join as All Advisors
+p2 = api('POST', f'/exercises/{eid}/waiting-room/join',
+         {'display_name': 'Crew Player'})
+pid_adv = p2['id']
+
+# Assign roles
+api('PUT', f'/exercises/{eid}/waiting-room/participants/{pid_dm}/role',
+    {'role': 'decision_maker'})
+api('PUT', f'/exercises/{eid}/waiting-room/participants/{pid_adv}/role',
+    {'role': 'all_advisors'})
+
+# Start + begin
+api('POST', f'/exercises/{eid}/engine/start')
+api('POST', f'/exercises/{eid}/engine/begin')
+
+print(f'EID={eid}')
+print(f'PID_DM={pid_dm}')
+print(f'PID_ADV={pid_adv}')
+"
+
+OUT
+EID=9
+PID_DM=cece7ff9-7400-4620-9f5c-9ad3e69b481d
+PID_ADV=09bf3f87-46a5-4180-a0fb-332a03a81760
+Exercise is running. Now Phase 2: Navigate both browsers.
+
+Update Todos
+
+Phase 2: Navigate both browsers to player views
+
+Phase 3: Play Turn 1
+
+Phase 3: Play Turn 2
+
+Phase 3: Play Turn 3
+
+Phase 4: Verify via API + report
+Plugin Playwright Playwright [browser_navigate]localhost
+OUT
+Ran Playwright code
+
+
+await page.goto('http://localhost:4201/player?exerciseId=9&participantId=cece7ff9-7400-4620-9f5c-9ad3e69b481d&role=decision_maker&gameMode=simple_collaborative');
+
+Page
+
+
+Page URL: http://localhost:4201/player?exerciseId=9&participantId=cece7ff9-7400-4620-9f5c-9ad3e69b481d&role=decision_maker&gameMode=simple_collaborative
+
+Page Title: TFC — Training Flow Control
+
+
+Snapshot
+
+
+
+Events
+
+
+[LOG] Angular is running in development mode. @ ht....2.2/tfc/vite/deps/chunk-5OVNZGHY.js?v=3c875af5:14330
+
+Chrome-devtools [navigate_page]localhost
+OUT
+Successfully navigated to http://localhost:4201/player?exerciseId=9&participantId=09bf3f87-46a5-4180-a0fb-332a03a81760&role=all_advisors&gameMode=simple_collaborative.
+
+
+Pages
+
+1: http://localhost:4201/player?exerciseId=9&participantId=09bf3f87-46a5-4180-a0fb-332a03a81760&role=all_advisors&gameMode=simple_collaborative [selected]
+
+Plugin Playwright Playwright [browser_wait_for]TURN
+OUT
+Result
+
+Waited for TURN
+
+
+Ran Playwright code
+
+
+await page.getByText("TURN").first().waitFor({ state: 'visible' });
+
+Page
+
+
+Page URL: http://localhost:4201/player?exerciseId=9&participantId=cece7ff9-7400-4620-9f5c-9ad3e69b481d&role=decision_maker&gameMode=simple_collaborative
+
+Page Title: TFC — Training Flow Control
+
+
+Snapshot
+
+
+- <changed> generic [ref=e3]:
+  - generic:
+    - img
+  - generic [ref=e4]:
+    - banner [ref=e5]:
+      - generic [ref=e6]: Smoke Test Baseline 2P
+      - generic [ref=e7]:
+        - generic [ref=e8]: Stress
+        - generic [ref=e9]: "0"
+      - generic [ref=e11]:
+        - generic [ref=e12]:
+          - generic [ref=e13]: Turn
+          - generic [ref=e14]: 00:04:35
+        - generic [ref=e15]: running
+    - main [ref=e16]:
+      - generic [ref=e17]:
+        - generic [ref=e18]: TURN 1
+        - generic [ref=e19]: In Transit
+      - generic [ref=e21]:
+        - generic [ref=e22]: Warfare
+        - generic [ref=e23]:
+          - generic [ref=e25]: ASUW
+          - generic [ref=e31]: ASW
+          - generic [ref=e37]: AAW
+          - generic [ref=e43]: CYBER
+      - generic [ref=e49]:
+        - generic [ref=e50]: Systems
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e53]: NAV RADAR
+            - generic [ref=e54]: "ON"
+          - generic [ref=e59]:
+            - generic [ref=e60]: IBMS / INS (incl. WECDIS)
+            - generic [ref=e61]: "ON"
+          - generic [ref=e66]:
+            - generic [ref=e67]: NAV SENSORS
+            - generic [ref=e68]: "ON"
+          - generic [ref=e73]:
+            - generic [ref=e74]: COMMS
+            - generic [ref=e75]: "ON"
+          - generic [ref=e80]:
+            - generic [ref=e81]: AAW RADAR
+            - generic [ref=e82]: "OFF"
+          - generic [ref=e87]:
+            - generic [ref=e88]: ASUW TRACKING RADAR
+            - generic [ref=e89]: "OFF"
+          - generic [ref=e94]:
+            - generic [ref=e95]: CIWS FWD
+            - generic [ref=e96]: "OFF"
+          - generic [ref=e100]:
+            - generic [ref=e101]: CIWS AFT
+            - generic [ref=e102]: "OFF"
+          - generic [ref=e106]:
+            - generic [ref=e107]: Missile Launcher
+            - generic [ref=e108]: "OFF"
+          - generic [ref=e112]:
+            - generic [ref=e113]: Gun
+            - generic [ref=e114]: "OFF"
+          - generic [ref=e118]:
+            - generic [ref=e119]: Decoys
+            - generic [ref=e120]: "OFF"
+      - generic [ref=e124]:
+        - generic [ref=e126]:
+          - generic [ref=e127]:
+            - generic [ref=e128]: OPS
+            - generic [ref=e129]: INTEL
+          - generic [ref=e130]: Operations Officer
+        - generic [ref=e132]:
+          - generic [ref=e133]:
+            - generic [ref=e134]: NAV
+            - generic [ref=e135]: INTEL
+          - generic [ref=e136]: Navigator
+        - generic [ref=e138]:
+          - generic [ref=e139]:
+            - generic [ref=e140]: EO
+            - generic [ref=e141]: INTEL
+          - generic [ref=e142]: Engineering Officer
+        - generic [ref=e144]:
+          - generic [ref=e145]:
+            - generic [ref=e146]: CYOP
+            - generic [ref=e147]: INTEL
+          - generic [ref=e148]: Cyber Operations Officer
+        - generic [ref=e150]:
+          - generic [ref=e151]:
+            - generic [ref=e152]: AAWO
+            - generic [ref=e153]: INTEL
+          - generic [ref=e154]: Anti-Air Warfare Officer
+        - generic [ref=e156]:
+          - generic [ref=e157]:
+            - generic [ref=e158]: PWO
+            - generic [ref=e159]: INTEL
+          - generic [ref=e160]: Principal Warfare Officer
+      - generic [ref=e162]:
+        - button "Confirm" [disabled]
+    - contentinfo [ref=e163]:
+      - generic [ref=e164]:
+        - paragraph [ref=e165]: You are the Decision Maker
+        - button "Logs" [ref=e167] [cursor=pointer]
+    - dialog [ref=e169]:
+      - generic [ref=e170]:
+        - heading "Decision Log" [level=2] [ref=e171]
+        - button "Close drawer" [ref=e172] [cursor=pointer]:
+          - img [ref=e173]
+      - generic [ref=e178]:
+        - generic [ref=e179]:
+          - generic [ref=e180]: Turn 1
+          - generic [ref=e181]: In Transit
+        - generic [ref=e182]: Awaiting decision...
+Chrome-devtools [wait_for]
+OUT
+Element matching one of ["TURN"] found.
+
+
+Latest page snapshot
+
+uid=1_0 RootWebArea "TFC — Training Flow Control" url="http://localhost:4201/player?exerciseId=9&participantId=09bf3f87-46a5-4180-a0fb-332a03a81760&role=all_advisors&gameMode=simple_collaborative"
+uid=1_1 banner
+uid=1_2 StaticText "SMOKE TEST BASELINE 2P"
+uid=1_3 StaticText "STRESS"
+uid=1_4 StaticText "0"
+uid=1_5 StaticText "TURN"
+uid=1_6 StaticText "00:04:34"
+uid=1_7 StaticText "RUNNING"
+uid=1_8 main
+uid=1_9 StaticText "TURN 1"
+uid=1_10 StaticText "In Transit"
+uid=1_11 StaticText "WARFARE"
+uid=1_12 StaticText "ASUW"
+uid=1_13 StaticText "ASW"
+uid=1_14 StaticText "AAW"
+uid=1_15 StaticText "CYBER"
+uid=1_16 StaticText "SYSTEMS"
+uid=1_17 StaticText "NAV RADAR"
+uid=1_18 StaticText "ON"
+uid=1_19 StaticText "IBMS / INS (incl. WECDIS)"
+uid=1_20 StaticText "ON"
+uid=1_21 StaticText "NAV SENSORS"
+uid=1_22 StaticText "ON"
+uid=1_23 StaticText "COMMS"
+uid=1_24 StaticText "ON"
+uid=1_25 StaticText "AAW RADAR"
+uid=1_26 StaticText "OFF"
+uid=1_27 StaticText "ASUW TRACKING RADAR"
+uid=1_28 StaticText "OFF"
+uid=1_29 StaticText "CIWS FWD"
+uid=1_30 StaticText "OFF"
+uid=1_31 StaticText "CIWS AFT"
+uid=1_32 StaticText "OFF"
+uid=1_33 StaticText "Missile Launcher"
+uid=1_34 StaticText "OFF"
+uid=1_35 StaticText "Gun"
+uid=1_36 StaticText "OFF"
+uid=1_37 StaticText "Decoys"
+uid=1_38 StaticText "OFF"
+uid=1_39 StaticText "OPS"
+uid=1_40 StaticText "DECISION"
+uid=1_41 StaticText "Operations Officer"
+uid=1_42 StaticText "Transit proceeding as planned. Estimated time to patrol sector unchanged. No updated intelligence from MTC. No declared maritime safety broadcasts affecting corridor. EMCON: Navigation radar only."
+uid=1_43 textbox "Enter your response..." multiline
+uid=1_44 button "Submit" disableable disabled
+uid=1_45 StaticText "NAV"
+uid=1_46 StaticText "DECISION"
+uid=1_47 StaticText "Navigator"
+uid=1_48 StaticText "Course and speed steady at 15 kts. No deviation from planned route. Commercial traffic density within expected levels. ETA to patrol area: 5 hours. Visibility ~12 nm."
+uid=1_49 textbox "Enter your response..." multiline
+uid=1_50 button "Submit" disableable disabled
+uid=1_51 StaticText "EO"
+uid=1_52 StaticText "DECISION"
+uid=1_53 StaticText "Engineering Officer"
+uid=1_54 StaticText "Radar performance nominal. Surface and air picture stable. No sensor anomalies observed. Communications functioning within expected parameters."
+uid=1_55 textbox "Enter your response..." multiline
+uid=1_56 button "Submit" disableable disabled
+uid=1_57 StaticText "CYOP"
+uid=1_58 StaticText "DECISION"
+uid=1_59 StaticText "Cyber Operations Officer"
+uid=1_60 StaticText "Network traffic baseline unchanged. No alerts. Routine monitoring only."
+uid=1_61 textbox "Enter your response..." multiline
+uid=1_62 button "Submit" disableable disabled
+uid=1_63 StaticText "AAWO"
+uid=1_64 StaticText "DECISION"
+uid=1_65 StaticText "Anti-Air Warfare Officer"
+uid=1_66 StaticText "Air picture normal. No contacts of concern."
+uid=1_67 textbox "Enter your response..." multiline
+uid=1_68 button "Submit" disableable disabled
+uid=1_69 StaticText "PWO"
+uid=1_70 StaticText "DECISION"
+uid=1_71 StaticText "Principal Warfare Officer"
+uid=1_72 StaticText "Surface picture normal. No contacts of concern."
+uid=1_73 textbox "Enter your response..." multiline
+uid=1_74 button "Submit" disableable disabled
+uid=1_75 contentinfo
+uid=1_76 StaticText "YOU ARE THE ALL ADVISORS PLAYER"
+uid=1_77 button "Logs"
+uid=1_78 dialog modal
+uid=1_79 heading "Decision Log" level="2"
+uid=1_80 button "Close drawer"
+uid=1_81 StaticText "TURN 1"
+uid=1_82 StaticText "In Transit"
+uid=1_83 StaticText "Awaiting decision..."
+
+Both browsers show TURN 1 — In Transit with correct role descriptions from the PDF. Let me take screenshots and check the decision state.
+
+Plugin Playwright Playwright [browser_take_screenshot]
+OUT
+Result
+
+
+Screenshot of viewport
+
+
+Ran Playwright code
+
+
+// Screenshot viewport and save it as .playwright-mcp/page-2026-03-23T00-54-46-923Z.png
+await page.screenshot({
+path: '.playwright-mcp/page-2026-03-23T00-54-46-923Z.png',
+  scale: 'css',
+  type: 'png'
+});
+
+image.png
+1460×825
+Chrome-devtools [take_screenshot]
+OUT
+Took a screenshot of the current page's viewport.
+
+
+image.png
+1998×1059
+Bash Check engine snapshot for decisions
+IN
+python3 -c "
+import urllib.request, json
+with urllib.request.urlopen('http://localhost:8001/api/exercises/9/engine/snapshot') as r:
+    d = json.loads(r.read())
+s = d.get('score', {})
+print(f'Phase: {d[\"phase\"]}')
+print(f'Turn: {s.get(\"turn_number\")}')
+print(f'Stress: {s.get(\"stress\")}')
+decisions = d.get('decisions', [])
+print(f'Decisions: {len(decisions)}')
+for dec in decisions:
+    print(f'  id={dec[\"id\"]}, status={dec[\"status\"]}, options={len(dec.get(\"options\", []))}')
+    for o in dec.get('options', []):
+        print(f'    {o[\"id\"]}: {o[\"label\"]}')
+"
+
+OUT
+Phase: running
+Turn: 1
+Stress: 0
+Decisions: 1
+  id=turn-1-inject-0, status=open, options=0
+
+image.png
+2906×282
+are all of those sytems needed for this scenario ?
+
+image.png
+2940×714
+this is ugly
+
+image.png
+2848×464
+we need for freet text here  ?
+Bug found. The engine snapshot shows options=0 for the decision — the turn-based authoring generates mismatched IDs between events (turn-1-inject-0) and decision templates (turn-1-decision). Let me investigate and fix.
+
+Grep "event_type.*decision|open_decision|create.*decision" (in /Users/dragan/Documents/AI-Boilerplate/apps/tfc/backend/engine/exercise_engine.py)
+52 lines of output
+An image in the conversation exceeds the dimension limit for many-image requests (2000px). Start a new session with fewer images.
+
+---
+
+do you hear me ???? why do i swb and not proper decision text ???
+
+---
+
+start over
+
+---
+
+look at my screenshots here above
+
+---
+
+yes
+
+---
+
+run the smole test tfc again, on siletn baseline
