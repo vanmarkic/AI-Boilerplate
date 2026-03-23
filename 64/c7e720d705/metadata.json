@@ -7,7 +7,9 @@
   "files_touched": [
     "apps/main/frontend/src/app/features/weather/weather.component.ts",
     "apps/main/frontend/src/app/features/weather/weather.store.ts",
-    "apps/main/frontend/src/app/shared/sse/event-source.service.spec.ts"
+    "apps/main/frontend/src/app/shared/sse/event-source.service.spec.ts",
+    "apps/main/frontend/src/app/shared/sse/with-live-events.spec.ts",
+    "apps/main/frontend/src/test-setup.ts"
   ],
   "sessions": [
     {
@@ -15,13 +17,19 @@
       "transcript": "/64/c7e720d705/0/full.jsonl",
       "content_hash": "/64/c7e720d705/0/content_hash.txt",
       "prompt": "/64/c7e720d705/0/prompt.txt"
+    },
+    {
+      "metadata": "/64/c7e720d705/1/metadata.json",
+      "transcript": "/64/c7e720d705/1/full.jsonl",
+      "content_hash": "/64/c7e720d705/1/content_hash.txt",
+      "prompt": ""
     }
   ],
   "token_usage": {
-    "input_tokens": 8,
-    "cache_creation_tokens": 4595,
-    "cache_read_tokens": 250551,
-    "output_tokens": 1753,
-    "api_call_count": 6
+    "input_tokens": 16,
+    "cache_creation_tokens": 12671,
+    "cache_read_tokens": 555715,
+    "output_tokens": 5267,
+    "api_call_count": 14
   }
 }
