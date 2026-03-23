@@ -15,11 +15,13 @@ export interface JoinableExercise {
     title: string;
     game_mode: string;
     scenario_id: number | null;
+    player_count_mode: string;
   };
   participants: ParticipantResponse[];
   roles: RoleDef[];
   max_players: number;
   requires_gm: boolean;
+  player_count_mode: string;
 }
 
 @Component({
@@ -108,6 +110,7 @@ export class LobbyPreview {
       queryParams: {
         exerciseId: d.exercise.id,
         gameMode: d.exercise.game_mode,
+        playerCountMode: d.player_count_mode ?? "full",
       },
     });
   }

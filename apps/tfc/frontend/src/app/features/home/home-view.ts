@@ -219,6 +219,7 @@ export class HomeView implements OnInit {
         scenario_id: scenario.id,
         game_mode: gameMode,
         practice_mode: practiceMode,
+        player_count_mode: playerCountMode ?? "full",
       })
       .subscribe({
         next: (exercise) => {

@@ -81,7 +81,10 @@ async def list_joinable_exercises(
             continue
 
         requires_gm = content.game_mode == GM_CLASSIC
-        max_players = len(content.roles) + (1 if requires_gm else 0)
+        if exercise.player_count_mode == "two_player":
+            max_players = 2
+        else:
+            max_players = len(content.roles) + (1 if requires_gm else 0)
         current = waiting_room_store.count(exercise.id)
         if current >= max_players:
             continue
@@ -94,6 +97,7 @@ async def list_joinable_exercises(
                 "roles": [r.model_dump() for r in content.roles],
                 "max_players": max_players,
                 "requires_gm": requires_gm,
+                "player_count_mode": exercise.player_count_mode,
             }
         )
 

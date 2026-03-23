@@ -12,6 +12,7 @@ export interface CreateExerciseRequest {
   time_factor?: number;
   game_mode?: string;
   practice_mode?: boolean;
+  player_count_mode?: string;
 }
 
 export interface ExerciseResponse {
@@ -24,6 +25,7 @@ export interface ExerciseResponse {
   time_factor: number;
   game_mode: string;
   practice_mode: boolean;
+  player_count_mode: string;
   session_code: string;
   created_at: string;
   updated_at: string;

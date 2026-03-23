@@ -43,6 +43,7 @@ class ExerciseService:
             time_factor=request.time_factor,
             game_mode=request.game_mode,
             practice_mode=request.practice_mode,
+            player_count_mode=request.player_count_mode,
         )
         created = await self.repository.create(exercise)
         return ExerciseResponse.model_validate(created)

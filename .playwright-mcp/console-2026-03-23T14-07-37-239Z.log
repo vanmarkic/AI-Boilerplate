@@ -1,0 +1,26 @@
+[     609ms] [WARNING] [.WebGL-0x3a9c00125a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:4201/home:0
+[     786ms] [WARNING] [.WebGL-0x3a9c00125a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:4201/home:0
+[     876ms] [WARNING] [.WebGL-0x3a9c00125a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels @ http://localhost:4201/home:0
+[     989ms] [WARNING] [.WebGL-0x3a9c00125a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) @ http://localhost:4201/home:0
+[  423814ms] [WARNING] WebSocket connection to 'ws://localhost:8001/api/exercises/21/ws?role=player&participant_id=8a467d10-11ef-4604-83ee-4fcc31e8f0d1' failed: WebSocket is closed before the connection is established. @ http://localhost:4201/chunk-NNDP7MPM.js:46
+[  426106ms] [WARNING] WebSocket connection to 'ws://localhost:8001/api/exercises/21/ws?role=player&participant_id=8a467d10-11ef-4604-83ee-4fcc31e8f0d1' failed: WebSocket is closed before the connection is established. @ http://localhost:4201/chunk-NNDP7MPM.js:46
+[  428116ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  437395ms] [WARNING] WebSocket connection to 'ws://localhost:8001/api/exercises/21/ws?role=player&participant_id=8a467d10-11ef-4604-83ee-4fcc31e8f0d1' failed: WebSocket is closed before the connection is established. @ http://localhost:4201/chunk-NNDP7MPM.js:46
+[  440690ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  457194ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  459693ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  476707ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  476714ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/context:0
+[  476717ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/decisions:0
+[  480532ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/decisions:0
+[  480534ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/context:0
+[  480535ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  507663ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  507674ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/decisions:0
+[  507677ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/context:0
+[  518642ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/snapshot:0
+[  518645ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/context:0
+[  518647ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8001/api/exercises/21/engine/decisions:0
+[  544070ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/21/ws?role=player&participant_id=8a467d10-11ef-4604-83ee-4fcc31e8f0d1' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:4201/chunk-NNDP7MPM.js:53
+[  546696ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/21/ws?role=player&participant_id=8a467d10-11ef-4604-83ee-4fcc31e8f0d1' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://localhost:4201/chunk-NNDP7MPM.js:53
+[  551122ms] [ERROR] WebSocket connection to 'ws://localhost:8001/api/exercises/21/ws?role=player&participant_id=8a467d10-11ef-4604-83ee-4fcc31e8f0d1' failed: Error during WebSocket handshake: net::ERR_CONNECTION_RESET @ http://localhost:4201/chunk-NNDP7MPM.js:53
