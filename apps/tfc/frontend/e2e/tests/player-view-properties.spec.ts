@@ -146,17 +146,17 @@ test.describe("Property: player view invariants @property", () => {
   });
 
 
-  test("P4: score bar visible iff score exists and not briefing", async ({ page }) => {
+  test("P4: turn banner visible iff score exists and not briefing", async ({ page }) => {
     await installRoutesOnce(page);
     await fc.assert(
       fc.asyncProperty(playerStateArb, async (state) => {
         updateMock(state);
         await page.goto(buildPlayerUrl(state));
-        const scoreBar = page.locator("tfc-score-bar");
+        const turnNumber = page.locator(".board-turn-banner__turn");
         if (shouldShowScore(state)) {
-          await expect(scoreBar).toBeVisible();
+          await expect(turnNumber).toBeVisible();
         } else {
-          await expect(scoreBar).not.toBeVisible();
+          await expect(turnNumber).not.toBeVisible();
         }
       }),
       { numRuns: NUM_RUNS },

@@ -307,7 +307,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 
@@ -328,7 +328,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeEnabled();
   });
 
@@ -348,7 +348,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 
@@ -373,7 +373,7 @@ test.describe("Waiting room — 2-player start constraints @waiting-room @two-pl
     await page.getByRole("button", { name: "2 Players" }).click();
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 });
@@ -410,7 +410,7 @@ test.describe("Waiting room — missing roles error state @waiting-room @two-pla
     await page.goto(collabWaitingRoomUrl(me.id));
 
     await expect(
-      page.getByRole("button", { name: /Start Exercise/ }),
+      page.getByRole("button", { name: /Deploy/ }),
     ).toBeDisabled();
   });
 });
@@ -570,7 +570,7 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     await expect(page.locator(".player-header__title")).toBeVisible();
 
     // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
 
     // All-advisors panel visible with tabs
     await expect(page.locator("tfc-all-advisors-panel")).toBeVisible();
@@ -604,7 +604,7 @@ test.describe("Combined — full 2-player scenario @player @two-player", () => {
     await expect(page.locator(".player-header__title")).toBeVisible();
 
     // Score visible
-    await expect(page.locator("tfc-score-bar")).toBeVisible();
+    await expect(page.locator(".board-turn-banner__turn")).toBeVisible();
 
     // Decision panel visible (DM style, no [Advisor] prefix)
     await expect(page.locator("tfc-decision-panel")).toBeAttached();
