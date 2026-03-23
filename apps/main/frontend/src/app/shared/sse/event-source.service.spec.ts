@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { EventSourceService } from './event-source.service';
 
-type MockEventSource = {
+interface MockEventSource {
   onmessage: ((event: MessageEvent) => void) | null;
   onerror: (() => void) | null;
   close: ReturnType<typeof vi.fn>;
   url: string;
-};
+}
 
 let lastCreatedSource: MockEventSource;
 
@@ -45,13 +45,13 @@ describe('EventSourceService', () => {
   });
 
   it('parses JSON messages and emits typed values', () => {
-    const received: Array<{ id: number }> = [];
+    const received: { id: number }[] = [];
 
     const sub = service.channel<{ id: number }>('test').subscribe((val) => {
       received.push(val);
     });
 
-    lastCreatedSource.onmessage!(
+    lastCreatedSource.onmessage?.(
       new MessageEvent('message', { data: '{"id": 42}' }),
     );
 
@@ -81,7 +81,7 @@ describe('EventSourceService', () => {
     });
 
     const source = lastCreatedSource;
-    source.onerror!();
+    source.onerror?.();
 
     expect(source.close).toHaveBeenCalled();
   });

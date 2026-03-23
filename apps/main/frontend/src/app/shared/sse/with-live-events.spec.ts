@@ -66,7 +66,7 @@ describe('withLiveEvents', () => {
   });
 
   function connectInContext(): void {
-    runInInjectionContext(injector, () => store.connectLive());
+    runInInjectionContext(injector, () => { store.connectLive(); });
   }
 
   it('connectLive subscribes to SSE channel', () => {

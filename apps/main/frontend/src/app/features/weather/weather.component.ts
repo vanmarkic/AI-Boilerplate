@@ -56,14 +56,14 @@ export class WeatherComponent {
   search(): void {
     const city = this.cityInput().trim();
     if (city) {
-      this.store.loadWeather(city);
+      void this.store.loadWeather(city);
     }
   }
 
   searchForecast(): void {
     const city = this.cityInput().trim();
     if (city) {
-      this.store.loadForecast(city);
+      void this.store.loadForecast(city);
     }
   }
 }
