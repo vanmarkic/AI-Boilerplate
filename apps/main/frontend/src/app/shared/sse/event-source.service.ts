@@ -39,8 +39,7 @@ export class EventSourceService {
 
     const stream$ = this.createStream<T>(name).pipe(
       retry({
-        delay: (_error, retryCount) =>
-          timer(Math.min(1_000 * 2 ** retryCount, MAX_RETRY_DELAY_MS)),
+        delay: (_error, retryCount) => timer(Math.min(1_000 * 2 ** retryCount, MAX_RETRY_DELAY_MS)),
       }),
       shareReplay({ bufferSize: 0, refCount: true }),
     );

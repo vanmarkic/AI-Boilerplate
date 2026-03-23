@@ -16,11 +16,7 @@ import { RegisterStore } from './register.store';
         <p class="text-sm text-primary">Account created! You can now sign in.</p>
       } @else {
         <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-          <ui-input
-            formControlName="name"
-            label="Full name"
-            placeholder="Alice Smith"
-          />
+          <ui-input formControlName="name" label="Full name" placeholder="Alice Smith" />
           <ui-form-error [control]="form.controls.name" />
 
           <ui-input

@@ -38,9 +38,7 @@ export class PermissionsStore {
     if (this._loaded) return;
     try {
       const resp = await firstValueFrom(
-        this.http.get<PermissionsResponse>(
-          `${environment.apiBaseUrl}/api/me/permissions`
-        )
+        this.http.get<PermissionsResponse>(`${environment.apiBaseUrl}/api/me/permissions`),
       );
       this._allowedRoutes.set(resp.routes);
     } catch {

@@ -37,11 +37,7 @@ import type { PermissionMapping } from './admin-permissions.types';
         (rowClick)="onEdit($event)"
       >
         <ui-data-table-column columnDef="role" label="Role" [sortable]="true" />
-        <ui-data-table-column
-          columnDef="route_pattern"
-          label="Route Pattern"
-          [sortable]="true"
-        />
+        <ui-data-table-column columnDef="route_pattern" label="Route Pattern" [sortable]="true" />
         <ui-data-table-column columnDef="method" label="Method" />
         <ui-data-table-column columnDef="frontend_route" label="Frontend Route" />
       </ui-data-table>
@@ -49,9 +45,7 @@ import type { PermissionMapping } from './admin-permissions.types';
 
     @if (showAddDialog() || editingPermission()) {
       <ui-dialog-panel (closed)="closeDialog()">
-        <span dialogTitle>
-          {{ editingPermission() ? 'Edit' : 'Add' }} Permission
-        </span>
+        <span dialogTitle> {{ editingPermission() ? 'Edit' : 'Add' }} Permission </span>
         <app-permission-form
           [permission]="editingPermission()"
           (submitted)="onSave($event)"
@@ -79,12 +73,14 @@ export class PermissionsTabComponent implements OnInit {
     if (editing) {
       await this.store.updatePermission(editing.id, value);
     } else {
-      await this.store.createPermission(value as {
-        role: string;
-        route_pattern: string;
-        method: string;
-        frontend_route: string | null;
-      });
+      await this.store.createPermission(
+        value as {
+          role: string;
+          route_pattern: string;
+          method: string;
+          frontend_route: string | null;
+        },
+      );
     }
     await this.store.reloadCache();
     this.closeDialog();

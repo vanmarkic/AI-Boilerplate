@@ -47,8 +47,7 @@ describe('UserRolesDialogComponent', () => {
   });
 
   it('should render checkboxes for all roles', () => {
-    const checkboxes =
-      fixture.nativeElement.querySelectorAll('input[type="checkbox"]');
+    const checkboxes = fixture.nativeElement.querySelectorAll('input[type="checkbox"]');
     expect(checkboxes.length).toBe(3);
   });
 
@@ -86,10 +85,8 @@ describe('UserRolesDialogComponent', () => {
       fixture.nativeElement.querySelectorAll('button[uibutton]') as NodeListOf<HTMLElement>,
     );
     const saveBtn = buttons.find((b) => b.textContent.includes('Save'));
-    (saveBtn)?.click();
+    saveBtn?.click();
 
-    expect(spy).toHaveBeenCalledWith(
-      expect.objectContaining({ added: ['custom'], removed: [] }),
-    );
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ added: ['custom'], removed: [] }));
   });
 });

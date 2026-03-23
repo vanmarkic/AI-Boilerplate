@@ -11,10 +11,10 @@
  * Third-party stylesheets wrapped in the vendor layer so
  * design-system layers can override them without !important.
  * ──────────────────────────────────────────────────────── */
-@import "maplibre-gl/dist/maplibre-gl.css" layer(vendor);
+@import 'maplibre-gl/dist/maplibre-gl.css' layer(vendor);
 
 /* ── Design System ───────────────────────────────────────
  * Imports the full design system from @aspect/design-system.
  * Local overrides (if any) go after this import.
  * ──────────────────────────────────────────────────────── */
-@import "@aspect/design-system";
+@import '@aspect/design-system';

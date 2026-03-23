@@ -1,5 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { BadgeComponent, HistogramTimelineComponent, type HistogramBar, type HistogramLabel } from '@aspect/ui';
+import {
+  BadgeComponent,
+  HistogramTimelineComponent,
+  type HistogramBar,
+  type HistogramLabel,
+} from '@aspect/ui';
 
 function seededRandom(seed: number) {
   return () => {
@@ -13,7 +18,11 @@ function generateBars(count: number, max: number, seed: number): HistogramBar[] 
   return Array.from({ length: count }, () => ({ value: Math.floor(rand() * max) }));
 }
 
-function generateLabels(count: number, interval: number, formatter: (i: number) => string): HistogramLabel[] {
+function generateLabels(
+  count: number,
+  interval: number,
+  formatter: (i: number) => string,
+): HistogramLabel[] {
   const labels: HistogramLabel[] = [];
   for (let i = 0; i < count; i += interval) {
     labels.push({ index: i, text: formatter(i) });
@@ -42,7 +51,6 @@ interface ActivityItem {
   imports: [HistogramTimelineComponent, BadgeComponent],
   template: `
     <div class="flex flex-col gap-xl px-lg py-lg mx-auto max-w-container-4xl">
-
       <!-- Header -->
       <div class="flex flex-row items-center justify-between">
         <div>
@@ -56,9 +64,14 @@ interface ActivityItem {
       <div class="grid grid-cols-4 gap-md">
         @for (stat of stats; track stat.label) {
           <div class="card">
-            <p class="text-xs text-muted-foreground uppercase tracking-wide font-medium">{{ stat.label }}</p>
+            <p class="text-xs text-muted-foreground uppercase tracking-wide font-medium">
+              {{ stat.label }}
+            </p>
             <p class="text-2xl font-bold text-foreground mt-xs">{{ stat.value }}</p>
-            <p class="text-xs mt-xs" [class]="stat.up ? 'text-xs mt-xs text-primary' : 'text-xs mt-xs text-destructive'">
+            <p
+              class="text-xs mt-xs"
+              [class]="stat.up ? 'text-xs mt-xs text-primary' : 'text-xs mt-xs text-destructive'"
+            >
               {{ stat.change }}
             </p>
           </div>
@@ -67,12 +80,13 @@ interface ActivityItem {
 
       <!-- Main content: histogram + activity feed -->
       <div class="grid grid-cols-3 gap-md">
-
         <!-- Histogram card (2/3 width) -->
         <div class="card col-span-2">
           <div class="flex flex-row items-center justify-between mb-md">
             <h2 class="card-title mb-0">Events per minute</h2>
-            <span class="font-mono text-xs text-muted-foreground border px-sm py-xs rounded-sm">12h window</span>
+            <span class="font-mono text-xs text-muted-foreground border px-sm py-xs rounded-sm"
+              >12h window</span
+            >
           </div>
           <ui-histogram-timeline
             [bars]="bars()"
@@ -101,7 +115,6 @@ interface ActivityItem {
 
       <!-- Bottom row: error histogram + system info -->
       <div class="grid grid-cols-3 gap-md">
-
         <!-- Error rate histogram -->
         <div class="card col-span-2">
           <div class="flex flex-row items-center justify-between mb-md">
@@ -139,16 +152,14 @@ interface ActivityItem {
 export class DashboardComponent {
   protected readonly bars = signal(generateBars(720, 50, 42));
   protected readonly labels = signal(
-    generateLabels(720, 60, i => {
+    generateLabels(720, 60, (i) => {
       const hour = 8 + Math.floor(i / 60);
       return `${String(hour)}:${String(i % 60).padStart(2, '0')}`;
     }),
   );
 
   protected readonly errorBars = signal(generateBars(24, 15, 99));
-  protected readonly errorLabels = signal(
-    generateLabels(24, 4, i => `${String(i)}:00`),
-  );
+  protected readonly errorLabels = signal(generateLabels(24, 4, (i) => `${String(i)}:00`));
 
   protected readonly stats: StatCard[] = [
     { label: 'Total events', value: '14,892', change: '+12.3% vs yesterday', up: true },
@@ -158,11 +169,41 @@ export class DashboardComponent {
   ];
 
   protected readonly activity: ActivityItem[] = [
-    { action: 'Deployment', target: 'frontend v2.4.1 → production', time: '2 min ago', badge: 'default', badgeLabel: 'deploy' },
-    { action: 'Alert resolved', target: 'CPU spike on worker-03', time: '18 min ago', badge: 'secondary', badgeLabel: 'resolved' },
-    { action: 'Error spike', target: '429 rate-limit on /api/search', time: '1h ago', badge: 'destructive', badgeLabel: 'error' },
-    { action: 'Config change', target: 'Feature flag dark-mode enabled', time: '3h ago', badge: 'outline', badgeLabel: 'config' },
-    { action: 'Deployment', target: 'backend v1.8.0 → staging', time: '5h ago', badge: 'default', badgeLabel: 'deploy' },
+    {
+      action: 'Deployment',
+      target: 'frontend v2.4.1 → production',
+      time: '2 min ago',
+      badge: 'default',
+      badgeLabel: 'deploy',
+    },
+    {
+      action: 'Alert resolved',
+      target: 'CPU spike on worker-03',
+      time: '18 min ago',
+      badge: 'secondary',
+      badgeLabel: 'resolved',
+    },
+    {
+      action: 'Error spike',
+      target: '429 rate-limit on /api/search',
+      time: '1h ago',
+      badge: 'destructive',
+      badgeLabel: 'error',
+    },
+    {
+      action: 'Config change',
+      target: 'Feature flag dark-mode enabled',
+      time: '3h ago',
+      badge: 'outline',
+      badgeLabel: 'config',
+    },
+    {
+      action: 'Deployment',
+      target: 'backend v1.8.0 → staging',
+      time: '5h ago',
+      badge: 'default',
+      badgeLabel: 'deploy',
+    },
   ];
 
   protected readonly systemInfo = [

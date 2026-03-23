@@ -18,9 +18,7 @@ describe('AdminPermissionsComponent', () => {
   });
 
   it('should render the page header title', () => {
-    const header = fixture.nativeElement.querySelector(
-      '.page-header-title',
-    ) as HTMLElement;
+    const header = fixture.nativeElement.querySelector('.page-header-title') as HTMLElement;
     expect(header.textContent).toContain('Administration');
   });
 

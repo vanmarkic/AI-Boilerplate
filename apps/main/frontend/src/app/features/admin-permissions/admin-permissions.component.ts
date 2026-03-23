@@ -21,18 +21,10 @@ import {
   ],
   template: `
     <ui-page-layout>
-      <ui-page-header
-        pageHeader
-        title="Administration"
-        subtitle="Manage permissions and users"
-      />
+      <ui-page-header pageHeader title="Administration" subtitle="Manage permissions and users" />
       <ui-tab-nav>
-        <a uiTabLink routerLink="permissions" routerLinkActive="tab-active">
-          Permissions
-        </a>
-        <a uiTabLink routerLink="users" routerLinkActive="tab-active">
-          Users
-        </a>
+        <a uiTabLink routerLink="permissions" routerLinkActive="tab-active"> Permissions </a>
+        <a uiTabLink routerLink="users" routerLinkActive="tab-active"> Users </a>
       </ui-tab-nav>
       <router-outlet />
     </ui-page-layout>

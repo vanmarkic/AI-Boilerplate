@@ -2,20 +2,78 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AssignRolesApiAdminUsersUserIdRolesPostData, AssignRolesApiAdminUsersUserIdRolesPostErrors, AssignRolesApiAdminUsersUserIdRolesPostResponses, CreatePermissionApiAdminPermissionsPostData, CreatePermissionApiAdminPermissionsPostErrors, CreatePermissionApiAdminPermissionsPostResponses, CreateRoleApiAdminRolesPostData, CreateRoleApiAdminRolesPostErrors, CreateRoleApiAdminRolesPostResponses, CreateUserData, CreateUserErrors, CreateUserResponses, DeletePermissionApiAdminPermissionsPermIdDeleteData, DeletePermissionApiAdminPermissionsPermIdDeleteErrors, DeletePermissionApiAdminPermissionsPermIdDeleteResponses, DeleteRoleApiAdminRolesRoleNameDeleteData, DeleteRoleApiAdminRolesRoleNameDeleteErrors, DeleteRoleApiAdminRolesRoleNameDeleteResponses, GetMyPermissionsApiMePermissionsGetData, GetMyPermissionsApiMePermissionsGetErrors, GetMyPermissionsApiMePermissionsGetResponses, GetUserData, GetUserErrors, GetUserResponses, GetUserRolesApiAdminUsersUserIdRolesGetData, GetUserRolesApiAdminUsersUserIdRolesGetErrors, GetUserRolesApiAdminUsersUserIdRolesGetResponses, HealthCheckApiHealthGetData, HealthCheckApiHealthGetResponses, ListChannelsData, ListChannelsResponses, ListPermissionsApiAdminPermissionsGetData, ListPermissionsApiAdminPermissionsGetErrors, ListPermissionsApiAdminPermissionsGetResponses, ListRolesApiAdminRolesGetData, ListRolesApiAdminRolesGetErrors, ListRolesApiAdminRolesGetResponses, ListUsersApiAdminUsersGetData, ListUsersApiAdminUsersGetErrors, ListUsersApiAdminUsersGetResponses, PingApiCanaryPingGetData, PingApiCanaryPingGetResponses, ReloadPermissionsApiAdminPermissionsReloadPostData, ReloadPermissionsApiAdminPermissionsReloadPostErrors, ReloadPermissionsApiAdminPermissionsReloadPostResponses, RemoveRolesApiAdminUsersUserIdRolesDeleteData, RemoveRolesApiAdminUsersUserIdRolesDeleteErrors, RemoveRolesApiAdminUsersUserIdRolesDeleteResponses, SubscribeToChannelData, SubscribeToChannelErrors, SubscribeToChannelResponses, UpdatePermissionApiAdminPermissionsPermIdPutData, UpdatePermissionApiAdminPermissionsPermIdPutErrors, UpdatePermissionApiAdminPermissionsPermIdPutResponses } from './types.gen';
+import type {
+  AssignRolesApiAdminUsersUserIdRolesPostData,
+  AssignRolesApiAdminUsersUserIdRolesPostErrors,
+  AssignRolesApiAdminUsersUserIdRolesPostResponses,
+  CreatePermissionApiAdminPermissionsPostData,
+  CreatePermissionApiAdminPermissionsPostErrors,
+  CreatePermissionApiAdminPermissionsPostResponses,
+  CreateRoleApiAdminRolesPostData,
+  CreateRoleApiAdminRolesPostErrors,
+  CreateRoleApiAdminRolesPostResponses,
+  CreateUserData,
+  CreateUserErrors,
+  CreateUserResponses,
+  DeletePermissionApiAdminPermissionsPermIdDeleteData,
+  DeletePermissionApiAdminPermissionsPermIdDeleteErrors,
+  DeletePermissionApiAdminPermissionsPermIdDeleteResponses,
+  DeleteRoleApiAdminRolesRoleNameDeleteData,
+  DeleteRoleApiAdminRolesRoleNameDeleteErrors,
+  DeleteRoleApiAdminRolesRoleNameDeleteResponses,
+  GetMyPermissionsApiMePermissionsGetData,
+  GetMyPermissionsApiMePermissionsGetErrors,
+  GetMyPermissionsApiMePermissionsGetResponses,
+  GetUserData,
+  GetUserErrors,
+  GetUserResponses,
+  GetUserRolesApiAdminUsersUserIdRolesGetData,
+  GetUserRolesApiAdminUsersUserIdRolesGetErrors,
+  GetUserRolesApiAdminUsersUserIdRolesGetResponses,
+  HealthCheckApiHealthGetData,
+  HealthCheckApiHealthGetResponses,
+  ListChannelsData,
+  ListChannelsResponses,
+  ListPermissionsApiAdminPermissionsGetData,
+  ListPermissionsApiAdminPermissionsGetErrors,
+  ListPermissionsApiAdminPermissionsGetResponses,
+  ListRolesApiAdminRolesGetData,
+  ListRolesApiAdminRolesGetErrors,
+  ListRolesApiAdminRolesGetResponses,
+  ListUsersApiAdminUsersGetData,
+  ListUsersApiAdminUsersGetErrors,
+  ListUsersApiAdminUsersGetResponses,
+  PingApiCanaryPingGetData,
+  PingApiCanaryPingGetResponses,
+  ReloadPermissionsApiAdminPermissionsReloadPostData,
+  ReloadPermissionsApiAdminPermissionsReloadPostErrors,
+  ReloadPermissionsApiAdminPermissionsReloadPostResponses,
+  RemoveRolesApiAdminUsersUserIdRolesDeleteData,
+  RemoveRolesApiAdminUsersUserIdRolesDeleteErrors,
+  RemoveRolesApiAdminUsersUserIdRolesDeleteResponses,
+  SubscribeToChannelData,
+  SubscribeToChannelErrors,
+  SubscribeToChannelResponses,
+  UpdatePermissionApiAdminPermissionsPermIdPutData,
+  UpdatePermissionApiAdminPermissionsPermIdPutErrors,
+  UpdatePermissionApiAdminPermissionsPermIdPutResponses,
+} from './types.gen';
 
-export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
-    /**
-     * You can provide a client instance returned by `createClient()` instead of
-     * individual options. This might be also useful if you want to implement a
-     * custom client.
-     */
-    client?: Client;
-    /**
-     * You can pass arbitrary values through the `meta` object. This can be
-     * used to access values that aren't defined as part of the SDK function.
-     */
-    meta?: Record<string, unknown>;
+export type Options<
+  TData extends TDataShape = TDataShape,
+  ThrowOnError extends boolean = boolean,
+> = Options2<TData, ThrowOnError> & {
+  /**
+   * You can provide a client instance returned by `createClient()` instead of
+   * individual options. This might be also useful if you want to implement a
+   * custom client.
+   */
+  client?: Client;
+  /**
+   * You can pass arbitrary values through the `meta` object. This can be
+   * used to access values that aren't defined as part of the SDK function.
+   */
+  meta?: Record<string, unknown>;
 };
 
 /**
@@ -27,166 +85,295 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
  * send Bearer headers. Add signed-ticket auth here when a feature
  * requires it. See Depends(get_current_user) in core/auth.py.
  */
-export const subscribeToChannel = <ThrowOnError extends boolean = false>(options: Options<SubscribeToChannelData, ThrowOnError>) => (options.client ?? client).get<SubscribeToChannelResponses, SubscribeToChannelErrors, ThrowOnError>({ url: '/api/events/{channel}', ...options });
+export const subscribeToChannel = <ThrowOnError extends boolean = false>(
+  options: Options<SubscribeToChannelData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    SubscribeToChannelResponses,
+    SubscribeToChannelErrors,
+    ThrowOnError
+  >({ url: '/api/events/{channel}', ...options });
 
 /**
  * List available SSE channels
  *
  * Return all registered channels and their descriptions.
  */
-export const listChannels = <ThrowOnError extends boolean = false>(options?: Options<ListChannelsData, ThrowOnError>) => (options?.client ?? client).get<ListChannelsResponses, unknown, ThrowOnError>({ url: '/api/events', ...options });
+export const listChannels = <ThrowOnError extends boolean = false>(
+  options?: Options<ListChannelsData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<ListChannelsResponses, unknown, ThrowOnError>({
+    url: '/api/events',
+    ...options,
+  });
 
 /**
  * List Permissions
  *
  * List all role-permission mappings.
  */
-export const listPermissionsApiAdminPermissionsGet = <ThrowOnError extends boolean = false>(options?: Options<ListPermissionsApiAdminPermissionsGetData, ThrowOnError>) => (options?.client ?? client).get<ListPermissionsApiAdminPermissionsGetResponses, ListPermissionsApiAdminPermissionsGetErrors, ThrowOnError>({ url: '/api/admin/permissions', ...options });
+export const listPermissionsApiAdminPermissionsGet = <ThrowOnError extends boolean = false>(
+  options?: Options<ListPermissionsApiAdminPermissionsGetData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListPermissionsApiAdminPermissionsGetResponses,
+    ListPermissionsApiAdminPermissionsGetErrors,
+    ThrowOnError
+  >({ url: '/api/admin/permissions', ...options });
 
 /**
  * Create Permission
  *
  * Create a new role-permission mapping.
  */
-export const createPermissionApiAdminPermissionsPost = <ThrowOnError extends boolean = false>(options: Options<CreatePermissionApiAdminPermissionsPostData, ThrowOnError>) => (options.client ?? client).post<CreatePermissionApiAdminPermissionsPostResponses, CreatePermissionApiAdminPermissionsPostErrors, ThrowOnError>({
+export const createPermissionApiAdminPermissionsPost = <ThrowOnError extends boolean = false>(
+  options: Options<CreatePermissionApiAdminPermissionsPostData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreatePermissionApiAdminPermissionsPostResponses,
+    CreatePermissionApiAdminPermissionsPostErrors,
+    ThrowOnError
+  >({
     url: '/api/admin/permissions',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
 
 /**
  * Delete Permission
  *
  * Delete a role-permission mapping.
  */
-export const deletePermissionApiAdminPermissionsPermIdDelete = <ThrowOnError extends boolean = false>(options: Options<DeletePermissionApiAdminPermissionsPermIdDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeletePermissionApiAdminPermissionsPermIdDeleteResponses, DeletePermissionApiAdminPermissionsPermIdDeleteErrors, ThrowOnError>({ url: '/api/admin/permissions/{perm_id}', ...options });
+export const deletePermissionApiAdminPermissionsPermIdDelete = <
+  ThrowOnError extends boolean = false,
+>(
+  options: Options<DeletePermissionApiAdminPermissionsPermIdDeleteData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeletePermissionApiAdminPermissionsPermIdDeleteResponses,
+    DeletePermissionApiAdminPermissionsPermIdDeleteErrors,
+    ThrowOnError
+  >({ url: '/api/admin/permissions/{perm_id}', ...options });
 
 /**
  * Update Permission
  *
  * Update an existing role-permission mapping.
  */
-export const updatePermissionApiAdminPermissionsPermIdPut = <ThrowOnError extends boolean = false>(options: Options<UpdatePermissionApiAdminPermissionsPermIdPutData, ThrowOnError>) => (options.client ?? client).put<UpdatePermissionApiAdminPermissionsPermIdPutResponses, UpdatePermissionApiAdminPermissionsPermIdPutErrors, ThrowOnError>({
+export const updatePermissionApiAdminPermissionsPermIdPut = <ThrowOnError extends boolean = false>(
+  options: Options<UpdatePermissionApiAdminPermissionsPermIdPutData, ThrowOnError>,
+) =>
+  (options.client ?? client).put<
+    UpdatePermissionApiAdminPermissionsPermIdPutResponses,
+    UpdatePermissionApiAdminPermissionsPermIdPutErrors,
+    ThrowOnError
+  >({
     url: '/api/admin/permissions/{perm_id}',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
 
 /**
  * Reload Permissions
  *
  * Force-refresh the in-memory RBAC permission cache.
  */
-export const reloadPermissionsApiAdminPermissionsReloadPost = <ThrowOnError extends boolean = false>(options?: Options<ReloadPermissionsApiAdminPermissionsReloadPostData, ThrowOnError>) => (options?.client ?? client).post<ReloadPermissionsApiAdminPermissionsReloadPostResponses, ReloadPermissionsApiAdminPermissionsReloadPostErrors, ThrowOnError>({ url: '/api/admin/permissions/reload', ...options });
+export const reloadPermissionsApiAdminPermissionsReloadPost = <
+  ThrowOnError extends boolean = false,
+>(
+  options?: Options<ReloadPermissionsApiAdminPermissionsReloadPostData, ThrowOnError>,
+) =>
+  (options?.client ?? client).post<
+    ReloadPermissionsApiAdminPermissionsReloadPostResponses,
+    ReloadPermissionsApiAdminPermissionsReloadPostErrors,
+    ThrowOnError
+  >({ url: '/api/admin/permissions/reload', ...options });
 
 /**
  * Get My Permissions
  *
  * Return the frontend routes accessible to the current user.
  */
-export const getMyPermissionsApiMePermissionsGet = <ThrowOnError extends boolean = false>(options?: Options<GetMyPermissionsApiMePermissionsGetData, ThrowOnError>) => (options?.client ?? client).get<GetMyPermissionsApiMePermissionsGetResponses, GetMyPermissionsApiMePermissionsGetErrors, ThrowOnError>({ url: '/api/me/permissions', ...options });
+export const getMyPermissionsApiMePermissionsGet = <ThrowOnError extends boolean = false>(
+  options?: Options<GetMyPermissionsApiMePermissionsGetData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    GetMyPermissionsApiMePermissionsGetResponses,
+    GetMyPermissionsApiMePermissionsGetErrors,
+    ThrowOnError
+  >({ url: '/api/me/permissions', ...options });
 
 /**
  * List Users
  *
  * List Keycloak users with their roles.
  */
-export const listUsersApiAdminUsersGet = <ThrowOnError extends boolean = false>(options?: Options<ListUsersApiAdminUsersGetData, ThrowOnError>) => (options?.client ?? client).get<ListUsersApiAdminUsersGetResponses, ListUsersApiAdminUsersGetErrors, ThrowOnError>({ url: '/api/admin/users', ...options });
+export const listUsersApiAdminUsersGet = <ThrowOnError extends boolean = false>(
+  options?: Options<ListUsersApiAdminUsersGetData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListUsersApiAdminUsersGetResponses,
+    ListUsersApiAdminUsersGetErrors,
+    ThrowOnError
+  >({ url: '/api/admin/users', ...options });
 
 /**
  * Remove Roles
  *
  * Remove realm roles from a user.
  */
-export const removeRolesApiAdminUsersUserIdRolesDelete = <ThrowOnError extends boolean = false>(options: Options<RemoveRolesApiAdminUsersUserIdRolesDeleteData, ThrowOnError>) => (options.client ?? client).delete<RemoveRolesApiAdminUsersUserIdRolesDeleteResponses, RemoveRolesApiAdminUsersUserIdRolesDeleteErrors, ThrowOnError>({
+export const removeRolesApiAdminUsersUserIdRolesDelete = <ThrowOnError extends boolean = false>(
+  options: Options<RemoveRolesApiAdminUsersUserIdRolesDeleteData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    RemoveRolesApiAdminUsersUserIdRolesDeleteResponses,
+    RemoveRolesApiAdminUsersUserIdRolesDeleteErrors,
+    ThrowOnError
+  >({
     url: '/api/admin/users/{user_id}/roles',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
 
 /**
  * Get User Roles
  *
  * Get realm roles for a specific user.
  */
-export const getUserRolesApiAdminUsersUserIdRolesGet = <ThrowOnError extends boolean = false>(options: Options<GetUserRolesApiAdminUsersUserIdRolesGetData, ThrowOnError>) => (options.client ?? client).get<GetUserRolesApiAdminUsersUserIdRolesGetResponses, GetUserRolesApiAdminUsersUserIdRolesGetErrors, ThrowOnError>({ url: '/api/admin/users/{user_id}/roles', ...options });
+export const getUserRolesApiAdminUsersUserIdRolesGet = <ThrowOnError extends boolean = false>(
+  options: Options<GetUserRolesApiAdminUsersUserIdRolesGetData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<
+    GetUserRolesApiAdminUsersUserIdRolesGetResponses,
+    GetUserRolesApiAdminUsersUserIdRolesGetErrors,
+    ThrowOnError
+  >({ url: '/api/admin/users/{user_id}/roles', ...options });
 
 /**
  * Assign Roles
  *
  * Assign realm roles to a user.
  */
-export const assignRolesApiAdminUsersUserIdRolesPost = <ThrowOnError extends boolean = false>(options: Options<AssignRolesApiAdminUsersUserIdRolesPostData, ThrowOnError>) => (options.client ?? client).post<AssignRolesApiAdminUsersUserIdRolesPostResponses, AssignRolesApiAdminUsersUserIdRolesPostErrors, ThrowOnError>({
+export const assignRolesApiAdminUsersUserIdRolesPost = <ThrowOnError extends boolean = false>(
+  options: Options<AssignRolesApiAdminUsersUserIdRolesPostData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    AssignRolesApiAdminUsersUserIdRolesPostResponses,
+    AssignRolesApiAdminUsersUserIdRolesPostErrors,
+    ThrowOnError
+  >({
     url: '/api/admin/users/{user_id}/roles',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
 
 /**
  * List Roles
  *
  * List all realm roles.
  */
-export const listRolesApiAdminRolesGet = <ThrowOnError extends boolean = false>(options?: Options<ListRolesApiAdminRolesGetData, ThrowOnError>) => (options?.client ?? client).get<ListRolesApiAdminRolesGetResponses, ListRolesApiAdminRolesGetErrors, ThrowOnError>({ url: '/api/admin/roles', ...options });
+export const listRolesApiAdminRolesGet = <ThrowOnError extends boolean = false>(
+  options?: Options<ListRolesApiAdminRolesGetData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<
+    ListRolesApiAdminRolesGetResponses,
+    ListRolesApiAdminRolesGetErrors,
+    ThrowOnError
+  >({ url: '/api/admin/roles', ...options });
 
 /**
  * Create Role
  *
  * Create a new realm role.
  */
-export const createRoleApiAdminRolesPost = <ThrowOnError extends boolean = false>(options: Options<CreateRoleApiAdminRolesPostData, ThrowOnError>) => (options.client ?? client).post<CreateRoleApiAdminRolesPostResponses, CreateRoleApiAdminRolesPostErrors, ThrowOnError>({
+export const createRoleApiAdminRolesPost = <ThrowOnError extends boolean = false>(
+  options: Options<CreateRoleApiAdminRolesPostData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<
+    CreateRoleApiAdminRolesPostResponses,
+    CreateRoleApiAdminRolesPostErrors,
+    ThrowOnError
+  >({
     url: '/api/admin/roles',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
 
 /**
  * Delete Role
  *
  * Delete a realm role.
  */
-export const deleteRoleApiAdminRolesRoleNameDelete = <ThrowOnError extends boolean = false>(options: Options<DeleteRoleApiAdminRolesRoleNameDeleteData, ThrowOnError>) => (options.client ?? client).delete<DeleteRoleApiAdminRolesRoleNameDeleteResponses, DeleteRoleApiAdminRolesRoleNameDeleteErrors, ThrowOnError>({ url: '/api/admin/roles/{role_name}', ...options });
+export const deleteRoleApiAdminRolesRoleNameDelete = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteRoleApiAdminRolesRoleNameDeleteData, ThrowOnError>,
+) =>
+  (options.client ?? client).delete<
+    DeleteRoleApiAdminRolesRoleNameDeleteResponses,
+    DeleteRoleApiAdminRolesRoleNameDeleteErrors,
+    ThrowOnError
+  >({ url: '/api/admin/roles/{role_name}', ...options });
 
 /**
  * Ping
  */
-export const pingApiCanaryPingGet = <ThrowOnError extends boolean = false>(options?: Options<PingApiCanaryPingGetData, ThrowOnError>) => (options?.client ?? client).get<PingApiCanaryPingGetResponses, unknown, ThrowOnError>({ url: '/api/canary/ping', ...options });
+export const pingApiCanaryPingGet = <ThrowOnError extends boolean = false>(
+  options?: Options<PingApiCanaryPingGetData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<PingApiCanaryPingGetResponses, unknown, ThrowOnError>({
+    url: '/api/canary/ping',
+    ...options,
+  });
 
 /**
  * Health Check
  *
  * Health check endpoint.
  */
-export const healthCheckApiHealthGet = <ThrowOnError extends boolean = false>(options?: Options<HealthCheckApiHealthGetData, ThrowOnError>) => (options?.client ?? client).get<HealthCheckApiHealthGetResponses, unknown, ThrowOnError>({ url: '/api/health', ...options });
+export const healthCheckApiHealthGet = <ThrowOnError extends boolean = false>(
+  options?: Options<HealthCheckApiHealthGetData, ThrowOnError>,
+) =>
+  (options?.client ?? client).get<HealthCheckApiHealthGetResponses, unknown, ThrowOnError>({
+    url: '/api/health',
+    ...options,
+  });
 
 /**
  * Create User
  */
-export const createUser = <ThrowOnError extends boolean = false>(options: Options<CreateUserData, ThrowOnError>) => (options.client ?? client).post<CreateUserResponses, CreateUserErrors, ThrowOnError>({
+export const createUser = <ThrowOnError extends boolean = false>(
+  options: Options<CreateUserData, ThrowOnError>,
+) =>
+  (options.client ?? client).post<CreateUserResponses, CreateUserErrors, ThrowOnError>({
     url: '/api/users',
     ...options,
     headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
 
 /**
  * Get User
  */
-export const getUser = <ThrowOnError extends boolean = false>(options: Options<GetUserData, ThrowOnError>) => (options.client ?? client).get<GetUserResponses, GetUserErrors, ThrowOnError>({ url: '/api/users/{user_id}', ...options });
+export const getUser = <ThrowOnError extends boolean = false>(
+  options: Options<GetUserData, ThrowOnError>,
+) =>
+  (options.client ?? client).get<GetUserResponses, GetUserErrors, ThrowOnError>({
+    url: '/api/users/{user_id}',
+    ...options,
+  });

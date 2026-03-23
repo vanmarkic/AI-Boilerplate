@@ -70,9 +70,7 @@ describe('UsersTabComponent', () => {
   });
 
   it('should render the search input', () => {
-    const input = fixture.nativeElement.querySelector(
-      'ui-input',
-    ) as HTMLElement;
+    const input = fixture.nativeElement.querySelector('ui-input') as HTMLElement;
     expect(input).toBeTruthy();
   });
 });
