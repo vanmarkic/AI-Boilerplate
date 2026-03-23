@@ -66,19 +66,15 @@ async def seed_domain_configs() -> None:
                 existing.terminology = payload.terminology.model_dump()
                 existing.theme = payload.theme.model_dump()
                 existing.roles = [r.model_dump() for r in payload.roles]
-                existing.severity_levels = [
-                    s.model_dump() for s in payload.severity_levels
-                ]
+                existing.severity_levels = [s.model_dump() for s in payload.severity_levels]
                 existing.systems = [s.model_dump() for s in payload.systems]
-                existing.warfare_domains = [
-                    w.model_dump() for w in payload.warfare_domains
-                ]
-                existing.blue_card_catalog = [
-                    c.model_dump() for c in payload.blue_card_catalog
-                ]
+                existing.warfare_domains = [w.model_dump() for w in payload.warfare_domains]
+                existing.blue_card_catalog = [c.model_dump() for c in payload.blue_card_catalog]
                 await session.commit()
                 logger.info(
-                    "Updated domain config '%s' from %s", slug, path.name,
+                    "Updated domain config '%s' from %s",
+                    slug,
+                    path.name,
                 )
                 continue
 

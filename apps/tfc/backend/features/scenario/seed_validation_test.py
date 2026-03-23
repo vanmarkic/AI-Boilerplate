@@ -31,7 +31,9 @@ def _domain_config_seed_files() -> list[Path]:
 
 
 @pytest.mark.parametrize(
-    "seed_path", _scenario_seed_files(), ids=lambda p: p.stem,
+    "seed_path",
+    _scenario_seed_files(),
+    ids=lambda p: p.stem,
 )
 def test_seed_content_validates(seed_path: Path) -> None:
     """Each scenario seed file's content must pass ScenarioContent validation."""
@@ -60,7 +62,9 @@ def test_silent_wake_structure() -> None:
 
 
 @pytest.mark.parametrize(
-    "seed_path", _domain_config_seed_files(), ids=lambda p: p.stem,
+    "seed_path",
+    _domain_config_seed_files(),
+    ids=lambda p: p.stem,
 )
 def test_domain_config_seed_validates(seed_path: Path) -> None:
     """Each domain-config seed must pass CreateDomainConfigRequest validation."""
@@ -107,9 +111,7 @@ def test_silent_wake_domain_config_system_ids_match_scenario() -> None:
 
     scenario_path = SEEDS_DIR / "silent_wake.json"
     sc_data = json.loads(scenario_path.read_text())
-    sc_system_ids = {
-        s["system_id"] for s in sc_data["content"]["initial_system_states"]
-    }
+    sc_system_ids = {s["system_id"] for s in sc_data["content"]["initial_system_states"]}
 
     # Domain config should cover all scenario systems
     # (scenario may have extra systems like ew_suite, cic_network not in the
