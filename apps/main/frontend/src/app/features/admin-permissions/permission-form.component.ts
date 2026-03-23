@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  effect,
-  input,
-  output,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, input, output } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { InputComponent, FormErrorComponent, ButtonDirective } from '@aspect/ui';
 import type { PermissionMapping } from './admin-permissions.types';
@@ -24,17 +18,9 @@ export interface PermissionFormValue {
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-md">
       <ui-input formControlName="role" label="Role" placeholder="e.g. admin" />
       <ui-form-error [control]="form.controls.role" />
-      <ui-input
-        formControlName="route_pattern"
-        label="Route Pattern"
-        placeholder="/api/..."
-      />
+      <ui-input formControlName="route_pattern" label="Route Pattern" placeholder="/api/..." />
       <ui-form-error [control]="form.controls.route_pattern" />
-      <ui-input
-        formControlName="method"
-        label="HTTP Method"
-        placeholder="GET, POST, *, etc."
-      />
+      <ui-input formControlName="method" label="HTTP Method" placeholder="GET, POST, *, etc." />
       <ui-form-error [control]="form.controls.method" />
       <ui-input
         formControlName="frontend_route"

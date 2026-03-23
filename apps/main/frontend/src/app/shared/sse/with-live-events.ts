@@ -26,11 +26,7 @@
  *   }
  */
 
-import {
-  signalStoreFeature,
-  withMethods,
-  withState,
-} from '@ngrx/signals';
+import { signalStoreFeature, withMethods, withState } from '@ngrx/signals';
 import { DestroyRef, inject } from '@angular/core';
 import { patchState } from '@ngrx/signals';
 import { Subscription } from 'rxjs';
@@ -58,10 +54,7 @@ interface LiveEventsState {
  * @param config.reduce - Pure function that maps an incoming event
  *   to a partial state patch passed to `patchState`.
  */
-export function withLiveEvents<TEvent>(
-  channel: string,
-  config: { reduce: EventReducer<TEvent> },
-) {
+export function withLiveEvents<TEvent>(channel: string, config: { reduce: EventReducer<TEvent> }) {
   return signalStoreFeature(
     withState<LiveEventsState>({ liveConnected: false }),
     withMethods((store) => {

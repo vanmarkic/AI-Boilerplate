@@ -38,9 +38,7 @@ const PROTECTED_ROLES = new Set(['admin', 'role_manager']);
       </div>
       <ng-container dialogFooter>
         <button uiButton [variant]="'outline'" (click)="closed.emit()">Close</button>
-        <button uiButton (click)="onSave()" [disabled]="!hasChanges()">
-          Save Changes
-        </button>
+        <button uiButton (click)="onSave()" [disabled]="!hasChanges()">Save Changes</button>
       </ng-container>
     </ui-dialog-panel>
   `,

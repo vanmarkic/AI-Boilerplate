@@ -51,9 +51,7 @@ describe('EventSourceService', () => {
       received.push(val);
     });
 
-    lastCreatedSource.onmessage?.(
-      new MessageEvent('message', { data: '{"id": 42}' }),
-    );
+    lastCreatedSource.onmessage?.(new MessageEvent('message', { data: '{"id": 42}' }));
 
     expect(received).toEqual([{ id: 42 }]);
     sub.unsubscribe();
@@ -77,7 +75,9 @@ describe('EventSourceService', () => {
 
   it('closes EventSource on error', () => {
     service.channel('err-test').subscribe({
-      error: () => { /* swallow retry error */ },
+      error: () => {
+        /* swallow retry error */
+      },
     });
 
     const source = lastCreatedSource;

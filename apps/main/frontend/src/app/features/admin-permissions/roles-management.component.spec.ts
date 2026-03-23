@@ -53,9 +53,7 @@ describe('RolesManagementComponent', () => {
     const buttons: HTMLElement[] = Array.from(
       fixture.nativeElement.querySelectorAll('button[uibutton]') as NodeListOf<HTMLElement>,
     );
-    const btn = buttons.find((b) =>
-      b.textContent.includes('Create Role'),
-    );
+    const btn = buttons.find((b) => b.textContent.includes('Create Role'));
     expect(btn).toBeTruthy();
   });
 

@@ -53,9 +53,7 @@ describe('PermissionsTabComponent', () => {
   });
 
   it('should render the Add Permission button', () => {
-    const btn = fixture.nativeElement.querySelector(
-      'button[uibutton]',
-    ) as HTMLButtonElement;
+    const btn = fixture.nativeElement.querySelector('button[uibutton]') as HTMLButtonElement;
     expect(btn.textContent).toContain('Add Permission');
   });
 });

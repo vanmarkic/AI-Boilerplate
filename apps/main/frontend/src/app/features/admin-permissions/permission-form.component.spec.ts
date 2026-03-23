@@ -41,9 +41,7 @@ describe('PermissionFormComponent', () => {
       method: 'GET',
     });
     component.form.markAllAsTouched();
-    const submitBtn = fixture.nativeElement.querySelector(
-      'button[type="submit"]',
-    );
+    const submitBtn = fixture.nativeElement.querySelector('button[type="submit"]');
     submitBtn?.click();
     expect(spy).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -58,9 +56,7 @@ describe('PermissionFormComponent', () => {
   it('should not emit on invalid submit', () => {
     const spy = vi.fn();
     component.submitted.subscribe(spy);
-    const submitBtn = fixture.nativeElement.querySelector(
-      'button[type="submit"]',
-    );
+    const submitBtn = fixture.nativeElement.querySelector('button[type="submit"]');
     submitBtn?.click();
     expect(spy).not.toHaveBeenCalled();
   });

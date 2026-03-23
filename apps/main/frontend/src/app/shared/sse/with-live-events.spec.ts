@@ -54,9 +54,7 @@ describe('withLiveEvents', () => {
 
     await TestBed.configureTestingModule({
       imports: [TestHostComponent],
-      providers: [
-        { provide: EventSourceService, useValue: mockSseService },
-      ],
+      providers: [{ provide: EventSourceService, useValue: mockSseService }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(TestHostComponent);
@@ -66,7 +64,9 @@ describe('withLiveEvents', () => {
   });
 
   function connectInContext(): void {
-    runInInjectionContext(injector, () => { store.connectLive(); });
+    runInInjectionContext(injector, () => {
+      store.connectLive();
+    });
   }
 
   it('connectLive subscribes to SSE channel', () => {

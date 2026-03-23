@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import {
   BadgeComponent,
@@ -66,11 +60,7 @@ const UNDELETABLE_ROLES = new Set(['admin', 'role_manager', 'user']);
     @if (showCreateDialog()) {
       <ui-dialog-panel (closed)="showCreateDialog.set(false)">
         <span dialogTitle>Create New Role</span>
-        <form
-          [formGroup]="createForm"
-          (ngSubmit)="onCreate()"
-          class="flex flex-col gap-md"
-        >
+        <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="flex flex-col gap-md">
           <ui-input formControlName="name" label="Role Name" placeholder="lowercase_snake" />
           <ui-form-error [control]="createForm.controls.name" />
           <ui-input formControlName="description" label="Description" />
@@ -90,9 +80,7 @@ export class RolesManagementComponent {
   private readonly auth = inject(AuthStore);
   protected readonly showCreateDialog = signal(false);
 
-  protected readonly isAdmin = computed(
-    () => this.auth.user()?.roles.includes('admin') ?? false,
-  );
+  protected readonly isAdmin = computed(() => this.auth.user()?.roles.includes('admin') ?? false);
 
   readonly createForm = new FormGroup({
     name: new FormControl('', {

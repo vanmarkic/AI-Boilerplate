@@ -19,9 +19,7 @@ describe('WeatherComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WeatherComponent],
-      providers: [
-        { provide: WeatherStore, useValue: mockStore },
-      ],
+      providers: [{ provide: WeatherStore, useValue: mockStore }],
     }).compileComponents();
     fixture = TestBed.createComponent(WeatherComponent);
   });

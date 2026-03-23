@@ -19,9 +19,7 @@ describe('UserProfileComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [UserProfileComponent],
-      providers: [
-        { provide: UserProfileStore, useValue: mockStore },
-      ],
+      providers: [{ provide: UserProfileStore, useValue: mockStore }],
     }).compileComponents();
 
     fixture = TestBed.createComponent(UserProfileComponent);

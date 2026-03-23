@@ -6,17 +6,18 @@ import { ButtonDirective } from '@aspect/ui';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [ButtonDirective],
   host: {
-    class: 'flex min-h-screen items-center justify-center bg-background px-md relative overflow-hidden',
+    class:
+      'flex min-h-screen items-center justify-center bg-background px-md relative overflow-hidden',
   },
   template: `
     <!-- Subtle radial glow behind content -->
-    <div
-      class="pointer-events-none absolute center-xy rounded-full landing-glow"
-    ></div>
+    <div class="pointer-events-none absolute center-xy rounded-full landing-glow"></div>
 
     <div class="relative flex flex-col items-center gap-xl text-center w-full max-w-container-md">
       <!-- Monospace tag -->
-      <span class="font-mono text-xs tracking-widest uppercase text-muted-foreground border px-sm py-xs rounded-sm whitespace-nowrap">
+      <span
+        class="font-mono text-xs tracking-widest uppercase text-muted-foreground border px-sm py-xs rounded-sm whitespace-nowrap"
+      >
         v0.1 &middot; open source
       </span>
 
@@ -39,27 +40,33 @@ import { ButtonDirective } from '@aspect/ui';
             required
             class="input-base flex-1"
           />
-          <button type="submit" uiButton size="lg">
-            Get access
-          </button>
+          <button type="submit" uiButton size="lg">Get access</button>
         </form>
       } @else {
         <div class="flex flex-col gap-sm items-center">
-          <div class="rounded-full border-2 border-primary flex items-center justify-center size-xl">
-            <svg class="text-primary size-md" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+          <div
+            class="rounded-full border-2 border-primary flex items-center justify-center size-xl"
+          >
+            <svg
+              class="text-primary size-md"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              stroke-width="3"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
             </svg>
           </div>
-          <p class="text-primary font-semibold text-lg">
-            You're on the list.
-          </p>
+          <p class="text-primary font-semibold text-lg">You're on the list.</p>
         </div>
       }
 
       <!-- Tech stack pills -->
       <div class="flex flex-row flex-wrap justify-center gap-sm self-stretch">
         @for (tech of stack; track tech) {
-          <span class="font-mono text-xs text-muted-foreground bg-card border px-sm py-xs rounded-sm">
+          <span
+            class="font-mono text-xs text-muted-foreground bg-card border px-sm py-xs rounded-sm"
+          >
             {{ tech }}
           </span>
         }

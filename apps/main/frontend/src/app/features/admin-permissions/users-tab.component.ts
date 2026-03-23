@@ -1,10 +1,4 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  OnInit,
-  signal,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import {
   DataTableComponent,
   DataTableColumnComponent,
@@ -94,10 +88,7 @@ export class UsersTabComponent implements OnInit {
     this.selectedUser.set(user);
   }
 
-  protected async onRolesChanged(changes: {
-    added: string[];
-    removed: string[];
-  }): Promise<void> {
+  protected async onRolesChanged(changes: { added: string[]; removed: string[] }): Promise<void> {
     const user = this.selectedUser();
     if (!user) return;
     if (changes.added.length > 0) {
