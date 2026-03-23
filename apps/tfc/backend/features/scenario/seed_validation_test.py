@@ -120,3 +120,52 @@ def test_silent_wake_domain_config_system_ids_match_scenario() -> None:
     assert not missing_from_scenario, (
         f"Domain config systems not found in scenario: {missing_from_scenario}"
     )
+
+
+def test_silent_wake_baseline_structure() -> None:
+    """Verify Silent Wake Baseline uses turn-based authoring and matches PDF."""
+    path = SEEDS_DIR / "silent_wake_baseline.json"
+    data = json.loads(path.read_text())
+    content = ScenarioContent.model_validate(data["content"])
+    assert content.game_mode == "simple_collaborative"
+    assert len(content.roles) == 7, "7 roles: CO + 6 advisors"
+    assert len(content.turns) == 16, "Turn 0 (briefing) + 15 game turns"
+
+    # Turn-based authoring: injects and available_cards on turns, not legacy arrays
+    assert all(t.injects for t in content.turns), "every turn has injects"
+    game_turns = [t for t in content.turns if t.turn_index > 0]
+    assert all(t.available_cards for t in game_turns), "every game turn has cards"
+    assert len(content.events) == 0, "no legacy events (generated from turns)"
+    assert len(content.decision_templates) == 0, "no legacy decision_templates"
+
+    # Only systems referenced in turn effects are included
+    assert len(content.initial_system_states) == 6
+    sys_cats = [s.category for s in content.initial_system_states]
+    assert sys_cats.count("weapon") == 2
+    assert sys_cats.count("system") == 4
+
+    # Warfare domains: 4
+    assert len(content.initial_warfare_domains) == 4
+
+    # Best path documented on all game turns
+    assert all(
+        t.best_path is not None for t in game_turns
+    ), "every game turn has best_path"
+
+
+def test_silent_wake_baseline_system_ids_match_domain_config() -> None:
+    """Baseline scenario system IDs must be a subset of domain config."""
+    dc_path = SEEDS_DIR / "silent_wake_domain_config.json"
+    dc_data = json.loads(dc_path.read_text())
+    dc_system_ids = {s["id"] for s in dc_data["systems"]}
+
+    sc_path = SEEDS_DIR / "silent_wake_baseline.json"
+    sc_data = json.loads(sc_path.read_text())
+    sc_system_ids = {
+        s["system_id"] for s in sc_data["content"]["initial_system_states"]
+    }
+
+    assert sc_system_ids <= dc_system_ids, (
+        f"Scenario has system IDs not in domain config: "
+        f"{sc_system_ids - dc_system_ids}"
+    )

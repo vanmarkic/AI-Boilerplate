@@ -97,6 +97,7 @@ def load_decision_templates(
                 DecisionOptionSnapshot(
                     id=o.id,
                     label=o.label,
+                    description=o.description,
                     score=o.score,
                     stress_delta=o.stress_delta,
                     system_effects=[
@@ -226,15 +227,18 @@ def generate_decisions_from_turns(
             catalog_entry = catalog_lookup.get(card_cfg.card_id)
             if catalog_entry:
                 label = catalog_entry.get("title", card_cfg.card_id)
+                description = catalog_entry.get("description", "")
                 targets_system = catalog_entry.get("targets_system", False)
             else:
                 label = card_cfg.card_id
+                description = ""
                 targets_system = False
 
             options.append(
                 DecisionOptionDef(
                     id=card_cfg.card_id,
                     label=label,
+                    description=description,
                     score=card_cfg.score,
                     stress_delta=card_cfg.stress_delta,
                     system_effects=list(card_cfg.system_effects),
@@ -245,7 +249,7 @@ def generate_decisions_from_turns(
 
         decisions.append(
             DecisionTemplateDef(
-                id=f"turn-{ti}-decision",
+                id=f"turn-{ti}-inject-0",
                 title=turn.title or f"Turn {ti} Decision",
                 description="",
                 issue_id=f"turn-{ti}-issue",

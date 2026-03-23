@@ -9,6 +9,7 @@ export type { RoleDef as RoleInfo } from "./scenario-api.service";
 export interface DecisionOption {
   id: string;
   label: string;
+  description?: string;
   score?: number;
   role?: string | null;
   targets_system?: boolean;

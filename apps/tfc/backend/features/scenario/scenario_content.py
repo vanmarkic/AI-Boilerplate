@@ -32,6 +32,7 @@ class DecisionOptionDef(BaseModel):
 
     id: str
     label: str
+    description: str = ""
     score: float = 0.0
     stress_delta: int = 0
     system_effects: list[SystemEffectDef] = []

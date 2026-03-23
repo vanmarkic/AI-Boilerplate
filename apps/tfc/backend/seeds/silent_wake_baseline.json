@@ -1,0 +1,513 @@
+{
+  "title": "Silent Wake (Baseline)",
+  "description": "Naval cyber-kinetic escalation — 15-turn simple collaborative exercise. Scenario Baseline, Naval Group, February 2026.",
+  "content": {
+    "game_mode": "simple_collaborative",
+    "stress_effect_preset": "standard",
+    "game_mode_config": {
+      "base_decision_time_ms": 300000
+    },
+    "default_time_factor": 1.0,
+    "briefing": "You are a crew of a Frigate. You need to prepare a mission briefing based on the information provided. Do not just read the text — extract only the information needed for a mission brief to your CO. You have 15 minutes.",
+    "objectives": [
+      "Maintain mission tempo through escalating anomalies",
+      "Identify and respond to AIS spoofing and cyber intrusion",
+      "Manage combat systems degradation under kinetic threat",
+      "Neutralise the hostile surface unit",
+      "Transition to post-crisis control with minimal residual risk"
+    ],
+    "rules": [
+      "ROE: Weapons Tight — do not engage unless positively identified as hostile and authorised.",
+      "CO selects up to 2 blue cards per turn after hearing advisor recommendations.",
+      "Each advisor must provide: recommendation, expected effect, trade-off, and time estimate (15 s per card).",
+      "SWB07 (Start Investigation) and SWB08 (Start In-Depth Investigation) may be repeated in the same turn only if each targets a different declared component.",
+      "SWB08 requires SWB07 to have been played on the same component in a previous turn.",
+      "System-targeting cards (e.g., Isolate, Reboot) apply to one system per play.",
+      "No competitive scoring — end-of-exercise results shown as Lo / Mid / Hi tier only."
+    ],
+    "roles": [
+      {"id": "co", "label": "Commanding Officer", "player_type": "decision_maker"},
+      {"id": "ops", "label": "Operations Officer", "player_type": "advisor"},
+      {"id": "nav", "label": "Navigator", "player_type": "advisor"},
+      {"id": "eo", "label": "Engineering Officer", "player_type": "advisor"},
+      {"id": "cyop", "label": "Cyber Operations Officer", "player_type": "advisor"},
+      {"id": "aawo", "label": "Anti-Air Warfare Officer", "player_type": "advisor"},
+      {"id": "pwo", "label": "Principal Warfare Officer", "player_type": "advisor"}
+    ],
+    "phases": [
+      {
+        "id": "phase-briefing",
+        "title": "Pre-Sail Briefing",
+        "description": "Turn 0: Mission briefing and initial board state."
+      },
+      {
+        "id": "phase-transit",
+        "title": "Transit Phase",
+        "description": "Turns 1–3: In transit with emerging anomalies."
+      },
+      {
+        "id": "phase-cyber-detect",
+        "title": "Cyber Detection",
+        "description": "Turns 4–6: AIS spoofing confirmed, hostile contact, cyber signal."
+      },
+      {
+        "id": "phase-escalation",
+        "title": "Escalation",
+        "description": "Turns 7–9: AAW malfunction, air threat, hostile salvo."
+      },
+      {
+        "id": "phase-combat",
+        "title": "Combat",
+        "description": "Turns 10–12: First hit, cyber root cause, new cyber alert."
+      },
+      {
+        "id": "phase-recovery",
+        "title": "Recovery",
+        "description": "Turns 13–15: Hard choices, surface threat neutralised, end state."
+      }
+    ],
+    "turns": [
+      {
+        "turn_index": 0,
+        "title": "Pre-Sail Briefing",
+        "facilitator_prompt": "You are a crew of a Frigate. You need to prepare a mission briefing based on the information provided. Do not just read the text — extract only the information needed for a mission brief to your CO. You have 15 minutes.",
+        "has_decisions": false,
+        "injects": [
+          {
+            "text": "Pre-sail briefing: mission context and initial system states.",
+            "role_descriptions": {
+              "ops": "Mission: Independent transit to patrol sector Alpha-3. NLT 112000B arrival. Transit time approx. 6 hrs at planned speed. Regional posture: Heightened readiness. Diplomatic channels active. Intelligence: Possible hostile naval presence in theatre. Potential use of visual and electronic deception tactics. No declared exclusion zones in transit corridor. ROE: Weapons Tight — engagement authorized only in case of confirmed hostile intent or hostile act. No escort assigned. No dedicated air support during transit. No friendly AEW coverage in corridor. Organic helicopter joins upon arrival in patrol sector.",
+              "nav": "Navigation systems nominal. WECDIS updated prior to departure (latest chart package + corrections). Update completed as per standard procedure. Route verified against latest Notices to Mariners. Planned transit speed: 15 kts average. Sea state 2–3. Visibility ~12 nm. Weather clear. Wind N 10 kts. No shallow water constraints. No restricted maneuvering zones. No anticipated navigational hazards.",
+              "eo": "All primary combat, navigation, sensor, and comms systems nominal. Air Surveillance Radar: Minor corrective maintenance last week. Intermittent flickering under certain clutter conditions. Module serviced + recalibrated. Post-maintenance checks satisfactory. If flicker reappears → restart affected component. Reboot ETBOL <1 minute. Surface tracking radar + Fire Control tested prior departure. No defects reported. Communications: SATCOM functional (512 kbps allocated). HF functional. UHF functional. UHF 5 occasional noise (known component issue). Replacement module pending delivery by organic helicopter. Repair ETBOL ~1 hour once part onboard. No other open technical defects.",
+              "cyop": "Cyber threat: Elevated. Adversary assessed capable of: Disruption, Data manipulation, Temporary system degradation. No specific threat indicators for this unit. MTC experienced contained cyber incident last week: Administrative networks affected, Operational systems reported unaffected, Investigation ongoing. Shipboard networks stable. No abnormal traffic. No authentication anomalies. No active alerts. Continuous monitoring active."
+            }
+          }
+        ],
+        "base_stress_delta": 0,
+        "design_notes": "Board after briefing: Stress 0. All systems Green. Only NAV RADAR, IBMS / INS, and COMMS are ON."
+      },
+      {
+        "turn_index": 1,
+        "title": "In Transit",
+        "facilitator_prompt": "You are underway. Transit phase has begun.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "Transit proceeding as planned. All systems nominal. No contacts of concern. EMCON: Navigation radar only.",
+            "role_descriptions": {
+              "ops": "Transit proceeding as planned. Estimated time to patrol sector unchanged. No updated intelligence from MTC. No declared maritime safety broadcasts affecting corridor. EMCON: Navigation radar only.",
+              "nav": "Course and speed steady at 15 kts. No deviation from planned route. Commercial traffic density within expected levels. ETA to patrol area: 5 hours. Visibility ~12 nm.",
+              "eo": "Radar performance nominal. Surface and air picture stable. No sensor anomalies observed. Communications functioning within expected parameters.",
+              "cyop": "Network traffic baseline unchanged. No alerts. Routine monitoring only.",
+              "aawo": "Air picture normal. No contacts of concern.",
+              "pwo": "Surface picture normal. No contacts of concern."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB01", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB03", "score": 10.0, "stress_delta": 0}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 0,
+        "best_path": {"card_ids": ["SWB01", "SWB03"], "notes": "Stress +0, no system degradation."},
+        "design_notes": "Board after turn: Stress 0, all systems Green."
+      },
+      {
+        "turn_index": 2,
+        "title": "Subtle Anomalies",
+        "facilitator_prompt": "Introduce speed discrepancy and ghost AIS contact. Gauge whether players treat this as routine or begin investigating. Do not prompt — let them decide.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "Speed discrepancy detected. Ghost AIS contact bearing 035 / 18 nm with no radar echo or ESM emissions.",
+            "role_descriptions": {
+              "nav": "Minor speed discrepancy between GPS SOG and STW. SOG: Speed Over Ground. STW: Speed Through Water. One AIS contact bearing 035, range 18 nm with no corresponding radar echo.",
+              "pwo": "No ESM emissions from bearing 035."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB01", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB07", "score": 10.0, "stress_delta": 0, "max_plays": 2}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 0,
+        "best_path": {"card_ids": ["SWB01", "SWB07"], "notes": "Stress +0. SWB07 targets Radar/AIS or Sensors."},
+        "acceptable_path": {"card_ids": ["SWB07", "SWB07"], "notes": "Stress +0. Double investigation: AIS/radar + doppler speed log."},
+        "design_notes": "The Start Investigation could target radar/AIS or sensors. If radar diagnostic is NOT initiated at least once → Stress +1 (latent sensor doubt). Board after turn: Stress 0, all systems Green."
+      },
+      {
+        "turn_index": 3,
+        "title": "Faulty Component / Increased Traffic",
+        "facilitator_prompt": "Faulty speed component identified with 5-min ETBOL. AIS traffic density rising. Watch whether players repair or press on — both are valid but carry different risk.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "Faulty speed component identified (ETBOL 5 min). AIS traffic density increasing beyond expected baseline.",
+            "role_descriptions": {
+              "eo": "Possible faulty component identified. Resolution: Restart (5' ETBOL).",
+              "nav": "Increase in AIS contacts within sector. Commercial traffic density higher than expected baseline. Majority of contacts remain beyond visual range."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB05", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB15", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB01", "score": 6.0, "stress_delta": 1}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 0,
+        "best_path": {"card_ids": ["SWB05", "SWB15"], "notes": "Stress +0."},
+        "acceptable_path": {"card_ids": ["SWB01", "SWB15"], "notes": "Stress +1."},
+        "design_notes": "A valid option could also be to contact MTC. Board after turn: Stress 0, all systems Green. Component repaired."
+      },
+      {
+        "turn_index": 4,
+        "title": "AIS Spoofing Possible",
+        "facilitator_prompt": "First confirmed deceptive AIS track. Component is back online. Trust in AIS picture is degrading. Probe whether players connect the dots to a deliberate deception campaign.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "First confirmed deceptive AIS track at bearing 041 / 11 nm. Component back online. Trust in AIS picture degrading.",
+            "role_descriptions": {
+              "nav": "New AIS contact bearing 041 at 11 nm. No vessel visible at this position.",
+              "eo": "Component is back online."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB09", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB08", "score": 10.0, "stress_delta": 1},
+          {"card_id": "SWB01", "score": 6.0, "stress_delta": 0},
+          {"card_id": "SWB29", "score": -5.0, "stress_delta": 1}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 0,
+        "best_path": {"card_ids": ["SWB09", "SWB08"], "notes": "Stress +1, expose one deceptive track."},
+        "acceptable_path": {"card_ids": ["SWB09", "SWB01"], "notes": "Stress +0, systems unchanged."},
+        "design_notes": "First confirmed deceptive AIS track identified. Needs to be investigated. Trust in AIS picture begins to degrade. If AIS was ignored earlier → introduce second suspicious track next turn. Trainees could investigate the WECDIS — that would be Stress -1, but it needs to be discussed. Board after turn: Stress 1, all systems Green. One deceptive AIS track exposed."
+      },
+      {
+        "turn_index": 5,
+        "title": "Cyber Alert & Comms Degradation",
+        "facilitator_prompt": "IBMS anomaly detected — first cyber signal but scope is ambiguous. COMMS degrading. Challenge players: is this a technical fault or something more? Do not confirm either way.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "IBMS anomaly detected — first cyber signal, scope ambiguous. COMMS degrading: SATCOM bandwidth reduced, HF inconsistent.",
+            "role_descriptions": {
+              "cyop": "Anomaly detected in IBMS.",
+              "eo": "SATCOM experiencing reduced bandwidth and intermittent connectivity. Observed throughput below allocated 512 kbps baseline. HF performance degraded. Signal clarity is inconsistent. Communication with MTC is not possible with UHF due to distance."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB07", "score": 10.0, "stress_delta": 0, "max_plays": 2},
+          {"card_id": "SWB01", "score": 6.0, "stress_delta": 0}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 1,
+        "system_effects_on_start": [
+          {"system_id": "comms", "operational_state": "yellow"}
+        ],
+        "domain_effects_on_start": [
+          {"domain_id": "cyber", "threat_level": "yellow"}
+        ],
+        "best_path": {"card_ids": ["SWB07", "SWB07"], "notes": "Stress +1. SWB07 on COMMS + SWB07 on IBMS. COMMS unchanged, reduce escalation chance next turn."},
+        "acceptable_path": {"card_ids": ["SWB01", "SWB07"], "notes": "Stress +1. SWB07 on COMMS. COMMS +1 if degraded."},
+        "design_notes": "This is the first explicit cyber signal. Still ambiguous in scope. No confirmed impact yet. Communications degradation may be: Environmental, Geographical, Network saturation, Malicious, Coincidental. Cadets should: Move COMMS to Yellow. Move CYBER to Yellow. Board after turn: Stress 2, COMMS Yellow. All others Green."
+      },
+      {
+        "turn_index": 6,
+        "title": "Cyber Analysis & Hostile Ship Spotting",
+        "facilitator_prompt": "WECDIS-to-INS anomalous data flow detected. Warship contact confirmed. ESM confirms non-commercial emissions. If CO does not select General Quarters (SWB20), it is forced automatically — announce this clearly.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "WECDIS → INS anomalous data flow detected. Warship contact confirmed at bearing 052 / 12 nm. ESM confirms non-commercial emissions.",
+            "role_descriptions": {
+              "cyop": "Analysis indicates anomalous data flow originating from WECDIS towards the INS. INS: Inertial Navigation System (responsible to feed all systems with course and speed considering GPS and inertia sensors). Effects are not yet fully determined.",
+              "nav": "New AIS contact bearing 052, range 12 nm. Visual silhouette indicates warship profile.",
+              "pwo": "ESM detects non-commercial radar emissions at bearing 052. Emission profile not consistent with merchant vessels."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB08", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB20", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "__all__", "power_state": true, "set_all_power": true}]},
+          {"card_id": "SWB01", "score": 6.0, "stress_delta": 0}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 2,
+        "domain_effects_on_start": [
+          {"domain_id": "asuw", "threat_level": "yellow"}
+        ],
+        "best_path": {"card_ids": ["SWB08", "SWB20"], "notes": "Stress +2. SWB08 targets IBMS."},
+        "acceptable_path": {"card_ids": ["SWB08", "SWB01"], "notes": "Stress +2. SWB20 (General Quarters) forced if not selected."},
+        "design_notes": "First credible hostile identification. Facilitator override: SWB20 (General Quarters) is mandatory this turn. If the team does not include it in their chosen actions, the facilitator cancels their selection, forces SWB20, and explains why General Quarters must be called at this point. This is the only turn where the facilitator overrides CO authority, reflecting that no warship commander would leave the crew at peacetime posture after credible hostile identification. AIS deception is now operationally meaningful. Cyber impact chain identified but not yet fully understood. All radars are now online (General Quarters). Board after turn: Stress 4, COMMS Yellow. All others Green. All systems and weapons ON (General Quarters)."
+      },
+      {
+        "turn_index": 7,
+        "title": "AAW Radar Malfunction",
+        "facilitator_prompt": "AAW radar tracks flickering — same symptom as pre-departure maintenance. Players may reboot or investigate. Note: reboot will trigger a silent privilege escalation (do not reveal this).",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "AAW radar online but tracks flickering — same symptom as pre-departure maintenance issue.",
+            "role_descriptions": {
+              "aawo": "Air surveillance radar online. Multiple tracks are flickering like last time."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB01", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB14", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "aaw_radar", "operational_state": "yellow"}]},
+          {"card_id": "SWB08", "score": 6.0, "stress_delta": 0}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 1,
+        "best_path": {"card_ids": ["SWB01", "SWB14"], "notes": "Stress +1. Malfunction path is clarified before reboot side effects are adjudicated."},
+        "acceptable_path": {"card_ids": ["SWB08", "SWB01"], "notes": "Stress +1."},
+        "design_notes": "Reboot will trigger the silent privilege escalation in AAW radar component. No visible immediate consequence. AAW status should be moved to Yellow. EO hint (if needed to give it in next turn): technician claims behavior is expected and proposed reboot. Board after turn: Stress 5, COMMS Yellow, AAW RADAR Yellow. All others Green."
+      },
+      {
+        "turn_index": 8,
+        "title": "Air Threat Warning",
+        "facilitator_prompt": "MTC reports hostile aircraft inbound, ETA 15 min. AAW radar still rebooting. Pressure is mounting — observe whether players prioritise air defence recovery or surface threat preparation.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "MTC reports hostile aircraft inbound — ETA 15 min. AAW radar still not operational.",
+            "role_descriptions": {
+              "aawo": "Report via MTC (C2 system): Hostile aircrafts approaching area (ETA: 15').",
+              "eo": "Reboot could fix the AAW issue (1' ETBOL) (provide card only if action was not proposed in the previous turn)."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB01", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB21", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB14", "score": 6.0, "stress_delta": 0, "system_effects": [{"system_id": "aaw_radar", "operational_state": "green"}]}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": -1,
+        "domain_effects_on_start": [
+          {"domain_id": "aaw", "threat_level": "yellow"}
+        ],
+        "best_path": {"card_ids": ["SWB01", "SWB21"], "notes": "Stress -1."},
+        "acceptable_path": {"card_ids": ["SWB01", "SWB14"], "notes": "Stress -1. Only if no reboot in the past turn."},
+        "design_notes": "AAW radar is not operational yet. Rebooting... Important: The white injects (white papers) must be distributed in the correct order this turn, as the sequencing matters. Board after turn: Stress 4, COMMS Yellow, AAW RADAR Yellow. All others Green."
+      },
+      {
+        "turn_index": 9,
+        "title": "Hostile Salvo",
+        "facilitator_prompt": "Three incoming missiles detected visually. AAW radar now restored. Target out of gun range. WECDIS attack still unresolved. This is the first kinetic engagement — raise urgency in delivery.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "3 incoming missiles detected. AAW radar restored. Target out of gun range. WECDIS attack unresolved.",
+            "role_descriptions": {
+              "nav": "3 incoming missiles visually detected.",
+              "eo": "AAW radar is back online.",
+              "pwo": "Target is out of gun range."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB29", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB27", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB01", "score": 6.0, "stress_delta": 1}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 1,
+        "domain_effects_on_start": [
+          {"domain_id": "aaw", "threat_level": "red"},
+          {"domain_id": "asuw", "threat_level": "red"}
+        ],
+        "best_path": {"card_ids": ["SWB29", "SWB27"], "notes": "Stress +1. Protect one weapon from downgrade, reduce surface threat posture."},
+        "acceptable_path": {"card_ids": ["SWB29", "SWB01"], "notes": "Stress +2. Degrade one weapon by one level."},
+        "design_notes": "WECDIS attack is not yet resolved, and that is what drives the missile counterattack failure. Out of gun range to force them to use missiles. Board after turn: Stress 5, COMMS Yellow, AAW RADAR Yellow. All others Green."
+      },
+      {
+        "turn_index": 10,
+        "title": "First Blood",
+        "facilitator_prompt": "Defensive engagement complete. One inbound missile successfully intercepted by CIWS. The other 2 missiles were detonated in close proximity. Shockwave and fragmentation effects were observed.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "One missile intercepted. Two detonated nearby — CIWS FWD and missile launcher lost. HF antenna disabled. Target now in gun range.",
+            "role_descriptions": {
+              "eo": "FWD CIWS: non-operational (ETBOL: 2 hours). Missiles launcher: non-operational (ETBOL: 5 hours). 1 HF antenna was disabled (unable to repair).",
+              "pwo": "Target now in gun range.",
+              "nav": "Missiles (counterattack) missed the target. No evidence of hostile manoeuvre to evade."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB18", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB04", "score": 10.0, "stress_delta": 1},
+          {"card_id": "SWB26", "score": 6.0, "stress_delta": 0},
+          {"card_id": "SWB28", "score": -3.0, "stress_delta": 1}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 1,
+        "system_effects_on_start": [
+          {"system_id": "ciws_fwd", "operational_state": "red", "power_state": false},
+          {"system_id": "missile_launcher", "operational_state": "red", "power_state": false}
+        ],
+        "best_path": {"card_ids": ["SWB18", "SWB04"], "notes": "Stress +2."},
+        "acceptable_path": {"card_ids": ["SWB18", "SWB26"], "notes": "Stress +1."},
+        "design_notes": "Missile defense capability significantly reduced. Gun is the only counterattack option. SWB28 (Engage Target with Guns) is also a valid option here. Board after turn: Stress 7, COMMS Yellow, AAW RADAR Yellow. CIWS FWD Disabled, Missile Launcher Disabled."
+      },
+      {
+        "turn_index": 11,
+        "title": "Cyber Analysis & Surface Tracking Malfunction",
+        "facilitator_prompt": "Cyber-attack confirmed: speed feed corrupted across all systems. Surface tracking radar unstable — manual targeting reduces effective gun range. Present both WECDIS options clearly (disconnect 1 min vs restore 30 min).",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "Cyber-attack confirmed — speed feed corrupted across all systems. Surface tracking radar unstable. Manual targeting reduces effective gun range.",
+            "role_descriptions": {
+              "cyop": "Analysis indicates a cyber-attack vector resulting in feeding all systems with wrong speed value. Two resolution options: Option 1: Disconnect WECDIS and restart INS (ETBOL: 1') — WECDIS not available. Option 2: Restore WECDIS and restart INS (ETBOL 30') — WECDIS available.",
+              "pwo": "Target within the effective gun range. Surface tracking radar is unable to achieve a stable lock. Manual targeting reduces effective engagement envelope (reduced gun effective range)."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB10", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "ibms_ins", "operational_state": "yellow"}]},
+          {"card_id": "SWB23", "score": 10.0, "stress_delta": 1},
+          {"card_id": "SWB30", "score": 6.0, "stress_delta": 0},
+          {"card_id": "SWB24", "score": -5.0, "stress_delta": 1}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 0,
+        "best_path": {"card_ids": ["SWB10", "SWB23"], "notes": "Stress +1."},
+        "acceptable_path": {"card_ids": ["SWB30", "SWB10"], "notes": "Stress +0."},
+        "design_notes": "Isolation removes corrupted speed feed. Surface tracking instability persists due to earlier radar escalation (if reboot occurred). Closing range compensates for reduced firing geometry. Full restore (30') operationally unacceptable under air threat timeline. SWB24 (Approach Target) is also a valid option here. EO/NAV should note: Disconnecting WECDIS removes digital chart references on bridge. Manual navigation procedures can compensate. It is not critical. Board after turn: Stress 8, COMMS Yellow, AAW RADAR Yellow, IBMS / INS Yellow (WECDIS disconnected). CIWS FWD Disabled, Missile Launcher Disabled."
+      },
+      {
+        "turn_index": 12,
+        "title": "New Cyber Alert",
+        "facilitator_prompt": "AAW radar identified as source of attack on surface tracking. Hostile aircraft ETA 10 min. Target 10 min from effective gun range. Dual-threat convergence — surface and air timelines colliding.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "AAW radar identified as cyber-attack source targeting surface tracking. Hostile aircraft ETA 10 min. Target 10 min from effective gun range.",
+            "role_descriptions": {
+              "cyop": "Malicious activity confirmed originating from AAW radar processing module towards the surface tracking radar. Can affect tracking capability. Originated by the 'faulty' AAW radar component.",
+              "aawo": "Report via MTC (C2 system): Hostile aircrafts approaching area (ETA: 10').",
+              "pwo": "Target is still out of effective gun range with manual tracking. 10' to be in range.",
+              "eo": "INS functioning correctly. Speed inputs verified across systems."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB08", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB01", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB23", "score": 6.0, "stress_delta": 1}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 1,
+        "best_path": {"card_ids": ["SWB08", "SWB01"], "notes": "Stress +1."},
+        "acceptable_path": {"card_ids": ["SWB08", "SWB23"], "notes": "Stress +2."},
+        "design_notes": "We increase the pressure to recover the automatic tracking, neutralize the surface threat and then deal with the air threat. Board after turn: Stress 9, COMMS Yellow, AAW RADAR Yellow, IBMS / INS Yellow. CIWS FWD Disabled, Missile Launcher Disabled."
+      },
+      {
+        "turn_index": 13,
+        "title": "Hard Choices",
+        "facilitator_prompt": "Isolating AAW restores surface tracking immediately but sacrifices air picture. Hostile aircraft ETA 8 min. This is the central dilemma — surface engagement vs air defence. Let players wrestle with it.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "AAW isolation restores surface tracking immediately. Hostile aircraft ETA 8 min. Surface threat must be neutralised first.",
+            "role_descriptions": {
+              "cyop": "AAW originated attack resolution options: Option 1: Restore AAW radar from backup (ETBOL: 30'). Full recovery by replacing the component from storage and flashing clean firmware. Option 2: Isolate AAW radar: < 1'. AAW radar unavailable while isolated. Surface tracking stability restored immediately.",
+              "aawo": "Report via MTC (C2 system): Hostile aircrafts approaching area (ETA: 8')."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB10", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "aaw_radar", "power_state": false, "operational_state": "red"}]},
+          {"card_id": "SWB28", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB23", "score": 6.0, "stress_delta": 0}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 1,
+        "best_path": {"card_ids": ["SWB10", "SWB28"], "notes": "Stress +1. Isolate AAW radar, engage target with guns."},
+        "acceptable_path": {"card_ids": ["SWB10", "SWB23"], "notes": "Stress +1."},
+        "design_notes": "Isolation immediately restores surface tracking capability. Surface threat must be neutralized before incoming air threat. Air threat resolution handled next turn. Pedagogical focus: Accept temporary loss of air picture. Restore core combat capability. Fight through cyber degradation. Board after turn: Stress 10, COMMS Yellow, AAW RADAR Red (isolated), IBMS / INS Yellow. ASUW TRACKING restored. CIWS FWD Disabled, Missile Launcher Disabled."
+      },
+      {
+        "turn_index": 14,
+        "title": "Ship Neutralised — AAW Threat Focus",
+        "facilitator_prompt": "Hostile vessel neutralised. Surface threat eliminated. Air threat remains unresolved. AAW reconnection restores air picture. Tension should begin to ease — acknowledge the team's progress.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "Hostile vessel neutralised. Surface threat eliminated. Air threat unresolved — AAW reconnection restores air picture.",
+            "role_descriptions": {
+              "nav": "Gun engagement achieved effective impact on hostile vessel. Target exhibiting loss of manoeuvrability.",
+              "pwo": "No further ESM emissions detected from hostile unit. Surface threat assessed as neutralised."
+            }
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB16", "score": 10.0, "stress_delta": 0, "system_effects": [{"system_id": "aaw_radar", "power_state": true, "operational_state": "yellow"}]},
+          {"card_id": "SWB01", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB08", "score": 6.0, "stress_delta": 1}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": 1,
+        "domain_effects_on_start": [
+          {"domain_id": "asuw", "threat_level": "green"}
+        ],
+        "best_path": {"card_ids": ["SWB16", "SWB01"], "notes": "Stress +1. Reconnect AAW radar."},
+        "acceptable_path": {"card_ids": ["SWB16", "SWB08"], "notes": "Stress +2."},
+        "design_notes": "Surface threat eliminated. Air threat unresolved. AAW radar reconnection restores organic air picture. This turn transitions from kinetic to stabilization posture. Board after turn: COMMS Yellow, AAW RADAR Yellow (reconnected), IBMS / INS Yellow. CIWS FWD Disabled, Missile Launcher Disabled."
+      },
+      {
+        "turn_index": 15,
+        "title": "Happy Ending",
+        "facilitator_prompt": "Hostile aircrafts were intercepted by friendly forces. The immediate threat to your ship has been neutralized. This concludes the wargame. Well done. You have just navigated 15 turns of escalating pressure — from ambiguous sensor anomalies through confirmed cyber attack and live combat — under degraded conditions and real time constraints. Regardless of where your board stands right now, what matters is the decisions you made, how you communicated under pressure, and the trade-offs you accepted as a team. Take a moment to look at your board. That is the story of your command decisions. We will debrief after lunch and go through the key moments together.",
+        "has_decisions": true,
+        "injects": [
+          {
+            "text": "Hostile aircraft intercepted by friendly forces. All threats neutralised. Exercise complete — debrief to follow.",
+            "role_descriptions": {}
+          }
+        ],
+        "available_cards": [
+          {"card_id": "SWB03", "score": 10.0, "stress_delta": 0},
+          {"card_id": "SWB01", "score": 10.0, "stress_delta": 0}
+        ],
+        "max_selections": 2,
+        "base_stress_delta": -1,
+        "domain_effects_on_start": [
+          {"domain_id": "aaw", "threat_level": "green"},
+          {"domain_id": "cyber", "threat_level": "green"}
+        ],
+        "best_path": {"card_ids": ["SWB03", "SWB01"], "notes": "Stress -1. Close with disciplined synchronization."},
+        "design_notes": "End of the game."
+      }
+    ],
+    "initial_system_states": [
+      {"system_id": "nav_radar", "label": "NAV RADAR", "operational_state": "green", "power_state": true},
+      {"system_id": "ibms_ins", "label": "IBMS / INS (incl. WECDIS)", "operational_state": "green", "power_state": true},
+      {"system_id": "comms", "label": "COMMS", "operational_state": "green", "power_state": true},
+      {"system_id": "aaw_radar", "label": "AAW RADAR", "operational_state": "green", "power_state": false},
+      {"system_id": "ciws_fwd", "label": "CIWS FWD", "category": "weapon", "operational_state": "green", "power_state": false},
+      {"system_id": "missile_launcher", "label": "Missile Launcher", "category": "weapon", "operational_state": "green", "power_state": false}
+    ],
+    "initial_warfare_domains": [
+      {"domain_id": "asuw", "label": "ASUW", "initial_threat_level": "green"},
+      {"domain_id": "asw", "label": "ASW", "initial_threat_level": "green"},
+      {"domain_id": "aaw", "label": "AAW", "initial_threat_level": "green"},
+      {"domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green"}
+    ],
+    "score_tier_thresholds": {
+      "lo": 0.33,
+      "mid": 0.66
+    }
+  }
+}
