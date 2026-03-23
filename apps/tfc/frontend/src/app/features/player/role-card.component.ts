@@ -96,7 +96,9 @@ export interface RoleCardSubmission {
                 />
                 <span>{{ option.label }}</span>
                 @if (option.description) {
-                  <span class="role-card__option-desc">{{ option.description }}</span>
+                  <span class="role-card__option-desc">{{
+                    option.description
+                  }}</span>
                 }
                 @if (option.targets_system && isSelected(option.id)) {
                   <select
