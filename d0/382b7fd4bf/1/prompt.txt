@@ -1,0 +1,35 @@
+<ide_opened_file>The user opened the file /Users/dragan/Documents/AI-Boilerplate/apps/tfc/frontend/src/app/features/home/sea-backdrop.ts in the IDE. This may or may not be related to the current task.</ide_opened_file>
+look at git ishtory of @apps/tfc/backend/seeds/silent_wake.json
+
+---
+
+i want to keep all the new feature from the latest data model but stick to the original scenario narrative, roles, domains, systems, warfare, etc...
+
+---
+
+did it mention of those ?
+
+No initial_system_states, initial_warfare_domains, turns, rules, stress_effect_preset, score_tier_thresholds
+No role_descriptions, system_effects, domain_effects on events
+No stress_delta, forced_option_ids, targets_system on decision options
+Simpler game_mode_config (had penalty_factor)
+
+---
+
+@apps/tfc/docs/SW_Scenario_Baseline (1).pdf what about this ?
+
+---
+
+yes ! make it the default seed on docker compose. if feature are missing (6.conditional injects). lof a gh issue
+
+---
+
+why not migrate inject_ids/decision_template_id to new injects/available_cards fie ?
+
+---
+
+use a new file name
+
+---
+
+reseed
