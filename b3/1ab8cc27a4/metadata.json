@@ -1,0 +1,26 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "b31ab8cc27a4",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 3,
+  "files_touched": [
+    ".playwright-mcp/console-2026-03-23T00-00-32-126Z.log",
+    "apps/tfc/frontend/src/app/features/home/sea-backdrop.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/b3/1ab8cc27a4/0/metadata.json",
+      "transcript": "/b3/1ab8cc27a4/0/full.jsonl",
+      "content_hash": "/b3/1ab8cc27a4/0/content_hash.txt",
+      "prompt": "/b3/1ab8cc27a4/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 75,
+    "cache_creation_tokens": 115477,
+    "cache_read_tokens": 2596629,
+    "output_tokens": 15468,
+    "api_call_count": 50
+  }
+}
