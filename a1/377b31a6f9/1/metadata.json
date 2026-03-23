@@ -1,0 +1,36 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "a1377b31a6f9",
+  "session_id": "6dd4f122-1869-436c-ba41-b471a9b7722f",
+  "strategy": "manual-commit",
+  "created_at": "2026-03-23T00:06:16.735323Z",
+  "branch": "master",
+  "checkpoints_count": 1,
+  "files_touched": [
+    ".playwright-mcp/console-2026-03-23T00-00-32-126Z.log",
+    "apps/tfc/backend/alembic/versions/00fb7a3af6bd_add_domain_config_catalogs.py",
+    "apps/tfc/backend/features/exercise/engine_context_prop_test.py",
+    "apps/tfc/backend/features/scenario/scenario_loader.py"
+  ],
+  "agent": "Claude Code",
+  "turn_id": "fd17837303d3",
+  "token_usage": {
+    "input_tokens": 11,
+    "cache_creation_tokens": 31313,
+    "cache_read_tokens": 223547,
+    "output_tokens": 2172,
+    "api_call_count": 9
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-03-23T00:06:16.676946Z",
+    "agent_lines": 25,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 25,
+    "agent_percentage": 100
+  }
+}

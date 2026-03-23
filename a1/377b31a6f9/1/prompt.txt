@@ -1,0 +1,8 @@
+<ide_selection>The user selected the lines 1 to 3 from /git-error-1774224159795:
+> git push origin master:master
+error: failed to push some refs to 'github.com:vanmarkic/AI-Boilerplate.git'
+
+
+This may or may not be related to the current task.</ide_selection>
+> git push origin master:master
+error: failed to push some refs to 'github.com:vanmarkic/AI-Boilerplate.git'
