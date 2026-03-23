@@ -1,0 +1,39 @@
+{
+  "cli_version": "0.5.1",
+  "checkpoint_id": "d0382b7fd4bf",
+  "strategy": "manual-commit",
+  "branch": "master",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".playwright-mcp/page-2026-03-23T01-47-45-337Z.png",
+    "apps/tfc/backend/engine/state_changes.py",
+    "apps/tfc/backend/features/exercise/engine_router.py",
+    "apps/tfc/backend/features/scenario/scenario_content.py",
+    "apps/tfc/backend/features/scenario/scenario_loader.py",
+    "apps/tfc/backend/features/scenario/seed_validation_test.py",
+    "apps/tfc/backend/seed.py",
+    "apps/tfc/backend/seeds/silent_wake_4roles.json",
+    "apps/tfc/backend/seeds/silent_wake_domain_config.json",
+    "apps/tfc/frontend/src/app/core/decision-api.service.ts",
+    "apps/tfc/frontend/src/app/core/generated/state-changes.types.ts",
+    "apps/tfc/frontend/src/app/features/player/co-decision-bar.component.ts",
+    "apps/tfc/frontend/src/app/features/player/role-card.component.ts",
+    "apps/tfc/frontend/src/app/shared/components-player-view.css",
+    "apps/tfc/frontend/src/app/shared/components-two-player.css"
+  ],
+  "sessions": [
+    {
+      "metadata": "/d0/382b7fd4bf/0/metadata.json",
+      "transcript": "/d0/382b7fd4bf/0/full.jsonl",
+      "content_hash": "/d0/382b7fd4bf/0/content_hash.txt",
+      "prompt": "/d0/382b7fd4bf/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 18,
+    "cache_creation_tokens": 57240,
+    "cache_read_tokens": 540111,
+    "output_tokens": 12272,
+    "api_call_count": 14
+  }
+}
