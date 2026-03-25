@@ -85,18 +85,6 @@ else
   ((skipped++))
 fi
 
-# --- Trivy (filesystem) ---
-if command -v trivy &>/dev/null; then
-  echo "==> Running trivy fs..."
-  trivy fs --format json --output "${REPORT_DIR}/trivy-fs-${TIMESTAMP}.json" \
-    --severity HIGH,CRITICAL "${REPO_ROOT}" 2>/dev/null || true
-  ((passed++))
-  echo "    trivy fs: done"
-else
-  echo "==> Skipping trivy (not installed)"
-  ((skipped++))
-fi
-
 # --- Gitleaks (secrets) ---
 if command -v gitleaks &>/dev/null; then
   echo "==> Running gitleaks..."

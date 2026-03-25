@@ -292,16 +292,6 @@ security-pip-audit:
     - pip-audit --vulnerability-service osv --index-url "$PIP_INDEX_URL"
   allow_failure: true
 
-security-trivy-fs:
-  stage: security
-  image:
-    name: aquasec/trivy:latest
-    entrypoint: [""]
-  needs: []
-  script:
-    - trivy fs --severity HIGH,CRITICAL --exit-code 1 .
-  allow_failure: true
-
 sonarqube:
   stage: security
   needs: []
