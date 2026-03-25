@@ -79,8 +79,7 @@ ai-boilerplate/
 │   ├── ng-feature-flags/            # @aspect/ng-feature-flags — Angular feature flag guard + service
 │   ├── ngrx-with-resource/          # @aspect/ngrx-with-resource — withResource() for NgRx Signal Store
 │   ├── monorepo-tier-filter/        # Python: filter features by tier for Docker builds
-│   ├── python-layer-lint/           # Python: layer boundary linter
-│   └── security-scan/               # Shell: Trivy + npm audit wrapper
+│   └── python-layer-lint/           # Python: layer boundary linter
 │
 ├── frontend/                        # Angular 21 (zoneless, signals, standalone)
 │   └── src/app/
@@ -109,7 +108,6 @@ ai-boilerplate/
 │   └── main.py
 │
 ├── keycloak/                        # Keycloak config + realm export
-├── security-reports/                # Committed Trivy/npm audit reports
 ├── shared/
 │   ├── manifest.schema.yaml         # Feature manifest schema
 │   └── scripts/                     # generate-frontend.sh, scaffold-feature.sh, lint-architecture.py
@@ -153,7 +151,6 @@ Components use `data-*` HTML attributes for variants, styled via CSS attribute s
 | `ci.yml` | push/PR to `main` | Architecture lint, backend tests, frontend tests, code lint, OpenAPI validation |
 | `frontend-ci.yml` | push/PR to `master` (frontend paths) | Lint, unit tests, build, E2E (Playwright) |
 | `deploy-storybook.yml` | push to `main` (frontend/design-system paths) | Build Storybook → deploy to GitHub Pages |
-| `security.yml` | push/PR + weekly schedule | Trivy container/filesystem scan, npm audit, CodeQL analysis |
 | `security-reports.yml` | weekly schedule | Generate and commit security scan reports to `security-reports/` |
 
 ## Adding a Feature

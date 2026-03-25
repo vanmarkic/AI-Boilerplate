@@ -10,7 +10,6 @@ Orchestrates multiple security scanning tools with graceful skip-if-missing beha
 | `pip-audit` | Python dependency vulnerabilities |
 | `bandit` | Python SAST (code patterns) |
 | `semgrep` | Multi-language SAST |
-| `trivy` | Filesystem vulnerability scanning |
 | `gitleaks` | Secret detection |
 
 Each tool is skipped if not installed — no hard dependencies.
