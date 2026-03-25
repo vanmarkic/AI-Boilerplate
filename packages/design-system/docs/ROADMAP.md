@@ -2,23 +2,26 @@
 
 Refinement plan benchmarked against 2026 industry best practices for homemade design systems.
 
+Current state: 14 CSS files, 1,838 lines, OKLCH color space, 2 themes (default + ocean), `data-*` attribute variant API, CSS cascade layers.
+
 ---
 
-## 🔴 Critical Gaps
+## Critical Gaps
 
 ### 1. No Design Token Format Standard (W3C DTCG / Style Dictionary)
 
-**Current state:** Tokens live exclusively in `tokens.css` as raw CSS custom properties.
+**Current state:** Tokens live exclusively in `tokens.css` as raw CSS custom properties (~80 tokens on `:root`, plus a full `[data-theme="ocean"]` override block).
 
-**2026 standard:** The W3C Design Token Community Group format (`tokens.json`) is now the lingua franca. Tools like Style Dictionary, Theo, and Cobalt consume it to generate platform outputs (CSS, iOS, Android, Figma variables). Raw CSS-only tokens are a dead-end for cross-platform consistency — you can't round-trip back to Figma or export to a native mobile spec.
+**2026 standard:** The W3C Design Token Community Group format (`tokens.json`) is the lingua franca. Tools like Style Dictionary, Theo, and Cobalt consume it to generate platform outputs (CSS, iOS, Android, Figma variables). Raw CSS-only tokens are a dead-end for cross-platform consistency — you can't round-trip back to Figma or export to a native mobile spec.
 
 **Concrete gap:**
 - No `tokens.json` source of truth
 - No generation script (the CSS is the source, not derived)
 - No Figma variable sync possible
 - Theming (glow-glass vs. none) is implemented via CSS cascade tricks instead of documented token sets
+- Ocean theme (`[data-theme="ocean"]`) must also be captured in `tokens.json` as a separate token set
 
-**Fix:** Add a `tokens/tokens.json` file in W3C DTCG format and generate `tokens.css` from it via Style Dictionary or a lightweight equivalent. The hand-authored CSS becomes a build artifact.
+**Fix:** Add a `tokens/tokens.json` file in W3C DTCG format and generate `tokens.css` from it via Style Dictionary or a lightweight equivalent. The hand-authored CSS becomes a build artifact. Both the default and ocean theme token sets must be generated.
 
 ---
 
@@ -43,13 +46,13 @@ Refinement plan benchmarked against 2026 industry best practices for homemade de
 - `inert` attribute automatically applied to background content
 - Escape key handling built-in
 
-**Fix:** `.dialog-backdrop` → `dialog::backdrop` in `components-forms.css`. Angular component migrated to `<dialog>` with `showModal()`, removing `CdkTrapFocus` and the `(keydown.escape)` host listener.
+**Fix:** `.dialog-backdrop` -> `dialog::backdrop` in `components-forms.css`. Angular component migrated to `<dialog>` with `showModal()`, removing `CdkTrapFocus` and the `(keydown.escape)` host listener.
 
 ---
 
 ### 4. No `:where()` for Zero-Specificity Component Resets
 
-**Current state:** Component selectors like `.btn`, `.card`, `.badge` carry specificity of `(0,1,0)`.
+**Current state:** Component selectors like `.btn`, `.card`, `.badge` carry specificity of `(0,1,0)`. There are ~40+ component selectors across 8 CSS files (`components-buttons.css`, `components-forms.css`, `components-panels.css`, `components-data-viz.css`, `components-layout.css`, `components-table.css`, `components-table-filter.css`, `components-tabs.css`).
 
 **2026 standard:** Wrapping selectors in `:where()` within the `components` layer reduces specificity to `(0,0,0)`, meaning any consumer rule overrides them without `!important`. This is now standard in Shoelace, Open Props, and Panda CSS:
 
@@ -60,9 +63,11 @@ Refinement plan benchmarked against 2026 industry best practices for homemade de
 }
 ```
 
+**Breaking change note:** Consumer CSS that relied on component selectors having specificity `(0,1,0)` to tie-break against their own `(0,1,0)` rules will see changed behavior. In practice this is a net improvement (easier overrides), but it must be documented in the changelog. Audit `apps/main/frontend` and `apps/tfc/frontend` for any custom overrides of design system classes before migrating.
+
 ---
 
-## 🟡 Significant Improvements
+## Significant Improvements
 
 ### 5. Primitive Token Tier Missing
 
@@ -80,9 +85,9 @@ The absence of component-level tokens means you can't theme a single component t
 
 ### 6. `--font-size-*--line-height` Naming Convention Is Non-Standard
 
-**Current state:** `--font-size-sm--line-height: 1.25rem` (double-dash BEM-style pairing)
+**Current state:** `--font-size-sm--line-height: 1.25rem` (double-dash BEM-style pairing). There are 10 such tokens in `tokens.css`.
 
-**2026 standard:** Nobody else does it this way. The conventional approach is independent named scales:
+**2026 standard:** The conventional approach is independent named scales:
 
 ```css
 --line-height-tight:   1.25rem;
@@ -92,15 +97,15 @@ The absence of component-level tokens means you can't theme a single component t
 --line-height-loose:   2rem;
 ```
 
-**Fix:** Add `--line-height-*` tokens; keep old ones as deprecated backward-compat aliases; update all internal usages.
+**Fix:** Add `--line-height-*` tokens. Keep old ones as deprecated backward-compat aliases with a comment. Update all internal usages in `reset.css` and component files (~10 references).
 
 ---
 
 ### 7. No Universal `:focus-visible` Baseline in Reset
 
-**Current state:** `.btn`, `.input-base`, `.collapsible-panel-trigger` each define their own `outline: none` + box-shadow focus rings. But `select`, `textarea`, link elements, and any custom interactive element are uncovered.
+**Current state:** `.btn`, `.input-base`, `.collapsible-panel-trigger`, `.card-group-toggle`, `.tree-filter-toggle`, `.tree-filter-input`, and `.data-table-row[data-clickable]` each define their own focus rings. But `select`, `textarea`, link elements, and any custom interactive element are uncovered.
 
-**2026 standard (WCAG 2.2 SC 2.4.11 Focus Appearance — Level AA):** The reset layer must include a universal focus-visible baseline:
+**2026 standard (WCAG 2.2 SC 2.4.11 Focus Appearance, Level AA):** The reset layer must include a universal focus-visible baseline:
 
 ```css
 @layer reset {
@@ -141,11 +146,15 @@ Wide browser support: Chrome 85+, Firefox 128+, Safari 16.4+.
 
 **Current state:** Utilities like `.flex`, `.grid`, `.gap-md` have no responsive variants. Layout components rely on viewport media queries implicitly via consumers.
 
-**2026 standard:** Since this system explicitly avoids Tailwind, container queries are the right answer. Components like `.stack`, `.layout-grid`, and `.card` should use `@container` internally for intrinsic responsiveness rather than relying on viewport breakpoints.
+**2026 standard:** Since this system explicitly avoids Tailwind, container queries are the right answer. Target components for `@container`:
+- `.sidebar-layout` — collapse sidebar below a threshold
+- `.page-layout` — adjust content area padding
+- `.card-group` — switch grid column count based on container width
+- `.grid` — responsive column adjustment
 
 ---
 
-## 🟢 Things to Keep (Already Best-in-Class)
+## Things to Keep (Already Best-in-Class)
 
 | Practice | Why it's right |
 |---|---|
@@ -161,14 +170,40 @@ Wide browser support: Chrome 85+, Firefox 128+, Safari 16.4+.
 
 ---
 
-## Priority Order for Implementation
+## Implementation Tiers
 
-- [ ] **`@property` for `--glow-strength` / `--glass-strength`** — 2-line fix, unlocks CSS transition interpolation on glow/glass effects
-- [ ] **Universal `:focus-visible` in `reset.css`** — WCAG 2.2 AA compliance, 3 lines
-- [ ] **`:where()` wrapping across all `@layer components` selectors** — zero-specificity consumer overrides without `!important`
-- [ ] **`--line-height-*` independent token scale** — add new tokens, deprecate `--font-size-*--line-height` pattern, update internal usage
-- [ ] **Native `<dialog>` migration** — replace `.dialog-backdrop` div with `dialog::backdrop`, update Angular component to use `showModal()`, remove `CdkTrapFocus`
-- [ ] **`tokens/tokens.json` in W3C DTCG format** — source of truth; `tokens.css` becomes a build artifact from Style Dictionary
-- [ ] **Primitive token tier** — prerequisite for safe per-component theming and light mode
-- [ ] **`prefers-color-scheme: light` theme** — completes accessible baseline; requires primitive tier first
-- [ ] **`@container` queries in layout components** — modern intrinsic responsive design
+Items are grouped by dependency. Complete each tier before starting the next.
+
+### Tier 1 — Standalone Quick Wins
+
+No dependencies on other items. Can be done in any order or in parallel.
+
+| Item | Size | Files | Acceptance Criteria |
+|---|---|---|---|
+| `@property` for `--glow-strength` / `--glass-strength` | XS | `tokens.css` | `transition: --glow-strength 250ms` interpolates smoothly in Chrome, Firefox, Safari. |
+| Universal `:focus-visible` in reset | XS | `reset.css` | All interactive elements (links, buttons, inputs, custom elements) show a 2px ring on keyboard focus. Existing component overrides still work. |
+| `--line-height-*` independent token scale | S | `tokens.css`, `reset.css`, ~10 component references | New `--line-height-*` tokens exist. Old `--font-size-*--line-height` tokens kept as aliases with `/* deprecated */` comment. All internal usages updated. |
+
+### Tier 2 — Standalone Broader Scope
+
+No dependencies on Tier 1 or each other, but larger in scope.
+
+| Item | Size | Files | Acceptance Criteria |
+|---|---|---|---|
+| `:where()` wrapping | M | 8 `components-*.css` files (~40+ selectors) | All component root selectors wrapped in `:where()`. Consumer overrides with a single class selector win without `!important`. No visual regressions in apps. |
+| Native `<dialog>` migration | M | `components-forms.css`, `packages/ui/src/dialog-panel.component.ts` | `.dialog-backdrop` class removed, replaced with `dialog::backdrop`. Angular component uses `<dialog>` element with `showModal()`. `CdkTrapFocus` removed. |
+| `@container` in layout components | M | `components-layout.css`, `components-forms.css` | `.sidebar-layout`, `.page-layout`, `.card-group`, `.grid` use `@container` for intrinsic responsiveness. |
+
+### Tier 3 — Chained (Must Execute in Order)
+
+Each item depends on the previous one.
+
+```
+tokens.json  -->  Primitive token tier  -->  Light mode
+```
+
+| Item | Size | Files | Acceptance Criteria |
+|---|---|---|---|
+| `tokens/tokens.json` (W3C DTCG) | L | New `tokens/tokens.json`, `tokens/config.js`, `tokens.css` becomes build output | `npm run build:tokens` generates `tokens.css` identical to current output. Both default and ocean themes in `tokens.json`. |
+| Primitive token tier | L | `tokens.json` restructured, `tokens.css` regenerated | Three tiers visible: primitive (`--blue-600`), semantic (`--color-primary`), component (`--button-bg`). Existing semantic tokens unchanged for backward compat. |
+| `prefers-color-scheme: light` theme | L | `tokens.json` (new light set), `tokens.css` (generated) | Light mode activates via `prefers-color-scheme: light` or `data-theme="light"`. All ~50 color tokens have light equivalents. WCAG AA contrast ratios met. |
