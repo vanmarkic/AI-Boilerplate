@@ -67,6 +67,58 @@
     border-bottom-color: var(--color-border);
   }
 
+  /* ── Turn Banner ─────────────────────────────────────── */
+
+  [data-theme="tfc-silent-wake"] .board-turn-banner__turn {
+    color: var(--color-accent);
+  }
+
+  [data-theme="tfc-silent-wake"] .board-turn-banner__title {
+    font-family: var(--font-sans, system-ui, sans-serif);
+    font-weight: 700;
+  }
+
+  /* ── Board Section Labels ────────────────────────────── */
+
+  [data-theme="tfc-silent-wake"] .board-turn-banner {
+    border-bottom-color: var(--color-border);
+  }
+
+  /* ── Role Card Active — use primary instead of success ─ */
+
+  [data-theme="tfc-silent-wake"] .role-card--active {
+    border-color: var(--color-primary);
+    background: color-mix(in oklch, var(--color-primary) 8%, var(--color-card));
+  }
+
+  [data-theme="tfc-silent-wake"] .role-card--active .role-card__role-id {
+    color: var(--color-primary);
+  }
+
+  [data-theme="tfc-silent-wake"] .role-card__decision {
+    border-top-color: var(--color-primary);
+  }
+
+  [data-theme="tfc-silent-wake"] .role-card__decision-question {
+    color: var(--color-primary);
+  }
+
+  [data-theme="tfc-silent-wake"] .role-card__option--selected {
+    border-color: var(--color-primary);
+  }
+
+  [data-theme="tfc-silent-wake"] .role-card__option input[type="radio"],
+  [data-theme="tfc-silent-wake"] .role-card__option input[type="checkbox"] {
+    accent-color: var(--color-primary);
+  }
+
+  /* ── CO Decision Bar — use primary ─────────────────── */
+
+  [data-theme="tfc-silent-wake"] .co-decision-bar {
+    border-top-color: var(--color-primary);
+    background: color-mix(in oklch, var(--color-primary) 5%, var(--color-card));
+  }
+
   /* ── Cards & Panels — rounding + left-border removal ── */
 
   [data-theme="tfc-silent-wake"] .role-card {

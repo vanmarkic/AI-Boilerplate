@@ -26,6 +26,17 @@
     --color-accent-foreground: oklch(8% 0.02 250);
     --color-ring: oklch(55% 0.22 260);
 
+    /* ── Semantic colors (cool-shifted) ──────────────── */
+    --color-success: oklch(70% 0.15 175);
+    --color-success-foreground: oklch(8% 0.02 250);
+    --color-warning: oklch(78% 0.14 75);
+    --color-warning-foreground: oklch(8% 0.02 250);
+    --color-destructive: oklch(60% 0.22 25);
+    --color-destructive-foreground: oklch(98% 0 0);
+
+    /* ── Typography (sans-serif everywhere) ──────────── */
+    --font-mono: var(--font-sans, system-ui, sans-serif);
+
     /* ── Radius (rounder than tactical themes) ───────── */
     --radius-sm: 0.5rem;
     --radius-md: 0.75rem;
