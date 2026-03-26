@@ -14,3 +14,4 @@ export {
   type HistogramLabel,
   type HistogramVariant,
 } from './histogram-timeline';
+export { DataTable, type DataTableProps, type DataTableColumn } from './data-table';
