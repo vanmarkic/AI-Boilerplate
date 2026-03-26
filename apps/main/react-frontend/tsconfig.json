@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "preserve",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "paths": {
+      "@aspect/react-ui": ["../../packages/react-ui/src/index.ts"],
+      "@aspect/design-system": ["../../packages/design-system/index.css"]
+    }
+  },
+  "include": ["src"]
+}
