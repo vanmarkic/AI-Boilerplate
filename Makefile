@@ -165,7 +165,10 @@ check: ## Run all CI-equivalent checks locally (fail-fast)
 	cd $(CURDIR)/$(MAIN_FE) && npx ng test --watch=false && \
 	cd $(CURDIR)/$(TFC_FE) && npx ng test --watch=false
 
-validate: lint-arch lint-length lint test ## Validate everything: architecture + linters + file-length + tests
+test-react-ui: ## Run React UI library tests
+	cd packages/react-ui && npx vitest run
+
+validate: lint-arch lint-length lint test test-react-ui ## Validate everything: architecture + linters + file-length + tests
 
 security-scan: ## Run security scans and save reports to security-reports/
 	bash shared/scripts/security-scan.sh
