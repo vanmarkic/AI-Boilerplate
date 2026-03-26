@@ -4,3 +4,6 @@ export { Input, type InputProps } from './input';
 export { FormError, type FormErrorProps } from './form-error';
 export { DialogPanel, type DialogPanelProps } from './dialog-panel';
 export { CollapsiblePanel, type CollapsiblePanelProps } from './collapsible-panel';
+export { PageLayout, type PageLayoutProps } from './page-layout';
+export { PageHeader, type PageHeaderProps } from './page-header';
+export { TabNav, type TabNavProps, TabLink, type TabLinkProps } from './tab-nav';
