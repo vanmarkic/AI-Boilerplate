@@ -7,3 +7,10 @@ export { CollapsiblePanel, type CollapsiblePanelProps } from './collapsible-pane
 export { PageLayout, type PageLayoutProps } from './page-layout';
 export { PageHeader, type PageHeaderProps } from './page-header';
 export { TabNav, type TabNavProps, TabLink, type TabLinkProps } from './tab-nav';
+export {
+  HistogramTimeline,
+  type HistogramTimelineProps,
+  type HistogramBar,
+  type HistogramLabel,
+  type HistogramVariant,
+} from './histogram-timeline';
