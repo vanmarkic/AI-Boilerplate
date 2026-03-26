@@ -14,7 +14,6 @@ const TRAVEL_SPEED = 150;
 const PATH_EDGES = 400;
 
 const BOLT_COLOR = 0xe84057; // hostile red — supply-chain attack
-const BOLT_COLOR_THREE = new THREE.Color(BOLT_COLOR);
 
 export interface Lightning {
   birth: number;
@@ -22,6 +21,7 @@ export interface Lightning {
   head: THREE.Sprite;
   headLight: THREE.PointLight;
   waypoints: { x: number; z: number }[];
+  color: THREE.Color;
 }
 
 /** Grid-edge neighbours: 4 cardinal + 4 diagonal (follow wireframe lines). */
@@ -137,6 +137,13 @@ export function createLightning(
   const waypoints = tracePath(positions, cols, rows);
   const n = waypoints.length;
 
+  const style = getComputedStyle(document.documentElement);
+  const lightningHex = style.getPropertyValue("--sw-sea-lightning-hex").trim();
+  const flashColor =
+    lightningHex && lightningHex.startsWith("#")
+      ? new THREE.Color(lightningHex)
+      : new THREE.Color(BOLT_COLOR);
+
   // Position buffer
   const verts = new Float32Array(n * 3);
   // Per-vertex color buffer (for trail fade)
@@ -172,7 +179,7 @@ export function createLightning(
   if (!sharedGlow) sharedGlow = createGlowTexture();
   const spriteMat = new THREE.SpriteMaterial({
     map: sharedGlow,
-    color: BOLT_COLOR,
+    color: flashColor,
     transparent: true,
     opacity: 0,
     blending: THREE.AdditiveBlending,
@@ -185,11 +192,11 @@ export function createLightning(
   scene.add(head);
 
   // Point light follows the head
-  const headLight = new THREE.PointLight(BOLT_COLOR, 0, 4);
+  const headLight = new THREE.PointLight(flashColor, 0, 4);
   headLight.position.copy(head.position);
   scene.add(headLight);
 
-  return { birth: t, line, head, headLight, waypoints };
+  return { birth: t, line, head, headLight, waypoints, color: flashColor };
 }
 
 /** Returns false when the bolt has fully faded. */
@@ -229,9 +236,9 @@ export function updateLightning(l: Lightning, t: number): boolean {
   // Update per-vertex colors: bright at head, fading trail behind
   // eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- THREE.js geometry attributes
   const colBuf = l.line.geometry.attributes["color"] as THREE.BufferAttribute;
-  const r = BOLT_COLOR_THREE.r;
-  const g = BOLT_COLOR_THREE.g;
-  const b = BOLT_COLOR_THREE.b;
+  const r = l.color.r;
+  const g = l.color.g;
+  const b = l.color.b;
 
   for (let i = 0; i < n; i++) {
     const off = i * 3;

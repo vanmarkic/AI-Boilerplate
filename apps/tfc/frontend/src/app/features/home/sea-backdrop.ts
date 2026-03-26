@@ -78,12 +78,16 @@ export class SeaBackdrop implements OnDestroy {
   private nextLightning = 3;
 
   private get themeColor(): THREE.Color {
-    const raw = getComputedStyle(document.documentElement)
-      .getPropertyValue("--color-primary")
-      .trim();
-    return new THREE.Color(
-      raw.startsWith("oklch") ? 0x1ac5c5 : raw || 0x1ac5c5,
-    );
+    const style = getComputedStyle(document.documentElement);
+    const hex = style.getPropertyValue("--sw-sea-primary-hex").trim();
+    if (hex && hex.startsWith("#")) {
+      return new THREE.Color(hex);
+    }
+    const raw = style.getPropertyValue("--color-primary").trim();
+    if (raw && !raw.startsWith("oklch")) {
+      return new THREE.Color(raw);
+    }
+    return new THREE.Color(0x1ac5c5);
   }
 
   constructor(private ngZone: NgZone) {
@@ -118,7 +122,11 @@ export class SeaBackdrop implements OnDestroy {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
     this.renderer.setSize(w, h, false);
 
-    const bgColor = new THREE.Color(0x061218);
+    const style = getComputedStyle(document.documentElement);
+    const bgHex = style.getPropertyValue("--sw-sea-bg-hex").trim();
+    const bgColor = new THREE.Color(
+      bgHex && bgHex.startsWith("#") ? bgHex : 0x061218,
+    );
     this.scene = new THREE.Scene();
     this.scene.background = bgColor;
     this.camera = new THREE.PerspectiveCamera(27, w / h, 0.1, 100);
