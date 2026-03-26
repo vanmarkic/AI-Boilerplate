@@ -3,6 +3,7 @@
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
 MAIN_BE  = apps/main/backend
+REACT_FE = apps/main/react-frontend
 TFC_FE   = apps/tfc/frontend
 TFC_BE   = apps/tfc/backend
 INFRA    = infra
@@ -31,6 +32,9 @@ dev-backend: ## Start main backend + db only (Docker)
 
 dev-frontend: ## Start main Angular dev server natively (expects backend running)
 	cd $(MAIN_FE) && npx ng serve
+
+dev-react-frontend: ## Start React frontend dev server (expects backend running)
+	cd $(REACT_FE) && npx vite
 
 test: test-backend test-frontend ## Run all main app tests
 
