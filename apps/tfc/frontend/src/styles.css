@@ -14,3 +14,5 @@
 @import "./app/shared/components-scenario-picker.css";
 @import "./app/shared/components-logs.css";
 @import "./app/shared/components-systems.css";
+@import "./app/shared/themes-tfc-silent-wake.css";
+@import "./app/shared/components-silent-wake.css";
