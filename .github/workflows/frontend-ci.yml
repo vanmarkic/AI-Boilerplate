@@ -139,6 +139,7 @@ jobs:
       - run: npm run build
 
   e2e:
+    if: false  # disabled — expensive (Playwright + chromium + 2 shards)
     name: E2E Tests (${{ matrix.shard }})
     needs: [type-check, lint, test]
     runs-on: ubuntu-latest

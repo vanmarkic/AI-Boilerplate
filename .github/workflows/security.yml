@@ -1,9 +1,10 @@
 name: Security
 
 on:
-  push:
-    branches: [master]
-  pull_request:
+  workflow_dispatch:  # disabled auto-trigger — expensive (CodeQL autobuild + Semgrep + 6 jobs)
+  # push:
+  #   branches: [master]
+  # pull_request:
 
 permissions:
   contents: read

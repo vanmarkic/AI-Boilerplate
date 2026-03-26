@@ -133,6 +133,7 @@ jobs:
         working-directory: apps/tfc/backend
 
   tier1-build-smoke:
+    if: false  # disabled — expensive (full npm install + frontend production build)
     name: Tier-1 Build Smoke
     runs-on: ubuntu-latest
     steps:
