@@ -35,14 +35,16 @@ Flex container for vertical or horizontal stacking with consistent gaps.
 | Prop | Type | Default | Maps to |
 |------|------|---------|---------|
 | `direction` | `'vertical' \| 'horizontal'` | `'vertical'` | `data-direction` (`'horizontal'` only — vertical is the CSS default) |
-| `gap` | `'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` | `data-gap` |
-| `align` | `'start' \| 'center' \| 'end' \| 'stretch'` | — | `data-align` |
-| `justify` | `'start' \| 'center' \| 'end' \| 'between'` | — | `data-justify` |
+| `gap` | `'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` | `data-gap` (always emitted) |
+| `align` | `'start' \| 'center' \| 'end' \| 'stretch'` | — | `data-align` (omitted when undefined) |
+| `justify` | `'start' \| 'center' \| 'end' \| 'between'` | — | `data-justify` (omitted when undefined) |
 | `fill` | `boolean` | `false` | inline `flex: 1; minHeight: 0` |
 | `as` | `ElementType` | `'div'` | rendered element |
-| `...rest` | `HTMLAttributes` | — | spread onto element |
+| `...rest` | `HTMLAttributes<HTMLElement>` | — | spread onto element |
 
-**Rendering:** Applies `className="stack"`, maps defined props to `data-*` attributes (omitting undefined values), merges caller's `className` if provided.
+**Rendering:** Applies `className="stack"`, always emits `data-gap` (since it has a default), emits `data-direction` only for `'horizontal'` (CSS default handles vertical), and emits `data-align`/`data-justify` only when defined. Merges caller's `className` if provided.
+
+**Note:** Horizontal direction uses `flex-flow: row wrap` in the CSS, so horizontal stacks wrap by default.
 
 **Usage:**
 
@@ -78,10 +80,12 @@ CSS Grid container with typed column configuration.
 | Prop | Type | Default | Maps to |
 |------|------|---------|---------|
 | `columns` | `number \| string` | — | `number` → CSS var `--grid-cols`; `string` → inline `gridTemplateColumns` |
-| `gap` | `'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` | `data-gap` |
+| `gap` | `'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` | `data-gap` (always emitted) |
 | `fill` | `boolean` | `false` | inline `flex: 1; minHeight: 0` |
 | `as` | `ElementType` | `'div'` | rendered element |
-| `...rest` | `HTMLAttributes` | — | spread onto element |
+| `...rest` | `HTMLAttributes<HTMLElement>` | — | spread onto element |
+
+**CSS prerequisite:** `.layout-grid` in `components-layout.css` is missing `data-gap="2xl"`. Add it during implementation to match `.stack`.
 
 **Column resolution:**
 - `columns={4}` → sets `--grid-cols: 4` (the `.layout-grid` CSS uses `repeat(var(--grid-cols), 1fr)`)
@@ -117,7 +121,7 @@ Grid child for controlling placement within a Grid.
 
 | Prop | Type | Default | Maps to |
 |------|------|---------|---------|
-| `span` | `number` | — | inline `gridColumn: span N` |
+| `span` | `number \| 'full'` | — | `number` → inline `gridColumn: span N`; `'full'` → `gridColumn: 1 / -1` |
 | `start` | `number` | — | inline `gridColumnStart: N` |
 | `rowSpan` | `number` | — | inline `gridRow: span N` |
 | `as` | `ElementType` | `'div'` | rendered element |
@@ -153,7 +157,9 @@ This replaces the `style={{ flex: 1, minHeight: 0 }}` pattern used throughout th
 
 ### The `as` prop
 
-All three components accept `as` to control the rendered HTML element. Uses `React.ElementType` for type safety. Defaults to `'div'`. Common uses: `as="section"`, `as="nav"`, `as="form"`, `as="ul"`.
+All three components accept `as` to control the rendered HTML element. Uses `React.ElementType` for rendering. Defaults to `'div'`. Common uses: `as="section"`, `as="nav"`, `as="form"`, `as="ul"`.
+
+**Type safety note:** The `...rest` props are typed as `HTMLAttributes<HTMLElement>`, which means element-specific attributes (e.g., `action` on `<form>`) won't be type-checked. This is a pragmatic trade-off — full generic polymorphism (`StackProps<T extends ElementType>`) adds significant complexity for minimal gain in this use case. Consumers needing element-specific attributes can cast or use a wrapper.
 
 ### className merging
 
@@ -169,11 +175,11 @@ All components accept `className` via the spread rest props. The component's bas
 
 ```
 packages/react-ui/src/
-├── stack.ts         # Stack component + types
-├── stack.test.tsx   # Stack tests
-├── grid.ts          # Grid + Cell components + types
-├── grid.test.tsx    # Grid + Cell tests
-└── index.ts         # updated exports
+├── stack.tsx         # Stack component + types
+├── stack.spec.tsx    # Stack tests
+├── grid.tsx          # Grid + Cell components + types
+├── grid.spec.tsx     # Grid + Cell tests
+└── index.ts          # updated exports
 ```
 
 Grid and Cell are co-located in the same file since Cell is only meaningful inside Grid and the combined code will be well under 100 lines.
@@ -248,9 +254,9 @@ Landing.tsx lines 109-134 (error rate section):
       <h3 className="card-title">Error rate</h3>
       <Badge variant="destructive">3 spikes</Badge>
     </Stack>
-    <div style={{ flex: 1, minHeight: 0 }}>
+    <Stack fill>
       <HistogramTimeline ... />
-    </div>
+    </Stack>
   </Stack>
   <Stack className="card" fill>
     <h3 className="card-title">System</h3>
