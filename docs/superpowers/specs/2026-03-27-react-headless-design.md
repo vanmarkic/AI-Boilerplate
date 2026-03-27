@@ -190,6 +190,8 @@ interface RovingFocusReturn {
 
 Used by: Tabs, Accordion. Future: Menu, RadioGroup, Toolbar.
 
+**Initial value:** `focusedIndex` starts at `0` (first non-disabled item) so that exactly one item has `tabIndex={0}` on initial render, per the roving tabindex pattern.
+
 **Note on index management:** The `getItemProps(index)` API is the escape-hatch hook interface. The compound components (Tabs.List, Accordion.Root) manage index tracking internally via context — consumers of the compound component API never call `getItemProps` directly.
 
 ## Utilities
@@ -370,7 +372,7 @@ interface AccordionSingleProps extends HTMLAttributes<HTMLDivElement> {
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
-  collapsible?: boolean; // allow closing all items (default: false)
+  collapsible?: boolean; // allow closing all items (default: false — matches WAI-ARIA APG accordion where one panel is always visible)
 }
 
 // Multiple mode: any number of items open
@@ -452,6 +454,7 @@ projects: [
 - No layout shift from scrollbar disappearing (padding compensation)
 - Nested dialog: inner traps focus, closing inner returns focus to outer
 - `aria-labelledby` matches Dialog.Title's ID; `aria-describedby` matches Dialog.Description's ID
+- `forceMount`: Content remains in DOM with `data-state="closed"` when dialog closes
 
 **Tabs e2e:**
 - Arrow keys move focus between triggers
@@ -477,6 +480,7 @@ projects: [
 - Arrow key navigation between triggers (vertical)
 - Home/End jump to first/last trigger
 - Disabled items skipped in keyboard navigation
+- `data-disabled` attribute present on disabled items across browsers
 
 ## react-ui Migration
 
@@ -544,9 +548,11 @@ Public API adds `onOpenChange` callback. `open` becomes controlled when paired w
 ```tsx
 import { Collapsible } from '@aspect/react-headless';
 
-export function CollapsiblePanel({ variant, size, open, onOpenChange, header, children }: CollapsiblePanelProps) {
+export function CollapsiblePanel({
+  variant, size, open, defaultOpen, onOpenChange, disabled, header, children,
+}: CollapsiblePanelProps) {
   return (
-    <Collapsible.Root open={open} defaultOpen={open} onOpenChange={onOpenChange}>
+    <Collapsible.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} disabled={disabled}>
       <div className="collapsible-panel" data-variant={variant} data-size={size}>
         <Collapsible.Trigger asChild>
           <button className="collapsible-panel-trigger" type="button">
@@ -566,6 +572,8 @@ export function CollapsiblePanel({ variant, size, open, onOpenChange, header, ch
 }
 ```
 
+**Props change:** `CollapsiblePanelProps` gains `defaultOpen`, `onOpenChange`, and `disabled`. The old `open` prop becomes controlled mode (requires `onOpenChange`). Consumers that previously passed `open` as a static initial value should switch to `defaultOpen`.
+
 ### Design-system CSS addition
 
 One addition to `packages/design-system/components-tabs.css`:
@@ -577,6 +585,8 @@ One addition to `packages/design-system/components-tabs.css`:
 ```
 
 Allows headless tabs to drive active state via ARIA. Existing `.tab-active` stays for Angular backward compatibility.
+
+**Pre-existing bug:** `admin-layout.tsx` currently applies a `.active` class on active NavLinks, but the design system only defines `.tab-active` — so active tabs have no design-system styling today. The migration to `TabLink` with `aria-selected` fixes this by using the new ARIA-driven selector instead of any CSS class.
 
 ## Hook Reuse Matrix
 
