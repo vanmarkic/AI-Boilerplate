@@ -48,6 +48,7 @@
 | `e2e/fixtures/test-app.tsx` | Minimal React app for Playwright |
 | `e2e/fixtures/main.tsx` | Vite entry point for e2e app |
 | `e2e/fixtures/index.html` | HTML shell for e2e app |
+| `e2e/fixtures/vite.config.ts` | Vite config for e2e fixture app |
 | `e2e/dialog.spec.ts` | Dialog cross-browser e2e |
 | `e2e/tabs.spec.ts` | Tabs cross-browser e2e |
 | `e2e/collapsible.spec.ts` | Collapsible cross-browser e2e |
@@ -434,9 +435,9 @@ describe('useScrollLock', () => {
   });
 
   it('compensates scrollbar width with padding-right', () => {
-    // jsdom has 0 scrollbar width, but verify padding-right is set
+    // jsdom has 0 scrollbar width, so padding-right should be '0px'
     renderHook(() => useScrollLock(true));
-    expect(document.body.style.paddingRight).toBeDefined();
+    expect(document.body.style.paddingRight).toBe('0px');
   });
 });
 ```
@@ -609,6 +610,61 @@ describe('useFocusTrap', () => {
     rerender({ active: false });
     expect(document.activeElement).toBe(outside);
   });
+
+  it('Tab on last focusable wraps to first', () => {
+    const container = createContainer('button', 'input', 'button');
+    const elements = Array.from(container.querySelectorAll('button, input'));
+    renderHook(() => {
+      const ref = useRefWith(container);
+      useFocusTrap(ref, { active: true });
+    });
+    // Focus last element
+    (elements[2] as HTMLElement).focus();
+    // Press Tab — should wrap to first
+    const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+    const prevented = !document.dispatchEvent(event);
+    // Focus should move to first (or event should be prevented for wrapping)
+    expect(document.activeElement).toBe(elements[0]);
+  });
+
+  it('Shift+Tab on first focusable wraps to last', () => {
+    const container = createContainer('button', 'input', 'button');
+    const elements = Array.from(container.querySelectorAll('button, input'));
+    renderHook(() => {
+      const ref = useRefWith(container);
+      useFocusTrap(ref, { active: true });
+    });
+    // Focus first element
+    (elements[0] as HTMLElement).focus();
+    // Press Shift+Tab — should wrap to last
+    const event = new KeyboardEvent('keydown', {
+      key: 'Tab',
+      shiftKey: true,
+      bubbles: true,
+    });
+    document.dispatchEvent(event);
+    expect(document.activeElement).toBe(elements[2]);
+  });
+
+  it('handles dynamically added focusable elements', async () => {
+    const container = createContainer('button');
+    renderHook(() => {
+      const ref = useRefWith(container);
+      useFocusTrap(ref, { active: true });
+    });
+    // Dynamically add a new button
+    const newBtn = document.createElement('button');
+    newBtn.textContent = 'Dynamic';
+    container.appendChild(newBtn);
+    // MutationObserver fires async — wait a tick
+    await new Promise((r) => setTimeout(r, 0));
+    // Focus the first button, Tab should now reach the new button
+    (container.querySelector('button') as HTMLElement).focus();
+    const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
+    document.dispatchEvent(event);
+    // The new button should be reachable (not trapped on old single-element list)
+    expect(document.activeElement).toBe(newBtn);
+  });
 });
 ```
 
@@ -723,7 +779,7 @@ export function useFocusTrap(
 - [ ] **Step 4: Run tests to verify they pass**
 
 Run: `cd packages/react-headless && npx vitest run src/hooks/use-focus-trap.spec.ts`
-Expected: 6 tests PASS
+Expected: 10 tests PASS
 
 - [ ] **Step 5: Export from index.ts**
 
@@ -858,6 +914,8 @@ Run: `cd packages/react-headless && npx vitest run src/hooks/use-roving-focus.sp
 Expected: FAIL
 
 - [ ] **Step 3: Implement the hook**
+
+**Implementation note:** The `getItemProps` function must NOT perform side effects (like mutating `disabledRef`) during render. Track disabled state via the `ref` callback (items register/deregister on mount/unmount) or via a separate `useEffect`. The `onKeyDown` handler must read `focusedIndex` from a ref (not a closure) to avoid stale state after re-renders.
 
 `src/hooks/use-roving-focus.ts`:
 ```typescript
@@ -1246,8 +1304,8 @@ export function Slot({ children, ref: slotRef, ...slotProps }: SlotProps) {
     mergedProps[key] = childProps[key];
   }
 
-  // Compose refs
-  const childRef = (children as { ref?: Ref<HTMLElement> }).ref;
+  // Compose refs — React 19 uses ref-as-prop (on children.props, not children.ref)
+  const childRef = childProps['ref'] as Ref<HTMLElement> | undefined;
   mergedProps['ref'] = composeRefs(slotRef, childRef);
 
   return cloneElement(children, mergedProps);
@@ -1458,7 +1516,9 @@ git commit -m "feat(react-headless): add Collapsible compound component"
 - `Dialog.Close` calls `onOpenChange(false)`
 - Escape fires `onEscapeKeyDown` then closes
 - Overlay click fires `onPointerDownOutside`
+- `onInteractOutside` fires on both Escape and overlay click
 - `asChild` works on Trigger and Close
+- Controlled mode (`open` prop) and uncontrolled mode (`defaultOpen` prop) both work
 - Dev warning when Title is omitted (mock `console.warn`)
 - Non-modal: no `aria-modal`, no focus trap call
 
@@ -1519,7 +1579,7 @@ git commit -m "feat(react-headless): add Dialog compound component with focus tr
 - `asChild` works on Trigger (render as `<a>`)
 - Auto-generated IDs link Trigger↔Content
 
-Reference spec lines 275-319 for full behavior. Keyboard tests are deferred to e2e (real browser needed for focus verification).
+Reference spec lines 275-319 for full behavior. Keyboard arrow-key focus tests are deferred to e2e (real browser needed for focus verification). However, include a unit test for `activationMode: 'manual'`: clicking a trigger in manual mode should NOT change the active value — only Enter/Space should activate.
 
 - [ ] **Step 2: Run tests to verify they fail**
 
@@ -1681,6 +1741,10 @@ export default defineConfig({
 ```typescript
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
@@ -1946,7 +2010,7 @@ git commit -m "fix(design-system): update CSS selectors for headless component m
 
 - [ ] **Step 1: Update admin-layout to use TabLink**
 
-Replace `NavLink` with `TabLink` from `@aspect/react-ui`. Derive `value` from the current path. Use `onValueChange` to navigate.
+Replace `NavLink` with `TabLink` from `@aspect/react-ui`. Derive `value` from the current path. Use `onValueChange` to navigate via React Router's `navigate()`. Do NOT include `href` on `TabLink` — navigation is handled by `onValueChange`, and an `href` on an `<a>` would cause a full page reload in an SPA. Alternatively, if `href` is used for progressive enhancement, the Tabs.Trigger implementation must call `event.preventDefault()` on click before firing `onValueChange`.
 
 ```tsx
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
@@ -1964,12 +2028,8 @@ export default function AdminLayout() {
       }
     >
       <TabNav value={activeTab} onValueChange={(v) => void navigate(`/admin/${v}`)}>
-        <TabLink value="permissions" href="/admin/permissions">
-          Permissions
-        </TabLink>
-        <TabLink value="users" href="/admin/users">
-          Users
-        </TabLink>
+        <TabLink value="permissions">Permissions</TabLink>
+        <TabLink value="users">Users</TabLink>
       </TabNav>
       <div className="p-lg">
         <Outlet />
