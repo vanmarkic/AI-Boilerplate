@@ -23,7 +23,7 @@
     "test:ci": "npx vitest run --config ../../vitest.config.ts"
   },
   "devDependencies": {
-    "stylelint": "^16.0.0",
+    "stylelint": "^17.6.0",
     "stylelint-config-standard": "^37.0.0"
   }
 }
