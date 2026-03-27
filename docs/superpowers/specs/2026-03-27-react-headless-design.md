@@ -552,21 +552,22 @@ export function CollapsiblePanel({
   variant, size, open, defaultOpen, onOpenChange, disabled, header, children,
 }: CollapsiblePanelProps) {
   return (
-    <Collapsible.Root open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} disabled={disabled}>
-      <div className="collapsible-panel" data-variant={variant} data-size={size}>
-        <Collapsible.Trigger asChild>
-          <button className="collapsible-panel-trigger" type="button">
-            {header}
-            <svg className="collapsible-panel-chevron" width="16" height="16" viewBox="0 0 24 24"
-              fill="none" stroke="currentColor" strokeWidth="2">
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-        </Collapsible.Trigger>
-        <Collapsible.Content>
-          <div className="collapsible-panel-content">{children}</div>
-        </Collapsible.Content>
-      </div>
+    <Collapsible.Root
+      open={open} defaultOpen={defaultOpen} onOpenChange={onOpenChange} disabled={disabled}
+      className="collapsible-panel" data-variant={variant} data-size={size}
+    >
+      <Collapsible.Trigger asChild>
+        <button className="collapsible-panel-trigger" type="button">
+          {header}
+          <svg className="collapsible-panel-chevron" width="16" height="16" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+      </Collapsible.Trigger>
+      <Collapsible.Content>
+        <div className="collapsible-panel-content">{children}</div>
+      </Collapsible.Content>
     </Collapsible.Root>
   );
 }
@@ -574,9 +575,9 @@ export function CollapsiblePanel({
 
 **Props change:** `CollapsiblePanelProps` gains `defaultOpen`, `onOpenChange`, and `disabled`. The old `open` prop becomes controlled mode (requires `onOpenChange`). Consumers that previously passed `open` as a static initial value should switch to `defaultOpen`.
 
-### Design-system CSS addition
+### Design-system CSS changes
 
-One addition to `packages/design-system/components-tabs.css`:
+**`packages/design-system/components-tabs.css`** — one addition:
 
 ```css
 .tab-link[aria-selected="true"] {
@@ -587,6 +588,22 @@ One addition to `packages/design-system/components-tabs.css`:
 Allows headless tabs to drive active state via ARIA. Existing `.tab-active` stays for Angular backward compatibility.
 
 **Pre-existing bug:** `admin-layout.tsx` currently applies a `.active` class on active NavLinks, but the design system only defines `.tab-active` — so active tabs have no design-system styling today. The migration to `TabLink` with `aria-selected` fixes this by using the new ARIA-driven selector instead of any CSS class.
+
+**`packages/design-system/components-panels.css`** — two changes:
+
+1. Replace native `[open]` selector with `data-state` for chevron rotation:
+
+```css
+/* Before: [open] > .collapsible-panel-trigger > & */
+/* After: */
+[data-state="open"] > .collapsible-panel-trigger > & {
+  transform: rotate(180deg);
+}
+```
+
+The current CSS uses `[open]` which targets the native `<details open>` attribute. After migration to `<div>` with `data-state`, this selector must change.
+
+2. The `::marker`, `::-webkit-details-marker` rules in `.collapsible-panel-trigger` become dead CSS (no longer a `<summary>` element). Remove them during migration to keep the stylesheet clean.
 
 ## Hook Reuse Matrix
 
