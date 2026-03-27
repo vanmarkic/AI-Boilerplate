@@ -14,7 +14,7 @@ export default defineConfig({
     alias: {
       '@aspect/design-system': path.resolve(
         __dirname,
-        '../../packages/design-system/index.css',
+        '../../../packages/design-system/index.css',
       ),
     },
     preserveSymlinks: true,

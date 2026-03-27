@@ -22,7 +22,7 @@ export default function Landing() {
   return (
     <div className="flex flex-col items-center justify-center gap-xl p-xl" style={{ minHeight: '100vh' }}>
       <span className="badge" data-variant="secondary">v0.1.0</span>
-      <h1 className="text-4xl font-bold text-center">Boilerplate</h1>
+      <h1 className="text-4xl font-bold text-center">AI Boilerplate</h1>
       <p className="text-muted-foreground text-center" style={{ maxWidth: '36rem' }}>
         Production-grade full-stack starter with enterprise auth, design system, and automated testing.
       </p>

@@ -67,16 +67,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setTimeout(() => resolve(false), 5000),
     );
 
-    void Promise.race([initPromise, timeout]).then((authenticated) => {
-      if (authenticated && kc.token) {
-        const user = parseToken(kc.token);
-        setTokenGetter(() => kc.token ?? null);
-        setState({ user, token: kc.token, initialized: true });
-      } else {
-        console.warn('Running without authentication');
+    void Promise.race([initPromise, timeout]).then(
+      (authenticated) => {
+        if (authenticated && kc.token) {
+          const user = parseToken(kc.token);
+          setTokenGetter(() => kc.token ?? null);
+          setState({ user, token: kc.token, initialized: true });
+        } else {
+          console.warn('Running without authentication');
+          setState((s) => ({ ...s, initialized: true }));
+        }
+      },
+      () => {
+        console.warn('Keycloak init failed — running without authentication');
         setState((s) => ({ ...s, initialized: true }));
-      }
-    });
+      },
+    );
 
     kc.onTokenExpired = () => {
       void kc.updateToken(30).then((refreshed) => {
