@@ -79,6 +79,8 @@ packages/react-headless/
 
 ## Public API
 
+The top-level `src/index.ts` re-exports all public symbols. This is an intentional exception to the project's "no barrel exports" rule — library packages require a single entry point for `package.json` `"exports"`. The same pattern is used by `@aspect/react-ui`. No barrel exports exist inside subdirectories.
+
 ```ts
 // Compound components (primary API)
 export { Dialog } from './dialog/dialog';
@@ -112,6 +114,8 @@ interface UseControllableStateOptions<T> {
 // Returns [currentValue, setValue]
 ```
 
+**Controlled vs. uncontrolled semantics:** In controlled mode (`value` prop is defined), `setValue` calls `onChange` but does not update internal state — the consumer is responsible for updating the value. In uncontrolled mode, `setValue` updates internal state and then calls `onChange`. Warns in development when switching from uncontrolled to controlled (or vice versa) mid-lifecycle.
+
 Used by: all primitives.
 
 ### useFocusTrap
@@ -132,8 +136,10 @@ function useFocusTrap(containerRef: RefObject<HTMLElement>, options: UseFocusTra
 - Tab on last focusable → wraps to first
 - Shift+Tab on first focusable → wraps to last
 - On deactivation: returns focus to previously focused element
-- Uses MutationObserver to handle dynamically added/removed focusable elements
+- Uses MutationObserver (`childList` + `subtree` + `attributes` for `disabled`, `hidden`, `aria-hidden`) to handle dynamically added/removed focusable elements
 - Skips elements with `tabIndex={-1}`, `disabled`, `hidden`, `aria-hidden="true"`
+- Zero focusable elements: falls back to focusing the container itself (sets `tabIndex={-1}` on it)
+- If `initialFocusRef` points to a disabled/hidden element, falls back to first focusable or container
 
 Used by: Dialog. Future: Popover, Menu.
 
@@ -150,6 +156,8 @@ function useScrollLock(active: boolean): void;
 - Compensates scrollbar width via `padding-right` to prevent layout jump
 - Ref-counts nested activations (nested modals)
 - Restores original styles on deactivation
+
+**Known limitation:** `overflow: hidden` on `document.body` does not prevent scroll on iOS Safari. The standard workaround (`position: fixed` with offset tracking) is out of scope for initial implementation; can be added later.
 
 Used by: Dialog.
 
@@ -182,6 +190,8 @@ interface RovingFocusReturn {
 
 Used by: Tabs, Accordion. Future: Menu, RadioGroup, Toolbar.
 
+**Note on index management:** The `getItemProps(index)` API is the escape-hatch hook interface. The compound components (Tabs.List, Accordion.Root) manage index tracking internally via context — consumers of the compound component API never call `getItemProps` directly.
+
 ## Utilities
 
 ### Portal
@@ -205,7 +215,7 @@ Enables rendering as the child element instead of a default wrapper:
 </Dialog.Trigger>
 ```
 
-**Merge rules:** event handlers — both fire; className — concatenated; refs — composed; styles — shallow merged; other props — child wins on conflict.
+**Merge rules:** event handlers — both fire (component handler first, then child); className — concatenated; refs — composed via callback ref that invokes both the component's internal ref and the consumer's ref; styles — shallow merged (child wins on conflict); other props — child wins on conflict. String refs are not supported. React 19's ref-as-prop is used throughout — no `forwardRef` wrappers.
 
 ## Primitives
 
@@ -238,13 +248,25 @@ interface DialogRootProps {
 
 interface DialogContentProps extends HTMLAttributes<HTMLDivElement> {
   asChild?: boolean;
+  forceMount?: boolean;
   onEscapeKeyDown?: (e: KeyboardEvent) => void;
   onPointerDownOutside?: (e: PointerEvent) => void;
   onInteractOutside?: (e: Event) => void;
 }
+
+interface DialogOverlayProps extends HTMLAttributes<HTMLDivElement> {
+  asChild?: boolean;
+  forceMount?: boolean;
+}
 ```
 
-**Lifecycle:**
+**State attributes:** `data-state="open" | "closed"` on Content, Overlay, and Trigger for CSS animation hooks. Use `forceMount` on Content/Overlay to keep them in the DOM during close animations.
+
+**ARIA omission rules:** If `Dialog.Title` is omitted, `aria-labelledby` is not set on Content (no dangling ID reference). If `Dialog.Description` is omitted, `aria-describedby` is not set. In development mode, a console warning is emitted when Content renders without a Title, since dialogs should have accessible labels.
+
+**Modal vs. non-modal:** When `modal={false}`: no focus trap, no scroll lock, no overlay click-to-close, `aria-modal` is omitted from Content. Content still renders in a Portal. Use `onEscapeKeyDown` and `onPointerDownOutside` with `event.preventDefault()` to selectively prevent close.
+
+**Lifecycle (modal=true):**
 1. Open: Portal mounts → scroll lock activates → focus trap activates → focus moves to first focusable in Content
 2. Close (Escape / overlay click / Close button): focus trap deactivates → scroll lock deactivates → focus returns to trigger → Portal unmounts
 
@@ -254,12 +276,12 @@ interface DialogContentProps extends HTMLAttributes<HTMLDivElement> {
 
 | Component | Renders | Role |
 |---|---|---|
-| `Tabs.Root` | `<div>` | Manages active value, orientation |
+| `Tabs.Root` | `<div>` (supports `asChild` for semantic wrappers like `<nav>`) | Manages active value, orientation |
 | `Tabs.List` | `<div>` | `role="tablist"`, `aria-orientation` |
 | `Tabs.Trigger` | `<button>` | `role="tab"`, `aria-selected`, `aria-controls` |
 | `Tabs.Content` | `<div>` | `role="tabpanel"`, `aria-labelledby` |
 
-Trigger and Content support `asChild`.
+Root, Trigger, and Content support `asChild`.
 
 **Props:**
 
@@ -280,6 +302,7 @@ interface TabsTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
   value: string;
+  asChild?: boolean;
   forceMount?: boolean;
 }
 ```
@@ -332,8 +355,11 @@ interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement> {
 |---|---|---|
 | `Accordion.Root` | `<div>` | Manages which items are open, coordinates single/multiple mode |
 | `Accordion.Item` | `<div>` | Wraps one trigger+content pair, holds its `value` |
-| `Accordion.Trigger` | `<button>` | `aria-expanded`, `aria-controls` |
+| `Accordion.Header` | `<h3>` (supports `asChild` for custom heading level) | Wraps trigger per WAI-ARIA APG accordion pattern |
+| `Accordion.Trigger` | `<button>` | `aria-expanded`, `aria-controls`, `aria-disabled` |
 | `Accordion.Content` | `<div>` | `role="region"`, `aria-labelledby` |
+
+Item, Header, Trigger, and Content support `asChild`.
 
 **Props:**
 
@@ -373,7 +399,9 @@ interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
 - Enter/Space toggles the focused item
 - Disabled items are skipped
 
-**State attributes:** `data-state="open" | "closed"` and `data-disabled` on all sub-components for CSS targeting.
+**State attributes:** `data-state="open" | "closed"`, `data-disabled`, and `aria-disabled` on all sub-components for CSS targeting and screen reader support.
+
+**File size note:** Accordion has the most complex state management (single/multiple discriminated union, roving focus, disabled items). If `accordion.tsx` approaches 350 lines, split into `accordion-root.tsx` (Root + context) and `accordion-item.tsx` (Item + Header + Trigger + Content).
 
 ## Testing Strategy
 
@@ -383,7 +411,7 @@ Fast, isolated unit tests. No DOM rendering overhead.
 
 | Hook | Key test cases |
 |---|---|
-| `useControllableState` | Uncontrolled default works; controlled value overrides internal; onChange fires on setValue; does not fire onChange when controlled value changes externally |
+| `useControllableState` | Uncontrolled default works; controlled value overrides internal; onChange fires on setValue; does not fire onChange when controlled value changes externally; warns when switching from uncontrolled to controlled mid-lifecycle |
 | `useFocusTrap` | Tab wraps last→first; Shift+Tab wraps first→last; skips disabled/hidden/aria-hidden elements; returns focus on deactivate; handles dynamic DOM mutations via MutationObserver |
 | `useScrollLock` | Sets body overflow hidden; compensates scrollbar width with padding-right; restores on deactivate; ref-counts nested activations |
 | `useRovingFocus` | Arrow keys move focusedIndex; Home/End jump to first/last; skips disabled items; loop wraps around; only active item has tabIndex 0 |
@@ -423,6 +451,7 @@ projects: [
 - Body scroll locked while open (visual verification)
 - No layout shift from scrollbar disappearing (padding compensation)
 - Nested dialog: inner traps focus, closing inner returns focus to outer
+- `aria-labelledby` matches Dialog.Title's ID; `aria-describedby` matches Dialog.Description's ID
 
 **Tabs e2e:**
 - Arrow keys move focus between triggers
@@ -483,8 +512,10 @@ import { Tabs } from '@aspect/react-headless';
 
 export function TabNav({ value, onValueChange, children }: TabNavProps) {
   return (
-    <Tabs.Root value={value} onValueChange={onValueChange}>
-      <Tabs.List className="tab-nav">{children}</Tabs.List>
+    <Tabs.Root value={value} onValueChange={onValueChange} asChild>
+      <nav>
+        <Tabs.List className="tab-nav">{children}</Tabs.List>
+      </nav>
     </Tabs.Root>
   );
 }
@@ -498,27 +529,33 @@ export function TabLink({ value, href, children, ...props }: TabLinkProps) {
 }
 ```
 
-Consumer update required in `apps/main/react-frontend/src/features/admin/admin-layout.tsx` (only usage).
+**Consumer note:** The existing `admin-layout.tsx` uses `TabNav` as a passive wrapper around React Router `NavLink` components — it does not use `TabLink` at all. The migration must update `admin-layout.tsx` to use `TabLink` with `value` props so that keyboard navigation and ARIA wiring activate. This is the only consumer.
 
-### CollapsiblePanel (non-breaking)
+### CollapsiblePanel (minor breaking)
 
-Public API unchanged: `variant`, `size`, `open`, `header`, `children`.
+The migration replaces the native `<details>` element with a JS-driven `Collapsible.Root` (`<div>`). This is a deliberate trade-off: we lose no-JS toggle behavior (acceptable — this is an SPA) in exchange for proper keyboard/ARIA support and CSS animation control.
+
+**Breaking changes:**
+- No longer fires the native `toggle` event (no consumers rely on it currently)
+- `open` prop changes from HTML attribute semantics (reflects current state) to `defaultOpen` (initial value only). To make it controlled, consumers should use `open` + `onOpenChange`.
+
+Public API adds `onOpenChange` callback. `open` becomes controlled when paired with `onOpenChange`.
 
 ```tsx
 import { Collapsible } from '@aspect/react-headless';
 
-export function CollapsiblePanel({ variant, size, open, header, children }: CollapsiblePanelProps) {
+export function CollapsiblePanel({ variant, size, open, onOpenChange, header, children }: CollapsiblePanelProps) {
   return (
-    <Collapsible.Root defaultOpen={open}>
+    <Collapsible.Root open={open} defaultOpen={open} onOpenChange={onOpenChange}>
       <div className="collapsible-panel" data-variant={variant} data-size={size}>
         <Collapsible.Trigger asChild>
-          <summary className="collapsible-panel-trigger">
+          <button className="collapsible-panel-trigger" type="button">
             {header}
             <svg className="collapsible-panel-chevron" width="16" height="16" viewBox="0 0 24 24"
               fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="6 9 12 15 18 9" />
             </svg>
-          </summary>
+          </button>
         </Collapsible.Trigger>
         <Collapsible.Content>
           <div className="collapsible-panel-content">{children}</div>
@@ -557,3 +594,5 @@ Allows headless tabs to drive active state via ARIA. Existing `.tab-active` stay
 - No SSR support (not needed — frontend apps are SPAs)
 - No replacement for `@tanstack/react-table` (it already follows the headless pattern)
 - No barrel exports inside subdirectories (per project conventions)
+- No iOS Safari scroll lock workaround (initial scope — can be added later)
+- No `forwardRef` — uses React 19's ref-as-prop throughout
