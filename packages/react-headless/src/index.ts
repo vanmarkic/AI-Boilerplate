@@ -7,3 +7,4 @@ export { Portal, type PortalProps } from './utilities/portal';
 export { Slot, type SlotProps } from './utilities/slot';
 export { Collapsible } from './collapsible/collapsible';
 export { Dialog } from './dialog/dialog';
+export { Tabs } from './tabs/tabs';
