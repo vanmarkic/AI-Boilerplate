@@ -48,11 +48,10 @@ storybook-tests:
     - linux
     - docker
   before_script:
-    - npm install -g yarn --registry=https://developers.naval-group.com/nexus/repository/npm-group/
-    - yarn config set npmRegistryServer https://developers.naval-group.com/nexus/repository/npm-group/
+    - npm config set registry https://developers.naval-group.com/nexus/repository/npm-group/
   script:
-    - yarn install --immutable
-    - yarn workspace @aspect/react-ui run test:ci
+    - npm install
+    - npm run test:ci --workspace=packages/react-ui
   artifacts:
     when: always
     paths:
