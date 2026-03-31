@@ -15,3 +15,5 @@ export {
   type HistogramVariant,
 } from './histogram-timeline';
 export { DataTable, type DataTableProps, type DataTableColumn } from './data-table';
+export { Stack, type StackProps, type StackGap } from './stack';
+export { Grid, type GridProps, type GridGap, Cell, type CellProps } from './grid';
