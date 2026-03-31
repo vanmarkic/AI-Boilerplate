@@ -45,6 +45,7 @@
     &, &[data-gap="md"] { gap: var(--spacing-md); }
     &[data-gap="lg"]  { gap: var(--spacing-lg); }
     &[data-gap="xl"]  { gap: var(--spacing-xl); }
+    &[data-gap="2xl"] { gap: var(--spacing-2xl); }
     &[data-gap="none"] { gap: 0; }
   }
 
