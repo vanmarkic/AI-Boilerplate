@@ -34,7 +34,7 @@ function useTabsContext(): TabsContextValue {
 // ─── List Context (roving focus props per trigger) ────────────────────────────
 
 interface TabsListContextValue {
-  getRovingProps: (value: string) => {
+  getRovingProps: (value: string, disabled?: boolean) => {
     ref: (el: HTMLElement | null) => void;
     tabIndex: number;
     onKeyDown: React.KeyboardEventHandler;
@@ -116,13 +116,13 @@ function List({ asChild = false, children, ...rest }: TabsListProps) {
 
   const { getItemProps } = useRovingFocus({ orientation });
 
-  const getRovingProps = (value: string) => {
+  const getRovingProps = (value: string, disabled = false) => {
     // Register on first access (mount order)
     if (!registrationMapRef.current.has(value)) {
       registrationMapRef.current.set(value, counterRef.current++);
     }
     const index = registrationMapRef.current.get(value)!;
-    return getItemProps(index);
+    return getItemProps(index, disabled);
   };
 
   const Comp = asChild ? Slot : 'div';
@@ -167,7 +167,7 @@ function Trigger({
   const triggerId = getTriggerIdForValue(value);
   const contentId = getContentIdForValue(value);
 
-  const rovingProps = getRovingProps(value);
+  const rovingProps = getRovingProps(value, disabled);
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     onClick?.(e);
