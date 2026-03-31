@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DialogPanel } from './dialog-panel';
 
@@ -15,10 +15,10 @@ describe('DialogPanel', () => {
   });
 
   it('applies variant', () => {
-    const { container } = render(
+    render(
       <DialogPanel variant="destructive">X</DialogPanel>,
     );
-    expect(container.querySelector('[role="dialog"]')).toHaveAttribute(
+    expect(document.querySelector('[role="dialog"]')).toHaveAttribute(
       'data-variant',
       'destructive',
     );
@@ -26,17 +26,30 @@ describe('DialogPanel', () => {
 
   it('fires onClose on backdrop click', async () => {
     const onClose = vi.fn();
-    const { container } = render(
+    render(
       <DialogPanel onClose={onClose}>X</DialogPanel>,
     );
-    await userEvent.click(container.querySelector('.dialog-backdrop')!);
+    await userEvent.click(document.querySelector('.dialog-backdrop')!);
     expect(onClose).toHaveBeenCalledOnce();
   });
 
-  it('fires onClose on Escape key', () => {
+  it('fires onClose on Escape key', async () => {
     const onClose = vi.fn();
     render(<DialogPanel onClose={onClose}>X</DialogPanel>);
-    fireEvent.keyDown(document, { key: 'Escape' });
+    await userEvent.keyboard('{Escape}');
     expect(onClose).toHaveBeenCalledOnce();
+  });
+
+  it('has role=dialog and aria-modal=true', () => {
+    render(<DialogPanel>Content</DialogPanel>);
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toHaveAttribute('aria-modal', 'true');
+  });
+
+  it('aria-labelledby links to title when provided', () => {
+    render(<DialogPanel title="My Title">Content</DialogPanel>);
+    const dialog = screen.getByRole('dialog');
+    const title = screen.getByText('My Title');
+    expect(dialog.getAttribute('aria-labelledby')).toBe(title.id);
   });
 });

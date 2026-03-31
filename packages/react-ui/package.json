@@ -16,6 +16,7 @@
     "react-dom": "^19.0.0"
   },
   "dependencies": {
+    "@aspect/react-headless": "*",
     "@tanstack/react-table": "^8.20.6"
   },
   "devDependencies": {
