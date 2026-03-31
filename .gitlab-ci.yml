@@ -48,8 +48,7 @@ storybook-tests:
     - linux
     - docker
   before_script:
-    - export COREPACK_NPM_REGISTRY=${NPM_DEFAULT_MIRROR}
-    - corepack enable
+    - npm install -g yarn --registry=${NPM_DEFAULT_MIRROR}
     - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
   script:
     - yarn install --immutable
