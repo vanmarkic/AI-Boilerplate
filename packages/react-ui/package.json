@@ -21,14 +21,20 @@
     "react-dom": "^19.0.0"
   },
   "peerDependenciesMeta": {
-    "maplibre-gl": { "optional": true },
-    "pmtiles": { "optional": true }
+    "maplibre-gl": {
+      "optional": true
+    },
+    "pmtiles": {
+      "optional": true
+    }
   },
   "dependencies": {
     "@aspect/react-headless": "*",
     "@tanstack/react-table": "^8.20.6"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^10.3.3",
+    "@storybook/addon-vitest": "^10.3.3",
     "@storybook/react-vite": "^10.3.3",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
@@ -36,7 +42,11 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "@vitejs/plugin-react": "^4.5.2",
+    "@vitest/browser": "^4.1.2",
+    "@vitest/browser-playwright": "^4.1.2",
+    "@vitest/coverage-v8": "^4.1.2",
     "jsdom": "^26.1.0",
+    "playwright": "^1.58.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "storybook": "^10.3.3",
