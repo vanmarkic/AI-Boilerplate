@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "storybook";
+import { expect, fn, userEvent, within } from "storybook/test";
 import { Button } from "./button";
 
 const meta: Meta<typeof Button> = {
@@ -41,4 +42,23 @@ export const Small: Story = {
 
 export const Large: Story = {
   args: { children: "Large", size: "lg" },
+};
+
+export const ClickInteraction: Story = {
+  args: { children: "Click me", onClick: fn() },
+  play: async ({ canvasElement, args }: { canvasElement: HTMLElement; args: Record<string, unknown> }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole("button", { name: "Click me" });
+    await userEvent.click(button);
+    await expect(args.onClick).toHaveBeenCalledOnce();
+  },
+};
+
+export const DisabledButton: Story = {
+  args: { children: "Disabled", disabled: true, onClick: fn() },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement);
+    const button = canvas.getByRole("button", { name: "Disabled" });
+    await expect(button).toBeDisabled();
+  },
 };

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "storybook";
+import { expect, userEvent, within } from "storybook/test";
 import { Input } from "./input";
 
 const meta: Meta<typeof Input> = {
@@ -19,4 +20,14 @@ export const WithPlaceholder: Story = {
 
 export const Disabled: Story = {
   args: { label: "Locked", value: "Read only", disabled: true },
+};
+
+export const TypeInteraction: Story = {
+  args: { label: "Username", placeholder: "Type here" },
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    const canvas = within(canvasElement);
+    const input = canvas.getByLabelText("Username");
+    await userEvent.type(input, "hello");
+    await expect(input).toHaveValue("hello");
+  },
 };

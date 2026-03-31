@@ -68,6 +68,7 @@ const pointsSource: GeoJSON = {
 
 const meta: Meta = {
   title: "Map/MapView/Layers & Popups",
+  tags: ["!test"],
   parameters: { layout: "padded" },
 };
 

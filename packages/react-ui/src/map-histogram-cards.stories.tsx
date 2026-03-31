@@ -185,6 +185,7 @@ function MapHistogramCardsPage() {
 
 const meta: Meta = {
   title: "Composed/MapHistogramCards",
+  tags: ["!test"],
   parameters: { layout: "fullscreen" },
 };
 

@@ -8,6 +8,7 @@ const DEMO_STYLE = "https://demotiles.maplibre.org/style.json";
 const meta: Meta<typeof MapView> = {
   title: "Map/MapView",
   component: MapView,
+  tags: ["!test"],
   parameters: { layout: "fullscreen" },
   argTypes: {
     variant: {

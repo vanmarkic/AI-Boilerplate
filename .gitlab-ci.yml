@@ -41,6 +41,24 @@ sonar-scanner:
     - yarn run prettier --check packages/react-ui/src packages/design-system
     - yarn run sonar-scanner --serverUrl=${SONAR_HOST_URL}
 
+storybook-tests:
+  stage: quality
+  image: mcr.microsoft.com/playwright:v1.52.0-noble
+  tags:
+    - linux
+    - docker
+  before_script:
+    - corepack enable
+    - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
+  script:
+    - yarn install --immutable
+    - yarn workspace @aspect/react-ui run test:ci
+  artifacts:
+    when: always
+    paths:
+      - packages/react-ui/coverage/
+    expire_in: 7 days
+
 # ===========================================================================
 #  SECURITY
 # ===========================================================================

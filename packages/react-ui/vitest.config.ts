@@ -10,12 +10,15 @@ export default defineConfig({
     react(),
     storybookTest({ configDir: '.storybook' }),
   ],
+  optimizeDeps: {
+    include: ['storybook/test'],
+  },
   test: {
     globals: true,
     setupFiles: ['src/test-setup.ts'],
     browser: {
       enabled: true,
-      provider: playwright,
+      provider: playwright(),
       instances: [{ browser: 'chromium' }],
     },
     coverage: {

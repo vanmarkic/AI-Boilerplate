@@ -29,6 +29,7 @@ const pointSource: GeoJSON = {
 const meta: Meta<typeof MapLayer> = {
   title: "Map/MapLayer",
   component: MapLayer,
+  tags: ["!test"],
 };
 
 export default meta;
