@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import dts from 'vite-plugin-dts';
 
 export default defineConfig({
-  plugins: [react(), dts({ tsconfigPath: './tsconfig.json' })],
+  plugins: [react(), dts({ tsconfigPath: './tsconfig.json', exclude: ['**/*.spec.*'] })],
   build: {
     lib: {
       entry: 'src/index.ts',

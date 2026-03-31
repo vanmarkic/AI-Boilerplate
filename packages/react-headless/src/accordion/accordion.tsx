@@ -140,7 +140,13 @@ function Root({ asChild = false, children, ...props }: AccordionRootProps) {
     onValueChange: _onValueChange,
     collapsible: _collapsible,
     ...domProps
-  } = props as AccordionSingleProps & AccordionMultipleProps & { collapsible?: boolean };
+  } = props as HTMLAttributes<HTMLDivElement> & {
+    type?: string;
+    value?: unknown;
+    defaultValue?: unknown;
+    onValueChange?: unknown;
+    collapsible?: boolean;
+  };
 
   const Comp = asChild ? Slot : 'div';
 

@@ -232,7 +232,7 @@ function Content({
 
   return (
     <Comp
-      ref={contentRef as React.Ref<HTMLElement>}
+      ref={contentRef as React.Ref<HTMLDivElement>}
       role="dialog"
       aria-modal={modal ? 'true' : undefined}
       aria-labelledby={titleId}
