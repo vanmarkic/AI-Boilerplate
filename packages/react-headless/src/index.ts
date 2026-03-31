@@ -2,3 +2,4 @@
 export { useControllableState, type UseControllableStateOptions } from './hooks/use-controllable-state';
 export { useScrollLock } from './hooks/use-scroll-lock';
 export { useFocusTrap, type UseFocusTrapOptions } from './hooks/use-focus-trap';
+export { useRovingFocus, type UseRovingFocusOptions, type RovingFocusReturn } from './hooks/use-roving-focus';
