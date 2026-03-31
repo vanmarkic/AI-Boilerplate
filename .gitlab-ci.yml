@@ -65,22 +65,22 @@ storybook-tests:
 # ===========================================================================
 
 # --- Dependency-Track (SCA — existing) ---
-dtrack:
-  stage: security
-  tags:
-    - linux
-    - docker
-  before_script:
-    - *vault-auth
-    - export DTRACK_APIKEY="$(vault kv get -field=apikey secrets/open-Digital-Factory/dtrack)"
-    - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
-  script:
-    - yarn install --immutable
-    - yarn workspace @aspect/react-ui run predtrack
-    - yarn workspace @aspect/react-ui run dtrack --baseUrl=${DTRACK_BASE_URL}
-    - yarn workspace @aspect/design-system run predtrack
-    - yarn workspace @aspect/design-system run dtrack --baseUrl=${DTRACK_BASE_URL}
-  allow_failure: true
+# dtrack:
+#   stage: security
+#   tags:
+#     - linux
+#     - docker
+#   before_script:
+#     - *vault-auth
+#     - export DTRACK_APIKEY="$(vault kv get -field=apikey secrets/open-Digital-Factory/dtrack)"
+#     - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
+#   script:
+#     - yarn install --immutable
+#     - yarn workspace @aspect/react-ui run predtrack
+#     - yarn workspace @aspect/react-ui run dtrack --baseUrl=${DTRACK_BASE_URL}
+#     - yarn workspace @aspect/design-system run predtrack
+#     - yarn workspace @aspect/design-system run dtrack --baseUrl=${DTRACK_BASE_URL}
+#   allow_failure: true
 
 # --- npm audit (JS/TS dependency vulnerabilities) ---
 npm-audit:
@@ -225,18 +225,18 @@ pip-audit:
 # ===========================================================================
 #  PUBLISH
 # ===========================================================================
-npm-publish:
-  stage: publish
-  tags:
-    - linux
-    - docker
-  before_script:
-    - *vault-auth
-    - export NPM_USER="$(vault kv get -field=username secrets/open-Digital-Factory/nexus/deployment)"
-    - export NPM_PASS="$(vault kv get -field=password secrets/open-Digital-Factory/nexus/deployment)"
-    - yarn config set npmScopes.aspect.npmPublishRegistry ${NPM_DEFAULT_REGISTRY}
-    - yarn config set npmScopes.aspect.npmAuthIdent ${NPM_USER}:${NPM_PASS}
-  script:
-    - yarn workspace @aspect/react-ui npm publish
-    - yarn workspace @aspect/design-system npm publish
+# npm-publish:
+#   stage: publish
+#   tags:
+#     - linux
+#     - docker
+#   before_script:
+#     - *vault-auth
+#     - export NPM_USER="$(vault kv get -field=username secrets/open-Digital-Factory/nexus/deployment)"
+#     - export NPM_PASS="$(vault kv get -field=password secrets/open-Digital-Factory/nexus/deployment)"
+#     - yarn config set npmScopes.aspect.npmPublishRegistry ${NPM_DEFAULT_REGISTRY}
+#     - yarn config set npmScopes.aspect.npmAuthIdent ${NPM_USER}:${NPM_PASS}
+#   script:
+#     - yarn workspace @aspect/react-ui npm publish
+#     - yarn workspace @aspect/design-system npm publish
 
