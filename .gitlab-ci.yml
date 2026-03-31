@@ -48,8 +48,8 @@ storybook-tests:
     - linux
     - docker
   before_script:
-    - npm install -g yarn --registry=${NPM_DEFAULT_MIRROR}
-    - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
+    - npm install -g yarn --registry=https://developers.naval-group.com/nexus/repository/npm-group/
+    - yarn config set npmRegistryServer https://developers.naval-group.com/nexus/repository/npm-group/
   script:
     - yarn install --immutable
     - yarn workspace @aspect/react-ui run test:ci
