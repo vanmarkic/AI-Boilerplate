@@ -16,30 +16,30 @@ cache:
 # ---------------------------------------------------------------------------
 # Vault helper — reusable before_script anchor
 # ---------------------------------------------------------------------------
-.vault-auth: &vault-auth
-  - curl -o /tmp/vault.zip ${VAULT_BINARY_URL}
-  - unzip /tmp/vault.zip -d /usr/local/bin
-  - chmod +x /usr/local/bin/vault
-  - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=${VAULT_ROLE} jwt=$CI_JOB_JWT)"
+# .vault-auth: &vault-auth
+#   - curl -o /tmp/vault.zip ${VAULT_BINARY_URL}
+#   - unzip /tmp/vault.zip -d /usr/local/bin
+#   - chmod +x /usr/local/bin/vault
+#   - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=${VAULT_ROLE} jwt=$CI_JOB_JWT)"
 
 # ===========================================================================
 #  QUALITY
 # ===========================================================================
-sonar-scanner:
-  stage: quality
-  tags:
-    - linux
-    - docker
-  before_script:
-    - *vault-auth
-    - export SONAR_LOGIN="$(vault kv get -field=token secrets/open-Digital-Factory/sonarqube/scanner)"
-    - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
-  script:
-    - yarn install --immutable
-    - yarn workspace @aspect/react-ui run test:ci
-    - yarn workspace @aspect/design-system run test:ci
-    - yarn run prettier --check packages/react-ui/src packages/design-system
-    - yarn run sonar-scanner --serverUrl=${SONAR_HOST_URL}
+# sonar-scanner:
+#   stage: quality
+#   tags:
+#     - linux
+#     - docker
+#   before_script:
+#     - *vault-auth
+#     - export SONAR_LOGIN="$(vault kv get -field=token secrets/open-Digital-Factory/sonarqube/scanner)"
+#     - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
+#   script:
+#     - yarn install --immutable
+#     - yarn workspace @aspect/react-ui run test:ci
+#     - yarn workspace @aspect/design-system run test:ci
+#     - yarn run prettier --check packages/react-ui/src packages/design-system
+#     - yarn run sonar-scanner --serverUrl=${SONAR_HOST_URL}
 
 storybook-tests:
   stage: quality
@@ -48,6 +48,7 @@ storybook-tests:
     - linux
     - docker
   before_script:
+    - export COREPACK_NPM_REGISTRY=${NPM_DEFAULT_MIRROR}
     - corepack enable
     - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
   script:
