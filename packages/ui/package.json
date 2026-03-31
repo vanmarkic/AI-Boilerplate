@@ -13,7 +13,7 @@
   },
   "devDependencies": {
     "ng-packagr": "^21.0.0",
-    "typescript": "~5.9.2"
+    "typescript": "~6.0.2"
   },
   "scripts": {
     "build": "ng-packagr -p ng-package.json"
