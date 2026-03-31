@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint-length lint storybook help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check context-tfc context-tfc-fe context-tfc-be context-main context-main-fe context-main-be context-all
+.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint-length lint storybook storybook-react help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check context-tfc context-tfc-fe context-tfc-be context-main context-main-fe context-main-be context-all
 
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
@@ -141,6 +141,9 @@ lint-length: ## Enforce per-file line length limits (350/150/500)
 
 storybook: ## Start Storybook dev server
 	cd $(MAIN_FE) && npx storybook dev -p 6006
+
+storybook-react: ## Start React Storybook dev server
+	cd packages/react-ui && npx storybook dev -p 6007
 
 lint: ## Run all linters
 	cd $(MAIN_BE) && ruff check . && ruff format --check .
