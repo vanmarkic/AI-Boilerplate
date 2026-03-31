@@ -33,15 +33,37 @@ This loads everything in the correct layer order: `vendor → reset → tokens �
 
 ### Built-in themes
 
-Two themes ship out of the box. Apply with a `data-theme` attribute on `<html>` or any ancestor:
+Three themes ship out of the box. Apply with a `data-theme` attribute on `<html>` or any ancestor:
 
 ```html
-<!-- Default: dark steel-blue -->
+<!-- Default: Naval Group Corporate (light) -->
 <html>
+
+<!-- Dark steel-blue -->
+<html data-theme="steel-blue">
 
 <!-- Dark teal / golden-yellow -->
 <html data-theme="ocean">
 ```
+
+#### Default — Naval Group Corporate (light)
+
+The default theme is a light-dominant palette based on the Naval Group Kit UI V1 guideline. Uses Source Sans Pro, petroleum blue (`#0E2C49`) for text and dark surfaces, and `#164194` as the active/primary accent.
+
+The theme follows the 25/75 rule: ~25% petroleum blue surfaces (header, sidebar) and ~75% light backgrounds. Use `data-surface="dark"` on containers that should flip to the dark petroleum blue variant:
+
+```html
+<html>
+  <header data-surface="dark"><!-- petroleum blue header --></header>
+  <main><!-- light background content --></main>
+</html>
+```
+
+Extra tokens available in this theme:
+- `--color-dynamic` — red accent (`#E1051E`)
+- `--color-alarm-*` — 7 alarm/alert levels (breakdown, degraded, intermediate, operational, uncertain, progress, cyan)
+- `--color-secondary-*` — 10 named secondary colors (brick, burnt-sienna, brown, khaki, olive, cyan, electric-blue, bluish-grey, lavender, purple)
+- `--color-surface-dark` / `--color-surface-dark-foreground` / `--color-surface-dark-muted` / `--color-surface-dark-inactive` — petroleum blue surface palette
 
 ### Built-in effects
 
@@ -133,15 +155,15 @@ Import only tokens and utilities, skip `components.css`, and write your own clas
 
 | Token | Default | Purpose |
 |---|---|---|
-| `--color-background` | `oklch(13% 0.008 250)` | Page background |
-| `--color-card` | `oklch(18% 0.008 250)` | Card / panel surface |
-| `--color-primary` | `oklch(62% 0.10 245)` | Brand accent |
-| `--color-foreground` | `oklch(92% 0 0)` | Body text |
-| `--color-muted-foreground` | `oklch(55% 0.005 250)` | Secondary text |
-| `--color-border` | `oklch(30% 0.010 250)` | Borders and dividers |
-| `--color-destructive` | `oklch(55% 0.22 27)` | Error / danger |
-| `--color-success` | `oklch(62% 0.15 155)` | Success |
-| `--color-warning` | `oklch(72% 0.17 70)` | Warning |
+| `--color-background` | `oklch(100% 0 0)` | Page background (#FFFFFF) |
+| `--color-card` | `oklch(96.6% 0.003 229)` | Card / panel surface (#F2F4F5) |
+| `--color-primary` | `oklch(40% 0.145 262)` | Brand accent (#164194) |
+| `--color-foreground` | `oklch(28.7% 0.064 250)` | Body text (#0E2C49) |
+| `--color-muted-foreground` | `oklch(55% 0.020 250)` | Secondary text |
+| `--color-border` | `oklch(85% 0.010 240)` | Borders and dividers |
+| `--color-destructive` | `oklch(64.9% 0.216 26)` | Error / danger (#F74343) |
+| `--color-success` | `oklch(76.9% 0.202 143)` | Success (#54D354) |
+| `--color-warning` | `oklch(75.6% 0.153 54)` | Warning (#F99246) |
 
 ### Spacing (4px grid)
 
@@ -149,11 +171,11 @@ Import only tokens and utilities, skip `components.css`, and write your own clas
 
 ### Controls
 
-`--control-sm` (32px) · `--control-md` (36px) · `--control-lg` (40px)
+`--control-sm` (28px) · `--control-md` (32px) · `--control-lg` (40px)
 
 ### Border radius
 
-`--radius-sm` (2px) · `--radius-md` (4px) · `--radius-lg` (6px) · `--radius-full` (9999px)
+`--radius-sm` (1.5px) · `--radius-md` (1.5px) · `--radius-lg` (1.5px) · `--radius-full` (9999px)
 
 ### Effects
 
