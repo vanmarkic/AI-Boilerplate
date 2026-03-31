@@ -132,6 +132,7 @@ bandit:
     - linux
     - docker
   script:
+    - pip config set global.index-url https://developers.naval-group.com/nexus/repository/pypi-group/simple
     - pip install --quiet bandit
     - bandit -r apps/main/backend apps/tfc/backend shared
         --severity-level medium
@@ -202,6 +203,7 @@ pip-audit:
     - linux
     - docker
   script:
+    - pip config set global.index-url https://developers.naval-group.com/nexus/repository/pypi-group/simple
     - pip install --quiet pip-audit
     - |
       EXIT_CODE=0
