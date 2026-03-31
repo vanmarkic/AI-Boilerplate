@@ -1,4 +1,5 @@
-import { type ReactNode, useEffect } from 'react';
+import { type ReactNode } from 'react';
+import { Dialog } from '@aspect/react-headless';
 
 export interface DialogPanelProps {
   variant?: 'default' | 'destructive';
@@ -15,31 +16,16 @@ export function DialogPanel({
   footer,
   children,
 }: DialogPanelProps) {
-  useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose?.();
-    };
-    document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
-  }, [onClose]);
-
   return (
-    <>
-      <div
-        className="dialog-backdrop"
-        onClick={() => onClose?.()}
-        aria-hidden="true"
-      />
-      <div
-        className="dialog-panel"
-        data-variant={variant}
-        role="dialog"
-        aria-modal="true"
-      >
-        {title && <div className="dialog-title">{title}</div>}
-        <div className="dialog-body">{children}</div>
-        {footer && <div className="dialog-footer">{footer}</div>}
-      </div>
-    </>
+    <Dialog.Root open={true} onOpenChange={(open) => { if (!open) onClose?.(); }}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="dialog-backdrop" />
+        <Dialog.Content className="dialog-panel" data-variant={variant}>
+          {title && <Dialog.Title className="dialog-title">{title}</Dialog.Title>}
+          <div className="dialog-body">{children}</div>
+          {footer && <div className="dialog-footer">{footer}</div>}
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

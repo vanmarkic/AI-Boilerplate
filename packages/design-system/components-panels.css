@@ -50,14 +50,6 @@
     text-align: start;
     list-style: none;
 
-    &::-webkit-details-marker {
-      display: none;
-    }
-
-    &::marker {
-      content: "";
-    }
-
     &:hover {
       background-color: var(--color-accent);
     }
@@ -74,7 +66,7 @@
     flex-shrink: 0;
     transition: transform var(--duration-normal) var(--ease-default);
 
-    [open] > .collapsible-panel-trigger > & {
+    [data-state="open"] > .collapsible-panel-trigger > & {
       transform: rotate(180deg);
     }
   }

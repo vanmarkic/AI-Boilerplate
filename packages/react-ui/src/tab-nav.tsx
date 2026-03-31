@@ -1,31 +1,31 @@
 import { type AnchorHTMLAttributes, type ReactNode } from 'react';
+import { Tabs } from '@aspect/react-headless';
 
 export interface TabNavProps {
+  value?: string;
+  onValueChange?: (value: string) => void;
   children?: ReactNode;
 }
 
-export function TabNav({ children }: TabNavProps) {
-  return <nav className="tab-nav">{children}</nav>;
+export function TabNav({ value, onValueChange, children }: TabNavProps) {
+  return (
+    <Tabs.Root value={value} onValueChange={onValueChange}>
+      <nav>
+        <Tabs.List className="tab-nav">{children}</Tabs.List>
+      </nav>
+    </Tabs.Root>
+  );
 }
 
 export interface TabLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
-  active?: boolean;
+  value: string;
   children?: ReactNode;
 }
 
-export function TabLink({
-  active,
-  className,
-  children,
-  ...props
-}: TabLinkProps) {
-  const classes = ['tab-link'];
-  if (active) classes.push('active');
-  if (className) classes.push(className);
-
+export function TabLink({ value, href, children, ...props }: TabLinkProps) {
   return (
-    <a className={classes.join(' ')} {...props}>
-      {children}
-    </a>
+    <Tabs.Trigger value={value} asChild>
+      <a href={href} className="tab-link" {...props}>{children}</a>
+    </Tabs.Trigger>
   );
 }
