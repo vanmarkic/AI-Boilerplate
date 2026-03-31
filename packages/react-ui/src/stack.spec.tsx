@@ -44,8 +44,8 @@ describe('Stack', () => {
   it('applies fill inline styles when fill is true', () => {
     render(<Stack fill data-testid="s">content</Stack>);
     const el = screen.getByTestId('s');
-    expect(el.style.flex).toBe('1');
-    expect(el.style.minHeight).toBe('0');
+    expect(el.style.flex).toBe('1 1 0%');
+    expect(el.style.minHeight).toBe('0px');
   });
 
   it('does not apply fill styles when fill is false', () => {
@@ -57,8 +57,8 @@ describe('Stack', () => {
   it('merges caller style with fill styles', () => {
     render(<Stack fill style={{ color: 'red' }} data-testid="s">content</Stack>);
     const el = screen.getByTestId('s');
-    expect(el.style.flex).toBe('1');
-    expect(el.style.minHeight).toBe('0');
+    expect(el.style.flex).toBe('1 1 0%');
+    expect(el.style.minHeight).toBe('0px');
     expect(el.style.color).toBe('red');
   });
 
