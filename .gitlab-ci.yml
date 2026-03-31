@@ -1,340 +1,72 @@
-# GitLab CI/CD Pipeline
-# Mirrors GitHub Actions CI and adds security scanning stages.
-
-workflow:
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+image: node:16-buster
 
 stages:
-  - prepare
-  - lint
-  - test
-  - e2e
-  - build
-  - deploy
+  - quality
   - security
+  - publish
 
-variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
-  PIP_INDEX_URL: "https://developers.naval-group.com/nexus/repository/pypi-group/simple/"
-  PIP_TRUSTED_HOST: "developers.naval-group.com"
-  NPM_CONFIG_CACHE: "$CI_PROJECT_DIR/.cache/npm"
-  NPM_CONFIG_REGISTRY: "https://developers.naval-group.com/nexus/repository/npm-group/"
-  POSTGRES_DB: boilerplate_test
-  POSTGRES_USER: dev
-  POSTGRES_PASSWORD: dev
-  FF_NETWORK_PER_BUILD: "true"
-  NODE_VERSION: "22"
+cache:
+  key:
+    files:
+      - yarn.lock
+    prefix: yarn
+  paths:
+    - .yarn/cache
 
-# ---------------------------------------------------------------------------
-# Cache templates
-# ---------------------------------------------------------------------------
-.python-cache:
-  cache:
-    key: python-${CI_COMMIT_REF_SLUG}
-    paths:
-      - .cache/pip
-
-.node-cache:
-  cache:
-    key: node-${CI_COMMIT_REF_SLUG}
-    paths:
-      - .cache/npm
-      - apps/main/frontend/node_modules
-
-# ===========================================================================
-# Prepare Stage – Install dependencies & generate OpenAPI client
-# ===========================================================================
-
-install-and-generate:
-  stage: prepare
-  image: node:22
-  extends: .node-cache
+sonar-scanner:
+  stage: quality
+  tags:
+    - linux
+    - docker
   before_script:
-    - apt-get update -qq && apt-get install -y -qq python3 python3-pip python3-venv > /dev/null
-    - cd apps/main/backend && python3 -m pip install --break-system-packages -e ".[dev]" && cd ..
+    - curl -o /tmp/vault.zip ${VAULT_BINARY_URL}
+    - unzip /tmp/vault.zip -d /usr/local/bin
+    - chmod +x /usr/local/bin/vault
+    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=${VAULT_ROLE} jwt=$CI_JOB_JWT)"
+    - export SONAR_LOGIN="$(vault kv get -field=token secrets/open-Digital-Factory/sonarqube/scanner)"
+    - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
   script:
-    - npm i
-    - cd apps/main/backend && python3 -c "import json; from main import create_app; print(json.dumps(create_app().openapi(), indent=2))" > ../shared/openapi.json && cd ..
-    - bash shared/scripts/generate-frontend.sh
-  artifacts:
-    paths:
-      - node_modules/
-      - apps/main/frontend/node_modules/
-      - packages/design-system/node_modules/
-      - apps/main/frontend/src/app/shared/api/generated/
-      - shared/openapi.json
-    expire_in: 1 hour
+    - yarn install --immutable
+    - yarn workspace @aspect/react-ui run test:ci
+    - yarn workspace @aspect/design-system run test:ci
+    - yarn run prettier --check packages/react-ui/src packages/design-system
+    - yarn run sonar-scanner --serverUrl=${SONAR_HOST_URL}
 
-# ===========================================================================
-# Lint Stage
-# ===========================================================================
-
-lint-architecture:
-  stage: lint
-  image: python:3.12-slim
-  extends: .python-cache
-  needs: []
-  script:
-    - pip install pyyaml packages/python-layer-lint
-    - python shared/scripts/lint-architecture.py
-
-lint-backend:
-  stage: lint
-  image: python:3.12-slim
-  extends: .python-cache
-  needs: []
-  script:
-    - cd apps/main/backend
-    - pip install ruff
-    - ruff check .
-
-lint-frontend:
-  stage: lint
-  image: node:22-slim
-  needs:
-    - install-and-generate
-  script:
-    - cd frontend
-    - npm run lint:all
-
-openapi-validate:
-  stage: lint
-  image: node:22
-  needs:
-    - install-and-generate
-  script:
-    - npx @redocly/cli lint shared/openapi.json
-
-# ===========================================================================
-# Test Stage
-# ===========================================================================
-
-test-backend:
-  stage: test
-  image: python:3.12-slim
-  extends: .python-cache
-  needs: []
-  services:
-    - name: postgres:17
-      alias: postgres
-      variables:
-        POSTGRES_DB: boilerplate_test
-        POSTGRES_USER: dev
-        POSTGRES_PASSWORD: dev
-  variables:
-    DATABASE_URL: "postgresql+asyncpg://dev:dev@postgres:5432/boilerplate_test"
-  script:
-    - cd apps/main/backend
-    - pip install -e ".[dev]"
-    - alembic upgrade head
-    - python -m pytest -v --tb=short
-
-test-frontend:
-  stage: test
-  image: node:22-slim
-  needs:
-    - install-and-generate
-  script:
-    - cd frontend
-    - npm run test:ci
-
-# ===========================================================================
-# E2E Stage
-# ===========================================================================
-
-e2e-frontend:
-  stage: e2e
-  image: node:22
-  needs:
-    - lint-frontend
-    - test-frontend
-  script:
-    - cd frontend
-    - npx playwright install --with-deps chromium
-    - npm run e2e
-  artifacts:
-    when: always
-    paths:
-      - apps/main/frontend/playwright-report/
-    expire_in: 7 days
-
-# ===========================================================================
-# Build Stage
-# ===========================================================================
-
-build-frontend:
-  stage: build
-  image: node:22-slim
-  needs:
-    - lint-frontend
-    - test-frontend
-  script:
-    - cd frontend
-    - npm run build
-
-.kaniko-build:
-  stage: build
-  image:
-    name: gcr.io/kaniko-project/executor:v1.23.2-debug
-    entrypoint: [""]
-  script:
-    - |
-      if [ -n "$CI_REGISTRY" ] && [ -n "$CI_REGISTRY_USER" ]; then
-        mkdir -p /kaniko/.docker
-        echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf '%s:%s' "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64)\"}}}" > /kaniko/.docker/config.json
-      fi
-    - /kaniko/executor
-      --context "$CI_PROJECT_DIR"
-      --dockerfile "$DOCKERFILE"
-      --destination "$CI_REGISTRY_IMAGE/$IMAGE_NAME:$CI_COMMIT_SHA"
-      --no-push=${NO_PUSH:-false}
-
-build-backend-image:
-  extends: .kaniko-build
-  needs: []
-  variables:
-    DOCKERFILE: apps/main/backend/Dockerfile
-    IMAGE_NAME: backend
-    NO_PUSH: "${CI_REGISTRY_IMAGE:+false}"
-
-build-frontend-image:
-  extends: .kaniko-build
-  needs: []
-  variables:
-    DOCKERFILE: apps/main/frontend/Dockerfile
-    IMAGE_NAME: frontend
-    NO_PUSH: "${CI_REGISTRY_IMAGE:+false}"
-
-# ===========================================================================
-# Deploy Stage – Storybook to GitLab Pages
-# ===========================================================================
-
-pages:
-  stage: deploy
-  image: node:22
-  needs:
-    - install-and-generate
-  script:
-    - cd frontend
-    - npm run build-storybook
-    - mv storybook-static ../public
-  artifacts:
-    paths:
-      - public
-  rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      changes:
-        - apps/main/frontend/**
-        - packages/design-system/**
-        - .gitlab-ci.yml
-
-# ===========================================================================
-# Security Stage – GitLab built-in security templates
-# ===========================================================================
-#
-# These templates auto-detect languages and package managers. They produce
-# reports that surface in the GitLab Security Dashboard and MR widgets.
-# See: https://docs.gitlab.com/ee/user/application_security/
-
-include:
-  # Static Application Security Testing – finds vulnerabilities in source code
-  - template: Security/SAST.gitlab-ci.yml
-  # Secret Detection – flags accidentally committed credentials & tokens
-  - template: Security/Secret-Detection.gitlab-ci.yml
-  # Dependency Scanning – checks pip & npm dependencies against CVE databases
-  - template: Security/Dependency-Scanning.gitlab-ci.yml
-  # Container Scanning – scans Docker images for OS-level vulnerabilities
-  - template: Security/Container-Scanning.gitlab-ci.yml
-
-# Override template defaults to run in the security stage instead of test.
-sast:
+dtrack:
   stage: security
-
-secret_detection:
-  stage: security
-
-dependency_scanning:
-  stage: security
-
-container_scanning:
-  stage: security
-  variables:
-    CS_IMAGE: "$CI_REGISTRY_IMAGE/backend:$CI_COMMIT_SHA"
-  needs:
-    - build-backend-image
-
-# ===========================================================================
-# Custom Security Jobs
-# ===========================================================================
-
-security-npm-audit:
-  stage: security
-  image: node:22-slim
-  extends: .node-cache
-  needs: []
+  tags:
+    - linux
+    - docker
+  before_script:
+    - curl -o /tmp/vault.zip ${VAULT_BINARY_URL}
+    - unzip /tmp/vault.zip -d /usr/local/bin
+    - chmod +x /usr/local/bin/vault
+    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=${VAULT_ROLE} jwt=$CI_JOB_JWT)"
+    - export DTRACK_APIKEY="$(vault kv get -field=apikey secrets/open-Digital-Factory/dtrack)"
+    - yarn config set npmRegistryServer ${NPM_DEFAULT_MIRROR}
   script:
-    - cd apps/main/frontend
-    - npm i
-    - npm audit --audit-level=high
+    - yarn install --immutable
+    - yarn workspace @aspect/react-ui run predtrack
+    - yarn workspace @aspect/react-ui run dtrack --baseUrl=${DTRACK_BASE_URL}
+    - yarn workspace @aspect/design-system run predtrack
+    - yarn workspace @aspect/design-system run dtrack --baseUrl=${DTRACK_BASE_URL}
   allow_failure: true
 
-security-pip-audit:
-  stage: security
-  image: python:3.12-slim
-  extends: .python-cache
-  needs: []
+npm-publish:
+  stage: publish
+  tags:
+    - linux
+    - docker
+  before_script:
+    - curl -o /tmp/vault.zip ${VAULT_BINARY_URL}
+    - unzip /tmp/vault.zip -d /usr/local/bin
+    - chmod +x /usr/local/bin/vault
+    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=${VAULT_ROLE} jwt=$CI_JOB_JWT)"
+    - export NPM_USER="$(vault kv get -field=username secrets/open-Digital-Factory/nexus/deployment)"
+    - export NPM_PASS="$(vault kv get -field=password secrets/open-Digital-Factory/nexus/deployment)"
+    - yarn config set npmScopes.aspect.npmPublishRegistry ${NPM_DEFAULT_REGISTRY}
+    - yarn config set npmScopes.aspect.npmAuthIdent ${NPM_USER}:${NPM_PASS}
   script:
-    - pip install pip-audit
-    - cd apps/main/backend
-    - pip install -e ".[dev]"
-    - pip-audit --vulnerability-service osv --index-url "$PIP_INDEX_URL"
-  allow_failure: true
+    - yarn workspace @aspect/react-ui npm publish
+    - yarn workspace @aspect/design-system npm publish
 
-sonarqube:
-  stage: security
-  needs: []
-  tags: ["docker", "linux"]
-  image:
-    name: sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  variables:
-    SONAR_OPTIONS: ""
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-    GIT_DEPTH: "0"
-    GIT_SUBMODULE_STRATEGY: "recursive"
-  id_tokens:
-    ID_TOKEN:
-      aud: "vault"
-  cache:
-    key: sonar-${CI_COMMIT_REF_SLUG}
-    paths:
-      - .sonar/cache
-  script:
-    - git config --global --add safe.directory "$CI_PROJECT_DIR"
-    - if $(git rev-parse --is-shallow-repository); then git fetch --unshallow ; fi
-    - |-
-      # get sonar credentials from Vault
-      if [ -z ${SONAR_TOKEN+x} ] ; then
-        if command -v wget ; then
-          wget -O /tmp/vault.zip "$VAULT_BINARY_URL"
-        elif command -v curl ; then
-          curl -o /tmp/vault.zip "$VAULT_BINARY_URL"
-        else
-          echo "Error: no wget or curl available to get vault credentials." ; exit 1
-        fi
-        if command -v unzip ; then
-          unzip /tmp/vault.zip -d /tmp
-        elif command -v jar ; then
-          (cd /tmp ; jar xvf /tmp/vault.zip)
-        else
-          echo "Error: unable to decompress vault for credentials." ; exit 1
-        fi
-        chmod +x /tmp/vault
-        VAULT_TOKEN="$(/tmp/vault write -field=token auth/jwt/login role=ci-commons jwt="$ID_TOKEN")" ; export VAULT_TOKEN
-        SONAR_TOKEN="$(/tmp/vault kv get -field=token secrets/open-Digital-Factory/sonarqube/scanner)" ; export SONAR_TOKEN
-        unset VAULT_TOKEN
-      fi
-    - sonar-scanner -Dsonar.login="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true $SONAR_OPTIONS
-  allow_failure: true

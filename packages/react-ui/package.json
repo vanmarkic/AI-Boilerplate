@@ -12,6 +12,7 @@
     "test:ci": "vitest run --reporter=default"
   },
   "peerDependencies": {
+    "@aspect/design-system": "^0.1.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
