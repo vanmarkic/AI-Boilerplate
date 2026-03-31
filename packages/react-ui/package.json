@@ -15,8 +15,14 @@
   },
   "peerDependencies": {
     "@aspect/design-system": "^0.1.0",
+    "maplibre-gl": "^5.0.0",
+    "pmtiles": "^4.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "peerDependenciesMeta": {
+    "maplibre-gl": { "optional": true },
+    "pmtiles": { "optional": true }
   },
   "dependencies": {
     "@aspect/react-headless": "*",
