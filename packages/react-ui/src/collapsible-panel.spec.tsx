@@ -1,32 +1,55 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { CollapsiblePanel } from './collapsible-panel';
 
 describe('CollapsiblePanel', () => {
-  it('renders collapsed by default', () => {
-    const { container } = render(
-      <CollapsiblePanel header="Section">Content</CollapsiblePanel>,
+  it('renders closed by default', () => {
+    render(
+      <CollapsiblePanel header="Header">Content</CollapsiblePanel>,
     );
-    expect(container.querySelector('details')).not.toHaveAttribute('open');
-    expect(screen.getByText('Section')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.queryByText('Content')).not.toBeInTheDocument();
   });
 
-  it('renders open when open=true', () => {
-    const { container } = render(
-      <CollapsiblePanel header="Section" open>
-        Content
-      </CollapsiblePanel>,
+  it('renders open with defaultOpen', () => {
+    render(
+      <CollapsiblePanel header="Header" defaultOpen>Content</CollapsiblePanel>,
     );
-    expect(container.querySelector('details')).toHaveAttribute('open');
+    expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('Content')).toBeInTheDocument();
   });
 
-  it('applies variant and size', () => {
+  it('variant and size applied via data attributes', () => {
     const { container } = render(
-      <CollapsiblePanel header="X" variant="outline" size="sm">
-        Y
-      </CollapsiblePanel>,
+      <CollapsiblePanel header="H" variant="ghost" size="sm">C</CollapsiblePanel>,
     );
-    const details = container.querySelector('details');
-    expect(details).toHaveAttribute('data-variant', 'outline');
-    expect(details).toHaveAttribute('data-size', 'sm');
+    const root = container.firstElementChild;
+    expect(root).toHaveAttribute('data-variant', 'ghost');
+    expect(root).toHaveAttribute('data-size', 'sm');
+  });
+
+  it('toggles via click', async () => {
+    render(<CollapsiblePanel header="Header">Content</CollapsiblePanel>);
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.getByText('Content')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByText('Content')).not.toBeInTheDocument();
+  });
+
+  it('fires onOpenChange', async () => {
+    const onOpenChange = vi.fn();
+    render(
+      <CollapsiblePanel header="H" onOpenChange={onOpenChange}>C</CollapsiblePanel>,
+    );
+    await userEvent.click(screen.getByRole('button'));
+    expect(onOpenChange).toHaveBeenCalledWith(true);
+  });
+
+  it('disabled prevents toggle', async () => {
+    render(
+      <CollapsiblePanel header="H" disabled>Content</CollapsiblePanel>,
+    );
+    await userEvent.click(screen.getByRole('button'));
+    expect(screen.queryByText('Content')).not.toBeInTheDocument();
   });
 });
