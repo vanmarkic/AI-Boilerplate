@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfc-frontend
+  namespace: boilerplate
+  labels:
+    app: tfc-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tfc-frontend
+  template:
+    metadata:
+      labels:
+        app: tfc-frontend
+    spec:
+      containers:
+        - name: tfc-frontend
+          image: PLACEHOLDER
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: API_BASE_URL
+              value: PLACEHOLDER
+            - name: WS_BASE_URL
+              value: PLACEHOLDER
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
