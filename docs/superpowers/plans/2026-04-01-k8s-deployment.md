@@ -24,7 +24,7 @@
 | `k8s/postgres/init-databases.sql` | Init script creating all 3 databases and users |
 | `k8s/keycloak/deployment.yaml` | Keycloak Deployment (production mode) |
 | `k8s/keycloak/service.yaml` | Keycloak ClusterIP Service |
-| `k8s/keycloak/configmap.yaml` | ConfigMap wrapping `realm-export.json` |
+| `k8s/keycloak/configmap.yaml` | ConfigMap wrapping `realm-export.json` and admin script |
 | `k8s/keycloak/job-configure-admin.yaml` | Job to assign realm-management roles |
 | `k8s/keycloak/ingress.yaml` | Keycloak Ingress |
 | `k8s/main/backend-deployment.yaml` | Main backend Deployment with init container |
@@ -165,7 +165,9 @@ if [ -n "$KEYCLOAK_URL" ]; then
 fi
 ```
 
-Rewrite `apps/main/frontend/Dockerfile`:
+Rewrite `apps/main/frontend/Dockerfile`. This follows the TFC frontend pattern: workspace-aware npm install from repo root, then build from the app's subdirectory.
+
+The main frontend has workspace dependencies (`@aspect/design-system: "*"`, `@aspect/ui: "*"`, etc.) that only resolve within an npm workspace context. The Dockerfile must copy the root `package.json` and all required workspace packages.
 
 ```dockerfile
 # Stage 1: Filter features by tier
@@ -182,18 +184,29 @@ RUN python3 /filter.py --tier=$TIER --src=/all-features/ --dest=/filtered-featur
 FROM node:22-slim AS build
 WORKDIR /app
 
-COPY apps/main/frontend/package.json ./
-RUN npm i
+COPY package.json ./
+COPY packages/design-system/package.json ./packages/design-system/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/ng-feature-flags/package.json ./packages/ng-feature-flags/
+COPY packages/ngrx-with-resource/package.json ./packages/ngrx-with-resource/
+COPY apps/main/frontend/package.json ./apps/main/frontend/
 
-COPY apps/main/frontend/ .
-COPY --from=feature-filter /filtered-features/ ./src/app/features/
+RUN npm install --workspace=apps/main/frontend
 
+COPY packages/design-system/ ./packages/design-system/
+COPY packages/ui/ ./packages/ui/
+COPY packages/ng-feature-flags/ ./packages/ng-feature-flags/
+COPY packages/ngrx-with-resource/ ./packages/ngrx-with-resource/
+COPY apps/main/frontend/ ./apps/main/frontend/
+COPY --from=feature-filter /filtered-features/ ./apps/main/frontend/src/app/features/
+
+WORKDIR /app/apps/main/frontend
 RUN npx ng build --configuration=production
 
 # Stage 3: Serve with nginx
 FROM nginx:1.27-alpine
 
-COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html
+COPY --from=build /app/apps/main/frontend/dist/frontend/browser /usr/share/nginx/html
 COPY apps/main/frontend/nginx.conf /etc/nginx/templates/default.conf.template
 COPY apps/main/frontend/entrypoint.sh /docker-entrypoint.d/40-inject-env.sh
 RUN chmod +x /docker-entrypoint.d/40-inject-env.sh
@@ -202,7 +215,7 @@ ENV PORT=80
 EXPOSE ${PORT}
 ```
 
-Note: The `dist/` output path (`dist/frontend/browser`) may vary — check `apps/main/frontend/angular.json` for `outputPath` config. Adjust if needed.
+Note: The `dist/` output path (`dist/frontend/browser`) may vary — check `apps/main/frontend/angular.json` for `outputPath` config. Adjust if needed. Also verify the workspace package names exist under `packages/` by running `ls packages/`.
 
 - [ ] **Step 3: Rewrite Keycloak Dockerfile**
 
@@ -221,7 +234,8 @@ CMD ["start", "--import-realm"]
 
 In `infra/keycloak/configure-admin-client.sh`, replace the hardcoded `http://localhost:8080` with an env var:
 
-Change line 18:
+Find the line containing `--server http://localhost:8080` and change it:
+
 ```bash
 # Before:
     --server http://localhost:8080 \
@@ -235,12 +249,14 @@ This preserves backward compatibility for docker-compose (defaults to localhost)
 
 Create `packages/react-ui/Dockerfile`:
 
+Note: `package-lock.json` is gitignored in this repo, so do NOT copy it. Use the same pattern as TFC frontend.
+
 ```dockerfile
 # Stage 1: Build Storybook
 FROM node:22-slim AS build
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY package.json ./
 COPY packages/design-system/package.json ./packages/design-system/
 COPY packages/react-headless/package.json ./packages/react-headless/
 COPY packages/react-ui/package.json ./packages/react-ui/
@@ -334,7 +350,7 @@ spec:
 
 - [ ] **Step 2: Create Helm values**
 
-Create `k8s/postgres/values.yaml`:
+Create `k8s/postgres/values.yaml`. The init script SQL is inlined directly in the values file under `primary.initdb.scripts` — this is how the Bitnami chart expects it. The separate `init-databases.sql` file is kept as a readable reference but the values.yaml is the source of truth for deployment.
 
 ```yaml
 image:
@@ -352,7 +368,38 @@ primary:
   initdb:
     scripts:
       init-databases.sql: |
-        -- See k8s/postgres/init-databases.sql for source
+        -- Create keycloak database and user
+        SELECT 'CREATE DATABASE keycloak'
+        WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'keycloak')\gexec
+
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'keycloak') THEN
+            CREATE USER keycloak WITH ENCRYPTED PASSWORD 'changeme';
+          END IF;
+        END
+        $$;
+
+        GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+        \c keycloak
+        GRANT ALL ON SCHEMA public TO keycloak;
+
+        -- Create tfc database and user
+        \c postgres
+        SELECT 'CREATE DATABASE tfc'
+        WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'tfc')\gexec
+
+        DO $$
+        BEGIN
+          IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'tfc') THEN
+            CREATE USER tfc WITH ENCRYPTED PASSWORD 'changeme';
+          END IF;
+        END
+        $$;
+
+        GRANT ALL PRIVILEGES ON DATABASE tfc TO tfc;
+        \c tfc
+        GRANT ALL ON SCHEMA public TO tfc;
   resources:
     requests:
       cpu: 250m
@@ -627,13 +674,16 @@ spec:
             defaultMode: 0755
 ```
 
-Note: The script is mounted via a ConfigMap. Create it at deploy time:
+Note: The script is mounted via a ConfigMap. Generate it and append to `k8s/keycloak/configmap.yaml`:
 
 ```bash
+echo "---" >> k8s/keycloak/configmap.yaml
 kubectl create configmap keycloak-admin-script \
   --from-file=configure-admin-client.sh=infra/keycloak/configure-admin-client.sh \
   --namespace=boilerplate --dry-run=client -o yaml >> k8s/keycloak/configmap.yaml
 ```
+
+This ConfigMap is already included as a resource via `k8s/keycloak/configmap.yaml` in `k8s/kustomization.yaml`.
 
 - [ ] **Step 5: Create Keycloak Ingress**
 
@@ -1459,6 +1509,7 @@ resources:
   - ../../../k8s
 
 patches:
+  - path: postgres-values-patch.yaml
   - path: keycloak-patch.yaml
   - path: main-backend-patch.yaml
   - path: main-frontend-patch.yaml
@@ -1502,6 +1553,7 @@ spec:
     spec:
       containers:
         - name: keycloak
+          image: registry-cyberlab-ngb.naval-group.dev/naval-group/boilerplate:dev-000000-keycloak
           env:
             - name: KC_HOSTNAME
               value: auth.dev.example.com
