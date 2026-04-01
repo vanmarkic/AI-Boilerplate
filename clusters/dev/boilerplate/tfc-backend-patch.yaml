@@ -1,0 +1,17 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfc-backend
+  namespace: boilerplate
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: migrate-and-seed
+          image: registry-cyberlab-ngb.naval-group.dev/naval-group/boilerplate:dev-000000-tfc-backend
+      containers:
+        - name: tfc-backend
+          image: registry-cyberlab-ngb.naval-group.dev/naval-group/boilerplate:dev-000000-tfc-backend
+          env:
+            - name: ALLOWED_ORIGINS
+              value: https://tfc.dev.example.com

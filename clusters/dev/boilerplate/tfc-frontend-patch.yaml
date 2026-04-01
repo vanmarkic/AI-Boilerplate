@@ -1,0 +1,11 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfc-frontend
+  namespace: boilerplate
+spec:
+  template:
+    spec:
+      containers:
+        - name: tfc-frontend
+          image: registry-cyberlab-ngb.naval-group.dev/naval-group/boilerplate:dev-000000-tfc-frontend
