@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - ../../../k8s
+
+patches:
+  - path: postgres-values-patch.yaml
+  - path: keycloak-patch.yaml
+  - path: main-backend-patch.yaml
+  - path: main-frontend-patch.yaml
+  - path: tfc-backend-patch.yaml
+  - path: tfc-frontend-patch.yaml
+  - path: storybook-patch.yaml

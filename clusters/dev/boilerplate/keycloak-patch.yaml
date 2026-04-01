@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: boilerplate
+spec:
+  template:
+    spec:
+      containers:
+        - name: keycloak
+          image: registry-cyberlab-ngb.naval-group.dev/naval-group/boilerplate:dev-000000-keycloak
+          env:
+            - name: KC_HOSTNAME
+              value: auth.dev.example.com

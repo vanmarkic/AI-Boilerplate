@@ -1,0 +1,14 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-backend
+  namespace: boilerplate
+spec:
+  template:
+    spec:
+      initContainers:
+        - name: migrate
+          image: registry-cyberlab-ngb.naval-group.dev/naval-group/boilerplate:dev-000000-main-backend
+      containers:
+        - name: main-backend
+          image: registry-cyberlab-ngb.naval-group.dev/naval-group/boilerplate:dev-000000-main-backend
