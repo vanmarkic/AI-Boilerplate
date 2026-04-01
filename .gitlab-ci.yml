@@ -4,6 +4,8 @@ stages:
   - quality
   - security
   - publish
+  - build
+  - deploy
 
 cache:
   key:
@@ -12,6 +14,56 @@ cache:
     prefix: yarn
   paths:
     - .yarn/cache
+
+variables:
+  IMAGE_REPOSITORY: "naval-group/boilerplate"
+  DEPLOY_JOB_IMAGE: "alpine/git:2.52.0"
+  CONTAINER_REGISTRY_HOST: "registry-cyberlab-ngb.naval-group.dev"
+
+.generate_id_token: &generate_id_token
+  ID_TOKEN:
+    aud: vault
+
+.get-credentials:
+  script:
+    - mkdir -p /tmp /usr/local/bin
+    - wget -qO /tmp/vault.zip ${VAULT_BINARY_URL}
+    - unzip /tmp/vault.zip -d /usr/local/bin
+    - chmod +x /usr/local/bin/vault
+    - VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=$DOCKER_VAULT_ROLE jwt=$ID_TOKEN)"
+    - export VAULT_TOKEN
+    - export USERNAME="$(vault kv get -field=username secrets/open-Digital-Factory/nexus/cyberlab-ngb)"
+    - export PASSWORD="$(vault kv get -field=password secrets/open-Digital-Factory/nexus/cyberlab-ngb)"
+
+.kaniko_base:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.24.0-debug
+    entrypoint: [""]
+  tags:
+    - linux
+    - docker
+    - s_c1r2
+  id_tokens: *generate_id_token
+  before_script:
+    - !reference [.get-credentials, script]
+    - export DOCKER_PRIVATE_REGISTRY_EFFECTIVE="${CONTAINER_REGISTRY_HOST}"
+    - echo "{\"auths\":{\"${DOCKER_PRIVATE_REGISTRY_EFFECTIVE}\":{\"auth\":\"$(printf "%s:%s" "${USERNAME}" "${PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  script:
+    - |
+      DESTINATION_IMAGE="${DOCKER_PRIVATE_REGISTRY_EFFECTIVE}/${IMAGE_REPOSITORY}:${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}-${IMAGE_SUFFIX}"
+
+      /kaniko/executor \
+        --context="${CI_PROJECT_DIR}/${CONTEXT_DIR}" \
+        --dockerfile="${CI_PROJECT_DIR}/${DOCKERFILE_PATH}" \
+        --destination="${DESTINATION_IMAGE}" \
+        --cache=true \
+        --cache-repo="${DOCKER_PRIVATE_REGISTRY_EFFECTIVE}/${IMAGE_REPOSITORY}/cache" \
+        --skip-tls-verify-registry="${DOCKER_PRIVATE_REGISTRY_EFFECTIVE}" \
+        --registry-mirror="${DOCKER_DEFAULT_MIRROR}" \
+        --snapshot-mode=redo \
+        --use-new-run \
+        --reproducible
 
 # ---------------------------------------------------------------------------
 # Vault helper — reusable before_script anchor
