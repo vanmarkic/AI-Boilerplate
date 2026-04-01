@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-frontend
+  namespace: boilerplate
+  labels:
+    app: main-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: main-frontend
+  template:
+    metadata:
+      labels:
+        app: main-frontend
+    spec:
+      containers:
+        - name: main-frontend
+          image: PLACEHOLDER
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: KEYCLOAK_URL
+              value: PLACEHOLDER
+            - name: KEYCLOAK_REALM
+              value: boilerplate
+            - name: KEYCLOAK_CLIENT_ID
+              value: frontend-app
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
