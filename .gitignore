@@ -59,3 +59,7 @@ coverage/
 
 # LLM context scope (per-developer preference)
 .claudeignore
+
+# K8s secrets (never commit actual credentials)
+k8s/secrets.yaml
+clusters/*/boilerplate/secrets.yaml

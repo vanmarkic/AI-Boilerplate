@@ -1,0 +1,34 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  # PostgreSQL is managed via Flux HelmRelease, not Kustomize
+  - postgres/helmrelease.yaml
+
+  # Keycloak
+  - keycloak/deployment.yaml
+  - keycloak/service.yaml
+  - keycloak/configmap.yaml
+  - keycloak/job-configure-admin.yaml
+  - keycloak/ingress.yaml
+
+  # Main app
+  - main/backend-deployment.yaml
+  - main/backend-service.yaml
+  - main/backend-ingress.yaml
+  - main/frontend-deployment.yaml
+  - main/frontend-service.yaml
+  - main/frontend-ingress.yaml
+
+  # TFC app
+  - tfc/backend-deployment.yaml
+  - tfc/backend-service.yaml
+  - tfc/backend-ingress.yaml
+  - tfc/frontend-deployment.yaml
+  - tfc/frontend-service.yaml
+  - tfc/frontend-ingress.yaml
+
+  # Storybook
+  - storybook/deployment.yaml
+  - storybook/service.yaml
+  - storybook/ingress.yaml
