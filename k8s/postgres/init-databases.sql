@@ -1,0 +1,32 @@
+-- Create keycloak database and user
+SELECT 'CREATE DATABASE keycloak'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'keycloak')\gexec
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'keycloak') THEN
+    CREATE USER keycloak WITH ENCRYPTED PASSWORD 'changeme';
+  END IF;
+END
+$$;
+
+GRANT ALL PRIVILEGES ON DATABASE keycloak TO keycloak;
+\c keycloak
+GRANT ALL ON SCHEMA public TO keycloak;
+
+-- Create tfc database and user
+\c postgres
+SELECT 'CREATE DATABASE tfc'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'tfc')\gexec
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'tfc') THEN
+    CREATE USER tfc WITH ENCRYPTED PASSWORD 'changeme';
+  END IF;
+END
+$$;
+
+GRANT ALL PRIVILEGES ON DATABASE tfc TO tfc;
+\c tfc
+GRANT ALL ON SCHEMA public TO tfc;
