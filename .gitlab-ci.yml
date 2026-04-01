@@ -331,3 +331,177 @@ pack-react-ui:
       - aspect-react-ui-*.tgz
     expire_in: 1 year
 
+# ===========================================================================
+#  BUILD — Kaniko image builds
+# ===========================================================================
+
+image_build_main_backend:
+  extends: .kaniko_base
+  variables:
+    CONTEXT_DIR: "."
+    DOCKERFILE_PATH: "apps/main/backend/Dockerfile"
+    IMAGE_SUFFIX: "main-backend"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      changes:
+        - apps/main/backend/**/*
+        - packages/**/*
+        - shared/**/*
+    - when: never
+
+image_build_main_frontend:
+  extends: .kaniko_base
+  variables:
+    CONTEXT_DIR: "."
+    DOCKERFILE_PATH: "apps/main/frontend/Dockerfile"
+    IMAGE_SUFFIX: "main-frontend"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      changes:
+        - apps/main/frontend/**/*
+        - packages/**/*
+        - shared/**/*
+    - when: never
+
+image_build_tfc_backend:
+  extends: .kaniko_base
+  variables:
+    CONTEXT_DIR: "."
+    DOCKERFILE_PATH: "apps/tfc/backend/Dockerfile"
+    IMAGE_SUFFIX: "tfc-backend"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      changes:
+        - apps/tfc/backend/**/*
+    - when: never
+
+image_build_tfc_frontend:
+  extends: .kaniko_base
+  variables:
+    CONTEXT_DIR: "."
+    DOCKERFILE_PATH: "apps/tfc/frontend/Dockerfile"
+    IMAGE_SUFFIX: "tfc-frontend"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      changes:
+        - apps/tfc/frontend/**/*
+        - packages/**/*
+    - when: never
+
+image_build_storybook:
+  extends: .kaniko_base
+  variables:
+    CONTEXT_DIR: "."
+    DOCKERFILE_PATH: "packages/react-ui/Dockerfile"
+    IMAGE_SUFFIX: "storybook"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      changes:
+        - packages/react-ui/**/*
+        - packages/react-headless/**/*
+        - packages/design-system/**/*
+    - when: never
+
+image_build_keycloak:
+  extends: .kaniko_base
+  variables:
+    CONTEXT_DIR: "."
+    DOCKERFILE_PATH: "infra/keycloak/Dockerfile"
+    IMAGE_SUFFIX: "keycloak"
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      changes:
+        - infra/keycloak/**/*
+    - when: never
+
+# ===========================================================================
+#  DEPLOY — Update Flux manifests
+# ===========================================================================
+
+update_flux_manifests:
+  stage: deploy
+  image:
+    name: ${DEPLOY_JOB_IMAGE}
+    entrypoint: [""]
+  tags:
+    - linux
+    - docker
+    - s_c1r2
+  resource_group: flux-dev
+  needs:
+    - job: image_build_main_backend
+      optional: true
+    - job: image_build_main_frontend
+      optional: true
+    - job: image_build_tfc_backend
+      optional: true
+    - job: image_build_tfc_frontend
+      optional: true
+    - job: image_build_storybook
+      optional: true
+    - job: image_build_keycloak
+      optional: true
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      changes:
+        - apps/**/*
+        - packages/**/*
+        - shared/**/*
+        - infra/keycloak/**/*
+    - when: never
+  script:
+    - |
+      set -eu
+
+      DOCKER_PRIVATE_REGISTRY_EFFECTIVE="${CONTAINER_REGISTRY_HOST}"
+      TAG_PREFIX="${CI_COMMIT_REF_SLUG}-${CI_COMMIT_SHORT_SHA}"
+
+      git config user.name "GitLab CI"
+      git config user.email "gitlab-ci@developers.naval-group.com"
+
+      git fetch origin "${CI_COMMIT_REF_NAME}"
+
+      REMOTE_SHA="$(git rev-parse "origin/${CI_COMMIT_REF_NAME}")"
+      if [ "${REMOTE_SHA}" != "${CI_COMMIT_SHA}" ]; then
+        echo "Skipping manifest update for stale pipeline ${CI_COMMIT_SHA}; branch head is ${REMOTE_SHA}"
+        exit 0
+      fi
+
+      git checkout -B "${CI_COMMIT_REF_NAME}" "origin/${CI_COMMIT_REF_NAME}"
+
+      PATCH_DIR="clusters/dev/boilerplate"
+      CHANGED=false
+
+      for SUFFIX in main-backend main-frontend tfc-backend tfc-frontend storybook keycloak; do
+        PATCH_FILE="${PATCH_DIR}/${SUFFIX}-patch.yaml"
+        if [ -f "${PATCH_FILE}" ]; then
+          IMAGE="${DOCKER_PRIVATE_REGISTRY_EFFECTIVE}/${IMAGE_REPOSITORY}:${TAG_PREFIX}-${SUFFIX}"
+          sed -i "s|^\([[:space:]]*image:[[:space:]]*\).*|\1${IMAGE}|" "${PATCH_FILE}"
+          if ! git diff --quiet -- "${PATCH_FILE}"; then
+            CHANGED=true
+          fi
+        fi
+      done
+
+      if [ "${CHANGED}" = "false" ]; then
+        echo "No manifest changes needed"
+        exit 0
+      fi
+
+      git add ${PATCH_DIR}/*-patch.yaml
+      git commit -m "ci: update Flux image tags for ${CI_COMMIT_SHORT_SHA} [skip ci]"
+
+      if [ -n "${GITLAB_PUSH_TOKEN:-}" ]; then
+        PUSH_USERNAME="${GITLAB_PUSH_USERNAME:-oauth2}"
+        PUSH_URL="https://${PUSH_USERNAME}:${GITLAB_PUSH_TOKEN}@developers.naval-group.com/gitlab/naval-group/projects/cyberlab-ngb/boilerplate.git"
+      elif [ -n "${CI_JOB_TOKEN:-}" ]; then
+        PUSH_URL="https://gitlab-ci-token:${CI_JOB_TOKEN}@developers.naval-group.com/gitlab/naval-group/projects/cyberlab-ngb/boilerplate.git"
+      else
+        echo "No GitLab push token available" >&2
+        exit 1
+      fi
+
+      git push "${PUSH_URL}" HEAD:${CI_COMMIT_REF_NAME}
+  environment:
+    name: dev
+
