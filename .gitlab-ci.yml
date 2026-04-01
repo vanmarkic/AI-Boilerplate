@@ -240,3 +240,39 @@ pip-audit:
 #     - yarn workspace @aspect/react-ui npm publish
 #     - yarn workspace @aspect/design-system npm publish
 
+# --- react-ui tarball (consumable without npm registry) ---
+pack-react-ui:
+  stage: publish
+  image: node:22-slim
+  tags:
+    - linux
+    - docker
+  before_script:
+    - npm config set registry https://developers.naval-group.com/nexus/repository/npm-group/
+  script:
+    - npm install
+    - npm run build --workspace=packages/react-headless
+    - npm run build --workspace=packages/react-ui
+    # Patch package.json: bundle design-system CSS + point exports at built output
+    - >-
+      node -e "
+        const fs = require('fs');
+        fs.mkdirSync('packages/react-ui/dist/design-system', { recursive: true });
+        const css = fs.readdirSync('packages/design-system').filter(f => f.endsWith('.css'));
+        css.forEach(f => fs.copyFileSync('packages/design-system/' + f, 'packages/react-ui/dist/design-system/' + f));
+        const pkg = JSON.parse(fs.readFileSync('packages/react-ui/package.json'));
+        pkg.exports = {
+          '.': './dist/index.js',
+          './design-system.css': './dist/design-system/index.css',
+          './design-system/*.css': './dist/design-system/*.css'
+        };
+        pkg.types = './dist/index.d.ts';
+        pkg.files = ['dist'];
+        fs.writeFileSync('packages/react-ui/package.json', JSON.stringify(pkg, null, 2) + '\n');
+      "
+    - cd packages/react-ui && npm pack --pack-destination ../../
+  artifacts:
+    paths:
+      - aspect-react-ui-*.tgz
+    expire_in: 1 year
+
