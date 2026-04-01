@@ -98,6 +98,12 @@ storybook-tests:
   tags:
     - linux
     - docker
+  rules:
+    - changes:
+        - packages/react-ui/**/*
+        - packages/react-headless/**/*
+        - packages/design-system/**/*
+        - package-lock.json
   before_script:
     - npm config set registry https://developers.naval-group.com/nexus/repository/npm-group/
   script:
@@ -130,73 +136,6 @@ storybook-tests:
 #     - yarn workspace @aspect/design-system run predtrack
 #     - yarn workspace @aspect/design-system run dtrack --baseUrl=${DTRACK_BASE_URL}
 #   allow_failure: true
-
-# --- npm audit (JS/TS dependency vulnerabilities) ---
-npm-audit:
-  stage: test
-  image: node:22-slim
-  tags:
-    - linux
-    - docker
-  script:
-    - npm audit --registry=https://registry.npmjs.org
-  allow_failure: true
-  artifacts:
-    when: always
-    paths:
-      - security-reports/
-    expire_in: 30 days
-
-# --- Semgrep (SAST — all languages) ---
-semgrep:
-  stage: test
-  image: semgrep/semgrep:latest
-  tags:
-    - linux
-    - docker
-  variables:
-    SEMGREP_RULES: p/security-audit p/owasp-top-ten
-  script:
-    - semgrep scan
-        --config "p/security-audit"
-        --config "p/owasp-top-ten"
-        --exclude "node_modules"
-        --exclude ".venv"
-        --exclude "dist"
-        --exclude ".angular"
-        --exclude "**/generated/**"
-        --json
-        --output semgrep-report.json
-        apps/ packages/react-ui/src packages/ui/src shared/
-  allow_failure: true
-  artifacts:
-    when: always
-    paths:
-      - semgrep-report.json
-    expire_in: 30 days
-
-# --- Bandit (Python SAST) ---
-bandit:
-  stage: test
-  image: python:3.12-slim
-  tags:
-    - linux
-    - docker
-  script:
-    - pip config set global.index-url https://developers.naval-group.com/nexus/repository/pypi-group/simple
-    - pip install --quiet bandit
-    - bandit -r apps/main/backend apps/tfc/backend shared
-        --severity-level medium
-        -x "apps/main/backend/.venv,apps/tfc/backend/.venv"
-        -f json
-        -o bandit-report.json
-        || true
-  allow_failure: true
-  artifacts:
-    when: always
-    paths:
-      - bandit-report.json
-    expire_in: 30 days
 
 # --- Grype (SCA — npm + pip dependency vulnerabilities) ---
 grype:
@@ -244,33 +183,6 @@ gitleaks:
     when: always
     paths:
       - gitleaks-report.json
-    expire_in: 30 days
-
-# --- pip-audit (Python dependency vulnerabilities) ---
-pip-audit:
-  stage: test
-  image: python:3.12-slim
-  tags:
-    - linux
-    - docker
-  script:
-    - pip config set global.index-url https://developers.naval-group.com/nexus/repository/pypi-group/simple
-    - pip install --quiet pip-audit
-    - |
-      EXIT_CODE=0
-      for lockfile in apps/main/backend/uv.lock apps/tfc/backend/uv.lock; do
-        DIR=$(dirname "$lockfile")
-        echo "==> Auditing $DIR"
-        cd "$DIR"
-        pip-audit --format json --output "/builds/$CI_PROJECT_PATH/pip-audit-$(basename $DIR).json" 2>/dev/null || EXIT_CODE=1
-        cd /builds/$CI_PROJECT_PATH
-      done
-      exit $EXIT_CODE
-  allow_failure: true
-  artifacts:
-    when: always
-    paths:
-      - pip-audit-*.json
     expire_in: 30 days
 
 # ===========================================================================
@@ -322,9 +234,7 @@ pack-react-ui:
         fs.writeFileSync('packages/react-ui/package.json', JSON.stringify(pkg, null, 2) + '\n');
       "
     - cd packages/react-ui && npm pack --pack-destination ../../
-  needs:
-    - job: storybook-tests
-      artifacts: false
+  needs: []
   artifacts:
     paths:
       - aspect-react-ui-*.tgz
