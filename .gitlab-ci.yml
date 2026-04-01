@@ -77,7 +77,7 @@ variables:
 #  QUALITY
 # ===========================================================================
 # sonar-scanner:
-#   stage: quality
+#   stage: test
 #   tags:
 #     - linux
 #     - docker
@@ -93,7 +93,7 @@ variables:
 #     - yarn run sonar-scanner --serverUrl=${SONAR_HOST_URL}
 
 storybook-tests:
-  stage: quality
+  stage: test
   image: mcr.microsoft.com/playwright:v1.59.0-noble
   tags:
     - linux
@@ -115,7 +115,7 @@ storybook-tests:
 
 # --- Dependency-Track (SCA — existing) ---
 # dtrack:
-#   stage: security
+#   stage: test
 #   tags:
 #     - linux
 #     - docker
@@ -133,7 +133,7 @@ storybook-tests:
 
 # --- npm audit (JS/TS dependency vulnerabilities) ---
 npm-audit:
-  stage: security
+  stage: test
   image: node:22-slim
   tags:
     - linux
@@ -149,7 +149,7 @@ npm-audit:
 
 # --- Semgrep (SAST — all languages) ---
 semgrep:
-  stage: security
+  stage: test
   image: semgrep/semgrep:latest
   tags:
     - linux
@@ -177,7 +177,7 @@ semgrep:
 
 # --- Bandit (Python SAST) ---
 bandit:
-  stage: security
+  stage: test
   image: python:3.12-slim
   tags:
     - linux
@@ -200,7 +200,7 @@ bandit:
 
 # --- Grype (SCA — npm + pip dependency vulnerabilities) ---
 grype:
-  stage: security
+  stage: test
   image:
     name: anchore/grype:latest
     entrypoint: [""]
@@ -227,7 +227,7 @@ grype:
 
 # --- Gitleaks (secrets detection in git history) ---
 gitleaks:
-  stage: security
+  stage: test
   image:
     name: zricethezav/gitleaks:latest
     entrypoint: [""]
@@ -248,7 +248,7 @@ gitleaks:
 
 # --- pip-audit (Python dependency vulnerabilities) ---
 pip-audit:
-  stage: security
+  stage: test
   image: python:3.12-slim
   tags:
     - linux
