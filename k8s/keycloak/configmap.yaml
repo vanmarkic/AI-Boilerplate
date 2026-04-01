@@ -1,0 +1,225 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realm
+  namespace: boilerplate
+data:
+  realm-export.json: |
+    {
+      "realm": "boilerplate",
+      "enabled": true,
+      "sslRequired": "none",
+      "registrationAllowed": false,
+      "loginWithEmailAllowed": true,
+      "duplicateEmailsAllowed": false,
+      "resetPasswordAllowed": false,
+      "editUsernameAllowed": false,
+      "bruteForceProtected": false,
+      "requiredActions": [
+        {
+          "alias": "CONFIGURE_TOTP",
+          "name": "Configure OTP",
+          "providerId": "CONFIGURE_TOTP",
+          "enabled": true,
+          "defaultAction": false
+        },
+        {
+          "alias": "UPDATE_PASSWORD",
+          "name": "Update Password",
+          "providerId": "UPDATE_PASSWORD",
+          "enabled": true,
+          "defaultAction": false
+        },
+        {
+          "alias": "UPDATE_PROFILE",
+          "name": "Update Profile",
+          "providerId": "UPDATE_PROFILE",
+          "enabled": true,
+          "defaultAction": false
+        },
+        {
+          "alias": "VERIFY_EMAIL",
+          "name": "Verify Email",
+          "providerId": "VERIFY_EMAIL",
+          "enabled": true,
+          "defaultAction": false
+        },
+        {
+          "alias": "TERMS_AND_CONDITIONS",
+          "name": "Terms and Conditions",
+          "providerId": "TERMS_AND_CONDITIONS",
+          "enabled": false,
+          "defaultAction": false
+        }
+      ],
+      "accessTokenLifespan": 300,
+      "ssoSessionIdleTimeout": 1800,
+      "roles": {
+        "realm": [
+          { "name": "admin", "composite": false },
+          { "name": "role_manager", "composite": false },
+          { "name": "user", "composite": false }
+        ]
+      },
+      "clients": [
+        {
+          "clientId": "frontend-app",
+          "enabled": true,
+          "publicClient": true,
+          "directAccessGrantsEnabled": true,
+          "standardFlowEnabled": true,
+          "implicitFlowEnabled": false,
+          "redirectUris": ["http://localhost:4200/*"],
+          "webOrigins": ["http://localhost:4200"],
+          "attributes": {
+            "post.logout.redirect.uris": "http://localhost:4200",
+            "pkce.code.challenge.method": "S256"
+          },
+          "protocolMappers": [
+            {
+              "name": "backend-api-audience",
+              "protocol": "openid-connect",
+              "protocolMapper": "oidc-audience-mapper",
+              "consentRequired": false,
+              "config": {
+                "included.client.audience": "backend-api",
+                "id.token.claim": "false",
+                "lightweight.claim": "false",
+                "access.token.claim": "true"
+              }
+            }
+          ]
+        },
+        {
+          "clientId": "backend-api",
+          "enabled": true,
+          "bearerOnly": true,
+          "publicClient": false
+        },
+        {
+          "clientId": "admin-api",
+          "enabled": true,
+          "publicClient": false,
+          "bearerOnly": false,
+          "serviceAccountsEnabled": true,
+          "directAccessGrantsEnabled": false,
+          "standardFlowEnabled": false,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "admin-api-secret",
+          "defaultClientScopes": [],
+          "optionalClientScopes": []
+        }
+      ],
+      "users": [
+        {
+          "username": "admin@local.dev",
+          "email": "admin@local.dev",
+          "emailVerified": true,
+          "enabled": true,
+          "requiredActions": [],
+          "credentials": [
+            {
+              "type": "password",
+              "value": "admin",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["admin", "user"]
+        },
+        {
+          "username": "user@local.dev",
+          "email": "user@local.dev",
+          "emailVerified": true,
+          "enabled": true,
+          "requiredActions": [],
+          "credentials": [
+            {
+              "type": "password",
+              "value": "user",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["user"]
+        },
+        {
+          "username": "manager@local.dev",
+          "email": "manager@local.dev",
+          "emailVerified": true,
+          "enabled": true,
+          "requiredActions": [],
+          "credentials": [
+            {
+              "type": "password",
+              "value": "manager",
+              "temporary": false
+            }
+          ],
+          "realmRoles": ["role_manager"]
+        }
+      ]
+    }
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-admin-script
+  namespace: boilerplate
+data:
+  configure-admin-client.sh: |
+    #!/bin/bash
+    # Grant realm-management client roles to admin-api service account.
+    # Runs after Keycloak starts and the realm has been imported.
+
+    set -euo pipefail
+
+    KCADM="/opt/keycloak/bin/kcadm.sh"
+    REALM="boilerplate"
+    MAX_RETRIES=30
+    RETRY_INTERVAL=2
+
+    # Wait for Keycloak to be ready
+    echo "Waiting for Keycloak to be ready..."
+    for i in $(seq 1 $MAX_RETRIES); do
+      if $KCADM config credentials \
+        --server "${KEYCLOAK_URL:-http://localhost:8080}" \
+        --realm master \
+        --user "$KC_BOOTSTRAP_ADMIN_USERNAME" \
+        --password "$KC_BOOTSTRAP_ADMIN_PASSWORD" 2>/dev/null; then
+        echo "Keycloak is ready."
+        break
+      fi
+      if [ "$i" -eq "$MAX_RETRIES" ]; then
+        echo "Keycloak did not become ready in time."
+        exit 1
+      fi
+      sleep $RETRY_INTERVAL
+    done
+
+    # Get the service account user ID for admin-api
+    SA_USER_ID=$($KCADM get clients -r "$REALM" -q clientId=admin-api --fields id \
+      | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['id'])" 2>/dev/null)
+
+    if [ -z "$SA_USER_ID" ]; then
+      echo "admin-api client not found, skipping configuration."
+      exit 0
+    fi
+
+    # Get the service account user
+    SA_USER=$($KCADM get clients/$SA_USER_ID/service-account-user -r "$REALM" --fields id \
+      | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])" 2>/dev/null)
+
+    # Get realm-management client ID
+    RM_CLIENT_ID=$($KCADM get clients -r "$REALM" -q clientId=realm-management --fields id \
+      | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['id'])" 2>/dev/null)
+
+    # Assign realm-management roles to the service account
+    for ROLE_NAME in view-users manage-users view-realm manage-realm; do
+      ROLE_JSON=$($KCADM get clients/$RM_CLIENT_ID/roles/$ROLE_NAME -r "$REALM" 2>/dev/null)
+      if [ -n "$ROLE_JSON" ]; then
+        echo "$ROLE_JSON" | $KCADM create users/$SA_USER/role-mappings/clients/$RM_CLIENT_ID \
+          -r "$REALM" -f - 2>/dev/null || true
+        echo "Assigned $ROLE_NAME to admin-api service account."
+      fi
+    done
+
+    echo "Admin API client configuration complete."
