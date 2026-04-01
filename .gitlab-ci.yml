@@ -271,6 +271,9 @@ pack-react-ui:
         fs.writeFileSync('packages/react-ui/package.json', JSON.stringify(pkg, null, 2) + '\n');
       "
     - cd packages/react-ui && npm pack --pack-destination ../../
+  needs:
+    - job: storybook-tests
+      artifacts: false
   artifacts:
     paths:
       - aspect-react-ui-*.tgz
