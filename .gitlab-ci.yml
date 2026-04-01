@@ -1,8 +1,7 @@
 image: node:16-buster
 
 stages:
-  - quality
-  - security
+  - test
   - publish
   - build
   - deploy
