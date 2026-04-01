@@ -13,7 +13,7 @@ RETRY_INTERVAL=2
 echo "Waiting for Keycloak to be ready..."
 for i in $(seq 1 $MAX_RETRIES); do
   if $KCADM config credentials \
-    --server http://localhost:8080 \
+    --server "${KEYCLOAK_URL:-http://localhost:8080}" \
     --realm master \
     --user "$KC_BOOTSTRAP_ADMIN_USERNAME" \
     --password "$KC_BOOTSTRAP_ADMIN_PASSWORD" 2>/dev/null; then
