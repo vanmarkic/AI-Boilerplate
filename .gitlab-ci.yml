@@ -26,7 +26,7 @@ variables:
 .get-credentials:
   script:
     - mkdir -p /tmp /usr/local/bin
-    - wget -qO /tmp/vault.zip ${VAULT_BINARY_URL}
+    - wget -q -O /tmp/vault.zip ${VAULT_BINARY_URL}
     - unzip /tmp/vault.zip -d /usr/local/bin
     - chmod +x /usr/local/bin/vault
     - VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=$DOCKER_VAULT_ROLE jwt=$ID_TOKEN)"
