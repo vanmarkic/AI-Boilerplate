@@ -37,7 +37,7 @@ variables:
 .kaniko_base:
   stage: build
   image:
-    name: gcr.io/kaniko-project/executor:v1.24.0-debug
+    name: kaniko-project/executor:v1.24.0-debug
     entrypoint: [""]
   tags:
     - linux
