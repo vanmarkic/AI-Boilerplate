@@ -1,5 +1,5 @@
 /* ── Silent Wake — Component Overrides ────────────────────
- *  Visual overrides scoped to [data-theme="tfc-silent-wake"].
+ *  Visual overrides scoped to [data-theme="silent-wake"].
  *  Covers typography, rounding, scanline suppression, badges.
  *  Does NOT change layouts or logic — only presentation.
  * ──────────────────────────────────────────────────────── */
@@ -8,43 +8,43 @@
 
   /* ── Typography ──────────────────────────────────────── */
 
-  [data-theme="tfc-silent-wake"] .home-hero__title {
+  [data-theme="silent-wake"] .home-hero__title {
     font-family: var(--font-sans, system-ui, sans-serif);
     font-weight: 900;
     letter-spacing: -0.025em;
     color: var(--color-foreground);
   }
 
-  [data-theme="tfc-silent-wake"] .home-hero__title::before,
-  [data-theme="tfc-silent-wake"] .home-hero__title::after {
+  [data-theme="silent-wake"] .home-hero__title::before,
+  [data-theme="silent-wake"] .home-hero__title::after {
     content: none;
   }
 
-  [data-theme="tfc-silent-wake"] .home-hero__subtitle {
+  [data-theme="silent-wake"] .home-hero__subtitle {
     font-family: var(--font-sans, system-ui, sans-serif);
     font-weight: 700;
     letter-spacing: 0.35em;
     color: var(--color-accent);
   }
 
-  [data-theme="tfc-silent-wake"] .player-header__title {
+  [data-theme="silent-wake"] .player-header__title {
     font-family: var(--font-sans, system-ui, sans-serif);
     font-weight: 900;
     letter-spacing: -0.025em;
     color: var(--color-foreground);
   }
 
-  [data-theme="tfc-silent-wake"] .tac-panel__label {
+  [data-theme="silent-wake"] .tac-panel__label {
     font-family: var(--font-sans, system-ui, sans-serif);
     font-weight: 700;
   }
 
-  [data-theme="tfc-silent-wake"] .mode-heading {
+  [data-theme="silent-wake"] .mode-heading {
     color: var(--color-accent);
     letter-spacing: 0.35em;
   }
 
-  [data-theme="tfc-silent-wake"] .cmd-panel__title {
+  [data-theme="silent-wake"] .cmd-panel__title {
     font-family: var(--font-sans, system-ui, sans-serif);
     font-weight: 900;
     letter-spacing: -0.025em;
@@ -53,106 +53,106 @@
 
   /* ── Header — scanline suppression ───────────────────── */
 
-  [data-theme="tfc-silent-wake"] .player-header {
+  [data-theme="silent-wake"] .player-header {
     border-bottom-color: var(--color-border);
   }
 
-  [data-theme="tfc-silent-wake"] .player-header::after,
-  [data-theme="tfc-silent-wake"] .home-hero::after,
-  [data-theme="tfc-silent-wake"] .cmd-panel__header::after {
+  [data-theme="silent-wake"] .player-header::after,
+  [data-theme="silent-wake"] .home-hero::after,
+  [data-theme="silent-wake"] .cmd-panel__header::after {
     display: none;
   }
 
-  [data-theme="tfc-silent-wake"] .cmd-panel__header {
+  [data-theme="silent-wake"] .cmd-panel__header {
     border-bottom-color: var(--color-border);
   }
 
   /* ── Turn Banner ─────────────────────────────────────── */
 
-  [data-theme="tfc-silent-wake"] .board-turn-banner__turn {
+  [data-theme="silent-wake"] .board-turn-banner__turn {
     color: var(--color-accent);
   }
 
-  [data-theme="tfc-silent-wake"] .board-turn-banner__title {
+  [data-theme="silent-wake"] .board-turn-banner__title {
     font-family: var(--font-sans, system-ui, sans-serif);
     font-weight: 700;
   }
 
   /* ── Board Section Labels ────────────────────────────── */
 
-  [data-theme="tfc-silent-wake"] .board-turn-banner {
+  [data-theme="silent-wake"] .board-turn-banner {
     border-bottom-color: var(--color-border);
   }
 
   /* ── Role Card Active — use primary instead of success ─ */
 
-  [data-theme="tfc-silent-wake"] .role-card--active {
+  [data-theme="silent-wake"] .role-card--active {
     border-color: var(--color-primary);
     background: color-mix(in oklch, var(--color-primary) 8%, var(--color-card));
   }
 
-  [data-theme="tfc-silent-wake"] .role-card--active .role-card__role-id {
+  [data-theme="silent-wake"] .role-card--active .role-card__role-id {
     color: var(--color-primary);
   }
 
-  [data-theme="tfc-silent-wake"] .role-card__decision {
+  [data-theme="silent-wake"] .role-card__decision {
     border-top-color: var(--color-primary);
   }
 
-  [data-theme="tfc-silent-wake"] .role-card__decision-question {
+  [data-theme="silent-wake"] .role-card__decision-question {
     color: var(--color-primary);
   }
 
-  [data-theme="tfc-silent-wake"] .role-card__option--selected {
+  [data-theme="silent-wake"] .role-card__option--selected {
     border-color: var(--color-primary);
   }
 
-  [data-theme="tfc-silent-wake"] .role-card__option input[type="radio"],
-  [data-theme="tfc-silent-wake"] .role-card__option input[type="checkbox"] {
+  [data-theme="silent-wake"] .role-card__option input[type="radio"],
+  [data-theme="silent-wake"] .role-card__option input[type="checkbox"] {
     accent-color: var(--color-primary);
   }
 
   /* ── CO Decision Bar — use primary ─────────────────── */
 
-  [data-theme="tfc-silent-wake"] .co-decision-bar {
+  [data-theme="silent-wake"] .co-decision-bar {
     border-top-color: var(--color-primary);
     background: color-mix(in oklch, var(--color-primary) 5%, var(--color-card));
   }
 
   /* ── Cards & Panels — rounding + left-border removal ── */
 
-  [data-theme="tfc-silent-wake"] .role-card {
+  [data-theme="silent-wake"] .role-card {
     border-radius: var(--radius-lg);
   }
 
-  [data-theme="tfc-silent-wake"] .role-card--intel {
+  [data-theme="silent-wake"] .role-card--intel {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
   }
 
-  [data-theme="tfc-silent-wake"] .role-card--active {
+  [data-theme="silent-wake"] .role-card--active {
     border-radius: var(--radius-lg);
   }
 
-  [data-theme="tfc-silent-wake"] .role-card--done {
+  [data-theme="silent-wake"] .role-card--done {
     border-radius: var(--radius-lg);
   }
 
   /* Tac-panel: rounding + re-color hardcoded hue 195→260 */
-  [data-theme="tfc-silent-wake"] .tac-panel {
-    border-radius: var(--radius-xl);
+  [data-theme="silent-wake"] .tac-panel {
+    border-radius: 1.5rem;
     border: 1px solid oklch(100% 0 0 / 6%);
     background: oklch(15% 0.02 250 / 60%);
   }
 
-  [data-theme="tfc-silent-wake"] .tac-panel:hover {
+  [data-theme="silent-wake"] .tac-panel:hover {
     background: oklch(20% 0.02 260 / 65%);
     border-color: var(--color-primary);
     transform: translateX(4px);
     box-shadow: -4px 0 12px oklch(55% 0.22 260 / 20%);
   }
 
-  [data-theme="tfc-silent-wake"] .tac-panel::after {
+  [data-theme="silent-wake"] .tac-panel::after {
     background: linear-gradient(
       90deg,
       transparent 0%,
@@ -163,116 +163,116 @@
     );
   }
 
-  [data-theme="tfc-silent-wake"] .tac-panel[data-primary] {
+  [data-theme="silent-wake"] .tac-panel[data-primary] {
     border-color: oklch(55% 0.22 260 / 30%);
     background: oklch(15% 0.02 260 / 55%);
     box-shadow: 0 0 20px oklch(55% 0.22 260 / 12%);
   }
 
   /* Event & issue tiles */
-  [data-theme="tfc-silent-wake"] .event-tile {
+  [data-theme="silent-wake"] .event-tile {
     border-radius: var(--radius-sm);
     border-left: 1px solid var(--color-border);
   }
 
-  [data-theme="tfc-silent-wake"] .event-tile__icon {
+  [data-theme="silent-wake"] .event-tile__icon {
     border-radius: var(--radius-sm);
   }
 
-  [data-theme="tfc-silent-wake"] .issue-tile {
+  [data-theme="silent-wake"] .issue-tile {
     border-radius: var(--radius-sm);
     border-left: 1px solid var(--color-border);
   }
 
-  [data-theme="tfc-silent-wake"] .issue-tile[data-lifecycle="active"] {
+  [data-theme="silent-wake"] .issue-tile[data-lifecycle="active"] {
     border-left: 1px solid var(--color-destructive);
   }
 
-  [data-theme="tfc-silent-wake"] .issue-tile[data-lifecycle="mitigated"] {
+  [data-theme="silent-wake"] .issue-tile[data-lifecycle="mitigated"] {
     border-left: 1px solid var(--color-warning);
   }
 
-  [data-theme="tfc-silent-wake"] .issue-tile[data-lifecycle="resolved"] {
+  [data-theme="silent-wake"] .issue-tile[data-lifecycle="resolved"] {
     border-left: 1px solid var(--color-success);
   }
 
-  [data-theme="tfc-silent-wake"] .issue-detail {
+  [data-theme="silent-wake"] .issue-detail {
     border-radius: var(--radius-sm);
   }
 
   /* Dossier card (scenario picker) */
-  [data-theme="tfc-silent-wake"] .dossier-card {
+  [data-theme="silent-wake"] .dossier-card {
     border-radius: var(--radius-sm);
     border-left: 1px solid var(--color-border);
   }
 
   /* CO card (two-player mode) */
-  [data-theme="tfc-silent-wake"] .co-card {
+  [data-theme="silent-wake"] .co-card {
     border-radius: var(--radius-lg);
     border-left: 1px solid var(--color-border);
   }
 
   /* CO decision bar options */
-  [data-theme="tfc-silent-wake"] .co-decision-bar__option {
+  [data-theme="silent-wake"] .co-decision-bar__option {
     border-radius: var(--radius-sm);
   }
 
   /* Decision log entries */
-  [data-theme="tfc-silent-wake"] .decision-entry {
+  [data-theme="silent-wake"] .decision-entry {
     border-radius: var(--radius-sm);
     border-left: 1px solid var(--color-border);
   }
 
-  [data-theme="tfc-silent-wake"] .decision-entry[data-status="closed"] {
+  [data-theme="silent-wake"] .decision-entry[data-status="closed"] {
     border-left-color: var(--color-success);
   }
 
-  [data-theme="tfc-silent-wake"] .decision-entry[data-status="open"] {
+  [data-theme="silent-wake"] .decision-entry[data-status="open"] {
     border-left-color: var(--color-warning);
   }
 
   /* System & warfare chips */
-  [data-theme="tfc-silent-wake"] .system-chip {
+  [data-theme="silent-wake"] .system-chip {
     border-radius: var(--radius-sm);
   }
 
-  [data-theme="tfc-silent-wake"] .warfare-chip {
+  [data-theme="silent-wake"] .warfare-chip {
     border-radius: var(--radius-sm);
   }
 
   /* ── Waiting Room ────────────────────────────────────── */
 
-  [data-theme="tfc-silent-wake"] .crew-station {
+  [data-theme="silent-wake"] .crew-station {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
   }
 
-  [data-theme="tfc-silent-wake"] .crew-station[data-filled] {
+  [data-theme="silent-wake"] .crew-station[data-filled] {
     border-color: var(--color-success);
   }
 
-  [data-theme="tfc-silent-wake"] .crew-station[data-self] {
+  [data-theme="silent-wake"] .crew-station[data-self] {
     border-color: var(--color-primary);
   }
 
-  [data-theme="tfc-silent-wake"] .wr-sidebar__item {
+  [data-theme="silent-wake"] .wr-sidebar__item {
     border-left: none;
     border-radius: var(--radius-sm);
   }
 
-  [data-theme="tfc-silent-wake"] .wr-sidebar__item[data-active] {
+  [data-theme="silent-wake"] .wr-sidebar__item[data-active] {
     border-left: none;
     border: 1px solid var(--color-primary);
   }
 
   /* ── Stress Bar — pill shape ─────────────────────────── */
 
-  [data-theme="tfc-silent-wake"] .stress-bar__track {
+  [data-theme="silent-wake"] .stress-bar__track {
     border-radius: 9999px;
     background: var(--color-muted);
   }
 
-  [data-theme="tfc-silent-wake"] .stress-bar__fill {
+  [data-theme="silent-wake"] .stress-bar__fill {
     border-radius: 9999px;
   }
 
@@ -285,7 +285,7 @@
      See phase-badge.component.ts host: { class: "exercise-phase" }
      and components-exercise-layout.css line 124. */
 
-  [data-theme="tfc-silent-wake"] .exercise-phase {
+  [data-theme="silent-wake"] .exercise-phase {
     border-radius: 9999px;
     padding: 0.15rem 0.75rem;
     font-weight: 600;
@@ -303,23 +303,23 @@
     color: var(--sw-phase-color, var(--color-muted-foreground));
   }
 
-  [data-theme="tfc-silent-wake"] [data-phase="running"] {
+  [data-theme="silent-wake"] [data-phase="running"] {
     --sw-phase-color: var(--color-success);
   }
 
-  [data-theme="tfc-silent-wake"] [data-phase="briefing"] {
+  [data-theme="silent-wake"] [data-phase="briefing"] {
     --sw-phase-color: var(--color-primary);
   }
 
-  [data-theme="tfc-silent-wake"] [data-phase="completed"] {
+  [data-theme="silent-wake"] [data-phase="completed"] {
     --sw-phase-color: oklch(75% 0.12 80);
   }
 
-  [data-theme="tfc-silent-wake"] [data-phase="setup"] {
+  [data-theme="silent-wake"] [data-phase="setup"] {
     --sw-phase-color: var(--color-muted-foreground);
   }
 
-  [data-theme="tfc-silent-wake"] [data-phase="paused"] {
+  [data-theme="silent-wake"] [data-phase="paused"] {
     --sw-phase-color: var(--color-warning);
   }
 
@@ -327,21 +327,21 @@
   /* data-role is on .playing-card__role-badge (child span).
      These style the badge text/bg directly. */
 
-  [data-theme="tfc-silent-wake"] .playing-card__role-badge[data-role="co"],
-  [data-theme="tfc-silent-wake"] .playing-card__role-badge[data-role="decision_maker"] {
+  [data-theme="silent-wake"] .playing-card__role-badge[data-role="co"],
+  [data-theme="silent-wake"] .playing-card__role-badge[data-role="decision_maker"] {
     border: 1px solid oklch(75% 0.15 195 / 50%);
     background: oklch(70% 0.15 195 / 15%);
     color: oklch(90% 0.05 195);
   }
 
-  [data-theme="tfc-silent-wake"] .playing-card__role-badge[data-role="admin"] {
+  [data-theme="silent-wake"] .playing-card__role-badge[data-role="admin"] {
     border: 1px solid oklch(80% 0.15 85 / 50%);
     background: oklch(75% 0.15 85 / 15%);
     color: oklch(92% 0.05 85);
   }
 
   /* Default advisor badge color (emerald) */
-  [data-theme="tfc-silent-wake"] .playing-card__role-badge {
+  [data-theme="silent-wake"] .playing-card__role-badge {
     border: 1px solid oklch(72% 0.17 160 / 50%);
     background: oklch(65% 0.17 160 / 15%);
     color: oklch(90% 0.05 160);
@@ -350,14 +350,14 @@
 
   /* ── Buttons — font weight ───────────────────────────── */
 
-  [data-theme="tfc-silent-wake"] button[class*="primary"],
-  [data-theme="tfc-silent-wake"] [uiButton] {
+  [data-theme="silent-wake"] button[class*="primary"],
+  [data-theme="silent-wake"] [uiButton] {
     font-weight: 700;
   }
 
   /* ── Footer ──────────────────────────────────────────── */
 
-  [data-theme="tfc-silent-wake"] .player-footer {
+  [data-theme="silent-wake"] .player-footer {
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   }
 
@@ -365,9 +365,9 @@
   /* Actual classes: .briefing-overlay__panel and
      .completion-overlay__panel (components-exercise-layout.css) */
 
-  [data-theme="tfc-silent-wake"] .briefing-overlay__panel,
-  [data-theme="tfc-silent-wake"] .completion-overlay__panel {
-    border-radius: var(--radius-xl);
+  [data-theme="silent-wake"] .briefing-overlay__panel,
+  [data-theme="silent-wake"] .completion-overlay__panel {
+    border-radius: 1.5rem;
     border: 1px solid var(--color-border);
   }
 }
