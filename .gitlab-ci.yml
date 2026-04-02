@@ -279,7 +279,7 @@ image_build_tfc_backend:
     DOCKERFILE_PATH: "apps/tfc/backend/Dockerfile"
     IMAGE_SUFFIX: "tfc-backend"
   rules:
-    - if: '$CI_COMMIT_REF_NAME == "dev"'
+    - if: '$CI_COMMIT_REF_NAME == "dev" || $CI_COMMIT_REF_NAME == "master"'
       changes:
         - apps/tfc/backend/**/*
     - when: never

@@ -24,6 +24,7 @@ COPY apps/main/backend/alembic.ini ./
 COPY apps/main/backend/alembic/ ./alembic/
 COPY --from=feature-filter /filtered-features/ ./features/
 
+ENV UV_INDEX_URL=https://developers.naval-group.com/nexus/repository/pypi-group/simple/
 RUN uv sync --frozen --no-dev --no-cache
 
 RUN useradd --create-home appuser

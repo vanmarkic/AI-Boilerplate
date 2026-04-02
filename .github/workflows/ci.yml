@@ -245,6 +245,13 @@ jobs:
         working-directory: apps/tfc/backend
         run: python -m pytest tests/migration_rollback_test.py -v --tb=short
 
+  docker-build-tfc-backend:
+    name: Docker Build (TFC backend)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker build -f apps/tfc/backend/Dockerfile .
+
   openapi-validate:
     name: OpenAPI Validation
     runs-on: ubuntu-latest
