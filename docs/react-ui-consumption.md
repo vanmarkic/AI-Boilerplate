@@ -71,12 +71,22 @@ import { Button, Input, DataTable, Card } from "@aspect/react-ui";
 
 The full design system (tokens, reset, utilities, components) is bundled in the tarball.
 
+#### All-in-one (includes default theme + all alternate themes)
+
 ```css
-/* Import everything */
 @import "@aspect/react-ui/design-system.css";
 ```
 
-Or import individual layers for finer control:
+This loads the default Naval Group Corporate light theme on `:root`. Activate alternate themes by setting `data-theme` on `<html>` or any container:
+
+| Theme | Attribute | Style |
+|-------|-----------|-------|
+| Default (Naval Group) | *(none — active on `:root`)* | Light, petroleum blue |
+| Steel Blue | `data-theme="steel-blue"` | Dark, steel-blue accent |
+| Ocean | `data-theme="ocean"` | Dark teal, golden-yellow accent |
+| Silent Wake | `data-theme="silent-wake"` | Dark navy, blue glow accent |
+
+#### Individual layers
 
 ```css
 @import "@aspect/react-ui/design-system/tokens.css";
@@ -84,6 +94,26 @@ Or import individual layers for finer control:
 @import "@aspect/react-ui/design-system/utilities.css";
 @import "@aspect/react-ui/design-system/components.css";
 ```
+
+#### Bring your own tokens (headless)
+
+Use the components with your own design tokens:
+
+```css
+@import "@aspect/react-ui/design-system/headless.css";
+@import "./my-brand-tokens.css";
+```
+
+The headless entry point includes reset, utilities, and component styles but **no tokens**. The `tokens` CSS layer is declared but empty — your token file slots into it.
+
+Start from the template for a complete list of tokens to define:
+
+```css
+/* Copy and customize: */
+@import "@aspect/react-ui/design-system/tokens-custom-template.css";
+```
+
+Components do not provide CSS fallback values. If a token is missing, the property resolves to its CSS initial value (typically `transparent` for colors), which will break rendering. Always start from the template.
 
 ### Available components
 
@@ -127,4 +157,4 @@ https://<GITLAB_HOST>/api/v4/projects/<PROJECT_ID>/jobs/<JOB_ID>/artifacts/aspec
 
 ## AI agent context
 
-If you are an AI coding assistant working in the consuming project, this is a pre-built React component library. Do not attempt to modify its source — it comes from the AI-Boilerplate monorepo. Use the components as documented above. The design system CSS uses CSS layers (`@layer vendor, reset, tokens, utilities, components`) — respect the layer ordering when adding custom styles.
+If you are an AI coding assistant working in the consuming project, this is a pre-built React component library. Do not attempt to modify its source — it comes from the AI-Boilerplate monorepo. Use the components as documented above. The design system CSS uses CSS layers (`@layer vendor, reset, tokens, utilities, components`) — respect the layer ordering when adding custom styles. The library supports three theming modes: (1) all-in-one import with `data-theme` attribute switching, (2) individual layer imports for fine control, (3) headless import + custom tokens for full BYO theming. See the "Design system CSS" section above.
