@@ -77,14 +77,14 @@ The full design system (tokens, reset, utilities, components) is bundled in the 
 @import "@aspect/react-ui/design-system.css";
 ```
 
-This loads the default Naval Group Corporate light theme on `:root`. Activate alternate themes by setting `data-theme` on `<html>` or any container:
+This loads the default Silent Wake dark theme on `:root`. Activate alternate themes by setting `data-theme` on `<html>` or any container:
 
 | Theme | Attribute | Style |
 |-------|-----------|-------|
-| Default (Naval Group) | *(none — active on `:root`)* | Light, petroleum blue |
+| Silent Wake (default) | *(none — active on `:root`)* | Dark navy, blue glow accent |
+| Naval Group | `data-theme="naval-group"` | Light, petroleum blue |
 | Steel Blue | `data-theme="steel-blue"` | Dark, steel-blue accent |
 | Ocean | `data-theme="ocean"` | Dark teal, golden-yellow accent |
-| Silent Wake | `data-theme="silent-wake"` | Dark navy, blue glow accent |
 
 #### Individual layers
 
@@ -157,4 +157,4 @@ https://<GITLAB_HOST>/api/v4/projects/<PROJECT_ID>/jobs/<JOB_ID>/artifacts/aspec
 
 ## AI agent context
 
-If you are an AI coding assistant working in the consuming project, this is a pre-built React component library. Do not attempt to modify its source — it comes from the AI-Boilerplate monorepo. Use the components as documented above. The design system CSS uses CSS layers (`@layer vendor, reset, tokens, utilities, components`) — respect the layer ordering when adding custom styles. The library supports three theming modes: (1) all-in-one import with `data-theme` attribute switching, (2) individual layer imports for fine control, (3) headless import + custom tokens for full BYO theming. See the "Design system CSS" section above.
+If you are an AI coding assistant working in the consuming project, this is a pre-built React component library. Do not attempt to modify its source — it comes from the AI-Boilerplate monorepo. Use the components as documented above. The design system CSS uses CSS layers (`@layer vendor, reset, tokens, utilities, components`) — respect the layer ordering when adding custom styles. The library supports three theming modes: (1) all-in-one import with `data-theme` attribute switching, (2) individual layer imports for fine control, (3) headless import + custom tokens for full BYO theming. The default theme is Silent Wake (dark). See the "Design system CSS" section above.
