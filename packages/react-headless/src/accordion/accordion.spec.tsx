@@ -7,7 +7,9 @@ describe('Accordion (single mode)', () => {
     render(
       <Accordion.Root type="single">
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -21,11 +23,15 @@ describe('Accordion (single mode)', () => {
     render(
       <Accordion.Root type="single">
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
         <Accordion.Item value="b">
-          <Accordion.Header><Accordion.Trigger>Item B</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item B</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content B</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -41,7 +47,9 @@ describe('Accordion (single mode)', () => {
     render(
       <Accordion.Root type="single" defaultValue="a">
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -55,7 +63,9 @@ describe('Accordion (single mode)', () => {
     render(
       <Accordion.Root type="single" defaultValue="a" collapsible>
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -69,7 +79,9 @@ describe('Accordion (single mode)', () => {
     render(
       <Accordion.Root type="single" onValueChange={onChange}>
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -82,7 +94,9 @@ describe('Accordion (single mode)', () => {
     render(
       <Accordion.Root type="single">
         <Accordion.Item value="a" disabled>
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -97,11 +111,15 @@ describe('Accordion (multiple mode)', () => {
     render(
       <Accordion.Root type="multiple">
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
         <Accordion.Item value="b">
-          <Accordion.Header><Accordion.Trigger>Item B</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item B</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content B</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -117,7 +135,9 @@ describe('Accordion (multiple mode)', () => {
     render(
       <Accordion.Root type="multiple" onValueChange={onChange}>
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -132,7 +152,9 @@ describe('Accordion (ARIA)', () => {
     render(
       <Accordion.Root type="single" defaultValue="a">
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -147,7 +169,9 @@ describe('Accordion (ARIA)', () => {
     render(
       <Accordion.Root type="single" defaultValue="a">
         <Accordion.Item value="a">
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,
@@ -161,7 +185,9 @@ describe('Accordion (ARIA)', () => {
     render(
       <Accordion.Root type="single">
         <Accordion.Item value="a" disabled>
-          <Accordion.Header><Accordion.Trigger>Item A</Accordion.Trigger></Accordion.Header>
+          <Accordion.Header>
+            <Accordion.Trigger>Item A</Accordion.Trigger>
+          </Accordion.Header>
           <Accordion.Content>Content A</Accordion.Content>
         </Accordion.Item>
       </Accordion.Root>,

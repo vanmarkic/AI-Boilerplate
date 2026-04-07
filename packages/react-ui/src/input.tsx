@@ -1,18 +1,11 @@
 import { type ChangeEvent, type InputHTMLAttributes, useId } from 'react';
 
-export interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
+export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label?: string;
   onValueChange?: (value: string) => void;
 }
 
-export function Input({
-  label,
-  onValueChange,
-  onChange,
-  id,
-  ...props
-}: InputProps) {
+export function Input({ label, onValueChange, onChange, id, ...props }: InputProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
 
@@ -28,12 +21,7 @@ export function Input({
           {label}
         </label>
       )}
-      <input
-        id={inputId}
-        className="input-base"
-        onChange={handleChange}
-        {...props}
-      />
+      <input id={inputId} className="input-base" onChange={handleChange} {...props} />
     </div>
   );
 }

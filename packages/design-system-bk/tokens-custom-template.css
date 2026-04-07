@@ -1,0 +1,184 @@
+/* ── Custom Theme Template ───────────────────────────────
+ *  Copy this file and fill in your brand values.
+ *  Every token that @aspect/react-ui components depend on
+ *  is listed below. Required tokens MUST be defined;
+ *  optional tokens can be omitted if unused.
+ *
+ *  Import alongside the headless entry point:
+ *    @import "@aspect/react-ui/design-system/headless.css";
+ *    @import "./my-brand-tokens.css";
+ * ──────────────────────────────────────────────────────── */
+
+@layer tokens {
+  :root {
+    /* ── Base surfaces ────────────────────────────────── */
+    --color-background: /* TODO */;
+    --color-card: /* TODO */;
+    --color-popover: /* TODO */;
+    --color-secondary: /* TODO */;
+    --color-muted: /* TODO */;
+
+    /* ── Borders & inputs ─────────────────────────────── */
+    --color-border: /* TODO */;
+    --color-input: /* TODO */;
+
+    /* ── Text ─────────────────────────────────────────── */
+    --color-foreground: /* TODO */;
+    --color-card-foreground: /* TODO */;
+    --color-popover-foreground: /* TODO */;
+    --color-secondary-foreground: /* TODO */;
+    --color-muted-foreground: /* TODO */;
+
+    /* ── Primary / accent ────────────────────────────── */
+    --color-primary: /* TODO */;
+    --color-primary-foreground: /* TODO */;
+    --color-accent: /* TODO */;
+    --color-accent-foreground: /* TODO */;
+    --color-ring: /* TODO */;
+
+    /* ── Dynamic accent ──────────────────────────────── */
+    --color-dynamic: /* TODO */;
+
+    /* ── Semantic signals ────────────────────────────── */
+    --color-destructive: /* TODO */;
+    --color-destructive-foreground: /* TODO */;
+    --color-warning: /* TODO */;
+    --color-warning-foreground: /* TODO */;
+    --color-success: /* TODO */;
+    --color-success-foreground: /* TODO */;
+    --color-info: /* TODO */;
+    --color-info-foreground: /* TODO */;
+
+    /* ── Spacing ──────────────────────────────────────── */
+    --spacing-xs: /* TODO */;
+    --spacing-sm: /* TODO */;
+    --spacing-md: /* TODO */;
+    --spacing-lg: /* TODO */;
+    --spacing-xl: /* TODO */;
+    --spacing-2xl: /* TODO */;
+
+    /* ── Typography ───────────────────────────────────── */
+    --font-sans: /* TODO */;
+    --font-mono: /* TODO */;
+    --font-size-xs: /* TODO */;
+    --font-size-xs--line-height: /* TODO */;
+    --font-size-sm: /* TODO */;
+    --font-size-sm--line-height: /* TODO */;
+    --font-size-base: /* TODO */;
+    --font-size-base--line-height: /* TODO */;
+    --font-size-lg: /* TODO */;
+    --font-size-lg--line-height: /* TODO */;
+    --font-size-xl: /* TODO */;
+    --font-size-xl--line-height: /* TODO */;
+    --font-size-2xl: /* TODO */;
+    --font-size-2xl--line-height: /* TODO */;
+    --font-size-3xl: /* TODO */;
+    --font-size-3xl--line-height: /* TODO */;
+    --font-size-4xl: /* TODO */;
+    --font-size-4xl--line-height: /* TODO */;
+    --font-size-5xl: /* TODO */;
+    --font-size-5xl--line-height: /* TODO */;
+    --font-size-6xl: /* TODO */;
+    --font-size-6xl--line-height: /* TODO */;
+
+    /* ── Container widths ─────────────────────────────── */
+    --container-xs: /* TODO */;
+    --container-sm: /* TODO */;
+    --container-md: /* TODO */;
+    --container-lg: /* TODO */;
+    --container-xl: /* TODO */;
+    --container-2xl: /* TODO */;
+    --container-3xl: /* TODO */;
+    --container-4xl: /* TODO */;
+    --container-5xl: /* TODO */;
+
+    /* ── Layout ───────────────────────────────────────── */
+    --sidebar-width: /* TODO */;
+
+    /* ── Control heights ──────────────────────────────── */
+    --control-sm: /* TODO */;
+    --control-md: /* TODO */;
+    --control-lg: /* TODO */;
+
+    /* ── Border radius ────────────────────────────────── */
+    --radius-sm: /* TODO */;
+    --radius-md: /* TODO */;
+    --radius-lg: /* TODO */;
+    --radius-full: /* TODO */;
+
+    /* ── Shadows ──────────────────────────────────────── */
+    --shadow-sm: /* TODO */;
+    --shadow-md: /* TODO */;
+    --shadow-lg: /* TODO */;
+
+    /* ── Glow + glass ─────────────────────────────────── */
+    --glow-strength: /* TODO */;
+    --glass-strength: /* TODO */;
+    --glow-color: /* TODO */;
+    --glow-sm: /* TODO */;
+    --glow-primary: /* TODO */;
+    --glow-lg: /* TODO */;
+    --glow-xl: /* TODO */;
+    --glass-bg: /* TODO */;
+    --glass-border: /* TODO */;
+    --glass-blur: /* TODO */;
+    --glass-shadow: /* TODO */;
+
+    /* ── Overlay & effects ────────────────────────────── */
+    --overlay-scanline: /* TODO */;
+    --overlay-vignette: /* TODO */;
+    --stress-vignette-opacity: /* TODO */;
+
+    /* ── Motion ───────────────────────────────────────── */
+    --duration-fast: /* TODO */;
+    --duration-normal: /* TODO */;
+    --duration-slow: /* TODO */;
+    --duration-emphasis: /* TODO */;
+    --duration-scenic: /* TODO */;
+    --ease-default: /* TODO */;
+    --ease-spring: /* TODO */;
+    --ease-out-expo: /* TODO */;
+    --ease-in-out-back: /* TODO */;
+
+    /* ── Z-index ──────────────────────────────────────── */
+    --z-base: /* TODO */;
+    --z-above: /* TODO */;
+    --z-modal: /* TODO */;
+    --z-toast: /* TODO */;
+
+    /* ── Optional — Extended alarms ──────────────────── */
+    --color-alarm-breakdown: /* Optional — remove if unused */;
+    --color-alarm-degraded: /* Optional — remove if unused */;
+    --color-alarm-intermediate: /* Optional — remove if unused */;
+    --color-alarm-operational: /* Optional — remove if unused */;
+    --color-alarm-uncertain: /* Optional — remove if unused */;
+    --color-alarm-progress: /* Optional — remove if unused */;
+    --color-alarm-cyan: /* Optional — remove if unused */;
+
+    /* ── Optional — Secondary palette ────────────────── */
+    --color-secondary-brick: /* Optional — remove if unused */;
+    --color-secondary-burnt-sienna: /* Optional — remove if unused */;
+    --color-secondary-brown: /* Optional — remove if unused */;
+    --color-secondary-khaki: /* Optional — remove if unused */;
+    --color-secondary-olive: /* Optional — remove if unused */;
+    --color-secondary-cyan: /* Optional — remove if unused */;
+    --color-secondary-electric-blue: /* Optional — remove if unused */;
+    --color-secondary-bluish-grey: /* Optional — remove if unused */;
+    --color-secondary-lavender: /* Optional — remove if unused */;
+    --color-secondary-purple: /* Optional — remove if unused */;
+
+    /* ── Optional — Petroleum blue surface ───────────── */
+    --color-surface-dark: /* Optional — remove if unused */;
+    --color-surface-dark-foreground: /* Optional — remove if unused */;
+    --color-surface-dark-muted: /* Optional — remove if unused */;
+    --color-surface-dark-inactive: /* Optional — remove if unused */;
+
+    /* ── Optional — Map surfaces ─────────────────────── */
+    --color-map-background: /* Optional — remove if unused */;
+    --color-map-land: /* Optional — remove if unused */;
+    --color-map-water: /* Optional — remove if unused */;
+    --color-map-roads: /* Optional — remove if unused */;
+    --color-map-buildings: /* Optional — remove if unused */;
+    --color-map-labels: /* Optional — remove if unused */;
+  }
+}

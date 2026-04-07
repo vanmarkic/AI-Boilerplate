@@ -38,13 +38,7 @@ export function DrawerPanel({
 
   return (
     <>
-      {open && (
-        <div
-          className="drawer-backdrop"
-          aria-hidden="true"
-          onClick={() => onClose?.()}
-        />
-      )}
+      {open && <div className="drawer-backdrop" aria-hidden="true" onClick={() => onClose?.()} />}
       <div
         ref={panelRef}
         role="dialog"

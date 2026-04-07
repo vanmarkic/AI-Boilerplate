@@ -4,25 +4,19 @@ import { describe, it, expect, vi } from 'vitest';
 
 describe('useControllableState', () => {
   it('returns defaultValue in uncontrolled mode', () => {
-    const { result } = renderHook(() =>
-      useControllableState({ defaultValue: 'hello' }),
-    );
+    const { result } = renderHook(() => useControllableState({ defaultValue: 'hello' }));
     expect(result.current[0]).toBe('hello');
   });
 
   it('updates internal state in uncontrolled mode', () => {
-    const { result } = renderHook(() =>
-      useControllableState({ defaultValue: 0 }),
-    );
+    const { result } = renderHook(() => useControllableState({ defaultValue: 0 }));
     act(() => result.current[1](5));
     expect(result.current[0]).toBe(5);
   });
 
   it('calls onChange in uncontrolled mode', () => {
     const onChange = vi.fn();
-    const { result } = renderHook(() =>
-      useControllableState({ defaultValue: 0, onChange }),
-    );
+    const { result } = renderHook(() => useControllableState({ defaultValue: 0, onChange }));
     act(() => result.current[1](5));
     expect(onChange).toHaveBeenCalledWith(5);
   });
@@ -57,14 +51,11 @@ describe('useControllableState', () => {
   it('warns when switching from uncontrolled to controlled', () => {
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     const { rerender } = renderHook(
-      ({ value }: { value?: string }) =>
-        useControllableState({ value, defaultValue: 'a' }),
+      ({ value }: { value?: string }) => useControllableState({ value, defaultValue: 'a' }),
       { initialProps: { value: undefined } },
     );
     rerender({ value: 'controlled' });
-    expect(warn).toHaveBeenCalledWith(
-      expect.stringContaining('uncontrolled to controlled'),
-    );
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('uncontrolled to controlled'));
     warn.mockRestore();
   });
 });

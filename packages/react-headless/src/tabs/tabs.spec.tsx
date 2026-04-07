@@ -110,7 +110,9 @@ describe('Tabs', () => {
       <Tabs.Root defaultValue="tab1">
         <Tabs.List>
           <Tabs.Trigger value="tab1">Tab 1</Tabs.Trigger>
-          <Tabs.Trigger value="tab2" disabled>Tab 2</Tabs.Trigger>
+          <Tabs.Trigger value="tab2" disabled>
+            Tab 2
+          </Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="tab1">C1</Tabs.Content>
         <Tabs.Content value="tab2">C2</Tabs.Content>
@@ -128,7 +130,9 @@ describe('Tabs', () => {
           <Tabs.Trigger value="tab2">Tab 2</Tabs.Trigger>
         </Tabs.List>
         <Tabs.Content value="tab1">Content 1</Tabs.Content>
-        <Tabs.Content value="tab2" forceMount>Content 2</Tabs.Content>
+        <Tabs.Content value="tab2" forceMount>
+          Content 2
+        </Tabs.Content>
       </Tabs.Root>,
     );
     expect(screen.getByText('Content 1')).toBeInTheDocument();

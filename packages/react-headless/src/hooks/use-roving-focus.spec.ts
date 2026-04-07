@@ -37,9 +37,7 @@ describe('useRovingFocus', () => {
   });
 
   it('ArrowRight moves focus forward (horizontal)', () => {
-    const { result } = renderHook(() =>
-      useRovingFocus({ orientation: 'horizontal' }),
-    );
+    const { result } = renderHook(() => useRovingFocus({ orientation: 'horizontal' }));
     const items = setupItems(result, 3);
     items[0].focus();
     fireEvent.keyDown(items[0], { key: 'ArrowRight' });
@@ -47,9 +45,7 @@ describe('useRovingFocus', () => {
   });
 
   it('ArrowDown moves focus forward (vertical)', () => {
-    const { result } = renderHook(() =>
-      useRovingFocus({ orientation: 'vertical' }),
-    );
+    const { result } = renderHook(() => useRovingFocus({ orientation: 'vertical' }));
     const items = setupItems(result, 3);
     items[0].focus();
     fireEvent.keyDown(items[0], { key: 'ArrowDown' });
@@ -60,7 +56,9 @@ describe('useRovingFocus', () => {
     const { result } = renderHook(() => useRovingFocus({}));
     const items = setupItems(result, 3);
     items[2].focus();
-    act(() => { result.current.getItemProps(2).onFocus({} as React.FocusEvent); });
+    act(() => {
+      result.current.getItemProps(2).onFocus({} as React.FocusEvent);
+    });
     fireEvent.keyDown(items[2], { key: 'Home' });
     expect(result.current.focusedIndex).toBe(0);
   });
@@ -74,12 +72,12 @@ describe('useRovingFocus', () => {
   });
 
   it('loops from last to first', () => {
-    const { result } = renderHook(() =>
-      useRovingFocus({ loop: true }),
-    );
+    const { result } = renderHook(() => useRovingFocus({ loop: true }));
     const items = setupItems(result, 3);
     items[2].focus();
-    act(() => { result.current.getItemProps(2).onFocus({} as React.FocusEvent); });
+    act(() => {
+      result.current.getItemProps(2).onFocus({} as React.FocusEvent);
+    });
     fireEvent.keyDown(items[2], { key: 'ArrowRight' });
     expect(result.current.focusedIndex).toBe(0);
   });

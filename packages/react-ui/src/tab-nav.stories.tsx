@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "storybook";
-import { TabNav, TabLink } from "./tab-nav";
+import type { Meta, StoryObj } from 'storybook';
+import { TabNav, TabLink } from './tab-nav';
 
 const meta: Meta<typeof TabNav> = {
-  title: "Components/TabNav",
+  title: 'Components/TabNav',
   component: TabNav,
 };
 
@@ -12,7 +12,9 @@ type Story = StoryObj<typeof TabNav>;
 export const Default: Story = {
   render: () => (
     <TabNav>
-      <TabLink href="#" active>Overview</TabLink>
+      <TabLink href="#" active>
+        Overview
+      </TabLink>
       <TabLink href="#">Details</TabLink>
       <TabLink href="#">History</TabLink>
     </TabNav>

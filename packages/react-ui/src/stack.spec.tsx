@@ -15,7 +15,11 @@ describe('Stack', () => {
   });
 
   it('maps gap prop to data-gap', () => {
-    render(<Stack gap="lg" data-testid="s">content</Stack>);
+    render(
+      <Stack gap="lg" data-testid="s">
+        content
+      </Stack>,
+    );
     expect(screen.getByTestId('s')).toHaveAttribute('data-gap', 'lg');
   });
 
@@ -23,12 +27,20 @@ describe('Stack', () => {
     const { rerender } = render(<Stack data-testid="s">content</Stack>);
     expect(screen.getByTestId('s')).not.toHaveAttribute('data-direction');
 
-    rerender(<Stack direction="horizontal" data-testid="s">content</Stack>);
+    rerender(
+      <Stack direction="horizontal" data-testid="s">
+        content
+      </Stack>,
+    );
     expect(screen.getByTestId('s')).toHaveAttribute('data-direction', 'horizontal');
   });
 
   it('maps align and justify to data attributes', () => {
-    render(<Stack align="center" justify="between" data-testid="s">content</Stack>);
+    render(
+      <Stack align="center" justify="between" data-testid="s">
+        content
+      </Stack>,
+    );
     const el = screen.getByTestId('s');
     expect(el).toHaveAttribute('data-align', 'center');
     expect(el).toHaveAttribute('data-justify', 'between');
@@ -42,7 +54,11 @@ describe('Stack', () => {
   });
 
   it('applies fill inline styles when fill is true', () => {
-    render(<Stack fill data-testid="s">content</Stack>);
+    render(
+      <Stack fill data-testid="s">
+        content
+      </Stack>,
+    );
     const el = screen.getByTestId('s');
     expect(el.style.flex).toBe('1 1 0%');
     expect(el.style.minHeight).toBe('0px');
@@ -55,7 +71,11 @@ describe('Stack', () => {
   });
 
   it('merges caller style with fill styles', () => {
-    render(<Stack fill style={{ color: 'red' }} data-testid="s">content</Stack>);
+    render(
+      <Stack fill style={{ color: 'red' }} data-testid="s">
+        content
+      </Stack>,
+    );
     const el = screen.getByTestId('s');
     expect(el.style.flex).toBe('1 1 0%');
     expect(el.style.minHeight).toBe('0px');
@@ -63,12 +83,20 @@ describe('Stack', () => {
   });
 
   it('renders as a different element via as prop', () => {
-    render(<Stack as="section" data-testid="s">content</Stack>);
+    render(
+      <Stack as="section" data-testid="s">
+        content
+      </Stack>,
+    );
     expect(screen.getByTestId('s').tagName).toBe('SECTION');
   });
 
   it('merges additional className', () => {
-    render(<Stack className="card mb-sm" data-testid="s">content</Stack>);
+    render(
+      <Stack className="card mb-sm" data-testid="s">
+        content
+      </Stack>,
+    );
     const el = screen.getByTestId('s');
     expect(el).toHaveClass('stack');
     expect(el).toHaveClass('card');
@@ -76,14 +104,22 @@ describe('Stack', () => {
   });
 
   it('spreads HTML attributes', () => {
-    render(<Stack id="main" aria-label="test" data-testid="s">content</Stack>);
+    render(
+      <Stack id="main" aria-label="test" data-testid="s">
+        content
+      </Stack>,
+    );
     const el = screen.getByTestId('s');
     expect(el).toHaveAttribute('id', 'main');
     expect(el).toHaveAttribute('aria-label', 'test');
   });
 
   it('renders children', () => {
-    render(<Stack><span>child</span></Stack>);
+    render(
+      <Stack>
+        <span>child</span>
+      </Stack>,
+    );
     expect(screen.getByText('child')).toBeInTheDocument();
   });
 });

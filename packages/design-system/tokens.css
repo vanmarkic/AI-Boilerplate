@@ -35,48 +35,48 @@
     --color-ring: oklch(55% 0.22 260);
 
     /* ── Dynamic (red accent) ────────────────────────── */
-    --color-dynamic: oklch(57.4% 0.232 26);           /* #E1051E */
+    --color-dynamic: oklch(57.4% 0.232 26); /* #E1051E */
 
     /* ── Semantic signals (A&A — Alarms & Alerts) ────── */
-    --color-destructive: oklch(64.9% 0.216 26);       /* #F74343 - Breakdown */
+    --color-destructive: oklch(64.9% 0.216 26); /* #F74343 - Breakdown */
     --color-destructive-foreground: oklch(100% 0 0);
-    --color-warning: oklch(75.6% 0.153 54);           /* #F99246 - Degraded */
+    --color-warning: oklch(75.6% 0.153 54); /* #F99246 - Degraded */
     --color-warning-foreground: oklch(28.7% 0.064 250);
-    --color-success: oklch(76.9% 0.202 143);          /* #54D354 - Operational */
+    --color-success: oklch(76.9% 0.202 143); /* #54D354 - Operational */
     --color-success-foreground: oklch(28.7% 0.064 250);
-    --color-info: oklch(62.5% 0.077 252);             /* #658BB5 - Progress */
+    --color-info: oklch(62.5% 0.077 252); /* #658BB5 - Progress */
     --color-info-foreground: oklch(100% 0 0);
 
     /* ── Extended alarms (Naval Group specific) ──────── */
-    --color-alarm-breakdown: oklch(64.9% 0.216 26);   /* #F74343 */
-    --color-alarm-degraded: oklch(75.6% 0.153 54);    /* #F99246 */
+    --color-alarm-breakdown: oklch(64.9% 0.216 26); /* #F74343 */
+    --color-alarm-degraded: oklch(75.6% 0.153 54); /* #F99246 */
     --color-alarm-intermediate: oklch(81.5% 0.147 95); /* #E0C13F */
     --color-alarm-operational: oklch(76.9% 0.202 143); /* #54D354 */
-    --color-alarm-uncertain: oklch(57.9% 0.196 288);  /* #785EE5 */
-    --color-alarm-progress: oklch(62.5% 0.077 252);   /* #658BB5 */
-    --color-alarm-cyan: oklch(81.4% 0.122 203);       /* #45D9E5 */
+    --color-alarm-uncertain: oklch(57.9% 0.196 288); /* #785EE5 */
+    --color-alarm-progress: oklch(62.5% 0.077 252); /* #658BB5 */
+    --color-alarm-cyan: oklch(81.4% 0.122 203); /* #45D9E5 */
 
     /* ── Secondary palette ───────────────────────────── */
-    --color-secondary-brick: oklch(75.3% 0.095 25);        /* #E59790 */
+    --color-secondary-brick: oklch(75.3% 0.095 25); /* #E59790 */
     --color-secondary-burnt-sienna: oklch(74.5% 0.027 21); /* #BDA6A5 */
-    --color-secondary-brown: oklch(74.6% 0.112 75);        /* #D6A256 */
-    --color-secondary-khaki: oklch(73.9% 0.064 108);       /* #AEAE7F */
-    --color-secondary-olive: oklch(73.2% 0.118 129);       /* #91B764 */
-    --color-secondary-cyan: oklch(73.1% 0.119 213);        /* #2BBBD4 */
-    --color-secondary-electric-blue: oklch(73.9% 0.100 246); /* #73B1E6 */
-    --color-secondary-bluish-grey: oklch(74.0% 0.042 239); /* #93AFC3 */
-    --color-secondary-lavender: oklch(75.0% 0.117 287);    /* #A9A2F4 */
-    --color-secondary-purple: oklch(75.3% 0.093 333);      /* #D399C8 */
+    --color-secondary-brown: oklch(74.6% 0.112 75); /* #D6A256 */
+    --color-secondary-khaki: oklch(73.9% 0.064 108); /* #AEAE7F */
+    --color-secondary-olive: oklch(73.2% 0.118 129); /* #91B764 */
+    --color-secondary-cyan: oklch(73.1% 0.119 213); /* #2BBBD4 */
+    --color-secondary-electric-blue: oklch(73.9% 0.1 246); /* #73B1E6 */
+    --color-secondary-bluish-grey: oklch(74% 0.042 239); /* #93AFC3 */
+    --color-secondary-lavender: oklch(75% 0.117 287); /* #A9A2F4 */
+    --color-secondary-purple: oklch(75.3% 0.093 333); /* #D399C8 */
 
     /* ── Petroleum blue surface (for 25% dark areas) ─── */
-    --color-surface-dark: oklch(28.7% 0.064 250);          /* #0E2C49 */
-    --color-surface-dark-foreground: oklch(100% 0 0);      /* white */
-    --color-surface-dark-muted: oklch(100% 0 0 / 0.70);   /* white 70% */
+    --color-surface-dark: oklch(28.7% 0.064 250); /* #0E2C49 */
+    --color-surface-dark-foreground: oklch(100% 0 0); /* white */
+    --color-surface-dark-muted: oklch(100% 0 0 / 0.7); /* white 70% */
     --color-surface-dark-inactive: oklch(100% 0 0 / 0.15); /* white 15% */
 
     /* ── Overlay & effect tokens ─────────────────────── */
     --overlay-scanline: transparent;
-    --overlay-vignette: oklch(0% 0 0 / 0.70);
+    --overlay-vignette: oklch(0% 0 0 / 0.7);
     --stress-vignette-opacity: 0.7;
 
     /* ── Map surfaces ─────────────────────────────────── */
@@ -96,8 +96,8 @@
     --spacing-2xl: 3rem;
 
     /* ── Typography ───────────────────────────────────── */
-    --font-sans: "Source Sans Pro", "Source Sans 3", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+    --font-sans: 'Source Sans Pro', 'Source Sans 3', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
     --font-size-xs: 0.75rem;
     --font-size-xs--line-height: 1rem;
     --font-size-sm: 0.875rem;
@@ -126,16 +126,16 @@
     --container-lg: 32rem;
     --container-xl: 40rem;
     --container-2xl: 48rem;
-    --container-3xl: 64rem;   /* 1024px */
-    --container-4xl: 80rem;   /* 1280px */
-    --container-5xl: 96rem;   /* 1536px */
+    --container-3xl: 64rem; /* 1024px */
+    --container-4xl: 80rem; /* 1280px */
+    --container-5xl: 96rem; /* 1536px */
 
     /* ── Layout ─────────────────────────────────────────── */
     --sidebar-width: 16rem;
 
     /* ── Control heights ──────────────────────────────── */
     --control-sm: 1.75rem;
-    --control-md: 2rem;       /* $height-button: 2em */
+    --control-md: 2rem; /* $height-button: 2em */
     --control-lg: 2.5rem;
 
     /* ── Border radius ────────────────────────────────── */
@@ -156,11 +156,15 @@
     --glow-sm: 0 0 14px oklch(55% 0.22 260 / calc(0.5 * var(--glow-strength)));
     --glow-primary: 0 0 28px oklch(55% 0.22 260 / calc(0.75 * var(--glow-strength)));
     --glow-lg: 0 0 48px oklch(55% 0.22 260 / calc(1 * var(--glow-strength)));
-    --glow-xl: 0 0 72px oklch(55% 0.22 260 / calc(0.6 * var(--glow-strength))), 0 0 120px oklch(55% 0.22 260 / calc(0.25 * var(--glow-strength)));
-    --glass-bg:     oklch(100% 0 0 / calc(0.12 * var(--glass-strength)));
+    --glow-xl:
+      0 0 72px oklch(55% 0.22 260 / calc(0.6 * var(--glow-strength))),
+      0 0 120px oklch(55% 0.22 260 / calc(0.25 * var(--glow-strength)));
+    --glass-bg: oklch(100% 0 0 / calc(0.12 * var(--glass-strength)));
     --glass-border: oklch(100% 0 0 / calc(0.22 * var(--glass-strength)));
-    --glass-blur:   calc(24px * var(--glass-strength));
-    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))), 0 0 20px oklch(55% 0.22 260 / calc(0.15 * var(--glow-strength)));
+    --glass-blur: calc(24px * var(--glass-strength));
+    --glass-shadow:
+      inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+      0 0 20px oklch(55% 0.22 260 / calc(0.15 * var(--glow-strength)));
 
     /* ── Motion ───────────────────────────────────────── */
     --duration-fast: 100ms;
@@ -190,15 +194,15 @@
    *  sidebar, footer — the ~25% dark areas).
    *  Apply with data-surface="dark" on any container.
    * ──────────────────────────────────────────────────────── */
-  [data-surface="dark"] {
-    --color-background: oklch(28.7% 0.064 250);       /* #0E2C49 */
+  [data-surface='dark'] {
+    --color-background: oklch(28.7% 0.064 250); /* #0E2C49 */
     --color-card: oklch(28.7% 0.064 250);
-    --color-foreground: oklch(100% 0 0);               /* white - Interactive */
+    --color-foreground: oklch(100% 0 0); /* white - Interactive */
     --color-card-foreground: oklch(100% 0 0);
-    --color-muted-foreground: oklch(100% 0 0 / 0.70);  /* white 70% - Informative */
-    --color-border: oklch(72.4% 0.061 264 / 0.30);    /* button 30% */
-    --color-accent: oklch(72.4% 0.061 264 / 0.15);    /* button 15% - normal bg */
-    --color-primary: oklch(40% 0.145 262);             /* #164194 - Active */
+    --color-muted-foreground: oklch(100% 0 0 / 0.7); /* white 70% - Informative */
+    --color-border: oklch(72.4% 0.061 264 / 0.3); /* button 30% */
+    --color-accent: oklch(72.4% 0.061 264 / 0.15); /* button 15% - normal bg */
+    --color-primary: oklch(40% 0.145 262); /* #164194 - Active */
     --color-primary-foreground: oklch(100% 0 0);
   }
 
@@ -206,12 +210,12 @@
    *  data-effects="glow-glass" → force on
    *  data-effects="none"       → force off
    * ──────────────────────────────────────────────────────── */
-  [data-effects="glow-glass"] {
+  [data-effects='glow-glass'] {
     --glow-strength: 1;
     --glass-strength: 1;
   }
 
-  [data-effects="none"] {
+  [data-effects='none'] {
     --glow-strength: 0;
     --glass-strength: 0;
   }

@@ -34,7 +34,10 @@ function useTabsContext(): TabsContextValue {
 // ─── List Context (roving focus props per trigger) ────────────────────────────
 
 interface TabsListContextValue {
-  getRovingProps: (value: string, disabled?: boolean) => {
+  getRovingProps: (
+    value: string,
+    disabled?: boolean,
+  ) => {
     ref: (el: HTMLElement | null) => void;
     tabIndex: number;
     onKeyDown: React.KeyboardEventHandler;
@@ -252,8 +255,7 @@ function Content({
   children,
   ...rest
 }: TabsContentProps) {
-  const { value: activeValue, getTriggerIdForValue, getContentIdForValue } =
-    useTabsContext();
+  const { value: activeValue, getTriggerIdForValue, getContentIdForValue } = useTabsContext();
 
   const isActive = activeValue === value;
   const dataState = isActive ? 'active' : 'inactive';

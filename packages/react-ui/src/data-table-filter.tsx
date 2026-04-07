@@ -6,8 +6,9 @@ import type {
   FilterPosition,
 } from './data-table-filter.types';
 
-export interface DataTableFilterProps<T = Record<string, unknown>>
-  extends HTMLAttributes<HTMLDivElement> {
+export interface DataTableFilterProps<
+  T = Record<string, unknown>,
+> extends HTMLAttributes<HTMLDivElement> {
   filterId: string;
   column: string;
   operator?: FilterOperator;
@@ -31,9 +32,7 @@ export function DataTableFilter<T = Record<string, unknown>>({
 }: DataTableFilterProps<T>) {
   return (
     <div
-      className={
-        className ? `data-table-filter ${className}` : 'data-table-filter'
-      }
+      className={className ? `data-table-filter ${className}` : 'data-table-filter'}
       data-position={position}
       data-filter-id={filterId}
       {...props}
@@ -51,25 +50,18 @@ function toComparable(v: unknown): number {
 }
 
 function isEqual(a: unknown, b: unknown): boolean {
-  if (a instanceof Date && b instanceof Date)
-    return a.getTime() === b.getTime();
+  if (a instanceof Date && b instanceof Date) return a.getTime() === b.getTime();
   return a === b;
 }
 
-function matchOperator(
-  cellValue: unknown,
-  filterValue: unknown,
-  op: FilterOperator,
-): boolean {
+function matchOperator(cellValue: unknown, filterValue: unknown, op: FilterOperator): boolean {
   switch (op) {
     case 'equals':
       return isEqual(cellValue, filterValue);
     case 'not-equals':
       return !isEqual(cellValue, filterValue);
     case 'contains':
-      return String(cellValue)
-        .toLowerCase()
-        .includes(String(filterValue).toLowerCase());
+      return String(cellValue).toLowerCase().includes(String(filterValue).toLowerCase());
     case 'gt':
       return toComparable(cellValue) > toComparable(filterValue);
     case 'lt':
@@ -79,10 +71,7 @@ function matchOperator(
     case 'lte':
       return toComparable(cellValue) <= toComparable(filterValue);
     case 'in':
-      return (
-        Array.isArray(filterValue) &&
-        filterValue.some((v) => isEqual(cellValue, v))
-      );
+      return Array.isArray(filterValue) && filterValue.some((v) => isEqual(cellValue, v));
     case 'custom':
       return true;
     default:

@@ -149,7 +149,9 @@ export function FlatCards({ groups, cols = 4 }: { groups: GroupDef[]; cols?: num
   return (
     <Grid columns={cols} gap="md">
       {allCards.map((c) => (
-        <Card key={c.title} title={c.title}>{c.body}</Card>
+        <Card key={c.title} title={c.title}>
+          {c.body}
+        </Card>
       ))}
     </Grid>
   );
@@ -173,7 +175,9 @@ export function GroupedCards({
           summary={<span>{g.summary}</span>}
         >
           {g.cards.map((c) => (
-            <Card key={c.title} title={c.title}>{c.body}</Card>
+            <Card key={c.title} title={c.title}>
+              {c.body}
+            </Card>
           ))}
         </CardGroup>
       ))}

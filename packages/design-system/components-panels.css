@@ -12,7 +12,7 @@
     border-radius: var(--radius-lg);
     background-color: var(--color-card);
 
-    [data-effects="glow-glass"] & {
+    [data-effects='glow-glass'] & {
       background: var(--glass-bg), var(--color-card);
       backdrop-filter: blur(var(--glass-blur));
       -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -66,7 +66,7 @@
     flex-shrink: 0;
     transition: transform var(--duration-normal) var(--ease-default);
 
-    [data-state="open"] > .collapsible-panel-trigger > & {
+    [data-state='open'] > .collapsible-panel-trigger > & {
       transform: rotate(180deg);
     }
   }
@@ -81,7 +81,7 @@
   }
 
   /* ── Size variants ── */
-  .collapsible-panel[data-size="sm"] {
+  .collapsible-panel[data-size='sm'] {
     & > .collapsible-panel-trigger {
       padding: var(--spacing-sm);
       font-size: var(--font-size-xs);
@@ -97,7 +97,7 @@
     }
   }
 
-  .collapsible-panel[data-size="lg"] {
+  .collapsible-panel[data-size='lg'] {
     & > .collapsible-panel-trigger {
       padding: var(--spacing-lg);
       font-size: var(--font-size-base);
@@ -112,12 +112,12 @@
   }
 
   /* ── Style variants ── */
-  .collapsible-panel[data-variant="ghost"] {
+  .collapsible-panel[data-variant='ghost'] {
     border-color: transparent;
     background-color: transparent;
   }
 
-  .collapsible-panel[data-variant="outline"] {
+  .collapsible-panel[data-variant='outline'] {
     background-color: transparent;
   }
 }

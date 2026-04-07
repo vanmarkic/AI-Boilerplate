@@ -1,4 +1,10 @@
-import { type CSSProperties, type ElementType, type HTMLAttributes, type ReactNode, createElement } from 'react';
+import {
+  type CSSProperties,
+  type ElementType,
+  type HTMLAttributes,
+  type ReactNode,
+  createElement,
+} from 'react';
 
 export type GridGap = 'none' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl';
 
@@ -28,7 +34,7 @@ export function Grid({
     columns === undefined
       ? {}
       : typeof columns === 'number'
-        ? { '--grid-cols': columns } as CSSProperties
+        ? ({ '--grid-cols': columns } as CSSProperties)
         : { gridTemplateColumns: columns };
 
   return createElement(
@@ -59,15 +65,7 @@ export interface CellProps extends HTMLAttributes<HTMLElement> {
   children?: ReactNode;
 }
 
-export function Cell({
-  span,
-  start,
-  rowSpan,
-  as = 'div',
-  style,
-  children,
-  ...rest
-}: CellProps) {
+export function Cell({ span, start, rowSpan, as = 'div', style, children, ...rest }: CellProps) {
   const cellStyle: CSSProperties = {
     ...(span !== undefined
       ? { gridColumn: span === 'full' ? '1 / -1' : `span ${span}` }

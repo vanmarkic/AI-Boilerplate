@@ -38,9 +38,7 @@ describe('MapPopup', () => {
         <MapPopup lngLat={{ lng: 0, lat: 0 }}>content</MapPopup>
       </MapViewContext.Provider>,
     );
-    expect(
-      screen.getByRole('button', { name: 'Close popup' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close popup' })).toBeInTheDocument();
   });
 
   it('hides the close button when variant is tooltip', () => {
@@ -51,9 +49,7 @@ describe('MapPopup', () => {
         </MapPopup>
       </MapViewContext.Provider>,
     );
-    expect(
-      screen.queryByRole('button', { name: 'Close popup' }),
-    ).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Close popup' })).not.toBeInTheDocument();
   });
 
   it('sets data-variant attribute', () => {

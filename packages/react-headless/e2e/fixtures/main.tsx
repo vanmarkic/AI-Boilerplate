@@ -5,5 +5,5 @@ import { TestApp } from './test-app';
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <TestApp />
-  </StrictMode>
+  </StrictMode>,
 );

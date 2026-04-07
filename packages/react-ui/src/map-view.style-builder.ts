@@ -13,7 +13,7 @@ export function oklchToHex(color: string): string {
 
   const l_ = L + 0.3963377774 * a_ + 0.2158037573 * b_;
   const m_ = L - 0.1055613458 * a_ - 0.0638541728 * b_;
-  const s_ = L - 0.0894841775 * a_ - 1.2914855480 * b_;
+  const s_ = L - 0.0894841775 * a_ - 1.291485548 * b_;
 
   const l3 = l_ * l_ * l_;
   const m3 = m_ * m_ * m_;
@@ -21,7 +21,7 @@ export function oklchToHex(color: string): string {
 
   const r = +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3;
   const g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3;
-  const b = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3;
+  const b = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.707614701 * s3;
 
   const toSrgb = (x: number) => {
     const c = Math.max(0, Math.min(1, x));
@@ -46,10 +46,8 @@ export function ensureHexColors(colors: MapStyleColors): MapStyleColors {
   };
 }
 
-const GLYPHS_CDN =
-  'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf';
-const SPRITE_CDN =
-  'https://protomaps.github.io/basemaps-assets/sprites/v4/dark';
+const GLYPHS_CDN = 'https://protomaps.github.io/basemaps-assets/fonts/{fontstack}/{range}.pbf';
+const SPRITE_CDN = 'https://protomaps.github.io/basemaps-assets/sprites/v4/dark';
 
 export interface ProtomapsStyleOptions {
   tileUrl: string;
@@ -61,15 +59,9 @@ export function buildProtomapsStyle(
   colors: MapStyleColors,
   options: ProtomapsStyleOptions,
 ): StyleSpecification {
-  const {
-    tileUrl,
-    glyphs = GLYPHS_CDN,
-    sprite = SPRITE_CDN,
-  } = options;
+  const { tileUrl, glyphs = GLYPHS_CDN, sprite = SPRITE_CDN } = options;
 
-  const url = tileUrl.startsWith('pmtiles://')
-    ? tileUrl
-    : `pmtiles://${tileUrl}`;
+  const url = tileUrl.startsWith('pmtiles://') ? tileUrl : `pmtiles://${tileUrl}`;
 
   const hex = ensureHexColors(colors);
 

@@ -3,11 +3,11 @@
  *  Each partial wraps its own content in @layer components.
  * ──────────────────────────────────────────────────────── */
 
-@import "./components-buttons.css";
-@import "./components-forms.css";
-@import "./components-panels.css";
-@import "./components-data-viz.css";
-@import "./components-layout.css";
-@import "./components-table.css";
-@import "./components-table-filter.css";
-@import "./components-tabs.css";
+@import './components-buttons.css';
+@import './components-forms.css';
+@import './components-panels.css';
+@import './components-data-viz.css';
+@import './components-layout.css';
+@import './components-table.css';
+@import './components-table-filter.css';
+@import './components-tabs.css';

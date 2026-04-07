@@ -230,10 +230,7 @@ describe('flatten', () => {
     {
       value: 'fruit',
       label: 'Fruits',
-      children: [
-        { value: 'apple', label: 'Apple' },
-        { value: 'banana' },
-      ],
+      children: [{ value: 'apple', label: 'Apple' }, { value: 'banana' }],
     },
     { value: 'veg' },
   ];

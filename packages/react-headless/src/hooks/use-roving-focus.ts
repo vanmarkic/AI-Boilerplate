@@ -25,9 +25,7 @@ export interface RovingFocusReturn {
   focusedIndex: number;
 }
 
-export function useRovingFocus(
-  options: UseRovingFocusOptions = {},
-): RovingFocusReturn {
+export function useRovingFocus(options: UseRovingFocusOptions = {}): RovingFocusReturn {
   const { orientation = 'horizontal', loop = true } = options;
   const [focusedIndex, setFocusedIndex] = useState(0);
   const itemsRef = useRef<Map<number, HTMLElement>>(new Map());
@@ -86,10 +84,8 @@ export function useRovingFocus(
         },
         tabIndex: index === focusedIndex && !disabled ? 0 : -1,
         onKeyDown: (e) => {
-          const forwardKey =
-            orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown';
-          const backKey =
-            orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp';
+          const forwardKey = orientation === 'horizontal' ? 'ArrowRight' : 'ArrowDown';
+          const backKey = orientation === 'horizontal' ? 'ArrowLeft' : 'ArrowUp';
 
           let nextIndex: number | null = null;
           const currentIndex = focusedIndexRef.current;

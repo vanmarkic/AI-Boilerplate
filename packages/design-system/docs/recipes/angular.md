@@ -40,7 +40,7 @@ export type ButtonSize = 'sm' | 'default' | 'lg';
 @Directive({
   selector: 'button[uiButton], a[uiButton]',
   host: {
-    'class': 'btn',
+    class: 'btn',
     '[attr.data-variant]': 'variant()',
     '[attr.data-size]': 'size()',
   },
@@ -66,7 +66,7 @@ import { Component, input } from '@angular/core';
 @Component({
   selector: 'ui-badge',
   host: {
-    'class': 'badge',
+    class: 'badge',
     '[attr.data-variant]': 'variant()',
   },
   template: `<ng-content />`,
@@ -135,12 +135,7 @@ import { Component, input } from '@angular/core';
     @if (label()) {
       <label [for]="id()" class="input-label">{{ label() }}</label>
     }
-    <input
-      [id]="id()"
-      [type]="type()"
-      [placeholder]="placeholder()"
-      class="input-base"
-    />
+    <input [id]="id()" [type]="type()" [placeholder]="placeholder()" class="input-base" />
   `,
 })
 export class InputComponent {

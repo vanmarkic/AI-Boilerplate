@@ -57,28 +57,14 @@ describe('DataTable', () => {
 
   it('fires onRowClick for clickable rows', async () => {
     const onRowClick = vi.fn();
-    render(
-      <DataTable
-        data={users}
-        columns={columns}
-        clickableRows
-        onRowClick={onRowClick}
-      />,
-    );
+    render(<DataTable data={users} columns={columns} clickableRows onRowClick={onRowClick} />);
     await userEvent.click(screen.getByText('Bob'));
     expect(onRowClick).toHaveBeenCalledWith(users[0]);
   });
 
   it('supports keyboard Enter on clickable rows', async () => {
     const onRowClick = vi.fn();
-    render(
-      <DataTable
-        data={users}
-        columns={columns}
-        clickableRows
-        onRowClick={onRowClick}
-      />,
-    );
+    render(<DataTable data={users} columns={columns} clickableRows onRowClick={onRowClick} />);
     const firstRow = screen.getAllByRole('row')[1];
     firstRow.focus();
     await userEvent.keyboard('{Enter}');

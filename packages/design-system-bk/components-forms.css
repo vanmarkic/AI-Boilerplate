@@ -1,0 +1,237 @@
+/* ── Card, Input, Form & Dialog Component Classes ──────────
+ *  Semantic styles with variant logic via data-* selectors.
+ *  Native CSS nesting.
+ * ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Card ───────────────────────────────────────────── */
+
+  .card {
+    display: block;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
+    }
+  }
+
+  .card-title {
+    font-size: var(--font-size-lg);
+    line-height: var(--font-size-lg--line-height);
+    font-weight: 600;
+    color: var(--color-card-foreground);
+    margin-block-end: var(--spacing-sm);
+  }
+
+  .card-content {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-muted-foreground);
+  }
+
+
+  /* ── Card Group ────────────────────────────────────────── */
+
+  .card-group {
+    display: block;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
+    }
+  }
+
+  .card-group-toggle {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: none;
+    background: none;
+    color: var(--color-card-foreground);
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: start;
+
+    &:hover {
+      background-color: var(--color-accent);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 2px var(--color-ring);
+    }
+  }
+
+  .card-group-title {
+    flex: 1 1 0%;
+  }
+
+  .card-group-count {
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--color-muted-foreground);
+    background-color: var(--color-muted);
+    padding: 2px var(--spacing-xs);
+    border-radius: var(--radius-sm);
+  }
+
+  .card-group-chevron {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    color: var(--color-muted-foreground);
+    transition: transform var(--duration-normal) var(--ease-default);
+  }
+
+  .card-group[data-mode="disaggregated"] .card-group-chevron {
+    transform: rotate(180deg);
+  }
+
+  .card-group-summary {
+    padding: 0 var(--spacing-md) var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+  }
+
+  .card-group-items {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    gap: var(--spacing-sm);
+    padding: 0 var(--spacing-md) var(--spacing-md);
+  }
+
+
+  /* ── Input ──────────────────────────────────────────── */
+
+  .input-base {
+    display: flex;
+    width: 100%;
+    height: var(--control-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-input);
+    background-color: var(--color-background);
+    padding-block: var(--spacing-xs);
+    padding-inline: var(--spacing-sm);
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-foreground);
+
+    &::placeholder {
+      color: var(--color-muted-foreground);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 2px var(--color-ring);
+
+      [data-effects="glow-glass"] & {
+        box-shadow: 0 0 0 2px var(--color-ring), var(--glow-primary);
+      }
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  .input-label {
+    display: block;
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    font-weight: 500;
+    color: var(--color-foreground);
+    margin-block-end: var(--spacing-xs);
+  }
+
+  .input-wrapper {
+    display: block;
+    margin-block-end: var(--spacing-sm);
+  }
+
+
+  /* ── Form Error ─────────────────────────────────────── */
+
+  .form-error {
+    font-size: var(--font-size-xs);
+    line-height: var(--font-size-xs--line-height);
+    color: var(--color-destructive);
+    margin-block-start: var(--spacing-xs);
+  }
+
+
+  /* ── Dialog ─────────────────────────────────────────── */
+
+  .dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background-color: oklch(0% 0 0 / 50%);
+  }
+
+  .dialog-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: var(--z-modal);
+    width: 100%;
+    max-width: var(--container-md);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-lg);
+
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-primary);
+    }
+
+    &[data-variant="destructive"] {
+      border-color: var(--color-destructive);
+    }
+  }
+
+  .dialog-title {
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin-block-end: var(--spacing-sm);
+  }
+
+  .dialog-body {
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-muted-foreground);
+  }
+
+  .dialog-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--spacing-sm);
+    margin-block-start: var(--spacing-md);
+  }
+}

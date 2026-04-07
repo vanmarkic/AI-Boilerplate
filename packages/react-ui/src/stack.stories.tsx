@@ -1,20 +1,26 @@
-import type { Meta, StoryObj } from "storybook";
-import { Stack } from "./stack";
+import type { Meta, StoryObj } from 'storybook';
+import { Stack } from './stack';
 
 const Box = ({ children }: { children: string }) => (
-  <div style={{ padding: "var(--spacing-sm)", background: "var(--color-muted)", borderRadius: "var(--radius-sm)" }}>
+  <div
+    style={{
+      padding: 'var(--spacing-sm)',
+      background: 'var(--color-muted)',
+      borderRadius: 'var(--radius-sm)',
+    }}
+  >
     {children}
   </div>
 );
 
 const meta: Meta<typeof Stack> = {
-  title: "Layout/Stack",
+  title: 'Layout/Stack',
   component: Stack,
   argTypes: {
-    direction: { control: "select", options: ["vertical", "horizontal"] },
-    gap: { control: "select", options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"] },
-    align: { control: "select", options: ["start", "center", "end", "stretch"] },
-    justify: { control: "select", options: ["start", "center", "end", "between"] },
+    direction: { control: 'select', options: ['vertical', 'horizontal'] },
+    gap: { control: 'select', options: ['none', 'xs', 'sm', 'md', 'lg', 'xl', '2xl'] },
+    align: { control: 'select', options: ['start', 'center', 'end', 'stretch'] },
+    justify: { control: 'select', options: ['start', 'center', 'end', 'between'] },
   },
 };
 
@@ -29,7 +35,7 @@ export const Vertical: Story = {
       <Box>Item 3</Box>
     </Stack>
   ),
-  args: { direction: "vertical", gap: "md" },
+  args: { direction: 'vertical', gap: 'md' },
 };
 
 export const Horizontal: Story = {
@@ -40,7 +46,7 @@ export const Horizontal: Story = {
       <Box>Item 3</Box>
     </Stack>
   ),
-  args: { direction: "horizontal", gap: "md" },
+  args: { direction: 'horizontal', gap: 'md' },
 };
 
 export const SpaceBetween: Story = {
@@ -50,5 +56,5 @@ export const SpaceBetween: Story = {
       <Box>Right</Box>
     </Stack>
   ),
-  args: { direction: "horizontal", justify: "between" },
+  args: { direction: 'horizontal', justify: 'between' },
 };

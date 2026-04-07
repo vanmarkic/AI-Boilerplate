@@ -39,38 +39,22 @@ describe('MapView', () => {
 
   it('renders with default aria-label', () => {
     render(<MapView styleUrl="https://example.com/style.json" />);
-    expect(screen.getByRole('application')).toHaveAttribute(
-      'aria-label',
-      'Interactive map',
-    );
+    expect(screen.getByRole('application')).toHaveAttribute('aria-label', 'Interactive map');
   });
 
   it('accepts custom aria-label', () => {
-    render(
-      <MapView styleUrl="https://example.com/style.json" ariaLabel="Fleet map" />,
-    );
-    expect(screen.getByRole('application')).toHaveAttribute(
-      'aria-label',
-      'Fleet map',
-    );
+    render(<MapView styleUrl="https://example.com/style.json" ariaLabel="Fleet map" />);
+    expect(screen.getByRole('application')).toHaveAttribute('aria-label', 'Fleet map');
   });
 
   it('sets data-variant to default', () => {
     render(<MapView styleUrl="https://example.com/style.json" />);
-    expect(screen.getByRole('application')).toHaveAttribute(
-      'data-variant',
-      'default',
-    );
+    expect(screen.getByRole('application')).toHaveAttribute('data-variant', 'default');
   });
 
   it('sets data-variant to provided value', () => {
-    render(
-      <MapView styleUrl="https://example.com/style.json" variant="satellite" />,
-    );
-    expect(screen.getByRole('application')).toHaveAttribute(
-      'data-variant',
-      'satellite',
-    );
+    render(<MapView styleUrl="https://example.com/style.json" variant="satellite" />);
+    expect(screen.getByRole('application')).toHaveAttribute('data-variant', 'satellite');
   });
 
   it('renders children', () => {

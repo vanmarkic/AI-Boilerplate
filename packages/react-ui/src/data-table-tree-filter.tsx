@@ -1,9 +1,6 @@
 import { type HTMLAttributes, useCallback, useMemo, useState } from 'react';
 import type { FilterPosition } from './data-table-filter.types';
-import type {
-  TreeFilterNode,
-  TreeSelectionChangeEvent,
-} from './data-table-tree-filter.types';
+import type { TreeFilterNode, TreeSelectionChangeEvent } from './data-table-tree-filter.types';
 import {
   flatten,
   isAncestorExpanded,
@@ -13,8 +10,7 @@ import {
   updateSelection,
 } from './data-table-tree-filter.utils';
 
-export interface DataTableTreeFilterProps
-  extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
+export interface DataTableTreeFilterProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   filterId: string;
   column: string;
   options: TreeFilterNode[];
@@ -33,20 +29,14 @@ export function DataTableTreeFilter({
   className,
   ...props
 }: DataTableTreeFilterProps) {
-  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(
-    () => new Set(),
-  );
-  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(
-    () => new Set(),
-  );
+  const [expandedKeys, setExpandedKeys] = useState<Set<string>>(() => new Set());
+  const [selectedKeys, setSelectedKeys] = useState<Set<string>>(() => new Set());
 
   const flatNodes = useMemo(() => flatten(options, []), [options]);
 
   const visibleNodes = useMemo(() => {
     return flatNodes
-      .filter(
-        (n) => n.depth === 0 || isAncestorExpanded(n.path, expandedKeys),
-      )
+      .filter((n) => n.depth === 0 || isAncestorExpanded(n.path, expandedKeys))
       .map((n) => ({
         ...n,
         expanded: expandedKeys.has(pathKey(n.path)),
@@ -71,9 +61,7 @@ export function DataTableTreeFilter({
       );
       setSelectedKeys((prev) => {
         const next = updateSelection(prev, key, descendants, multi);
-        const paths = flatNodes
-          .filter((n) => next.has(pathKey(n.path)))
-          .map((n) => n.path);
+        const paths = flatNodes.filter((n) => next.has(pathKey(n.path))).map((n) => n.path);
         onSelectionChange?.({ filterId, selectedPaths: paths });
         return next;
       });
@@ -84,9 +72,7 @@ export function DataTableTreeFilter({
   return (
     <div
       className={
-        className
-          ? `data-table-filter tree-filter ${className}`
-          : 'data-table-filter tree-filter'
+        className ? `data-table-filter tree-filter ${className}` : 'data-table-filter tree-filter'
       }
       data-position={position}
       data-filter-id={filterId}
@@ -106,9 +92,7 @@ export function DataTableTreeFilter({
             >
               <span
                 className={
-                  node.expanded
-                    ? 'tree-filter-arrow tree-filter-arrow-open'
-                    : 'tree-filter-arrow'
+                  node.expanded ? 'tree-filter-arrow tree-filter-arrow-open' : 'tree-filter-arrow'
                 }
               >
                 &#9654;

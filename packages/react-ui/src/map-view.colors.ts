@@ -30,10 +30,7 @@ function toMapLibreColor(cssColor: string, doc: Document): string {
   return rgb || cssColor;
 }
 
-function toMapLibreColors(
-  colors: MapStyleColors,
-  doc?: Document,
-): MapStyleColors {
+function toMapLibreColors(colors: MapStyleColors, doc?: Document): MapStyleColors {
   if (!doc) return ensureHexColors(colors);
   return {
     background: toMapLibreColor(colors.background, doc),
@@ -45,32 +42,19 @@ function toMapLibreColors(
   };
 }
 
-export function resolveColors(
-  overrides: Partial<MapStyleColors>,
-  doc?: Document,
-): MapStyleColors {
+export function resolveColors(overrides: Partial<MapStyleColors>, doc?: Document): MapStyleColors {
   const rootStyle = doc ? getComputedStyle(doc.documentElement) : undefined;
 
   const base: MapStyleColors = rootStyle
     ? {
         background:
-          rootStyle.getPropertyValue(TOKEN_MAP.background).trim() ||
-          FALLBACK_COLORS.background,
-        land:
-          rootStyle.getPropertyValue(TOKEN_MAP.land).trim() ||
-          FALLBACK_COLORS.land,
-        water:
-          rootStyle.getPropertyValue(TOKEN_MAP.water).trim() ||
-          FALLBACK_COLORS.water,
-        roads:
-          rootStyle.getPropertyValue(TOKEN_MAP.roads).trim() ||
-          FALLBACK_COLORS.roads,
+          rootStyle.getPropertyValue(TOKEN_MAP.background).trim() || FALLBACK_COLORS.background,
+        land: rootStyle.getPropertyValue(TOKEN_MAP.land).trim() || FALLBACK_COLORS.land,
+        water: rootStyle.getPropertyValue(TOKEN_MAP.water).trim() || FALLBACK_COLORS.water,
+        roads: rootStyle.getPropertyValue(TOKEN_MAP.roads).trim() || FALLBACK_COLORS.roads,
         buildings:
-          rootStyle.getPropertyValue(TOKEN_MAP.buildings).trim() ||
-          FALLBACK_COLORS.buildings,
-        labels:
-          rootStyle.getPropertyValue(TOKEN_MAP.labels).trim() ||
-          FALLBACK_COLORS.labels,
+          rootStyle.getPropertyValue(TOKEN_MAP.buildings).trim() || FALLBACK_COLORS.buildings,
+        labels: rootStyle.getPropertyValue(TOKEN_MAP.labels).trim() || FALLBACK_COLORS.labels,
       }
     : { ...FALLBACK_COLORS };
 

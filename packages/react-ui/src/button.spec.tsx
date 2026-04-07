@@ -12,7 +12,11 @@ describe('Button', () => {
   });
 
   it('applies custom variant and size', () => {
-    render(<Button variant="destructive" size="lg">Delete</Button>);
+    render(
+      <Button variant="destructive" size="lg">
+        Delete
+      </Button>,
+    );
     const btn = screen.getByRole('button', { name: 'Delete' });
     expect(btn).toHaveAttribute('data-variant', 'destructive');
     expect(btn).toHaveAttribute('data-size', 'lg');

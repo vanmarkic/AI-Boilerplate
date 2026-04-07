@@ -1,0 +1,18 @@
+/* @aspect/design-system — framework-agnostic CSS design system
+ * Import this file for the complete system, or import individual files:
+ *   @import "@aspect/design-system/tokens.css";
+ *   @import "@aspect/design-system/reset.css";
+ *   @import "@aspect/design-system/utilities.css";
+ *   @import "@aspect/design-system/components.css";
+ */
+
+@layer vendor, reset, tokens, utilities, components;
+
+@import "./vendor.css";
+@import "./tokens.css";
+@import "./tokens-naval-group.css";
+@import "./tokens-steel-blue.css";
+@import "./tokens-silent-wake.css";
+@import "./reset.css";
+@import "./utilities.css";
+@import "./components.css";

@@ -1,0 +1,16 @@
+/* @aspect/design-system — headless (no tokens)
+ * Import this when providing your own design tokens.
+ * The tokens layer is declared but empty — your token file
+ * slots into it via @layer tokens { :root { ... } }.
+ *
+ * Usage:
+ *   @import "@aspect/react-ui/design-system/headless.css";
+ *   @import "./my-brand-tokens.css";
+ */
+
+@layer vendor, reset, tokens, utilities, components;
+
+@import "./vendor.css";
+@import "./reset.css";
+@import "./utilities.css";
+@import "./components.css";

@@ -7,14 +7,17 @@
   /* ── Card ───────────────────────────────────────────── */
 
   .card {
-    display: block;
+    display: flex;
+    flex-direction: column;
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     background-color: var(--color-card);
-    padding: var(--spacing-md);
+    padding: var(--spacing-lg);
     box-shadow: var(--shadow-sm);
+    gap: var(--spacing-md);
+    height: 100%;
 
-    [data-effects="glow-glass"] & {
+    [data-effects='glow-glass'] & {
       background: var(--glass-bg), var(--color-card);
       backdrop-filter: blur(var(--glass-blur));
       -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -23,20 +26,36 @@
     }
   }
 
+  .card:not([data-disabled]) {
+    transition: border-color var(--duration-fast) var(--ease-default);
+  }
+
+  .card:not([data-disabled]):hover {
+    border-color: var(--color-primary);
+  }
+
+  .card[data-disabled] {
+    opacity: var(--opacity-disabled, 0.45);
+    pointer-events: none;
+  }
+
   .card-title {
-    font-size: var(--font-size-lg);
-    line-height: var(--font-size-lg--line-height);
-    font-weight: 600;
+    font-size: var(--font-size-2xl);
+    line-height: var(--font-size-2xl--line-height);
+    font-weight: 700;
     color: var(--color-card-foreground);
-    margin-block-end: var(--spacing-sm);
+    margin: 0;
   }
 
   .card-content {
-    font-size: var(--font-size-sm);
-    line-height: var(--font-size-sm--line-height);
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    font-size: var(--font-size-base);
+    line-height: var(--font-size-base--line-height);
     color: var(--color-muted-foreground);
   }
-
 
   /* ── Card Group ────────────────────────────────────────── */
 
@@ -48,7 +67,7 @@
     box-shadow: var(--shadow-sm);
     overflow: hidden;
 
-    [data-effects="glow-glass"] & {
+    [data-effects='glow-glass'] & {
       background: var(--glass-bg), var(--color-card);
       backdrop-filter: blur(var(--glass-blur));
       -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -103,7 +122,7 @@
     transition: transform var(--duration-normal) var(--ease-default);
   }
 
-  .card-group[data-mode="disaggregated"] .card-group-chevron {
+  .card-group[data-mode='disaggregated'] .card-group-chevron {
     transform: rotate(180deg);
   }
 
@@ -119,7 +138,6 @@
     gap: var(--spacing-sm);
     padding: 0 var(--spacing-md) var(--spacing-md);
   }
-
 
   /* ── Input ──────────────────────────────────────────── */
 
@@ -144,8 +162,10 @@
       outline: none;
       box-shadow: 0 0 0 2px var(--color-ring);
 
-      [data-effects="glow-glass"] & {
-        box-shadow: 0 0 0 2px var(--color-ring), var(--glow-primary);
+      [data-effects='glow-glass'] & {
+        box-shadow:
+          0 0 0 2px var(--color-ring),
+          var(--glow-primary);
       }
     }
 
@@ -169,7 +189,6 @@
     margin-block-end: var(--spacing-sm);
   }
 
-
   /* ── Form Error ─────────────────────────────────────── */
 
   .form-error {
@@ -178,7 +197,6 @@
     color: var(--color-destructive);
     margin-block-start: var(--spacing-xs);
   }
-
 
   /* ── Dialog ─────────────────────────────────────────── */
 
@@ -203,7 +221,7 @@
     padding: var(--spacing-lg);
     box-shadow: var(--shadow-lg);
 
-    [data-effects="glow-glass"] & {
+    [data-effects='glow-glass'] & {
       background: var(--glass-bg), var(--color-card);
       backdrop-filter: blur(var(--glass-blur));
       -webkit-backdrop-filter: blur(var(--glass-blur));
@@ -211,7 +229,7 @@
       box-shadow: var(--glass-shadow), var(--glow-primary);
     }
 
-    &[data-variant="destructive"] {
+    &[data-variant='destructive'] {
       border-color: var(--color-destructive);
     }
   }

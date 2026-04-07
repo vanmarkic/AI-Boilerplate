@@ -1,6 +1,6 @@
-import type { Meta, StoryObj } from "storybook";
-import { HistogramTimeline } from "./histogram-timeline";
-import type { HistogramBar, HistogramLabel } from "./histogram-timeline";
+import type { Meta, StoryObj } from 'storybook';
+import { HistogramTimeline } from './histogram-timeline';
+import type { HistogramBar, HistogramLabel } from './histogram-timeline';
 
 function seededRandom(seed: number): () => number {
   let s = seed;
@@ -23,12 +23,12 @@ function generateLabels(count: number, step: number): HistogramLabel[] {
 }
 
 const meta: Meta<typeof HistogramTimeline> = {
-  title: "Components/HistogramTimeline",
+  title: 'Components/HistogramTimeline',
   component: HistogramTimeline,
   argTypes: {
     variant: {
-      control: "select",
-      options: ["default", "success", "destructive", "muted"],
+      control: 'select',
+      options: ['default', 'success', 'destructive', 'muted'],
     },
   },
 };
@@ -43,7 +43,7 @@ export const Default: Story = {
   args: {
     bars: bars24,
     labels: labels24,
-    ariaLabel: "24-hour activity histogram",
+    ariaLabel: '24-hour activity histogram',
   },
 };
 
@@ -51,8 +51,8 @@ export const Success: Story = {
   args: {
     bars: bars24,
     labels: labels24,
-    ariaLabel: "Success histogram",
-    variant: "success",
+    ariaLabel: 'Success histogram',
+    variant: 'success',
   },
 };
 
@@ -60,7 +60,7 @@ export const Dense: Story = {
   args: {
     bars: generateBars(720, 99),
     labels: generateLabels(720, 120),
-    ariaLabel: "Dense 720-bar histogram",
-    variant: "muted",
+    ariaLabel: 'Dense 720-bar histogram',
+    variant: 'muted',
   },
 };

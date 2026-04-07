@@ -220,9 +220,7 @@ function Content({
   // Dev warning when no title
   useEffect(() => {
     if (process.env.NODE_ENV !== 'production' && open && !titleId) {
-      console.warn(
-        '[Dialog] Dialog.Content is missing a Dialog.Title. Add one for accessibility.',
-      );
+      console.warn('[Dialog] Dialog.Content is missing a Dialog.Title. Add one for accessibility.');
     }
   }, [open, titleId]);
 
@@ -308,10 +306,7 @@ function Close({ asChild = false, children, ...rest }: DialogCloseProps) {
 
   if (asChild) {
     return (
-      <Slot
-        onClick={handleClick}
-        {...(rest as HTMLAttributes<HTMLElement>)}
-      >
+      <Slot onClick={handleClick} {...(rest as HTMLAttributes<HTMLElement>)}>
         {children}
       </Slot>
     );

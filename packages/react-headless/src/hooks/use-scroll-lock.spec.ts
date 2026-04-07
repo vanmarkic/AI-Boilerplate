@@ -18,10 +18,9 @@ describe('useScrollLock', () => {
   });
 
   it('restores overflow on deactivation', () => {
-    const { rerender } = renderHook(
-      ({ active }) => useScrollLock(active),
-      { initialProps: { active: true } },
-    );
+    const { rerender } = renderHook(({ active }) => useScrollLock(active), {
+      initialProps: { active: true },
+    });
     expect(document.body.style.overflow).toBe('hidden');
     rerender({ active: false });
     expect(document.body.style.overflow).toBe('');

@@ -12,7 +12,7 @@ Then load the design system CSS once at your app entry point:
 
 ```css
 /* app.css */
-@import "@aspect/design-system";
+@import '@aspect/design-system';
 ```
 
 ```tsx
@@ -41,10 +41,10 @@ import { Button } from '@aspect/react-ui';
 <Button variant="ghost" disabled>Loading…</Button>
 ```
 
-| Prop | Type | Default |
-|---|---|---|
+| Prop      | Type                                                 | Default     |
+| --------- | ---------------------------------------------------- | ----------- |
 | `variant` | `'default' \| 'destructive' \| 'outline' \| 'ghost'` | `'default'` |
-| `size` | `'sm' \| 'default' \| 'lg'` | `'default'` |
+| `size`    | `'sm' \| 'default' \| 'lg'`                          | `'default'` |
 
 Extends all native `<button>` attributes.
 
@@ -60,8 +60,8 @@ import { Badge } from '@aspect/react-ui';
 <Badge variant="outline">Draft</Badge>
 ```
 
-| Prop | Type | Default |
-|---|---|---|
+| Prop      | Type                                                     | Default     |
+| --------- | -------------------------------------------------------- | ----------- |
 | `variant` | `'default' \| 'secondary' \| 'destructive' \| 'outline'` | `'default'` |
 
 ---
@@ -88,8 +88,8 @@ import { FormError } from '@aspect/react-ui';
 <FormError />  {/* renders nothing when message is absent */}
 ```
 
-| Prop | Type |
-|---|---|
+| Prop      | Type                  |
+| --------- | --------------------- |
 | `message` | `string \| undefined` |
 
 ---
@@ -120,14 +120,14 @@ import { Stack } from '@aspect/react-ui';
 <Stack as="section" gap="md">…</Stack>
 ```
 
-| Prop | Type | Default |
-|---|---|---|
-| `direction` | `'vertical' \| 'horizontal'` | `'vertical'` |
-| `gap` | `'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'` |
-| `align` | `'start' \| 'center' \| 'end' \| 'stretch'` | — |
-| `justify` | `'start' \| 'center' \| 'end' \| 'between'` | — |
-| `fill` | `boolean` | `false` |
-| `as` | `ElementType` | `'div'` |
+| Prop        | Type                                                      | Default      |
+| ----------- | --------------------------------------------------------- | ------------ |
+| `direction` | `'vertical' \| 'horizontal'`                              | `'vertical'` |
+| `gap`       | `'none' \| 'xs' \| 'sm' \| 'md' \| 'lg' \| 'xl' \| '2xl'` | `'md'`       |
+| `align`     | `'start' \| 'center' \| 'end' \| 'stretch'`               | —            |
+| `justify`   | `'start' \| 'center' \| 'end' \| 'between'`               | —            |
+| `fill`      | `boolean`                                                 | `false`      |
+| `as`        | `ElementType`                                             | `'div'`      |
 
 ---
 
@@ -138,18 +138,15 @@ Full-height shell with sticky header and footer slots.
 ```tsx
 import { PageLayout, PageHeader } from '@aspect/react-ui';
 
-<PageLayout
-  header={<PageHeader title="Dashboard" />}
-  footer={<Footer />}
->
+<PageLayout header={<PageHeader title="Dashboard" />} footer={<Footer />}>
   <main>…</main>
-</PageLayout>
+</PageLayout>;
 ```
 
-| Prop | Type |
-|---|---|
-| `header` | `ReactNode` |
-| `footer` | `ReactNode` |
+| Prop       | Type        |
+| ---------- | ----------- |
+| `header`   | `ReactNode` |
+| `footer`   | `ReactNode` |
 | `children` | `ReactNode` |
 
 ---
@@ -159,18 +156,14 @@ import { PageLayout, PageHeader } from '@aspect/react-ui';
 ```tsx
 import { PageHeader } from '@aspect/react-ui';
 
-<PageHeader
-  title="Incidents"
-  subtitle="Last 30 days"
-  actions={<Button>New incident</Button>}
-/>
+<PageHeader title="Incidents" subtitle="Last 30 days" actions={<Button>New incident</Button>} />;
 ```
 
-| Prop | Type |
-|---|---|
-| `title` | `string` |
-| `subtitle` | `string` |
-| `actions` | `ReactNode` |
+| Prop       | Type        |
+| ---------- | ----------- |
+| `title`    | `string`    |
+| `subtitle` | `string`    |
+| `actions`  | `ReactNode` |
 
 ---
 
@@ -182,10 +175,12 @@ Router-agnostic tab bar. Pass your router's `<Link>` via the `as` prop or use pl
 import { TabNav, TabLink } from '@aspect/react-ui';
 
 <TabNav>
-  <TabLink href="/overview" active>Overview</TabLink>
+  <TabLink href="/overview" active>
+    Overview
+  </TabLink>
   <TabLink href="/events">Events</TabLink>
   <TabLink href="/settings">Settings</TabLink>
-</TabNav>
+</TabNav>;
 ```
 
 `TabLink` extends all native `<a>` attributes plus `active: boolean`.
@@ -201,8 +196,10 @@ import { DialogPanel } from '@aspect/react-ui';
 
 <DialogPanel title="Confirm deletion" onClose={() => setOpen(false)}>
   <p>This action cannot be undone.</p>
-  <Button variant="destructive" onClick={handleDelete}>Delete</Button>
-</DialogPanel>
+  <Button variant="destructive" onClick={handleDelete}>
+    Delete
+  </Button>
+</DialogPanel>;
 ```
 
 ---
@@ -216,7 +213,7 @@ import { CollapsiblePanel } from '@aspect/react-ui';
 
 <CollapsiblePanel title="Advanced options">
   <Input placeholder="Custom value" />
-</CollapsiblePanel>
+</CollapsiblePanel>;
 ```
 
 ---
@@ -229,12 +226,12 @@ Sortable, typed table built on TanStack Table.
 import { DataTable, type DataTableColumn } from '@aspect/react-ui';
 
 const columns: DataTableColumn<User>[] = [
-  { key: 'name',  header: 'Name',   cell: row => row.name },
-  { key: 'email', header: 'Email',  cell: row => row.email },
-  { key: 'role',  header: 'Role',   cell: row => <Badge>{row.role}</Badge> },
+  { key: 'name', header: 'Name', cell: (row) => row.name },
+  { key: 'email', header: 'Email', cell: (row) => row.email },
+  { key: 'role', header: 'Role', cell: (row) => <Badge>{row.role}</Badge> },
 ];
 
-<DataTable data={users} columns={columns} />
+<DataTable data={users} columns={columns} />;
 ```
 
 ---
@@ -252,7 +249,7 @@ const bars: HistogramBar[] = [
   { label: '12:00', value: 78 },
 ];
 
-<HistogramTimeline bars={bars} variant="default" />
+<HistogramTimeline bars={bars} variant="default" />;
 ```
 
 ## Overriding styles
@@ -260,21 +257,25 @@ const bars: HistogramBar[] = [
 Add a stylesheet after the design system import and target the component's class name:
 
 ```css
-@import "@aspect/design-system";
+@import '@aspect/design-system';
 
 /* Pill-shaped buttons */
-.btn { border-radius: var(--radius-full); }
+.btn {
+  border-radius: var(--radius-full);
+}
 
 /* Wider tab bar */
-.tab-link { padding-inline: var(--spacing-lg); }
+.tab-link {
+  padding-inline: var(--spacing-lg);
+}
 ```
 
 Unlayered CSS always beats `@layer components` — no `!important` needed.
 
 ## Peer dependencies
 
-| Package | Version |
-|---|---|
-| `@aspect/design-system` | `^0.1.0` |
-| `react` | `^19.0.0` |
-| `react-dom` | `^19.0.0` |
+| Package                 | Version   |
+| ----------------------- | --------- |
+| `@aspect/design-system` | `^0.1.0`  |
+| `react`                 | `^19.0.0` |
+| `react-dom`             | `^19.0.0` |

@@ -10,13 +10,21 @@
     "./tokens.css": "./tokens.css",
     "./reset.css": "./reset.css",
     "./utilities.css": "./utilities.css",
-    "./components.css": "./components.css"
+    "./components.css": "./components.css",
+    "./fonts.css": "./fonts.css"
   },
   "files": [
     "*.css",
+    "fonts/",
     "docs/"
   ],
-  "keywords": ["css", "design-system", "tokens", "oklch", "css-layers"],
+  "keywords": [
+    "css",
+    "design-system",
+    "tokens",
+    "oklch",
+    "css-layers"
+  ],
   "scripts": {
     "lint": "stylelint \"*.css\"",
     "test": "npx vitest run --config ../../vitest.config.ts",

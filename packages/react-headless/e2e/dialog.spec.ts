@@ -51,7 +51,9 @@ test.describe('Dialog', () => {
     expect(overflow).toBe('hidden');
   });
 
-  test('forceMount: content in DOM with data-state=closed when dialog is closed', async ({ page }) => {
+  test('forceMount: content in DOM with data-state=closed when dialog is closed', async ({
+    page,
+  }) => {
     await page.goto('/#dialog-force-mount');
     const content = page.locator('[data-testid="dialog-content"]');
     await expect(content).toBeAttached(); // in DOM

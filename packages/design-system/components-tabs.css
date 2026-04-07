@@ -13,7 +13,9 @@
     text-decoration: none;
     font-size: var(--font-size-sm);
     font-weight: 500;
-    transition: color 0.15s, border-color 0.15s;
+    transition:
+      color 0.15s,
+      border-color 0.15s;
     margin-bottom: -1px;
   }
 
@@ -25,16 +27,16 @@
     color: var(--color-primary);
     border-bottom-color: var(--color-primary);
 
-    [data-effects="glow-glass"] & {
+    [data-effects='glow-glass'] & {
       text-shadow: 0 0 12px var(--glow-color);
     }
   }
 
-  .tab-link[aria-selected="true"] {
+  .tab-link[aria-selected='true'] {
     color: var(--color-primary);
     border-bottom-color: var(--color-primary);
 
-    [data-effects="glow-glass"] & {
+    [data-effects='glow-glass'] & {
       text-shadow: 0 0 12px var(--glow-color);
     }
   }

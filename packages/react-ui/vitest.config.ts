@@ -6,10 +6,7 @@ import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
 import { playwright } from '@vitest/browser-playwright';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    storybookTest({ configDir: '.storybook' }),
-  ],
+  plugins: [react(), storybookTest({ configDir: '.storybook' })],
   optimizeDeps: {
     include: ['storybook/test'],
   },

@@ -1,0 +1,8 @@
+/* ── Vendor Layer ────────────────────────────────────────
+ *  Placeholder for the @layer vendor declaration.
+ *  Actual vendor CSS is imported by consuming apps using
+ *  @import "..." layer(vendor) syntax.
+ *  This file ensures the vendor layer exists in the cascade.
+ * ──────────────────────────────────────────────────────── */
+
+@layer vendor;

@@ -6,12 +6,14 @@ export default defineConfig({
   plugins: [react(), dts({ tsconfigPath: './tsconfig.json', exclude: ['**/*.spec.*'] })],
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: {
+        index: 'src/index.ts',
+        map: 'src/map.ts',
+      },
       formats: ['es'],
-      fileName: 'index',
     },
     rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
+      external: ['react', 'react-dom', 'react/jsx-runtime', 'maplibre-gl', 'pmtiles'],
     },
   },
 });

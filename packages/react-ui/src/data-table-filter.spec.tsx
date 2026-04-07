@@ -65,9 +65,7 @@ const rows: Row[] = [
   { name: 'Carol', age: 35, role: 'admin' },
 ];
 
-function makeFilter(
-  overrides: Partial<FilterConfig<Row>> & { column: string },
-): FilterConfig<Row> {
+function makeFilter(overrides: Partial<FilterConfig<Row>> & { column: string }): FilterConfig<Row> {
   return {
     filterId: 'f',
     operator: 'equals',
@@ -108,30 +106,22 @@ describe('applyFilters', () => {
   });
 
   it('filters with gt operator', () => {
-    const result = applyFilters(rows, [
-      makeFilter({ column: 'age', operator: 'gt', value: 30 }),
-    ]);
+    const result = applyFilters(rows, [makeFilter({ column: 'age', operator: 'gt', value: 30 })]);
     expect(result).toEqual([rows[2]]);
   });
 
   it('filters with lt operator', () => {
-    const result = applyFilters(rows, [
-      makeFilter({ column: 'age', operator: 'lt', value: 30 }),
-    ]);
+    const result = applyFilters(rows, [makeFilter({ column: 'age', operator: 'lt', value: 30 })]);
     expect(result).toEqual([rows[1]]);
   });
 
   it('filters with gte operator', () => {
-    const result = applyFilters(rows, [
-      makeFilter({ column: 'age', operator: 'gte', value: 30 }),
-    ]);
+    const result = applyFilters(rows, [makeFilter({ column: 'age', operator: 'gte', value: 30 })]);
     expect(result).toEqual([rows[0], rows[2]]);
   });
 
   it('filters with lte operator', () => {
-    const result = applyFilters(rows, [
-      makeFilter({ column: 'age', operator: 'lte', value: 30 }),
-    ]);
+    const result = applyFilters(rows, [makeFilter({ column: 'age', operator: 'lte', value: 30 })]);
     expect(result).toEqual([rows[0], rows[1]]);
   });
 

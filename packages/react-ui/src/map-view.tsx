@@ -1,18 +1,6 @@
-import {
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Map as MlMap, StyleSpecification } from 'maplibre-gl';
-import type {
-  MapCenter,
-  MapMoveEvent,
-  MapStyleColors,
-  MapVariant,
-} from './map-view.types';
+import type { MapCenter, MapMoveEvent, MapStyleColors, MapVariant } from './map-view.types';
 import { createMap } from './map-view.init';
 import { MapViewContext } from './map-view.context';
 
@@ -90,12 +78,7 @@ export function MapView({
 
   return (
     <MapViewContext.Provider value={ctx}>
-      <div
-        className="map-view"
-        data-variant={variant}
-        aria-label={ariaLabel}
-        role="application"
-      >
+      <div className="map-view" data-variant={variant} aria-label={ariaLabel} role="application">
         <div className="map-view-canvas" ref={containerRef} />
         {children}
       </div>

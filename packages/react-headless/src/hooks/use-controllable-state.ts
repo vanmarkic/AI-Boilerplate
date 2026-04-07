@@ -16,14 +16,10 @@ export function useControllableState<T>(
 
   if (process.env.NODE_ENV !== 'production') {
     if (wasControlledRef.current && !isControlled) {
-      console.warn(
-        'A component changed from controlled to uncontrolled. This is not supported.',
-      );
+      console.warn('A component changed from controlled to uncontrolled. This is not supported.');
     }
     if (!wasControlledRef.current && isControlled) {
-      console.warn(
-        'A component changed from uncontrolled to controlled. This is not supported.',
-      );
+      console.warn('A component changed from uncontrolled to controlled. This is not supported.');
     }
   }
   wasControlledRef.current = isControlled;

@@ -13,16 +13,16 @@ npm install @aspect/design-system
 Full bundle (recommended):
 
 ```css
-@import "@aspect/design-system";
+@import '@aspect/design-system';
 ```
 
 Individual files for granular control:
 
 ```css
-@import "@aspect/design-system/tokens.css";
-@import "@aspect/design-system/reset.css";
-@import "@aspect/design-system/utilities.css";
-@import "@aspect/design-system/components.css";
+@import '@aspect/design-system/tokens.css';
+@import '@aspect/design-system/reset.css';
+@import '@aspect/design-system/utilities.css';
+@import '@aspect/design-system/components.css';
 ```
 
 ## Layer Cascade
@@ -39,10 +39,10 @@ The system declares CSS layers in this order:
 
 Components use `data-*` HTML attributes for variant and size logic, styled via CSS attribute selectors. No runtime class computation required.
 
-| Attribute        | Purpose                                                        |
-| ---------------- | -------------------------------------------------------------- |
-| `data-variant`   | Visual variant (`default`, `destructive`, `outline`, `ghost`, `secondary`) |
-| `data-size`      | Size variant (`sm`, `default`, `lg`)                           |
+| Attribute      | Purpose                                                                    |
+| -------------- | -------------------------------------------------------------------------- |
+| `data-variant` | Visual variant (`default`, `destructive`, `outline`, `ghost`, `secondary`) |
+| `data-size`    | Size variant (`sm`, `default`, `lg`)                                       |
 
 Example:
 
@@ -52,13 +52,13 @@ Example:
 
 ## Available Components
 
-| Component  | CSS classes                                                                        |
-| ---------- | ---------------------------------------------------------------------------------- |
-| Button     | `.btn`                                                                             |
-| Badge      | `.badge`                                                                           |
-| Card       | `.card`, `.card-title`, `.card-content`                                            |
-| Input      | `.input-wrapper`, `.input-label`, `.input-base`                                    |
-| Form Error | `.form-error`                                                                      |
+| Component  | CSS classes                                                                            |
+| ---------- | -------------------------------------------------------------------------------------- |
+| Button     | `.btn`                                                                                 |
+| Badge      | `.badge`                                                                               |
+| Card       | `.card`, `.card-title`, `.card-content`                                                |
+| Input      | `.input-wrapper`, `.input-label`, `.input-base`                                        |
+| Form Error | `.form-error`                                                                          |
 | Dialog     | `.dialog-backdrop`, `.dialog-panel`, `.dialog-title`, `.dialog-body`, `.dialog-footer` |
 
 ## Font Setup
@@ -73,8 +73,8 @@ Import them in your application entry point (not via CSS `@import`):
 
 ```ts
 // main.ts or equivalent
-import "@fontsource-variable/inter";
-import "@fontsource-variable/jetbrains-mono";
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
 ```
 
 ## Framework Recipes

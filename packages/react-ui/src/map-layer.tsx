@@ -1,12 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { AddLayerObject, MapLayerMouseEvent } from 'maplibre-gl';
 import type { GeoJSON } from 'geojson';
-import type {
-  MapFeatureEvent,
-  MapLayerType,
-  MapLayout,
-  MapPaint,
-} from './map-view.types';
+import type { MapFeatureEvent, MapLayerType, MapLayout, MapPaint } from './map-view.types';
 import { useMapView } from './map-view.context';
 
 export interface MapLayerProps {

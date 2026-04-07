@@ -81,9 +81,7 @@ describe('buildProtomapsStyle', () => {
       glyphs: 'https://custom.com/fonts/{fontstack}/{range}.pbf',
       sprite: 'https://custom.com/sprites',
     });
-    expect(style.glyphs).toBe(
-      'https://custom.com/fonts/{fontstack}/{range}.pbf',
-    );
+    expect(style.glyphs).toBe('https://custom.com/fonts/{fontstack}/{range}.pbf');
     expect(style.sprite).toBe('https://custom.com/sprites');
   });
 

@@ -3,23 +3,14 @@ import { SidebarLayout } from './sidebar-layout';
 
 describe('SidebarLayout', () => {
   it('renders sidebar and main content', () => {
-    render(
-      <SidebarLayout sidebar={<nav>Sidebar nav</nav>}>
-        Main content
-      </SidebarLayout>,
-    );
+    render(<SidebarLayout sidebar={<nav>Sidebar nav</nav>}>Main content</SidebarLayout>);
     expect(screen.getByText('Sidebar nav')).toBeInTheDocument();
     expect(screen.getByText('Main content')).toBeInTheDocument();
   });
 
   it('defaults to data-side="left"', () => {
-    const { container } = render(
-      <SidebarLayout sidebar={<div>Side</div>}>Main</SidebarLayout>,
-    );
-    expect(container.querySelector('.sidebar-layout')).toHaveAttribute(
-      'data-side',
-      'left',
-    );
+    const { container } = render(<SidebarLayout sidebar={<div>Side</div>}>Main</SidebarLayout>);
+    expect(container.querySelector('.sidebar-layout')).toHaveAttribute('data-side', 'left');
   });
 
   it('applies data-side="right" when side prop is right', () => {
@@ -28,10 +19,7 @@ describe('SidebarLayout', () => {
         Main
       </SidebarLayout>,
     );
-    expect(container.querySelector('.sidebar-layout')).toHaveAttribute(
-      'data-side',
-      'right',
-    );
+    expect(container.querySelector('.sidebar-layout')).toHaveAttribute('data-side', 'right');
   });
 
   it('merges custom className', () => {
@@ -51,30 +39,17 @@ describe('SidebarLayout', () => {
         Main
       </SidebarLayout>,
     );
-    expect(container.querySelector('.sidebar-layout')).toHaveAttribute(
-      'data-testid',
-      'my-layout',
-    );
+    expect(container.querySelector('.sidebar-layout')).toHaveAttribute('data-testid', 'my-layout');
   });
 
   it('renders sidebar in aside element', () => {
-    const { container } = render(
-      <SidebarLayout sidebar={<div>Side</div>}>Main</SidebarLayout>,
-    );
-    expect(
-      container.querySelector('aside.sidebar-layout-sidebar'),
-    ).not.toBeNull();
+    const { container } = render(<SidebarLayout sidebar={<div>Side</div>}>Main</SidebarLayout>);
+    expect(container.querySelector('aside.sidebar-layout-sidebar')).not.toBeNull();
   });
 
   it('renders main content in sidebar-layout-main div', () => {
-    const { container } = render(
-      <SidebarLayout sidebar={<div>Side</div>}>Main</SidebarLayout>,
-    );
-    expect(
-      container.querySelector('.sidebar-layout-main'),
-    ).not.toBeNull();
-    expect(
-      container.querySelector('.sidebar-layout-main')!.textContent,
-    ).toBe('Main');
+    const { container } = render(<SidebarLayout sidebar={<div>Side</div>}>Main</SidebarLayout>);
+    expect(container.querySelector('.sidebar-layout-main')).not.toBeNull();
+    expect(container.querySelector('.sidebar-layout-main')!.textContent).toBe('Main');
   });
 });

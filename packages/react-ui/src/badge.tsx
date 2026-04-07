@@ -7,18 +7,9 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
   children?: ReactNode;
 }
 
-export function Badge({
-  variant = 'default',
-  className,
-  children,
-  ...props
-}: BadgeProps) {
+export function Badge({ variant = 'default', className, children, ...props }: BadgeProps) {
   return (
-    <span
-      className={className ? `badge ${className}` : 'badge'}
-      data-variant={variant}
-      {...props}
-    >
+    <span className={className ? `badge ${className}` : 'badge'} data-variant={variant} {...props}>
       {children}
     </span>
   );

@@ -2,8 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const DIR = import.meta.dirname;
-const read = (name: string) =>
-  readFileSync(resolve(DIR, name), 'utf-8');
+const read = (name: string) => readFileSync(resolve(DIR, name), 'utf-8');
 
 describe('glow + glass token system', () => {
   const tokens = read('tokens.css');
@@ -39,18 +38,14 @@ describe('glow + glass token system', () => {
   // ── tokens.css — data-effects toggle ───────────────────
 
   it('enables effects via data-effects="glow-glass"', () => {
-    const block = tokens.match(
-      /\[data-effects="glow-glass"\]\s*\{([^}]+)\}/,
-    );
+    const block = tokens.match(/\[data-effects="glow-glass"\]\s*\{([^}]+)\}/);
     expect(block).not.toBeNull();
     expect(block![1]).toMatch(/--glow-strength:\s*1/);
     expect(block![1]).toMatch(/--glass-strength:\s*1/);
   });
 
   it('disables effects via data-effects="none"', () => {
-    const block = tokens.match(
-      /\[data-effects="none"\]\s*\{([^}]+)\}/,
-    );
+    const block = tokens.match(/\[data-effects="none"\]\s*\{([^}]+)\}/);
     expect(block).not.toBeNull();
     expect(block![1]).toMatch(/--glow-strength:\s*0/);
     expect(block![1]).toMatch(/--glass-strength:\s*0/);
@@ -59,18 +54,14 @@ describe('glow + glass token system', () => {
   // ── tokens.css — accessibility ─────────────────────────
 
   it('disables glow+glass in prefers-reduced-motion', () => {
-    const motionBlock = tokens.match(
-      /prefers-reduced-motion:\s*reduce[\s\S]*?\{([\s\S]*?)\}\s*\}/,
-    );
+    const motionBlock = tokens.match(/prefers-reduced-motion:\s*reduce[\s\S]*?\{([\s\S]*?)\}\s*\}/);
     expect(motionBlock).not.toBeNull();
     expect(motionBlock![1]).toMatch(/--glow-strength:\s*0/);
     expect(motionBlock![1]).toMatch(/--glass-strength:\s*0/);
   });
 
   it('disables glow+glass in prefers-contrast: more', () => {
-    const contrastBlock = tokens.match(
-      /prefers-contrast:\s*more[\s\S]*?\{([\s\S]*?)\}\s*\}/,
-    );
+    const contrastBlock = tokens.match(/prefers-contrast:\s*more[\s\S]*?\{([\s\S]*?)\}\s*\}/);
     expect(contrastBlock).not.toBeNull();
     expect(contrastBlock![1]).toMatch(/--glow-strength:\s*0/);
     expect(contrastBlock![1]).toMatch(/--glass-strength:\s*0/);
@@ -99,8 +90,6 @@ describe('glow + glass token system', () => {
   // ── components-layout.css — landing-glow wired ────────
 
   it('.landing-glow uses --glow-strength for opacity', () => {
-    expect(layout).toMatch(
-      /\.landing-glow[\s\S]*?opacity:\s*calc\([^)]*var\(--glow-strength\)/,
-    );
+    expect(layout).toMatch(/\.landing-glow[\s\S]*?opacity:\s*calc\([^)]*var\(--glow-strength\)/);
   });
 });

@@ -1,0 +1,123 @@
+/* ── Collapsible Panel Component Classes ────────────────────
+ *  Semantic styles with variant logic via data-* selectors.
+ *  Native CSS nesting.
+ * ──────────────────────────────────────────────────────── */
+
+@layer components {
+  /* ── Collapsible Panel ──────────────────────────────── */
+
+  .collapsible-panel {
+    display: block;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-card);
+
+    [data-effects="glow-glass"] & {
+      background: var(--glass-bg), var(--color-card);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      border-color: var(--glass-border);
+      box-shadow: var(--glass-shadow), var(--glow-sm);
+    }
+
+    & + & {
+      margin-block-start: calc(-1 * 1px);
+      border-start-start-radius: 0;
+      border-start-end-radius: 0;
+    }
+
+    &:has(+ &) {
+      border-end-start-radius: 0;
+      border-end-end-radius: 0;
+    }
+  }
+
+  .collapsible-panel-trigger {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    border: none;
+    border-radius: inherit;
+    background: none;
+    color: var(--color-card-foreground);
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    font-weight: 600;
+    cursor: pointer;
+    text-align: start;
+    list-style: none;
+
+    &:hover {
+      background-color: var(--color-accent);
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 2px var(--color-ring);
+    }
+  }
+
+  .collapsible-panel-chevron {
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    transition: transform var(--duration-normal) var(--ease-default);
+
+    [data-state="open"] > .collapsible-panel-trigger > & {
+      transform: rotate(180deg);
+    }
+  }
+
+  .collapsible-panel-content {
+    overflow: hidden;
+    padding-inline: var(--spacing-md);
+    padding-block-end: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    line-height: var(--font-size-sm--line-height);
+    color: var(--color-muted-foreground);
+  }
+
+  /* ── Size variants ── */
+  .collapsible-panel[data-size="sm"] {
+    & > .collapsible-panel-trigger {
+      padding: var(--spacing-sm);
+      font-size: var(--font-size-xs);
+      line-height: var(--font-size-xs--line-height);
+    }
+
+    & > .collapsible-panel-content,
+    & .collapsible-panel-content {
+      padding-inline: var(--spacing-sm);
+      padding-block-end: var(--spacing-sm);
+      font-size: var(--font-size-xs);
+      line-height: var(--font-size-xs--line-height);
+    }
+  }
+
+  .collapsible-panel[data-size="lg"] {
+    & > .collapsible-panel-trigger {
+      padding: var(--spacing-lg);
+      font-size: var(--font-size-base);
+      line-height: var(--font-size-base--line-height);
+    }
+
+    & > .collapsible-panel-content,
+    & .collapsible-panel-content {
+      padding-inline: var(--spacing-lg);
+      padding-block-end: var(--spacing-lg);
+    }
+  }
+
+  /* ── Style variants ── */
+  .collapsible-panel[data-variant="ghost"] {
+    border-color: transparent;
+    background-color: transparent;
+  }
+
+  .collapsible-panel[data-variant="outline"] {
+    background-color: transparent;
+  }
+}

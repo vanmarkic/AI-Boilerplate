@@ -84,10 +84,7 @@ describe('Collapsible', () => {
       </Collapsible.Root>,
     );
     expect(screen.getByText('Content')).toBeInTheDocument();
-    expect(screen.getByText('Content').parentElement).toHaveAttribute(
-      'data-state',
-      'closed',
-    );
+    expect(screen.getByText('Content').parentElement).toHaveAttribute('data-state', 'closed');
   });
 
   it('links trigger and content via aria-controls', () => {

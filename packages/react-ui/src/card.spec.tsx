@@ -37,4 +37,22 @@ describe('Card', () => {
     const { container } = render(<Card data-testid="my-card">X</Card>);
     expect(container.querySelector('[data-testid="my-card"]')).toBeInTheDocument();
   });
+
+  it('sets data-disabled attribute when disabled', () => {
+    const { container } = render(<Card disabled>X</Card>);
+    const card = container.firstElementChild;
+    expect(card).toHaveAttribute('data-disabled');
+  });
+
+  it('does not set data-disabled when not disabled', () => {
+    const { container } = render(<Card>X</Card>);
+    const card = container.firstElementChild;
+    expect(card).not.toHaveAttribute('data-disabled');
+  });
+
+  it('does not set data-disabled when disabled is false', () => {
+    const { container } = render(<Card disabled={false}>X</Card>);
+    const card = container.firstElementChild;
+    expect(card).not.toHaveAttribute('data-disabled');
+  });
 });

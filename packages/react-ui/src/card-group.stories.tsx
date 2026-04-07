@@ -1,14 +1,14 @@
-import type { Meta, StoryObj } from "storybook";
-import { CardGroup } from "./card-group";
-import { Card } from "./card";
+import type { Meta, StoryObj } from 'storybook';
+import { CardGroup } from './card-group';
+import { Card } from './card';
 
 const meta: Meta<typeof CardGroup> = {
-  title: "Components/CardGroup",
+  title: 'Components/CardGroup',
   component: CardGroup,
   argTypes: {
     mode: {
-      control: "select",
-      options: ["aggregated", "disaggregated"],
+      control: 'select',
+      options: ['aggregated', 'disaggregated'],
     },
   },
 };
@@ -18,9 +18,9 @@ type Story = StoryObj<typeof CardGroup>;
 
 export const Aggregated: Story = {
   args: {
-    title: "Infrastructure",
+    title: 'Infrastructure',
     count: 4,
-    mode: "aggregated",
+    mode: 'aggregated',
     summary: <span>4 metrics — all within normal range</span>,
     children: (
       <>
@@ -35,9 +35,9 @@ export const Aggregated: Story = {
 
 export const Disaggregated: Story = {
   args: {
-    title: "Infrastructure",
+    title: 'Infrastructure',
     count: 4,
-    mode: "disaggregated",
+    mode: 'disaggregated',
     summary: <span>4 metrics — all within normal range</span>,
     children: (
       <>
@@ -52,7 +52,14 @@ export const Disaggregated: Story = {
 
 export const MultipleGroups: Story = {
   render: () => (
-    <div style={{ display: "flex", flexDirection: "column", gap: "var(--spacing-md)", maxWidth: "48rem" }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--spacing-md)',
+        maxWidth: '48rem',
+      }}
+    >
       <CardGroup
         title="Infrastructure"
         count={4}

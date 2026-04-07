@@ -9,10 +9,7 @@ export function isPathPrefix(prefix: string[], full: string[]): boolean {
   return prefix.every((v, i) => v === full[i]);
 }
 
-export function isAncestorExpanded(
-  path: string[],
-  expanded: Set<string>,
-): boolean {
+export function isAncestorExpanded(path: string[], expanded: Set<string>): boolean {
   for (let i = 1; i < path.length; i++) {
     if (!expanded.has(pathKey(path.slice(0, i)))) return false;
   }
@@ -28,10 +25,7 @@ export function selectionState(
   if (!node.expandable) return { selected: isSel, indeterminate: false };
 
   const descs = allNodes.filter(
-    (n) =>
-      !n.expandable &&
-      n.path.length > node.path.length &&
-      isPathPrefix(node.path, n.path),
+    (n) => !n.expandable && n.path.length > node.path.length && isPathPrefix(node.path, n.path),
   );
   if (descs.length === 0) return { selected: isSel, indeterminate: false };
 
@@ -41,11 +35,7 @@ export function selectionState(
   return { selected: false, indeterminate: true };
 }
 
-export function filterByPaths<T>(
-  rows: T[],
-  paths: string[][],
-  column: string,
-): T[] {
+export function filterByPaths<T>(rows: T[], paths: string[][], column: string): T[] {
   return rows.filter((row) => {
     const cellPath = (row as Record<string, unknown>)[column];
     if (!Array.isArray(cellPath)) return false;
@@ -71,10 +61,7 @@ export function updateSelection(
   return next;
 }
 
-export function flatten(
-  nodes: TreeFilterNode[],
-  parentPath: string[],
-): FlatTreeNode[] {
+export function flatten(nodes: TreeFilterNode[], parentPath: string[]): FlatTreeNode[] {
   const result: FlatTreeNode[] = [];
   for (const node of nodes) {
     const path = [...parentPath, node.value];

@@ -25,7 +25,9 @@ export interface TabLinkProps extends AnchorHTMLAttributes<HTMLAnchorElement> {
 export function TabLink({ value, href, children, ...props }: TabLinkProps) {
   return (
     <Tabs.Trigger value={value} asChild>
-      <a href={href} className="tab-link" {...props}>{children}</a>
+      <a href={href} className="tab-link" {...props}>
+        {children}
+      </a>
     </Tabs.Trigger>
   );
 }

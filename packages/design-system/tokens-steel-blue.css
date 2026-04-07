@@ -8,7 +8,7 @@
  * ──────────────────────────────────────────────────────── */
 
 @layer tokens {
-  [data-theme="steel-blue"] {
+  [data-theme='steel-blue'] {
     /* ── Base surfaces (dark → light) ─────────────────── */
     --color-background: oklch(13% 0.008 250);
     --color-card: oklch(18% 0.008 250);
@@ -17,8 +17,8 @@
     --color-muted: oklch(25% 0.008 250);
 
     /* ── Borders & inputs ─────────────────────────────── */
-    --color-border: oklch(30% 0.010 250);
-    --color-input: oklch(30% 0.010 250);
+    --color-border: oklch(30% 0.01 250);
+    --color-input: oklch(30% 0.01 250);
 
     /* ── Text ─────────────────────────────────────────── */
     --color-foreground: oklch(92% 0 0);
@@ -28,11 +28,11 @@
     --color-muted-foreground: oklch(55% 0.005 250);
 
     /* ── Accent — steel blue ──────────────────────────── */
-    --color-primary: oklch(62% 0.10 245);
+    --color-primary: oklch(62% 0.1 245);
     --color-primary-foreground: oklch(98% 0 0);
-    --color-accent: oklch(62% 0.10 245);
+    --color-accent: oklch(62% 0.1 245);
     --color-accent-foreground: oklch(92% 0 0);
-    --color-ring: oklch(62% 0.10 245);
+    --color-ring: oklch(62% 0.1 245);
 
     /* ── Semantic signals ─────────────────────────────── */
     --color-destructive: oklch(55% 0.22 27);
@@ -46,7 +46,7 @@
 
     /* ── Overlay & effect tokens ─────────────────────── */
     --overlay-scanline: oklch(0% 0 0 / 0.06);
-    --overlay-vignette: oklch(0% 0 0 / 0.70);
+    --overlay-vignette: oklch(0% 0 0 / 0.7);
     --stress-vignette-opacity: 0.7;
 
     /* ── Map surfaces ──────────────────────────────────── */
@@ -58,8 +58,8 @@
     --color-map-labels: var(--color-muted-foreground);
 
     /* ── Typography ───────────────────────────────────── */
-    --font-sans: "Inter Variable", "Inter", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+    --font-sans: 'Inter Variable', 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
 
     /* ── Control heights ──────────────────────────────── */
     --control-sm: 2rem;
@@ -77,21 +77,23 @@
     --shadow-lg: 0 4px 12px oklch(0% 0 0 / 50%);
 
     /* ── Glow + Glass ────────────────────────────────── */
-    --glow-color: oklch(62% 0.10 245);
-    --glow-sm:      0 0 14px oklch(62% 0.10 245 / calc(0.5 * var(--glow-strength)));
-    --glow-primary: 0 0 28px oklch(62% 0.10 245 / calc(0.75 * var(--glow-strength)));
-    --glow-lg:      0 0 48px oklch(62% 0.10 245 / calc(1.0 * var(--glow-strength)));
-    --glow-xl:      0 0 72px oklch(62% 0.10 245 / calc(0.6 * var(--glow-strength))),
-                    0 0 120px oklch(62% 0.10 245 / calc(0.25 * var(--glow-strength)));
-    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
-                    0 0 20px oklch(62% 0.10 245 / calc(0.15 * var(--glow-strength)));
+    --glow-color: oklch(62% 0.1 245);
+    --glow-sm: 0 0 14px oklch(62% 0.1 245 / calc(0.5 * var(--glow-strength)));
+    --glow-primary: 0 0 28px oklch(62% 0.1 245 / calc(0.75 * var(--glow-strength)));
+    --glow-lg: 0 0 48px oklch(62% 0.1 245 / calc(1 * var(--glow-strength)));
+    --glow-xl:
+      0 0 72px oklch(62% 0.1 245 / calc(0.6 * var(--glow-strength))),
+      0 0 120px oklch(62% 0.1 245 / calc(0.25 * var(--glow-strength)));
+    --glass-shadow:
+      inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+      0 0 20px oklch(62% 0.1 245 / calc(0.15 * var(--glow-strength)));
   }
 
   /* ── Ocean theme ─────────────────────────────────────────
    *  Dark teal / slate palette with golden-yellow accent.
    *  Activate with data-theme="ocean" on <html> or any root.
    * ──────────────────────────────────────────────────────── */
-  [data-theme="ocean"] {
+  [data-theme='ocean'] {
     /* ── Base surfaces (dark → light) ─────────────────── */
     --color-background: oklch(16% 0.03 210);
     --color-card: oklch(21% 0.04 200);
@@ -119,13 +121,15 @@
 
     /* ── Glow color (theme-matched) ──────────────────── */
     --glow-color: oklch(78% 0.15 85);
-    --glow-sm:      0 0 14px oklch(78% 0.15 85 / calc(0.5 * var(--glow-strength)));
+    --glow-sm: 0 0 14px oklch(78% 0.15 85 / calc(0.5 * var(--glow-strength)));
     --glow-primary: 0 0 28px oklch(78% 0.15 85 / calc(0.75 * var(--glow-strength)));
-    --glow-lg:      0 0 48px oklch(78% 0.15 85 / calc(1.0 * var(--glow-strength)));
-    --glow-xl:      0 0 72px oklch(78% 0.15 85 / calc(0.6 * var(--glow-strength))),
-                    0 0 120px oklch(78% 0.15 85 / calc(0.25 * var(--glow-strength)));
-    --glass-shadow: inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
-                    0 0 20px oklch(78% 0.15 85 / calc(0.15 * var(--glow-strength)));
+    --glow-lg: 0 0 48px oklch(78% 0.15 85 / calc(1 * var(--glow-strength)));
+    --glow-xl:
+      0 0 72px oklch(78% 0.15 85 / calc(0.6 * var(--glow-strength))),
+      0 0 120px oklch(78% 0.15 85 / calc(0.25 * var(--glow-strength)));
+    --glass-shadow:
+      inset 0 1px 0 oklch(100% 0 0 / calc(0.12 * var(--glass-strength))),
+      0 0 20px oklch(78% 0.15 85 / calc(0.15 * var(--glow-strength)));
 
     /* ── Semantic signals ─────────────────────────────── */
     --color-destructive: oklch(55% 0.22 27);

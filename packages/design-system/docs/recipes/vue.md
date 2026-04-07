@@ -8,14 +8,14 @@ Import the design system and fonts in your entry file:
 
 ```ts
 // main.ts
-import "@fontsource-variable/inter";
-import "@fontsource-variable/jetbrains-mono";
-import "@aspect/design-system";
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '@aspect/design-system';
 
-import { createApp } from "vue";
-import App from "./App.vue";
+import { createApp } from 'vue';
+import App from './App.vue';
 
-createApp(App).mount("#app");
+createApp(App).mount('#app');
 ```
 
 If using Vite, no additional config is needed.
@@ -36,10 +36,10 @@ All components are SFCs with `<template>` and `<script setup>`. No `<style>` blo
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    variant?: "default" | "destructive" | "outline" | "ghost";
-    size?: "sm" | "default" | "lg";
+    variant?: 'default' | 'destructive' | 'outline' | 'ghost';
+    size?: 'sm' | 'default' | 'lg';
   }>(),
-  { variant: "default", size: "default" },
+  { variant: 'default', size: 'default' },
 );
 </script>
 ```
@@ -62,10 +62,10 @@ Usage:
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    variant?: "default" | "destructive" | "outline" | "ghost";
-    size?: "sm" | "default" | "lg";
+    variant?: 'default' | 'destructive' | 'outline' | 'ghost';
+    size?: 'sm' | 'default' | 'lg';
   }>(),
-  { variant: "default", size: "default" },
+  { variant: 'default', size: 'default' },
 );
 </script>
 ```
@@ -82,9 +82,9 @@ withDefaults(
 <script setup lang="ts">
 withDefaults(
   defineProps<{
-    variant?: "default" | "secondary" | "destructive" | "outline";
+    variant?: 'default' | 'secondary' | 'destructive' | 'outline';
   }>(),
-  { variant: "default" },
+  { variant: 'default' },
 );
 </script>
 ```
@@ -130,15 +130,15 @@ withDefaults(
   defineProps<{
     id?: string;
     label?: string;
-    type?: "text" | "email" | "password";
+    type?: 'text' | 'email' | 'password';
     placeholder?: string;
     modelValue?: string;
   }>(),
-  { type: "text", modelValue: "" },
+  { type: 'text', modelValue: '' },
 );
 
 defineEmits<{
-  "update:modelValue": [value: string];
+  'update:modelValue': [value: string];
 }>();
 </script>
 ```
@@ -182,13 +182,13 @@ defineProps<{
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted } from 'vue';
 
 withDefaults(
   defineProps<{
-    variant?: "default" | "destructive";
+    variant?: 'default' | 'destructive';
   }>(),
-  { variant: "default" },
+  { variant: 'default' },
 );
 
 const emit = defineEmits<{
@@ -196,11 +196,11 @@ const emit = defineEmits<{
 }>();
 
 function onKeydown(e: KeyboardEvent) {
-  if (e.key === "Escape") emit("close");
+  if (e.key === 'Escape') emit('close');
 }
 
-onMounted(() => document.addEventListener("keydown", onKeydown));
-onUnmounted(() => document.removeEventListener("keydown", onKeydown));
+onMounted(() => document.addEventListener('keydown', onKeydown));
+onUnmounted(() => document.removeEventListener('keydown', onKeydown));
 </script>
 ```
 

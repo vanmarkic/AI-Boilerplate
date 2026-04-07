@@ -85,26 +85,10 @@ describe('MapLayer', () => {
         <MapLayer id="events-layer" type="fill" source={emptyGeoJson} />
       </MapViewContext.Provider>,
     );
-    expect(mockMap.on).toHaveBeenCalledWith(
-      'click',
-      'events-layer',
-      expect.any(Function),
-    );
-    expect(mockMap.on).toHaveBeenCalledWith(
-      'mousemove',
-      'events-layer',
-      expect.any(Function),
-    );
-    expect(mockMap.on).toHaveBeenCalledWith(
-      'mouseenter',
-      'events-layer',
-      expect.any(Function),
-    );
-    expect(mockMap.on).toHaveBeenCalledWith(
-      'mouseleave',
-      'events-layer',
-      expect.any(Function),
-    );
+    expect(mockMap.on).toHaveBeenCalledWith('click', 'events-layer', expect.any(Function));
+    expect(mockMap.on).toHaveBeenCalledWith('mousemove', 'events-layer', expect.any(Function));
+    expect(mockMap.on).toHaveBeenCalledWith('mouseenter', 'events-layer', expect.any(Function));
+    expect(mockMap.on).toHaveBeenCalledWith('mouseleave', 'events-layer', expect.any(Function));
   });
 
   it('does not register when map is null', () => {
@@ -120,13 +104,7 @@ describe('MapLayer', () => {
   it('includes minzoom and maxzoom when provided', () => {
     render(
       <MapViewContext.Provider value={{ map: mockMap }}>
-        <MapLayer
-          id="zoom-layer"
-          type="line"
-          source={emptyGeoJson}
-          minZoom={5}
-          maxZoom={15}
-        />
+        <MapLayer id="zoom-layer" type="line" source={emptyGeoJson} minZoom={5} maxZoom={15} />
       </MapViewContext.Provider>,
     );
     expect(mockMap.addLayer).toHaveBeenCalledWith(

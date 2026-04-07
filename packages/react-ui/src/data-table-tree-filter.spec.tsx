@@ -17,25 +17,14 @@ const options: TreeFilterNode[] = [
 
 describe('DataTableTreeFilter', () => {
   it('renders root-level nodes', () => {
-    render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-      />,
-    );
+    render(<DataTableTreeFilter filterId="cat" column="category" options={options} />);
     expect(screen.getByText('Fruits')).toBeInTheDocument();
     expect(screen.getByText('Vegetables')).toBeInTheDocument();
   });
 
   it('sets data-filter-id and data-position attributes', () => {
     const { container } = render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-        position="top"
-      />,
+      <DataTableTreeFilter filterId="cat" column="category" options={options} position="top" />,
     );
     const div = container.firstElementChild!;
     expect(div).toHaveAttribute('data-filter-id', 'cat');
@@ -44,38 +33,19 @@ describe('DataTableTreeFilter', () => {
 
   it('defaults position to left', () => {
     const { container } = render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-      />,
+      <DataTableTreeFilter filterId="cat" column="category" options={options} />,
     );
-    expect(container.firstElementChild).toHaveAttribute(
-      'data-position',
-      'left',
-    );
+    expect(container.firstElementChild).toHaveAttribute('data-position', 'left');
   });
 
   it('does not show children until parent is expanded', () => {
-    render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-      />,
-    );
+    render(<DataTableTreeFilter filterId="cat" column="category" options={options} />);
     expect(screen.queryByText('Apple')).not.toBeInTheDocument();
     expect(screen.queryByText('Banana')).not.toBeInTheDocument();
   });
 
   it('expands a parent node to reveal children', async () => {
-    render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-      />,
-    );
+    render(<DataTableTreeFilter filterId="cat" column="category" options={options} />);
     const toggle = screen.getByRole('button');
     await userEvent.click(toggle);
 
@@ -84,13 +54,7 @@ describe('DataTableTreeFilter', () => {
   });
 
   it('collapses an expanded parent on second click', async () => {
-    render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-      />,
-    );
+    render(<DataTableTreeFilter filterId="cat" column="category" options={options} />);
     const toggle = screen.getByRole('button');
 
     await userEvent.click(toggle); // expand
@@ -101,26 +65,13 @@ describe('DataTableTreeFilter', () => {
   });
 
   it('renders radio inputs in single mode (default)', () => {
-    render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-      />,
-    );
+    render(<DataTableTreeFilter filterId="cat" column="category" options={options} />);
     const radios = screen.getAllByRole('radio');
     expect(radios.length).toBe(2); // only root-level visible
   });
 
   it('renders checkbox inputs in multi mode', () => {
-    render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-        multi
-      />,
-    );
+    render(<DataTableTreeFilter filterId="cat" column="category" options={options} multi />);
     const checkboxes = screen.getAllByRole('checkbox');
     expect(checkboxes.length).toBe(2); // only root-level visible
   });
@@ -160,17 +111,11 @@ describe('DataTableTreeFilter', () => {
 
     expect(onChange).toHaveBeenLastCalledWith({
       filterId: 'cat',
-      selectedPaths: expect.arrayContaining([
-        ['fruit'],
-        ['fruit', 'apple'],
-        ['fruit', 'banana'],
-      ]),
+      selectedPaths: expect.arrayContaining([['fruit'], ['fruit', 'apple'], ['fruit', 'banana']]),
     });
     // Vegetables should no longer be selected (single mode clears previous)
     const lastCall = onChange.mock.calls[onChange.mock.calls.length - 1][0];
-    const hasVeg = lastCall.selectedPaths.some(
-      (p: string[]) => p.length === 1 && p[0] === 'veg',
-    );
+    const hasVeg = lastCall.selectedPaths.some((p: string[]) => p.length === 1 && p[0] === 'veg');
     expect(hasVeg).toBe(false);
   });
 
@@ -241,25 +186,14 @@ describe('DataTableTreeFilter', () => {
 
     expect(onChange).toHaveBeenLastCalledWith({
       filterId: 'cat',
-      selectedPaths: expect.arrayContaining([
-        ['fruit'],
-        ['fruit', 'apple'],
-        ['fruit', 'banana'],
-      ]),
+      selectedPaths: expect.arrayContaining([['fruit'], ['fruit', 'apple'], ['fruit', 'banana']]),
     });
   });
 
   it('applies custom className alongside base classes', () => {
     const { container } = render(
-      <DataTableTreeFilter
-        filterId="cat"
-        column="category"
-        options={options}
-        className="custom"
-      />,
+      <DataTableTreeFilter filterId="cat" column="category" options={options} className="custom" />,
     );
-    expect(container.firstElementChild!.className).toBe(
-      'data-table-filter tree-filter custom',
-    );
+    expect(container.firstElementChild!.className).toBe('data-table-filter tree-filter custom');
   });
 });

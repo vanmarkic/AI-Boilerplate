@@ -69,19 +69,12 @@ export function DataTable<T>({
                   onClick={header.column.getToggleSortingHandler()}
                 >
                   <div className="data-table-header-cell-content">
-                    {flexRender(
-                      header.column.columnDef.header,
-                      header.getContext(),
-                    )}
+                    {flexRender(header.column.columnDef.header, header.getContext())}
                     {header.column.getCanSort() && (
                       <span
                         className="data-table-sort-icon"
-                        data-active={
-                          header.column.getIsSorted() ? 'true' : undefined
-                        }
-                        data-direction={
-                          header.column.getIsSorted() || undefined
-                        }
+                        data-active={header.column.getIsSorted() ? 'true' : undefined}
+                        data-direction={header.column.getIsSorted() || undefined}
                       >
                         <svg
                           width="12"
@@ -107,11 +100,7 @@ export function DataTable<T>({
               key={row.id}
               className="data-table-row"
               data-clickable={clickableRows || undefined}
-              onClick={
-                clickableRows
-                  ? () => onRowClick?.(row.original)
-                  : undefined
-              }
+              onClick={clickableRows ? () => onRowClick?.(row.original) : undefined}
               onKeyDown={
                 clickableRows
                   ? (e) => {
@@ -123,10 +112,7 @@ export function DataTable<T>({
             >
               {row.getVisibleCells().map((cell) => (
                 <td key={cell.id} className="data-table-cell">
-                  {flexRender(
-                    cell.column.columnDef.cell,
-                    cell.getContext(),
-                  )}
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
                 </td>
               ))}
             </tr>

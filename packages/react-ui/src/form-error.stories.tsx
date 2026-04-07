@@ -1,8 +1,8 @@
-import type { Meta, StoryObj } from "storybook";
-import { FormError } from "./form-error";
+import type { Meta, StoryObj } from 'storybook';
+import { FormError } from './form-error';
 
 const meta: Meta<typeof FormError> = {
-  title: "Components/FormError",
+  title: 'Components/FormError',
   component: FormError,
 };
 

@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useId,
-  type HTMLAttributes,
-} from 'react';
+import { createContext, useContext, useId, type HTMLAttributes } from 'react';
 import { useControllableState } from '../hooks/use-controllable-state';
 import { Slot } from '../utilities/slot';
 
@@ -91,7 +86,8 @@ function useAccordionItemContext(): AccordionItemContextValue {
 
 function Root({ asChild = false, children, ...props }: AccordionRootProps) {
   const { type } = props;
-  const collapsible = type === 'single' ? (props as AccordionSingleProps).collapsible ?? false : false;
+  const collapsible =
+    type === 'single' ? ((props as AccordionSingleProps).collapsible ?? false) : false;
 
   // Both hooks called unconditionally (React rules of hooks)
   const [singleValue, setSingleValue] = useControllableState<string>({
@@ -151,9 +147,7 @@ function Root({ asChild = false, children, ...props }: AccordionRootProps) {
   const Comp = asChild ? Slot : 'div';
 
   return (
-    <AccordionContext
-      value={{ type, isOpen, toggle, getTriggerId, getContentId }}
-    >
+    <AccordionContext value={{ type, isOpen, toggle, getTriggerId, getContentId }}>
       <Comp {...domProps}>{children}</Comp>
     </AccordionContext>
   );
@@ -161,13 +155,7 @@ function Root({ asChild = false, children, ...props }: AccordionRootProps) {
 
 // ─── Item ─────────────────────────────────────────────────────────────────────
 
-function Item({
-  value,
-  disabled = false,
-  asChild = false,
-  children,
-  ...rest
-}: AccordionItemProps) {
+function Item({ value, disabled = false, asChild = false, children, ...rest }: AccordionItemProps) {
   const { isOpen, getTriggerId, getContentId } = useAccordionContext();
   const open = isOpen(value);
   const dataState = open ? 'open' : 'closed';
@@ -178,11 +166,7 @@ function Item({
 
   return (
     <AccordionItemContext value={{ value, isOpen: open, disabled, triggerId, contentId }}>
-      <Comp
-        data-state={dataState}
-        {...(disabled ? { 'data-disabled': '' } : {})}
-        {...rest}
-      >
+      <Comp data-state={dataState} {...(disabled ? { 'data-disabled': '' } : {})} {...rest}>
         {children}
       </Comp>
     </AccordionItemContext>
@@ -263,13 +247,7 @@ function Content({
   const Comp = asChild ? Slot : 'div';
 
   return (
-    <Comp
-      id={contentId}
-      role="region"
-      aria-labelledby={triggerId}
-      data-state={dataState}
-      {...rest}
-    >
+    <Comp id={contentId} role="region" aria-labelledby={triggerId} data-state={dataState} {...rest}>
       {children}
     </Comp>
   );

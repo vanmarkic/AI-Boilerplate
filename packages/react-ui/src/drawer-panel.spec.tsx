@@ -15,9 +15,7 @@ describe('DrawerPanel', () => {
 
   it('renders a close button', () => {
     render(<DrawerPanel open>Content</DrawerPanel>);
-    expect(
-      screen.getByRole('button', { name: 'Close drawer' }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Close drawer' })).toBeInTheDocument();
   });
 
   it('defaults to data-side="right"', () => {
@@ -45,9 +43,7 @@ describe('DrawerPanel', () => {
   });
 
   it('renders backdrop only when open', () => {
-    const { container, rerender } = render(
-      <DrawerPanel>Content</DrawerPanel>,
-    );
+    const { container, rerender } = render(<DrawerPanel>Content</DrawerPanel>);
     expect(container.querySelector('.drawer-backdrop')).toBeNull();
 
     rerender(<DrawerPanel open>Content</DrawerPanel>);
@@ -72,9 +68,7 @@ describe('DrawerPanel', () => {
         Content
       </DrawerPanel>,
     );
-    await userEvent.click(
-      screen.getByRole('button', { name: 'Close drawer' }),
-    );
+    await userEvent.click(screen.getByRole('button', { name: 'Close drawer' }));
     expect(onClose).toHaveBeenCalledOnce();
   });
 
@@ -91,11 +85,7 @@ describe('DrawerPanel', () => {
 
   it('does not fire onClose on Escape key when closed', () => {
     const onClose = vi.fn();
-    render(
-      <DrawerPanel onClose={onClose}>
-        Content
-      </DrawerPanel>,
-    );
+    render(<DrawerPanel onClose={onClose}>Content</DrawerPanel>);
     fireEvent.keyDown(document, { key: 'Escape' });
     expect(onClose).not.toHaveBeenCalled();
   });

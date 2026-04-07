@@ -8,9 +8,9 @@ Import the design system and fonts in your entry file:
 
 ```tsx
 // main.tsx
-import "@fontsource-variable/inter";
-import "@fontsource-variable/jetbrains-mono";
-import "@aspect/design-system";
+import '@fontsource-variable/inter';
+import '@fontsource-variable/jetbrains-mono';
+import '@aspect/design-system';
 ```
 
 If using Vite, no additional config is needed -- CSS imports work out of the box.
@@ -20,17 +20,17 @@ If using Vite, no additional config is needed -- CSS imports work out of the box
 ### Button
 
 ```tsx
-import { ButtonHTMLAttributes, AnchorHTMLAttributes } from "react";
+import { ButtonHTMLAttributes, AnchorHTMLAttributes } from 'react';
 
-type ButtonVariant = "default" | "destructive" | "outline" | "ghost";
-type ButtonSize = "sm" | "default" | "lg";
+type ButtonVariant = 'default' | 'destructive' | 'outline' | 'ghost';
+type ButtonSize = 'sm' | 'default' | 'lg';
 
 type ButtonProps = {
   variant?: ButtonVariant;
   size?: ButtonSize;
 } & ButtonHTMLAttributes<HTMLButtonElement>;
 
-export function Button({ variant = "default", size = "default", children, ...props }: ButtonProps) {
+export function Button({ variant = 'default', size = 'default', children, ...props }: ButtonProps) {
   return (
     <button className="btn" data-variant={variant} data-size={size} {...props}>
       {children}
@@ -43,7 +43,12 @@ type ButtonLinkProps = {
   size?: ButtonSize;
 } & AnchorHTMLAttributes<HTMLAnchorElement>;
 
-export function ButtonLink({ variant = "default", size = "default", children, ...props }: ButtonLinkProps) {
+export function ButtonLink({
+  variant = 'default',
+  size = 'default',
+  children,
+  ...props
+}: ButtonLinkProps) {
   return (
     <a className="btn" data-variant={variant} data-size={size} {...props}>
       {children}
@@ -62,15 +67,15 @@ Usage:
 ### Badge
 
 ```tsx
-import { HTMLAttributes } from "react";
+import { HTMLAttributes } from 'react';
 
-type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+type BadgeVariant = 'default' | 'secondary' | 'destructive' | 'outline';
 
 type BadgeProps = {
   variant?: BadgeVariant;
 } & HTMLAttributes<HTMLSpanElement>;
 
-export function Badge({ variant = "default", children, ...props }: BadgeProps) {
+export function Badge({ variant = 'default', children, ...props }: BadgeProps) {
   return (
     <span className="badge" data-variant={variant} {...props}>
       {children}
@@ -82,7 +87,7 @@ export function Badge({ variant = "default", children, ...props }: BadgeProps) {
 ### Card
 
 ```tsx
-import { HTMLAttributes, ReactNode } from "react";
+import { HTMLAttributes, ReactNode } from 'react';
 
 type CardProps = {
   title?: string;
@@ -102,7 +107,7 @@ export function Card({ title, children, ...props }: CardProps) {
 ### Input
 
 ```tsx
-import { InputHTMLAttributes } from "react";
+import { InputHTMLAttributes } from 'react';
 
 type InputProps = {
   label?: string;
@@ -138,9 +143,9 @@ export function FormError({ message }: FormErrorProps) {
 ### Dialog
 
 ```tsx
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect } from 'react';
 
-type DialogVariant = "default" | "destructive";
+type DialogVariant = 'default' | 'destructive';
 
 type DialogProps = {
   variant?: DialogVariant;
@@ -150,13 +155,13 @@ type DialogProps = {
   onClose: () => void;
 };
 
-export function Dialog({ variant = "default", title, footer, children, onClose }: DialogProps) {
+export function Dialog({ variant = 'default', title, footer, children, onClose }: DialogProps) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === 'Escape') onClose();
     };
-    document.addEventListener("keydown", handleKey);
-    return () => document.removeEventListener("keydown", handleKey);
+    document.addEventListener('keydown', handleKey);
+    return () => document.removeEventListener('keydown', handleKey);
   }, [onClose]);
 
   return (
@@ -180,8 +185,12 @@ Usage:
   title={<h2>Delete account?</h2>}
   footer={
     <>
-      <Button variant="outline" onClick={onClose}>Cancel</Button>
-      <Button variant="destructive" onClick={onDelete}>Delete</Button>
+      <Button variant="outline" onClick={onClose}>
+        Cancel
+      </Button>
+      <Button variant="destructive" onClick={onDelete}>
+        Delete
+      </Button>
     </>
   }
   onClose={onClose}

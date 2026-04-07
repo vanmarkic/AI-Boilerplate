@@ -17,7 +17,12 @@ export function DialogPanel({
   children,
 }: DialogPanelProps) {
   return (
-    <Dialog.Root open={true} onOpenChange={(open) => { if (!open) onClose?.(); }}>
+    <Dialog.Root
+      open={true}
+      onOpenChange={(open) => {
+        if (!open) onClose?.();
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="dialog-backdrop" />
         <Dialog.Content className="dialog-panel" data-variant={variant}>

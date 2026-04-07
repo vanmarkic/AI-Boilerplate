@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./map": "./src/map.ts",
+    "./design-system.css": "../design-system/index.css"
   },
   "scripts": {
     "build": "vite build",
@@ -31,7 +33,8 @@
   },
   "dependencies": {
     "@aspect/react-headless": "*",
-    "@tanstack/react-table": "^8.20.6"
+    "@tanstack/react-table": "^8.20.6",
+    "sirv": "^3.0.2"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "^10.3.3",

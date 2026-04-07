@@ -15,9 +15,7 @@ describe('DialogPanel', () => {
   });
 
   it('applies variant', () => {
-    render(
-      <DialogPanel variant="destructive">X</DialogPanel>,
-    );
+    render(<DialogPanel variant="destructive">X</DialogPanel>);
     expect(document.querySelector('[role="dialog"]')).toHaveAttribute(
       'data-variant',
       'destructive',
@@ -26,9 +24,7 @@ describe('DialogPanel', () => {
 
   it('fires onClose on backdrop click', async () => {
     const onClose = vi.fn();
-    render(
-      <DialogPanel onClose={onClose}>X</DialogPanel>,
-    );
+    render(<DialogPanel onClose={onClose}>X</DialogPanel>);
     await userEvent.click(document.querySelector('.dialog-backdrop')!);
     expect(onClose).toHaveBeenCalledOnce();
   });

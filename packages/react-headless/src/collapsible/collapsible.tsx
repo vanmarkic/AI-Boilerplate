@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useId,
-  type HTMLAttributes,
-} from 'react';
+import { createContext, useContext, useId, type HTMLAttributes } from 'react';
 import { useControllableState } from '../hooks/use-controllable-state';
 import { Slot } from '../utilities/slot';
 
@@ -22,9 +17,7 @@ const CollapsibleContext = createContext<CollapsibleContextValue | null>(null);
 function useCollapsibleContext(): CollapsibleContextValue {
   const ctx = useContext(CollapsibleContext);
   if (!ctx) {
-    throw new Error(
-      'Collapsible sub-components must be used inside <Collapsible.Root>',
-    );
+    throw new Error('Collapsible sub-components must be used inside <Collapsible.Root>');
   }
   return ctx;
 }
@@ -140,13 +133,7 @@ function Content({
   const Comp = asChild ? Slot : 'div';
 
   return (
-    <Comp
-      id={contentId}
-      role="region"
-      aria-labelledby={triggerId}
-      data-state={dataState}
-      {...rest}
-    >
+    <Comp id={contentId} role="region" aria-labelledby={triggerId} data-state={dataState} {...rest}>
       {children}
     </Comp>
   );

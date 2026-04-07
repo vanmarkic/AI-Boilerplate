@@ -59,10 +59,7 @@ export function Slot({ children, ref: slotRef, ...slotProps }: SlotProps) {
 
   // Merge event handlers
   for (const key of Object.keys(slotProps)) {
-    if (
-      key.startsWith('on') &&
-      typeof (slotProps as Record<string, unknown>)[key] === 'function'
-    ) {
+    if (key.startsWith('on') && typeof (slotProps as Record<string, unknown>)[key] === 'function') {
       mergedProps[key] = composeEventHandlers(
         (slotProps as Record<string, unknown>)[key] as (...args: unknown[]) => void,
         childProps[key] as ((...args: unknown[]) => void) | undefined,

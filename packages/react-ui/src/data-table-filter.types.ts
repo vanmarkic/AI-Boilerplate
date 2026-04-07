@@ -11,10 +11,7 @@ export type FilterOperator =
   | 'in'
   | 'custom';
 
-export type FilterFn<T = Record<string, unknown>> = (
-  row: T,
-  value: unknown,
-) => boolean;
+export type FilterFn<T = Record<string, unknown>> = (row: T, value: unknown) => boolean;
 
 export interface FilterState {
   readonly filterId: string;
