@@ -339,6 +339,10 @@ Update all callers of `_activate()` to pass `current_rt_ms` where available:
 - In `activate_by_event()`: add `current_rt_ms: float = 0.0` param, pass through
 - In `manual_activate()`: add `current_rt_ms: float = 0.0` param, pass through
 
+Also update the callers of `activate_by_event()` and `manual_activate()` to pass actual RT:
+- In `exercise_engine.py:365` (tick loop): `self._issues.activate_by_event(event_id, pt, self._time.real_time_ms)`
+- In `engine_actions_router.py:124` (activate_issue): `engine.issue_manager.manual_activate(issue_id, pt, engine.time_manager.real_time_ms)`
+
 - [ ] **Step 5: Update IssueSnapshot and snapshot()**
 
 In `apps/tfc/backend/engine/state_changes.py`, update `IssueSnapshot`:
@@ -628,7 +632,7 @@ class TestScoringVisibility:
         snap = engine.snapshot()
         assert snap["score"] is None
 
-    def test_score_visible_after_completion(self, engine: ExerciseEngine) -> None:
+    async def test_score_visible_after_completion(self, engine: ExerciseEngine) -> None:
         # complete the engine, then check
         await engine.complete()
         snap = engine.snapshot()
