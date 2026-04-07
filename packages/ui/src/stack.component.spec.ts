@@ -64,4 +64,16 @@ describe('StackComponent', () => {
     fixture.detectChanges();
     expect(fixture.nativeElement.getAttribute('data-justify')).toBeNull();
   });
+
+  it('should not apply fill styles by default', () => {
+    fixture.detectChanges();
+    expect(fixture.nativeElement.style.flex).toBe('');
+  });
+
+  it('should apply flex: 1 and min-height: 0 when fill is true', () => {
+    fixture.componentRef.setInput('fill', true);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.style.flex).toContain('1');
+    expect(fixture.nativeElement.style.minHeight).toBe('0px');
+  });
 });

@@ -7,16 +7,19 @@ export { CardGroupComponent, type CardGroupMode } from './card-group.component';
 export { FormErrorComponent } from './form-error.component';
 export { DialogPanelComponent } from './dialog-panel.component';
 export { DrawerPanelComponent, type DrawerSide } from './drawer-panel.component';
-export { CollapsiblePanelComponent, type CollapsiblePanelVariant, type CollapsiblePanelSize } from './collapsible-panel.component';
-export { HistogramTimelineComponent, type HistogramBar, type HistogramLabel, type HistogramVariant } from './histogram-timeline.component';
-export { MapViewComponent } from './map-view.component';
-export { registerPmtilesProtocol } from './map-view.pmtiles';
-export { buildProtomapsStyle, type ProtomapsStyleOptions } from './map-view.style-builder';
-export { MapLayerComponent } from './map-layer.component';
-export { MapMarkerComponent } from './map-marker.component';
-export { MapPopupComponent } from './map-popup.component';
+export {
+  CollapsiblePanelComponent,
+  type CollapsiblePanelVariant,
+  type CollapsiblePanelSize,
+} from './collapsible-panel.component';
+export {
+  HistogramTimelineComponent,
+  type HistogramBar,
+  type HistogramLabel,
+  type HistogramVariant,
+} from './histogram-timeline.component';
 export { StackComponent, type StackDirection, type StackGap, type StackAlign, type StackJustify } from './stack.component';
-export { GridComponent, type GridCols, type GridGap } from './grid.component';
+export { GridComponent, CellDirective, type GridGap } from './grid.component';
 export { PageLayoutComponent } from './page-layout.component';
 export { SidebarLayoutComponent, type SidebarSide } from './sidebar-layout.component';
 export { PageHeaderComponent } from './page-header.component';
@@ -40,6 +43,14 @@ export type {
   FlatTreeNode,
   TreeSelectionChangeEvent,
 } from './data-table-tree-filter.types';
+
+// Map components — also re-exported from map-api.ts as a focused entry point
+export { MapViewComponent } from './map-view.component';
+export { registerPmtilesProtocol } from './map-view.pmtiles';
+export { buildProtomapsStyle, type ProtomapsStyleOptions } from './map-view.style-builder';
+export { MapLayerComponent } from './map-layer.component';
+export { MapMarkerComponent } from './map-marker.component';
+export { MapPopupComponent } from './map-popup.component';
 export type {
   MapCenter,
   MapBounds,

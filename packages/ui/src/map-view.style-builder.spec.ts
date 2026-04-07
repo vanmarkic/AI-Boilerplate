@@ -1,4 +1,4 @@
-import { resolveColors } from './map-view.style-builder';
+import { resolveColors } from './map-view.colors';
 
 describe('map-view style-builder', () => {
   describe('resolveColors', () => {

@@ -14,6 +14,8 @@ export type StackJustify = 'start' | 'center' | 'end' | 'between';
     '[attr.data-gap]': 'gap()',
     '[attr.data-align]': 'align()',
     '[attr.data-justify]': 'justify()',
+    '[style.flex]': 'fill() ? 1 : null',
+    '[style.min-height]': 'fill() ? 0 : null',
   },
   template: `<ng-content />`,
 })
@@ -22,4 +24,5 @@ export class StackComponent {
   readonly gap = input<StackGap>('md');
   readonly align = input<StackAlign | null>(null);
   readonly justify = input<StackJustify | null>(null);
+  readonly fill = input(false);
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 export type CollapsiblePanelVariant = 'default' | 'ghost' | 'outline';
 export type CollapsiblePanelSize = 'sm' | 'default' | 'lg';
@@ -12,8 +12,8 @@ export type CollapsiblePanelSize = 'sm' | 'default' | 'lg';
     '[attr.data-size]': 'size()',
   },
   template: `
-    <details [open]="open()">
-      <summary class="collapsible-panel-trigger">
+    <details [open]="open()" (toggle)="onToggle($event)">
+      <summary class="collapsible-panel-trigger" [attr.aria-disabled]="disabled() || null">
         <ng-content select="[panelTitle]" />
         <svg
           class="collapsible-panel-chevron"
@@ -39,4 +39,15 @@ export class CollapsiblePanelComponent {
   readonly variant = input<CollapsiblePanelVariant>('default');
   readonly size = input<CollapsiblePanelSize>('default');
   readonly open = input(false);
+  readonly disabled = input(false);
+  readonly openChange = output<boolean>();
+
+  protected onToggle(event: Event): void {
+    const details = event.target as HTMLDetailsElement;
+    if (this.disabled()) {
+      details.open = this.open();
+      return;
+    }
+    this.openChange.emit(details.open);
+  }
 }

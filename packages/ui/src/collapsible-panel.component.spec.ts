@@ -80,4 +80,39 @@ describe('CollapsiblePanelComponent', () => {
     const content = fixture.nativeElement.querySelector('.collapsible-panel-content');
     expect(content).toBeTruthy();
   });
+
+  it('should emit openChange when details is toggled', () => {
+    fixture.detectChanges();
+    const spy = vi.fn();
+    fixture.componentInstance.openChange.subscribe(spy);
+    const details = fixture.nativeElement.querySelector('details') as HTMLDetailsElement;
+    details.open = true;
+    details.dispatchEvent(new Event('toggle'));
+    expect(spy).toHaveBeenCalledWith(true);
+  });
+
+  it('should not toggle when disabled', () => {
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    const spy = vi.fn();
+    fixture.componentInstance.openChange.subscribe(spy);
+    const details = fixture.nativeElement.querySelector('details') as HTMLDetailsElement;
+    details.open = true;
+    details.dispatchEvent(new Event('toggle'));
+    expect(spy).not.toHaveBeenCalled();
+    expect(details.open).toBe(false);
+  });
+
+  it('should set aria-disabled on summary when disabled', () => {
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    const summary = fixture.nativeElement.querySelector('summary');
+    expect(summary.getAttribute('aria-disabled')).toBe('true');
+  });
+
+  it('should not set aria-disabled when not disabled', () => {
+    fixture.detectChanges();
+    const summary = fixture.nativeElement.querySelector('summary');
+    expect(summary.getAttribute('aria-disabled')).toBeNull();
+  });
 });
