@@ -4,8 +4,8 @@ import {
   computed,
   inject,
   input,
+  linkedSignal,
   output,
-  signal,
 } from '@angular/core';
 import { DialogPanelComponent, BadgeComponent, ButtonDirective } from '@aspect/ui';
 import { AuthStore } from '../../shared/auth/auth.store';
@@ -25,7 +25,7 @@ const PROTECTED_ROLES = new Set(['admin', 'role_manager']);
           <label class="flex items-center gap-sm">
             <input
               type="checkbox"
-              [checked]="isAssigned(role.name)"
+              [checked]="selectedRoles().has(role.name)"
               (change)="onToggle(role.name, $event)"
               [disabled]="isProtectedForCurrentUser(role.name)"
             />
@@ -53,31 +53,13 @@ export class UserRolesDialogComponent {
   private readonly currentUserIsAdmin = computed(
     () => this.auth.user()?.roles.includes('admin') ?? false,
   );
-  protected readonly selectedRoles = signal<Set<string>>(new Set());
-  private initialized = false;
 
-  private ensureInitialized(): void {
-    if (!this.initialized) {
-      this.selectedRoles.set(new Set(this.user().roles));
-      this.initialized = true;
-    }
-  }
-
-  protected isAssigned(roleName: string): boolean {
-    this.ensureInitialized();
-    return this.selectedRoles().has(roleName);
-  }
-
-  protected isProtected(roleName: string): boolean {
-    return PROTECTED_ROLES.has(roleName);
-  }
-
-  protected isProtectedForCurrentUser(roleName: string): boolean {
-    return this.isProtected(roleName) && !this.currentUserIsAdmin();
-  }
+  protected readonly selectedRoles = linkedSignal<KeycloakUser, Set<string>>({
+    source: this.user,
+    computation: (user) => new Set(user.roles),
+  });
 
   protected readonly hasChanges = computed(() => {
-    this.ensureInitialized();
     const original = new Set(this.user().roles);
     const current = this.selectedRoles();
     if (original.size !== current.size) return true;
@@ -87,8 +69,15 @@ export class UserRolesDialogComponent {
     return false;
   });
 
+  protected isProtected(roleName: string): boolean {
+    return PROTECTED_ROLES.has(roleName);
+  }
+
+  protected isProtectedForCurrentUser(roleName: string): boolean {
+    return this.isProtected(roleName) && !this.currentUserIsAdmin();
+  }
+
   protected onToggle(roleName: string, event: Event): void {
-    this.ensureInitialized();
     const checked = (event.target as HTMLInputElement).checked;
     const updated = new Set(this.selectedRoles());
     if (checked) {
