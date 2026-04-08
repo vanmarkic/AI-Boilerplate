@@ -31,6 +31,7 @@ import { TickService } from "../../core/tick.service";
 import { DecisionApiService } from "../../core/decision-api.service";
 import { Subscription } from "rxjs";
 import { handlePlayerWsMessage } from "./player-ws-handler";
+import { InjectFeedComponent } from "./inject-feed.component";
 import { RoleCardComponent } from "./role-card.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
@@ -57,6 +58,7 @@ import { buildRoleCards } from "./role-card.types";
     StressBarComponent,
     StressOverlayComponent,
     ButtonDirective,
+    InjectFeedComponent,
     RoleCardComponent,
     CoDecisionBarComponent,
     SystemStatusBoardComponent,

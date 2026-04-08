@@ -21,6 +21,75 @@
     </div>
   </header>
 
+  @if (!store.isCollaborative()) {
+  <main class="player-main player-main--board player-main--classic">
+    <div class="classic-layout">
+      <aside class="classic-layout__feed">
+        <h2 class="inject-feed__heading">Inject Feed</h2>
+        <tfc-inject-feed
+          [events]="store.events()"
+          [playerRole]="store.playerRole()"
+        />
+      </aside>
+      <div class="classic-layout__board">
+        @if (currentTurnEvent(); as event) {
+        <div class="board-turn-banner">
+          @if (store.score(); as score) {
+          <span class="board-turn-banner__turn">TURN {{ score.turnNumber }}</span>
+          }
+          <span class="board-turn-banner__title">{{ event.title }}</span>
+        </div>
+        } @else {
+        <div class="board-turn-banner">
+          <span class="board-turn-banner__title">Waiting for next turn...</span>
+        </div>
+        }
+
+        <tfc-warfare-domain-board [domains]="store.warfareDomains()" />
+        <tfc-system-status-board [systems]="store.systems()" />
+
+        @if (isAllRoles()) {
+        <div class="board-columns board-columns--all-roles">
+          @for (card of advisorRoleCards(); track card.roleId) {
+          <tfc-role-card
+            [card]="card"
+            [systems]="store.systems()"
+            (submitted)="onRoleCardSubmitted($event)"
+          />
+          }
+          <div class="co-card">
+            <div class="role-card__header">
+              <span class="role-card__role-id">{{
+                coRoleDef()?.id?.toUpperCase() ?? 'CO'
+              }}</span>
+            </div>
+            <div class="role-card__role-label">
+              {{ coRoleDef()?.label ?? 'Commanding Officer' }}
+            </div>
+            <tfc-co-decision-bar
+              [decision]="activeDecisions()[0] ?? null"
+              [advisorRoles]="advisorRoles()"
+              [systems]="store.systems()"
+              [coIntel]="coIntel()"
+              (confirmed)="onCoDecisionConfirmed($event)"
+            />
+          </div>
+        </div>
+        } @else {
+        <div class="board-grid">
+          @for (card of roleCards(); track card.roleId) {
+          <tfc-role-card
+            [card]="card"
+            [systems]="store.systems()"
+            (submitted)="onRoleCardSubmitted($event)"
+          />
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </main>
+  } @else {
   <main class="player-main player-main--board">
     @if (currentTurnEvent(); as event) {
     <div class="board-turn-banner">
@@ -109,6 +178,7 @@
     </div>
     }
   </main>
+  }
 
   @if (store.phase() === 'briefing' && store.context(); as ctx) {
   <tfc-briefing-overlay
