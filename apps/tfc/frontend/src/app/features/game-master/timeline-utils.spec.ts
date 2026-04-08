@@ -26,6 +26,7 @@ function makeEvent(overrides: Partial<EventSnapshot> = {}): EventSnapshot {
     target_roles: [],
     role_descriptions: {},
     system_effects: [],
+    execution_mode: 'automatic',
     ...overrides,
   };
 }
@@ -36,9 +37,11 @@ function makeIssue(overrides: Partial<IssueSnapshot> = {}): IssueSnapshot {
     title: "Issue 1",
     description: "",
     trigger_mode: "manual",
-    auto_resolve_ms: 0,
+    auto_resolve_pt_ms: 0,
+    auto_resolve_rt_ms: 0,
     lifecycle: "inactive",
     activated_at_pt_ms: null,
+    activated_at_rt_ms: null,
     resolved_at_pt_ms: null,
     released: false,
     ...overrides,
@@ -132,7 +135,7 @@ describe("timeline-utils", () => {
           id: "i1",
           lifecycle: "active",
           activated_at_pt_ms: 3000,
-          auto_resolve_ms: 20_000,
+          auto_resolve_pt_ms: 20_000,
         }),
       ];
       const { issueItems } = computeTimelineItems([], issues, 10_000);
@@ -161,7 +164,7 @@ describe("timeline-utils", () => {
           id: "i1",
           lifecycle: "active",
           activated_at_pt_ms: 2000,
-          auto_resolve_ms: 0,
+          auto_resolve_pt_ms: 0,
         }),
       ];
       const { issueItems } = computeTimelineItems([], issues, 15_000);

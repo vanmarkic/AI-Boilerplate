@@ -23,6 +23,7 @@ export interface EventSnapshot {
   target_roles: string[];
   role_descriptions: Record<string, string>;
   system_effects: SystemEffect[];
+  execution_mode: string;
 }
 
 export interface IssueSnapshot {
@@ -30,9 +31,11 @@ export interface IssueSnapshot {
   title: string;
   description: string;
   trigger_mode: string;
-  auto_resolve_ms: number;
+  auto_resolve_pt_ms: number;
+  auto_resolve_rt_ms: number;
   lifecycle: string;
   activated_at_pt_ms: number | null;
+  activated_at_rt_ms: number | null;
   resolved_at_pt_ms: number | null;
   released: boolean;
 }

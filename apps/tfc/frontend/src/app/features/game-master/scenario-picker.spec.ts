@@ -57,7 +57,7 @@ describe("ScenarioPickerComponent", () => {
             trigger_mode: "manual",
             trigger_time_pt_ms: null,
             trigger_event_id: null,
-            auto_resolve_ms: 0,
+            auto_resolve_pt_ms: 0,
           },
         ],
         decision_templates: [],

@@ -91,9 +91,9 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                 <ui-badge variant="secondary">{{
                   issue.trigger_mode
                 }}</ui-badge>
-                @if (issue.auto_resolve_ms > 0) {
+                @if (issue.auto_resolve_pt_ms > 0) {
                   <span class="text-xs text-muted-foreground ml-sm">
-                    auto-resolve: {{ issue.auto_resolve_ms / 1000 }}s
+                    auto-resolve: {{ issue.auto_resolve_pt_ms / 1000 }}s
                   </span>
                 }
                 @if (issue.trigger_event_id) {
@@ -184,7 +184,7 @@ export class ScenarioIssueEditorComponent {
       trigger_mode: this.newTrigger(),
       trigger_time_pt_ms: null,
       trigger_event_id: null,
-      auto_resolve_ms: 0,
+      auto_resolve_pt_ms: 0,
     });
     this.newTitle.set("");
   }
@@ -194,7 +194,7 @@ export class ScenarioIssueEditorComponent {
     this.editTitle.set(issue.title);
     this.editDesc.set(issue.description);
     this.editTrigger.set(issue.trigger_mode);
-    this.editAutoResolve.set(issue.auto_resolve_ms);
+    this.editAutoResolve.set(issue.auto_resolve_pt_ms);
   }
 
   protected scrollTo(elementId: string): void {
@@ -208,7 +208,7 @@ export class ScenarioIssueEditorComponent {
       title: this.editTitle(),
       description: this.editDesc(),
       trigger_mode: this.editTrigger(),
-      auto_resolve_ms: this.editAutoResolve(),
+      auto_resolve_pt_ms: this.editAutoResolve(),
     });
     this.editingId.set(null);
   }

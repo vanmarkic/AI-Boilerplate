@@ -30,6 +30,7 @@ describe("EventTimelineComponent", () => {
       target_roles: [],
       role_descriptions: {},
       system_effects: [],
+      execution_mode: 'automatic',
     },
     {
       id: "e2",
@@ -46,6 +47,7 @@ describe("EventTimelineComponent", () => {
       target_roles: [],
       role_descriptions: {},
       system_effects: [],
+      execution_mode: 'automatic',
     },
   ];
 
@@ -55,9 +57,11 @@ describe("EventTimelineComponent", () => {
       title: "Issue 1",
       description: "",
       trigger_mode: "manual",
-      auto_resolve_ms: 60_000,
+      auto_resolve_pt_ms: 60_000,
+      auto_resolve_rt_ms: 0,
       lifecycle: "active",
       activated_at_pt_ms: 10_000,
+      activated_at_rt_ms: null,
       resolved_at_pt_ms: null,
       released: true,
     },

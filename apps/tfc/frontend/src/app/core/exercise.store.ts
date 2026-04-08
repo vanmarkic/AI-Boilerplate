@@ -139,12 +139,12 @@ export const ExerciseStore = signalStore(
         .filter(
           (i) =>
             i.lifecycle === "active" &&
-            i.auto_resolve_ms > 0 &&
+            i.auto_resolve_pt_ms > 0 &&
             i.activated_at_pt_ms !== null,
         )
         .map((i) => {
           const elapsed = pt - (i.activated_at_pt_ms ?? 0);
-          const remaining = Math.max(0, i.auto_resolve_ms - elapsed);
+          const remaining = Math.max(0, i.auto_resolve_pt_ms - elapsed);
           return { ...i, remaining_ms: remaining };
         });
     }),

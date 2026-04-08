@@ -50,8 +50,8 @@ function issueToItem(
   let endMs: number;
   if (i.resolved_at_pt_ms != null) {
     endMs = i.resolved_at_pt_ms;
-  } else if (i.auto_resolve_ms > 0) {
-    endMs = startMs + i.auto_resolve_ms;
+  } else if (i.auto_resolve_pt_ms > 0) {
+    endMs = startMs + i.auto_resolve_pt_ms;
   } else {
     endMs =
       i.lifecycle === "active" || i.lifecycle === "mitigated"

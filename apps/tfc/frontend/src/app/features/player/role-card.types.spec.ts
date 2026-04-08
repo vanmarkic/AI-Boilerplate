@@ -26,6 +26,7 @@ function makeEvent(overrides: Partial<EventSnapshot> = {}): EventSnapshot {
     target_roles: [],
     role_descriptions: {},
     system_effects: [],
+    execution_mode: 'automatic',
     ...overrides,
   };
 }

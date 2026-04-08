@@ -142,9 +142,11 @@ describe("ExerciseStore", () => {
             title: "Issue 1",
             description: "",
             trigger_mode: "manual",
-            auto_resolve_ms: 10000,
+            auto_resolve_pt_ms: 10000,
+            auto_resolve_rt_ms: 0,
             lifecycle: "active",
             activated_at_pt_ms: 2000,
+            activated_at_rt_ms: null,
             resolved_at_pt_ms: null,
             released: false,
           },
@@ -171,9 +173,11 @@ describe("ExerciseStore", () => {
             title: "Issue 1",
             description: "",
             trigger_mode: "manual",
-            auto_resolve_ms: 10000,
+            auto_resolve_pt_ms: 10000,
+            auto_resolve_rt_ms: 0,
             lifecycle: "active",
             activated_at_pt_ms: 2000,
+            activated_at_rt_ms: null,
             resolved_at_pt_ms: null,
             released: false,
           },
@@ -183,7 +187,7 @@ describe("ExerciseStore", () => {
       expect(countdown[0].remaining_ms).toBe(0);
     });
 
-    it("excludes issues without auto_resolve_ms", () => {
+    it("excludes issues without auto_resolve_pt_ms", () => {
       store.applySnapshot({
         ...minimalSnapshot,
         time: {
@@ -198,9 +202,11 @@ describe("ExerciseStore", () => {
             title: "Issue 1",
             description: "",
             trigger_mode: "manual",
-            auto_resolve_ms: 0,
+            auto_resolve_pt_ms: 0,
+            auto_resolve_rt_ms: 0,
             lifecycle: "active",
             activated_at_pt_ms: 2000,
+            activated_at_rt_ms: null,
             resolved_at_pt_ms: null,
             released: false,
           },
@@ -224,9 +230,11 @@ describe("ExerciseStore", () => {
             title: "Issue 1",
             description: "",
             trigger_mode: "manual",
-            auto_resolve_ms: 10000,
+            auto_resolve_pt_ms: 10000,
+            auto_resolve_rt_ms: 0,
             lifecycle: "inactive",
             activated_at_pt_ms: null,
+            activated_at_rt_ms: null,
             resolved_at_pt_ms: null,
             released: false,
           },
