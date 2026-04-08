@@ -84,7 +84,7 @@
         "description": "Routine approach. All systems Green.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-tut1",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-tut-nav-offset",
@@ -92,7 +92,7 @@
         "description": "0.3 nm lateral offset detected. Current stronger than forecast.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-tut2",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       }
     ],
     "decision_templates": [

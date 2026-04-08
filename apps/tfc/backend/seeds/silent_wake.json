@@ -395,7 +395,7 @@
         "description": "All systems Green. NAV RADAR, IBMS/INS, COMMS ON. Weapons OFF.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t1",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-sensor-anomaly",
@@ -403,7 +403,7 @@
         "description": "SOG vs STW mismatch. AIS contact bearing 035 / 18 nm with no radar echo.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t2",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-faulty-component",
@@ -411,7 +411,7 @@
         "description": "Faulty component identified. Restart ETBOL 5 min.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t3",
-        "auto_resolve_ms": 600000
+        "auto_resolve_pt_ms": 600000
       },
       {
         "id": "iss-ais-spoofing",
@@ -419,7 +419,7 @@
         "description": "AIS contact bearing 041 / 11 nm \u2014 no vessel at that position. Trust in AIS picture degrading.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t4",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-cyber-alert",
@@ -427,7 +427,7 @@
         "description": "Anomalous data flow detected in IBMS. Scope ambiguous.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t5",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-comms-degraded",
@@ -435,7 +435,7 @@
         "description": "SATCOM reduced bandwidth. HF signal inconsistent. UHF range-limited. COMMS \u2192 Yellow.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t5",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-hostile-contact",
@@ -443,7 +443,7 @@
         "description": "Visual warship profile at bearing 052 / 12 nm. ESM confirms non-commercial radar emissions. WECDIS \u2192 INS anomalous data flow detected.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t6",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-aaw-malfunction",
@@ -451,7 +451,7 @@
         "description": "Air surveillance radar online but multiple tracks flickering. Same symptom as pre-departure maintenance issue. AAW RADAR \u2192 Yellow.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t7",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-air-threat",
@@ -459,7 +459,7 @@
         "description": "MTC reports hostile aircraft approaching. ETA 15 minutes.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t8",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-under-attack",
@@ -467,7 +467,7 @@
         "description": "3 incoming missiles visually detected. Target out of gun range. AAW radar restored. WECDIS attack unresolved.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t9",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-damage-first-hit",
@@ -475,7 +475,7 @@
         "description": "CIWS FWD non-operational (ETBOL 2 hrs). Missile Launcher non-operational (ETBOL 5 hrs). 1 HF antenna permanently disabled. Target now in gun range.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t10",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-cyber-confirmed",
@@ -483,7 +483,7 @@
         "description": "WECDIS \u2192 INS attack confirmed. All systems fed wrong speed value. Option 1: Disconnect WECDIS + restart INS (1 min). Option 2: Restore WECDIS + restart INS (30 min).",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t11",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-surface-tracking-degraded",
@@ -491,7 +491,7 @@
         "description": "Surface tracking radar unable to achieve stable lock. Manual targeting reduces effective gun engagement range.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t11",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       },
       {
         "id": "iss-aaw-attack-source",
@@ -499,7 +499,7 @@
         "description": "Malicious activity confirmed: AAW radar processing module attacking surface tracking radar. Root: reboot-triggered privilege escalation. Hostile aircraft ETA 10 min.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t12",
-        "auto_resolve_ms": 0
+        "auto_resolve_pt_ms": 0
       }
     ],
     "decision_templates": [
