@@ -56,38 +56,52 @@ async def trigger_event(exercise_id: int, event_id: str) -> EventChange:
 
 @router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
 async def cancel_event(exercise_id: int, event_id: str) -> EventChange:
-    return _or_404(
-        _get_engine(exercise_id).event_scheduler.cancel_event(event_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.event_scheduler.cancel_event(event_id),
         f"Event {event_id} not found or not cancellable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/events/{event_id}/complete", operation_id="completeEvent")
 async def complete_event(exercise_id: int, event_id: str) -> EventChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.event_scheduler.complete_event(event_id, pt),
         f"Event {event_id} not found or not completable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/events/{event_id}/pause", operation_id="pauseEvent")
 async def pause_event(exercise_id: int, event_id: str) -> EventChange:
-    return _or_404(
-        _get_engine(exercise_id).event_scheduler.pause_event(event_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.event_scheduler.pause_event(event_id),
         f"Event {event_id} not found or not pausable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/events/{event_id}/resume", operation_id="resumeEvent")
 async def resume_event(exercise_id: int, event_id: str) -> EventChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.event_scheduler.resume_event(event_id, pt),
         f"Event {event_id} not found or not resumable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/events/{event_id}/delay", operation_id="delayEvent")
@@ -96,21 +110,26 @@ async def delay_event(
     event_id: str,
     body: DelayRequest,
 ) -> EventChange:
-    return _or_404(
-        _get_engine(exercise_id).event_scheduler.delay_event(
-            event_id,
-            body.delay_ms,
-        ),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.event_scheduler.delay_event(event_id, body.delay_ms),
         f"Event {event_id} not found or not delayable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/events/{event_id}/skip", operation_id="skipEvent")
 async def skip_event(exercise_id: int, event_id: str) -> EventChange:
-    return _or_404(
-        _get_engine(exercise_id).event_scheduler.skip_event(event_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.event_scheduler.skip_event(event_id),
         f"Event {event_id} not found or not skippable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 # ── Issue actions ────────────────────────────────────────────────────────
@@ -121,36 +140,50 @@ async def activate_issue(exercise_id: int, issue_id: str) -> IssueChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     rt = engine.time_manager.real_time_ms
-    return _or_404(
+    change = _or_404(
         engine.issue_manager.manual_activate(issue_id, pt, rt),
         f"Issue {issue_id} not found or not activatable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/issues/{issue_id}/mitigate", operation_id="mitigateIssue")
 async def mitigate_issue(exercise_id: int, issue_id: str) -> IssueChange:
-    return _or_404(
-        _get_engine(exercise_id).issue_manager.mitigate(issue_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.issue_manager.mitigate(issue_id),
         f"Issue {issue_id} not found or not mitigatable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/issues/{issue_id}/resolve", operation_id="resolveIssue")
 async def resolve_issue(exercise_id: int, issue_id: str) -> IssueChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.issue_manager.resolve(issue_id, pt),
         f"Issue {issue_id} not found or not resolvable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 @router.post("/issues/{issue_id}/release", operation_id="releaseIssue")
 async def release_issue(exercise_id: int, issue_id: str) -> IssueChange:
-    return _or_404(
-        _get_engine(exercise_id).issue_manager.release_to_players(issue_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.issue_manager.release_to_players(issue_id),
         f"Issue {issue_id} not found or not releasable",
     )
+    if engine._on_state_change:
+        await engine._on_state_change([change])
+    return change
 
 
 # ── Decision actions ─────────────────────────────────────────────────────
