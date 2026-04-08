@@ -435,4 +435,102 @@
     padding: var(--spacing-lg) var(--spacing-xl);
     border-top: 1px solid var(--color-border);
   }
+
+  /* ── Details Panel ───────────────────────────────────────── */
+
+  .details-panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+
+  .details-panel__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+  }
+
+  .details-panel__title {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-foreground);
+    margin: 0;
+  }
+
+  .details-panel__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .details-panel__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: var(--spacing-sm);
+  }
+
+  .details-panel__field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xs);
+  }
+
+  .details-panel__label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted-foreground);
+  }
+
+  .details-panel__value {
+    font-size: var(--font-size-sm);
+    color: var(--color-foreground);
+  }
+
+  .details-panel__section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .details-panel__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+
+  .details-panel__role-desc {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+  }
+
+  .details-panel__role-name {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-primary);
+  }
+
+  .details-panel__role-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-foreground);
+    line-height: 1.5;
+  }
+
+  .details-panel__actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding-top: var(--spacing-xs);
+  }
+
+  .details-panel__empty {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin: 0;
+  }
 }

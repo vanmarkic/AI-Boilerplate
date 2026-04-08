@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   OnDestroy,
   OnInit,
   inject,
@@ -41,11 +42,21 @@ import { EventTimelineComponent } from "./event-timeline.component";
 import { GmDefectListComponent } from "./gm-defect-list.component";
 import { ExerciseListComponent } from "./exercise-list.component";
 import { GmItemActionsComponent } from "./gm-item-actions.component";
+import { GmDetailsPanelComponent } from "./gm-details-panel.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
 import { StressBarComponent } from "../../shared/stress-bar.component";
 import type { ExerciseResponse } from "../../core/exercise-api.service";
+import type {
+  EventSnapshot,
+  IssueSnapshot,
+} from "../../core/engine-api.service";
 import { Subscription } from "rxjs";
+
+type SelectedItem =
+  | { kind: "event"; item: EventSnapshot }
+  | { kind: "issue"; item: IssueSnapshot }
+  | null;
 
 @Component({
   selector: "tfc-game-master-view",
@@ -66,6 +77,7 @@ import { Subscription } from "rxjs";
     GmDefectListComponent,
     ExerciseListComponent,
     GmItemActionsComponent,
+    GmDetailsPanelComponent,
     LogsDrawerComponent,
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
@@ -171,9 +183,17 @@ import { Subscription } from "rxjs";
                 <p class="text-muted-foreground text-sm">No responses yet.</p>
               }
             } @else {
-              <p class="text-muted-foreground text-sm">
-                Select a decision to view context.
-              </p>
+              <tfc-gm-details-panel
+                [selectedEvent]="selectedEventSnapshot()"
+                [selectedIssue]="selectedIssueSnapshot()"
+                (pauseEvent)="pauseEvent($event)"
+                (resumeEvent)="resumeEvent($event)"
+                (cancelEvent)="cancelEvent($event)"
+                (completeEvent)="completeEvent($event)"
+                (activateIssue)="activateIssue($event)"
+                (mitigateIssue)="mitigateIssue($event)"
+                (resolveIssue)="resolveIssue($event)"
+              />
             }
           </ui-collapsible-panel>
           @if (store.context(); as ctx) {
@@ -254,11 +274,28 @@ export class GameMasterView implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   protected readonly selectedDecision = signal<DecisionDetail | null>(null);
+  protected readonly selectedItem = signal<SelectedItem>(null);
   protected readonly exerciseId = signal<number | null>(null);
   protected readonly logsOpen = signal(false);
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
   private readonly tick = inject(TickService);
+
+  protected readonly selectedEventSnapshot = computed<EventSnapshot | null>(
+    () => {
+      const sel = this.selectedItem();
+      if (sel?.kind === "event") return sel.item;
+      return null;
+    },
+  );
+
+  protected readonly selectedIssueSnapshot = computed<IssueSnapshot | null>(
+    () => {
+      const sel = this.selectedItem();
+      if (sel?.kind === "issue") return sel.item;
+      return null;
+    },
+  );
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
@@ -371,8 +408,17 @@ export class GameMasterView implements OnInit, OnDestroy {
     this.ws.disconnect();
     this.router.navigate(["/"]);
   }
-  protected onDefectSelected(_issueId: string): void {
-    // placeholder — will be wired to detail panel selection
+  protected onDefectSelected(issueId: string): void {
+    const issue = this.store.issues().find((i) => i.id === issueId) ?? null;
+    if (issue) {
+      this.selectedItem.set({ kind: "issue", item: issue });
+    }
+  }
+  protected onEventSelected(eventId: string): void {
+    const event = this.store.events().find((e) => e.id === eventId) ?? null;
+    if (event) {
+      this.selectedItem.set({ kind: "event", item: event });
+    }
   }
   protected onSpeedChange(e: Event): void {
     const target = e.target;
@@ -385,6 +431,12 @@ export class GameMasterView implements OnInit, OnDestroy {
   }
   protected triggerEvent(id: string): void {
     this.api.triggerEvent(this.eid(), id).subscribe();
+  }
+  protected pauseEvent(id: string): void {
+    this.api.pauseEvent(this.eid(), id).subscribe();
+  }
+  protected resumeEvent(id: string): void {
+    this.api.resumeEvent(this.eid(), id).subscribe();
   }
   protected cancelEvent(id: string): void {
     this.api.cancelEvent(this.eid(), id).subscribe();
