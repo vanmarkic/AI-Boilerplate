@@ -33,6 +33,8 @@ import type { ScenarioSelection } from "./scenario-picker";
 import { handleGmWsMessage } from "./gm-ws-handler";
 import {
   startExercise,
+  beginExercise,
+  resumeExercise,
   pauseExercise,
   resetExercise,
   completeExercise,
@@ -220,9 +222,19 @@ type SelectedItem =
 
         <footer class="exercise-controls">
           <div class="exercise-controls__group">
-            @if (store.phase() === "setup" || store.phase() === "paused") {
+            @if (store.phase() === "setup") {
               <button uiButton variant="default" (click)="onStart()">
-                {{ store.phase() === "setup" ? "Start" : "Resume" }}
+                Start
+              </button>
+            }
+            @if (store.phase() === "briefing") {
+              <button uiButton variant="default" (click)="onBegin()">
+                Begin
+              </button>
+            }
+            @if (store.phase() === "paused") {
+              <button uiButton variant="default" (click)="onResume()">
+                Resume
               </button>
             }
             @if (store.phase() === "running") {
@@ -384,6 +396,13 @@ export class GameMasterView implements OnInit, OnDestroy {
     });
   }
 
+  private reloadState(id: number): void {
+    this.loadSnapshot(id);
+    this.decisionApi.getContext(id).subscribe({
+      next: (ctx) => this.store.setContext(ctx),
+    });
+  }
+
   protected viewDecision(id: string): void {
     this.decisionApi.getDecisionDetail(Number(id)).subscribe({
       next: (detail) => this.selectedDecision.set(detail),
@@ -397,7 +416,15 @@ export class GameMasterView implements OnInit, OnDestroy {
   }
 
   protected onStart(): void {
-    startExercise(this.api, this.store, this.exerciseId()!);
+    const id = this.exerciseId()!;
+    startExercise(this.api, this.store, id, () => this.reloadState(id));
+  }
+  protected onBegin(): void {
+    const id = this.exerciseId()!;
+    beginExercise(this.api, this.store, id, () => this.reloadState(id));
+  }
+  protected onResume(): void {
+    resumeExercise(this.api, this.store, this.exerciseId()!);
   }
   protected onPause(): void {
     pauseExercise(this.api, this.store, this.exerciseId()!);

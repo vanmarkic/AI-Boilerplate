@@ -16,8 +16,36 @@ export function startExercise(
   api: EngineApiService,
   store: StoreInstance,
   exerciseId: number,
+  onSuccess?: () => void,
 ): void {
   api.start(exerciseId).subscribe({
+    next: (r) => {
+      applyPhaseResponse(store, r);
+      onSuccess?.();
+    },
+  });
+}
+
+export function beginExercise(
+  api: EngineApiService,
+  store: StoreInstance,
+  exerciseId: number,
+  onSuccess?: () => void,
+): void {
+  api.begin(exerciseId).subscribe({
+    next: (r) => {
+      applyPhaseResponse(store, r);
+      onSuccess?.();
+    },
+  });
+}
+
+export function resumeExercise(
+  api: EngineApiService,
+  store: StoreInstance,
+  exerciseId: number,
+): void {
+  api.resume(exerciseId).subscribe({
     next: (r) => applyPhaseResponse(store, r),
   });
 }

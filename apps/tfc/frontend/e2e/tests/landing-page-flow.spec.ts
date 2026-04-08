@@ -88,7 +88,7 @@ test.describe("Scenario picker @home @scenario-builder", () => {
 // ── Lobby Preview ─────────────────────────────────────────────────────
 
 test.describe("Landing page — active lobby @home @landing", () => {
-  test("shows lobby when joinable exercise exists", async ({
+  test("shows Join Exercise card when joinable exercise exists", async ({
     page,
     mockApi,
   }) => {
@@ -107,13 +107,12 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Hospital MCI")).toBeVisible();
-    await expect(page.getByText("0 / 2 crew")).toBeVisible();
-    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
-    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 
-  test("shows Join Exercise link in lobby preview", async ({
+  test("shows Join Exercise card that navigates to waiting room", async ({
     page,
     mockApi,
   }) => {
@@ -132,10 +131,12 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByRole("button", { name: "Join Operation" })).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    // No "Join Operation" button; the card itself is the clickable element
+    await expect(page.getByRole("button", { name: "Join Operation" })).not.toBeVisible();
   });
 
-  test("shows active operation count with participants", async ({
+  test("shows active operation count regardless of participants", async ({
     page,
     mockApi,
   }) => {
@@ -158,8 +159,9 @@ test.describe("Landing page — active lobby @home @landing", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("1 / 2 crew")).toBeVisible();
+    // Home page shows operation count, not individual participant details
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 });
 

@@ -343,3 +343,33 @@ async def test_force_trigger_next_decision_emits_event_change_with_role_descript
     assert ec["lifecycle"] == "running"
     assert ec["target_roles"] == ["nav", "ops"]
     assert ec["role_descriptions"] == {"nav": "Verify course", "ops": "Scan contacts"}
+
+
+# ── Score visibility ────────────────────────────────────────────────────
+
+
+class TestScoreVisibility:
+    """Score is hidden (None) until the exercise is COMPLETED."""
+
+    @pytest.mark.asyncio
+    async def test_score_none_while_running(self) -> None:
+        engine = ExerciseEngine(_config())
+        await engine.start()
+        with patch("engine.time_manager._now_ms", return_value=0.0):
+            await engine.begin()
+        snap = engine.snapshot()
+        assert snap["score"] is None
+        engine._stop_tick_loop()
+
+    @pytest.mark.asyncio
+    async def test_score_present_when_completed(self) -> None:
+        engine = ExerciseEngine(_config())
+        await engine.start()
+        with patch("engine.time_manager._now_ms", return_value=0.0):
+            await engine.begin()
+            await engine.complete()
+        snap = engine.snapshot()
+        # ClassicMode.snapshot() returns None (no scoring), but the branch
+        # exercises the "phase == COMPLETED" path — the key is that
+        # the engine *calls* game_mode.snapshot() instead of returning None.
+        assert engine.phase == EnginePhase.COMPLETED

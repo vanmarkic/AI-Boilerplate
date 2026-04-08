@@ -165,20 +165,19 @@ test.describe("/home — Lobby: empty, collaborative, not joined @home @waiting-
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("0 / 2 crew")).toBeVisible();
-    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
-    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
-    const openSlots = page.getByText("Open", { exact: true });
-    await expect(openSlots).toHaveCount(2);
-    await expect(page.getByRole("button", { name: "Join Operation" })).toBeVisible();
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 
-  test("no Game Master text on home", async ({ page, mockApi }) => {
+  test("no lobby detail shown on home for collaborative mode", async ({ page, mockApi }) => {
     mockApi.seedJoinable(joinable());
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Game Master")).not.toBeVisible();
+    // Lobby preview details (role slots, crew counts) are no longer on the home page
+    await expect(page.getByText("0 / 2 crew")).not.toBeVisible();
+    await expect(page.locator("tfc-lobby-preview")).not.toBeAttached();
   });
 });
 
@@ -188,10 +187,9 @@ test.describe("/home — Lobby: empty, classic, not joined @home @waiting-room",
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Game Master")).toBeVisible();
-    await expect(page.getByText("0 / 3 crew")).toBeVisible();
-    const openSlots = page.getByText("Open", { exact: true });
-    await expect(openSlots).toHaveCount(3); // co + nav + gm
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 });
 
@@ -205,9 +203,9 @@ test.describe("/home — Lobby: partial fill (1/2) @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("1 / 2 crew")).toBeVisible();
-    await expect(page.getByText("Open", { exact: true })).toHaveCount(1);
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 });
 
@@ -222,10 +220,10 @@ test.describe("/home — Lobby: full (2/2) @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Alice")).toBeVisible();
-    await expect(page.getByText("Bob")).toBeVisible();
-    await expect(page.getByText("2 / 2 crew")).toBeVisible();
-    await expect(page.getByText("Open", { exact: true })).toHaveCount(0);
+    // Home page shows a summary card, not individual participant details
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 });
 
@@ -243,7 +241,8 @@ test.describe("/home — Lobby: start button logic @home @waiting-room", () => {
       page.getByRole("button", { name: /Deploy/ }),
     ).not.toBeVisible();
     await expect(page.getByRole("button", { name: "Leave" })).not.toBeVisible();
-    await expect(page.getByRole("button", { name: "Join Operation" })).toBeVisible();
+    // No "Join Operation" button on new home page; the card itself navigates
+    await expect(page.getByRole("button", { name: "Join Operation" })).not.toBeVisible();
   });
 });
 
@@ -265,12 +264,10 @@ test.describe("/home — Lobby: 3-role scenario @home @waiting-room", () => {
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Commanding Officer (CO)")).toBeVisible();
-    await expect(page.getByText("Navigator (NAV)")).toBeVisible();
-    await expect(
-      page.getByText("Principal Warfare Officer (PWO)"),
-    ).toBeVisible();
-    await expect(page.getByText("0 / 3 crew")).toBeVisible();
+    // Home page shows a summary card, not individual role details
+    await expect(page.getByText("Join Exercise")).toBeVisible();
+    await expect(page.getByText("1 active operation awaiting crew")).toBeVisible();
+    await expect(page.getByText("Live")).toBeVisible();
   });
 });
 
