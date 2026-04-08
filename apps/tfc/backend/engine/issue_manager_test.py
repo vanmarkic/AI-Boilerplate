@@ -180,3 +180,15 @@ class TestEtbolRtPtSplit:
         mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0)])
         mgr.tick(0.0, 5000.0, set())  # activate at RT=5000
         assert mgr.issues["i1"].activated_at_rt_ms == 5000.0
+
+    def test_rt_does_not_resolve_prematurely(self) -> None:
+        """Issue with RT timer must survive intermediate ticks."""
+        mgr = IssueManager()
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, auto_resolve_rt_ms=500.0)])
+        mgr.tick(0.0, 0.0, set())  # activate at RT=0
+        mgr.tick(10.0, 10.0, set())  # 10ms later — should NOT resolve
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
+        mgr.tick(250.0, 250.0, set())  # 250ms — still not enough
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
+        mgr.tick(500.0, 500.0, set())  # 500ms — exactly at threshold
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED

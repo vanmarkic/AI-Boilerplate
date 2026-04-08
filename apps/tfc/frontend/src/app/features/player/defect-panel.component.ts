@@ -33,7 +33,7 @@ type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
             issue.lifecycle
           }}</ui-badge>
         </div>
-        @if (issue.auto_resolve_pt_ms > 0) {
+        @if (issue.auto_resolve_pt_ms > 0 || issue.auto_resolve_rt_ms > 0) {
           <div class="defect-panel__countdown">
             ETBOL {{ countdown(issue) }}
           </div>
@@ -61,6 +61,7 @@ type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 export class DefectPanelComponent {
   readonly issues = input<IssueSnapshot[]>([]);
   readonly playTimeMs = input(0);
+  readonly realTimeMs = input(0);
 
   protected readonly activeIssues = computed(() =>
     this.issues().filter(
@@ -94,9 +95,18 @@ export class DefectPanelComponent {
   }
 
   protected countdown(issue: IssueSnapshot): string {
-    const activatedAt = issue.activated_at_pt_ms ?? 0;
-    const deadline = activatedAt + issue.auto_resolve_pt_ms;
-    const remaining = Math.max(0, deadline - this.playTimeMs());
-    return formatTimeMs(remaining);
+    const ptRemaining =
+      issue.auto_resolve_pt_ms > 0
+        ? (issue.activated_at_pt_ms ?? 0) +
+          issue.auto_resolve_pt_ms -
+          this.playTimeMs()
+        : Infinity;
+    const rtRemaining =
+      issue.auto_resolve_rt_ms > 0
+        ? (issue.activated_at_rt_ms ?? 0) +
+          issue.auto_resolve_rt_ms -
+          this.realTimeMs()
+        : Infinity;
+    return formatTimeMs(Math.max(0, Math.min(ptRemaining, rtRemaining)));
   }
 }

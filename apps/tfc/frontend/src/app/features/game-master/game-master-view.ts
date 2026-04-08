@@ -117,6 +117,7 @@ type SelectedItem =
           <tfc-gm-defect-list
             [issues]="store.issues()"
             [playTimeMs]="store.playTimeMs()"
+            [realTimeMs]="store.realTimeMs()"
             (issueSelected)="onDefectSelected($event)"
           />
         </div>

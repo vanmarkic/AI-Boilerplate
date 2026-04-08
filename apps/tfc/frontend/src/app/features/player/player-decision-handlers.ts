@@ -99,14 +99,10 @@ export function submitDecision(
 export function resolvePlayerRole(
   ctx: ScenarioContext,
   role: string,
-  gameMode: string,
   store: InstanceType<typeof ExerciseStore>,
   roleLabel: WritableSignal<string>,
 ): void {
   store.setContext(ctx);
-  if (!gameMode && ctx.roles && ctx.roles.length > 0) {
-    store.setGameMode("simple_collaborative");
-  }
   const roleInfo = ctx.roles?.find((r) => r.id === role);
   if (roleInfo) {
     store.setPlayerType(roleInfo.player_type);

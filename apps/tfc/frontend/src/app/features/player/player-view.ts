@@ -256,7 +256,7 @@ export class PlayerView implements OnInit, OnDestroy {
     this.loadSnapshot(id);
     this.decisionApi.getContext(id).subscribe({
       next: (ctx) =>
-        resolvePlayerRole(ctx, role, gameMode, this.store, this.roleLabel),
+        resolvePlayerRole(ctx, role, this.store, this.roleLabel),
       error: () => {},
     });
     this.decisionApi.getEngineDecisions(id).subscribe({
