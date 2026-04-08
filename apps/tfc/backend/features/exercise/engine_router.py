@@ -89,13 +89,13 @@ async def _build_config(
     """Build EngineConfig from a scenario-linked exercise."""
     if not hasattr(exercise, "scenario_id") or exercise.scenario_id is None:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Exercise must be linked to a scenario before starting.",
         )
     scenario = await scenario_service.get_scenario(exercise.scenario_id)
     if not scenario.content:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail="Scenario has no content. Add events, roles, and decisions first.",
         )
     content = ScenarioContent.model_validate(scenario.content)

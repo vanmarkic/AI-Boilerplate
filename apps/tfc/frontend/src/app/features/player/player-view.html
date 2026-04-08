@@ -74,7 +74,7 @@
               {{ coRoleDef()?.label ?? 'Commanding Officer' }}
             </div>
             <tfc-co-decision-bar
-              [decision]="activeDecisions()[0] ?? null"
+              [decision]="activeDecisions()[0]"
               [advisorRoles]="advisorRoles()"
               [systems]="store.systems()"
               [coIntel]="coIntel()"
@@ -151,7 +151,7 @@
           {{ coRoleDef()?.label ?? 'Commanding Officer' }}
         </div>
         <tfc-co-decision-bar
-          [decision]="activeDecisions()[0] ?? null"
+          [decision]="activeDecisions()[0]"
           [advisorRoles]="advisorRoles()"
           [systems]="store.systems()"
           [coIntel]="coIntel()"
@@ -183,7 +183,7 @@
       }
     </div>
     <tfc-co-decision-bar
-      [decision]="activeDecisions()[0] ?? null"
+      [decision]="activeDecisions()[0]"
       [advisorRoles]="advisorRoles()"
       [systems]="store.systems()"
       [coIntel]="coIntel()"
