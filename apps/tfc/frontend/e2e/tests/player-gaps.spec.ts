@@ -53,6 +53,11 @@ const EVENT_FOR_DECISION = {
   lifecycle: "running",
   started_at_pt_ms: 10_000,
   completed_at_pt_ms: null,
+  execution_mode: "automatic",
+  triggered_issues: [] as string[],
+  target_roles: [] as string[],
+  role_descriptions: {} as Record<string, string>,
+  system_effects: [] as unknown[],
 };
 
 const snapshotWithScore = {

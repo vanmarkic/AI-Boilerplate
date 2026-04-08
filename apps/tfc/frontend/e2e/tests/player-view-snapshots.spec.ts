@@ -37,6 +37,11 @@ const EVENT_RUNNING = {
   lifecycle: "running",
   started_at_pt_ms: 10_000,
   completed_at_pt_ms: null,
+  execution_mode: "automatic",
+  triggered_issues: [] as string[],
+  target_roles: [] as string[],
+  role_descriptions: {} as Record<string, string>,
+  system_effects: [] as unknown[],
 };
 
 const EVENT_COMPLETED = {
@@ -50,6 +55,11 @@ const EVENT_COMPLETED = {
   lifecycle: "completed",
   started_at_pt_ms: 5_000,
   completed_at_pt_ms: 10_000,
+  execution_mode: "automatic",
+  triggered_issues: [] as string[],
+  target_roles: [] as string[],
+  role_descriptions: {} as Record<string, string>,
+  system_effects: [] as unknown[],
 };
 
 const EVENT_SCHEDULED = {
@@ -63,6 +73,11 @@ const EVENT_SCHEDULED = {
   lifecycle: "scheduled",
   started_at_pt_ms: null,
   completed_at_pt_ms: null,
+  execution_mode: "automatic",
+  triggered_issues: [] as string[],
+  target_roles: [] as string[],
+  role_descriptions: {} as Record<string, string>,
+  system_effects: [] as unknown[],
 };
 
 const ISSUE_ACTIVE = {
@@ -70,9 +85,11 @@ const ISSUE_ACTIVE = {
   title: "Radar Failure",
   description: "Radar is down.",
   trigger_mode: "event-based",
-  auto_resolve_ms: 0,
+  auto_resolve_pt_ms: 0,
+  auto_resolve_rt_ms: 0,
   lifecycle: "active",
   activated_at_pt_ms: 20_000,
+  activated_at_rt_ms: null,
   resolved_at_pt_ms: null,
   released: true,
 };
@@ -82,9 +99,11 @@ const ISSUE_RESOLVED = {
   title: "Comms Restored",
   description: "Fixed.",
   trigger_mode: "event-based",
-  auto_resolve_ms: 0,
+  auto_resolve_pt_ms: 0,
+  auto_resolve_rt_ms: 0,
   lifecycle: "resolved",
   activated_at_pt_ms: 10_000,
+  activated_at_rt_ms: null,
   resolved_at_pt_ms: 50_000,
   released: true,
 };
@@ -158,7 +177,7 @@ function snap(opts: SnapOpts = {}) {
 }
 
 function playerUrl(participantId: string, role: string, practiceMode = false): string {
-  const base = `/player?exerciseId=${EX_ID}&participantId=${participantId}&role=${role}`;
+  const base = `/player?exerciseId=${EX_ID}&participantId=${participantId}&role=${role}&gameMode=simple_collaborative`;
   return practiceMode ? `${base}&practiceMode=true` : base;
 }
 

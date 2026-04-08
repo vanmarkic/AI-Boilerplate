@@ -50,6 +50,11 @@ const EVENT_RUNNING = {
   lifecycle: "running",
   started_at_pt_ms: 10_000,
   completed_at_pt_ms: null,
+  execution_mode: "automatic",
+  triggered_issues: [] as string[],
+  target_roles: [] as string[],
+  role_descriptions: {} as Record<string, string>,
+  system_effects: [] as unknown[],
 };
 
 const EVENT_COMPLETED = {
@@ -63,6 +68,11 @@ const EVENT_COMPLETED = {
   lifecycle: "completed",
   started_at_pt_ms: 5_000,
   completed_at_pt_ms: 10_000,
+  execution_mode: "automatic",
+  triggered_issues: [] as string[],
+  target_roles: [] as string[],
+  role_descriptions: {} as Record<string, string>,
+  system_effects: [] as unknown[],
 };
 
 const EVENT_SCHEDULED = {
@@ -76,6 +86,11 @@ const EVENT_SCHEDULED = {
   lifecycle: "scheduled",
   started_at_pt_ms: null,
   completed_at_pt_ms: null,
+  execution_mode: "automatic",
+  triggered_issues: [] as string[],
+  target_roles: [] as string[],
+  role_descriptions: {} as Record<string, string>,
+  system_effects: [] as unknown[],
 };
 
 const ISSUE_ACTIVE_RELEASED = {
@@ -83,9 +98,11 @@ const ISSUE_ACTIVE_RELEASED = {
   title: "Radar Failure",
   description: "Radar is down.",
   trigger_mode: "event-based",
-  auto_resolve_ms: 0,
+  auto_resolve_pt_ms: 0,
+  auto_resolve_rt_ms: 0,
   lifecycle: "active",
   activated_at_pt_ms: 20_000,
+  activated_at_rt_ms: null,
   resolved_at_pt_ms: null,
   released: true,
 };
@@ -95,9 +112,11 @@ const ISSUE_ACTIVE_UNRELEASED = {
   title: "Hidden Issue",
   description: "Players should not see this.",
   trigger_mode: "manual",
-  auto_resolve_ms: 0,
+  auto_resolve_pt_ms: 0,
+  auto_resolve_rt_ms: 0,
   lifecycle: "active",
   activated_at_pt_ms: 30_000,
+  activated_at_rt_ms: null,
   resolved_at_pt_ms: null,
   released: false,
 };
@@ -107,9 +126,11 @@ const ISSUE_RESOLVED = {
   title: "Resolved Issue",
   description: "Done.",
   trigger_mode: "event-based",
-  auto_resolve_ms: 0,
+  auto_resolve_pt_ms: 0,
+  auto_resolve_rt_ms: 0,
   lifecycle: "resolved",
   activated_at_pt_ms: 10_000,
+  activated_at_rt_ms: null,
   resolved_at_pt_ms: 50_000,
   released: true,
 };
@@ -195,7 +216,7 @@ function snapshot(opts: SnapshotOpts = {}) {
 }
 
 function playerUrl(participantId: string, role = "player"): string {
-  return `/player?exerciseId=${EX_ID}&participantId=${participantId}&role=${role}`;
+  return `/player?exerciseId=${EX_ID}&participantId=${participantId}&role=${role}&gameMode=simple_collaborative`;
 }
 
 async function installMocks(

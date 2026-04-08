@@ -48,9 +48,14 @@ function makeEvent(index: number, lifecycle: string, pt: number) {
     scheduled_pt_ms: pt,
     duration_ms: lifecycle === "completed" ? 5_000 : null,
     dependencies: [] as string[],
+    triggered_issues: [] as string[],
     lifecycle,
     started_at_pt_ms: lifecycle === "scheduled" ? null : pt,
     completed_at_pt_ms: lifecycle === "completed" ? pt + 5_000 : null,
+    target_roles: [] as string[],
+    role_descriptions: {} as Record<string, string>,
+    system_effects: [] as { system_id: string; operational_state: string | null; power_state: boolean | null; set_all_power: boolean }[],
+    execution_mode: "automatic" as const,
   };
 }
 
@@ -76,9 +81,11 @@ function makeIssue(index: number, lifecycle: string, released: boolean) {
     title: `Issue-${index}`,
     description: `Description for issue ${index}`,
     trigger_mode: "event-based" as const,
-    auto_resolve_ms: 0,
+    auto_resolve_pt_ms: 0,
+    auto_resolve_rt_ms: 0,
     lifecycle,
     activated_at_pt_ms: 20_000,
+    activated_at_rt_ms: null as number | null,
     resolved_at_pt_ms: lifecycle === "resolved" ? 50_000 : null,
     released,
   };
@@ -252,7 +259,7 @@ export function buildSnapshot(state: PlayerState) {
 
 export function buildPlayerUrl(state: PlayerState): string {
   const participantId = `${state.role}-prop`;
-  const base = `/player?exerciseId=${EX_ID}&participantId=${participantId}&role=${state.role}`;
+  const base = `/player?exerciseId=${EX_ID}&participantId=${participantId}&role=${state.role}&gameMode=simple_collaborative`;
   return state.practiceMode ? `${base}&practiceMode=true` : base;
 }
 
