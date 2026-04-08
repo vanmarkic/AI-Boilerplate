@@ -11,6 +11,15 @@ api_endpoints:
   - GET /api/scenarios/{scenario_id}
   - PUT /api/scenarios/{scenario_id}
   - DELETE /api/scenarios/{scenario_id}
+  - POST /api/scenarios/{scenario_id}/content/events
+  - PUT /api/scenarios/{scenario_id}/content/events/{eid}
+  - DELETE /api/scenarios/{scenario_id}/content/events/{eid}
+  - POST /api/scenarios/{scenario_id}/content/issues
+  - PUT /api/scenarios/{scenario_id}/content/issues/{iid}
+  - DELETE /api/scenarios/{scenario_id}/content/issues/{iid}
+  - POST /api/scenarios/{scenario_id}/content/decisions
+  - PUT /api/scenarios/{scenario_id}/content/decisions/{did}
+  - DELETE /api/scenarios/{scenario_id}/content/decisions/{did}
 models:
   - Scenario
 events_emitted: []
