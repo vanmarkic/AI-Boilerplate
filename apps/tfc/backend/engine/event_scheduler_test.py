@@ -4,6 +4,7 @@ from engine.event_scheduler import (
     EventLifecycle,
     EventScheduler,
     EventType,
+    ExecutionMode,
     ScheduledEvent,
 )
 
@@ -173,3 +174,44 @@ class TestDurationAutoComplete:
         changes = sched.tick(200.0)
         assert sched.events["e1"].lifecycle == EventLifecycle.COMPLETED
         assert any(c["action"] == "completed" for c in changes)
+
+
+def _manual_event(
+    id: str = "m1",
+    scheduled_pt_ms: float = 0.0,
+) -> ScheduledEvent:
+    return ScheduledEvent(
+        id=id,
+        title=f"Manual {id}",
+        description="test",
+        event_type=EventType.OPERATIONAL,
+        scheduled_pt_ms=scheduled_pt_ms,
+        execution_mode=ExecutionMode.MANUAL,
+    )
+
+
+class TestExecutionMode:
+    def test_manual_event_does_not_auto_activate(self) -> None:
+        sched = EventScheduler()
+        sched.load_events([_manual_event("m1", scheduled_pt_ms=0.0)])
+        sched.tick(100.0)  # well past scheduled time
+        assert sched.events["m1"].lifecycle == EventLifecycle.SCHEDULED
+
+    def test_manual_event_can_be_force_triggered(self) -> None:
+        sched = EventScheduler()
+        sched.load_events([_manual_event("m1", scheduled_pt_ms=0.0)])
+        change = sched.force_trigger("m1", 100.0)
+        assert change is not None
+        assert sched.events["m1"].lifecycle == EventLifecycle.RUNNING
+
+    def test_automatic_event_still_auto_activates(self) -> None:
+        sched = EventScheduler()
+        sched.load_events([_event("e1", scheduled_pt_ms=100.0)])
+        sched.tick(100.0)
+        assert sched.events["e1"].lifecycle == EventLifecycle.PENDING
+
+    def test_snapshot_includes_execution_mode(self) -> None:
+        sched = EventScheduler()
+        sched.load_events([_manual_event("m1")])
+        snap = sched.snapshot()
+        assert snap[0]["execution_mode"] == "manual"

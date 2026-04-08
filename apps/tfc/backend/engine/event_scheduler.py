@@ -30,6 +30,11 @@ class EventType(StrEnum):
     DECISION = "decision"
 
 
+class ExecutionMode(StrEnum):
+    AUTOMATIC = "automatic"
+    MANUAL = "manual"
+
+
 VALID_TRANSITIONS: dict[EventLifecycle, set[EventLifecycle]] = {
     EventLifecycle.SCHEDULED: {EventLifecycle.PENDING, EventLifecycle.CANCELLED},
     EventLifecycle.PENDING: {EventLifecycle.RUNNING, EventLifecycle.CANCELLED},
@@ -63,6 +68,7 @@ class ScheduledEvent:
     role_descriptions: dict[str, str] = field(default_factory=dict)
     system_effects: list[SystemEffect] = field(default_factory=list)
     domain_effects: list[DomainEffect] = field(default_factory=list)
+    execution_mode: ExecutionMode = ExecutionMode.AUTOMATIC
 
 
 class EventScheduler:
@@ -202,6 +208,8 @@ class EventScheduler:
         current_pt_ms: float,
     ) -> bool:
         """Check if event should transition from scheduled to pending."""
+        if event.execution_mode == ExecutionMode.MANUAL:
+            return False
         if current_pt_ms < event.scheduled_pt_ms:
             return False
         # Check dependencies are completed
@@ -248,6 +256,7 @@ class EventScheduler:
                 target_roles=e.target_roles,
                 role_descriptions=e.role_descriptions,
                 system_effects=list(e.system_effects),
+                execution_mode=e.execution_mode.value,
             )
             for e in self._events.values()
         ]

@@ -34,6 +34,7 @@ class EventSnapshot(TypedDict):
     target_roles: list[str]
     role_descriptions: dict[str, str]
     system_effects: list[SystemEffect]
+    execution_mode: str
 
 
 class IssueSnapshot(TypedDict):
