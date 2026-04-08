@@ -31,6 +31,12 @@
           [playerRole]="store.playerRole()"
         />
       </aside>
+      <aside class="classic-layout__defects">
+        <tfc-defect-panel
+          [issues]="store.releasedIssues()"
+          [playTimeMs]="store.playTimeMs()"
+        />
+      </aside>
       <div class="classic-layout__board">
         @if (currentTurnEvent(); as event) {
         <div class="board-turn-banner">

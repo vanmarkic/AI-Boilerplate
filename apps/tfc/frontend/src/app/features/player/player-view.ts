@@ -41,6 +41,7 @@ import {
   CoDecisionBarComponent,
   type CoDecisionConfirmation,
 } from "./co-decision-bar.component";
+import { DefectPanelComponent } from "./defect-panel.component";
 import { buildRoleCards } from "./role-card.types";
 
 @Component({
@@ -61,6 +62,7 @@ import { buildRoleCards } from "./role-card.types";
     InjectFeedComponent,
     RoleCardComponent,
     CoDecisionBarComponent,
+    DefectPanelComponent,
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
     SeaBackdrop,
