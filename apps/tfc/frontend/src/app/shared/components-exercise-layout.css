@@ -533,4 +533,76 @@
     color: var(--color-muted-foreground);
     margin: 0;
   }
+
+  /* ── Trainee Monitor ─────────────────────────────────── */
+
+  .trainee-monitor {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    overflow-x: auto;
+    border-bottom: 1px solid var(--color-muted);
+    background: var(--color-card);
+  }
+
+  .trainee-monitor__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xs);
+    padding: var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    min-width: 10rem;
+    flex-shrink: 0;
+  }
+
+  .trainee-monitor__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .trainee-monitor__status-dot {
+    display: inline-block;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--color-muted-foreground);
+    flex-shrink: 0;
+  }
+
+  .trainee-monitor__status-dot[data-connected="true"] {
+    background: var(--color-success);
+  }
+
+  .trainee-monitor__name {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .trainee-monitor__decision {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-xs);
+  }
+
+  .trainee-monitor__decision-title {
+    font-size: var(--font-size-xs);
+    color: var(--color-muted-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .trainee-monitor__empty {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin: 0;
+    padding: var(--spacing-xs) 0;
+  }
 }

@@ -46,6 +46,7 @@ import { GmDetailsPanelComponent } from "./gm-details-panel.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
 import { WarfareDomainBoardComponent } from "../../shared/warfare-domain-board.component";
 import { StressBarComponent } from "../../shared/stress-bar.component";
+import { TraineeMonitorComponent } from "./trainee-monitor.component";
 import type { ExerciseResponse } from "../../core/exercise-api.service";
 import type {
   EventSnapshot,
@@ -82,6 +83,7 @@ type SelectedItem =
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
     StressBarComponent,
+    TraineeMonitorComponent,
   ],
   template: `
     @if (!exerciseId()) {
@@ -116,6 +118,11 @@ type SelectedItem =
             (issueSelected)="onDefectSelected($event)"
           />
         </div>
+
+        <tfc-trainee-monitor
+          [participants]="store.connectedParticipants()"
+          [decisions]="store.decisions()"
+        />
 
         <div class="exercise-overview">
           <tfc-gm-item-actions
