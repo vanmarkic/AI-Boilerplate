@@ -38,6 +38,7 @@ import {
   stopExercise,
 } from "./gm-engine-actions";
 import { EventTimelineComponent } from "./event-timeline.component";
+import { GmDefectListComponent } from "./gm-defect-list.component";
 import { ExerciseListComponent } from "./exercise-list.component";
 import { GmItemActionsComponent } from "./gm-item-actions.component";
 import { SystemStatusBoardComponent } from "../../shared/system-status-board.component";
@@ -62,6 +63,7 @@ import { Subscription } from "rxjs";
     DomainSelectorComponent,
     PresenceIndicatorComponent,
     EventTimelineComponent,
+    GmDefectListComponent,
     ExerciseListComponent,
     GmItemActionsComponent,
     LogsDrawerComponent,
@@ -90,11 +92,18 @@ import { Subscription } from "rxjs";
           </div>
         </header>
 
-        <tfc-event-timeline
-          [events]="store.events()"
-          [issues]="store.issues()"
-          [playTimeMs]="store.playTimeMs()"
-        />
+        <div class="exercise-overview--flex">
+          <tfc-event-timeline
+            [events]="store.events()"
+            [issues]="store.issues()"
+            [playTimeMs]="store.playTimeMs()"
+          />
+          <tfc-gm-defect-list
+            [issues]="store.issues()"
+            [playTimeMs]="store.playTimeMs()"
+            (issueSelected)="onDefectSelected($event)"
+          />
+        </div>
 
         <div class="exercise-overview">
           <tfc-gm-item-actions
@@ -361,6 +370,9 @@ export class GameMasterView implements OnInit, OnDestroy {
   private onExerciseStopped(): void {
     this.ws.disconnect();
     this.router.navigate(["/"]);
+  }
+  protected onDefectSelected(_issueId: string): void {
+    // placeholder — will be wired to detail panel selection
   }
   protected onSpeedChange(e: Event): void {
     const target = e.target;

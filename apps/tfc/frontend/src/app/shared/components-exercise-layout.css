@@ -158,6 +158,127 @@
     color: var(--color-muted-foreground);
   }
 
+  /* ── Defect List ───────────────────────────────────────── */
+
+  .defect-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    overflow: auto;
+  }
+
+  .defect-list__title {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-foreground);
+    margin: 0;
+  }
+
+  .defect-list__group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+  }
+
+  .defect-list__group-label {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted-foreground);
+  }
+
+  .defect-list__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    cursor: pointer;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    transition: background 0.15s;
+  }
+
+  .defect-list__item:hover {
+    background: var(--color-muted);
+  }
+
+  .defect-list__item[data-lifecycle="active"] {
+    border-left: 3px solid var(--color-destructive);
+  }
+
+  .defect-list__item[data-lifecycle="mitigated"] {
+    border-left: 3px solid var(--color-warning);
+  }
+
+  .defect-list__item[data-lifecycle="resolved"] {
+    border-left: 3px solid var(--color-success);
+  }
+
+  .defect-list__item[data-lifecycle="inactive"] {
+    border-left: 3px solid var(--color-muted-foreground);
+    opacity: 0.6;
+  }
+
+  .defect-list__item-title {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-foreground);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .defect-list__item-meta {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-shrink: 0;
+  }
+
+  .defect-list__countdown {
+    font-family: var(--font-mono);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--color-destructive);
+  }
+
+  .defect-list__empty {
+    font-size: var(--font-size-sm);
+    color: var(--color-muted-foreground);
+    margin: 0;
+  }
+
+  /* ── Overview Flex Layout ─────────────────────────────── */
+
+  .exercise-overview--flex {
+    display: flex;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    overflow: auto;
+  }
+
+  .exercise-overview--flex > :first-child {
+    flex: 2;
+    min-width: 0;
+  }
+
+  .exercise-overview--flex > :last-child {
+    flex: 1;
+    min-width: 0;
+  }
+
   /* ── Briefing Overlay ──────────────────────────────────── */
 
   .briefing-overlay__backdrop {
