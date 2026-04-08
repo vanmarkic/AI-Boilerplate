@@ -46,7 +46,7 @@ class DecisionTemplateDef(BaseModel):
     id: str
     title: str
     description: str = ""
-    issue_id: str  # linked issue
+    issue_id: str | None = None  # linked issue (optional)
     question_type: str  # single_choice, multi_choice, free_text, scale
     options: list[DecisionOptionDef] = []
     completion_mode: str = "first_response"
