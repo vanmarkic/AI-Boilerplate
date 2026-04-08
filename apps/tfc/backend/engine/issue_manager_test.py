@@ -13,7 +13,8 @@ def _issue(
     trigger_mode: TriggerMode = TriggerMode.TIME_BASED,
     trigger_time_pt_ms: float | None = None,
     trigger_event_id: str | None = None,
-    auto_resolve_ms: float = 0.0,
+    auto_resolve_pt_ms: float = 0.0,
+    auto_resolve_rt_ms: float = 0.0,
 ) -> TrackedIssue:
     return TrackedIssue(
         id=id,
@@ -22,7 +23,8 @@ def _issue(
         trigger_mode=trigger_mode,
         trigger_time_pt_ms=trigger_time_pt_ms,
         trigger_event_id=trigger_event_id,
-        auto_resolve_ms=auto_resolve_ms,
+        auto_resolve_pt_ms=auto_resolve_pt_ms,
+        auto_resolve_rt_ms=auto_resolve_rt_ms,
     )
 
 
@@ -30,14 +32,14 @@ class TestTimeBasedActivation:
     def test_activates_at_trigger_time(self) -> None:
         mgr = IssueManager()
         mgr.load_issues([_issue("i1", trigger_time_pt_ms=500.0)])
-        changes = mgr.tick(500.0, set())
+        changes = mgr.tick(500.0, 0.0, set())
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
         assert any(c["action"] == "activated" for c in changes)
 
     def test_not_activated_before_time(self) -> None:
         mgr = IssueManager()
         mgr.load_issues([_issue("i1", trigger_time_pt_ms=500.0)])
-        mgr.tick(499.0, set())
+        mgr.tick(499.0, 0.0, set())
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.INACTIVE
 
 
@@ -116,10 +118,10 @@ class TestMitigateResolve:
 class TestAutoResolveCountdown:
     def test_auto_resolve_expires(self) -> None:
         mgr = IssueManager()
-        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, auto_resolve_ms=1000.0)])
-        mgr.tick(0.0, set())  # activates
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, auto_resolve_pt_ms=1000.0)])
+        mgr.tick(0.0, 0.0, set())  # activates
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.ACTIVE
-        changes = mgr.tick(1000.0, set())
+        changes = mgr.tick(1000.0, 0.0, set())
         assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
         assert any(c["action"] == "auto_resolve_expired" for c in changes)
 
@@ -149,3 +151,32 @@ class TestInactiveGuards:
         mgr = IssueManager()
         mgr.load_issues([_issue("i1", trigger_mode=TriggerMode.MANUAL)])
         assert mgr.resolve("i1", 0.0) is None
+
+
+class TestEtbolRtPtSplit:
+    def test_pt_only_resolves_by_play_time(self) -> None:
+        mgr = IssueManager()
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, auto_resolve_pt_ms=500.0)])
+        mgr.tick(0.0, 0.0, set())  # activate
+        mgr.tick(500.0, 100.0, set())  # PT elapsed, RT not
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
+
+    def test_rt_only_resolves_by_real_time(self) -> None:
+        mgr = IssueManager()
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, auto_resolve_rt_ms=200.0)])
+        mgr.tick(0.0, 0.0, set())  # activate
+        mgr.tick(50.0, 200.0, set())  # PT not elapsed, RT elapsed
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
+
+    def test_both_resolves_on_first_expiry(self) -> None:
+        mgr = IssueManager()
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0, auto_resolve_pt_ms=1000.0, auto_resolve_rt_ms=200.0)])
+        mgr.tick(0.0, 0.0, set())  # activate
+        mgr.tick(100.0, 200.0, set())  # RT hits first
+        assert mgr.issues["i1"].lifecycle == IssueLifecycle.RESOLVED
+
+    def test_activated_at_rt_ms_recorded(self) -> None:
+        mgr = IssueManager()
+        mgr.load_issues([_issue("i1", trigger_time_pt_ms=0.0)])
+        mgr.tick(0.0, 5000.0, set())  # activate at RT=5000
+        assert mgr.issues["i1"].activated_at_rt_ms == 5000.0

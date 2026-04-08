@@ -120,8 +120,9 @@ async def skip_event(exercise_id: int, event_id: str) -> EventChange:
 async def activate_issue(exercise_id: int, issue_id: str) -> IssueChange:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
+    rt = engine.time_manager.real_time_ms
     return _or_404(
-        engine.issue_manager.manual_activate(issue_id, pt),
+        engine.issue_manager.manual_activate(issue_id, pt, rt),
         f"Issue {issue_id} not found or not activatable",
     )
 

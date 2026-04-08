@@ -77,7 +77,8 @@ def load_scenario_issues(content: ScenarioContent) -> list[TrackedIssue]:
                 trigger_mode=TriggerMode(iss.trigger_mode),
                 trigger_time_pt_ms=iss.trigger_time_pt_ms,
                 trigger_event_id=iss.trigger_event_id,
-                auto_resolve_ms=iss.auto_resolve_ms,
+                auto_resolve_pt_ms=iss.auto_resolve_pt_ms,
+                auto_resolve_rt_ms=iss.auto_resolve_rt_ms,
             ),
         )
     return issues

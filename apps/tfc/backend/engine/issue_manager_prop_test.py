@@ -22,7 +22,7 @@ def _issue(
     trigger_mode: TriggerMode = TriggerMode.TIME_BASED,
     trigger_time_pt_ms: float | None = None,
     trigger_event_id: str | None = None,
-    auto_resolve_ms: float = 0.0,
+    auto_resolve_pt_ms: float = 0.0,
 ) -> TrackedIssue:
     return TrackedIssue(
         id=iid,
@@ -31,7 +31,7 @@ def _issue(
         trigger_mode=trigger_mode,
         trigger_time_pt_ms=trigger_time_pt_ms,
         trigger_event_id=trigger_event_id,
-        auto_resolve_ms=auto_resolve_ms,
+        auto_resolve_pt_ms=auto_resolve_pt_ms,
     )
 
 
@@ -50,12 +50,12 @@ class TestTransitionsAlwaysValid:
         auto_resolve: float,
         ticks: list[float],
     ) -> None:
-        issue = _issue(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
+        issue = _issue(trigger_time_pt_ms=trigger_time, auto_resolve_pt_ms=auto_resolve)
         mgr = IssueManager()
         mgr.load_issues([issue])
         prev = IssueLifecycle.INACTIVE
         for pt in ticks:
-            mgr.tick(pt, set())
+            mgr.tick(pt, 0.0, set())
             current = mgr.issues["i0"].lifecycle
             if current != prev:
                 assert current in VALID_TRANSITIONS[prev], (
@@ -79,17 +79,17 @@ class TestResolvedAbsorbing:
         auto_resolve: float,
         extra_ticks: list[float],
     ) -> None:
-        issue = _issue(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
+        issue = _issue(trigger_time_pt_ms=trigger_time, auto_resolve_pt_ms=auto_resolve)
         mgr = IssueManager()
         mgr.load_issues([issue])
         # Activate then wait for auto-resolve
         far_future = trigger_time + auto_resolve + 1.0
-        mgr.tick(far_future, set())  # activates
-        mgr.tick(far_future + auto_resolve + 1.0, set())  # auto-resolves
+        mgr.tick(far_future, 0.0, set())  # activates
+        mgr.tick(far_future + auto_resolve + 1.0, 0.0, set())  # auto-resolves
         if mgr.issues["i0"].lifecycle != IssueLifecycle.RESOLVED:
             return  # timing edge case, skip
         for pt in extra_ticks:
-            mgr.tick(far_future + auto_resolve + 1.0 + pt, set())
+            mgr.tick(far_future + auto_resolve + 1.0 + pt, 0.0, set())
             assert mgr.issues["i0"].lifecycle == IssueLifecycle.RESOLVED
 
     @given(extra_ticks=monotonic_play_times(min_size=3, max_size=15))
@@ -105,7 +105,7 @@ class TestResolvedAbsorbing:
         mgr.resolve("i0", 100.0)
         assert mgr.issues["i0"].lifecycle == IssueLifecycle.RESOLVED
         for pt in extra_ticks:
-            mgr.tick(pt, set())
+            mgr.tick(pt, 0.0, set())
             assert mgr.issues["i0"].lifecycle == IssueLifecycle.RESOLVED
 
 
@@ -180,7 +180,7 @@ class TestActivationSetsReleasedFlag:
         issue = _issue(trigger_time_pt_ms=0.0)
         mgr = IssueManager()
         mgr.load_issues([issue])
-        mgr.tick(pt, set())
+        mgr.tick(pt, 0.0, set())
         if mgr.issues["i0"].lifecycle == IssueLifecycle.ACTIVE:
             assert mgr.issues["i0"].released_to_players is True
 

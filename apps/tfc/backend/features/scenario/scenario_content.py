@@ -84,7 +84,8 @@ class ScenarioIssueDef(BaseModel):
     trigger_mode: str  # time-based, event-based, manual
     trigger_time_pt_ms: float | None = None
     trigger_event_id: str | None = None
-    auto_resolve_ms: float = 0  # 0 = no auto-resolve
+    auto_resolve_pt_ms: float = 0  # 0 = no auto-resolve (play time)
+    auto_resolve_rt_ms: float = 0  # 0 = no auto-resolve (real time)
 
 
 class ScenarioPhaseDef(BaseModel):

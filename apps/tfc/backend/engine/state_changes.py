@@ -42,9 +42,11 @@ class IssueSnapshot(TypedDict):
     title: str
     description: str
     trigger_mode: str
-    auto_resolve_ms: float
+    auto_resolve_pt_ms: float
+    auto_resolve_rt_ms: float
     lifecycle: str
     activated_at_pt_ms: float | None
+    activated_at_rt_ms: float | None
     resolved_at_pt_ms: float | None
     released: bool
 

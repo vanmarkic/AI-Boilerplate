@@ -47,9 +47,11 @@ class TrackedIssue:
     trigger_mode: TriggerMode
     trigger_time_pt_ms: float | None = None
     trigger_event_id: str | None = None
-    auto_resolve_ms: float = 0.0
+    auto_resolve_pt_ms: float = 0.0
+    auto_resolve_rt_ms: float = 0.0
     lifecycle: IssueLifecycle = IssueLifecycle.INACTIVE
     activated_at_pt_ms: float | None = None
+    activated_at_rt_ms: float | None = None
     resolved_at_pt_ms: float | None = None
     released_to_players: bool = False
 
@@ -76,12 +78,14 @@ class IssueManager:
     def tick(
         self,
         current_pt_ms: float,
+        current_rt_ms: float,
         completed_event_ids: set[str],
     ) -> list[IssueChange]:
         """Check all issues for activation and auto-resolve expiry.
 
         Args:
             current_pt_ms: Current play time in milliseconds.
+            current_rt_ms: Current real time in milliseconds.
             completed_event_ids: Set of event IDs that have completed.
 
         Returns:
@@ -92,16 +96,24 @@ class IssueManager:
         for issue in self._issues.values():
             if issue.lifecycle == IssueLifecycle.INACTIVE:
                 if self._should_activate(issue, current_pt_ms, completed_event_ids):
-                    self._activate(issue, current_pt_ms)
+                    self._activate(issue, current_pt_ms, current_rt_ms)
                     changes.append(self._change(issue, "activated"))
 
-            if issue.lifecycle == IssueLifecycle.ACTIVE and issue.auto_resolve_ms > 0:
-                if issue.activated_at_pt_ms is not None:
-                    elapsed = current_pt_ms - issue.activated_at_pt_ms
-                    if elapsed >= issue.auto_resolve_ms:
-                        self._transition(issue, IssueLifecycle.RESOLVED)
-                        issue.resolved_at_pt_ms = current_pt_ms
-                        changes.append(self._change(issue, "auto_resolve_expired"))
+            if issue.lifecycle == IssueLifecycle.ACTIVE:
+                pt_expired = (
+                    issue.auto_resolve_pt_ms > 0
+                    and issue.activated_at_pt_ms is not None
+                    and (current_pt_ms - issue.activated_at_pt_ms) >= issue.auto_resolve_pt_ms
+                )
+                rt_expired = (
+                    issue.auto_resolve_rt_ms > 0
+                    and issue.activated_at_rt_ms is not None
+                    and (current_rt_ms - issue.activated_at_rt_ms) >= issue.auto_resolve_rt_ms
+                )
+                if pt_expired or rt_expired:
+                    self._transition(issue, IssueLifecycle.RESOLVED)
+                    issue.resolved_at_pt_ms = current_pt_ms
+                    changes.append(self._change(issue, "auto_resolve_expired"))
 
         return changes
 
@@ -109,6 +121,7 @@ class IssueManager:
         self,
         event_id: str,
         current_pt_ms: float,
+        current_rt_ms: float = 0.0,
     ) -> list[IssueChange]:
         """Activate all issues triggered by a specific event."""
         changes: list[IssueChange] = []
@@ -118,7 +131,7 @@ class IssueManager:
                 and issue.trigger_mode == TriggerMode.EVENT_BASED
                 and issue.trigger_event_id == event_id
             ):
-                self._activate(issue, current_pt_ms)
+                self._activate(issue, current_pt_ms, current_rt_ms)
                 changes.append(self._change(issue, "activated"))
         return changes
 
@@ -126,12 +139,13 @@ class IssueManager:
         self,
         issue_id: str,
         current_pt_ms: float,
+        current_rt_ms: float = 0.0,
     ) -> IssueChange | None:
         """GM manually activates an issue."""
         issue = self._issues.get(issue_id)
         if not issue or issue.lifecycle != IssueLifecycle.INACTIVE:
             return None
-        self._activate(issue, current_pt_ms)
+        self._activate(issue, current_pt_ms, current_rt_ms)
         return self._change(issue, "manual_activated")
 
     def mitigate(self, issue_id: str) -> IssueChange | None:
@@ -182,9 +196,10 @@ class IssueManager:
         return False  # manual triggers don't auto-activate
 
     @staticmethod
-    def _activate(issue: TrackedIssue, current_pt_ms: float) -> None:
+    def _activate(issue: TrackedIssue, current_pt_ms: float, current_rt_ms: float = 0.0) -> None:
         issue.lifecycle = IssueLifecycle.ACTIVE
         issue.activated_at_pt_ms = current_pt_ms
+        issue.activated_at_rt_ms = current_rt_ms
         issue.released_to_players = True
 
     @staticmethod
@@ -212,9 +227,11 @@ class IssueManager:
                 title=i.title,
                 description=i.description,
                 trigger_mode=i.trigger_mode.value,
-                auto_resolve_ms=i.auto_resolve_ms,
+                auto_resolve_pt_ms=i.auto_resolve_pt_ms,
+                auto_resolve_rt_ms=i.auto_resolve_rt_ms,
                 lifecycle=i.lifecycle.value,
                 activated_at_pt_ms=i.activated_at_pt_ms,
+                activated_at_rt_ms=i.activated_at_rt_ms,
                 resolved_at_pt_ms=i.resolved_at_pt_ms,
                 released=i.released_to_players,
             )

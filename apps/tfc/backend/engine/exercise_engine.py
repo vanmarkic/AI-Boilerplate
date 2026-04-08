@@ -362,10 +362,10 @@ class ExerciseEngine:
         for change in event_changes:
             if change.get("action") == "completed":
                 event_id = change["event_id"]
-                issue_changes = self._issues.activate_by_event(event_id, pt)
+                issue_changes = self._issues.activate_by_event(event_id, pt, self._time.real_time_ms)
                 changes.extend(issue_changes)
 
-        issue_changes = self._issues.tick(pt, completed_events)
+        issue_changes = self._issues.tick(pt, self._time.real_time_ms, completed_events)
         changes.extend(issue_changes)
 
         if changes and self._on_state_change:
