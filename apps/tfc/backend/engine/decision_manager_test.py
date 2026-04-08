@@ -171,3 +171,32 @@ def test_snapshot_includes_selected_option_ids() -> None:
     mgr.close_decision("d1", current_pt_ms=100.0, selected_option_ids=["o1"])
     snap = mgr.snapshot()
     assert snap[0]["selected_option_ids"] == ["o1"]
+
+
+class TestAllRespondCompletion:
+    def test_all_target_roles_responded_false_when_missing(self) -> None:
+        mgr = DecisionManager()
+        mgr.open_decision(
+            id="d1", event_id=None, issue_id=None, title="T",
+            description="D", question_type="single_choice",
+            options=[], completion_mode="all_respond",
+            target_roles=["co", "logistics"], current_pt_ms=0.0,
+        )
+        mgr.submit_recommendation("d1", "alice", "opt1", role_id="co")
+        assert not mgr.all_target_roles_responded("d1")
+
+    def test_all_target_roles_responded_true_when_all_present(self) -> None:
+        mgr = DecisionManager()
+        mgr.open_decision(
+            id="d1", event_id=None, issue_id=None, title="T",
+            description="D", question_type="single_choice",
+            options=[], completion_mode="all_respond",
+            target_roles=["co", "logistics"], current_pt_ms=0.0,
+        )
+        mgr.submit_recommendation("d1", "alice", "opt1", role_id="co")
+        mgr.submit_recommendation("d1", "bob", "opt2", role_id="logistics")
+        assert mgr.all_target_roles_responded("d1")
+
+    def test_returns_false_for_nonexistent_decision(self) -> None:
+        mgr = DecisionManager()
+        assert not mgr.all_target_roles_responded("nope")

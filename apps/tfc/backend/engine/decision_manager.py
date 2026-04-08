@@ -170,6 +170,23 @@ class DecisionManager:
         """Look up a decision by ID, regardless of status."""
         return self._decisions.get(decision_id)
 
+    def all_target_roles_responded(self, decision_id: str) -> bool:
+        """Check if every target_role has at least one recommendation."""
+        decision = self._decisions.get(decision_id)
+        if decision is None or decision.status != "open":
+            return False
+        if not decision.target_roles:
+            return False
+        responded_roles: set[str] = set()
+        for key in decision.recommendations:
+            # key format: "participant_id:role_id" or just "participant_id"
+            parts = key.rsplit(":", 1)
+            if len(parts) == 2:
+                responded_roles.add(parts[1])
+            else:
+                responded_roles.add(key)
+        return all(role in responded_roles for role in decision.target_roles)
+
     def get_open_decisions(self) -> list[ActiveDecision]:
         """Return only decisions with status 'open'."""
         return [d for d in self._decisions.values() if d.status == "open"]

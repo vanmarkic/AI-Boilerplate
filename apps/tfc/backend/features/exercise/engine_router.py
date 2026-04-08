@@ -284,6 +284,29 @@ async def submit_recommendation(
         )
     await broadcast_changes(connection_manager, exercise_id, [result])
     await _log_to_audit(exercise_id, [result])
+
+    # Auto-close if all_respond completion mode and all target roles responded
+    decision = engine.decision_manager.get_decision(body.decision_id)
+    if (
+        decision
+        and decision.completion_mode == "all_respond"
+        and engine.decision_manager.all_target_roles_responded(body.decision_id)
+    ):
+        all_changes: list[StateChange] = []
+
+        async def _broadcast(changes: list[StateChange]) -> None:
+            all_changes.extend(changes)
+            await broadcast_changes(connection_manager, exercise_id, changes)
+
+        svc = EngineDecisionService()
+        await svc.close_decision(
+            engine,
+            body.decision_id,
+            [body.option_id],
+            broadcast=_broadcast,
+        )
+        await _log_to_audit(exercise_id, all_changes)
+
     return result
 
 
