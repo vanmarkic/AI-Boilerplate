@@ -94,6 +94,23 @@
         }
       </div>
     </div>
+
+    @if (store.hasOpenDecision()) {
+    <div class="decision-overlay">
+      <div class="decision-overlay__content">
+        <h2 class="decision-overlay__title">Decision Required</h2>
+        <div class="decision-overlay__cards">
+          @for (card of roleCards(); track card.roleId) {
+          <tfc-role-card
+            [card]="card"
+            [systems]="store.systems()"
+            (submitted)="onRoleCardSubmitted($event)"
+          />
+          }
+        </div>
+      </div>
+    </div>
+    }
   </main>
   } @else {
   <main class="player-main player-main--board">
