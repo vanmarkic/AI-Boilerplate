@@ -57,6 +57,39 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                 </div>
               </div>
               <div class="flex gap-sm">
+                <div class="flex flex-col gap-xs" style="flex:1">
+                  <label class="text-xs">Completion Mode</label>
+                  <select
+                    class="input-base"
+                    [value]="editCompletionMode()"
+                    (change)="editCompletionMode.set(sel($event))"
+                  >
+                    <option value="first_response">First response</option>
+                    <option value="all_respond">All respond</option>
+                    <option value="gm_closes">GM closes</option>
+                  </select>
+                </div>
+              </div>
+              @if (editCompletionMode() === 'all_respond') {
+                <div class="flex flex-col gap-xs">
+                  <span class="text-xs text-muted-foreground"
+                    >Target roles:</span
+                  >
+                  <div class="flex gap-sm flex-wrap">
+                    @for (role of store.content().roles ?? []; track role.id) {
+                      <label class="flex items-center gap-xs text-sm">
+                        <input
+                          type="checkbox"
+                          [checked]="editTargetRoles().includes(role.id)"
+                          (change)="toggleTargetRole(role.id, $event)"
+                        />
+                        {{ role.label }}
+                      </label>
+                    }
+                  </div>
+                </div>
+              }
+              <div class="flex gap-sm">
                 <button
                   uiButton
                   variant="default"
@@ -80,6 +113,9 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
               <div>
                 <span class="text-sm font-medium">{{ dt.title }}</span>
                 <ui-badge variant="secondary">{{ dt.question_type }}</ui-badge>
+                <ui-badge variant="secondary">{{
+                  dt.completion_mode
+                }}</ui-badge>
                 @if (dt.issue_id) {
                   <span
                     class="text-xs text-muted-foreground ml-sm cursor-pointer"
@@ -142,6 +178,8 @@ export class ScenarioDecisionEditorComponent {
   protected readonly editDesc = signal("");
   protected readonly editIssueId = signal("");
   protected readonly editQType = signal("single_choice");
+  protected readonly editCompletionMode = signal("first_response");
+  protected readonly editTargetRoles = signal<string[]>([]);
 
   protected sel(event: Event): string {
     const target = event.target;
@@ -178,14 +216,30 @@ export class ScenarioDecisionEditorComponent {
     this.editDesc.set(dt.description);
     this.editIssueId.set(dt.issue_id);
     this.editQType.set(dt.question_type);
+    this.editCompletionMode.set(dt.completion_mode);
+    this.editTargetRoles.set(dt.target_roles ?? []);
+  }
+
+  protected toggleTargetRole(roleId: string, event: Event): void {
+    const target = event.target;
+    if (!(target instanceof HTMLInputElement)) return;
+    const current = this.editTargetRoles();
+    const updated = target.checked
+      ? [...current, roleId]
+      : current.filter((r) => r !== roleId);
+    this.editTargetRoles.set(updated);
   }
 
   protected save(dtId: string): void {
+    const completionMode = this.editCompletionMode();
     this.store.updateDecisionTemplate(dtId, {
       title: this.editTitle(),
       description: this.editDesc(),
       issue_id: this.editIssueId(),
       question_type: this.editQType(),
+      completion_mode: completionMode,
+      target_roles:
+        completionMode === "all_respond" ? this.editTargetRoles() : [],
     });
     this.editingId.set(null);
   }

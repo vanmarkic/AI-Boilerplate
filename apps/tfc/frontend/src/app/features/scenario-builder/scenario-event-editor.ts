@@ -71,12 +71,25 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                   (valueChange)="editDur.set($event ? +$event : null)"
                 />
               </div>
-              <ui-input
-                id="edit-evt-roles"
-                label="Target Roles (comma-separated, empty = all)"
-                [value]="editTargetRoles()"
-                (valueChange)="editTargetRoles.set($event)"
-              />
+              <div class="flex gap-sm">
+                <ui-input
+                  id="edit-evt-roles"
+                  label="Target Roles (comma-separated, empty = all)"
+                  [value]="editTargetRoles()"
+                  (valueChange)="editTargetRoles.set($event)"
+                />
+                <div class="flex flex-col gap-xs" style="flex:1">
+                  <label class="text-xs">Execution Mode</label>
+                  <select
+                    class="input-base"
+                    [value]="editExecMode()"
+                    (change)="editExecMode.set(sel($event))"
+                  >
+                    <option value="automatic">Automatic</option>
+                    <option value="manual">Manual</option>
+                  </select>
+                </div>
+              </div>
               <div class="flex gap-sm">
                 <button
                   uiButton
@@ -101,6 +114,9 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
               <div>
                 <span class="text-sm font-medium">{{ event.title }}</span>
                 <ui-badge variant="secondary">{{ event.event_type }}</ui-badge>
+                @if (event.execution_mode === 'manual') {
+                  <ui-badge variant="secondary">manual</ui-badge>
+                }
                 <span class="text-xs text-muted-foreground ml-sm">
                   @ {{ event.scheduled_pt_ms / 1000 }}s
                 </span>
@@ -183,6 +199,7 @@ export class ScenarioEventEditorComponent {
   protected readonly editPt = signal(0);
   protected readonly editDur = signal<number | null>(null);
   protected readonly editTargetRoles = signal("");
+  protected readonly editExecMode = signal("automatic");
 
   protected sel(event: Event): string {
     const target = event.target;
@@ -205,6 +222,7 @@ export class ScenarioEventEditorComponent {
       triggered_issues: [],
       target_roles: [],
       role_descriptions: {},
+      execution_mode: "automatic",
     });
     this.newTitle.set("");
     this.newTime.set("");
@@ -218,6 +236,7 @@ export class ScenarioEventEditorComponent {
     this.editPt.set(event.scheduled_pt_ms);
     this.editDur.set(event.duration_ms);
     this.editTargetRoles.set((event.target_roles ?? []).join(", "));
+    this.editExecMode.set(event.execution_mode ?? "automatic");
   }
 
   protected scrollTo(elementId: string): void {
@@ -245,6 +264,7 @@ export class ScenarioEventEditorComponent {
       duration_ms: this.editDur(),
       target_roles,
       role_descriptions: existing?.role_descriptions ?? {},
+      execution_mode: this.editExecMode(),
     });
     this.editingId.set(null);
   }

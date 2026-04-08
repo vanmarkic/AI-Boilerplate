@@ -15,6 +15,7 @@ export interface ScenarioEventDef {
   triggered_issues: string[];
   target_roles: string[];
   role_descriptions: Record<string, string>;
+  execution_mode?: string;
 }
 
 export interface ScenarioIssueDef {
@@ -25,6 +26,7 @@ export interface ScenarioIssueDef {
   trigger_time_pt_ms: number | null;
   trigger_event_id: string | null;
   auto_resolve_pt_ms: number;
+  auto_resolve_rt_ms: number;
 }
 
 export interface DecisionTemplateDef {

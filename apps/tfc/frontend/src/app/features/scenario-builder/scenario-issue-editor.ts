@@ -59,10 +59,16 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                   </select>
                 </div>
                 <ui-input
-                  id="edit-iss-ar"
-                  label="Auto-resolve (ms)"
-                  [value]="'' + editAutoResolve()"
-                  (valueChange)="editAutoResolve.set(+$event)"
+                  id="edit-iss-ar-pt"
+                  label="Auto-resolve PT (ms)"
+                  [value]="'' + editAutoResolvePt()"
+                  (valueChange)="editAutoResolvePt.set(+$event)"
+                />
+                <ui-input
+                  id="edit-iss-ar-rt"
+                  label="Auto-resolve RT (ms)"
+                  [value]="'' + editAutoResolveRt()"
+                  (valueChange)="editAutoResolveRt.set(+$event)"
                 />
               </div>
               <div class="flex gap-sm">
@@ -93,7 +99,12 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                 }}</ui-badge>
                 @if (issue.auto_resolve_pt_ms > 0) {
                   <span class="text-xs text-muted-foreground ml-sm">
-                    auto-resolve: {{ issue.auto_resolve_pt_ms / 1000 }}s
+                    PT: {{ issue.auto_resolve_pt_ms / 1000 }}s
+                  </span>
+                }
+                @if (issue.auto_resolve_rt_ms > 0) {
+                  <span class="text-xs text-muted-foreground ml-sm">
+                    RT: {{ issue.auto_resolve_rt_ms / 1000 }}s
                   </span>
                 }
                 @if (issue.trigger_event_id) {
@@ -166,7 +177,8 @@ export class ScenarioIssueEditorComponent {
   protected readonly editTitle = signal("");
   protected readonly editDesc = signal("");
   protected readonly editTrigger = signal("manual");
-  protected readonly editAutoResolve = signal(0);
+  protected readonly editAutoResolvePt = signal(0);
+  protected readonly editAutoResolveRt = signal(0);
 
   protected sel(event: Event): string {
     const target = event.target;
@@ -185,6 +197,7 @@ export class ScenarioIssueEditorComponent {
       trigger_time_pt_ms: null,
       trigger_event_id: null,
       auto_resolve_pt_ms: 0,
+      auto_resolve_rt_ms: 0,
     });
     this.newTitle.set("");
   }
@@ -194,7 +207,8 @@ export class ScenarioIssueEditorComponent {
     this.editTitle.set(issue.title);
     this.editDesc.set(issue.description);
     this.editTrigger.set(issue.trigger_mode);
-    this.editAutoResolve.set(issue.auto_resolve_pt_ms);
+    this.editAutoResolvePt.set(issue.auto_resolve_pt_ms);
+    this.editAutoResolveRt.set(issue.auto_resolve_rt_ms);
   }
 
   protected scrollTo(elementId: string): void {
@@ -208,7 +222,8 @@ export class ScenarioIssueEditorComponent {
       title: this.editTitle(),
       description: this.editDesc(),
       trigger_mode: this.editTrigger(),
-      auto_resolve_pt_ms: this.editAutoResolve(),
+      auto_resolve_pt_ms: this.editAutoResolvePt(),
+      auto_resolve_rt_ms: this.editAutoResolveRt(),
     });
     this.editingId.set(null);
   }
