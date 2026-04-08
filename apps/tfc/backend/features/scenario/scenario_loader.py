@@ -7,7 +7,7 @@ ScheduledEvent / TrackedIssue / EngineConfig dataclasses.
 from __future__ import annotations
 
 from engine.engine_config import RoleInfo
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.event_scheduler import EventType, ExecutionMode, ScheduledEvent
 from engine.exercise_engine import (
     DecisionTemplate,
     EngineConfig,
@@ -59,6 +59,7 @@ def load_scenario_events(content: ScenarioContent) -> list[ScheduledEvent]:
                     DomainEffect(domain_id=de.domain_id, threat_level=de.threat_level)
                     for de in evt.domain_effects
                 ],
+                execution_mode=ExecutionMode(evt.execution_mode),
             ),
         )
     return events

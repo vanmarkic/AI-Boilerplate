@@ -72,6 +72,7 @@ class ScenarioEventDef(BaseModel):
     role_descriptions: dict[str, str] = {}  # per-role description overrides
     system_effects: list[SystemEffectDef] = []  # system state changes on event start
     domain_effects: list[DomainEffectDef] = []  # warfare domain changes on event start
+    execution_mode: str = "automatic"  # "automatic" or "manual"
 
 
 class ScenarioIssueDef(BaseModel):

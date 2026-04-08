@@ -9,7 +9,7 @@ from __future__ import annotations
 from hypothesis import strategies as st
 from hypothesis.strategies import SearchStrategy
 
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.event_scheduler import EventType, ExecutionMode, ScheduledEvent
 from engine.issue_manager import TrackedIssue, TriggerMode
 from engine.system_manager import SystemState
 
@@ -68,6 +68,7 @@ def scheduled_events(
         triggered_issues=[],
         target_roles=target_roles,
         role_descriptions=role_descs,
+        execution_mode=draw(st.sampled_from(ExecutionMode)),
     )
 
 
