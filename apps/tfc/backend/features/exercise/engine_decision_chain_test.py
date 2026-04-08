@@ -20,6 +20,7 @@ OPTIONS = [
     {
         "id": "good",
         "label": "Good",
+        "description": "",
         "score": 10,
         "stress_delta": 0,
         "system_effects": [],
@@ -30,6 +31,7 @@ OPTIONS = [
     {
         "id": "bad",
         "label": "Bad",
+        "description": "",
         "score": 0,
         "stress_delta": 1,
         "system_effects": [],
@@ -43,6 +45,7 @@ FORCED_OPTIONS = [
     {
         "id": "good",
         "label": "Good",
+        "description": "",
         "score": 10,
         "stress_delta": 0,
         "system_effects": [],
@@ -53,6 +56,7 @@ FORCED_OPTIONS = [
     {
         "id": "forced",
         "label": "Forced",
+        "description": "",
         "score": -5,
         "stress_delta": 0,
         "system_effects": [],
@@ -63,6 +67,7 @@ FORCED_OPTIONS = [
     {
         "id": "bad",
         "label": "Bad",
+        "description": "",
         "score": 0,
         "stress_delta": 1,
         "system_effects": [],

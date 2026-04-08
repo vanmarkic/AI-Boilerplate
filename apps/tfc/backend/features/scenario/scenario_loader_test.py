@@ -65,6 +65,7 @@ def test_build_engine_config_loads_decision_templates() -> None:
     assert tmpl.options[0] == {
         "id": "o1",
         "label": "Yes",
+        "description": "",
         "score": 1.0,
         "stress_delta": 0,
         "system_effects": [],
@@ -468,7 +469,7 @@ def test_build_engine_config_uses_turns_when_present() -> None:
     # Decision templates generated from turns
     assert len(config.decision_templates) == 1
     dt = config.decision_templates[0]
-    assert dt.id == "turn-0-decision"
+    assert dt.id == "turn-0-inject-0"
     assert dt.max_selections == 1
     assert dt.stress_delta == 2
     assert len(dt.options) == 2
