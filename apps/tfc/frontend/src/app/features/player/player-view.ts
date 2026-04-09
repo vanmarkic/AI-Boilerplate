@@ -7,7 +7,6 @@ import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { DecisionPanelComponent } from '../../shared/decision-panel.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
-import { DomainService } from '../../core/domain.service';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
@@ -28,7 +27,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
   template: `
     <div class="exercise-layout">
       <header class="exercise-header">
-        <span class="exercise-header__title">{{ store.title() || domain.term('exercise') + ' Dashboard' }}</span>
+        <span class="exercise-header__title">{{ store.title() || 'Exercise Dashboard' }}</span>
         <div class="exercise-header__clocks">
           <tfc-clock-display label="RT" [value]="store.rtClock()" />
           <tfc-clock-display label="PT" [value]="store.ptClock()" />
@@ -37,54 +36,54 @@ import { handleDecisionWsChanges } from './player-ws-handler';
       </header>
 
       <div class="exercise-overview">
-        <ui-card [title]="'Released ' + domain.term('event') + 's'">
-          @for (event of visibleEvents(); track event.id) {
+        <ui-card title="Released Injects">
+          @for (inject of visibleInjects(); track inject.id) {
             <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm font-medium">{{ event.title }}</span>
-              <ui-badge variant="secondary">{{ event.lifecycle }}</ui-badge>
+              <span class="text-sm font-medium">{{ inject.title }}</span>
+              <ui-badge variant="secondary">{{ inject.lifecycle }}</ui-badge>
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No events released yet.</p>
+            <p class="text-muted-foreground text-sm p-sm">No injects released yet.</p>
           }
         </ui-card>
 
-        <ui-card [title]="'Active ' + domain.term('issue') + 's'">
-          @for (issue of store.releasedIssues(); track issue.id) {
+        <ui-card title="Active Defects">
+          @for (defect of store.releasedDefects(); track defect.id) {
             <div class="flex items-center justify-between p-sm border-b"
-              [class.cursor-pointer]="issue.lifecycle === 'active'"
-              (click)="selectIssue(issue.id)">
-              <span class="text-sm font-medium">{{ issue.title }}</span>
-              <ui-badge [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'">
-                {{ issue.lifecycle }}
+              [class.cursor-pointer]="defect.lifecycle === 'active'"
+              (click)="selectDefect(defect.id)">
+              <span class="text-sm font-medium">{{ defect.title }}</span>
+              <ui-badge [variant]="defect.lifecycle === 'active' ? 'destructive' : 'secondary'">
+                {{ defect.lifecycle }}
               </ui-badge>
-              @if (getIssueCountdown(issue.id); as cd) {
+              @if (getDefectCountdown(defect.id); as cd) {
                 <span class="text-xs text-muted-foreground ml-sm">
                   Auto-resolve: {{ cd }}
                 </span>
               }
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No issues assigned yet.</p>
+            <p class="text-muted-foreground text-sm p-sm">No defects assigned yet.</p>
           }
         </ui-card>
       </div>
 
       <div class="exercise-details">
-        @if (selectedIssueId()) {
-          <ui-card title="Issue Details">
-            @for (issue of store.releasedIssues(); track issue.id) {
-              @if (issue.id === selectedIssueId()) {
-                <p class="text-sm">{{ issue.description }}</p>
+        @if (selectedDefectId()) {
+          <ui-card title="Defect Details">
+            @for (defect of store.releasedDefects(); track defect.id) {
+              @if (defect.id === selectedDefectId()) {
+                <p class="text-sm">{{ defect.description }}</p>
                 <div class="flex gap-sm mt-md">
-                  <ui-badge variant="secondary">{{ issue.trigger_mode }}</ui-badge>
-                  <ui-badge variant="secondary">{{ issue.lifecycle }}</ui-badge>
+                  <ui-badge variant="secondary">{{ defect.trigger_mode }}</ui-badge>
+                  <ui-badge variant="secondary">{{ defect.lifecycle }}</ui-badge>
                 </div>
               }
             }
           </ui-card>
         } @else {
           <p class="text-muted-foreground text-sm p-sm">
-            Select an issue to view details and submit a decision.
+            Select a defect to view details and submit a decision.
           </p>
         }
 
@@ -96,7 +95,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
             [rules]="ctx.rules" />
         }
 
-        <ui-card [title]="domain.term('decision') + ' History'">
+        <ui-card title="Decision History">
           @for (decision of decisionHistory(); track decision.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <span class="text-sm font-medium">{{ decision.title }}</span>
@@ -123,7 +122,7 @@ import { handleDecisionWsChanges } from './player-ws-handler';
       <footer class="exercise-controls">
         <div class="exercise-controls__group">
           <p class="text-sm text-muted-foreground">
-            Waiting for {{ domain.term('gameMaster') }} actions...
+            Waiting for Game Master actions...
           </p>
         </div>
       </footer>
@@ -132,17 +131,16 @@ import { handleDecisionWsChanges } from './player-ws-handler';
 })
 export class PlayerView implements OnInit, OnDestroy {
   protected readonly store = inject(ExerciseStore);
-  protected readonly domain = inject(DomainService);
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
-  protected readonly selectedIssueId = signal<string | null>(null);
+  protected readonly selectedDefectId = signal<string | null>(null);
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
   private readonly exerciseId = signal(1); // TODO: from route param
   private sub: Subscription | null = null;
 
-  protected visibleEvents() {
-    return this.store.events().filter(
+  protected visibleInjects() {
+    return this.store.injects().filter(
       (e) => e.lifecycle === 'running' || e.lifecycle === 'completed',
     );
   }
@@ -186,14 +184,14 @@ export class PlayerView implements OnInit, OnDestroy {
     this.connSub?.unsubscribe();
   }
 
-  protected getIssueCountdown(issueId: string): string | null {
-    const item = this.store.issuesWithCountdown().find((i) => i.id === issueId);
+  protected getDefectCountdown(defectId: string): string | null {
+    const item = this.store.defectsWithCountdown().find((i) => i.id === defectId);
     if (!item || item.remaining_ms <= 0) return null;
     return formatTimeMs(item.remaining_ms);
   }
 
-  protected selectIssue(issueId: string): void {
-    this.selectedIssueId.set(issueId);
+  protected selectDefect(defectId: string): void {
+    this.selectedDefectId.set(defectId);
   }
 
   protected onDecisionSubmitted(
@@ -222,12 +220,12 @@ export class PlayerView implements OnInit, OnDestroy {
             this.store.applyTimeUpdate(change['time'] as never);
           }
         }
-        if (change.type === 'event_change') {
-          this.store.updateEvent(change['event_id'] as string, change['lifecycle'] as string);
+        if (change.type === 'inject_change') {
+          this.store.updateInject(change['inject_id'] as string, change['lifecycle'] as string);
         }
-        if (change.type === 'issue_change') {
-          this.store.updateIssue(
-            change['issue_id'] as string,
+        if (change.type === 'defect_change') {
+          this.store.updateDefect(
+            change['defect_id'] as string,
             change['lifecycle'] as string,
             change['released'] as boolean,
           );

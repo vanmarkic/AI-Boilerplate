@@ -92,7 +92,7 @@ import { formatTimeMs } from '../../core/format-time';
           }
         </ui-card>
 
-        <ui-card title="Event Summary">
+        <ui-card title="Inject Summary">
           @for (entry of eventEntries(); track entry.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <span class="text-sm">{{ entry.target_id }} — {{ entry.action }}</span>
@@ -101,7 +101,7 @@ import { formatTimeMs } from '../../core/format-time';
               </span>
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No event changes recorded.</p>
+            <p class="text-muted-foreground text-sm p-sm">No inject changes recorded.</p>
           }
         </ui-card>
 
@@ -158,7 +158,7 @@ export class ReviewView implements OnInit, OnDestroy {
   });
 
   protected eventEntries = computed(() =>
-    this.visibleEntries().filter((e) => e.entry_type === 'event_change'),
+    this.visibleEntries().filter((e) => e.entry_type === 'inject_change'),
   );
 
   protected decisionEntries = computed(() =>

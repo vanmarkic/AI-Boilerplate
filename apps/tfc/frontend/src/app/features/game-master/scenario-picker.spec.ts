@@ -16,15 +16,14 @@ describe('ScenarioPickerComponent', () => {
       id: 1,
       title: 'Fire Drill',
       description: 'Basic fire scenario',
-      domain_id: null,
       content: {
         phases: [],
-        events: [
-          { id: 'e1', title: 'Alarm', description: '', event_type: 'operational', scheduled_pt_ms: 0, duration_ms: null, dependencies: [], triggered_issues: [] },
-          { id: 'e2', title: 'Evacuation', description: '', event_type: 'operational', scheduled_pt_ms: 5000, duration_ms: null, dependencies: [], triggered_issues: [] },
+        injects: [
+          { id: 'e1', title: 'Alarm', description: '', inject_type: 'operational', scheduled_pt_ms: 0, duration_ms: null, dependencies: [], triggered_defects: [] },
+          { id: 'e2', title: 'Evacuation', description: '', inject_type: 'operational', scheduled_pt_ms: 5000, duration_ms: null, dependencies: [], triggered_defects: [] },
         ],
-        issues: [
-          { id: 'i1', title: 'Blocked Exit', description: '', trigger_mode: 'manual', trigger_time_pt_ms: null, trigger_event_id: null, auto_resolve_ms: 0 },
+        defects: [
+          { id: 'i1', title: 'Blocked Exit', description: '', trigger_mode: 'manual', trigger_time_pt_ms: null, trigger_inject_id: null, auto_resolve_ms: 0 },
         ],
         decision_templates: [],
         default_time_factor: 2.0,
@@ -37,7 +36,6 @@ describe('ScenarioPickerComponent', () => {
       id: 2,
       title: 'Flood Response',
       description: '',
-      domain_id: null,
       content: null,
       version: 1,
       created_at: '2026-03-17T00:00:00Z',
@@ -82,21 +80,21 @@ describe('ScenarioPickerComponent', () => {
     expect(text).toContain('Flood Response');
   });
 
-  it('shows event and issue counts from content', () => {
+  it('shows inject and defect counts from content', () => {
     fixture.detectChanges();
     flushScenarios();
     const badges = fixture.nativeElement.querySelectorAll('ui-badge');
     const badgeTexts = Array.from(badges).map((b) => (b as Element).textContent?.trim());
-    expect(badgeTexts).toContain('2 Events');
-    expect(badgeTexts).toContain('1 Issues');
+    expect(badgeTexts).toContain('2 Injects');
+    expect(badgeTexts).toContain('1 Defects');
   });
 
-  it('shows 0 events/issues when content is null', () => {
+  it('shows 0 injects/defects when content is null', () => {
     fixture.detectChanges();
     flushScenarios();
     const text = fixture.nativeElement.textContent;
-    expect(text).toContain('0 Events');
-    expect(text).toContain('0 Issues');
+    expect(text).toContain('0 Injects');
+    expect(text).toContain('0 Defects');
   });
 
   it('shows version badge', () => {

@@ -4,12 +4,11 @@ import {
   PageHeaderComponent, CardComponent, ButtonDirective, InputComponent,
   BadgeComponent, CollapsiblePanelComponent,
 } from '@aspect/ui';
-import { DomainService } from '../../core/domain.service';
 import { ScenarioApiService } from '../../core/scenario-api.service';
 import type { DecisionTemplateDef } from '../../core/scenario-api.service';
 import { ScenarioBuilderStore } from './scenario-builder.store';
-import { ScenarioEventEditorComponent } from './scenario-event-editor';
-import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
+import { ScenarioInjectEditorComponent } from './scenario-inject-editor';
+import { ScenarioDefectEditorComponent } from './scenario-defect-editor';
 
 @Component({
   selector: 'tfc-scenario-builder-view',
@@ -18,7 +17,7 @@ import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
   imports: [
     FormsModule, PageHeaderComponent, CardComponent, ButtonDirective,
     InputComponent, BadgeComponent, CollapsiblePanelComponent,
-    ScenarioEventEditorComponent, ScenarioIssueEditorComponent,
+    ScenarioInjectEditorComponent, ScenarioDefectEditorComponent,
   ],
   template: `
     <div class="flex flex-col gap-md p-lg">
@@ -38,10 +37,10 @@ import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
       </div>
 
       <div class="grid grid-cols-2 gap-md">
-        <tfc-scenario-event-editor />
-        <tfc-scenario-issue-editor />
+        <tfc-scenario-inject-editor />
+        <tfc-scenario-defect-editor />
 
-        <ui-card [title]="domain.term('decision') + ' Templates'">
+        <ui-card title="Decision Templates">
           @for (dt of store.content().decision_templates; track dt.id) {
             <div class="flex flex-col gap-xs p-sm border-b">
               @if (editingDtId() === dt.id) {
@@ -132,7 +131,6 @@ import { ScenarioIssueEditorComponent } from './scenario-issue-editor';
 })
 export class ScenarioBuilderView implements OnInit {
   protected readonly store = inject(ScenarioBuilderStore);
-  protected readonly domain = inject(DomainService);
   private readonly api = inject(ScenarioApiService);
   protected readonly scenarios = signal<{ id: number; title: string }[]>([]);
   private counter = 0;

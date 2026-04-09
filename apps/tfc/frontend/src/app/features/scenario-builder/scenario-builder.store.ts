@@ -1,8 +1,8 @@
 import { patchState, signalStore, withMethods, withState } from '@ngrx/signals';
 import type {
   ScenarioContent,
-  ScenarioEventDef,
-  ScenarioIssueDef,
+  ScenarioInjectDef,
+  ScenarioDefectDef,
   DecisionTemplateDef,
 } from '../../core/scenario-api.service';
 
@@ -17,8 +17,8 @@ interface ScenarioBuilderState {
 
 const emptyContent: ScenarioContent = {
   phases: [],
-  events: [],
-  issues: [],
+  injects: [],
+  defects: [],
   decision_templates: [],
   default_time_factor: 1.0,
   briefing: '',
@@ -60,53 +60,53 @@ export const ScenarioBuilderStore = signalStore(
       });
     },
 
-    addEvent(event: ScenarioEventDef): void {
+    addInject(injectDef: ScenarioInjectDef): void {
       patchState(store, {
-        content: { ...store.content(), events: [...store.content().events, event] },
+        content: { ...store.content(), injects: [...store.content().injects, injectDef] },
       });
     },
 
-    removeEvent(eventId: string): void {
+    removeInject(injectId: string): void {
       patchState(store, {
         content: {
           ...store.content(),
-          events: store.content().events.filter((e) => e.id !== eventId),
+          injects: store.content().injects.filter((e: ScenarioInjectDef) => e.id !== injectId),
         },
       });
     },
 
-    updateEvent(eventId: string, updates: Partial<ScenarioEventDef>): void {
+    updateInject(injectId: string, updates: Partial<ScenarioInjectDef>): void {
       patchState(store, {
         content: {
           ...store.content(),
-          events: store.content().events.map((e) =>
-            e.id === eventId ? { ...e, ...updates } : e,
+          injects: store.content().injects.map((e: ScenarioInjectDef) =>
+            e.id === injectId ? { ...e, ...updates } : e,
           ),
         },
       });
     },
 
-    addIssue(issue: ScenarioIssueDef): void {
+    addDefect(defect: ScenarioDefectDef): void {
       patchState(store, {
-        content: { ...store.content(), issues: [...store.content().issues, issue] },
+        content: { ...store.content(), defects: [...store.content().defects, defect] },
       });
     },
 
-    removeIssue(issueId: string): void {
+    removeDefect(defectId: string): void {
       patchState(store, {
         content: {
           ...store.content(),
-          issues: store.content().issues.filter((i) => i.id !== issueId),
+          defects: store.content().defects.filter((i: ScenarioDefectDef) => i.id !== defectId),
         },
       });
     },
 
-    updateIssue(issueId: string, updates: Partial<ScenarioIssueDef>): void {
+    updateDefect(defectId: string, updates: Partial<ScenarioDefectDef>): void {
       patchState(store, {
         content: {
           ...store.content(),
-          issues: store.content().issues.map((i) =>
-            i.id === issueId ? { ...i, ...updates } : i,
+          defects: store.content().defects.map((i: ScenarioDefectDef) =>
+            i.id === defectId ? { ...i, ...updates } : i,
           ),
         },
       });
@@ -125,7 +125,7 @@ export const ScenarioBuilderStore = signalStore(
       patchState(store, {
         content: {
           ...store.content(),
-          decision_templates: store.content().decision_templates.filter((d) => d.id !== templateId),
+          decision_templates: store.content().decision_templates.filter((d: DecisionTemplateDef) => d.id !== templateId),
         },
       });
     },
@@ -134,7 +134,7 @@ export const ScenarioBuilderStore = signalStore(
       patchState(store, {
         content: {
           ...store.content(),
-          decision_templates: store.content().decision_templates.map((d) =>
+          decision_templates: store.content().decision_templates.map((d: DecisionTemplateDef) =>
             d.id === templateId ? { ...d, ...updates } : d,
           ),
         },
