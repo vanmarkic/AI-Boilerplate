@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, output, signal } from '@angular/core';
 import { CardComponent, ButtonDirective, BadgeComponent } from '@aspect/ui';
-import { DomainService } from '../../core/domain.service';
 import { ScenarioApiService } from '../../core/scenario-api.service';
 import type { ScenarioResponse } from '../../core/scenario-api.service';
 
@@ -10,7 +9,7 @@ import type { ScenarioResponse } from '../../core/scenario-api.service';
   imports: [CardComponent, ButtonDirective, BadgeComponent],
   template: `
     <div class="flex flex-col gap-md p-lg">
-      <h2 class="text-lg font-semibold">Select a {{ domain.term('exercise') }}</h2>
+      <h2 class="text-lg font-semibold">Select an Exercise</h2>
       <p class="text-sm text-muted-foreground">
         Pick a scenario created in the Builder to start an exercise.
       </p>
@@ -29,10 +28,10 @@ import type { ScenarioResponse } from '../../core/scenario-api.service';
                   <span class="text-sm text-muted-foreground">{{ scenario.description || 'No description' }}</span>
                   <div class="flex gap-xs">
                     <ui-badge variant="secondary">
-                      {{ scenario.content?.events?.length ?? 0 }} {{ domain.term('event') }}s
+                      {{ scenario.content?.injects?.length ?? 0 }} Injects
                     </ui-badge>
                     <ui-badge variant="secondary">
-                      {{ scenario.content?.issues?.length ?? 0 }} {{ domain.term('issue') }}s
+                      {{ scenario.content?.defects?.length ?? 0 }} Defects
                     </ui-badge>
                     <ui-badge variant="secondary">
                       v{{ scenario.version }}
@@ -58,7 +57,6 @@ import type { ScenarioResponse } from '../../core/scenario-api.service';
 export class ScenarioPickerComponent implements OnInit {
   readonly scenarioSelected = output<ScenarioResponse>();
 
-  protected readonly domain = inject(DomainService);
   private readonly api = inject(ScenarioApiService);
   protected readonly scenarios = signal<ScenarioResponse[]>([]);
   protected readonly loading = signal(false);

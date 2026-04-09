@@ -23,12 +23,12 @@ function handleStateChange(change: WsStateChange, store: StoreInstance): void {
       store.applyTimeUpdate(change['time'] as never);
     }
   }
-  if (change.type === 'event_change') {
-    store.updateEvent(change['event_id'] as string, change['lifecycle'] as string);
+  if (change.type === 'inject_change') {
+    store.updateInject(change['inject_id'] as string, change['lifecycle'] as string);
   }
-  if (change.type === 'issue_change') {
-    store.updateIssue(
-      change['issue_id'] as string,
+  if (change.type === 'defect_change') {
+    store.updateDefect(
+      change['defect_id'] as string,
       change['lifecycle'] as string,
       change['released'] as boolean,
     );

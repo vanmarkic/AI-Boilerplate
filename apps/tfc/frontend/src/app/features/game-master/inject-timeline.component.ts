@@ -1,16 +1,15 @@
 import {
   ChangeDetectionStrategy, Component, computed, effect,
-  ElementRef, inject, input, viewChild,
+  ElementRef, input, viewChild,
 } from '@angular/core';
-import type { EventSnapshot, IssueSnapshot } from '../../core/engine-api.service';
-import { DomainService } from '../../core/domain.service';
+import type { InjectSnapshot, DefectSnapshot } from '../../core/engine-api.service';
 import { TimelineLaneComponent } from './timeline-lane.component';
 import { computeTimelineItems, computeTimeScale } from './timeline-utils';
 
 const DEFAULT_WIDTH_PX = 1200;
 
 @Component({
-  selector: 'tfc-event-timeline',
+  selector: 'tfc-inject-timeline',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TimelineLaneComponent],
   template: `
@@ -25,35 +24,34 @@ const DEFAULT_WIDTH_PX = 1200;
         </div>
 
         <div class="timeline-lane-group">
-          <span class="timeline-lane-group__label">{{ domain.term('event') }}s</span>
-          <tfc-timeline-lane [items]="timeline().eventItems" [scale]="scale()" />
+          <span class="timeline-lane-group__label">Injects</span>
+          <tfc-timeline-lane [items]="timeline().injectItems" [scale]="scale()" />
         </div>
 
         <div class="timeline-lane-group">
-          <span class="timeline-lane-group__label">{{ domain.term('issue') }}s</span>
-          <tfc-timeline-lane [items]="timeline().issueItems" [scale]="scale()" />
+          <span class="timeline-lane-group__label">Defects</span>
+          <tfc-timeline-lane [items]="timeline().defectItems" [scale]="scale()" />
         </div>
 
         <div class="timeline-now-marker" [style.left.px]="nowMarkerPx()"></div>
       </div>
     </div>
   `,
-  host: { class: 'event-timeline' },
+  host: { class: 'inject-timeline' },
 })
-export class EventTimelineComponent {
-  readonly events = input<EventSnapshot[]>([]);
-  readonly issues = input<IssueSnapshot[]>([]);
+export class InjectTimelineComponent {
+  readonly injects = input<InjectSnapshot[]>([]);
+  readonly defects = input<DefectSnapshot[]>([]);
   readonly playTimeMs = input(0);
 
-  protected readonly domain = inject(DomainService);
   private readonly scrollRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
 
   protected readonly timeline = computed(() =>
-    computeTimelineItems(this.events(), this.issues(), this.playTimeMs()),
+    computeTimelineItems(this.injects(), this.defects(), this.playTimeMs()),
   );
 
   protected readonly scale = computed(() => {
-    const all = [...this.timeline().eventItems, ...this.timeline().issueItems];
+    const all = [...this.timeline().injectItems, ...this.timeline().defectItems];
     return computeTimeScale(all, this.playTimeMs(), DEFAULT_WIDTH_PX);
   });
 

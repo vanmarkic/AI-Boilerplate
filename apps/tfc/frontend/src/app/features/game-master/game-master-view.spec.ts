@@ -28,11 +28,10 @@ describe('GameMasterView', () => {
     id: 10,
     title: 'Test Scenario',
     description: 'A test',
-    domain_id: null,
     content: {
       phases: [],
-      events: [],
-      issues: [],
+      injects: [],
+      defects: [],
       decision_templates: [],
       default_time_factor: 2.5,
     },
@@ -47,7 +46,6 @@ describe('GameMasterView', () => {
     description: '',
     phase: 'setup',
     scenario_id: 10,
-    domain_id: null,
     time_factor: 2.5,
     created_at: '2026-03-17T00:00:00Z',
     updated_at: '2026-03-17T00:00:00Z',
@@ -122,8 +120,8 @@ describe('GameMasterView', () => {
       title: 'Test Scenario',
       phase: 'setup',
       time: { play_time_ms: 0, real_time_ms: 0, factor: 2.5, paused: true },
-      events: [],
-      issues: [],
+      injects: [],
+      defects: [],
     });
 
     // Flush context request
@@ -160,7 +158,7 @@ describe('GameMasterView', () => {
     snapReq.flush({
       exercise_id: 99, title: '', phase: 'setup',
       time: { play_time_ms: 0, real_time_ms: 0, factor: 1, paused: true },
-      events: [], issues: [],
+      injects: [], defects: [],
     });
     const ctxReq = httpTesting.expectOne(
       (r) => r.url === `${base}/api/exercises/99/engine/context`,
@@ -197,7 +195,7 @@ describe('GameMasterView', () => {
     httpTesting.expectOne(`${base}/api/exercises/99/engine/snapshot`).flush({
       exercise_id: 99, title: '', phase: 'setup',
       time: { play_time_ms: 0, real_time_ms: 0, factor: 5.0, paused: true },
-      events: [], issues: [],
+      injects: [], defects: [],
     });
     httpTesting.expectOne(
       (r) => r.url === `${base}/api/exercises/99/engine/context`,
@@ -220,7 +218,7 @@ describe('GameMasterView', () => {
     httpTesting.expectOne(`${base}/api/exercises/99/engine/snapshot`).flush({
       exercise_id: 99, title: '', phase: 'setup',
       time: { play_time_ms: 0, real_time_ms: 0, factor: 1.0, paused: true },
-      events: [], issues: [],
+      injects: [], defects: [],
     });
     httpTesting.expectOne(
       (r) => r.url === `${base}/api/exercises/99/engine/context`,

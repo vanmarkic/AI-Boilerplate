@@ -4,12 +4,10 @@ import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { SpeedDisplayComponent } from '../../shared/speed-display.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
-import { DomainSelectorComponent } from '../../shared/domain-selector.component';
 import { PresenceIndicatorComponent } from '../../shared/presence-indicator.component';
 import { EngineApiService } from '../../core/engine-api.service';
 import { DecisionApiService } from '../../core/decision-api.service';
 import type { DecisionDetail } from '../../core/decision-api.service';
-import { DomainService } from '../../core/domain.service';
 import { ExerciseApiService } from '../../core/exercise-api.service';
 import { ExerciseWsService } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
@@ -17,7 +15,7 @@ import { ScenarioPickerComponent } from './scenario-picker';
 import type { ScenarioResponse } from '../../core/scenario-api.service';
 import { handleGmWsMessage } from './gm-ws-handler';
 import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-engine-actions';
-import { EventTimelineComponent } from './event-timeline.component';
+import { InjectTimelineComponent } from './inject-timeline.component';
 import { GmItemActionsComponent } from './gm-item-actions.component';
 import { Subscription } from 'rxjs';
 
@@ -29,8 +27,8 @@ import { Subscription } from 'rxjs';
     BadgeComponent, ButtonDirective, CollapsiblePanelComponent,
     ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent,
     ContextPanelComponent, ScenarioPickerComponent,
-    DomainSelectorComponent, PresenceIndicatorComponent,
-    EventTimelineComponent, GmItemActionsComponent,
+    PresenceIndicatorComponent,
+    InjectTimelineComponent, GmItemActionsComponent,
   ],
   template: `
     @if (!exerciseId()) {
@@ -38,8 +36,7 @@ import { Subscription } from 'rxjs';
     } @else {
     <div class="exercise-layout">
       <header class="exercise-header">
-        <span class="exercise-header__title">{{ store.title() || domain.term('exercise') + ' Control Panel' }}</span>
-        <tfc-domain-selector />
+        <span class="exercise-header__title">{{ store.title() || 'Exercise Control Panel' }}</span>
         <tfc-presence-indicator [participants]="store.participants()" />
         <div class="exercise-header__clocks">
           <tfc-clock-display label="RT" [value]="store.rtClock()" />
@@ -49,20 +46,20 @@ import { Subscription } from 'rxjs';
         </div>
       </header>
 
-      <tfc-event-timeline
-        [events]="store.events()"
-        [issues]="store.issues()"
+      <tfc-inject-timeline
+        [injects]="store.injects()"
+        [defects]="store.defects()"
         [playTimeMs]="store.playTimeMs()" />
 
       <div class="exercise-overview">
         <tfc-gm-item-actions
-          [events]="store.events()" [issues]="store.issues()"
-          (triggerEvent)="triggerEvent($event)" (completeEvent)="completeEvent($event)"
-          (cancelEvent)="cancelEvent($event)" (activateIssue)="activateIssue($event)"
-          (mitigateIssue)="mitigateIssue($event)" (resolveIssue)="resolveIssue($event)" />
+          [injects]="store.injects()" [defects]="store.defects()"
+          (triggerInject)="triggerInject($event)" (completeInject)="completeInject($event)"
+          (cancelInject)="cancelInject($event)" (activateDefect)="activateDefect($event)"
+          (mitigateDefect)="mitigateDefect($event)" (resolveDefect)="resolveDefect($event)" />
 
         <ui-collapsible-panel>
-          <span panelTitle>{{ domain.term('decision') }}s</span>
+          <span panelTitle>Decisions</span>
           @for (decision of store.openDecisions(); track decision.id) {
             <div class="flex items-center justify-between p-sm border-b">
               <div>
@@ -132,7 +129,6 @@ import { Subscription } from 'rxjs';
 })
 export class GameMasterView implements OnDestroy {
   protected readonly store = inject(ExerciseStore);
-  protected readonly domain = inject(DomainService);
   private readonly api = inject(EngineApiService);
   private readonly exerciseApi = inject(ExerciseApiService);
   private readonly decisionApi = inject(DecisionApiService);
@@ -143,10 +139,6 @@ export class GameMasterView implements OnDestroy {
   private connSub: Subscription | null = null;
 
   protected onScenarioSelected(scenario: ScenarioResponse): void {
-    if (scenario.domain_id != null) {
-      const domainMap: Record<number, string> = { 1: 'cybersecurity', 2: 'healthcare', 3: 'military' };
-      this.domain.setDomain(domainMap[scenario.domain_id] ?? 'default');
-    }
     this.exerciseApi.create({
       title: scenario.title,
       scenario_id: scenario.id,
@@ -195,10 +187,10 @@ export class GameMasterView implements OnDestroy {
   }
 
   private eid(): number { return this.exerciseId()!; }
-  protected triggerEvent(id: string): void { this.api.triggerEvent(this.eid(), id).subscribe(); }
-  protected cancelEvent(id: string): void { this.api.cancelEvent(this.eid(), id).subscribe(); }
-  protected completeEvent(id: string): void { this.api.completeEvent(this.eid(), id).subscribe(); }
-  protected activateIssue(id: string): void { this.api.activateIssue(this.eid(), id).subscribe(); }
-  protected mitigateIssue(id: string): void { this.api.mitigateIssue(this.eid(), id).subscribe(); }
-  protected resolveIssue(id: string): void { this.api.resolveIssue(this.eid(), id).subscribe(); }
+  protected triggerInject(id: string): void { this.api.triggerInject(this.eid(), id).subscribe(); }
+  protected cancelInject(id: string): void { this.api.cancelInject(this.eid(), id).subscribe(); }
+  protected completeInject(id: string): void { this.api.completeInject(this.eid(), id).subscribe(); }
+  protected activateDefect(id: string): void { this.api.activateDefect(this.eid(), id).subscribe(); }
+  protected mitigateDefect(id: string): void { this.api.mitigateDefect(this.eid(), id).subscribe(); }
+  protected resolveDefect(id: string): void { this.api.resolveDefect(this.eid(), id).subscribe(); }
 }

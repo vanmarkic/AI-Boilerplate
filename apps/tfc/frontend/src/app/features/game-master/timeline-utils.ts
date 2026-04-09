@@ -1,4 +1,4 @@
-import type { EventSnapshot, IssueSnapshot } from '../../core/engine-api.service';
+import type { InjectSnapshot, DefectSnapshot } from '../../core/engine-api.service';
 
 export interface TimelineItem {
   id: string;
@@ -6,7 +6,7 @@ export interface TimelineItem {
   startMs: number;
   endMs: number;
   lifecycle: string;
-  kind: 'event' | 'issue';
+  kind: 'inject' | 'defect';
   lane: number;
 }
 
@@ -15,8 +15,8 @@ export interface TimeScale {
   pxPerMs: number;
 }
 
-/** Map an EventSnapshot to a TimelineItem (lane assigned later). */
-function eventToItem(e: EventSnapshot, playTimeMs: number): TimelineItem {
+/** Map an InjectSnapshot to a TimelineItem (lane assigned later). */
+function injectToItem(e: InjectSnapshot, playTimeMs: number): TimelineItem {
   const startMs = e.started_at_pt_ms ?? e.scheduled_pt_ms;
   let endMs: number;
   if (e.completed_at_pt_ms != null) {
@@ -26,22 +26,22 @@ function eventToItem(e: EventSnapshot, playTimeMs: number): TimelineItem {
   } else {
     endMs = e.lifecycle === 'running' ? playTimeMs : startMs + 30_000;
   }
-  return { id: e.id, label: e.title, startMs, endMs, lifecycle: e.lifecycle, kind: 'event', lane: 0 };
+  return { id: e.id, label: e.title, startMs, endMs, lifecycle: e.lifecycle, kind: 'inject', lane: 0 };
 }
 
-/** Map an IssueSnapshot to a TimelineItem (lane assigned later). */
-function issueToItem(i: IssueSnapshot, playTimeMs: number): TimelineItem | null {
+/** Map a DefectSnapshot to a TimelineItem (lane assigned later). */
+function defectToItem(i: DefectSnapshot, playTimeMs: number): TimelineItem | null {
   if (i.activated_at_pt_ms == null) return null;
   const startMs = i.activated_at_pt_ms;
   let endMs: number;
   if (i.resolved_at_pt_ms != null) {
     endMs = i.resolved_at_pt_ms;
-  } else if (i.auto_resolve_ms > 0) {
-    endMs = startMs + i.auto_resolve_ms;
+  } else if (i.auto_resolve_pt_ms > 0) {
+    endMs = startMs + i.auto_resolve_pt_ms;
   } else {
     endMs = i.lifecycle === 'active' || i.lifecycle === 'mitigated' ? playTimeMs : startMs + 30_000;
   }
-  return { id: i.id, label: i.title, startMs, endMs, lifecycle: i.lifecycle, kind: 'issue', lane: 0 };
+  return { id: i.id, label: i.title, startMs, endMs, lifecycle: i.lifecycle, kind: 'defect', lane: 0 };
 }
 
 /** Greedily assign lanes so overlapping items stack vertically. */
@@ -67,15 +67,15 @@ export function assignLanes(items: TimelineItem[]): TimelineItem[] {
 
 /** Convert snapshots into positioned timeline items. */
 export function computeTimelineItems(
-  events: EventSnapshot[],
-  issues: IssueSnapshot[],
+  injects: InjectSnapshot[],
+  defects: DefectSnapshot[],
   playTimeMs: number,
-): { eventItems: TimelineItem[]; issueItems: TimelineItem[] } {
-  const rawEvents = events.map((e) => eventToItem(e, playTimeMs));
-  const rawIssues = issues.map((i) => issueToItem(i, playTimeMs)).filter(Boolean) as TimelineItem[];
+): { injectItems: TimelineItem[]; defectItems: TimelineItem[] } {
+  const rawInjects = injects.map((e) => injectToItem(e, playTimeMs));
+  const rawDefects = defects.map((i) => defectToItem(i, playTimeMs)).filter(Boolean) as TimelineItem[];
   return {
-    eventItems: assignLanes(rawEvents),
-    issueItems: assignLanes(rawIssues),
+    injectItems: assignLanes(rawInjects),
+    defectItems: assignLanes(rawDefects),
   };
 }
 

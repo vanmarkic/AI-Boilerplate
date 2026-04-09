@@ -1,82 +1,79 @@
-import { ChangeDetectionStrategy, Component, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { BadgeComponent, ButtonDirective, CardComponent } from '@aspect/ui';
-import { DomainService } from '../../core/domain.service';
-import type { EventSnapshot, IssueSnapshot } from '../../core/engine-api.service';
+import type { InjectSnapshot, DefectSnapshot } from '../../core/engine-api.service';
 
 @Component({
   selector: 'tfc-gm-item-actions',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [BadgeComponent, ButtonDirective, CardComponent],
   template: `
-    <ui-card [title]="domain.term('event') + 's'">
-      @for (event of events(); track event.id) {
+    <ui-card title="Injects">
+      @for (inject of injects(); track inject.id) {
         <div class="flex items-center justify-between p-sm border-b">
           <div>
-            <span class="text-sm font-medium">{{ event.title }}</span>
-            <span class="text-xs text-muted-foreground ml-sm">{{ event.lifecycle }}</span>
+            <span class="text-sm font-medium">{{ inject.title }}</span>
+            <span class="text-xs text-muted-foreground ml-sm">{{ inject.lifecycle }}</span>
           </div>
           <div class="flex gap-xs">
-            @if (event.lifecycle === 'scheduled' || event.lifecycle === 'pending') {
+            @if (inject.lifecycle === 'scheduled' || inject.lifecycle === 'pending') {
               <button uiButton variant="outline" size="sm"
-                (click)="triggerEvent.emit(event.id)">Trigger</button>
+                (click)="triggerInject.emit(inject.id)">Trigger</button>
             }
-            @if (event.lifecycle === 'running') {
+            @if (inject.lifecycle === 'running') {
               <button uiButton variant="outline" size="sm"
-                (click)="completeEvent.emit(event.id)">Complete</button>
+                (click)="completeInject.emit(inject.id)">Complete</button>
             }
-            @if (event.lifecycle !== 'completed' && event.lifecycle !== 'cancelled') {
+            @if (inject.lifecycle !== 'completed' && inject.lifecycle !== 'cancelled') {
               <button uiButton variant="destructive" size="sm"
-                (click)="cancelEvent.emit(event.id)">Cancel</button>
+                (click)="cancelInject.emit(inject.id)">Cancel</button>
             }
           </div>
         </div>
       } @empty {
-        <p class="text-muted-foreground text-sm p-sm">No events loaded.</p>
+        <p class="text-muted-foreground text-sm p-sm">No injects loaded.</p>
       }
     </ui-card>
 
-    <ui-card [title]="domain.term('issue') + 's'">
-      @for (issue of issues(); track issue.id) {
+    <ui-card title="Defects">
+      @for (defect of defects(); track defect.id) {
         <div class="flex items-center justify-between p-sm border-b">
           <div>
-            <span class="text-sm font-medium">{{ issue.title }}</span>
-            <ui-badge [variant]="issue.lifecycle === 'active' ? 'destructive' : 'secondary'">
-              {{ issue.lifecycle }}
+            <span class="text-sm font-medium">{{ defect.title }}</span>
+            <ui-badge [variant]="defect.lifecycle === 'active' ? 'destructive' : 'secondary'">
+              {{ defect.lifecycle }}
             </ui-badge>
           </div>
           <div class="flex gap-xs">
-            @if (issue.lifecycle === 'inactive') {
+            @if (defect.lifecycle === 'inactive') {
               <button uiButton variant="outline" size="sm"
-                (click)="activateIssue.emit(issue.id)">Activate</button>
+                (click)="activateDefect.emit(defect.id)">Activate</button>
             }
-            @if (issue.lifecycle === 'active') {
+            @if (defect.lifecycle === 'active') {
               <button uiButton variant="outline" size="sm"
-                (click)="mitigateIssue.emit(issue.id)">Mitigate</button>
+                (click)="mitigateDefect.emit(defect.id)">Mitigate</button>
               <button uiButton variant="outline" size="sm"
-                (click)="resolveIssue.emit(issue.id)">Resolve</button>
+                (click)="resolveDefect.emit(defect.id)">Resolve</button>
             }
-            @if (issue.lifecycle === 'mitigated') {
+            @if (defect.lifecycle === 'mitigated') {
               <button uiButton variant="outline" size="sm"
-                (click)="resolveIssue.emit(issue.id)">Resolve</button>
+                (click)="resolveDefect.emit(defect.id)">Resolve</button>
             }
           </div>
         </div>
       } @empty {
-        <p class="text-muted-foreground text-sm p-sm">No issues loaded.</p>
+        <p class="text-muted-foreground text-sm p-sm">No defects loaded.</p>
       }
     </ui-card>
   `,
 })
 export class GmItemActionsComponent {
-  protected readonly domain = inject(DomainService);
+  readonly injects = input<InjectSnapshot[]>([]);
+  readonly defects = input<DefectSnapshot[]>([]);
 
-  readonly events = input<EventSnapshot[]>([]);
-  readonly issues = input<IssueSnapshot[]>([]);
-
-  readonly triggerEvent = output<string>();
-  readonly completeEvent = output<string>();
-  readonly cancelEvent = output<string>();
-  readonly activateIssue = output<string>();
-  readonly mitigateIssue = output<string>();
-  readonly resolveIssue = output<string>();
+  readonly triggerInject = output<string>();
+  readonly completeInject = output<string>();
+  readonly cancelInject = output<string>();
+  readonly activateDefect = output<string>();
+  readonly mitigateDefect = output<string>();
+  readonly resolveDefect = output<string>();
 }
