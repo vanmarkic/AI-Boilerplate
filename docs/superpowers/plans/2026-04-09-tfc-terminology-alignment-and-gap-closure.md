@@ -16,6 +16,8 @@
 
 These tasks rename the pure-Python engine layer. No DB, no HTTP. Each task is a single file rename + internal content rename. Tasks A1-A4 are independent and parallelizable.
 
+**Note:** Tasks A1-A4 create intermediate broken state (imports reference not-yet-renamed files). Commit each task individually for git history, but only run full test validation after A5 completes (A5 Step 3). Intermediate test failures between A1-A4 are expected and acceptable.
+
 ### Task A1: Rename `event_scheduler.py` → `inject_scheduler.py`
 
 **Files:**
@@ -433,14 +435,21 @@ git add apps/tfc/backend/features/decision/
 git commit -m "refactor(tfc): rename decision feature issue_id → defect_id"
 ```
 
-### Task B5: Rename audit service and remove domain_id
+### Task B5: Rename audit service and remove domain_id from all layers
 
 **Files:**
 - Modify: `apps/tfc/backend/features/audit/audit_service.py`
 - Modify: `apps/tfc/backend/features/audit/audit_test.py`
 - Modify: `apps/tfc/backend/features/exercise/exercise_model.py`
 - Modify: `apps/tfc/backend/features/exercise/exercise_schema.py`
+- Modify: `apps/tfc/backend/features/exercise/exercise_service.py`
 - Modify: `apps/tfc/backend/features/scenario/scenario_model.py`
+- Modify: `apps/tfc/backend/features/scenario/scenario_schema.py`
+- Modify: `apps/tfc/backend/features/scenario/scenario_service.py`
+- Modify: `apps/tfc/backend/features/scenario/scenario_router.py`
+- Modify: `apps/tfc/backend/features/scenario/scenario_repository.py`
+- Modify: `apps/tfc/backend/features/scenario/scenario_test.py`
+- Modify: `apps/tfc/backend/features/exercise/engine_router_p2_test.py` (if exists)
 
 - [ ] **Step 1: Update audit_service.py**
 
@@ -465,21 +474,40 @@ Delete `domain_id = Column(Integer, nullable=True)` line.
 
 Remove `domain_id` from `CreateExerciseRequest`, `UpdateExerciseRequest`, `ExerciseResponse`.
 
-- [ ] **Step 5: Remove domain_id from scenario_model.py**
+- [ ] **Step 5: Remove domain_id from exercise_service.py**
+
+Remove `domain_id=request.domain_id` assignment and any other domain_id references.
+
+- [ ] **Step 6: Remove domain_id from scenario_model.py**
 
 Delete `domain_id` column.
 
-- [ ] **Step 6: Run all backend tests**
+- [ ] **Step 7: Remove domain_id from scenario_schema.py, scenario_service.py, scenario_router.py, scenario_repository.py**
+
+- `scenario_schema.py`: remove `domain_id` from request/response schemas
+- `scenario_service.py`: remove `domain_id` references (lines 22, 39, 41, 42)
+- `scenario_router.py`: remove `domain_id` query parameter (line 33)
+- `scenario_repository.py`: remove `list_by_domain()` method or its `domain_id` filter
+
+- [ ] **Step 8: Update scenario_test.py**
+
+Remove `domain_id` from test data.
+
+- [ ] **Step 9: Update engine_router_p2_test.py**
+
+If it exists, update `event_change`/`event_id` string literals to `inject_change`/`inject_id`.
+
+- [ ] **Step 10: Run all backend tests**
 
 ```bash
 cd apps/tfc/backend && python -m pytest -v
 ```
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 11: Commit**
 
 ```bash
 git add apps/tfc/backend/features/
-git commit -m "refactor(tfc): rename audit terminology, remove domain_id from models"
+git commit -m "refactor(tfc): rename audit terminology, remove domain_id from all layers"
 ```
 
 ### Task B6: Database migration
@@ -624,7 +652,7 @@ git commit -m "refactor(tfc): rename exercise store signals to inject/defect"
 **Files:**
 - Rename: `apps/tfc/frontend/src/app/features/game-master/event-timeline.component.ts` → `inject-timeline.component.ts`
 - Rename: `apps/tfc/frontend/src/app/features/game-master/event-timeline.component.spec.ts` → `inject-timeline.component.spec.ts`
-- Rename: `apps/tfc/frontend/src/app/features/game-master/gm-event-actions.ts` → `gm-inject-actions.ts`
+- Rename: `apps/tfc/frontend/src/app/features/game-master/gm-engine-actions.ts` → `gm-inject-actions.ts`
 - Modify: `apps/tfc/frontend/src/app/features/game-master/game-master-view.ts`
 - Modify: `apps/tfc/frontend/src/app/features/game-master/gm-ws-handler.ts`
 - Modify: `apps/tfc/frontend/src/app/features/game-master/gm-item-actions.component.ts`
@@ -640,7 +668,7 @@ git commit -m "refactor(tfc): rename exercise store signals to inject/defect"
 cd apps/tfc/frontend/src/app/features/game-master
 git mv event-timeline.component.ts inject-timeline.component.ts
 git mv event-timeline.component.spec.ts inject-timeline.component.spec.ts
-git mv gm-event-actions.ts gm-inject-actions.ts
+git mv gm-engine-actions.ts gm-inject-actions.ts
 ```
 
 - [ ] **Step 2: Update inject-timeline.component.ts**
@@ -651,7 +679,7 @@ git mv gm-event-actions.ts gm-inject-actions.ts
 - Template references
 - `domain.term()` calls → hardcoded strings
 
-- [ ] **Step 3: Update gm-inject-actions.ts**
+- [ ] **Step 3: Update gm-inject-actions.ts (renamed from gm-engine-actions.ts)**
 
 - `createEventActions()` → `createInjectActions()`
 - `createIssueActions()` → `createDefectActions()`
@@ -762,12 +790,16 @@ git add apps/tfc/frontend/src/app/features/
 git commit -m "refactor(tfc): rename player, scenario-builder, review to inject/defect"
 ```
 
-### Task C5: Delete DomainService and update e2e fixtures
+### Task C5: Delete DomainService, remove domain_id from frontend, update e2e fixtures
 
 **Files:**
 - Delete: `apps/tfc/frontend/src/app/core/domain.service.ts`
 - Delete: `apps/tfc/frontend/src/app/shared/domain-selector.component.ts`
 - Delete: `apps/tfc/frontend/src/app/shared/domain-selector.component.spec.ts`
+- Modify: `apps/tfc/frontend/src/app/core/exercise-api.service.ts` — remove `domain_id` from interfaces
+- Modify: `apps/tfc/frontend/src/app/core/exercise-api.service.spec.ts` — remove `domain_id` from test data
+- Modify: `apps/tfc/frontend/src/app/features/game-master/game-master-view.spec.ts` — remove `domain_id` from test data
+- Modify: `apps/tfc/frontend/src/app/features/game-master/scenario-picker.spec.ts` — remove `domain_id`, update `auto_resolve_ms`→`auto_resolve_pt_ms`, `trigger_event_id`→`trigger_inject_id`
 - Modify: `apps/tfc/frontend/e2e/fixtures/base.fixture.ts`
 
 - [ ] **Step 1: Delete DomainService files**
@@ -778,28 +810,38 @@ git rm apps/tfc/frontend/src/app/shared/domain-selector.component.ts
 git rm apps/tfc/frontend/src/app/shared/domain-selector.component.spec.ts
 ```
 
-- [ ] **Step 2: Update e2e fixtures**
+- [ ] **Step 2: Remove domain_id from exercise-api.service.ts interfaces**
+
+Remove `domain_id` from `CreateExerciseRequest`, `ExerciseResponse`, etc.
+
+- [ ] **Step 3: Update all frontend spec files with domain_id/auto_resolve_ms references**
+
+- `exercise-api.service.spec.ts`: remove `domain_id`
+- `game-master-view.spec.ts`: remove `domain_id: null`
+- `scenario-picker.spec.ts`: remove `domain_id`, rename `auto_resolve_ms` → `auto_resolve_pt_ms`, `trigger_event_id` → `trigger_inject_id`
+
+- [ ] **Step 4: Update e2e fixtures**
 
 Remove `domain_id: null` from mock exercise responses in `base.fixture.ts`.
 
-- [ ] **Step 3: Build frontend to verify**
+- [ ] **Step 5: Build frontend to verify**
 
 ```bash
 cd apps/tfc/frontend && npx ng build --configuration=development
 ```
 Expected: NO ERRORS
 
-- [ ] **Step 4: Run frontend tests**
+- [ ] **Step 6: Run frontend tests**
 
 ```bash
 make test-tfc-frontend
 ```
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add -A apps/tfc/frontend/
-git commit -m "refactor(tfc): delete DomainService, update e2e fixtures"
+git commit -m "refactor(tfc): delete DomainService, remove domain_id from frontend, update fixtures"
 ```
 
 ---
@@ -1089,7 +1131,16 @@ Test that calling `cancel_inject` endpoint results in an audit log entry.
 
 - [ ] **Step 2: Implement**
 
-For each of the 10 entity action endpoints, after getting the change dict from the engine method, call `engine._on_state_change([change])` if the engine has a state change callback, instead of just returning the change. This ensures the WS broadcast + audit logging happens.
+First, add a public `broadcast_changes()` method to `ExerciseEngine`:
+
+```python
+async def broadcast_changes(self, changes: list[dict]) -> None:
+    """Broadcast state changes to listeners (WS + audit)."""
+    if self._on_state_change and changes:
+        await self._on_state_change(changes)
+```
+
+Then, for each of the 10 entity action endpoints, after getting the change dict from the engine method, call `engine.broadcast_changes([change])`. This ensures WS broadcast + audit logging happens.
 
 Pattern:
 ```python
@@ -1097,8 +1148,7 @@ Pattern:
 async def cancel_inject(inject_id: str, exercise_id: int, ...):
     engine = session_store.get(exercise_id)
     change = engine.inject_scheduler.cancel_inject(inject_id)
-    if engine._on_state_change:
-        await engine._on_state_change([change])
+    await engine.broadcast_changes([change])
     return change
 ```
 
@@ -1112,38 +1162,41 @@ git commit -m "fix(tfc): route entity action endpoints through _on_state_change 
 
 ---
 
-## Phase F: Codegen & Integration Verification
+## Phase F: Full Build & Test Verification
 
-### Task F1: Regenerate types and verify
+TFC uses hand-written API services (no codegen). This phase verifies everything compiles and passes after the rename + gap closure.
 
-- [ ] **Step 1: Run codegen**
+### Task F1: Backend verification
 
-```bash
-make generate
-```
-
-- [ ] **Step 2: Verify frontend compiles**
-
-```bash
-cd apps/tfc/frontend && npx ng build --configuration=development
-```
-
-- [ ] **Step 3: Run all backend tests**
+- [ ] **Step 1: Run all backend tests**
 
 ```bash
 make test-tfc-backend
 ```
+Expected: ALL PASS. If failures, fix before proceeding.
 
-- [ ] **Step 4: Run all frontend tests**
+- [ ] **Step 2: Commit any remaining fixes**
+
+### Task F2: Frontend verification
+
+- [ ] **Step 1: Verify frontend compiles**
+
+```bash
+cd apps/tfc/frontend && npx ng build --configuration=development
+```
+Expected: NO ERRORS
+
+- [ ] **Step 2: Run all frontend tests**
 
 ```bash
 make test-tfc-frontend
 ```
+Expected: ALL PASS
 
-- [ ] **Step 5: Commit any codegen output changes**
+- [ ] **Step 3: Commit any remaining fixes**
 
 ```bash
-git add -A && git commit -m "chore(tfc): regenerate types after terminology alignment"
+git add -A && git commit -m "fix(tfc): resolve remaining build/test issues after rename"
 ```
 
 ---

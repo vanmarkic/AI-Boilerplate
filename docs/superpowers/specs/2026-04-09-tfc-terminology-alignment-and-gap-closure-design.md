@@ -50,7 +50,7 @@ The spec uses fixed terms: **inject**, **defect**, **decision point**. The codeb
 |---|---|
 | `game-master/event-timeline.component.ts` | `game-master/inject-timeline.component.ts` |
 | `game-master/event-timeline.component.spec.ts` | `game-master/inject-timeline.component.spec.ts` |
-| `game-master/gm-event-actions.ts` | `game-master/gm-inject-actions.ts` |
+| `game-master/gm-engine-actions.ts` | `game-master/gm-inject-actions.ts` |
 | `scenario-builder/scenario-event-editor.ts` | `scenario-builder/scenario-inject-editor.ts` |
 | `scenario-builder/scenario-issue-editor.ts` | `scenario-builder/scenario-defect-editor.ts` |
 
@@ -259,7 +259,7 @@ Same pattern as above — `'event_change'` → `'inject_change'`, `change['event
 
 ### GM Action Helper Renames
 
-**gm-inject-actions.ts** (renamed from `gm-event-actions.ts`):
+**gm-inject-actions.ts** (renamed from `gm-engine-actions.ts`):
 
 | Current | New |
 |---|---|
