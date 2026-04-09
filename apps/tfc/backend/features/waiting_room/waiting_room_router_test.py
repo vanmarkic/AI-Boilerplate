@@ -13,10 +13,14 @@ from httpx import AsyncClient
 
 
 async def _create_exercise(client: AsyncClient) -> int:
-    """Create an exercise and return its ID."""
+    """Create an exercise and return its ID.
+
+    Uses simple_collaborative to avoid classic-mode trainer auto-assign,
+    keeping the waiting room empty for tests that verify join/leave mechanics.
+    """
     resp = await client.post(
         "/api/exercises",
-        json={"title": "WR Test Exercise"},
+        json={"title": "WR Test Exercise", "game_mode": "simple_collaborative"},
     )
     assert resp.status_code == 201
     return resp.json()["id"]

@@ -24,7 +24,7 @@ from features.exercise.adapters.connection_manager import (
 async def _create_exercise(client: AsyncClient) -> int:
     resp = await client.post(
         "/api/exercises",
-        json={"title": "Integration Test Exercise"},
+        json={"title": "Integration Test Exercise", "game_mode": "simple_collaborative"},
     )
     assert resp.status_code == 201
     return resp.json()["id"]
@@ -323,7 +323,7 @@ class TestWsBroadcastLive:
         # Create exercise via sync client
         resp = sync_client.post(
             "/api/exercises",
-            json={"title": "WS Live Test"},
+            json={"title": "WS Live Test", "game_mode": "simple_collaborative"},
         )
         assert resp.status_code == 201
         eid = resp.json()["id"]
@@ -349,7 +349,7 @@ class TestWsBroadcastLive:
 
         resp = sync_client.post(
             "/api/exercises",
-            json={"title": "WS Role Test"},
+            json={"title": "WS Role Test", "game_mode": "simple_collaborative"},
         )
         eid = resp.json()["id"]
 
@@ -379,7 +379,7 @@ class TestWsBroadcastLive:
 
         resp = sync_client.post(
             "/api/exercises",
-            json={"title": "WS Leave Test"},
+            json={"title": "WS Leave Test", "game_mode": "simple_collaborative"},
         )
         eid = resp.json()["id"]
 
@@ -406,7 +406,7 @@ class TestWsBroadcastLive:
 
         resp = sync_client.post(
             "/api/exercises",
-            json={"title": "Multi WS Test"},
+            json={"title": "Multi WS Test", "game_mode": "simple_collaborative"},
         )
         eid = resp.json()["id"]
 

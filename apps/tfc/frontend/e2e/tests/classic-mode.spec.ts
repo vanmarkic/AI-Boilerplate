@@ -209,6 +209,20 @@ test.describe.serial(
       return `/player?exerciseId=${exerciseId}&participantId=${participantId}&role=co&gameMode=classic`;
     }
 
+    // ── 0. Trainer auto-assigned on exercise creation ─────────────
+
+    test("trainer is auto-assigned to waiting room", async () => {
+      const res = await apiFetch(
+        `${API_BASE}/api/exercises/${exerciseId}/waiting-room`,
+      );
+      const data = (await res.json()) as {
+        participants: { role: string; display_name: string }[];
+      };
+      const trainer = data.participants.find((p) => p.role === "trainer");
+      expect(trainer).toBeDefined();
+      expect(trainer!.display_name).toBe("Trainer");
+    });
+
     // ── 1. Classic layout renders correctly ─────────────────────────
 
     test("player view renders classic 3-column layout", async ({ page }) => {

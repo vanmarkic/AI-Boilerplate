@@ -32,6 +32,9 @@ async def create_exercise(
     service: ExerciseService = Depends(get_exercise_service),
 ) -> ExerciseResponse:
     result = await service.create_exercise(request)
+    # Classic mode: auto-assign the trainer to the waiting room
+    if request.game_mode == GM_CLASSIC and not request.practice_mode:
+        waiting_room_store.join(result.id, "Trainer", "trainer")
     if not request.practice_mode:
         await connection_manager.broadcast_lobby({"type": "lobby_update"})
     return result

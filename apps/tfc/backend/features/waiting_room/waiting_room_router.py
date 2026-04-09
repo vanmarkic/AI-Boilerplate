@@ -14,6 +14,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from core.dependencies import get_exercise_service, get_scenario_service
+from core.game_mode_constants import GM_CLASSIC
 from features.exercise.adapters.connection_manager import connection_manager
 from features.exercise.exercise_service import ExerciseService
 from features.scenario.scenario_content import ScenarioContent
@@ -82,7 +83,8 @@ async def join_waiting_room(
         if exercise_obj.practice_mode:
             max_players = 1
         else:
-            max_players = len(roles)
+            requires_trainer = exercise_obj.game_mode == GM_CLASSIC
+            max_players = len(roles) + (1 if requires_trainer else 0)
         if waiting_room_store.count(exercise_id) >= max_players:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
