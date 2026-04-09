@@ -1,6 +1,6 @@
 import { computed } from '@angular/core';
 import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
-import type { EngineSnapshot, EventSnapshot, IssueSnapshot } from './engine-api.service';
+import type { EngineSnapshot, InjectSnapshot, DefectSnapshot } from './engine-api.service';
 import type { ActiveDecision, ScenarioContext } from './decision-api.service';
 import { formatTimeMs } from './format-time';
 
@@ -19,8 +19,8 @@ interface ExerciseState {
   realTimeMs: number;
   speedFactor: number;
   paused: boolean;
-  events: EventSnapshot[];
-  issues: IssueSnapshot[];
+  injects: InjectSnapshot[];
+  defects: DefectSnapshot[];
   decisions: ActiveDecision[];
   participants: ParticipantPresence[];
   context: ScenarioContext | null;
@@ -37,8 +37,8 @@ const initialState: ExerciseState = {
   realTimeMs: 0,
   speedFactor: 1,
   paused: true,
-  events: [],
-  issues: [],
+  injects: [],
+  defects: [],
   decisions: [],
   participants: [],
   context: null,
@@ -53,21 +53,21 @@ export const ExerciseStore = signalStore(
   withComputed((store) => ({
     rtClock: computed(() => formatTimeMs(store.realTimeMs())),
     ptClock: computed(() => formatTimeMs(store.playTimeMs())),
-    activeEvents: computed(() => store.events().filter((e) => e.lifecycle === 'running')),
-    scheduledEvents: computed(() => store.events().filter((e) => e.lifecycle === 'scheduled')),
-    completedEvents: computed(() => store.events().filter((e) => e.lifecycle === 'completed')),
-    activeIssues: computed(() => store.issues().filter((i) => i.lifecycle === 'active')),
-    issuesWithCountdown: computed(() => {
+    activeInjects: computed(() => store.injects().filter((e: InjectSnapshot) => e.lifecycle === 'running')),
+    scheduledInjects: computed(() => store.injects().filter((e: InjectSnapshot) => e.lifecycle === 'scheduled')),
+    completedInjects: computed(() => store.injects().filter((e: InjectSnapshot) => e.lifecycle === 'completed')),
+    activeDefects: computed(() => store.defects().filter((i: DefectSnapshot) => i.lifecycle === 'active')),
+    defectsWithCountdown: computed(() => {
       const pt = store.playTimeMs();
-      return store.issues()
-        .filter((i) => i.lifecycle === 'active' && i.auto_resolve_ms > 0 && i.activated_at_pt_ms !== null)
-        .map((i) => {
+      return store.defects()
+        .filter((i: DefectSnapshot) => i.lifecycle === 'active' && i.auto_resolve_pt_ms > 0 && i.activated_at_pt_ms !== null)
+        .map((i: DefectSnapshot) => {
           const elapsed = pt - (i.activated_at_pt_ms ?? 0);
-          const remaining = Math.max(0, i.auto_resolve_ms - elapsed);
+          const remaining = Math.max(0, i.auto_resolve_pt_ms - elapsed);
           return { ...i, remaining_ms: remaining };
         });
     }),
-    releasedIssues: computed(() => store.issues().filter((i) => i.released)),
+    releasedDefects: computed(() => store.defects().filter((i: DefectSnapshot) => i.released)),
     openDecisions: computed(() => store.decisions().filter((d) => d.status === 'open')),
     hasOpenDecision: computed(() => store.decisions().filter((d) => d.status === 'open').length > 0),
     connectedParticipants: computed(() => store.participants().filter((p) => p.connected)),
@@ -96,8 +96,8 @@ export const ExerciseStore = signalStore(
         realTimeMs: snapshot.time.real_time_ms,
         speedFactor: snapshot.time.factor,
         paused: snapshot.time.paused,
-        events: snapshot.events,
-        issues: snapshot.issues,
+        injects: snapshot.injects,
+        defects: snapshot.defects,
         loading: false,
         error: null,
       });
@@ -116,20 +116,20 @@ export const ExerciseStore = signalStore(
       patchState(store, { phase });
     },
 
-    updateEvent(eventId: string, lifecycle: string): void {
-      const events = store.events().map((e) =>
-        e.id === eventId ? { ...e, lifecycle } : e,
+    updateInject(injectId: string, lifecycle: string): void {
+      const injects = store.injects().map((e: InjectSnapshot) =>
+        e.id === injectId ? { ...e, lifecycle } : e,
       );
-      patchState(store, { events });
+      patchState(store, { injects });
     },
 
-    updateIssue(issueId: string, lifecycle: string, released?: boolean): void {
-      const issues = store.issues().map((i) =>
-        i.id === issueId
+    updateDefect(defectId: string, lifecycle: string, released?: boolean): void {
+      const defects = store.defects().map((i: DefectSnapshot) =>
+        i.id === defectId
           ? { ...i, lifecycle, released: released ?? i.released }
           : i,
       );
-      patchState(store, { issues });
+      patchState(store, { defects });
     },
 
     setLoading(loading: boolean): void {

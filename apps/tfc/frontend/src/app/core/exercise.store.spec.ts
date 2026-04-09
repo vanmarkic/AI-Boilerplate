@@ -11,28 +11,28 @@ describe('ExerciseStore', () => {
     store = TestBed.inject(ExerciseStore);
   });
 
-  describe('issuesWithCountdown', () => {
-    it('returns empty when no active issues', () => {
-      expect(store.issuesWithCountdown()).toEqual([]);
+  describe('defectsWithCountdown', () => {
+    it('returns empty when no active defects', () => {
+      expect(store.defectsWithCountdown()).toEqual([]);
     });
 
-    it('calculates remaining time for active issues with auto-resolve', () => {
+    it('calculates remaining time for active defects with auto-resolve', () => {
       store.applySnapshot({
         exercise_id: 1,
         title: 'Test',
         phase: 'running',
         time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
-        events: [],
-        issues: [
+        injects: [],
+        defects: [
           {
-            id: 'i1', title: 'Issue 1', description: '',
-            trigger_mode: 'manual', auto_resolve_ms: 10000,
+            id: 'i1', title: 'Defect 1', description: '',
+            trigger_mode: 'manual', auto_resolve_pt_ms: 10000,
             lifecycle: 'active', activated_at_pt_ms: 2000,
             resolved_at_pt_ms: null, released: false,
           },
         ],
       });
-      const countdown = store.issuesWithCountdown();
+      const countdown = store.defectsWithCountdown();
       expect(countdown.length).toBe(1);
       // elapsed = 5000 - 2000 = 3000, remaining = 10000 - 3000 = 7000
       expect(countdown[0].remaining_ms).toBe(7000);
@@ -44,56 +44,56 @@ describe('ExerciseStore', () => {
         title: 'Test',
         phase: 'running',
         time: { play_time_ms: 15000, real_time_ms: 15000, factor: 1, paused: false },
-        events: [],
-        issues: [
+        injects: [],
+        defects: [
           {
-            id: 'i1', title: 'Issue 1', description: '',
-            trigger_mode: 'manual', auto_resolve_ms: 10000,
+            id: 'i1', title: 'Defect 1', description: '',
+            trigger_mode: 'manual', auto_resolve_pt_ms: 10000,
             lifecycle: 'active', activated_at_pt_ms: 2000,
             resolved_at_pt_ms: null, released: false,
           },
         ],
       });
-      const countdown = store.issuesWithCountdown();
+      const countdown = store.defectsWithCountdown();
       expect(countdown[0].remaining_ms).toBe(0);
     });
 
-    it('excludes issues without auto_resolve_ms', () => {
+    it('excludes defects without auto_resolve_pt_ms', () => {
       store.applySnapshot({
         exercise_id: 1,
         title: 'Test',
         phase: 'running',
         time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
-        events: [],
-        issues: [
+        injects: [],
+        defects: [
           {
-            id: 'i1', title: 'Issue 1', description: '',
-            trigger_mode: 'manual', auto_resolve_ms: 0,
+            id: 'i1', title: 'Defect 1', description: '',
+            trigger_mode: 'manual', auto_resolve_pt_ms: 0,
             lifecycle: 'active', activated_at_pt_ms: 2000,
             resolved_at_pt_ms: null, released: false,
           },
         ],
       });
-      expect(store.issuesWithCountdown().length).toBe(0);
+      expect(store.defectsWithCountdown().length).toBe(0);
     });
 
-    it('excludes inactive issues', () => {
+    it('excludes inactive defects', () => {
       store.applySnapshot({
         exercise_id: 1,
         title: 'Test',
         phase: 'running',
         time: { play_time_ms: 5000, real_time_ms: 5000, factor: 1, paused: false },
-        events: [],
-        issues: [
+        injects: [],
+        defects: [
           {
-            id: 'i1', title: 'Issue 1', description: '',
-            trigger_mode: 'manual', auto_resolve_ms: 10000,
+            id: 'i1', title: 'Defect 1', description: '',
+            trigger_mode: 'manual', auto_resolve_pt_ms: 10000,
             lifecycle: 'inactive', activated_at_pt_ms: null,
             resolved_at_pt_ms: null, released: false,
           },
         ],
       });
-      expect(store.issuesWithCountdown().length).toBe(0);
+      expect(store.defectsWithCountdown().length).toBe(0);
     });
   });
 
