@@ -59,7 +59,6 @@ export class MockApi {
           description: body.description ?? '',
           phase: 'setup',
           scenario_id: null,
-          domain_id: null,
           time_factor: 1.0,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
