@@ -3,35 +3,35 @@ from unittest.mock import patch
 
 import pytest
 
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.inject_scheduler import InjectType, ScheduledInject
 from engine.exercise_engine import EngineConfig, EnginePhase, ExerciseEngine
-from engine.issue_manager import TrackedIssue, TriggerMode
+from engine.defect_manager import TrackedDefect, TriggerMode
 
 
 def _config(
-    events: list[ScheduledEvent] | None = None,
-    issues: list[TrackedIssue] | None = None,
+    injects: list[ScheduledInject] | None = None,
+    defects: list[TrackedDefect] | None = None,
     factor: float = 1.0,
 ) -> EngineConfig:
     return EngineConfig(
         exercise_id=1,
         title="Test Exercise",
         time_factor=factor,
-        events=events or [],
-        issues=issues or [],
+        injects=injects or [],
+        defects=defects or [],
     )
 
 
-def _event(id: str, scheduled_pt_ms: float = 0.0, **kw: object) -> ScheduledEvent:
-    return ScheduledEvent(
-        id=id, title=f"E-{id}", description="", event_type=EventType.OPERATIONAL,
+def _inject(id: str, scheduled_pt_ms: float = 0.0, **kw: object) -> ScheduledInject:
+    return ScheduledInject(
+        id=id, title=f"E-{id}", description="", inject_type=InjectType.OPERATIONAL,
         scheduled_pt_ms=scheduled_pt_ms, **kw,
     )
 
 
-def _issue(id: str, **kw: object) -> TrackedIssue:
+def _defect(id: str, **kw: object) -> TrackedDefect:
     mode = kw.pop("trigger_mode", TriggerMode.MANUAL)
-    return TrackedIssue(
+    return TrackedDefect(
         id=id, title=f"I-{id}", description="",
         trigger_mode=mode,
         **kw,
@@ -92,9 +92,9 @@ async def test_cannot_start_from_completed() -> None:
 
 
 @pytest.mark.asyncio
-async def test_tick_processes_events() -> None:
-    evt = _event("e1", scheduled_pt_ms=0.0, duration_ms=100.0)
-    engine = ExerciseEngine(_config(events=[evt]))
+async def test_tick_processes_injects() -> None:
+    inj = _inject("e1", scheduled_pt_ms=0.0, duration_ms=100.0)
+    engine = ExerciseEngine(_config(injects=[inj]))
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
@@ -105,22 +105,22 @@ async def test_tick_processes_events() -> None:
 
 
 @pytest.mark.asyncio
-async def test_event_completion_triggers_linked_issues() -> None:
-    evt = _event("e1", scheduled_pt_ms=0.0, duration_ms=50.0, triggered_issues=["i1"])
-    iss = _issue(
-        "i1", trigger_mode=TriggerMode.EVENT_BASED, trigger_event_id="e1",
+async def test_inject_completion_triggers_linked_defects() -> None:
+    inj = _inject("e1", scheduled_pt_ms=0.0, duration_ms=50.0, triggered_defects=["i1"])
+    dfct = _defect(
+        "i1", trigger_mode=TriggerMode.INJECT_BASED, trigger_inject_id="e1",
     )
-    engine = ExerciseEngine(_config(events=[evt], issues=[iss]))
-    # Start and advance past duration so event completes
+    engine = ExerciseEngine(_config(injects=[inj], defects=[dfct]))
+    # Start and advance past duration so inject completes
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
-        await engine.tick()  # event -> pending
-        await engine.tick()  # event -> running at pt=0
+        await engine.tick()  # inject -> pending
+        await engine.tick()  # inject -> running at pt=0
     with patch("engine.time_manager._now_ms", return_value=100.0):
-        changes = await engine.tick()  # event -> completed, issue activated
-    issue_actions = [c["action"] for c in changes if c.get("type") == "issue_change"]
-    assert "activated" in issue_actions
+        changes = await engine.tick()  # inject -> completed, defect activated
+    defect_actions = [c["action"] for c in changes if c.get("type") == "defect_change"]
+    assert "activated" in defect_actions
 
 
 def test_set_speed_changes_factor() -> None:
@@ -137,28 +137,28 @@ def test_snapshot_returns_full_state() -> None:
     assert snap["title"] == "Test Exercise"
     assert snap["phase"] == "setup"
     assert "time" in snap
-    assert "events" in snap
-    assert "issues" in snap
+    assert "injects" in snap
+    assert "defects" in snap
 
 
 # ── Decision integration tests ───────────────────────────────────────────
 
 
-def _decision_event(
+def _decision_inject(
     id: str, scheduled_pt_ms: float = 0.0, **kw: object,
-) -> ScheduledEvent:
-    return ScheduledEvent(
-        id=id, title=f"DE-{id}", description="Decision event",
-        event_type=EventType.DECISION,
+) -> ScheduledInject:
+    return ScheduledInject(
+        id=id, title=f"DE-{id}", description="Decision inject",
+        inject_type=InjectType.DECISION,
         scheduled_pt_ms=scheduled_pt_ms, **kw,
     )
 
 
 @pytest.mark.asyncio
-async def test_decision_event_pauses_engine() -> None:
-    """A DECISION event starting should auto-pause the engine."""
-    evt = _decision_event("d1", scheduled_pt_ms=0.0)
-    engine = ExerciseEngine(_config(events=[evt]))
+async def test_decision_inject_pauses_engine() -> None:
+    """A DECISION inject starting should auto-pause the engine."""
+    inj = _decision_inject("d1", scheduled_pt_ms=0.0)
+    engine = ExerciseEngine(_config(injects=[inj]))
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
@@ -179,8 +179,8 @@ async def test_decision_event_pauses_engine() -> None:
 @pytest.mark.asyncio
 async def test_close_decision_resumes_engine() -> None:
     """Closing the last open decision allows resuming the engine."""
-    evt = _decision_event("d1", scheduled_pt_ms=0.0)
-    engine = ExerciseEngine(_config(events=[evt]))
+    inj = _decision_inject("d1", scheduled_pt_ms=0.0)
+    engine = ExerciseEngine(_config(injects=[inj]))
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
@@ -209,8 +209,8 @@ def test_snapshot_includes_decisions() -> None:
 @pytest.mark.asyncio
 async def test_reset_clears_decisions() -> None:
     """Reset should clear all tracked decisions."""
-    evt = _decision_event("d1", scheduled_pt_ms=0.0)
-    engine = ExerciseEngine(_config(events=[evt]))
+    inj = _decision_inject("d1", scheduled_pt_ms=0.0)
+    engine = ExerciseEngine(_config(injects=[inj]))
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False

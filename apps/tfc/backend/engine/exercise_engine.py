@@ -1,4 +1,4 @@
-"""Exercise engine — orchestrates TimeManager, EventScheduler, IssueManager."""
+"""Exercise engine — orchestrates TimeManager, InjectScheduler, DefectManager."""
 from __future__ import annotations
 
 import asyncio
@@ -11,8 +11,8 @@ from engine.engine_config import (  # noqa: F401 — re-exported
     TICK_INTERVAL_S, DecisionTemplate, EngineConfig, ScenarioContext,
 )
 from engine.time_manager import TimeManager
-from engine.event_scheduler import EventScheduler, EventLifecycle, EventType
-from engine.issue_manager import IssueManager
+from engine.inject_scheduler import InjectScheduler, InjectLifecycle, InjectType
+from engine.defect_manager import DefectManager
 from engine.decision_manager import DecisionManager
 
 
@@ -34,15 +34,15 @@ class ExerciseEngine:
         self._config = config
         self._phase = EnginePhase.SETUP
         self._time = TimeManager(factor=config.time_factor)
-        self._events = EventScheduler()
-        self._issues = IssueManager()
+        self._injects = InjectScheduler()
+        self._defects = DefectManager()
         self._decisions = DecisionManager()
         self._tick_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._timeout_task: asyncio.Task | None = None  # type: ignore[type-arg]
         self._on_state_change = on_state_change
 
-        self._events.load_events(config.events)
-        self._issues.load_issues(config.issues)
+        self._injects.load_injects(config.injects)
+        self._defects.load_defects(config.defects)
 
     @property
     def phase(self) -> EnginePhase:
@@ -53,12 +53,12 @@ class ExerciseEngine:
         return self._time
 
     @property
-    def event_scheduler(self) -> EventScheduler:
-        return self._events
+    def inject_scheduler(self) -> InjectScheduler:
+        return self._injects
 
     @property
-    def issue_manager(self) -> IssueManager:
-        return self._issues
+    def defect_manager(self) -> DefectManager:
+        return self._defects
 
     @property
     def decision_manager(self) -> DecisionManager:
@@ -97,8 +97,8 @@ class ExerciseEngine:
         self._stop_timeout_monitor()
         self._phase = EnginePhase.SETUP
         self._time.reset()
-        self._events.load_events(self._config.events)
-        self._issues.load_issues(self._config.issues)
+        self._injects.load_injects(self._config.injects)
+        self._defects.load_defects(self._config.defects)
         self._decisions.clear()
         return self._phase_change("reset")
 
@@ -112,25 +112,25 @@ class ExerciseEngine:
         self._time.tick()
         pt = self._time.play_time_ms
 
-        event_changes = self._events.tick(pt)
-        changes.extend(event_changes)
+        inject_changes = self._injects.tick(pt)
+        changes.extend(inject_changes)
 
-        decision_changes = self._handle_decision_events(event_changes, pt)
+        decision_changes = self._handle_decision_injects(inject_changes, pt)
         changes.extend(decision_changes)
 
-        completed_events = {
-            eid for eid, ev in self._events.events.items()
-            if ev.lifecycle == EventLifecycle.COMPLETED
+        completed_injects = {
+            eid for eid, ev in self._injects.injects.items()
+            if ev.lifecycle == InjectLifecycle.COMPLETED
         }
 
-        for change in event_changes:
+        for change in inject_changes:
             if change.get("action") == "completed":
-                event_id = change["event_id"]
-                issue_changes = self._issues.activate_by_event(event_id, pt)
-                changes.extend(issue_changes)
+                inject_id = change["inject_id"]
+                defect_changes = self._defects.activate_by_inject(inject_id, pt)
+                changes.extend(defect_changes)
 
-        issue_changes = self._issues.tick(pt, completed_events)
-        changes.extend(issue_changes)
+        defect_changes = self._defects.tick(pt, completed_injects)
+        changes.extend(defect_changes)
 
         if changes and self._on_state_change:
             await self._on_state_change(changes)
@@ -143,30 +143,30 @@ class ExerciseEngine:
             "title": self._config.title,
             "phase": self._phase.value,
             "time": self._time.snapshot(),
-            "events": self._events.snapshot(),
-            "issues": self._issues.snapshot(),
+            "injects": self._injects.snapshot(),
+            "defects": self._defects.snapshot(),
             "decisions": self._decisions.snapshot(),
         }
 
-    def _handle_decision_events(
-        self, event_changes: list[dict], pt: float,
+    def _handle_decision_injects(
+        self, inject_changes: list[dict], pt: float,
     ) -> list[dict]:
         changes: list[dict] = []
-        for change in event_changes:
+        for change in inject_changes:
             if change.get("action") != "started":
                 continue
-            event_id = change["event_id"]
-            event = self._events.events.get(event_id)
-            if event is None or event.event_type != EventType.DECISION:
+            inject_id = change["inject_id"]
+            inject = self._injects.injects.get(inject_id)
+            if inject is None or inject.inject_type != InjectType.DECISION:
                 continue
-            t = self._find_decision_template(event_id)
+            t = self._find_decision_template(inject_id)
             timeout_ms = t.timeout_ms if t else 0.0
             changes.append(self._decisions.open_decision(
-                id=t.id if t else event_id,
-                event_id=event_id,
-                issue_id=t.issue_id if t else None,
-                title=t.title if t else event.title,
-                description=t.description if t else event.description,
+                id=t.id if t else inject_id,
+                inject_id=inject_id,
+                defect_id=t.defect_id if t else None,
+                title=t.title if t else inject.title,
+                description=t.description if t else inject.description,
                 question_type=t.question_type if t else "free_text",
                 options=t.options if t else [],
                 completion_mode=t.completion_mode if t else "first_response",
@@ -181,9 +181,9 @@ class ExerciseEngine:
                 self._start_timeout_monitor()
         return changes
 
-    def _find_decision_template(self, event_id: str) -> DecisionTemplate | None:
+    def _find_decision_template(self, inject_id: str) -> DecisionTemplate | None:
         for dt in self._config.decision_templates:
-            if dt.id == event_id:
+            if dt.id == inject_id:
                 return dt
         return None
 

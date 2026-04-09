@@ -4,29 +4,29 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from engine.engine_config import DecisionTemplate, EngineConfig, ScenarioContext
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.inject_scheduler import InjectType, ScheduledInject
 from engine.exercise_engine import EnginePhase, ExerciseEngine
 
 
-def _decision_event(
+def _decision_inject(
     id: str, scheduled_pt_ms: float = 0.0, **kw: object,
-) -> ScheduledEvent:
-    return ScheduledEvent(
-        id=id, title=f"DE-{id}", description="Decision event",
-        event_type=EventType.DECISION,
+) -> ScheduledInject:
+    return ScheduledInject(
+        id=id, title=f"DE-{id}", description="Decision inject",
+        inject_type=InjectType.DECISION,
         scheduled_pt_ms=scheduled_pt_ms, **kw,
     )
 
 
 def _config(
-    events: list[ScheduledEvent] | None = None,
+    injects: list[ScheduledInject] | None = None,
     decision_templates: list[DecisionTemplate] | None = None,
     context: ScenarioContext | None = None,
 ) -> EngineConfig:
     return EngineConfig(
         exercise_id=1,
         title="Test",
-        events=events or [],
+        injects=injects or [],
         decision_templates=decision_templates or [],
         context=context or ScenarioContext(),
     )
@@ -34,14 +34,14 @@ def _config(
 
 @pytest.mark.asyncio
 async def test_decision_template_with_timeout_pauses_engine() -> None:
-    """Decision event with a timeout template should still pause engine."""
-    evt = _decision_event("d1")
+    """Decision inject with a timeout template should still pause engine."""
+    inj = _decision_inject("d1")
     dt = DecisionTemplate(
-        id="d1", title="T", description="D", issue_id="i1",
+        id="d1", title="T", description="D", defect_id="i1",
         question_type="single_choice", options=[], completion_mode="first_response",
         timeout_ms=5000.0,
     )
-    engine = ExerciseEngine(_config(events=[evt], decision_templates=[dt]))
+    engine = ExerciseEngine(_config(injects=[inj], decision_templates=[dt]))
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
@@ -55,13 +55,13 @@ async def test_decision_template_with_timeout_pauses_engine() -> None:
 
 @pytest.mark.asyncio
 async def test_decision_opened_includes_target_roles() -> None:
-    evt = _decision_event("d1")
+    inj = _decision_inject("d1")
     dt = DecisionTemplate(
-        id="d1", title="T", description="D", issue_id="i1",
+        id="d1", title="T", description="D", defect_id="i1",
         question_type="single_choice", options=[], completion_mode="first_response",
         target_roles=["player", "observer"],
     )
-    engine = ExerciseEngine(_config(events=[evt], decision_templates=[dt]))
+    engine = ExerciseEngine(_config(injects=[inj], decision_templates=[dt]))
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
@@ -75,8 +75,8 @@ async def test_decision_opened_includes_target_roles() -> None:
 async def test_on_state_change_called_with_decision() -> None:
     """The on_state_change callback should fire when decision opens."""
     callback = AsyncMock()
-    evt = _decision_event("d1")
-    engine = ExerciseEngine(_config(events=[evt]), on_state_change=callback)
+    inj = _decision_inject("d1")
+    engine = ExerciseEngine(_config(injects=[inj]), on_state_change=callback)
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
