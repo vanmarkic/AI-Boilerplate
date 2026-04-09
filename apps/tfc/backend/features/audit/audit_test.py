@@ -64,7 +64,7 @@ class TestAuditLog:
         results = await service.get_exercise_log(42, entry_type="inject_change")
         assert len(results) == 1
         assert results[0].target_id == "e1"
-        repo.list_by_exercise.assert_awaited_once_with(42, entry_type="event_change")
+        repo.list_by_exercise.assert_awaited_once_with(42, entry_type="inject_change")
 
     @pytest.mark.asyncio
     async def test_get_exercise_log_empty(self) -> None:
