@@ -1,7 +1,7 @@
 """Hypothesis strategies for generating engine domain objects.
 
 Used by property tests (*_prop_test.py) to generate random but valid
-ScheduledEvent, TrackedIssue, ActiveDecision, and EngineConfig instances.
+ScheduledInject, TrackedDefect, ActiveDecision, and EngineConfig instances.
 """
 from __future__ import annotations
 
@@ -9,17 +9,17 @@ from hypothesis import strategies as st
 from hypothesis.strategies import SearchStrategy
 
 from engine.decision_manager import ActiveDecision
-from engine.event_scheduler import EventLifecycle, EventType, ScheduledEvent
-from engine.issue_manager import IssueLifecycle, TrackedIssue, TriggerMode
+from engine.inject_scheduler import InjectLifecycle, InjectType, ScheduledInject
+from engine.defect_manager import DefectLifecycle, TrackedDefect, TriggerMode
 
 
-def event_ids(prefix: str = "e") -> SearchStrategy[str]:
-    """Generate short event-style IDs like 'e0', 'e1', ..., 'e19'."""
+def inject_ids(prefix: str = "e") -> SearchStrategy[str]:
+    """Generate short inject-style IDs like 'e0', 'e1', ..., 'e19'."""
     return st.integers(min_value=0, max_value=19).map(lambda i: f"{prefix}{i}")
 
 
-def issue_ids() -> SearchStrategy[str]:
-    return event_ids(prefix="i")
+def defect_ids() -> SearchStrategy[str]:
+    return inject_ids(prefix="i")
 
 
 def play_times() -> SearchStrategy[float]:
@@ -38,53 +38,53 @@ def speed_factors() -> SearchStrategy[float]:
 
 
 @st.composite
-def scheduled_events(
+def scheduled_injects(
     draw: st.DrawFn,
     *,
     with_duration: bool | None = None,
     with_dependencies: bool = False,
-) -> ScheduledEvent:
-    """Generate a random ScheduledEvent."""
-    eid = draw(event_ids())
+) -> ScheduledInject:
+    """Generate a random ScheduledInject."""
+    eid = draw(inject_ids())
     scheduled_pt = draw(play_times())
     duration = None
     if with_duration is True or (with_duration is None and draw(st.booleans())):
         duration = draw(durations())
     deps: list[str] = []
     if with_dependencies:
-        deps = draw(st.lists(event_ids(), max_size=3, unique=True))
+        deps = draw(st.lists(inject_ids(), max_size=3, unique=True))
         deps = [d for d in deps if d != eid]
-    return ScheduledEvent(
+    return ScheduledInject(
         id=eid,
-        title=f"Event {eid}",
+        title=f"Inject {eid}",
         description="generated",
-        event_type=draw(st.sampled_from(EventType)),
+        inject_type=draw(st.sampled_from(InjectType)),
         scheduled_pt_ms=scheduled_pt,
         duration_ms=duration,
         dependencies=deps,
-        triggered_issues=[],
+        triggered_defects=[],
     )
 
 
 @st.composite
-def tracked_issues(
+def tracked_defects(
     draw: st.DrawFn,
     *,
     trigger_mode: TriggerMode | None = None,
-) -> TrackedIssue:
-    """Generate a random TrackedIssue."""
-    iid = draw(issue_ids())
+) -> TrackedDefect:
+    """Generate a random TrackedDefect."""
+    iid = draw(defect_ids())
     mode = trigger_mode or draw(st.sampled_from(TriggerMode))
     trigger_time = draw(play_times()) if mode == TriggerMode.TIME_BASED else None
-    trigger_event = draw(event_ids()) if mode == TriggerMode.EVENT_BASED else None
+    trigger_inject = draw(inject_ids()) if mode == TriggerMode.INJECT_BASED else None
     auto_resolve = draw(st.one_of(st.just(0.0), durations()))
-    return TrackedIssue(
+    return TrackedDefect(
         id=iid,
-        title=f"Issue {iid}",
+        title=f"Defect {iid}",
         description="generated",
         trigger_mode=mode,
         trigger_time_pt_ms=trigger_time,
-        trigger_event_id=trigger_event,
+        trigger_inject_id=trigger_inject,
         auto_resolve_ms=auto_resolve,
     )
 

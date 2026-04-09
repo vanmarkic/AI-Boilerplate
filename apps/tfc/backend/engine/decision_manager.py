@@ -15,8 +15,8 @@ from engine.state_changes import DecisionClosed, DecisionOpened
 class ActiveDecision:
     """Runtime representation of a decision point."""
     id: str
-    event_id: str | None
-    issue_id: str | None
+    inject_id: str | None
+    defect_id: str | None
     title: str
     description: str
     question_type: str
@@ -40,8 +40,8 @@ class DecisionManager:
         self,
         *,
         id: str,
-        event_id: str | None,
-        issue_id: str | None,
+        inject_id: str | None,
+        defect_id: str | None,
         title: str,
         description: str,
         question_type: str,
@@ -54,8 +54,8 @@ class DecisionManager:
         """Register a new open decision. Returns a change dict."""
         decision = ActiveDecision(
             id=id,
-            event_id=event_id,
-            issue_id=issue_id,
+            inject_id=inject_id,
+            defect_id=defect_id,
             title=title,
             description=description,
             question_type=question_type,
@@ -119,8 +119,8 @@ class DecisionManager:
         return [
             {
                 "id": d.id,
-                "event_id": d.event_id,
-                "issue_id": d.issue_id,
+                "inject_id": d.inject_id,
+                "defect_id": d.defect_id,
                 "title": d.title,
                 "description": d.description,
                 "question_type": d.question_type,

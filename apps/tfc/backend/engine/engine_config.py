@@ -7,8 +7,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from engine.event_scheduler import ScheduledEvent
-from engine.issue_manager import TrackedIssue
+from engine.inject_scheduler import ScheduledInject
+from engine.defect_manager import TrackedDefect
 
 TICK_INTERVAL_S = 0.25
 
@@ -18,7 +18,7 @@ class DecisionTemplate:
     id: str
     title: str
     description: str
-    issue_id: str
+    defect_id: str
     question_type: str
     options: list[dict]
     completion_mode: str
@@ -40,7 +40,7 @@ class EngineConfig:
     exercise_id: int
     title: str
     time_factor: float = 1.0
-    events: list[ScheduledEvent] = field(default_factory=list)
-    issues: list[TrackedIssue] = field(default_factory=list)
+    injects: list[ScheduledInject] = field(default_factory=list)
+    defects: list[TrackedDefect] = field(default_factory=list)
     decision_templates: list[DecisionTemplate] = field(default_factory=list)
     context: ScenarioContext = field(default_factory=ScenarioContext)
