@@ -8,13 +8,13 @@ from engine.decision_manager import ActiveDecision, DecisionManager
 
 def _decision_kwargs(
     id: str = "d1",
-    event_id: str | None = "e1",
-    issue_id: str | None = "i1",
+    inject_id: str | None = "e1",
+    defect_id: str | None = "i1",
 ) -> dict:
     return {
         "id": id,
-        "event_id": event_id,
-        "issue_id": issue_id,
+        "inject_id": inject_id,
+        "defect_id": defect_id,
         "title": f"Decision {id}",
         "description": f"Desc {id}",
         "question_type": "single_choice",

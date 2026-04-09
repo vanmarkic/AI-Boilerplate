@@ -16,8 +16,8 @@ def _open(
 ) -> dict:
     return mgr.open_decision(
         id=did,
-        event_id="e0",
-        issue_id="i0",
+        inject_id="e0",
+        defect_id="i0",
         title=f"Decision {did}",
         description=f"Desc {did}",
         question_type="single_choice",

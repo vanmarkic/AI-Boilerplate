@@ -12,8 +12,8 @@ def _decision_kwargs(
 ) -> dict:
     return {
         "id": id,
-        "event_id": "e1",
-        "issue_id": "i1",
+        "inject_id": "e1",
+        "defect_id": "i1",
         "title": f"Decision {id}",
         "description": f"Desc {id}",
         "question_type": "single_choice",
