@@ -1,40 +1,40 @@
-"""Property tests for EventScheduler lifecycle transitions."""
+"""Property tests for InjectScheduler lifecycle transitions."""
 from __future__ import annotations
 
 from hypothesis import given, settings, assume
 from hypothesis import strategies as st
 
-from engine.event_scheduler import (
+from engine.inject_scheduler import (
     VALID_TRANSITIONS,
-    EventLifecycle,
-    EventScheduler,
-    EventType,
-    ScheduledEvent,
+    InjectLifecycle,
+    InjectScheduler,
+    InjectType,
+    ScheduledInject,
 )
 from engine.strategies import (
     durations,
     monotonic_play_times,
     play_times,
-    scheduled_events,
+    scheduled_injects,
 )
 
-TERMINAL = {EventLifecycle.COMPLETED, EventLifecycle.CANCELLED}
+TERMINAL = {InjectLifecycle.COMPLETED, InjectLifecycle.CANCELLED}
 
 
-def _simple_event(
+def _simple_inject(
     eid: str = "e0",
     scheduled_pt_ms: float = 0.0,
     duration_ms: float | None = None,
-) -> ScheduledEvent:
-    return ScheduledEvent(
+) -> ScheduledInject:
+    return ScheduledInject(
         id=eid,
-        title=f"Event {eid}",
+        title=f"Inject {eid}",
         description="test",
-        event_type=EventType.OPERATIONAL,
+        inject_type=InjectType.OPERATIONAL,
         scheduled_pt_ms=scheduled_pt_ms,
         duration_ms=duration_ms,
         dependencies=[],
-        triggered_issues=[],
+        triggered_defects=[],
     )
 
 
@@ -53,13 +53,13 @@ class TestTransitionsAlwaysValid:
         duration: float | None,
         ticks: list[float],
     ) -> None:
-        event = _simple_event(scheduled_pt_ms=scheduled_pt, duration_ms=duration)
-        sched = EventScheduler()
-        sched.load_events([event])
-        prev = EventLifecycle.SCHEDULED
+        inject = _simple_inject(scheduled_pt_ms=scheduled_pt, duration_ms=duration)
+        sched = InjectScheduler()
+        sched.load_injects([inject])
+        prev = InjectLifecycle.SCHEDULED
         for pt in ticks:
             sched.tick(pt)
-            current = sched.events["e0"].lifecycle
+            current = sched.injects["e0"].lifecycle
             if current != prev:
                 assert current in VALID_TRANSITIONS[prev], (
                     f"Invalid transition {prev} -> {current} at pt={pt}"
@@ -68,67 +68,67 @@ class TestTransitionsAlwaysValid:
 
 
 class TestTerminalStatesAbsorbing:
-    """Once an event is COMPLETED or CANCELLED, no tick changes its state."""
+    """Once an inject is COMPLETED or CANCELLED, no tick changes its state."""
 
     @given(
         duration=durations(),
         extra_ticks=monotonic_play_times(min_size=5, max_size=20),
     )
     @settings(max_examples=200)
-    def test_completed_event_stays_completed(
+    def test_completed_inject_stays_completed(
         self, duration: float, extra_ticks: list[float],
     ) -> None:
-        event = _simple_event(scheduled_pt_ms=0.0, duration_ms=duration)
-        sched = EventScheduler()
-        sched.load_events([event])
+        inject = _simple_inject(scheduled_pt_ms=0.0, duration_ms=duration)
+        sched = InjectScheduler()
+        sched.load_injects([inject])
         sched.tick(0.0)   # -> pending
         sched.tick(0.0)   # -> running
         sched.tick(duration + 1.0)  # -> completed
-        assert sched.events["e0"].lifecycle == EventLifecycle.COMPLETED
+        assert sched.injects["e0"].lifecycle == InjectLifecycle.COMPLETED
         for pt in extra_ticks:
             sched.tick(duration + 1.0 + pt)
-            assert sched.events["e0"].lifecycle == EventLifecycle.COMPLETED
+            assert sched.injects["e0"].lifecycle == InjectLifecycle.COMPLETED
 
     @given(extra_ticks=monotonic_play_times(min_size=5, max_size=20))
     @settings(max_examples=100)
-    def test_cancelled_event_stays_cancelled(
+    def test_cancelled_inject_stays_cancelled(
         self, extra_ticks: list[float],
     ) -> None:
-        event = _simple_event(scheduled_pt_ms=9999.0)
-        sched = EventScheduler()
-        sched.load_events([event])
-        sched.cancel_event("e0")
-        assert sched.events["e0"].lifecycle == EventLifecycle.CANCELLED
+        inject = _simple_inject(scheduled_pt_ms=9999.0)
+        sched = InjectScheduler()
+        sched.load_injects([inject])
+        sched.cancel_inject("e0")
+        assert sched.injects["e0"].lifecycle == InjectLifecycle.CANCELLED
         for pt in extra_ticks:
             sched.tick(pt)
-            assert sched.events["e0"].lifecycle == EventLifecycle.CANCELLED
+            assert sched.injects["e0"].lifecycle == InjectLifecycle.CANCELLED
 
 
 class TestCancelIdempotent:
-    """Cancelling a terminal event always returns None."""
+    """Cancelling a terminal inject always returns None."""
 
     @given(duration=durations())
     @settings(max_examples=100)
     def test_cancel_completed_returns_none(self, duration: float) -> None:
-        sched = EventScheduler()
-        sched.load_events([_simple_event(scheduled_pt_ms=0.0, duration_ms=duration)])
+        sched = InjectScheduler()
+        sched.load_injects([_simple_inject(scheduled_pt_ms=0.0, duration_ms=duration)])
         sched.tick(0.0)
         sched.tick(0.0)
         sched.tick(duration + 1.0)
-        assert sched.events["e0"].lifecycle == EventLifecycle.COMPLETED
-        assert sched.cancel_event("e0") is None
+        assert sched.injects["e0"].lifecycle == InjectLifecycle.COMPLETED
+        assert sched.cancel_inject("e0") is None
 
     @given(data=st.data())
     @settings(max_examples=50)
     def test_double_cancel_returns_none(self, data: st.DataObject) -> None:
-        sched = EventScheduler()
-        sched.load_events([_simple_event(scheduled_pt_ms=9999.0)])
-        sched.cancel_event("e0")
-        assert sched.cancel_event("e0") is None
+        sched = InjectScheduler()
+        sched.load_injects([_simple_inject(scheduled_pt_ms=9999.0)])
+        sched.cancel_inject("e0")
+        assert sched.cancel_inject("e0") is None
 
 
 class TestDependencyOrdering:
-    """Child events never activate before their dependencies complete."""
+    """Child injects never activate before their dependencies complete."""
 
     @given(
         dep_schedule=play_times(),
@@ -144,36 +144,36 @@ class TestDependencyOrdering:
         child_schedule: float,
         ticks: list[float],
     ) -> None:
-        dep = ScheduledEvent(
+        dep = ScheduledInject(
             id="dep",
             title="Dep",
             description="dep",
-            event_type=EventType.OPERATIONAL,
+            inject_type=InjectType.OPERATIONAL,
             scheduled_pt_ms=dep_schedule,
             duration_ms=dep_duration,
             dependencies=[],
-            triggered_issues=[],
+            triggered_defects=[],
         )
-        child = ScheduledEvent(
+        child = ScheduledInject(
             id="child",
             title="Child",
             description="child",
-            event_type=EventType.OPERATIONAL,
+            inject_type=InjectType.OPERATIONAL,
             scheduled_pt_ms=child_schedule,
             dependencies=["dep"],
-            triggered_issues=[],
+            triggered_defects=[],
         )
-        sched = EventScheduler()
-        sched.load_events([dep, child])
+        sched = InjectScheduler()
+        sched.load_injects([dep, child])
 
         for pt in ticks:
             sched.tick(pt)
-            dep_ev = sched.events["dep"]
-            child_ev = sched.events["child"]
-            if child_ev.lifecycle != EventLifecycle.SCHEDULED:
-                assert dep_ev.lifecycle == EventLifecycle.COMPLETED, (
-                    f"Child left SCHEDULED ({child_ev.lifecycle}) "
-                    f"but dep is {dep_ev.lifecycle}"
+            dep_inj = sched.injects["dep"]
+            child_inj = sched.injects["child"]
+            if child_inj.lifecycle != InjectLifecycle.SCHEDULED:
+                assert dep_inj.lifecycle == InjectLifecycle.COMPLETED, (
+                    f"Child left SCHEDULED ({child_inj.lifecycle}) "
+                    f"but dep is {dep_inj.lifecycle}"
                 )
 
 
@@ -181,25 +181,25 @@ class TestSnapshotRoundtrip:
     """Snapshot always returns a list with correct structure."""
 
     @given(
-        n_events=st.integers(min_value=1, max_value=10),
+        n_injects=st.integers(min_value=1, max_value=10),
         ticks=monotonic_play_times(min_size=1, max_size=10),
     )
     @settings(max_examples=100)
     def test_snapshot_has_correct_length_and_keys(
-        self, n_events: int, ticks: list[float],
+        self, n_injects: int, ticks: list[float],
     ) -> None:
-        events = [
-            _simple_event(eid=f"e{i}", scheduled_pt_ms=float(i * 100))
-            for i in range(n_events)
+        injects = [
+            _simple_inject(eid=f"e{i}", scheduled_pt_ms=float(i * 100))
+            for i in range(n_injects)
         ]
-        sched = EventScheduler()
-        sched.load_events(events)
+        sched = InjectScheduler()
+        sched.load_injects(injects)
         for pt in ticks:
             sched.tick(pt)
         snap = sched.snapshot()
-        assert len(snap) == n_events
-        required_keys = {"id", "title", "description", "event_type", "scheduled_pt_ms",
-                         "duration_ms", "dependencies", "triggered_issues", "lifecycle",
+        assert len(snap) == n_injects
+        required_keys = {"id", "title", "description", "inject_type", "scheduled_pt_ms",
+                         "duration_ms", "dependencies", "triggered_defects", "lifecycle",
                          "started_at_pt_ms", "completed_at_pt_ms"}
         for entry in snap:
             assert required_keys <= set(entry.keys())
