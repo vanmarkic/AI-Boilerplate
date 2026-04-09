@@ -11,6 +11,8 @@
 
 The spec uses fixed terms: **inject**, **defect**, **decision point**. The codebase currently uses "event" for inject and "issue" for defect. The DomainService that provided flexible per-domain vocabulary is deleted — there is one vocabulary, period.
 
+**Scope guard:** Only TFC domain terms are renamed. Generic programming uses of "event" (Angular `EventEmitter`, DOM events, `@HostListener`, etc.) are untouched.
+
 ### Rename Map
 
 | Current | New | Applies to |
@@ -19,16 +21,18 @@ The spec uses fixed terms: **inject**, **defect**, **decision point**. The codeb
 | `Issue` (class prefix) | `Defect` | `IssueManager` → `DefectManager`, `TrackedIssue` → `TrackedDefect`, `IssueLifecycle` → `DefectLifecycle`, `IssueSnapshot` → `DefectSnapshot`, `IssueChange` → `DefectChange`, `ScenarioIssueDef` → `ScenarioDefectDef` |
 | `event_change` (string) | `inject_change` | WS messages, state changes, audit |
 | `issue_change` (string) | `defect_change` | WS messages, state changes, audit |
-| `event_id` (TFC field) | `inject_id` | Decision links, API params, audit extraction |
-| `issue_id` (TFC field) | `defect_id` | Decision links, DB column, API params, audit |
+| `event_id` (TFC field) | `inject_id` | Decision links, API params, audit extraction, WS handler dict keys |
+| `issue_id` (TFC field) | `defect_id` | Decision links, DB column + ORM model + schemas, API params, audit |
 | `event_type` (field) | `inject_type` | Scenario defs, snapshots |
 | `triggered_issues` (field) | `triggered_defects` | Scenario defs, engine |
 | `trigger_event_id` (field) | `trigger_inject_id` | Defect trigger config |
 | `auto_resolve_ms` (field) | `auto_resolve_pt_ms` | Defect config (also part of ETBOL fix in Part 2) |
-
-**Scope guard:** Only TFC domain terms are renamed. Generic programming uses of "event" (Angular `EventEmitter`, DOM events, `@HostListener`, etc.) are untouched.
+| `domain_id` (field) | **deleted** | Exercise model/schema, scenario model/schema, DB columns |
+| `TriggerMode.EVENT_BASED` | `TriggerMode.INJECT_BASED` | Enum value and all references |
 
 ### File Renames
+
+**Backend engine:**
 
 | Current | New |
 |---|---|
@@ -39,44 +43,188 @@ The spec uses fixed terms: **inject**, **defect**, **decision point**. The codeb
 | `engine/issue_manager.py` | `engine/defect_manager.py` |
 | `engine/issue_manager_test.py` | `engine/defect_manager_test.py` |
 | `engine/issue_manager_prop_test.py` | `engine/defect_manager_prop_test.py` |
-| `frontend/.../event-timeline.component.ts` | `frontend/.../inject-timeline.component.ts` |
-| `frontend/.../event-timeline.component.spec.ts` | `frontend/.../inject-timeline.component.spec.ts` |
-| `frontend/.../scenario-event-editor.ts` | `frontend/.../scenario-inject-editor.ts` |
-| `frontend/.../scenario-issue-editor.ts` | `frontend/.../scenario-defect-editor.ts` |
-| `frontend/.../gm-event-actions.ts` (if exists) | `frontend/.../gm-inject-actions.ts` |
+
+**Frontend:**
+
+| Current | New |
+|---|---|
+| `game-master/event-timeline.component.ts` | `game-master/inject-timeline.component.ts` |
+| `game-master/event-timeline.component.spec.ts` | `game-master/inject-timeline.component.spec.ts` |
+| `game-master/gm-event-actions.ts` | `game-master/gm-inject-actions.ts` |
+| `scenario-builder/scenario-event-editor.ts` | `scenario-builder/scenario-inject-editor.ts` |
+| `scenario-builder/scenario-issue-editor.ts` | `scenario-builder/scenario-defect-editor.ts` |
+
+### ExerciseEngine Internal Renames
+
+| Current | New | Location |
+|---|---|---|
+| `self._events` | `self._injects` | `exercise_engine.py:37` |
+| `self._issues` | `self._defects` | `exercise_engine.py:38` |
+| `event_scheduler` property | `inject_scheduler` property | `exercise_engine.py:56` |
+| `issue_manager` property | `defect_manager` property | `exercise_engine.py:59` |
+| `_handle_decision_events()` | `_handle_decision_injects()` | `exercise_engine.py:151` |
+| Snapshot keys `"events"`, `"issues"` | `"injects"`, `"defects"` | `exercise_engine.py:146-147` |
+| `self._events.load_events(config.events)` | `self._injects.load_injects(config.injects)` | `exercise_engine.py:44` |
+| `self._issues.load_issues(config.issues)` | `self._defects.load_defects(config.defects)` | `exercise_engine.py:45` |
+| All `event_id` local vars/params | `inject_id` | Throughout |
+| All `issue_id` local vars/params | `defect_id` | Throughout |
+
+### EngineConfig Field Renames
+
+| Current | New | Location |
+|---|---|---|
+| `events: list[ScheduledEvent]` | `injects: list[ScheduledInject]` | `engine_config.py` |
+| `issues: list[TrackedIssue]` | `defects: list[TrackedDefect]` | `engine_config.py` |
+
+### DecisionManager Field Renames
+
+| Current | New | Location |
+|---|---|---|
+| `ActiveDecision.event_id` | `ActiveDecision.inject_id` | `decision_manager.py:18` |
+| `ActiveDecision.issue_id` | `ActiveDecision.defect_id` | `decision_manager.py:19` |
+| `open_decision(event_id=, issue_id=)` | `open_decision(inject_id=, defect_id=)` | `decision_manager.py:43-44` |
+| Snapshot dict keys `"event_id"`, `"issue_id"` | `"inject_id"`, `"defect_id"` | `decision_manager.py:122-123` |
+
+### ScenarioContent Field Renames
+
+| Current | New | Location |
+|---|---|---|
+| `ScenarioContent.events` | `ScenarioContent.injects` | `scenario_content.py:70` |
+| `ScenarioContent.issues` | `ScenarioContent.defects` | `scenario_content.py:71` |
+| `ScenarioPhaseDef.events` | `ScenarioPhaseDef.injects` | `scenario_content.py:59` |
+
+### Scenario Loader Function Renames
+
+| Current | New |
+|---|---|
+| `load_scenario_events()` | `load_scenario_injects()` |
+| `load_scenario_issues()` | `load_scenario_defects()` |
+
+### Decision Feature Renames (DB layer)
+
+| Current | New | Location |
+|---|---|---|
+| `Decision.issue_id` (ORM) | `Decision.defect_id` | `decision_model.py:17` |
+| `CreateDecisionRequest.issue_id` | `.defect_id` | `decision_schema.py:13` |
+| `DecisionResponse.issue_id` | `.defect_id` | `decision_schema.py:39` |
+| `DecisionDetailResponse.issue_id` | `.defect_id` | `decision_schema.py:51` |
+| `decision_service.py` — all `issue_id` refs | `defect_id` | `decision_service.py:40,63,171` |
+
+### Exercise Feature — `domain_id` Removal
+
+Remove `domain_id` from:
+- `exercise_model.py:25` — drop `domain_id` column mapping
+- `exercise_schema.py` — remove from `CreateExerciseRequest`, `UpdateExerciseRequest`, `ExerciseResponse`
+- `exercise_service.py` / `exercise_repository.py` — remove any `domain_id` references
+- `scenario_model.py` — drop `domain_id` column mapping
+- `scenario_schema.py` — remove from request/response schemas
+
+### Audit Service Renames
+
+| Current | New | Location |
+|---|---|---|
+| `change.get("event_id")` | `change.get("inject_id")` | `audit_service.py:50` |
+| `change.get("issue_id")` | `change.get("defect_id")` | `audit_service.py:50` |
+
+### Hypothesis Strategies File Renames
+
+`engine/strategies.py` — used by property-based tests:
+
+| Current | New |
+|---|---|
+| `event_ids()` | `inject_ids()` |
+| `issue_ids()` | `defect_ids()` |
+| `scheduled_events()` | `scheduled_injects()` |
+| `tracked_issues()` | `tracked_defects()` |
+| All imports (`ScheduledEvent`, `EventType`, etc.) | Updated to new names |
+| `triggered_issues=[]` | `triggered_defects=[]` |
+| `trigger_event_id=` | `trigger_inject_id=` |
+| `TriggerMode.EVENT_BASED` | `TriggerMode.INJECT_BASED` |
 
 ### API Path Renames
 
 | Current | New |
 |---|---|
-| `POST .../injects/{inject_id}/trigger` | (was `/events/{event_id}/trigger`) |
-| `POST .../injects/{inject_id}/cancel` | (was `/events/{event_id}/cancel`) |
-| `POST .../injects/{inject_id}/complete` | (was `/events/{event_id}/complete`) |
-| `POST .../injects/{inject_id}/pause` | (was `/events/{event_id}/pause`) |
-| `POST .../injects/{inject_id}/resume` | (was `/events/{event_id}/resume`) |
-| `POST .../injects/{inject_id}/delay` | (was `/events/{event_id}/delay`) |
-| `POST .../injects/{inject_id}/skip` | (was `/events/{event_id}/skip`) |
-| `POST .../defects/{defect_id}/activate` | (was `/issues/{issue_id}/activate`) |
-| `POST .../defects/{defect_id}/mitigate` | (was `/issues/{issue_id}/mitigate`) |
-| `POST .../defects/{defect_id}/resolve` | (was `/issues/{issue_id}/resolve`) |
-| `POST .../defects/{defect_id}/release` | (was `/issues/{issue_id}/release`) |
+| `POST .../events/{event_id}/trigger` | `POST .../injects/{inject_id}/trigger` |
+| `POST .../events/{event_id}/cancel` | `POST .../injects/{inject_id}/cancel` |
+| `POST .../events/{event_id}/complete` | `POST .../injects/{inject_id}/complete` |
+| `POST .../events/{event_id}/pause` | `POST .../injects/{inject_id}/pause` |
+| `POST .../events/{event_id}/resume` | `POST .../injects/{inject_id}/resume` |
+| `POST .../events/{event_id}/delay` | `POST .../injects/{inject_id}/delay` |
+| `POST .../events/{event_id}/skip` | `POST .../injects/{inject_id}/skip` |
+| `POST .../issues/{issue_id}/activate` | `POST .../defects/{defect_id}/activate` |
+| `POST .../issues/{issue_id}/mitigate` | `POST .../defects/{defect_id}/mitigate` |
+| `POST .../issues/{issue_id}/resolve` | `POST .../defects/{defect_id}/resolve` |
+| `POST .../issues/{issue_id}/release` | `POST .../defects/{defect_id}/release` |
 
-### Frontend Store Renames
+Operation IDs: `triggerEvent` → `triggerInject`, `cancelEvent` → `cancelInject`, etc. Same pattern for all.
+
+### Frontend TypeScript Interface Renames
+
+**engine-api.service.ts:**
 
 | Current | New |
 |---|---|
+| `EventSnapshot` interface | `InjectSnapshot` |
+| `IssueSnapshot` interface | `DefectSnapshot` |
+| `EngineSnapshot.events` field | `EngineSnapshot.injects` |
+| `EngineSnapshot.issues` field | `EngineSnapshot.defects` |
+| `EventSnapshot.event_type` | `InjectSnapshot.inject_type` |
+| `IssueSnapshot.auto_resolve_ms` | `DefectSnapshot.auto_resolve_pt_ms` |
+
+**scenario-api.service.ts:**
+
+| Current | New |
+|---|---|
+| `ScenarioEventDef` interface | `ScenarioInjectDef` |
+| `ScenarioIssueDef` interface | `ScenarioDefectDef` |
+| `.event_type` field | `.inject_type` |
+| `.triggered_issues` field | `.triggered_defects` |
+| `.trigger_event_id` field | `.trigger_inject_id` |
+| `ScenarioContent.events` | `ScenarioContent.injects` |
+| `ScenarioContent.issues` | `ScenarioContent.defects` |
+
+**decision-api.service.ts:**
+
+| Current | New |
+|---|---|
+| `ActiveDecision.event_id` | `ActiveDecision.inject_id` |
+| `ActiveDecision.issue_id` | `ActiveDecision.defect_id` |
+| `DecisionDetail.issue_id` | `DecisionDetail.defect_id` |
+
+### Frontend Store Renames
+
+**exercise.store.ts** — state shape, signals, computed, methods:
+
+| Current | New |
+|---|---|
+| State `events: EventSnapshot[]` | `injects: InjectSnapshot[]` |
+| State `issues: IssueSnapshot[]` | `defects: DefectSnapshot[]` |
 | `events` signal | `injects` |
 | `issues` signal | `defects` |
-| `activeEvents` | `activeInjects` |
-| `scheduledEvents` | `scheduledInjects` |
-| `completedEvents` | `completedInjects` |
-| `activeIssues` | `activeDefects` |
-| `releasedIssues` | `releasedDefects` |
-| `issuesWithCountdown` | `defectsWithCountdown` |
-| `updateEvent()` | `updateInject()` |
-| `updateIssue()` | `updateDefect()` |
+| `activeEvents` computed | `activeInjects` |
+| `scheduledEvents` computed | `scheduledInjects` |
+| `completedEvents` computed | `completedInjects` |
+| `activeIssues` computed | `activeDefects` |
+| `releasedIssues` computed | `releasedDefects` |
+| `issuesWithCountdown` computed | `defectsWithCountdown` |
+| `updateEvent()` method | `updateInject()` |
+| `updateIssue()` method | `updateDefect()` |
+| `applySnapshot()` — `snapshot.events` | `snapshot.injects` |
+| `applySnapshot()` — `snapshot.issues` | `snapshot.defects` |
+
+**scenario-builder.store.ts:**
+
+| Current | New |
+|---|---|
+| `addEvent()` / `removeEvent()` / `updateEvent()` | `addInject()` / `removeInject()` / `updateInject()` |
+| `addIssue()` / `removeIssue()` / `updateIssue()` | `addDefect()` / `removeDefect()` / `updateDefect()` |
+| `content().events` | `content().injects` |
+| `content().issues` | `content().defects` |
 
 ### Frontend Service Method Renames
+
+**engine-api.service.ts:**
 
 | Current | New |
 |---|---|
@@ -92,12 +240,52 @@ The spec uses fixed terms: **inject**, **defect**, **decision point**. The codeb
 | `resolveIssue()` | `resolveDefect()` |
 | `releaseIssue()` | `releaseDefect()` |
 
-### Scenario Builder Store Renames
+### WS Handler String Literal Renames
+
+**gm-ws-handler.ts:**
 
 | Current | New |
 |---|---|
-| `addEvent()` / `removeEvent()` / `updateEvent()` | `addInject()` / `removeInject()` / `updateInject()` |
-| `addIssue()` / `removeIssue()` / `updateIssue()` | `addDefect()` / `removeDefect()` / `updateDefect()` |
+| `'event_change'` | `'inject_change'` |
+| `change['event_id']` | `change['inject_id']` |
+| `'issue_change'` | `'defect_change'` |
+| `change['issue_id']` | `change['defect_id']` |
+| `store.updateEvent()` | `store.updateInject()` |
+| `store.updateIssue()` | `store.updateDefect()` |
+
+**player-view.ts** (inline WS handler):
+
+Same pattern as above — `'event_change'` → `'inject_change'`, `change['event_id']` → `change['inject_id']`, etc.
+
+### GM Action Helper Renames
+
+**gm-inject-actions.ts** (renamed from `gm-event-actions.ts`):
+
+| Current | New |
+|---|---|
+| `createEventActions()` | `createInjectActions()` |
+| `createIssueActions()` | `createDefectActions()` |
+| Internal calls `api.triggerEvent()` etc. | `api.triggerInject()` etc. |
+
+### Timeline Utility Renames
+
+**timeline-utils.ts:**
+
+| Current | New |
+|---|---|
+| Parameter `events: EventSnapshot[]` | `injects: InjectSnapshot[]` |
+| Parameter `issues: IssueSnapshot[]` | `defects: DefectSnapshot[]` |
+| Return `.eventItems` | `.injectItems` |
+| Return `.issueItems` | `.defectItems` |
+
+### Review View Renames
+
+**review-view.ts:**
+
+| Current | New |
+|---|---|
+| Filter `e.entry_type === 'event_change'` | `e.entry_type === 'inject_change'` |
+| Card title "Event Summary" | "Inject Summary" |
 
 ### DomainService Deletion
 
@@ -107,7 +295,7 @@ The spec uses fixed terms: **inject**, **defect**, **decision point**. The codeb
 - `apps/tfc/frontend/src/app/shared/domain-selector.component.spec.ts`
 
 **Remove from consumers (10 files):**
-All `domain.term('event')` calls → hardcoded `'Inject'`. All `domain.term('issue')` calls → hardcoded `'Defect'`. All `domain.term('decision')` calls → hardcoded `'Decision'`. All `domain.term('exercise')` calls → hardcoded `'Exercise'`. All `domain.term('participant')` calls → hardcoded `'Participant'`. All `domain.term('gameMaster')` calls → hardcoded `'Game Master'`.
+All `domain.term('event')` → hardcoded `'Inject'`. All `domain.term('issue')` → hardcoded `'Defect'`. All `domain.term('decision')` → hardcoded `'Decision'`. All `domain.term('exercise')` → hardcoded `'Exercise'`. All `domain.term('participant')` → hardcoded `'Participant'`. All `domain.term('gameMaster')` → hardcoded `'Game Master'`.
 
 Remove `DomainSelectorComponent` from game-master-view template and imports.
 
@@ -132,7 +320,7 @@ def downgrade():
 ### Seed Data
 
 `sample_er_scenario.py` dict keys:
-- `"events"` → `"injects"`
+- `"events"` → `"injects"` (top-level and inside phase definitions)
 - `"issues"` → `"defects"`
 - `"event_type"` → `"inject_type"`
 - `"triggered_issues"` → `"triggered_defects"`
@@ -140,21 +328,90 @@ def downgrade():
 
 ID values (`evt-*`, `iss-*`) remain unchanged — they are opaque identifiers.
 
+### E2E Fixtures
+
+`apps/tfc/frontend/e2e/fixtures/base.fixture.ts` — remove `domain_id: null` from mock exercise responses.
+
 ### Documentation Updates
 
-- `apps/tfc/AGENTS.md` — rename all domain model references, update architecture diagrams, update engine concepts section
+- `apps/tfc/AGENTS.md` — rename all domain model references (`EventScheduler` → `InjectScheduler`, `IssueManager` → `DefectManager`, etc.), update architecture diagram, update engine concepts section, remove stale `@aspect/tfc-shared` references (`ExerciseEvent`, `Issue`, `EVENT_TRANSITIONS`, `ISSUE_TRANSITIONS`, `DomainConfig`), remove `domain` from shared services list
+- `apps/tfc/README.md` — rename all "events"/"issues" references to "injects"/"defects"
 - `docs/plans/*.md` — leave as-is (historical records)
 - `docs/exercise-control.md` — already uses correct terms, no changes needed
 
-### TriggerMode Rename
+### Full File Inventory
 
-`TriggerMode.EVENT_BASED` → `TriggerMode.INJECT_BASED` (enum value and all references).
+Every file requiring internal terminology changes (beyond the file renames listed above):
+
+**Backend engine (internal renames):**
+- `engine/exercise_engine.py` — properties, methods, snapshot keys, imports
+- `engine/exercise_engine_test.py` — test classes, fixtures, assertions
+- `engine/exercise_engine_p2_test.py` — same
+- `engine/engine_config.py` — field names, imports
+- `engine/state_changes.py` — TypedDict names, type strings, field names
+- `engine/decision_manager.py` — field names, method params, snapshot keys
+- `engine/decision_manager_test.py` — test data, assertions
+- `engine/decision_manager_p2_test.py` — same
+- `engine/decision_manager_prop_test.py` — same
+- `engine/strategies.py` — strategy functions, imports, field names
+- `engine/conftest.py` — fixture names if applicable
+
+**Backend features (internal renames):**
+- `features/exercise/engine_actions_router.py` — paths, params, operation IDs, function names
+- `features/exercise/engine_actions_router_test.py` — test data, assertions
+- `features/exercise/engine_router.py` — engine property access
+- `features/exercise/ws_router.py` — state change type strings if present
+- `features/exercise/exercise_model.py` — remove `domain_id`
+- `features/exercise/exercise_schema.py` — remove `domain_id`
+- `features/exercise/exercise_service.py` — remove `domain_id` references
+- `features/decision/decision_model.py` — `issue_id` → `defect_id`
+- `features/decision/decision_schema.py` — `issue_id` → `defect_id`
+- `features/decision/decision_service.py` — `issue_id` → `defect_id`
+- `features/decision/decision_router.py` — if references `issue_id`
+- `features/decision/decision_test.py` — test data
+- `features/scenario/scenario_content.py` — model names, field names
+- `features/scenario/scenario_content_test.py` — test data
+- `features/scenario/scenario_content_p2_test.py` — test data
+- `features/scenario/scenario_loader.py` — function names, field access
+- `features/scenario/scenario_loader_test.py` — test data
+- `features/scenario/scenario_model.py` — remove `domain_id`
+- `features/scenario/scenario_schema.py` — remove `domain_id` if present
+- `features/scenario/sample_er_scenario.py` — dict keys
+- `features/scenario/sample_er_scenario_test.py` — test data
+- `features/audit/audit_service.py` — dict key extraction
+- `features/audit/audit_test.py` — test data strings
+
+**Frontend (internal renames):**
+- `core/engine-api.service.ts` — interfaces, methods
+- `core/decision-api.service.ts` — interface fields
+- `core/scenario-api.service.ts` — interfaces, fields
+- `core/exercise-ws.service.ts` — WS message type strings
+- `core/exercise.store.ts` — state shape, signals, computed, methods
+- `core/exercise.store.spec.ts` — test data
+- `features/game-master/game-master-view.ts` — template bindings, imports, DomainService removal
+- `features/game-master/game-master-view.spec.ts` — test data
+- `features/game-master/gm-ws-handler.ts` — string literals, store calls
+- `features/game-master/gm-item-actions.component.ts` — input names
+- `features/game-master/gm-item-actions.component.spec.ts` — test data
+- `features/game-master/timeline-lane.component.ts` — if references event/issue types
+- `features/game-master/timeline-lane.component.spec.ts` — test data
+- `features/game-master/timeline-utils.ts` — params, return properties
+- `features/game-master/timeline-utils.spec.ts` — test data
+- `features/game-master/scenario-picker.ts` — DomainService removal
+- `features/game-master/scenario-picker.spec.ts` — test data
+- `features/player/player-view.ts` — WS strings, store calls, template text, DomainService removal
+- `features/player/player-ws-handler.ts` — string literals, store calls
+- `features/scenario-builder/scenario-builder-view.ts` — store calls, DomainService removal
+- `features/scenario-builder/scenario-builder.store.ts` — methods, field access
+- `features/review/review-view.ts` — filter strings, card titles
+- `e2e/fixtures/base.fixture.ts` — remove `domain_id`
+- `e2e/tests/*.spec.ts` — if references old terminology
 
 ---
 
 ## Part 2: Spec Gap Closure
 
-All changes below use the new terminology from Part 1. These are absorbed from the prior EXCON default mode design spec with no semantic changes.
+All changes below use the new terminology from Part 1. Absorbed from the prior EXCON default mode design spec.
 
 ### Change 1: Inject Execution Mode
 
@@ -178,12 +435,12 @@ All changes below use the new terminology from Part 1. These are absorbed from t
 
 | Layer | File (post-rename) | Change |
 |---|---|---|
-| Scenario content | `scenario_content.py:ScenarioDefectDef` | Rename `auto_resolve_ms` → `auto_resolve_pt_ms`. Add `auto_resolve_rt_ms: float = 0` |
+| Scenario content | `scenario_content.py:ScenarioDefectDef` | `auto_resolve_pt_ms` (renamed from `auto_resolve_ms`). Add `auto_resolve_rt_ms: float = 0` |
 | Loader | `scenario_loader.py` | Map both fields to `TrackedDefect` |
-| Engine runtime | `defect_manager.py:TrackedDefect` | Rename `auto_resolve_ms` → `auto_resolve_pt_ms`. Add `auto_resolve_rt_ms: float = 0.0`. Add `activated_at_rt_ms: float | None = None` |
+| Engine runtime | `defect_manager.py:TrackedDefect` | `auto_resolve_pt_ms` (renamed). Add `auto_resolve_rt_ms: float = 0.0`. Add `activated_at_rt_ms: float | None = None` |
 | Engine logic | `defect_manager.py:tick()` | New param `current_rt_ms: float`. Check both countdowns; resolve on whichever expires first. `_activate()` records `activated_at_rt_ms` |
 | Engine caller | `exercise_engine.py:tick()` | Pass `self._time.real_time_ms` to `self._defects.tick()` |
-| State changes | `state_changes.py:DefectSnapshot` | Rename `auto_resolve_ms` → `auto_resolve_pt_ms`. Add `auto_resolve_rt_ms: float` |
+| State changes | `state_changes.py:DefectSnapshot` | `auto_resolve_pt_ms` (renamed). Add `auto_resolve_rt_ms: float` |
 | Snapshot | `defect_manager.py:snapshot()` | Include both fields |
 
 ### Change 3: Fix `all_respond` Completion Mode
@@ -192,16 +449,20 @@ All changes below use the new terminology from Part 1. These are absorbed from t
 
 | Layer | File (post-rename) | Change |
 |---|---|---|
-| Engine | `decision_manager.py` | New method: `all_target_roles_responded(decision_id) -> bool` |
-| HTTP handler | `engine_router.py:submit_recommendation()` | After recording, check `all_respond` + `all_target_roles_responded()`. If yes, call `engine.close_decision()` |
+| Engine | `decision_manager.py` | New method: `all_target_roles_responded(decision_id) -> bool` — checks every role in `target_roles` has at least one recommendation |
+| HTTP handler | `engine_router.py:submit_recommendation()` | After recording, check `completion_mode == "all_respond"` and `all_target_roles_responded()`. If yes, call `engine.close_decision()` |
+
+**Semantics:** "All respond" = all `target_roles` have at least one recommendation. Not all participants — all *roles*.
 
 ### Change 4: Scoring Hidden During Execution
 
 **Spec ref:** Lines 211-221 — "Scoring is optional and invisible during exercise execution"
 
-| Layer | File (post-rename) | Change |
-|---|---|---|
-| Engine | `exercise_engine.py:snapshot()` | Return `score=self._config.game_mode.snapshot() if self._phase == EnginePhase.COMPLETED else None` |
+**Current state:** The engine snapshot (`exercise_engine.py:snapshot()`) has no `score` key. There is no `GameMode` class in the codebase — scoring lives only in `DecisionService._calculate_score()` at the DB layer.
+
+**Action:** No engine change needed. Scoring is already invisible during execution because it's never been exposed in the snapshot. The spec requirement is satisfied by the current architecture. If a `score` summary is needed post-exercise, it comes from `DecisionService.list_decisions()` which queries the DB — this is already a debrief-only path.
+
+**Verify with test:** Add one test asserting `snapshot()` does not contain a `"score"` key during any phase.
 
 ### Change 5: DecisionTemplate.defect_id Optional
 
@@ -216,11 +477,11 @@ All changes below use the new terminology from Part 1. These are absorbed from t
 
 **Spec ref:** Lines 203-210 — "All state transitions and actions are logged... Trainer overrides"
 
-8 entity action endpoints in `engine_actions_router.py` bypass `_on_state_change()` and therefore bypass audit logging. Fix: route all changes through `engine._on_state_change([change])`.
+10 entity action endpoints in `engine_actions_router.py` bypass `_on_state_change()` and therefore bypass audit logging. Fix: route all changes through `engine._on_state_change([change])`.
 
-Affected endpoints (post-rename):
-- `cancel_inject`, `complete_inject`, `pause_inject`, `resume_inject`, `delay_inject`, `skip_inject`
-- `activate_defect`, `mitigate_defect`, `resolve_defect`, `release_defect`
+Affected endpoints (post-rename, 10 total):
+- `cancel_inject`, `complete_inject`, `pause_inject`, `resume_inject`, `delay_inject`, `skip_inject` (6 inject actions)
+- `activate_defect`, `mitigate_defect`, `resolve_defect`, `release_defect` (4 defect actions)
 
 (`trigger_inject` already broadcasts correctly.)
 
@@ -314,7 +575,7 @@ Smoke test flow:
 6. Decision opens → exercise pauses
 7. Trainees respond → completion condition met → decision closes
 8. Trainer completes exercise → COMPLETED phase
-9. Score revealed in snapshot
+9. Score revealed via decision detail API (debrief path)
 10. Audit trail verified: all injects, decisions, trainer overrides logged with RT/PT
 
 ---
@@ -332,6 +593,7 @@ Smoke test flow:
 | Stress dimension | Waiting on PM formula |
 | `max_selections` on decisions | No server validation yet; not blocking |
 | Systems + warfare domains in trainee sidebar | Not in exercise-control.md spec; deferred |
+| Defect "control mode" (auto/manual/hybrid for resolution) | Spec line 125 mentions it but current `TriggerMode` + manual override covers the use cases |
 
 ## Test Impact
 
@@ -341,6 +603,6 @@ Smoke test flow:
 | Execution mode | 0 existing | 2-3 unit tests for MANUAL skip |
 | ETBOL RT/PT | 4 files (rename field) | 3 property tests (PT-only, RT-only, both) |
 | `all_respond` | 0 existing | 1-2 integration tests |
-| Scoring visibility | 0 existing | 1 test for score=None during RUNNING |
+| Scoring visibility | 0 existing | 1 test asserting no score key in snapshot |
 | `defect_id` optional | 0 existing | 0 |
 | Audit completeness | 0 existing | 1 integration test |
