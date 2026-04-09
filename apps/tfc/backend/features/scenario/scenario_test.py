@@ -9,14 +9,14 @@ async def test_create_scenario(client: AsyncClient) -> None:
         json={
             "title": "Alpha Scenario",
             "description": "Test scenario",
-            "content": {"phases": [], "events": []},
+            "content": {"phases": [], "injects": []},
         },
     )
     assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Alpha Scenario"
     assert data["version"] == 1
-    assert data["content"] == {"phases": [], "events": []}
+    assert data["content"] == {"phases": [], "injects": []}
 
 
 @pytest.mark.asyncio
@@ -46,20 +46,6 @@ async def test_list_scenarios(client: AsyncClient) -> None:
     response = await client.get("/api/scenarios")
     assert response.status_code == 200
     assert len(response.json()) >= 2
-
-
-@pytest.mark.asyncio
-async def test_list_scenarios_by_domain(client: AsyncClient) -> None:
-    await client.post(
-        "/api/scenarios", json={"title": "Domain Sc", "domain_id": 42},
-    )
-    await client.post(
-        "/api/scenarios", json={"title": "Other Sc", "domain_id": 99},
-    )
-
-    response = await client.get("/api/scenarios?domain_id=42")
-    assert response.status_code == 200
-    assert all(s["domain_id"] == 42 for s in response.json())
 
 
 @pytest.mark.asyncio

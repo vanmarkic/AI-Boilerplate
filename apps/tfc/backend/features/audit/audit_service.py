@@ -47,7 +47,7 @@ class AuditService:
                 entry_type=change.get("type", "unknown"),
                 action=change.get("action", "unknown"),
                 target_type=change.get("type", "").replace("_change", ""),
-                target_id=change.get("event_id") or change.get("issue_id"),
+                target_id=change.get("inject_id") or change.get("defect_id"),
                 play_time_ms=play_time_ms,
                 real_time_ms=real_time_ms,
                 details=change,

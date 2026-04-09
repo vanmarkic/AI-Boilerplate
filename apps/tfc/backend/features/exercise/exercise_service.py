@@ -36,7 +36,6 @@ class ExerciseService:
             description=request.description,
             phase=request.phase,
             scenario_id=request.scenario_id,
-            domain_id=request.domain_id,
             time_factor=request.time_factor,
         )
         created = await self.repository.create(exercise)

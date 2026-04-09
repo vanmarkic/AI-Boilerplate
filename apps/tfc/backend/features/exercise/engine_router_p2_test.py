@@ -4,7 +4,7 @@ from features.exercise.engine_router import _split_targeted_changes
 
 def test_split_no_targeted_changes() -> None:
     changes = [
-        {"type": "event_change", "event_id": "e1", "action": "started"},
+        {"type": "inject_change", "inject_id": "e1", "action": "started"},
         {"type": "phase_change", "phase": "running"},
     ]
     targeted, general = _split_targeted_changes(changes)
@@ -14,7 +14,7 @@ def test_split_no_targeted_changes() -> None:
 
 def test_split_decision_with_target_roles() -> None:
     changes = [
-        {"type": "event_change", "event_id": "e1", "action": "started"},
+        {"type": "inject_change", "inject_id": "e1", "action": "started"},
         {
             "type": "decision_opened", "decision_id": "d1",
             "target_roles": ["player"],
@@ -22,7 +22,7 @@ def test_split_decision_with_target_roles() -> None:
     ]
     targeted, general = _split_targeted_changes(changes)
     assert len(general) == 1
-    assert general[0]["type"] == "event_change"
+    assert general[0]["type"] == "inject_change"
     assert len(targeted) == 1
     roles, role_changes = targeted[0]
     assert "player" in roles

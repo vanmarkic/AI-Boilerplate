@@ -48,20 +48,20 @@ class TestAuditLog:
         entry_mock = MagicMock()
         entry_mock.id = 1
         entry_mock.exercise_id = 42
-        entry_mock.entry_type = "event_change"
+        entry_mock.entry_type = "inject_change"
         entry_mock.action = "activated"
         entry_mock.actor_id = None
         entry_mock.actor_name = None
-        entry_mock.target_type = "event"
+        entry_mock.target_type = "inject"
         entry_mock.target_id = "e1"
         entry_mock.play_time_ms = 1000.0
         entry_mock.real_time_ms = 500.0
-        entry_mock.details = {"event_id": "e1"}
+        entry_mock.details = {"inject_id": "e1"}
         entry_mock.created_at = "2026-01-01T00:00:00"
         repo.list_by_exercise = AsyncMock(return_value=[entry_mock])
         service = AuditService(repo)
 
-        results = await service.get_exercise_log(42, entry_type="event_change")
+        results = await service.get_exercise_log(42, entry_type="inject_change")
         assert len(results) == 1
         assert results[0].target_id == "e1"
         repo.list_by_exercise.assert_awaited_once_with(42, entry_type="event_change")

@@ -30,10 +30,9 @@ async def create_scenario(
     operation_id="listScenarios",
 )
 async def list_scenarios(
-    domain_id: int | None = None,
     service: ScenarioService = Depends(get_scenario_service),
 ) -> list[ScenarioResponse]:
-    return await service.list_scenarios(domain_id)
+    return await service.list_scenarios()
 
 
 @router.get(

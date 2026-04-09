@@ -10,7 +10,6 @@ class CreateExerciseRequest(BaseModel):
     description: str = ""
     phase: str = "setup"
     scenario_id: int | None = None
-    domain_id: int | None = None
     time_factor: float = 1.0
 
 
@@ -19,7 +18,6 @@ class UpdateExerciseRequest(BaseModel):
     description: str | None = None
     phase: str | None = None
     scenario_id: int | None = None
-    domain_id: int | None = None
     time_factor: float | None = None
 
 
@@ -29,7 +27,6 @@ class ExerciseResponse(ResponseBase):
     description: str
     phase: str
     scenario_id: int | None
-    domain_id: int | None
     time_factor: float
     session_code: str
     created_at: datetime
