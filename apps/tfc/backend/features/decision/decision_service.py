@@ -37,7 +37,7 @@ class DecisionService:
             )
         decision = Decision(
             exercise_id=request.exercise_id,
-            issue_id=request.issue_id,
+            defect_id=request.defect_id,
             title=request.title,
             description=request.description,
             question_type=request.question_type,
@@ -61,7 +61,7 @@ class DecisionService:
         return DecisionDetailResponse(
             id=decision.id,
             exercise_id=decision.exercise_id,
-            issue_id=decision.issue_id,
+            defect_id=decision.defect_id,
             title=decision.title,
             description=decision.description,
             question_type=decision.question_type,
@@ -168,7 +168,7 @@ class DecisionService:
         return DecisionResponse(
             id=decision.id,
             exercise_id=decision.exercise_id,
-            issue_id=decision.issue_id,
+            defect_id=decision.defect_id,
             title=decision.title,
             description=decision.description,
             question_type=decision.question_type,

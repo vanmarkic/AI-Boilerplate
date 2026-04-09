@@ -14,7 +14,7 @@ class Decision(Base):
     exercise_id: Mapped[int] = mapped_column(
         Integer, ForeignKey("tfc_exercises.id"),
     )
-    issue_id: Mapped[str] = mapped_column(String(255))
+    defect_id: Mapped[str] = mapped_column(String(255))
     title: Mapped[str] = mapped_column(String(255))
     description: Mapped[str] = mapped_column(Text, default="")
     question_type: Mapped[str] = mapped_column(String(50))

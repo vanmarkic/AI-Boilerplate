@@ -9,7 +9,7 @@ class CreateDecisionRequest(BaseModel):
     title: str
     description: str = ""
     exercise_id: int
-    issue_id: str
+    defect_id: str
     question_type: str
     options: list[dict] = []
     completion_mode: str
@@ -34,7 +34,7 @@ class ResponseItem(ResponseBase):
 class DecisionResponse(ResponseBase):
     id: int
     exercise_id: int
-    issue_id: str
+    defect_id: str
     title: str
     description: str
     question_type: str
@@ -49,7 +49,7 @@ class DecisionResponse(ResponseBase):
 class DecisionDetailResponse(ResponseBase):
     id: int
     exercise_id: int
-    issue_id: str
+    defect_id: str
     title: str
     description: str
     question_type: str

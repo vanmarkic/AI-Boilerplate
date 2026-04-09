@@ -14,7 +14,7 @@ def _mock_decision(**overrides) -> MagicMock:  # noqa: ANN003
     defaults = {
         "id": 1,
         "exercise_id": 42,
-        "issue_id": "issue-1",
+        "defect_id": "issue-1",
         "title": "Test Decision",
         "description": "desc",
         "question_type": "single_choice",
@@ -66,7 +66,7 @@ class TestCreateDecision:
             title="Test",
             description="desc",
             exercise_id=42,
-            issue_id="issue-1",
+            defect_id="issue-1",
             question_type="single_choice",
             options=[{"id": "a", "label": "Isolate", "score": 10}],
             completion_mode="first_response",
@@ -83,7 +83,7 @@ class TestCreateDecision:
             await svc.create_decision(CreateDecisionRequest(
                 title="Bad",
                 exercise_id=1,
-                issue_id="x",
+                defect_id="x",
                 question_type="invalid",
                 completion_mode="first_response",
             ))
