@@ -91,16 +91,18 @@ async def list_joinable_exercises(
         if exercise.player_count_mode == "two_player":
             max_players = 2
         else:
-            max_players = len(content.roles) + (1 if requires_trainer else 0)
-        current = waiting_room_store.count(exercise.id)
+            max_players = len(content.roles)
+        # Count only non-trainer participants toward crew readiness
+        all_participants = waiting_room_store.list_participants(exercise.id)
+        current = sum(1 for p in all_participants if p.role != "trainer")
         if current >= max_players:
             continue
 
-        participants = waiting_room_store.list_participants(exercise.id)
+        crew_participants = [p for p in all_participants if p.role != "trainer"]
         results.append(
             {
                 "exercise": exercise.model_dump(),
-                "participants": [p.to_dict() for p in participants],
+                "participants": [p.to_dict() for p in crew_participants],
                 "roles": [r.model_dump() for r in content.roles],
                 "max_players": max_players,
                 "requires_trainer": requires_trainer,

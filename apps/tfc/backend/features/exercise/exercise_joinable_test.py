@@ -196,7 +196,8 @@ class TestJoinableEndpoint:
         data = resp.json()
         assert len(data) == 1
         assert data[0]["requires_trainer"] is True
-        assert data[0]["max_players"] == 3  # 2 roles + 1 GM
+        # Trainer is auto-assigned and excluded from crew count
+        assert data[0]["max_players"] == 2  # 2 player roles only
 
     @pytest.mark.asyncio
     async def test_excludes_practice_mode_exercises(
