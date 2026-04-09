@@ -323,7 +323,7 @@ test.describe.serial(
 
     // ── 5. Decision opens from event, player sees overlay ───────────
 
-    test("decision opens and player sees decision overlay", async ({
+    test("decision opens and player sees inline role card", async ({
       page,
     }) => {
       // evt-t1 is a decision event — wait for decision to open
@@ -332,18 +332,14 @@ test.describe.serial(
       await page.goto(playerUrl());
       await dismissViteErrors(page);
 
-      // Decision overlay should appear
-      await expect(page.locator(".decision-overlay")).toBeVisible({
-        timeout: 10_000,
-      });
-      await expect(
-        page.locator(".decision-overlay__title"),
-      ).toHaveText("Decision Required");
+      // Classic mode: no blocking overlay — decision is inline in the board
+      await expect(page.locator(".decision-overlay")).not.toBeAttached();
 
-      // At least one role card in the overlay
-      await expect(
-        page.locator(".decision-overlay tfc-role-card").first(),
-      ).toBeVisible({ timeout: 5_000 });
+      // Role card with checkboxes visible in the board grid
+      const card = page.locator(".board-grid tfc-role-card").first();
+      await expect(card).toBeVisible({ timeout: 10_000 });
+      await expect(card.locator('input[type="checkbox"]').first()).toBeVisible();
+      await expect(card.getByRole("button", { name: "Submit" })).toBeVisible();
 
       // Close the decision via API (GM action)
       const snap = await getSnapshot(exerciseId);
