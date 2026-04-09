@@ -1,19 +1,15 @@
-"""Manages defect (issue) lifecycle with activation triggers and auto-resolve countdowns.
+"""Manages issue lifecycle with activation triggers and auto-resolve countdowns.
 
-Domain term: "defect". Code uses "issue" throughout.
-Also known as: DefectManager, defect manager.
-
-Defects progress through: inactive -> active -> mitigated -> resolved.
-Trigger modes: time-based, inject-based (event-based), manual (GM).
-Auto-resolve countdown = time in PT before the defect resolves automatically.
+Issues progress through: inactive -> active -> mitigated -> resolved.
+Trigger modes: time-based, event-based, manual (GM).
+Auto-resolve countdown = time in PT before the issue resolves automatically.
 """
-
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import StrEnum
 
-from engine.state_changes import IssueChange, IssueSnapshot
+from engine.state_changes import IssueChange
 
 
 class IssueLifecycle(StrEnum):
@@ -39,8 +35,7 @@ VALID_TRANSITIONS: dict[IssueLifecycle, set[IssueLifecycle]] = {
 
 @dataclass
 class TrackedIssue:
-    """Runtime representation of a defect (issue) during exercise execution."""
-
+    """Runtime representation of an issue during exercise execution."""
     id: str
     title: str
     description: str
@@ -55,10 +50,7 @@ class TrackedIssue:
 
 
 class IssueManager:
-    """Manages defect (issue) activation, auto-resolve countdowns, and lifecycle.
-
-    Also known as: DefectManager.
-    """
+    """Manages issue activation, auto-resolve countdowns, and lifecycle."""
 
     def __init__(self) -> None:
         self._issues: dict[str, TrackedIssue] = {}
@@ -77,7 +69,7 @@ class IssueManager:
         self,
         current_pt_ms: float,
         completed_event_ids: set[str],
-    ) -> list[IssueChange]:
+    ) -> list[dict]:
         """Check all issues for activation and auto-resolve expiry.
 
         Args:
@@ -87,7 +79,7 @@ class IssueManager:
         Returns:
             List of state change dicts for broadcasting.
         """
-        changes: list[IssueChange] = []
+        changes: list[dict] = []
 
         for issue in self._issues.values():
             if issue.lifecycle == IssueLifecycle.INACTIVE:
@@ -106,12 +98,10 @@ class IssueManager:
         return changes
 
     def activate_by_event(
-        self,
-        event_id: str,
-        current_pt_ms: float,
-    ) -> list[IssueChange]:
+        self, event_id: str, current_pt_ms: float,
+    ) -> list[dict]:
         """Activate all issues triggered by a specific event."""
-        changes: list[IssueChange] = []
+        changes: list[dict] = []
         for issue in self._issues.values():
             if (
                 issue.lifecycle == IssueLifecycle.INACTIVE
@@ -123,10 +113,8 @@ class IssueManager:
         return changes
 
     def manual_activate(
-        self,
-        issue_id: str,
-        current_pt_ms: float,
-    ) -> IssueChange | None:
+        self, issue_id: str, current_pt_ms: float,
+    ) -> dict | None:
         """GM manually activates an issue."""
         issue = self._issues.get(issue_id)
         if not issue or issue.lifecycle != IssueLifecycle.INACTIVE:
@@ -134,7 +122,7 @@ class IssueManager:
         self._activate(issue, current_pt_ms)
         return self._change(issue, "manual_activated")
 
-    def mitigate(self, issue_id: str) -> IssueChange | None:
+    def mitigate(self, issue_id: str) -> dict | None:
         """Transition issue to mitigated state."""
         issue = self._issues.get(issue_id)
         if not issue or issue.lifecycle != IssueLifecycle.ACTIVE:
@@ -143,10 +131,8 @@ class IssueManager:
         return self._change(issue, "mitigated")
 
     def resolve(
-        self,
-        issue_id: str,
-        current_pt_ms: float,
-    ) -> IssueChange | None:
+        self, issue_id: str, current_pt_ms: float,
+    ) -> dict | None:
         """Resolve an active or mitigated issue."""
         issue = self._issues.get(issue_id)
         if not issue:
@@ -157,7 +143,7 @@ class IssueManager:
         issue.resolved_at_pt_ms = current_pt_ms
         return self._change(issue, "resolved")
 
-    def release_to_players(self, issue_id: str) -> IssueChange | None:
+    def release_to_players(self, issue_id: str) -> dict | None:
         """Mark an issue as visible to players."""
         issue = self._issues.get(issue_id)
         if not issue or issue.lifecycle == IssueLifecycle.INACTIVE:
@@ -173,11 +159,13 @@ class IssueManager:
     ) -> bool:
         if issue.trigger_mode == TriggerMode.TIME_BASED:
             return (
-                issue.trigger_time_pt_ms is not None and current_pt_ms >= issue.trigger_time_pt_ms
+                issue.trigger_time_pt_ms is not None
+                and current_pt_ms >= issue.trigger_time_pt_ms
             )
         if issue.trigger_mode == TriggerMode.EVENT_BASED:
             return (
-                issue.trigger_event_id is not None and issue.trigger_event_id in completed_event_ids
+                issue.trigger_event_id is not None
+                and issue.trigger_event_id in completed_event_ids
             )
         return False  # manual triggers don't auto-activate
 
@@ -205,18 +193,18 @@ class IssueManager:
             "released": issue.released_to_players,
         }
 
-    def snapshot(self) -> list[IssueSnapshot]:
+    def snapshot(self) -> list[dict]:
         return [
-            IssueSnapshot(
-                id=i.id,
-                title=i.title,
-                description=i.description,
-                trigger_mode=i.trigger_mode.value,
-                auto_resolve_ms=i.auto_resolve_ms,
-                lifecycle=i.lifecycle.value,
-                activated_at_pt_ms=i.activated_at_pt_ms,
-                resolved_at_pt_ms=i.resolved_at_pt_ms,
-                released=i.released_to_players,
-            )
+            {
+                "id": i.id,
+                "title": i.title,
+                "description": i.description,
+                "trigger_mode": i.trigger_mode.value,
+                "auto_resolve_ms": i.auto_resolve_ms,
+                "lifecycle": i.lifecycle.value,
+                "activated_at_pt_ms": i.activated_at_pt_ms,
+                "resolved_at_pt_ms": i.resolved_at_pt_ms,
+                "released": i.released_to_players,
+            }
             for i in self._issues.values()
         ]

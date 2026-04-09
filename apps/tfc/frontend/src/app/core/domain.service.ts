@@ -1,95 +1,109 @@
-import { Injectable, inject, signal } from "@angular/core";
-import { firstValueFrom } from "rxjs";
-import {
-  DomainConfigApiService,
-  type DomainConfigResponse,
-  type TerminologyMap,
-} from "./domain-config-api.service";
+import { Injectable, signal } from '@angular/core';
 
-const FALLBACK_TERMINOLOGY: TerminologyMap = {
-  event: "Event",
-  issue: "Issue",
-  player: "Player",
-  gameMaster: "Game Master",
-  exercise: "Exercise",
-  scenario: "Scenario",
-  decision: "Decision",
-};
+export interface DomainTerminology {
+  event: string;
+  issue: string;
+  decision: string;
+  participant: string;
+  gameMaster: string;
+  exercise: string;
+}
 
-const FALLBACK_DOMAIN: DomainConfigResponse = {
-  id: 0,
-  slug: "default",
-  name: "Default",
-  description: "",
-  terminology: FALLBACK_TERMINOLOGY,
-  theme: {
-    colorPrimary: "#3b82f6",
-    colorSecondary: "#6366f1",
-    colorBackground: "#ffffff",
-    colorForeground: "#1e293b",
-    fontFamily: "system-ui, sans-serif",
-    fontFamilyMono: "ui-monospace, monospace",
-    density: "comfortable",
+export interface DomainConfig {
+  id: string;
+  name: string;
+  theme: string;
+  terminology: DomainTerminology;
+}
+
+const DEFAULT_DOMAIN: DomainConfig = {
+  id: 'default',
+  name: 'Default',
+  theme: 'tfc-hoi',
+  terminology: {
+    event: 'Event',
+    issue: 'Issue',
+    decision: 'Decision',
+    participant: 'Participant',
+    gameMaster: 'Game Master',
+    exercise: 'Exercise',
   },
-  roles: [],
-  severity_levels: [],
-  systems: [],
-  warfare_domains: [],
-  blue_card_catalog: [],
-  created_at: "",
-  updated_at: "",
 };
 
-@Injectable({ providedIn: "root" })
-export class DomainService {
-  private readonly api = inject(DomainConfigApiService);
+const CYBERSECURITY_DOMAIN: DomainConfig = {
+  id: 'cybersecurity',
+  name: 'Cybersecurity',
+  theme: 'tfc-cyber',
+  terminology: {
+    event: 'Incident',
+    issue: 'Threat',
+    decision: 'Response Action',
+    participant: 'Analyst',
+    gameMaster: 'Exercise Director',
+    exercise: 'Cyber Exercise',
+  },
+};
 
-  readonly activeDomain = signal<DomainConfigResponse>(FALLBACK_DOMAIN);
-  readonly availableDomains = signal<DomainConfigResponse[]>([]);
-  readonly loading = signal(false);
+const HEALTHCARE_DOMAIN: DomainConfig = {
+  id: 'healthcare',
+  name: 'Healthcare',
+  theme: 'tfc-health',
+  terminology: {
+    event: 'Clinical Event',
+    issue: 'Patient Concern',
+    decision: 'Clinical Decision',
+    participant: 'Clinician',
+    gameMaster: 'Facilitator',
+    exercise: 'Simulation',
+  },
+};
+
+const MILITARY_DOMAIN: DomainConfig = {
+  id: 'military',
+  name: 'Military',
+  theme: 'tfc-military',
+  terminology: {
+    event: 'SITREP',
+    issue: 'Operational Issue',
+    decision: 'Command Decision',
+    participant: 'Operator',
+    gameMaster: 'Exercise Controller',
+    exercise: 'Tactical Exercise',
+  },
+};
+
+const DOMAINS: Record<string, DomainConfig> = {
+  default: DEFAULT_DOMAIN,
+  cybersecurity: CYBERSECURITY_DOMAIN,
+  healthcare: HEALTHCARE_DOMAIN,
+  military: MILITARY_DOMAIN,
+};
+
+@Injectable({ providedIn: 'root' })
+export class DomainService {
+  readonly activeDomain = signal<DomainConfig>(DEFAULT_DOMAIN);
+  readonly availableDomains = Object.values(DOMAINS);
 
   constructor() {
-    this.loadAll();
+    this.applyTheme(DEFAULT_DOMAIN.theme);
   }
 
-  async loadAll(): Promise<void> {
-    this.loading.set(true);
-    try {
-      const domains = await firstValueFrom(this.api.list());
-      this.availableDomains.set(domains);
-      const current = domains.find((d) => d.slug === this.activeDomain().slug);
-      if (current) {
-        this.activeDomain.set(current);
-      }
-    } finally {
-      this.loading.set(false);
-    }
+  setDomain(domainId: string): void {
+    const domain = DOMAINS[domainId] ?? DEFAULT_DOMAIN;
+    this.activeDomain.set(domain);
+    this.applyTheme(domain.theme);
   }
 
-  async setDomain(slugOrId: string | number): Promise<void> {
-    const cached = this.availableDomains().find((d) =>
-      typeof slugOrId === "number" ? d.id === slugOrId : d.slug === slugOrId,
-    );
-    if (cached) {
-      this.activeDomain.set(cached);
-      this.applyTheme(cached.slug);
-      return;
-    }
-    const fetched =
-      typeof slugOrId === "number"
-        ? await firstValueFrom(this.api.get(slugOrId))
-        : await firstValueFrom(this.api.getBySlug(slugOrId));
-    this.activeDomain.set(fetched);
-    this.applyTheme(fetched.slug);
+  term(key: keyof DomainTerminology): string {
+    return this.activeDomain().terminology[key];
   }
 
-  term(key: keyof TerminologyMap): string {
-    return this.activeDomain().terminology[key] ?? key;
-  }
-
-  private applyTheme(slug: string): void {
-    const themeAttr = `tfc-${slug}`;
+  private applyTheme(theme: string): void {
     const html = document.documentElement;
-    html.setAttribute("data-theme", themeAttr);
+    if (theme) {
+      html.setAttribute('data-theme', theme);
+    } else {
+      html.removeAttribute('data-theme');
+    }
   }
 }

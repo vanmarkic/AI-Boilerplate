@@ -2,7 +2,6 @@
 
 Tests written first (TDD) — these should fail until implementation exists.
 """
-
 from __future__ import annotations
 
 import json
@@ -11,6 +10,7 @@ from unittest.mock import AsyncMock
 import pytest
 
 from features.exercise.adapters.connection_manager import ConnectionManager, connection_manager
+
 
 # ── Unit tests ───────────────────────────────────────────────────────────
 

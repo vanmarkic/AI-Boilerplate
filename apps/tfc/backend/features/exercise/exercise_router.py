@@ -1,22 +1,12 @@
-import logging
+from fastapi import APIRouter, Depends, status
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import ValidationError
-
-from core.dependencies import get_exercise_service, get_scenario_service
-from engine.game_modes import GM_CLASSIC
-from features.exercise.adapters.connection_manager import connection_manager
+from core.dependencies import get_exercise_service
 from features.exercise.exercise_schema import (
     CreateExerciseRequest,
     ExerciseResponse,
     UpdateExerciseRequest,
 )
 from features.exercise.exercise_service import ExerciseService
-from features.scenario.scenario_content import ScenarioContent
-from features.scenario.scenario_service import ScenarioService
-from features.waiting_room.waiting_room_store import waiting_room_store
-
-logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/exercises", tags=["exercises"])
 
@@ -31,10 +21,7 @@ async def create_exercise(
     request: CreateExerciseRequest,
     service: ExerciseService = Depends(get_exercise_service),
 ) -> ExerciseResponse:
-    result = await service.create_exercise(request)
-    if not request.practice_mode:
-        await connection_manager.broadcast_lobby({"type": "lobby_update"})
-    return result
+    return await service.create_exercise(request)
 
 
 @router.get(
@@ -47,65 +34,6 @@ async def list_exercises(
     service: ExerciseService = Depends(get_exercise_service),
 ) -> list[ExerciseResponse]:
     return await service.list_exercises(phase)
-
-
-@router.get(
-    "/joinable",
-    operation_id="listJoinableExercises",
-)
-async def list_joinable_exercises(
-    service: ExerciseService = Depends(get_exercise_service),
-    scenario_service: ScenarioService = Depends(get_scenario_service),
-) -> list[dict]:
-    """Return all joinable exercises with available slots."""
-    results: list[dict] = []
-    exercises = await service.list_exercises(phase="setup")
-    for exercise in exercises:
-        if exercise.scenario_id is None:
-            continue
-        if exercise.practice_mode:
-            continue
-        try:
-            scenario = await scenario_service.get_scenario(
-                exercise.scenario_id,
-            )
-        except HTTPException:
-            continue
-        if scenario.content is None:
-            continue
-        try:
-            content = ScenarioContent.model_validate(scenario.content)
-        except ValidationError:
-            logger.warning(
-                "Scenario %d has invalid content — skipping from joinable list",
-                exercise.scenario_id,
-            )
-            continue
-        if not content.roles:
-            continue
-
-        requires_gm = content.game_mode == GM_CLASSIC
-        if exercise.player_count_mode == "two_player":
-            max_players = 2
-        else:
-            max_players = len(content.roles) + (1 if requires_gm else 0)
-        current = waiting_room_store.count(exercise.id)
-        if current >= max_players:
-            continue
-
-        participants = waiting_room_store.list_participants(exercise.id)
-        results.append(
-            {
-                "exercise": exercise.model_dump(),
-                "participants": [p.to_dict() for p in participants],
-                "roles": [r.model_dump() for r in content.roles],
-                "max_players": max_players,
-                "requires_gm": requires_gm,
-                "player_count_mode": exercise.player_count_mode,
-            }
-        )
-
-    return results
 
 
 @router.get(

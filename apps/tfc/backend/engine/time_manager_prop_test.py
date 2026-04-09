@@ -1,18 +1,16 @@
 """Property tests for TimeManager dual-clock logic."""
-
 from __future__ import annotations
 
-from collections.abc import Callable
 from unittest.mock import patch
 
-from hypothesis import given, settings
+from hypothesis import given, settings, assume
 from hypothesis import strategies as st
 
 from engine.strategies import speed_factors
 from engine.time_manager import TimeManager
 
 
-def _make_clock(start: float = 0.0) -> tuple[Callable[[], float], Callable[[float], None]]:
+def _make_clock(start: float = 0.0):
     """Return a controllable clock for deterministic testing."""
     state = {"now": start}
 
@@ -43,10 +41,7 @@ class TestPlayTimeMonotonicity:
     )
     @settings(max_examples=200)
     def test_play_time_never_decreases(
-        self,
-        factor: float,
-        actions: list[str],
-        deltas: list[float],
+        self, factor: float, actions: list[str], deltas: list[float],
     ) -> None:
         now_ms, advance = _make_clock(0.0)
         with patch("engine.time_manager._now_ms", side_effect=now_ms):
@@ -62,7 +57,8 @@ class TestPlayTimeMonotonicity:
                 elif action == "start":
                     tm.start()
                 assert tm.play_time_ms >= prev, (
-                    f"Play time decreased from {prev} to {tm.play_time_ms} after action={action}"
+                    f"Play time decreased from {prev} to {tm.play_time_ms} "
+                    f"after action={action}"
                 )
                 prev = tm.play_time_ms
 
@@ -76,9 +72,7 @@ class TestFactorScaling:
     )
     @settings(max_examples=200)
     def test_tick_delta_equals_elapsed_times_factor(
-        self,
-        factor: float,
-        elapsed: float,
+        self, factor: float, elapsed: float,
     ) -> None:
         now_ms, advance = _make_clock(0.0)
         with patch("engine.time_manager._now_ms", side_effect=now_ms):
@@ -87,9 +81,7 @@ class TestFactorScaling:
             advance(elapsed)
             delta = tm.tick()
             expected = elapsed * factor
-            assert (
-                abs(delta - expected) < 1e-6 or abs(delta - expected) / max(expected, 1e-12) < 1e-6
-            )
+            assert abs(delta - expected) < 1e-6 or abs(delta - expected) / max(expected, 1e-12) < 1e-6
 
 
 class TestPauseIdempotency:
@@ -97,19 +89,12 @@ class TestPauseIdempotency:
 
     @given(
         n_pauses=st.integers(min_value=1, max_value=10),
-        elapsed_before=st.floats(
-            min_value=0.0, max_value=1e4, allow_nan=False, allow_infinity=False
-        ),
-        elapsed_during=st.floats(
-            min_value=0.0, max_value=1e4, allow_nan=False, allow_infinity=False
-        ),
+        elapsed_before=st.floats(min_value=0.0, max_value=1e4, allow_nan=False, allow_infinity=False),
+        elapsed_during=st.floats(min_value=0.0, max_value=1e4, allow_nan=False, allow_infinity=False),
     )
     @settings(max_examples=100)
     def test_paused_tick_returns_zero(
-        self,
-        n_pauses: int,
-        elapsed_before: float,
-        elapsed_during: float,
+        self, n_pauses: int, elapsed_before: float, elapsed_during: float,
     ) -> None:
         now_ms, advance = _make_clock(0.0)
         with patch("engine.time_manager._now_ms", side_effect=now_ms):
@@ -144,10 +129,7 @@ class TestResetInvariant:
     )
     @settings(max_examples=100)
     def test_reset_zeroes_all_state(
-        self,
-        factor: float,
-        actions: list[str],
-        deltas: list[float],
+        self, factor: float, actions: list[str], deltas: list[float],
     ) -> None:
         now_ms, advance = _make_clock(0.0)
         with patch("engine.time_manager._now_ms", side_effect=now_ms):

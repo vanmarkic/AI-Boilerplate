@@ -1,25 +1,16 @@
 import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  effect,
-  ElementRef,
-  inject,
-  input,
-  viewChild,
-} from "@angular/core";
-import type {
-  EventSnapshot,
-  IssueSnapshot,
-} from "../../core/engine-api.service";
-import { DomainService } from "../../core/domain.service";
-import { TimelineLaneComponent } from "./timeline-lane.component";
-import { computeTimelineItems, computeTimeScale } from "./timeline-utils";
+  ChangeDetectionStrategy, Component, computed, effect,
+  ElementRef, inject, input, viewChild,
+} from '@angular/core';
+import type { EventSnapshot, IssueSnapshot } from '../../core/engine-api.service';
+import { DomainService } from '../../core/domain.service';
+import { TimelineLaneComponent } from './timeline-lane.component';
+import { computeTimelineItems, computeTimeScale } from './timeline-utils';
 
 const DEFAULT_WIDTH_PX = 1200;
 
 @Component({
-  selector: "tfc-event-timeline",
+  selector: 'tfc-event-timeline',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [TimelineLaneComponent],
   template: `
@@ -34,30 +25,20 @@ const DEFAULT_WIDTH_PX = 1200;
         </div>
 
         <div class="timeline-lane-group">
-          <span class="timeline-lane-group__label"
-            >{{ domain.term("event") }}s</span
-          >
-          <tfc-timeline-lane
-            [items]="timeline().eventItems"
-            [scale]="scale()"
-          />
+          <span class="timeline-lane-group__label">{{ domain.term('event') }}s</span>
+          <tfc-timeline-lane [items]="timeline().eventItems" [scale]="scale()" />
         </div>
 
         <div class="timeline-lane-group">
-          <span class="timeline-lane-group__label"
-            >{{ domain.term("issue") }}s</span
-          >
-          <tfc-timeline-lane
-            [items]="timeline().issueItems"
-            [scale]="scale()"
-          />
+          <span class="timeline-lane-group__label">{{ domain.term('issue') }}s</span>
+          <tfc-timeline-lane [items]="timeline().issueItems" [scale]="scale()" />
         </div>
 
         <div class="timeline-now-marker" [style.left.px]="nowMarkerPx()"></div>
       </div>
     </div>
   `,
-  host: { class: "event-timeline" },
+  host: { class: 'event-timeline' },
 })
 export class EventTimelineComponent {
   readonly events = input<EventSnapshot[]>([]);
@@ -65,8 +46,7 @@ export class EventTimelineComponent {
   readonly playTimeMs = input(0);
 
   protected readonly domain = inject(DomainService);
-  private readonly scrollRef =
-    viewChild<ElementRef<HTMLElement>>("scrollContainer");
+  private readonly scrollRef = viewChild<ElementRef<HTMLElement>>('scrollContainer');
 
   protected readonly timeline = computed(() =>
     computeTimelineItems(this.events(), this.issues(), this.playTimeMs()),
@@ -81,8 +61,8 @@ export class EventTimelineComponent {
     Math.max(this.scale().totalMs * this.scale().pxPerMs, DEFAULT_WIDTH_PX),
   );
 
-  protected readonly nowMarkerPx = computed(
-    () => this.playTimeMs() * this.scale().pxPerMs,
+  protected readonly nowMarkerPx = computed(() =>
+    this.playTimeMs() * this.scale().pxPerMs,
   );
 
   protected readonly axisTicks = computed(() => {
@@ -118,7 +98,5 @@ function formatTickLabel(ms: number): string {
   const totalSeconds = Math.round(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  return seconds === 0
-    ? `${minutes}m`
-    : `${minutes}:${String(seconds).padStart(2, "0")}`;
+  return seconds === 0 ? `${minutes}m` : `${minutes}:${String(seconds).padStart(2, '0')}`;
 }

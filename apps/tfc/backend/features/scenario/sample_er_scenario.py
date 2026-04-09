@@ -309,25 +309,6 @@ ER_SCENARIO_CONTENT: dict = {
             "auto_resolve_ms": 0,
         },
     ],
-    # ── Game Mode ──────────────────────────────────────────────────────────
-    "game_mode": "simple_collaborative",
-    "decision_sequence": [
-        "dec-mci-level",
-        "dec-or-priority",
-        "dec-blood-protocol",
-        "dec-icu-overflow",
-        "dec-paeds-transfer",
-    ],
-    # ── Roles ─────────────────────────────────────────────────────────────
-    "roles": [
-        {"id": "co", "label": "Commanding Officer (CO)", "player_type": "decision_maker"},
-        {"id": "ops", "label": "Operations Officer (OPS)", "player_type": "advisor"},
-        {"id": "nav", "label": "Navigator (NAV)", "player_type": "advisor"},
-        {"id": "pwo", "label": "Principal Warfare Officer (PWO)", "player_type": "advisor"},
-        {"id": "aawo", "label": "Anti-Air Warfare Officer (AAWO)", "player_type": "advisor"},
-        {"id": "cyop", "label": "Cyber Operator (CyOp)", "player_type": "advisor"},
-        {"id": "eo", "label": "Engineering Officer (EO)", "player_type": "advisor"},
-    ],
     # ── Decision Templates ───────────────────────────────────────────────
     "decision_templates": [
         {

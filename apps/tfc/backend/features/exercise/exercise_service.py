@@ -1,19 +1,18 @@
-from core.exceptions import BadRequestError, NotFoundError
+from fastapi import HTTPException, status
+
 from features.exercise.exercise_model import Exercise
 from features.exercise.exercise_repository import ExerciseRepository
 from features.exercise.exercise_schema import (
-    VALID_GAME_MODES,
     CreateExerciseRequest,
     ExerciseResponse,
     UpdateExerciseRequest,
 )
 
-VALID_PHASES = {"setup", "briefing", "running", "paused", "completed"}
+VALID_PHASES = {"setup", "running", "paused", "completed"}
 
 # Allowed phase transitions: current -> set of valid next phases
 PHASE_TRANSITIONS: dict[str, set[str]] = {
-    "setup": {"briefing"},
-    "briefing": {"running", "setup"},
+    "setup": {"running"},
     "running": {"paused", "completed"},
     "paused": {"running", "completed"},
     "completed": set(),
@@ -25,15 +24,13 @@ class ExerciseService:
         self.repository = repository
 
     async def create_exercise(
-        self,
-        request: CreateExerciseRequest,
+        self, request: CreateExerciseRequest,
     ) -> ExerciseResponse:
         if request.phase not in VALID_PHASES:
-            raise BadRequestError(f"Invalid phase: {request.phase}")
-        if request.game_mode not in VALID_GAME_MODES:
-            raise BadRequestError(f"Invalid game_mode: {request.game_mode}")
-        if request.practice_mode and request.game_mode != "simple_collaborative":
-            raise BadRequestError("practice_mode requires game_mode 'simple_collaborative'")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid phase: {request.phase}",
+            )
         exercise = Exercise(
             title=request.title,
             description=request.description,
@@ -41,9 +38,6 @@ class ExerciseService:
             scenario_id=request.scenario_id,
             domain_id=request.domain_id,
             time_factor=request.time_factor,
-            game_mode=request.game_mode,
-            practice_mode=request.practice_mode,
-            player_count_mode=request.player_count_mode,
         )
         created = await self.repository.create(exercise)
         return ExerciseResponse.model_validate(created)
@@ -51,21 +45,25 @@ class ExerciseService:
     async def get_exercise(self, exercise_id: int) -> ExerciseResponse:
         exercise = await self.repository.get_by_id(exercise_id)
         if not exercise:
-            raise NotFoundError("Exercise not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Exercise not found",
+            )
         return ExerciseResponse.model_validate(exercise)
 
     async def get_exercise_by_code(
-        self,
-        session_code: str,
+        self, session_code: str,
     ) -> ExerciseResponse:
         exercise = await self.repository.get_by_session_code(session_code)
         if not exercise:
-            raise NotFoundError("Exercise not found for session code")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Exercise not found for session code",
+            )
         return ExerciseResponse.model_validate(exercise)
 
     async def list_exercises(
-        self,
-        phase: str | None = None,
+        self, phase: str | None = None,
     ) -> list[ExerciseResponse]:
         if phase:
             exercises = await self.repository.list_by_phase(phase)
@@ -74,23 +72,17 @@ class ExerciseService:
         return [ExerciseResponse.model_validate(e) for e in exercises]
 
     async def update_exercise(
-        self,
-        exercise_id: int,
-        request: UpdateExerciseRequest,
+        self, exercise_id: int, request: UpdateExerciseRequest,
     ) -> ExerciseResponse:
         exercise = await self.repository.get_by_id(exercise_id)
         if not exercise:
-            raise NotFoundError("Exercise not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Exercise not found",
+            )
 
         if request.phase is not None:
             self._validate_phase_transition(exercise.phase, request.phase)
-
-        final_game_mode = request.game_mode if request.game_mode is not None else exercise.game_mode
-        final_practice = (
-            request.practice_mode if request.practice_mode is not None else exercise.practice_mode
-        )
-        if final_practice and final_game_mode != "simple_collaborative":
-            raise BadRequestError("practice_mode requires game_mode 'simple_collaborative'")
 
         update_data = request.model_dump(exclude_unset=True)
         for field, value in update_data.items():
@@ -102,18 +94,27 @@ class ExerciseService:
     async def delete_exercise(self, exercise_id: int) -> None:
         deleted = await self.repository.delete(exercise_id)
         if not deleted:
-            raise NotFoundError("Exercise not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Exercise not found",
+            )
 
     @staticmethod
     def _validate_phase_transition(
-        current_phase: str,
-        new_phase: str,
+        current_phase: str, new_phase: str,
     ) -> None:
         """Validate that the phase transition is allowed."""
         if new_phase not in VALID_PHASES:
-            raise BadRequestError(f"Invalid phase: {new_phase}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid phase: {new_phase}",
+            )
         allowed = PHASE_TRANSITIONS.get(current_phase, set())
         if new_phase != current_phase and new_phase not in allowed:
-            raise BadRequestError(
-                f"Cannot transition from '{current_phase}' to '{new_phase}'",
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Cannot transition from '{current_phase}' "
+                    f"to '{new_phase}'"
+                ),
             )

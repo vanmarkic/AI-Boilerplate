@@ -1,11 +1,9 @@
-import { Routes } from "@angular/router";
-import { WaitingRoomView } from "./waiting-room-view";
-import { practiceRedirectGuard } from "./practice-redirect.guard";
+import { Routes } from '@angular/router';
+import { WaitingRoomView } from './waiting-room-view';
 
 export const WAITING_ROOM_ROUTES: Routes = [
   {
-    path: "",
+    path: '',
     component: WaitingRoomView,
-    canActivate: [practiceRedirectGuard],
   },
 ];

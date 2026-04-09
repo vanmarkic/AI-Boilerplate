@@ -5,16 +5,12 @@ from fastapi import FastAPI, Request, Response, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from core.config import settings
-from core.exceptions import AppError
-
 
 def setup_middleware(app: FastAPI) -> None:
     """Configure all application middleware."""
-    origins = [o.strip() for o in settings.allowed_origins.split(",") if o.strip()]
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=origins,
+        allow_origins=["http://localhost:4201"],
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -30,16 +26,6 @@ def setup_middleware(app: FastAPI) -> None:
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         return response
-
-    @app.exception_handler(AppError)
-    async def app_error_handler(
-        request: Request,
-        exc: AppError,
-    ) -> JSONResponse:
-        return JSONResponse(
-            status_code=exc.status_code,
-            content={"detail": exc.detail},
-        )
 
     @app.exception_handler(Exception)
     async def global_exception_handler(

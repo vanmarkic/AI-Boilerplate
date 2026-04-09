@@ -11,6 +11,7 @@ A real-time exercise simulation platform. A Game Master loads a scenario, starts
 | Database | PostgreSQL 17 — SQLAlchemy 2.0 (async), Alembic migrations (port 5433, separate from main) |
 | Auth | None (disabled — anonymous access) |
 | Real-time | WebSocket — engine state broadcast + client commands |
+| Shared types | `@aspect/tfc-shared` — TypeScript types and lifecycle constants |
 | Design System | `@aspect/design-system` + `@aspect/ui` (shared with main app) |
 
 ## Quick Start
@@ -41,43 +42,25 @@ apps/tfc/
 ├── backend/
 │   ├── core/                         # Config, database, auth, middleware, DI
 │   ├── engine/                       # Pure-Python exercise runtime
-│   │   ├── engine_config.py          #   DecisionTemplate, EngineConfig dataclasses
 │   │   ├── time_manager.py           #   Wall-clock → play-time with speed factor
 │   │   ├── event_scheduler.py        #   Trigger events by play-time offset
 │   │   ├── issue_manager.py          #   Issue lifecycle (dormant → active → resolved)
 │   │   ├── decision_manager.py       #   Decision point tracking
 │   │   ├── exercise_engine.py        #   Orchestrator (250ms tick loop)
-│   │   ├── session_store.py          #   In-memory engine instance registry
-│   │   ├── state_changes.py          #   State change event types
-│   │   ├── strategies.py             #   Hypothesis data generators for property tests
-│   │   └── game_modes/               #   Pluggable game mode strategies
-│   │       ├── classic.py            #     ClassicMode — GM-driven, no scoring
-│   │       └── simple_collaborative.py #   SimpleCollaborativeMode — advisor/decision-maker roles
+│   │   └── session_store.py          #   In-memory engine instance registry
 │   ├── features/
 │   │   ├── audit/                    #   Audit trail
 │   │   ├── decision/                 #   Decision CRUD
-│   │   ├── domain_config/            #   DB-backed domain terminology dictionary
 │   │   ├── exercise/                 #   Exercise lifecycle + engine API + WebSocket
 │   │   ├── health/                   #   Health check
-│   │   ├── scenario/                 #   Scenario CRUD + content loader
-│   │   └── waiting_room/             #   Pre-exercise lobby (presence, ready-up)
+│   │   └── scenario/                 #   Scenario CRUD + content loader
 │   └── main.py                       # App factory with auto-discovery
-│
-├── codegen/
-│   ├── generate-types.py             # Python TypedDicts → TypeScript interfaces
-│   └── check-freshness.sh            # CI: fail if generated types are stale
 │
 ├── frontend/
 │   └── src/app/
-│       ├── core/                     # Services, store, environment config
-│       │   └── generated/            #   Codegen output (DO NOT EDIT)
+│       ├── core/                     # Environment config
 │       ├── shared/                   # TFC shared components, services, store
-│       │   ├── components/           #   Clock, context panel, decision panel, phase badge,
-│       │   │                         #   advisor bubbles, ambient background, domain selector,
-│       │   │                         #   presence indicator, score bar, turn banner
-│       │   ├── components-animations.css   # GSAP animation classes
-│       │   ├── components-decision.css     # Decision panel styles
-│       │   ├── components-exercise-layout.css  # Exercise layout primitives
+│       │   ├── components/           #   Clock, context panel, decision panel, phase badge
 │       │   ├── *.service.ts          #   Engine API, WebSocket, scenario, audit, decision
 │       │   └── exercise.store.ts     #   Central NgRx Signal Store
 │       └── features/
@@ -85,18 +68,38 @@ apps/tfc/
 │           ├── player/               #   Player view (events, decisions)
 │           ├── join/                 #   Exercise join / lobby
 │           ├── review/               #   Post-exercise review
-│           ├── scenario-builder/     #   Scenario creation UI
-│           └── waiting-room/         #   Pre-exercise lobby (presence, ready-up)
+│           └── scenario-builder/     #   Scenario creation UI
+│
+packages/tfc-shared/                  # Shared TypeScript types + constants
+    └── src/
+        ├── types/                    #   Time, Event, Issue, Decision, Exercise, Scenario, Domain
+        └── constants/                #   Lifecycle transitions, domain presets
 ```
 
 ## How It Works
 
-See `SPECS.md` for the complete domain model, business rules, game modes, scoring, stress model, and API surface. Quick summary:
+1. **Scenario** — A reusable template containing a briefing, objectives, timed events, issues, and decision templates.
+2. **Exercise** — A running instance of a scenario. The GM creates an exercise, players join, and the GM starts the clock.
+3. **Engine** — A pure-Python tick loop (250ms) that advances play time, triggers events, surfaces issues, and pauses for decision points. State changes are broadcast to all connected clients via WebSocket.
+4. **Game Master** — Controls the exercise: start, pause, resume, complete, adjust speed. Sees the full timeline and can inject ad-hoc events.
+5. **Player** — Sees events and issues as they fire, responds to decision points, and reviews outcomes after the exercise.
 
-1. **Scenario** → **Exercise** → **Engine** (250ms tick loop) → **WebSocket** → all clients
-2. Engine phases: `setup → briefing → running → paused → completed`
-3. Game modes: Classic (GM-driven) and Simple Collaborative (advisor/decision-maker, scored)
-4. Players join via 6-character session codes; roles assigned in waiting room
+### Engine Phases
+
+```
+setup ──▶ running ──▶ paused ──▶ completed
+              │           │
+              └───────────┘  (resume)
+```
+
+Decision events automatically pause the engine until the GM or players resolve them.
+
+### Key Concepts
+
+- **Play time vs real time**: The engine supports a configurable speed factor (e.g., 2× means 2 minutes of simulated time per 1 real minute).
+- **Events**: Scheduled occurrences (`NARRATIVE`, `DECISION`, `INJECT`) with lifecycle `pending → active → completed`.
+- **Issues**: Problems triggered by events, with lifecycle `dormant → active → mitigated → resolved`.
+- **Decisions**: Questions posed to players when a `DECISION` event fires. The engine pauses until resolved.
 
 ## Development
 
@@ -112,17 +115,6 @@ The `engine/` directory is intentionally isolated — no database, no HTTP, no F
 cd apps/tfc/backend
 python -m pytest engine/ -v
 ```
-
-### Type Codegen
-
-Backend Python TypedDicts in `engine/state_changes.py` are the single source of truth for engine state types. A codegen script generates the TypeScript equivalents:
-
-```bash
-cd apps/tfc/frontend
-npm run generate:types    # Regenerate core/generated/state-changes.types.ts
-```
-
-Run this after modifying any TypedDict in `state_changes.py`. The CI freshness check (`codegen/check-freshness.sh`) will fail if the generated file is stale.
 
 ### Frontend Development
 

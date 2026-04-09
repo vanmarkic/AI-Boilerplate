@@ -3,18 +3,15 @@
 Tracks connected clients per exercise_id with their role (gm/player).
 Thread-safe by design: asyncio is single-threaded, so no locks needed.
 """
-
 from __future__ import annotations
 
 import json
 import logging
+from typing import Any
 
 from fastapi import WebSocket
 
 logger = logging.getLogger(__name__)
-
-
-LOBBY_CHANNEL = 0  # Sentinel exercise_id for home-page lobby connections
 
 
 class ConnectionManager:
@@ -36,9 +33,7 @@ class ConnectionManager:
         self._connections[exercise_id].append((websocket, role, participant_id))
         logger.info(
             "WS connected: exercise=%d role=%s participant=%s",
-            exercise_id,
-            role,
-            participant_id,
+            exercise_id, role, participant_id,
         )
 
     def disconnect(self, exercise_id: int, websocket: WebSocket) -> None:
@@ -53,7 +48,9 @@ class ConnectionManager:
             del self._connections[exercise_id]
         logger.info("WS disconnected: exercise=%d", exercise_id)
 
-    async def broadcast(self, exercise_id: int, message: dict[str, object]) -> None:
+    async def broadcast(
+        self, exercise_id: int, message: dict[str, Any]
+    ) -> None:
         """Send a JSON message to all clients of an exercise."""
         conns = self._connections.get(exercise_id)
         if not conns:
@@ -64,13 +61,15 @@ class ConnectionManager:
             try:
                 await ws.send_text(text)
             except Exception:
-                logger.warning("Failed to send to WS for exercise=%d", exercise_id)
+                logger.warning(
+                    "Failed to send to WS for exercise=%d", exercise_id
+                )
                 dead.append(ws)
         for ws in dead:
             self.disconnect(exercise_id, ws)
 
     async def broadcast_to_role(
-        self, exercise_id: int, role: str, message: dict[str, object]
+        self, exercise_id: int, role: str, message: dict[str, Any]
     ) -> None:
         """Send a JSON message only to clients with a specific role."""
         conns = self._connections.get(exercise_id)
@@ -92,34 +91,24 @@ class ConnectionManager:
         for ws in dead:
             self.disconnect(exercise_id, ws)
 
-    async def close_all(self, exercise_id: int) -> int:
-        """Close all WebSocket connections for an exercise and remove them.
-
-        Returns the number of connections closed.
-        """
-        conns = self._connections.pop(exercise_id, [])
-        closed = 0
-        for ws, _role, _pid in conns:
-            try:
-                await ws.close()
-                closed += 1
-            except Exception:
-                logger.warning("Failed to close WS for exercise=%d", exercise_id)
-        return closed
-
-    def get_connections(self, exercise_id: int) -> list[tuple[WebSocket, str]]:
+    def get_connections(
+        self, exercise_id: int
+    ) -> list[tuple[WebSocket, str]]:
         """List active connections for an exercise (ws, role)."""
-        return [(ws, role) for ws, role, _pid in self._connections.get(exercise_id, [])]
-
-    def get_connected_participant_ids(self, exercise_id: int) -> list[str]:
-        """Return participant IDs of currently connected clients."""
         return [
-            pid for _ws, _role, pid in self._connections.get(exercise_id, []) if pid is not None
+            (ws, role)
+            for ws, role, _pid in self._connections.get(exercise_id, [])
         ]
 
-    async def broadcast_lobby(self, message: dict[str, object]) -> None:
-        """Send a JSON message to all clients connected to the lobby channel."""
-        await self.broadcast(LOBBY_CHANNEL, message)
+    def get_connected_participant_ids(
+        self, exercise_id: int
+    ) -> list[str]:
+        """Return participant IDs of currently connected clients."""
+        return [
+            pid
+            for _ws, _role, pid in self._connections.get(exercise_id, [])
+            if pid is not None
+        ]
 
 
 # Global singleton

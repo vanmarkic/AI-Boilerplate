@@ -48,8 +48,8 @@ def discover_routers(app: FastAPI) -> None:
 
 def _register_extra_routers(application: FastAPI) -> None:
     """Register routers that live outside the {name}_router.py convention."""
-    from features.exercise.engine_actions_router import router as engine_actions_router
     from features.exercise.engine_router import router as engine_router
+    from features.exercise.engine_actions_router import router as engine_actions_router
     from features.exercise.ws_router import ws_router
 
     application.include_router(engine_router)

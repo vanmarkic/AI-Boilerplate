@@ -1,8 +1,6 @@
 """Tests for audit service."""
-
-from unittest.mock import AsyncMock, MagicMock
-
 import pytest
+from unittest.mock import AsyncMock, MagicMock
 
 from features.audit.audit_schema import CreateAuditEntry
 from features.audit.audit_service import AuditService
@@ -34,13 +32,11 @@ class TestAuditLog:
         repo.create = AsyncMock(return_value=entry_mock)
         service = AuditService(repo)
 
-        result = await service.log(
-            CreateAuditEntry(
-                exercise_id=42,
-                entry_type="phase_change",
-                action="started",
-            )
-        )
+        result = await service.log(CreateAuditEntry(
+            exercise_id=42,
+            entry_type="phase_change",
+            action="started",
+        ))
         assert result.exercise_id == 42
         assert result.entry_type == "phase_change"
         assert result.action == "started"

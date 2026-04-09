@@ -13,13 +13,8 @@ COPY apps/tfc/backend/main.py ./
 COPY apps/tfc/backend/alembic.ini ./
 COPY apps/tfc/backend/alembic/ ./alembic/
 COPY apps/tfc/backend/features/ ./features/
-COPY apps/tfc/backend/seed.py ./
-COPY apps/tfc/backend/seeds/ ./seeds/
-COPY apps/tfc/backend/validate_seeds.py ./
 
-ENV UV_INDEX_URL=https://developers.naval-group.com/nexus/repository/pypi-group/simple/
 RUN uv pip install --system --no-cache -e .
-RUN python validate_seeds.py
 
 RUN useradd --create-home appuser
 USER appuser

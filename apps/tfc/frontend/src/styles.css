@@ -1,17 +1,3 @@
 @import "@aspect/design-system";
-@import "./app/shared/themes-tfc-domains.css";
-@import "./app/shared/themes-tfc-hoi-extras.css";
-@import "./app/shared/themes-tfc-builder.css";
-@import "./app/shared/components-presence.css";
-@import "./app/shared/components-timeline.css";
 @import "./app/shared/components-decision.css";
 @import "./app/shared/components-exercise-layout.css";
-@import "./app/shared/components-animations.css";
-@import "./app/shared/components-player-view.css";
-@import "./app/shared/components-two-player.css";
-@import "./app/shared/components-home.css";
-@import "./app/shared/components-waiting-room.css";
-@import "./app/shared/components-scenario-picker.css";
-@import "./app/shared/components-logs.css";
-@import "./app/shared/components-systems.css";
-@import "./app/shared/components-silent-wake.css";

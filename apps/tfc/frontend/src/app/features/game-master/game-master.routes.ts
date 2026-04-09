@@ -1,9 +1,9 @@
-import { Routes } from "@angular/router";
-import { GameMasterView } from "./game-master-view";
+import { Routes } from '@angular/router';
+import { GameMasterView } from './game-master-view';
 
 export const GAME_MASTER_ROUTES: Routes = [
   {
-    path: "",
+    path: '',
     component: GameMasterView,
   },
 ];

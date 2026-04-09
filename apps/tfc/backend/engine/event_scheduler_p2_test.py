@@ -1,5 +1,4 @@
 """Tests for P2 EventScheduler additions: pause, resume, delay, skip."""
-
 from engine.event_scheduler import (
     EventLifecycle,
     EventScheduler,
@@ -144,11 +143,8 @@ class TestSnapshotIncludesTriggeredIssues:
     def test_triggered_issues_in_snapshot(self) -> None:
         sched = EventScheduler()
         evt = ScheduledEvent(
-            id="e1",
-            title="E1",
-            description="",
-            event_type=EventType.OPERATIONAL,
-            scheduled_pt_ms=0.0,
+            id="e1", title="E1", description="",
+            event_type=EventType.OPERATIONAL, scheduled_pt_ms=0.0,
             triggered_issues=["i1", "i2"],
         )
         sched.load_events([evt])

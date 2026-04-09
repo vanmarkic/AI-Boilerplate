@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, input } from "@angular/core";
-import { CollapsiblePanelComponent } from "@aspect/ui";
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { CollapsiblePanelComponent } from '@aspect/ui';
 
 @Component({
-  selector: "tfc-context-panel",
+  selector: 'tfc-context-panel',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CollapsiblePanelComponent],
-  host: { class: "context-panel" },
+  host: { 'class': 'context-panel' },
   template: `
-    <ui-collapsible-panel [open]="open()">
+    <ui-collapsible-panel>
       <span panelTitle>{{ title() }}</span>
 
       @if (briefing()) {
@@ -44,9 +44,8 @@ import { CollapsiblePanelComponent } from "@aspect/ui";
   `,
 })
 export class ContextPanelComponent {
-  readonly title = input<string>("Scenario Context");
-  readonly briefing = input<string>("");
+  readonly title = input<string>('Scenario Context');
+  readonly briefing = input<string>('');
   readonly objectives = input<string[]>([]);
   readonly rules = input<string[]>([]);
-  readonly open = input(false);
 }

@@ -3,10 +3,7 @@
 Real Time (RT): Wall-clock elapsed milliseconds since exercise start.
 Play Time (PT): Simulated scenario time, advances by (elapsed_rt * factor).
 """
-
 import time
-
-from engine.state_changes import TimeSnapshot
 
 
 class TimeManager:
@@ -78,7 +75,7 @@ class TimeManager:
         self._play_time_ms += pt_delta
         return pt_delta
 
-    def snapshot(self) -> TimeSnapshot:
+    def snapshot(self) -> dict:
         """Return current time state as a serializable dict."""
         return {
             "play_time_ms": self._play_time_ms,

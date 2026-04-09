@@ -18,8 +18,7 @@ class DecisionRepository(CrudRepository[Decision]):
         return list(result.scalars().all())
 
     async def list_open_by_exercise(
-        self,
-        exercise_id: int,
+        self, exercise_id: int,
     ) -> list[Decision]:
         """List only open decisions for an exercise."""
         stmt = select(Decision).where(
@@ -30,9 +29,7 @@ class DecisionRepository(CrudRepository[Decision]):
         return list(result.scalars().all())
 
     async def list_by_exercise_and_status(
-        self,
-        exercise_id: int,
-        status: str,
+        self, exercise_id: int, status: str,
     ) -> list[Decision]:
         """List decisions filtered by exercise and status."""
         stmt = select(Decision).where(
@@ -43,9 +40,7 @@ class DecisionRepository(CrudRepository[Decision]):
         return list(result.scalars().all())
 
     async def add_response(
-        self,
-        decision_id: int,
-        response: DecisionResponseRecord,
+        self, decision_id: int, response: DecisionResponseRecord,
     ) -> DecisionResponseRecord:
         """Create a response record for a decision."""
         response.decision_id = decision_id
@@ -55,8 +50,7 @@ class DecisionRepository(CrudRepository[Decision]):
         return response
 
     async def get_responses(
-        self,
-        decision_id: int,
+        self, decision_id: int,
     ) -> list[DecisionResponseRecord]:
         """List all responses for a decision."""
         stmt = select(DecisionResponseRecord).where(

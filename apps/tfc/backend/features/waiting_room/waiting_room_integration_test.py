@@ -4,37 +4,36 @@ Covers the high-value gaps: verifying that REST mutations (join, leave,
 role-change) trigger WebSocket broadcasts, multi-client scenarios, game
 master flows, and full lifecycle sequences.
 """
-
 from __future__ import annotations
 
 import json
 from unittest.mock import AsyncMock, patch
 
 import pytest
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 from starlette.testclient import TestClient
 
 from features.exercise.adapters.connection_manager import (
+    ConnectionManager,
     connection_manager,
 )
+from features.waiting_room.waiting_room_store import waiting_room_store
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 
 async def _create_exercise(client: AsyncClient) -> int:
     resp = await client.post(
-        "/api/exercises",
-        json={"title": "Integration Test Exercise"},
+        "/api/exercises", json={"title": "Integration Test Exercise"},
     )
     assert resp.status_code == 201
     return resp.json()["id"]
 
 
 async def _join(
-    client: AsyncClient,
-    exercise_id: int,
-    display_name: str = "Alice",
-    role: str = "player",
+    client: AsyncClient, exercise_id: int,
+    display_name: str = "Alice", role: str = "player",
 ) -> dict:
     resp = await client.post(
         f"/api/exercises/{exercise_id}/waiting-room/join",
@@ -47,21 +46,7 @@ async def _join(
 def _ws_client() -> TestClient:
     """Create a sync test client for WebSocket connections."""
     from main import app
-
     return TestClient(app)
-
-
-def _recv_type(ws: object, msg_type: str, *, limit: int = 20) -> dict:
-    """Receive WS messages until one with the given top-level type arrives.
-
-    Skips interleaved messages (e.g. presence_update broadcasts) so tests
-    are not sensitive to message ordering.
-    """
-    for _ in range(limit):
-        data = json.loads(ws.receive_text())  # type: ignore[union-attr]
-        if data.get("type") == msg_type:
-            return data
-    raise AssertionError(f"Did not receive message with type={msg_type!r} within {limit} messages")
 
 
 # ── Broadcast on Join ────────────────────────────────────────────────────
@@ -74,9 +59,7 @@ class TestBroadcastOnJoin:
     async def test_join_calls_broadcast(self, client: AsyncClient) -> None:
         eid = await _create_exercise(client)
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             await _join(client, eid, "Alice", "player")
 
@@ -91,21 +74,20 @@ class TestBroadcastOnJoin:
 
     @pytest.mark.asyncio
     async def test_second_join_broadcasts_both_participants(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             await _join(client, eid, "Alice", "player")
             await _join(client, eid, "Bob", "observer")
 
             assert mock_broadcast.call_count == 2
             last_payload = mock_broadcast.call_args_list[1][0][1]
-            names = {p["display_name"] for p in last_payload["participants"]}
+            names = {
+                p["display_name"] for p in last_payload["participants"]
+            }
             assert names == {"Alice", "Bob"}
 
 
@@ -117,16 +99,13 @@ class TestBroadcastOnRoleChange:
 
     @pytest.mark.asyncio
     async def test_role_change_broadcasts_updated_role(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
 
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             resp = await client.put(
                 f"/api/exercises/{eid}/waiting-room/participants/{p['id']}/role",
@@ -140,14 +119,11 @@ class TestBroadcastOnRoleChange:
 
     @pytest.mark.asyncio
     async def test_role_change_does_not_broadcast_on_404(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             resp = await client.put(
                 f"/api/exercises/{eid}/waiting-room/participants/bad-id/role",
@@ -165,17 +141,14 @@ class TestBroadcastOnLeave:
 
     @pytest.mark.asyncio
     async def test_leave_broadcasts_remaining_participants(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p1 = await _join(client, eid, "Alice", "player")
         await _join(client, eid, "Bob", "observer")
 
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             resp = await client.delete(
                 f"/api/exercises/{eid}/waiting-room/participants/{p1['id']}",
@@ -184,21 +157,20 @@ class TestBroadcastOnLeave:
 
             mock_broadcast.assert_called_once()
             payload = mock_broadcast.call_args[0][1]
-            names = {p["display_name"] for p in payload["participants"]}
+            names = {
+                p["display_name"] for p in payload["participants"]
+            }
             assert names == {"Bob"}
 
     @pytest.mark.asyncio
     async def test_leave_last_participant_broadcasts_empty(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
 
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             await client.delete(
                 f"/api/exercises/{eid}/waiting-room/participants/{p['id']}",
@@ -209,14 +181,11 @@ class TestBroadcastOnLeave:
 
     @pytest.mark.asyncio
     async def test_leave_does_not_broadcast_on_404(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             resp = await client.delete(
                 f"/api/exercises/{eid}/waiting-room/participants/bad-id",
@@ -261,8 +230,7 @@ class TestGameMasterFlow:
 
     @pytest.mark.asyncio
     async def test_gm_demotes_self_to_player(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         """GM can demote themselves to player."""
         eid = await _create_exercise(client)
@@ -277,8 +245,7 @@ class TestGameMasterFlow:
 
     @pytest.mark.asyncio
     async def test_gm_assigns_diverse_roles(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         """GM sets up a room with player, observer, and soc-analyst roles."""
         eid = await _create_exercise(client)
@@ -301,7 +268,10 @@ class TestGameMasterFlow:
         listing = await client.get(
             f"/api/exercises/{eid}/waiting-room",
         )
-        role_map = {p["display_name"]: p["role"] for p in listing.json()["participants"]}
+        role_map = {
+            p["display_name"]: p["role"]
+            for p in listing.json()["participants"]
+        }
         assert role_map == {
             "GM Lead": "game-master",
             "Alice": "observer",
@@ -338,7 +308,8 @@ class TestWsBroadcastLive:
             )
             assert join_resp.status_code == 200
 
-            msg = _recv_type(ws, "waiting_room_update")
+            msg = json.loads(ws.receive_text())
+            assert msg["type"] == "waiting_room_update"
             assert msg["exercise_id"] == eid
             assert len(msg["participants"]) == 1
             assert msg["participants"][0]["display_name"] == "Alice"
@@ -348,8 +319,7 @@ class TestWsBroadcastLive:
         sync_client = _ws_client()
 
         resp = sync_client.post(
-            "/api/exercises",
-            json={"title": "WS Role Test"},
+            "/api/exercises", json={"title": "WS Role Test"},
         )
         eid = resp.json()["id"]
 
@@ -361,8 +331,8 @@ class TestWsBroadcastLive:
                 json={"display_name": "Alice", "role": "player"},
             )
             pid = join_resp.json()["id"]
-            # Consume join broadcast (player never gets presence_update)
-            _recv_type(ws, "waiting_room_update")
+            # Consume join broadcast
+            ws.receive_text()
 
             # Change role
             sync_client.put(
@@ -370,7 +340,8 @@ class TestWsBroadcastLive:
                 json={"role": "game-master"},
             )
 
-            msg = _recv_type(ws, "waiting_room_update")
+            msg = json.loads(ws.receive_text())
+            assert msg["type"] == "waiting_room_update"
             assert msg["participants"][0]["role"] == "game-master"
 
     def test_ws_client_receives_leave_broadcast(self) -> None:
@@ -378,8 +349,7 @@ class TestWsBroadcastLive:
         sync_client = _ws_client()
 
         resp = sync_client.post(
-            "/api/exercises",
-            json={"title": "WS Leave Test"},
+            "/api/exercises", json={"title": "WS Leave Test"},
         )
         eid = resp.json()["id"]
 
@@ -391,13 +361,14 @@ class TestWsBroadcastLive:
                 json={"display_name": "Alice", "role": "player"},
             )
             pid = join_resp.json()["id"]
-            _recv_type(ws, "waiting_room_update")  # consume join broadcast
+            ws.receive_text()  # consume join broadcast
 
             sync_client.delete(
                 f"/api/exercises/{eid}/waiting-room/participants/{pid}",
             )
 
-            msg = _recv_type(ws, "waiting_room_update")
+            msg = json.loads(ws.receive_text())
+            assert msg["type"] == "waiting_room_update"
             assert msg["participants"] == []
 
     def test_multiple_ws_clients_receive_broadcast(self) -> None:
@@ -405,27 +376,25 @@ class TestWsBroadcastLive:
         sync_client = _ws_client()
 
         resp = sync_client.post(
-            "/api/exercises",
-            json={"title": "Multi WS Test"},
+            "/api/exercises", json={"title": "Multi WS Test"},
         )
         eid = resp.json()["id"]
 
-        with (
-            sync_client.websocket_connect(
-                f"/api/exercises/{eid}/ws?role=gm",
-            ) as ws_gm,
-            sync_client.websocket_connect(
-                f"/api/exercises/{eid}/ws?role=player",
-            ) as ws_player,
-        ):
+        with sync_client.websocket_connect(
+            f"/api/exercises/{eid}/ws?role=gm",
+        ) as ws_gm, sync_client.websocket_connect(
+            f"/api/exercises/{eid}/ws?role=player",
+        ) as ws_player:
             sync_client.post(
                 f"/api/exercises/{eid}/waiting-room/join",
                 json={"display_name": "Alice", "role": "player"},
             )
 
-            msg_gm = _recv_type(ws_gm, "waiting_room_update")
-            msg_player = _recv_type(ws_player, "waiting_room_update")
+            msg_gm = json.loads(ws_gm.receive_text())
+            msg_player = json.loads(ws_player.receive_text())
 
+            assert msg_gm["type"] == "waiting_room_update"
+            assert msg_player["type"] == "waiting_room_update"
             assert msg_gm["participants"] == msg_player["participants"]
 
 
@@ -437,14 +406,13 @@ class TestFullLifecycle:
 
     @pytest.mark.asyncio
     async def test_complete_waiting_room_lifecycle(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         """Simulate a realistic pre-exercise setup flow."""
         eid = await _create_exercise(client)
 
         # 1. Game master joins first
-        _gm = await _join(client, eid, "Commander", "game-master")
+        gm = await _join(client, eid, "Commander", "game-master")
 
         # 2. Players join with default role
         p1 = await _join(client, eid, "Alice", "player")
@@ -462,7 +430,7 @@ class TestFullLifecycle:
         )
 
         # 4. A late joiner arrives
-        _p4 = await _join(client, eid, "Dave", "player")
+        p4 = await _join(client, eid, "Dave", "player")
 
         # 5. Carol decides to leave before start
         resp = await client.delete(
@@ -478,7 +446,10 @@ class TestFullLifecycle:
         assert data["exercise_id"] == eid
         assert len(data["participants"]) == 4
 
-        role_map = {p["display_name"]: p["role"] for p in data["participants"]}
+        role_map = {
+            p["display_name"]: p["role"]
+            for p in data["participants"]
+        }
         assert role_map == {
             "Commander": "game-master",
             "Alice": "soc-analyst",
@@ -488,15 +459,14 @@ class TestFullLifecycle:
 
     @pytest.mark.asyncio
     async def test_join_across_exercises_isolated(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         """Participants in different exercises don't interfere."""
         eid1 = await _create_exercise(client)
         eid2 = await _create_exercise(client)
 
         gm1 = await _join(client, eid1, "GM-Alpha", "game-master")
-        _gm2 = await _join(client, eid2, "GM-Bravo", "game-master")
+        gm2 = await _join(client, eid2, "GM-Bravo", "game-master")
         await _join(client, eid1, "Alice", "player")
         await _join(client, eid2, "Bob", "player")
 
@@ -509,20 +479,23 @@ class TestFullLifecycle:
         listing2 = await client.get(
             f"/api/exercises/{eid2}/waiting-room",
         )
-        names2 = {p["display_name"] for p in listing2.json()["participants"]}
+        names2 = {
+            p["display_name"] for p in listing2.json()["participants"]
+        }
         assert names2 == {"GM-Bravo", "Bob"}
 
         # Exercise 1 should only have Alice
         listing1 = await client.get(
             f"/api/exercises/{eid1}/waiting-room",
         )
-        names1 = {p["display_name"] for p in listing1.json()["participants"]}
+        names1 = {
+            p["display_name"] for p in listing1.json()["participants"]
+        }
         assert names1 == {"Alice"}
 
     @pytest.mark.asyncio
     async def test_rapid_join_leave_cycle(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         """Rapid join/leave cycles should not corrupt state."""
         eid = await _create_exercise(client)
@@ -546,25 +519,22 @@ class TestFullLifecycle:
 
     @pytest.mark.asyncio
     async def test_broadcast_count_matches_mutations(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         """Each mutation (join/leave/role-change) emits exactly one broadcast."""
         eid = await _create_exercise(client)
 
         with patch.object(
-            connection_manager,
-            "broadcast",
-            new_callable=AsyncMock,
+            connection_manager, "broadcast", new_callable=AsyncMock,
         ) as mock_broadcast:
             p1 = await _join(client, eid, "Alice", "player")  # 1
-            p2 = await _join(client, eid, "Bob", "player")  # 2
+            p2 = await _join(client, eid, "Bob", "player")    # 2
 
-            await client.put(  # 3
+            await client.put(                                   # 3
                 f"/api/exercises/{eid}/waiting-room/participants/{p1['id']}/role",
                 json={"role": "game-master"},
             )
-            await client.delete(  # 4
+            await client.delete(                                # 4
                 f"/api/exercises/{eid}/waiting-room/participants/{p2['id']}",
             )
 

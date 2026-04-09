@@ -1,42 +1,15 @@
-import type {
-  ExerciseWsService,
-  WsMessage,
-} from "../../core/exercise-ws.service";
-import type { ExerciseStore } from "../../core/exercise.store";
-import { handleStateChange } from "../../core/ws-state-handler";
+import type { WsStateChange } from '../../core/exercise-ws.service';
+import type { ActiveDecision } from '../../core/decision-api.service';
+import type { ExerciseStore } from '../../core/exercise.store';
 
 type StoreInstance = InstanceType<typeof ExerciseStore>;
 
-/** Canonical completion handler — one path for all completion detection. */
-function handleCompletion(store: StoreInstance, ws?: ExerciseWsService): void {
-  store.applyPhaseChange("completed");
-  ws?.disconnect();
-}
-
-export function handlePlayerWsMessage(
-  msg: WsMessage,
-  store: StoreInstance,
-  onStopped?: () => void,
-  ws?: ExerciseWsService,
-): void {
-  switch (msg.type) {
-    case "exercise_stopped":
-      if (msg.reason === "completed") {
-        handleCompletion(store, ws);
-      } else {
-        onStopped?.();
-      }
-      break;
-    case "snapshot":
-      store.applySnapshot(msg);
-      break;
-    case "state_changes":
-      for (const change of msg.changes) {
-        handleStateChange(change, store);
-        if (change.type === "phase_change" && change.phase === "completed") {
-          handleCompletion(store, ws);
-        }
-      }
-      break;
+/** Handle decision_opened and decision_closed WS state changes */
+export function handleDecisionWsChanges(change: WsStateChange, store: StoreInstance): void {
+  if (change.type === 'decision_opened') {
+    store.applyDecisions([...store.openDecisions(), change as unknown as ActiveDecision]);
+  }
+  if (change.type === 'decision_closed') {
+    store.closeDecision(change['decision_id'] as string);
   }
 }

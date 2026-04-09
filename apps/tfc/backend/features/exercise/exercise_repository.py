@@ -16,8 +16,7 @@ class ExerciseRepository(CrudRepository[Exercise]):
         return list(result.scalars().all())
 
     async def get_by_session_code(
-        self,
-        session_code: str,
+        self, session_code: str,
     ) -> Exercise | None:
         """Look up an exercise by its session code."""
         stmt = select(Exercise).where(

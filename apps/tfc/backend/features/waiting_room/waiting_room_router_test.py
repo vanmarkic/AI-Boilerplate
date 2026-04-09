@@ -3,11 +3,11 @@
 Tests cover join, list, update role, leave, error handling,
 broadcast integration, and edge cases.
 """
-
 from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
+
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -15,18 +15,15 @@ from httpx import AsyncClient
 async def _create_exercise(client: AsyncClient) -> int:
     """Create an exercise and return its ID."""
     resp = await client.post(
-        "/api/exercises",
-        json={"title": "WR Test Exercise"},
+        "/api/exercises", json={"title": "WR Test Exercise"},
     )
     assert resp.status_code == 201
     return resp.json()["id"]
 
 
 async def _join(
-    client: AsyncClient,
-    exercise_id: int,
-    display_name: str = "Alice",
-    role: str = "player",
+    client: AsyncClient, exercise_id: int,
+    display_name: str = "Alice", role: str = "player",
 ) -> dict:
     """Join the waiting room and return the response."""
     resp = await client.post(
@@ -43,8 +40,7 @@ async def _join(
 class TestJoinEndpoint:
     @pytest.mark.asyncio
     async def test_join_returns_participant(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         data = await _join(client, eid, "Alice", "player")
@@ -61,8 +57,7 @@ class TestJoinEndpoint:
 
     @pytest.mark.asyncio
     async def test_join_default_role_is_player(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         resp = await client.post(
@@ -80,8 +75,7 @@ class TestJoinEndpoint:
 
     @pytest.mark.asyncio
     async def test_join_multiple_participants(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p1 = await _join(client, eid, "Alice", "player")
@@ -91,8 +85,7 @@ class TestJoinEndpoint:
 
     @pytest.mark.asyncio
     async def test_join_empty_name_rejected(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         resp = await client.post(
@@ -103,8 +96,7 @@ class TestJoinEndpoint:
 
     @pytest.mark.asyncio
     async def test_join_missing_name_rejected(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         resp = await client.post(
@@ -115,8 +107,7 @@ class TestJoinEndpoint:
 
     @pytest.mark.asyncio
     async def test_join_empty_role_rejected(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         resp = await client.post(
@@ -158,8 +149,7 @@ class TestListEndpoint:
 
     @pytest.mark.asyncio
     async def test_list_separate_exercises(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid1 = await _create_exercise(client)
         eid2 = await _create_exercise(client)
@@ -179,8 +169,7 @@ class TestListEndpoint:
 
     @pytest.mark.asyncio
     async def test_list_reflects_role_changes(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
@@ -197,8 +186,7 @@ class TestListEndpoint:
 
     @pytest.mark.asyncio
     async def test_list_reflects_leaves(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p1 = await _join(client, eid, "Alice", "player")
@@ -221,8 +209,7 @@ class TestListEndpoint:
 class TestUpdateRoleEndpoint:
     @pytest.mark.asyncio
     async def test_update_role_success(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
@@ -236,8 +223,7 @@ class TestUpdateRoleEndpoint:
 
     @pytest.mark.asyncio
     async def test_update_role_preserves_other_fields(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
@@ -253,8 +239,7 @@ class TestUpdateRoleEndpoint:
 
     @pytest.mark.asyncio
     async def test_update_role_unknown_participant_404(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         await _join(client, eid, "Alice", "player")
@@ -267,8 +252,7 @@ class TestUpdateRoleEndpoint:
 
     @pytest.mark.asyncio
     async def test_update_role_no_room_404(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         resp = await client.put(
@@ -279,8 +263,7 @@ class TestUpdateRoleEndpoint:
 
     @pytest.mark.asyncio
     async def test_update_role_empty_role_rejected(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
@@ -293,8 +276,7 @@ class TestUpdateRoleEndpoint:
 
     @pytest.mark.asyncio
     async def test_update_role_missing_role_rejected(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
@@ -307,8 +289,7 @@ class TestUpdateRoleEndpoint:
 
     @pytest.mark.asyncio
     async def test_update_other_participants_role(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p1 = await _join(client, eid, "Alice", "player")
@@ -331,8 +312,7 @@ class TestUpdateRoleEndpoint:
 
     @pytest.mark.asyncio
     async def test_update_role_multiple_times(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
@@ -362,8 +342,7 @@ class TestLeaveEndpoint:
 
     @pytest.mark.asyncio
     async def test_leave_removes_from_list(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
@@ -377,8 +356,7 @@ class TestLeaveEndpoint:
 
     @pytest.mark.asyncio
     async def test_leave_unknown_participant_404(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         await _join(client, eid, "Alice", "player")
@@ -390,8 +368,7 @@ class TestLeaveEndpoint:
 
     @pytest.mark.asyncio
     async def test_leave_no_room_404(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         resp = await client.delete(
@@ -416,8 +393,7 @@ class TestLeaveEndpoint:
 
     @pytest.mark.asyncio
     async def test_leave_does_not_affect_others(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
         p1 = await _join(client, eid, "Alice", "player")
@@ -440,8 +416,7 @@ class TestLeaveEndpoint:
 class TestFullFlow:
     @pytest.mark.asyncio
     async def test_join_change_role_leave_flow(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid = await _create_exercise(client)
 
@@ -478,14 +453,13 @@ class TestFullFlow:
 
     @pytest.mark.asyncio
     async def test_multiple_exercises_independent(
-        self,
-        client: AsyncClient,
+        self, client: AsyncClient,
     ) -> None:
         eid1 = await _create_exercise(client)
         eid2 = await _create_exercise(client)
 
         p1 = await _join(client, eid1, "Alice", "player")
-        _p2 = await _join(client, eid2, "Bob", "observer")
+        p2 = await _join(client, eid2, "Bob", "observer")
 
         # Change role in exercise 1 only
         await client.put(
@@ -498,182 +472,3 @@ class TestFullFlow:
             f"/api/exercises/{eid2}/waiting-room",
         )
         assert listing2.json()["participants"][0]["role"] == "observer"
-
-
-# ── Helpers for scenario-linked exercises ────────────────────────────
-
-
-async def _create_scenario_with_roles(
-    client: AsyncClient,
-    roles: list[dict],
-    game_mode: str = "simple_collaborative",
-) -> int:
-    """Create a scenario with roles and return its ID."""
-    resp = await client.post(
-        "/api/scenarios",
-        json={
-            "title": "Test Scenario",
-            "content": {
-                "phases": [],
-                "events": [],
-                "issues": [],
-                "decision_templates": [],
-                "default_time_factor": 1.0,
-                "briefing": "Test",
-                "objectives": [],
-                "rules": [],
-                "game_mode": game_mode,
-                "game_mode_config": {},
-                "decision_sequence": [],
-                "roles": roles,
-            },
-        },
-    )
-    assert resp.status_code == 201
-    return resp.json()["id"]
-
-
-async def _create_exercise_with_scenario(
-    client: AsyncClient,
-    scenario_id: int,
-    game_mode: str = "simple_collaborative",
-) -> int:
-    """Create an exercise linked to a scenario and return its ID."""
-    resp = await client.post(
-        "/api/exercises",
-        json={
-            "title": "Test Exercise",
-            "scenario_id": scenario_id,
-            "game_mode": game_mode,
-        },
-    )
-    assert resp.status_code == 201
-    return resp.json()["id"]
-
-
-_TWO_ROLES = [
-    {"id": "co", "label": "CO", "player_type": "decision_maker"},
-    {"id": "nav", "label": "NAV", "player_type": "advisor"},
-]
-
-
-# ── Unique Role Enforcement ──────────────────────────────────────────
-
-
-class TestUniqueRoleEnforcement:
-    @pytest.mark.asyncio
-    async def test_join_with_taken_role_returns_409(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
-        eid = await _create_exercise_with_scenario(client, sid)
-        await _join(client, eid, "Alice", "co")
-        resp = await client.post(
-            f"/api/exercises/{eid}/waiting-room/join",
-            json={"display_name": "Bob", "role": "co"},
-        )
-        assert resp.status_code == 409
-
-    @pytest.mark.asyncio
-    async def test_update_role_to_taken_role_returns_409(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
-        eid = await _create_exercise_with_scenario(client, sid)
-        await _join(client, eid, "Alice", "co")
-        p2 = await _join(client, eid, "Bob", "nav")
-        resp = await client.put(
-            f"/api/exercises/{eid}/waiting-room/participants/{p2['id']}/role",
-            json={"role": "co"},
-        )
-        assert resp.status_code == 409
-
-    @pytest.mark.asyncio
-    async def test_update_role_to_own_current_role_succeeds(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
-        eid = await _create_exercise_with_scenario(client, sid)
-        p = await _join(client, eid, "Alice", "co")
-        resp = await client.put(
-            f"/api/exercises/{eid}/waiting-room/participants/{p['id']}/role",
-            json={"role": "co"},
-        )
-        assert resp.status_code == 200
-
-    @pytest.mark.asyncio
-    async def test_join_with_player_placeholder_allows_duplicates(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        """Multiple participants can join with the generic 'player' role."""
-        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
-        eid = await _create_exercise_with_scenario(client, sid)
-        p1 = await _join(client, eid, "Alice", "player")
-        p2 = await _join(client, eid, "Bob", "player")
-        assert p1["role"] == "player"
-        assert p2["role"] == "player"
-
-    @pytest.mark.asyncio
-    async def test_join_with_available_role_succeeds(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
-        eid = await _create_exercise_with_scenario(client, sid)
-        await _join(client, eid, "Alice", "co")
-        p2 = await _join(client, eid, "Bob", "nav")
-        assert p2["role"] == "nav"
-
-    @pytest.mark.asyncio
-    async def test_exercise_without_scenario_allows_duplicate_roles(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        eid = await _create_exercise(client)
-        await _join(client, eid, "Alice", "player")
-        p2 = await _join(client, eid, "Bob", "player")
-        assert p2["role"] == "player"
-
-
-# ── Max Players Enforcement ──────────────────────────────────────────
-
-
-class TestMaxPlayersEnforcement:
-    @pytest.mark.asyncio
-    async def test_join_when_full_returns_409(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
-        eid = await _create_exercise_with_scenario(client, sid)
-        await _join(client, eid, "Alice", "co")
-        await _join(client, eid, "Bob", "nav")
-        resp = await client.post(
-            f"/api/exercises/{eid}/waiting-room/join",
-            json={"display_name": "Carol", "role": "player"},
-        )
-        assert resp.status_code == 409
-
-    @pytest.mark.asyncio
-    async def test_join_when_slots_available_succeeds(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        sid = await _create_scenario_with_roles(client, _TWO_ROLES)
-        eid = await _create_exercise_with_scenario(client, sid)
-        p = await _join(client, eid, "Alice", "co")
-        assert p["display_name"] == "Alice"
-
-    @pytest.mark.asyncio
-    async def test_exercise_without_scenario_has_no_limit(
-        self,
-        client: AsyncClient,
-    ) -> None:
-        eid = await _create_exercise(client)
-        for i in range(10):
-            p = await _join(client, eid, f"Player{i}", "player")
-            assert p["display_name"] == f"Player{i}"

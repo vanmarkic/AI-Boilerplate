@@ -2,12 +2,11 @@
 
 Maps exercise_id -> ExerciseEngine for all running/paused sessions.
 """
-
 from __future__ import annotations
 
-from collections.abc import Awaitable, Callable
+from typing import Awaitable, Callable
 
-from engine.exercise_engine import EngineConfig, ExerciseEngine
+from engine.exercise_engine import ExerciseEngine, EngineConfig
 
 
 class SessionStore:

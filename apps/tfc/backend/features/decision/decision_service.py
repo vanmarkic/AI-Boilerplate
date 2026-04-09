@@ -1,6 +1,7 @@
-from datetime import UTC, datetime
+from datetime import datetime, timezone
 
-from core.exceptions import BadRequestError, NotFoundError
+from fastapi import HTTPException, status
+
 from features.decision.decision_model import Decision, DecisionResponseRecord
 from features.decision.decision_repository import DecisionRepository
 from features.decision.decision_schema import (
@@ -12,10 +13,7 @@ from features.decision.decision_schema import (
 )
 
 VALID_QUESTION_TYPES = {
-    "single_choice",
-    "multi_choice",
-    "free_text",
-    "scale",
+    "single_choice", "multi_choice", "free_text", "scale",
 }
 VALID_COMPLETION_MODES = {"first_response", "all_respond", "gm_closes"}
 
@@ -25,16 +23,17 @@ class DecisionService:
         self.repository = repository
 
     async def create_decision(
-        self,
-        request: CreateDecisionRequest,
+        self, request: CreateDecisionRequest,
     ) -> DecisionResponse:
         if request.question_type not in VALID_QUESTION_TYPES:
-            raise BadRequestError(
-                f"Invalid question_type: {request.question_type}",
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid question_type: {request.question_type}",
             )
         if request.completion_mode not in VALID_COMPLETION_MODES:
-            raise BadRequestError(
-                f"Invalid completion_mode: {request.completion_mode}",
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Invalid completion_mode: {request.completion_mode}",
             )
         decision = Decision(
             exercise_id=request.exercise_id,
@@ -42,7 +41,7 @@ class DecisionService:
             title=request.title,
             description=request.description,
             question_type=request.question_type,
-            options=[o.model_dump() for o in request.options] if request.options else None,
+            options=request.options or None,
             completion_mode=request.completion_mode,
             status="open",
         )
@@ -50,12 +49,14 @@ class DecisionService:
         return self._to_response(created, 0)
 
     async def get_decision(
-        self,
-        decision_id: int,
+        self, decision_id: int,
     ) -> DecisionDetailResponse:
         decision = await self.repository.get_by_id(decision_id)
         if not decision:
-            raise NotFoundError("Decision not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Decision not found",
+            )
         responses = await self.repository.get_responses(decision_id)
         return DecisionDetailResponse(
             id=decision.id,
@@ -69,7 +70,9 @@ class DecisionService:
             status=decision.status,
             created_at=decision.created_at,
             closed_at=decision.closed_at,
-            responses=[ResponseItem.model_validate(r) for r in responses],
+            responses=[
+                ResponseItem.model_validate(r) for r in responses
+            ],
         )
 
     async def list_decisions(
@@ -79,8 +82,7 @@ class DecisionService:
     ) -> list[DecisionResponse]:
         if status_filter:
             decisions = await self.repository.list_by_exercise_and_status(
-                exercise_id,
-                status_filter,
+                exercise_id, status_filter,
             )
         else:
             decisions = await self.repository.list_by_exercise(exercise_id)
@@ -97,9 +99,15 @@ class DecisionService:
     ) -> ResponseItem:
         decision = await self.repository.get_by_id(decision_id)
         if not decision:
-            raise NotFoundError("Decision not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Decision not found",
+            )
         if decision.status != "open":
-            raise BadRequestError("Decision is closed")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Decision is closed",
+            )
         score = self._calculate_score(decision, request)
         record = DecisionResponseRecord(
             participant_id=request.participant_id,
@@ -114,19 +122,21 @@ class DecisionService:
         return ResponseItem.model_validate(created)
 
     async def close_decision(
-        self,
-        decision_id: int,
+        self, decision_id: int,
     ) -> DecisionResponse:
         decision = await self.repository.get_by_id(decision_id)
         if not decision:
-            raise NotFoundError("Decision not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Decision not found",
+            )
         await self._close(decision)
         count = await self.repository.count_responses(decision_id)
         return self._to_response(decision, count)
 
     async def _close(self, decision: Decision) -> None:
         decision.status = "closed"
-        decision.closed_at = datetime.now(UTC)
+        decision.closed_at = datetime.now(timezone.utc)
         await self.repository.update(decision)
 
     @staticmethod
@@ -138,19 +148,22 @@ class DecisionService:
             return None
         if not decision.options or not request.selected_options:
             return None
-        options_map = {opt["id"]: opt.get("score", 0) for opt in decision.options}
+        options_map = {
+            opt["id"]: opt.get("score", 0) for opt in decision.options
+        }
         if decision.question_type == "single_choice":
             selected_id = request.selected_options[0] if request.selected_options else None
             if selected_id is None:
                 return None
             return float(options_map.get(selected_id, 0))
-        total = sum(options_map.get(oid, 0) for oid in request.selected_options)
+        total = sum(
+            options_map.get(oid, 0) for oid in request.selected_options
+        )
         return float(total)
 
     @staticmethod
     def _to_response(
-        decision: Decision,
-        responses_count: int,
+        decision: Decision, responses_count: int,
     ) -> DecisionResponse:
         return DecisionResponse(
             id=decision.id,

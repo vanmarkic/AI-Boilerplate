@@ -4,7 +4,6 @@ Each factory wires Session -> Repository -> Service.
 Uses lazy imports (inside function body) so features
 don't break at module import time.
 """
-
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,18 +52,3 @@ async def get_audit_service(
 
     repository = AuditRepository(session)
     return AuditService(repository)
-
-
-async def get_domain_config_service(
-    session: AsyncSession = Depends(get_session),
-) -> "DomainConfigService":  # noqa: F821
-    """Wire up the DomainConfigService with its repository."""
-    from features.domain_config.domain_config_repository import (
-        DomainConfigRepository,
-    )
-    from features.domain_config.domain_config_service import (
-        DomainConfigService,
-    )
-
-    repository = DomainConfigRepository(session)
-    return DomainConfigService(repository)

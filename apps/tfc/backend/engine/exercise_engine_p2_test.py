@@ -1,5 +1,4 @@
 """Tests for P2 ExerciseEngine additions: decision timeout, role targeting."""
-
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -10,17 +9,12 @@ from engine.exercise_engine import EnginePhase, ExerciseEngine
 
 
 def _decision_event(
-    id: str,
-    scheduled_pt_ms: float = 0.0,
-    **kw: object,
+    id: str, scheduled_pt_ms: float = 0.0, **kw: object,
 ) -> ScheduledEvent:
     return ScheduledEvent(
-        id=id,
-        title=f"DE-{id}",
-        description="Decision event",
+        id=id, title=f"DE-{id}", description="Decision event",
         event_type=EventType.DECISION,
-        scheduled_pt_ms=scheduled_pt_ms,
-        **kw,
+        scheduled_pt_ms=scheduled_pt_ms, **kw,
     )
 
 
@@ -43,13 +37,8 @@ async def test_decision_template_with_timeout_pauses_engine() -> None:
     """Decision event with a timeout template should still pause engine."""
     evt = _decision_event("d1")
     dt = DecisionTemplate(
-        id="d1",
-        title="T",
-        description="D",
-        issue_id="i1",
-        question_type="single_choice",
-        options=[],
-        completion_mode="first_response",
+        id="d1", title="T", description="D", issue_id="i1",
+        question_type="single_choice", options=[], completion_mode="first_response",
         timeout_ms=5000.0,
     )
     engine = ExerciseEngine(_config(events=[evt], decision_templates=[dt]))
@@ -68,13 +57,8 @@ async def test_decision_template_with_timeout_pauses_engine() -> None:
 async def test_decision_opened_includes_target_roles() -> None:
     evt = _decision_event("d1")
     dt = DecisionTemplate(
-        id="d1",
-        title="T",
-        description="D",
-        issue_id="i1",
-        question_type="single_choice",
-        options=[],
-        completion_mode="first_response",
+        id="d1", title="T", description="D", issue_id="i1",
+        question_type="single_choice", options=[], completion_mode="first_response",
         target_roles=["player", "observer"],
     )
     engine = ExerciseEngine(_config(events=[evt], decision_templates=[dt]))
@@ -109,11 +93,8 @@ async def test_on_state_change_called_with_decision() -> None:
 @pytest.mark.asyncio
 async def test_snapshot_includes_context_fields() -> None:
     ctx = ScenarioContext(
-        title="ER Scenario",
-        description="Desc",
-        briefing="Brief",
-        objectives=["Obj1"],
-        rules=["Rule1"],
+        title="ER Scenario", description="Desc",
+        briefing="Brief", objectives=["Obj1"], rules=["Rule1"],
     )
     engine = ExerciseEngine(_config(context=ctx))
     snap = engine.snapshot()

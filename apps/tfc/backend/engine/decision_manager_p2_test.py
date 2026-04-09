@@ -1,5 +1,4 @@
 """Tests for P2 DecisionManager additions: timeout, tick, wall-clock tracking."""
-
 from __future__ import annotations
 
 from unittest.mock import patch
@@ -18,18 +17,7 @@ def _decision_kwargs(
         "title": f"Decision {id}",
         "description": f"Desc {id}",
         "question_type": "single_choice",
-        "options": [
-            {
-                "id": "o1",
-                "label": "Yes",
-                "score": 1.0,
-                "stress_delta": 0,
-                "system_effects": [],
-                "targets_system": False,
-                "max_plays": 1,
-                "role": None,
-            }
-        ],
+        "options": [{"id": "o1", "label": "Yes", "score": 1.0}],
         "completion_mode": "first_response",
         "target_roles": ["player"],
         "timeout_ms": timeout_ms,

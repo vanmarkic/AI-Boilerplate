@@ -6,26 +6,16 @@ import {
   OnDestroy,
   signal,
   computed,
-} from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
-import {
-  PageHeaderComponent,
-  CardComponent,
-  BadgeComponent,
-  ButtonDirective,
-} from "@aspect/ui";
-import { AuditApiService, AuditEntry } from "../../core/audit-api.service";
-import { formatTimeMs } from "../../core/format-time";
+} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective } from '@aspect/ui';
+import { AuditApiService, AuditEntry } from '../../core/audit-api.service';
+import { formatTimeMs } from '../../core/format-time';
 
 @Component({
-  selector: "tfc-review-view",
+  selector: 'tfc-review-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    PageHeaderComponent,
-    CardComponent,
-    BadgeComponent,
-    ButtonDirective,
-  ],
+  imports: [PageHeaderComponent, CardComponent, BadgeComponent, ButtonDirective],
   template: `
     <div class="flex flex-col gap-md p-lg">
       <ui-page-header title="Exercise Review" />
@@ -34,51 +24,22 @@ import { formatTimeMs } from "../../core/format-time";
       <ui-card title="Timeline Replay">
         <div class="flex flex-col gap-sm p-sm">
           <div class="flex items-center gap-md">
-            <button
-              uiButton
-              variant="outline"
-              size="sm"
-              (click)="stepBack()"
-              [disabled]="replayIndex() <= 0"
-            >
-              Prev
+            <button uiButton variant="outline" size="sm" (click)="stepBack()"
+              [disabled]="replayIndex() <= 0">Prev</button>
+            <button uiButton [variant]="playing() ? 'destructive' : 'default'" size="sm"
+              (click)="togglePlay()">
+              {{ playing() ? 'Pause' : 'Play' }}
             </button>
-            <button
-              uiButton
-              [variant]="playing() ? 'destructive' : 'default'"
-              size="sm"
-              (click)="togglePlay()"
-            >
-              {{ playing() ? "Pause" : "Play" }}
-            </button>
-            <button
-              uiButton
-              variant="outline"
-              size="sm"
-              (click)="stepForward()"
-              [disabled]="replayIndex() >= sortedLog().length"
-            >
-              Next
-            </button>
-            <button
-              uiButton
-              variant="outline"
-              size="sm"
-              (click)="resetReplay()"
-            >
-              Reset
-            </button>
+            <button uiButton variant="outline" size="sm" (click)="stepForward()"
+              [disabled]="replayIndex() >= sortedLog().length">Next</button>
+            <button uiButton variant="outline" size="sm" (click)="resetReplay()">Reset</button>
             <span class="text-sm text-muted-foreground">
               {{ replayIndex() }} / {{ sortedLog().length }}
             </span>
             <div class="flex items-center gap-xs" style="margin-left: auto">
               <span class="text-xs text-muted-foreground">Speed:</span>
-              <select
-                class="input-base"
-                style="width: var(--container-xs, 5rem)"
-                [value]="playbackSpeed()"
-                (change)="onSpeedChange($event)"
-              >
+              <select class="input-base" style="width: 80px"
+                [value]="playbackSpeed()" (change)="onSpeedChange($event)">
                 <option value="0.5">0.5x</option>
                 <option value="1">1x</option>
                 <option value="2">2x</option>
@@ -86,20 +47,16 @@ import { formatTimeMs } from "../../core/format-time";
               </select>
             </div>
           </div>
-          <div
-            style="width: 100%; height: var(--radius-md); background: var(--color-muted); border-radius: var(--radius-sm); position: relative;"
-          >
+          <div style="width: 100%; height: 4px; background: var(--color-muted); border-radius: 2px; position: relative;">
             <div
-              style="height: 100%; border-radius: var(--radius-sm); transition: width 0.2s;"
+              style="height: 100%; border-radius: 2px; transition: width 0.2s;"
               [style.width.%]="progressPercent()"
               [style.background]="'var(--color-primary)'"
             ></div>
           </div>
           @if (currentEntry(); as entry) {
-            <div
-              class="flex items-center gap-md p-sm"
-              style="background: var(--color-muted); border-radius: var(--radius-sm)"
-            >
+            <div class="flex items-center gap-md p-sm"
+              style="background: var(--color-muted); border-radius: var(--radius-sm)">
               <span class="text-sm font-medium">{{ entry.action }}</span>
               <ui-badge variant="secondary">{{ entry.entry_type }}</ui-badge>
               @if (entry.target_id) {
@@ -107,10 +64,7 @@ import { formatTimeMs } from "../../core/format-time";
                   target: {{ entry.target_id }}
                 </span>
               }
-              <span
-                class="text-xs text-muted-foreground"
-                style="margin-left: auto"
-              >
+              <span class="text-xs text-muted-foreground" style="margin-left: auto">
                 PT {{ formatTime(entry.play_time_ms) }}
               </span>
             </div>
@@ -121,10 +75,8 @@ import { formatTimeMs } from "../../core/format-time";
       <div class="grid grid-cols-3 gap-md">
         <ui-card title="Visible Timeline">
           @for (entry of visibleEntries(); track entry.id) {
-            <div
-              class="flex items-center justify-between p-sm border-b"
-              [style.opacity]="isHighlighted(entry) ? '1' : '0.6'"
-            >
+            <div class="flex items-center justify-between p-sm border-b"
+              [style.opacity]="isHighlighted(entry) ? '1' : '0.6'">
               <div class="flex flex-col">
                 <span class="text-sm font-medium">{{ entry.action }}</span>
                 <span class="text-xs text-muted-foreground">
@@ -143,17 +95,13 @@ import { formatTimeMs } from "../../core/format-time";
         <ui-card title="Event Summary">
           @for (entry of eventEntries(); track entry.id) {
             <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm"
-                >{{ entry.target_id }} — {{ entry.action }}</span
-              >
+              <span class="text-sm">{{ entry.target_id }} — {{ entry.action }}</span>
               <span class="text-xs text-muted-foreground">
                 {{ formatTime(entry.play_time_ms) }}
               </span>
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">
-              No event changes recorded.
-            </p>
+            <p class="text-muted-foreground text-sm p-sm">No event changes recorded.</p>
           }
         </ui-card>
 
@@ -162,9 +110,9 @@ import { formatTimeMs } from "../../core/format-time";
             <div class="flex items-center justify-between p-sm border-b">
               <div class="flex flex-col">
                 <span class="text-sm">{{ entry.action }}</span>
-                @if (entry.details && entry.details["title"]) {
+                @if (entry.details && entry.details['title']) {
                   <span class="text-xs text-muted-foreground">
-                    {{ entry.details["title"] }}
+                    {{ entry.details['title'] }}
                   </span>
                 }
               </div>
@@ -173,9 +121,7 @@ import { formatTimeMs } from "../../core/format-time";
               </span>
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">
-              No decision entries recorded.
-            </p>
+            <p class="text-muted-foreground text-sm p-sm">No decision entries recorded.</p>
           }
         </ui-card>
       </div>
@@ -212,18 +158,18 @@ export class ReviewView implements OnInit, OnDestroy {
   });
 
   protected eventEntries = computed(() =>
-    this.visibleEntries().filter((e) => e.entry_type === "event_change"),
+    this.visibleEntries().filter((e) => e.entry_type === 'event_change'),
   );
 
   protected decisionEntries = computed(() =>
-    this.visibleEntries().filter((e) => e.entry_type === "decision"),
+    this.visibleEntries().filter((e) => e.entry_type === 'decision'),
   );
 
   protected formatTime = formatTimeMs;
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
-    const exerciseId = Number(params["exerciseId"] ?? 1);
+    const exerciseId = Number(params['exerciseId'] ?? 1);
     this.auditApi.getLog(exerciseId).subscribe({
       next: (entries) => this.auditLog.set(entries),
     });
@@ -264,9 +210,7 @@ export class ReviewView implements OnInit, OnDestroy {
   }
 
   protected onSpeedChange(event: Event): void {
-    const target = event.target;
-    if (!(target instanceof HTMLSelectElement)) return;
-    const speed = parseFloat(target.value);
+    const speed = parseFloat((event.target as HTMLSelectElement).value);
     this.playbackSpeed.set(speed);
     if (this.playing()) {
       this.stopPlayback();

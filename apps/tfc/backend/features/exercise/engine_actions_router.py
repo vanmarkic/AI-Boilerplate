@@ -2,15 +2,12 @@
 
 Split from engine_router.py to stay under the 250-line limit.
 """
-
 from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, Field
 
-from engine.exercise_engine import ExerciseEngine
 from engine.session_store import session_store
-from engine.state_changes import EventChange, IssueChange, StateChange
 
 router = APIRouter(prefix="/api/exercises/{exercise_id}/engine", tags=["engine"])
 
@@ -19,7 +16,7 @@ class DelayRequest(BaseModel):
     delay_ms: float = Field(..., gt=0)
 
 
-def _get_engine(exercise_id: int) -> ExerciseEngine:
+def _get_engine(exercise_id: int):
     """Retrieve engine or raise 404."""
     engine = session_store.get(exercise_id)
     if engine is None:
@@ -30,7 +27,7 @@ def _get_engine(exercise_id: int) -> ExerciseEngine:
     return engine
 
 
-def _or_404[T: StateChange](result: T | None, detail: str) -> T:
+def _or_404(result: dict | None, detail: str) -> dict:
     if result is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=detail)
     return result
@@ -40,22 +37,17 @@ def _or_404[T: StateChange](result: T | None, detail: str) -> T:
 
 
 @router.post("/events/{event_id}/trigger", operation_id="triggerEvent")
-async def trigger_event(exercise_id: int, event_id: str) -> EventChange:
+async def trigger_event(exercise_id: int, event_id: str) -> dict:
     engine = _get_engine(exercise_id)
-    try:
-        changes = engine.trigger_event(event_id)
-    except ValueError as exc:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(exc),
-        ) from exc
-    if changes and engine._on_state_change:
-        await engine._on_state_change(changes)
-    return changes[0]  # EventChange is always first
+    pt = engine.time_manager.play_time_ms
+    return _or_404(
+        engine.event_scheduler.force_trigger(event_id, pt),
+        f"Event {event_id} not found or not triggerable",
+    )
 
 
 @router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
-async def cancel_event(exercise_id: int, event_id: str) -> EventChange:
+async def cancel_event(exercise_id: int, event_id: str) -> dict:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.cancel_event(event_id),
         f"Event {event_id} not found or not cancellable",
@@ -63,7 +55,7 @@ async def cancel_event(exercise_id: int, event_id: str) -> EventChange:
 
 
 @router.post("/events/{event_id}/complete", operation_id="completeEvent")
-async def complete_event(exercise_id: int, event_id: str) -> EventChange:
+async def complete_event(exercise_id: int, event_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -73,7 +65,7 @@ async def complete_event(exercise_id: int, event_id: str) -> EventChange:
 
 
 @router.post("/events/{event_id}/pause", operation_id="pauseEvent")
-async def pause_event(exercise_id: int, event_id: str) -> EventChange:
+async def pause_event(exercise_id: int, event_id: str) -> dict:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.pause_event(event_id),
         f"Event {event_id} not found or not pausable",
@@ -81,7 +73,7 @@ async def pause_event(exercise_id: int, event_id: str) -> EventChange:
 
 
 @router.post("/events/{event_id}/resume", operation_id="resumeEvent")
-async def resume_event(exercise_id: int, event_id: str) -> EventChange:
+async def resume_event(exercise_id: int, event_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -92,21 +84,18 @@ async def resume_event(exercise_id: int, event_id: str) -> EventChange:
 
 @router.post("/events/{event_id}/delay", operation_id="delayEvent")
 async def delay_event(
-    exercise_id: int,
-    event_id: str,
-    body: DelayRequest,
-) -> EventChange:
+    exercise_id: int, event_id: str, body: DelayRequest,
+) -> dict:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.delay_event(
-            event_id,
-            body.delay_ms,
+            event_id, body.delay_ms,
         ),
         f"Event {event_id} not found or not delayable",
     )
 
 
 @router.post("/events/{event_id}/skip", operation_id="skipEvent")
-async def skip_event(exercise_id: int, event_id: str) -> EventChange:
+async def skip_event(exercise_id: int, event_id: str) -> dict:
     return _or_404(
         _get_engine(exercise_id).event_scheduler.skip_event(event_id),
         f"Event {event_id} not found or not skippable",
@@ -117,7 +106,7 @@ async def skip_event(exercise_id: int, event_id: str) -> EventChange:
 
 
 @router.post("/issues/{issue_id}/activate", operation_id="activateIssue")
-async def activate_issue(exercise_id: int, issue_id: str) -> IssueChange:
+async def activate_issue(exercise_id: int, issue_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -127,7 +116,7 @@ async def activate_issue(exercise_id: int, issue_id: str) -> IssueChange:
 
 
 @router.post("/issues/{issue_id}/mitigate", operation_id="mitigateIssue")
-async def mitigate_issue(exercise_id: int, issue_id: str) -> IssueChange:
+async def mitigate_issue(exercise_id: int, issue_id: str) -> dict:
     return _or_404(
         _get_engine(exercise_id).issue_manager.mitigate(issue_id),
         f"Issue {issue_id} not found or not mitigatable",
@@ -135,7 +124,7 @@ async def mitigate_issue(exercise_id: int, issue_id: str) -> IssueChange:
 
 
 @router.post("/issues/{issue_id}/resolve", operation_id="resolveIssue")
-async def resolve_issue(exercise_id: int, issue_id: str) -> IssueChange:
+async def resolve_issue(exercise_id: int, issue_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
@@ -145,7 +134,7 @@ async def resolve_issue(exercise_id: int, issue_id: str) -> IssueChange:
 
 
 @router.post("/issues/{issue_id}/release", operation_id="releaseIssue")
-async def release_issue(exercise_id: int, issue_id: str) -> IssueChange:
+async def release_issue(exercise_id: int, issue_id: str) -> dict:
     return _or_404(
         _get_engine(exercise_id).issue_manager.release_to_players(issue_id),
         f"Issue {issue_id} not found or not releasable",
@@ -156,40 +145,42 @@ async def release_issue(exercise_id: int, issue_id: str) -> IssueChange:
 
 
 @router.get("/decisions", operation_id="getOpenDecisions")
-async def get_open_decisions(exercise_id: int) -> list[dict[str, object]]:
+async def get_open_decisions(exercise_id: int) -> list[dict]:
     engine = _get_engine(exercise_id)
     return [
-        {
-            "id": d.id,
-            "event_id": d.event_id,
-            "title": d.title,
-            "question_type": d.question_type,
-            "options": d.options,
-            "target_roles": d.target_roles,
-            "status": d.status,
-        }
+        {"id": d.id, "title": d.title, "question_type": d.question_type,
+         "options": d.options, "target_roles": d.target_roles, "status": d.status}
         for d in engine.decision_manager.get_open_decisions()
     ]
 
-    # close_decision endpoint has been consolidated into engine_router.py
-    # to support scoring, turn chaining, and forced card enforcement.
+
+@router.post("/decisions/{decision_id}/close", operation_id="closeDecision")
+async def close_decision(exercise_id: int, decision_id: str) -> dict:
+    engine = _get_engine(exercise_id)
+    pt = engine.time_manager.play_time_ms
+    result = engine.decision_manager.close_decision(decision_id, current_pt_ms=pt)
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Decision {decision_id} not found or already closed",
+        )
+    if not engine.decision_manager.get_open_decisions():
+        await engine.resume()
+    return result
 
 
 # ── Context ──────────────────────────────────────────────────────────────
 
 
 @router.get("/context", operation_id="getEngineContext")
-async def get_engine_context(exercise_id: int) -> dict[str, object]:
+async def get_engine_context(exercise_id: int) -> dict:
     engine = _get_engine(exercise_id)
-    ctx = engine.config.context
+    ctx = engine._config.context
     return {
         "title": ctx.title,
         "description": ctx.description,
         "briefing": ctx.briefing,
         "objectives": ctx.objectives,
         "rules": ctx.rules,
-        "roles": [{"id": r.id, "label": r.label, "player_type": r.player_type} for r in ctx.roles],
-        "default_time_factor": engine.config.time_factor,
-        "score_tier_thresholds": ctx.score_tier_thresholds,
-        "stress_effect_preset": ctx.stress_effect_preset,
+        "default_time_factor": engine._config.time_factor,
     }

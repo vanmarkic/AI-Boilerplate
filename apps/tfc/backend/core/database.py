@@ -15,7 +15,6 @@ async_session_factory = async_sessionmaker(engine, expire_on_commit=False)
 
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
-
     pass
 
 

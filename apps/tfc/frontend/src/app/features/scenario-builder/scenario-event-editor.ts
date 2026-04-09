@@ -1,99 +1,41 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from "@angular/core";
-import { FormsModule } from "@angular/forms";
-import {
-  CardComponent,
-  ButtonDirective,
-  InputComponent,
-  BadgeComponent,
-} from "@aspect/ui";
-import type { ScenarioEventDef } from "../../core/scenario-api.service";
-import { ScenarioBuilderStore } from "./scenario-builder.store";
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { CardComponent, ButtonDirective, InputComponent, BadgeComponent } from '@aspect/ui';
+import type { ScenarioEventDef } from '../../core/scenario-api.service';
+import { ScenarioBuilderStore } from './scenario-builder.store';
 
 @Component({
-  selector: "tfc-scenario-event-editor",
+  selector: 'tfc-scenario-event-editor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    FormsModule,
-    CardComponent,
-    ButtonDirective,
-    InputComponent,
-    BadgeComponent,
-  ],
+  imports: [FormsModule, CardComponent, ButtonDirective, InputComponent, BadgeComponent],
   template: `
     <ui-card title="Events">
       @for (event of store.content().events; track event.id) {
-        <div
-          [id]="'event-' + event.id"
-          class="flex flex-col gap-xs p-sm border-b"
-        >
+        <div class="flex flex-col gap-xs p-sm border-b">
           @if (editingId() === event.id) {
             <div class="flex flex-col gap-xs">
-              <ui-input
-                id="edit-evt-title"
-                label="Title"
-                [value]="editTitle()"
-                (valueChange)="editTitle.set($event)"
-              />
-              <ui-input
-                id="edit-evt-desc"
-                label="Description"
-                [value]="editDesc()"
-                (valueChange)="editDesc.set($event)"
-              />
+              <ui-input id="edit-evt-title" label="Title"
+                [value]="editTitle()" (valueChange)="editTitle.set($event)" />
+              <ui-input id="edit-evt-desc" label="Description"
+                [value]="editDesc()" (valueChange)="editDesc.set($event)" />
               <div class="flex gap-sm">
                 <div class="flex flex-col gap-xs" style="flex:1">
                   <label class="text-xs">Type</label>
-                  <select
-                    class="input-base"
-                    [value]="editType()"
-                    (change)="editType.set(sel($event))"
-                  >
+                  <select class="input-base" [value]="editType()"
+                    (change)="editType.set(sel($event))">
                     <option value="informational">Informational</option>
                     <option value="operational">Operational</option>
                     <option value="decision">Decision</option>
                   </select>
                 </div>
-                <ui-input
-                  id="edit-evt-pt"
-                  label="PT (ms)"
-                  [value]="'' + editPt()"
-                  (valueChange)="editPt.set(+$event)"
-                />
-                <ui-input
-                  id="edit-evt-dur"
-                  label="Duration (ms)"
-                  [value]="'' + (editDur() ?? '')"
-                  (valueChange)="editDur.set($event ? +$event : null)"
-                />
+                <ui-input id="edit-evt-pt" label="PT (ms)"
+                  [value]="'' + editPt()" (valueChange)="editPt.set(+$event)" />
+                <ui-input id="edit-evt-dur" label="Duration (ms)"
+                  [value]="'' + (editDur() ?? '')" (valueChange)="editDur.set($event ? +$event : null)" />
               </div>
-              <ui-input
-                id="edit-evt-roles"
-                label="Target Roles (comma-separated, empty = all)"
-                [value]="editTargetRoles()"
-                (valueChange)="editTargetRoles.set($event)"
-              />
               <div class="flex gap-sm">
-                <button
-                  uiButton
-                  variant="default"
-                  size="sm"
-                  (click)="save(event.id)"
-                >
-                  Save
-                </button>
-                <button
-                  uiButton
-                  variant="outline"
-                  size="sm"
-                  (click)="editingId.set(null)"
-                >
-                  Cancel
-                </button>
+                <button uiButton variant="default" size="sm" (click)="save(event.id)">Save</button>
+                <button uiButton variant="outline" size="sm" (click)="editingId.set(null)">Cancel</button>
               </div>
             </div>
           } @else {
@@ -104,34 +46,11 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                 <span class="text-xs text-muted-foreground ml-sm">
                   @ {{ event.scheduled_pt_ms / 1000 }}s
                 </span>
-                @for (issueId of event.triggered_issues; track issueId) {
-                  <span
-                    class="text-xs cursor-pointer"
-                    style="text-decoration: underline dotted; color: var(--color-primary)"
-                    (click)="
-                      scrollTo('issue-' + issueId); $event.stopPropagation()
-                    "
-                    >{{ issueId }}</span
-                  >
-                }
               </div>
               <div class="flex gap-xs">
-                <button
-                  uiButton
-                  variant="outline"
-                  size="sm"
-                  (click)="edit(event)"
-                >
-                  Edit
-                </button>
-                <button
-                  uiButton
-                  variant="destructive"
-                  size="sm"
-                  (click)="store.removeEvent(event.id)"
-                >
-                  Remove
-                </button>
+                <button uiButton variant="outline" size="sm" (click)="edit(event)">Edit</button>
+                <button uiButton variant="destructive" size="sm"
+                  (click)="store.removeEvent(event.id)">Remove</button>
               </div>
             </div>
           }
@@ -140,30 +59,17 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
         <p class="text-muted-foreground text-sm p-sm">No events yet.</p>
       }
       <div class="flex gap-sm p-sm border-t">
-        <ui-input
-          id="event-title"
-          label=""
-          placeholder="Event title"
-          [(value)]="newTitle"
-        />
-        <ui-input
-          id="event-time"
-          label=""
-          placeholder="PT (ms)"
-          [(value)]="newTime"
-        />
-        <select
-          class="input-base"
-          [value]="newType()"
-          (change)="newType.set(sel($event))"
-        >
+        <ui-input id="event-title" label="" placeholder="Event title"
+          [(value)]="newTitle" />
+        <ui-input id="event-time" label="" placeholder="PT (ms)"
+          [(value)]="newTime" />
+        <select class="input-base" [value]="newType()"
+          (change)="newType.set(sel($event))">
           <option value="operational">Operational</option>
           <option value="informational">Informational</option>
           <option value="decision">Decision</option>
         </select>
-        <button uiButton variant="outline" size="sm" (click)="add()">
-          Add
-        </button>
+        <button uiButton variant="outline" size="sm" (click)="add()">Add</button>
       </div>
     </ui-card>
   `,
@@ -172,22 +78,19 @@ export class ScenarioEventEditorComponent {
   protected readonly store = inject(ScenarioBuilderStore);
   private counter = 0;
 
-  protected readonly newTitle = signal("");
-  protected readonly newTime = signal("");
-  protected readonly newType = signal("operational");
+  protected readonly newTitle = signal('');
+  protected readonly newTime = signal('');
+  protected readonly newType = signal('operational');
 
   protected readonly editingId = signal<string | null>(null);
-  protected readonly editTitle = signal("");
-  protected readonly editDesc = signal("");
-  protected readonly editType = signal("operational");
+  protected readonly editTitle = signal('');
+  protected readonly editDesc = signal('');
+  protected readonly editType = signal('operational');
   protected readonly editPt = signal(0);
   protected readonly editDur = signal<number | null>(null);
-  protected readonly editTargetRoles = signal("");
 
   protected sel(event: Event): string {
-    const target = event.target;
-    if (target instanceof HTMLSelectElement) return target.value;
-    return "";
+    return (event.target as HTMLSelectElement).value;
   }
 
   protected add(): void {
@@ -197,17 +100,15 @@ export class ScenarioEventEditorComponent {
     this.store.addEvent({
       id: `evt-${++this.counter}`,
       title,
-      description: "",
+      description: '',
       event_type: this.newType(),
       scheduled_pt_ms: time,
       duration_ms: null,
       dependencies: [],
       triggered_issues: [],
-      target_roles: [],
-      role_descriptions: {},
     });
-    this.newTitle.set("");
-    this.newTime.set("");
+    this.newTitle.set('');
+    this.newTime.set('');
   }
 
   protected edit(event: ScenarioEventDef): void {
@@ -217,34 +118,15 @@ export class ScenarioEventEditorComponent {
     this.editType.set(event.event_type);
     this.editPt.set(event.scheduled_pt_ms);
     this.editDur.set(event.duration_ms);
-    this.editTargetRoles.set((event.target_roles ?? []).join(", "));
-  }
-
-  protected scrollTo(elementId: string): void {
-    document
-      .getElementById(elementId)
-      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
   protected save(eventId: string): void {
-    const rolesStr = this.editTargetRoles().trim();
-    const target_roles = rolesStr
-      ? rolesStr
-          .split(",")
-          .map((r: string) => r.trim())
-          .filter(Boolean)
-      : [];
-    const existing = this.store
-      .content()
-      .events.find((e: ScenarioEventDef) => e.id === eventId);
     this.store.updateEvent(eventId, {
       title: this.editTitle(),
       description: this.editDesc(),
       event_type: this.editType(),
       scheduled_pt_ms: this.editPt(),
       duration_ms: this.editDur(),
-      target_roles,
-      role_descriptions: existing?.role_descriptions ?? {},
     });
     this.editingId.set(null);
   }

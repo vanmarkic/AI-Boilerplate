@@ -1,30 +1,29 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices } from '@playwright/test';
 
-const CI = !!process.env["CI"];
+const CI = !!process.env['CI'];
 
 export default defineConfig({
-  testDir: "./e2e/tests",
+  testDir: './e2e/tests',
   fullyParallel: true,
   forbidOnly: CI,
   retries: CI ? 2 : 0,
   workers: CI ? 1 : undefined,
-  reporter: CI ? [["github"], ["html", { open: "never" }]] : "html",
+  reporter: CI ? [['github'], ['html', { open: 'never' }]] : 'html',
   timeout: 30_000,
   use: {
-    baseURL: "http://localhost:4201",
-    trace: "on-first-retry",
-    screenshot: "only-on-failure",
+    baseURL: 'http://localhost:4201',
+    trace: 'on-first-retry',
     actionTimeout: 10_000,
   },
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
   webServer: {
-    command: "npm run start",
-    url: "http://localhost:4201",
+    command: 'npm run start',
+    url: 'http://localhost:4201',
     reuseExistingServer: !CI,
     timeout: 120_000,
   },

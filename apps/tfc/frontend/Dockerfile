@@ -1,31 +1,23 @@
-# Stage 1: Build Angular app
-FROM node:22-slim AS build
+FROM node:22-slim
 WORKDIR /app
 
-COPY package.json ./
+# Install workspace root + dependencies
+COPY package.json package-lock.json ./
 COPY packages/design-system/package.json ./packages/design-system/
 COPY packages/ui/package.json ./packages/ui/
+COPY packages/tfc-shared/package.json ./packages/tfc-shared/
 COPY apps/tfc/frontend/package.json ./apps/tfc/frontend/
 
-RUN npm install --workspace=apps/tfc/frontend
+RUN npm ci --workspace=apps/tfc/frontend
 
 COPY packages/design-system/ ./packages/design-system/
 COPY packages/ui/ ./packages/ui/
+COPY packages/tfc-shared/ ./packages/tfc-shared/
 COPY apps/tfc/frontend/ ./apps/tfc/frontend/
 
 WORKDIR /app/apps/tfc/frontend
-RUN npx ng build --configuration=production
 
-# Stage 2: Serve with nginx
-FROM nginx:1.27-alpine
+USER node
 
-# Copy built assets
-COPY --from=build /app/apps/tfc/frontend/dist/tfc/browser /usr/share/nginx/html
-
-# Copy nginx config and entrypoint
-COPY apps/tfc/frontend/nginx.conf /etc/nginx/templates/default.conf.template
-COPY apps/tfc/frontend/entrypoint.sh /docker-entrypoint.d/40-inject-env.sh
-RUN chmod +x /docker-entrypoint.d/40-inject-env.sh
-
-ENV PORT=80
-EXPOSE ${PORT}
+EXPOSE 4201
+CMD ["npx", "ng", "serve", "--host", "0.0.0.0"]

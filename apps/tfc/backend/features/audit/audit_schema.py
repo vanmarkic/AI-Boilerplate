@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -15,7 +16,7 @@ class CreateAuditEntry(BaseModel):
     target_id: str | None = None
     play_time_ms: float = 0.0
     real_time_ms: float = 0.0
-    details: dict[str, object] | None = None
+    details: dict[str, Any] | None = None
 
 
 class AuditEntryResponse(ResponseBase):
@@ -29,5 +30,5 @@ class AuditEntryResponse(ResponseBase):
     target_id: str | None
     play_time_ms: float
     real_time_ms: float
-    details: dict[str, object] | None
+    details: dict[str, Any] | None
     created_at: datetime

@@ -3,7 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from core.base_schema import ResponseBase
-from features.scenario.scenario_content import DecisionOptionDef
 
 
 class CreateDecisionRequest(BaseModel):
@@ -12,7 +11,7 @@ class CreateDecisionRequest(BaseModel):
     exercise_id: int
     issue_id: str
     question_type: str
-    options: list[DecisionOptionDef] = []
+    options: list[dict] = []
     completion_mode: str
 
 
@@ -39,7 +38,7 @@ class DecisionResponse(ResponseBase):
     title: str
     description: str
     question_type: str
-    options: list[DecisionOptionDef] | None
+    options: list[dict] | None
     completion_mode: str
     status: str
     created_at: datetime
@@ -54,9 +53,9 @@ class DecisionDetailResponse(ResponseBase):
     title: str
     description: str
     question_type: str
-    options: list[DecisionOptionDef] | None
+    options: list[dict] | None
     completion_mode: str
     status: str
     created_at: datetime
     closed_at: datetime | None
-    responses: list[ResponseItem] = []  # noqa: RUF012 — Pydantic copies per instance
+    responses: list[ResponseItem] = []

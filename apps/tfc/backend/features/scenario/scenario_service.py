@@ -14,14 +14,13 @@ class ScenarioService:
         self.repository = repository
 
     async def create_scenario(
-        self,
-        request: CreateScenarioRequest,
+        self, request: CreateScenarioRequest,
     ) -> ScenarioResponse:
         scenario = Scenario(
             title=request.title,
             description=request.description,
             domain_id=request.domain_id,
-            content=request.content.model_dump(),
+            content=request.content,
             version=request.version,
         )
         created = await self.repository.create(scenario)
@@ -37,8 +36,7 @@ class ScenarioService:
         return ScenarioResponse.model_validate(scenario)
 
     async def list_scenarios(
-        self,
-        domain_id: int | None = None,
+        self, domain_id: int | None = None,
     ) -> list[ScenarioResponse]:
         if domain_id is not None:
             scenarios = await self.repository.list_by_domain(domain_id)
@@ -47,9 +45,7 @@ class ScenarioService:
         return [ScenarioResponse.model_validate(s) for s in scenarios]
 
     async def update_scenario(
-        self,
-        scenario_id: int,
-        request: UpdateScenarioRequest,
+        self, scenario_id: int, request: UpdateScenarioRequest,
     ) -> ScenarioResponse:
         scenario = await self.repository.get_by_id(scenario_id)
         if not scenario:
@@ -64,23 +60,6 @@ class ScenarioService:
 
         updated = await self.repository.update(scenario)
         return ScenarioResponse.model_validate(updated)
-
-    async def clone_scenario(self, scenario_id: int) -> ScenarioResponse:
-        scenario = await self.repository.get_by_id(scenario_id)
-        if not scenario:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Scenario not found",
-            )
-        clone = Scenario(
-            title=f"{scenario.title} (Copy)",
-            description=scenario.description,
-            domain_id=scenario.domain_id,
-            content=scenario.content,
-            version=1,
-        )
-        created = await self.repository.create(clone)
-        return ScenarioResponse.model_validate(created)
 
     async def delete_scenario(self, scenario_id: int) -> None:
         deleted = await self.repository.delete(scenario_id)

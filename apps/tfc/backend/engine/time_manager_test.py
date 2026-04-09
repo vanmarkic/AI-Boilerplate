@@ -1,6 +1,4 @@
 """Tests for TimeManager dual-clock logic."""
-
-from collections.abc import Callable
 from unittest.mock import patch
 
 import pytest
@@ -8,7 +6,7 @@ import pytest
 from engine.time_manager import TimeManager
 
 
-def _make_clock(start: float = 0.0) -> tuple[Callable[[], float], Callable[[float], None]]:
+def _make_clock(start: float = 0.0):
     """Return a mock _now_ms that increments by a controllable amount."""
     state = {"now": start}
 
@@ -27,7 +25,7 @@ class TestStartPauseResume:
         assert tm.paused is True
 
     @patch("engine.time_manager._now_ms", return_value=1000.0)
-    def test_start_unpauses(self, _mock: object) -> None:  # noqa: PT019
+    def test_start_unpauses(self, _mock: object) -> None:
         tm = TimeManager()
         tm.start()
         assert tm.paused is False

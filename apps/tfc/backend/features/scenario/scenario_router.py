@@ -61,19 +61,6 @@ async def update_scenario(
     return await service.update_scenario(scenario_id, request)
 
 
-@router.post(
-    "/{scenario_id}/clone",
-    status_code=status.HTTP_201_CREATED,
-    response_model=ScenarioResponse,
-    operation_id="cloneScenario",
-)
-async def clone_scenario(
-    scenario_id: int,
-    service: ScenarioService = Depends(get_scenario_service),
-) -> ScenarioResponse:
-    return await service.clone_scenario(scenario_id)
-
-
 @router.delete(
     "/{scenario_id}",
     status_code=status.HTTP_204_NO_CONTENT,

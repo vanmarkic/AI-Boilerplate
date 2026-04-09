@@ -3,7 +3,7 @@
  *
  * Provides API route mocking helpers so tests run without a live backend.
  */
-import { test as base, type Page, type Route } from "@playwright/test";
+import { test as base, type Page, type Route } from '@playwright/test';
 
 /** Shape returned by POST /waiting-room/join */
 export interface MockParticipant {
@@ -11,35 +11,6 @@ export interface MockParticipant {
   display_name: string;
   role: string;
   joined_at: string;
-}
-
-export interface MockRole {
-  id: string;
-  label: string;
-  player_type: string;
-}
-
-export interface MockScenario {
-  id: number;
-  title: string;
-  description: string;
-  domain_id: number | null;
-  content: {
-    roles?: MockRole[];
-    game_mode?: string;
-    [key: string]: unknown;
-  } | null;
-  version: number;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface MockJoinableResponse {
-  exercise: Record<string, unknown>;
-  participants: MockParticipant[];
-  roles: MockRole[];
-  max_players: number;
-  requires_gm: boolean;
 }
 
 let participantCounter = 0;
@@ -51,31 +22,11 @@ export function mockParticipant(
   participantCounter += 1;
   return {
     id: `p-${participantCounter}-${Date.now()}`,
-    display_name: overrides.display_name ?? "TestUser",
-    role: overrides.role ?? "player",
+    display_name: overrides.display_name ?? 'TestUser',
+    role: overrides.role ?? 'player',
     joined_at: new Date().toISOString(),
     ...overrides,
   };
-}
-
-/** Derive scenario roles from participant roles. */
-function deriveRoles(participants: MockParticipant[]): MockRole[] {
-  const seen = new Set<string>();
-  const roles: MockRole[] = [];
-  for (const p of participants) {
-    if (p.role === "game-master" || seen.has(p.role)) continue;
-    seen.add(p.role);
-    const isDecisionMaker = p.role === "decision_maker" || p.role === "co";
-    roles.push({
-      id: p.role,
-      label: p.role
-        .split(/[_-]/)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" "),
-      player_type: isDecisionMaker ? "decision_maker" : "advisor",
-    });
-  }
-  return roles;
 }
 
 type Fixtures = {
@@ -86,221 +37,56 @@ type Fixtures = {
 export class MockApi {
   /** Accumulated participants per exercise_id (mirrors server state). */
   readonly rooms = new Map<number, MockParticipant[]>();
-  /** Session code → exercise lookup payload. */
-  readonly codeMap = new Map<string, object>();
-  /** Scenario list for GET /api/scenarios. */
-  readonly scenarios: MockScenario[] = [];
-  /** Joinable exercise responses (array, always 200). */
-  joinableResponses: MockJoinableResponse[] = [];
-  /** Exercise ID → exercise payload (for GET /api/exercises/:id). */
-  readonly exerciseMap = new Map<number, object>();
 
-  readonly page: Page;
-  constructor(page: Page) {
-    this.page = page;
-  }
-
-  /** Register a session code so by-code lookup returns this exercise. */
-  seedCode(code: string, exerciseId: number, gameMode = "classic"): void {
-    const exercise = {
-      id: exerciseId,
-      title: "Seeded Exercise",
-      description: "",
-      phase: "setup",
-      scenario_id: null,
-      domain_id: null,
-      time_factor: 1.0,
-      game_mode: gameMode,
-      session_code: code.toUpperCase(),
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    this.codeMap.set(code.toUpperCase(), exercise);
-    this.exerciseMap.set(exerciseId, exercise);
-  }
-
-  /** Seed exercise data for GET /api/exercises/:id. */
-  seedExercise(
-    exerciseId: number,
-    gameMode = "classic",
-    scenarioId: number | null = null,
-  ): void {
-    this.exerciseMap.set(exerciseId, {
-      id: exerciseId,
-      title: "Seeded Exercise",
-      description: "",
-      phase: "setup",
-      scenario_id: scenarioId,
-      domain_id: null,
-      time_factor: 1.0,
-      game_mode: gameMode,
-      session_code: "TEST",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    });
-  }
-
-  /** Seed a scenario for GET /api/scenarios. */
-  seedScenario(scenario: MockScenario): void {
-    this.scenarios.push(scenario);
-  }
-
-  /** Add a joinable exercise response. */
-  seedJoinable(data: MockJoinableResponse): void {
-    this.joinableResponses.push(data);
-  }
+  constructor(private readonly page: Page) {}
 
   /** Install default API route handlers. Call once per test. */
   async install(): Promise<void> {
-    // GET /api/exercises/joinable
-    await this.page.route("**/api/exercises/joinable", async (route) => {
-      if (route.request().method() !== "GET") {
-        await route.fallback();
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(this.joinableResponses),
-      });
-    });
-
-    // GET /api/scenarios and GET /api/scenarios/:id
-    await this.page.route("**/api/scenarios", async (route) => {
-      if (route.request().method() !== "GET") {
-        await route.fallback();
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(this.scenarios),
-      });
-    });
-
-    await this.page.route("**/api/scenarios/*", async (route) => {
-      if (route.request().method() !== "GET") {
-        await route.fallback();
-        return;
-      }
-      const url = route.request().url();
-      const m = url.match(/scenarios\/(\d+)/);
-      const id = m ? Number(m[1]) : 0;
-      const s = this.scenarios.find((x) => x.id === id);
-      if (!s) {
-        await route.fulfill({ status: 404 });
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(s),
-      });
-    });
-
     // POST /api/exercises — create exercise
-    await this.page.route("**/api/exercises", async (route) => {
-      if (route.request().method() === "GET") {
-        // GET /api/exercises/:id fallthrough handled below
-        await route.fallback();
-        return;
-      }
-      if (route.request().method() !== "POST") {
+    await this.page.route('**/api/exercises', async (route) => {
+      if (route.request().method() !== 'POST') {
         await route.fallback();
         return;
       }
       const body = route.request().postDataJSON();
       const id = Math.floor(Math.random() * 9000) + 1000;
-      const sessionCode = Math.random().toString(36).slice(2, 8).toUpperCase();
       await route.fulfill({
         status: 201,
-        contentType: "application/json",
+        contentType: 'application/json',
         body: JSON.stringify({
           id,
-          title: body.title ?? "Test Exercise",
-          description: body.description ?? "",
-          phase: "setup",
-          scenario_id: body.scenario_id ?? null,
+          title: body.title ?? 'Test Exercise',
+          description: body.description ?? '',
+          phase: 'setup',
+          scenario_id: null,
           domain_id: null,
           time_factor: 1.0,
-          game_mode: body.game_mode ?? "classic",
-          session_code: sessionCode,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         }),
       });
     });
 
-    // GET /api/exercises/:id — single exercise lookup
-    await this.page.route("**/api/exercises/*", async (route) => {
-      if (route.request().method() !== "GET") {
-        await route.fallback();
-        return;
-      }
-      const url = route.request().url();
-      // Skip by-code, waiting-room, engine, joinable, and participants sub-paths
-      if (/by-code|waiting-room|engine|participants|joinable/.test(url)) {
-        await route.fallback();
-        return;
-      }
-      const m = url.match(/exercises\/(\d+)$/);
-      if (!m) {
-        await route.fallback();
-        return;
-      }
-      const id = Number(m[1]);
-      const stored = this.exerciseMap.get(id);
-      if (!stored) {
-        await route.fulfill({ status: 404 });
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(stored),
-      });
-    });
-
-    // GET /api/exercises/by-code/:code — session code lookup
-    await this.page.route("**/api/exercises/by-code/**", async (route) => {
-      if (route.request().method() !== "GET") {
-        await route.fallback();
-        return;
-      }
-      const url = route.request().url();
-      const code = url.split("/by-code/")[1]?.toUpperCase() ?? "";
-      const stored = this.codeMap.get(code);
-      if (!stored) {
-        await route.fulfill({ status: 404 });
-        return;
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(stored),
-      });
-    });
-
     // POST /waiting-room/join
-    await this.page.route("**/waiting-room/join", async (route) => {
+    await this.page.route('**/waiting-room/join', async (route) => {
       const url = route.request().url();
       const exerciseId = this.extractExerciseId(url);
       const body = route.request().postDataJSON();
       const p = mockParticipant({
         display_name: body.display_name,
-        role: body.role ?? "player",
+        role: body.role ?? 'player',
       });
       this.addParticipant(exerciseId, p);
       await route.fulfill({
         status: 200,
-        contentType: "application/json",
+        contentType: 'application/json',
         body: JSON.stringify(p),
       });
     });
 
     // GET /waiting-room
-    await this.page.route("**/waiting-room", async (route) => {
-      if (route.request().method() !== "GET") {
+    await this.page.route('**/waiting-room', async (route) => {
+      if (route.request().method() !== 'GET') {
         await route.fallback();
         return;
       }
@@ -308,7 +94,7 @@ export class MockApi {
       const exerciseId = this.extractExerciseId(url);
       await route.fulfill({
         status: 200,
-        contentType: "application/json",
+        contentType: 'application/json',
         body: JSON.stringify({
           exercise_id: exerciseId,
           participants: this.rooms.get(exerciseId) ?? [],
@@ -317,8 +103,8 @@ export class MockApi {
     });
 
     // PUT /participants/:id/role
-    await this.page.route("**/participants/*/role", async (route) => {
-      if (route.request().method() !== "PUT") {
+    await this.page.route('**/participants/*/role', async (route) => {
+      if (route.request().method() !== 'PUT') {
         await route.fallback();
         return;
       }
@@ -333,14 +119,14 @@ export class MockApi {
       }
       await route.fulfill({
         status: 200,
-        contentType: "application/json",
+        contentType: 'application/json',
         body: JSON.stringify(p),
       });
     });
 
     // DELETE /participants/:id
-    await this.page.route("**/waiting-room/participants/*", async (route) => {
-      if (route.request().method() !== "DELETE") {
+    await this.page.route('**/waiting-room/participants/*', async (route) => {
+      if (route.request().method() !== 'DELETE') {
         await route.fallback();
         return;
       }
@@ -352,40 +138,17 @@ export class MockApi {
     });
 
     // Swallow WebSocket upgrade attempts (no real server)
-    await this.page.route("**/ws?*", (route) =>
-      route.abort("connectionrefused"),
+    await this.page.route('**/ws?*', (route) =>
+      route.abort('connectionrefused'),
     );
-    await this.page.route("**/ws", (route) => route.abort("connectionrefused"));
+    await this.page.route('**/ws', (route) =>
+      route.abort('connectionrefused'),
+    );
   }
 
-  /**
-   * Seed the room with participants before navigating.
-   * Also auto-registers exercise + scenario data (with roles derived from
-   * participants) unless the exercise was already explicitly seeded.
-   */
-  seed(
-    exerciseId: number,
-    participants: MockParticipant[],
-    gameMode = "classic",
-  ): void {
+  /** Seed the room with participants before navigating. */
+  seed(exerciseId: number, participants: MockParticipant[]): void {
     this.rooms.set(exerciseId, [...participants]);
-    if (!this.exerciseMap.has(exerciseId)) {
-      const roles = deriveRoles(participants);
-      const scenarioId = exerciseId;
-      this.seedExercise(exerciseId, gameMode, scenarioId);
-      if (!this.scenarios.find((s) => s.id === scenarioId)) {
-        this.seedScenario({
-          id: scenarioId,
-          title: "Test Scenario",
-          description: "",
-          domain_id: null,
-          content: { roles, game_mode: gameMode },
-          version: 1,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-      }
-    }
   }
 
   private addParticipant(exerciseId: number, p: MockParticipant): void {
@@ -424,7 +187,7 @@ export class MockApi {
 
   private extractParticipantId(url: string): string {
     const m = url.match(/participants\/([^/]+)/);
-    return m ? m[1] : "";
+    return m ? m[1] : '';
   }
 }
 
@@ -435,4 +198,4 @@ export const test = base.extend<Fixtures>({
   },
 });
 
-export { expect } from "@playwright/test";
+export { expect } from '@playwright/test';

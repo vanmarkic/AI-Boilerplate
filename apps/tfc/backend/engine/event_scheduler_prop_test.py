@@ -1,8 +1,7 @@
 """Property tests for EventScheduler lifecycle transitions."""
-
 from __future__ import annotations
 
-from hypothesis import given, settings
+from hypothesis import given, settings, assume
 from hypothesis import strategies as st
 
 from engine.event_scheduler import (
@@ -16,6 +15,7 @@ from engine.strategies import (
     durations,
     monotonic_play_times,
     play_times,
+    scheduled_events,
 )
 
 TERMINAL = {EventLifecycle.COMPLETED, EventLifecycle.CANCELLED}
@@ -76,15 +76,13 @@ class TestTerminalStatesAbsorbing:
     )
     @settings(max_examples=200)
     def test_completed_event_stays_completed(
-        self,
-        duration: float,
-        extra_ticks: list[float],
+        self, duration: float, extra_ticks: list[float],
     ) -> None:
         event = _simple_event(scheduled_pt_ms=0.0, duration_ms=duration)
         sched = EventScheduler()
         sched.load_events([event])
-        sched.tick(0.0)  # -> pending
-        sched.tick(0.0)  # -> running
+        sched.tick(0.0)   # -> pending
+        sched.tick(0.0)   # -> running
         sched.tick(duration + 1.0)  # -> completed
         assert sched.events["e0"].lifecycle == EventLifecycle.COMPLETED
         for pt in extra_ticks:
@@ -94,8 +92,7 @@ class TestTerminalStatesAbsorbing:
     @given(extra_ticks=monotonic_play_times(min_size=5, max_size=20))
     @settings(max_examples=100)
     def test_cancelled_event_stays_cancelled(
-        self,
-        extra_ticks: list[float],
+        self, extra_ticks: list[float],
     ) -> None:
         event = _simple_event(scheduled_pt_ms=9999.0)
         sched = EventScheduler()
@@ -175,7 +172,8 @@ class TestDependencyOrdering:
             child_ev = sched.events["child"]
             if child_ev.lifecycle != EventLifecycle.SCHEDULED:
                 assert dep_ev.lifecycle == EventLifecycle.COMPLETED, (
-                    f"Child left SCHEDULED ({child_ev.lifecycle}) but dep is {dep_ev.lifecycle}"
+                    f"Child left SCHEDULED ({child_ev.lifecycle}) "
+                    f"but dep is {dep_ev.lifecycle}"
                 )
 
 
@@ -188,12 +186,11 @@ class TestSnapshotRoundtrip:
     )
     @settings(max_examples=100)
     def test_snapshot_has_correct_length_and_keys(
-        self,
-        n_events: int,
-        ticks: list[float],
+        self, n_events: int, ticks: list[float],
     ) -> None:
         events = [
-            _simple_event(eid=f"e{i}", scheduled_pt_ms=float(i * 100)) for i in range(n_events)
+            _simple_event(eid=f"e{i}", scheduled_pt_ms=float(i * 100))
+            for i in range(n_events)
         ]
         sched = EventScheduler()
         sched.load_events(events)
@@ -201,18 +198,8 @@ class TestSnapshotRoundtrip:
             sched.tick(pt)
         snap = sched.snapshot()
         assert len(snap) == n_events
-        required_keys = {
-            "id",
-            "title",
-            "description",
-            "event_type",
-            "scheduled_pt_ms",
-            "duration_ms",
-            "dependencies",
-            "triggered_issues",
-            "lifecycle",
-            "started_at_pt_ms",
-            "completed_at_pt_ms",
-        }
+        required_keys = {"id", "title", "description", "event_type", "scheduled_pt_ms",
+                         "duration_ms", "dependencies", "triggered_issues", "lifecycle",
+                         "started_at_pt_ms", "completed_at_pt_ms"}
         for entry in snap:
             assert required_keys <= set(entry.keys())

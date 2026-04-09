@@ -3,7 +3,6 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from core.base_schema import ResponseBase
-from core.game_mode_constants import GM_CLASSIC, VALID_GAME_MODES  # noqa: F401
 
 
 class CreateExerciseRequest(BaseModel):
@@ -13,9 +12,6 @@ class CreateExerciseRequest(BaseModel):
     scenario_id: int | None = None
     domain_id: int | None = None
     time_factor: float = 1.0
-    game_mode: str = GM_CLASSIC
-    practice_mode: bool = False
-    player_count_mode: str = "full"
 
 
 class UpdateExerciseRequest(BaseModel):
@@ -25,9 +21,6 @@ class UpdateExerciseRequest(BaseModel):
     scenario_id: int | None = None
     domain_id: int | None = None
     time_factor: float | None = None
-    game_mode: str | None = None
-    practice_mode: bool | None = None
-    player_count_mode: str | None = None
 
 
 class ExerciseResponse(ResponseBase):
@@ -38,9 +31,6 @@ class ExerciseResponse(ResponseBase):
     scenario_id: int | None
     domain_id: int | None
     time_factor: float
-    game_mode: str
-    practice_mode: bool
-    player_count_mode: str
     session_code: str
     created_at: datetime
     updated_at: datetime

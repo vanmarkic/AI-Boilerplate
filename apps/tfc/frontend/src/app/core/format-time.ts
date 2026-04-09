@@ -6,7 +6,5 @@ export function formatTimeMs(ms: number): string {
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  return [hours, minutes, seconds]
-    .map((n) => String(n).padStart(2, "0"))
-    .join(":");
+  return [hours, minutes, seconds].map((n) => String(n).padStart(2, '0')).join(':');
 }

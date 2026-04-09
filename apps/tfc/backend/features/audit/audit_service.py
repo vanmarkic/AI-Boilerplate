@@ -29,8 +29,7 @@ class AuditService:
         entry_type: str | None = None,
     ) -> list[AuditEntryResponse]:
         entries = await self.repository.list_by_exercise(
-            exercise_id,
-            entry_type=entry_type,
+            exercise_id, entry_type=entry_type,
         )
         return [AuditEntryResponse.model_validate(e) for e in entries]
 
@@ -43,28 +42,12 @@ class AuditService:
     ) -> None:
         """Batch-log engine state changes to the audit trail."""
         for change in changes:
-            change_type = change.get("type", "unknown")
-            # Derive a human-readable action from the change type
-            action = change.get("action") or change.get("lifecycle")
-            if not action:
-                if change_type == "decision_closed":
-                    action = "decided"
-                elif change_type == "decision_opened":
-                    action = "opened"
-                elif change_type == "score_change":
-                    action = "scored"
-                else:
-                    action = "unknown"
             entry = AuditEntry(
                 exercise_id=exercise_id,
-                entry_type=change_type,
-                action=action,
-                target_type=change_type.replace("_change", "")
-                .replace("_closed", "")
-                .replace("_opened", ""),
-                target_id=change.get("decision_id")
-                or change.get("event_id")
-                or change.get("issue_id"),
+                entry_type=change.get("type", "unknown"),
+                action=change.get("action", "unknown"),
+                target_type=change.get("type", "").replace("_change", ""),
+                target_id=change.get("event_id") or change.get("issue_id"),
                 play_time_ms=play_time_ms,
                 real_time_ms=real_time_ms,
                 details=change,
