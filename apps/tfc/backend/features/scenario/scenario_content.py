@@ -37,6 +37,7 @@ class ScenarioInjectDef(BaseModel):
     duration_ms: float | None = None  # auto-complete after duration
     dependencies: list[str] = []  # inject IDs that must complete first
     triggered_defects: list[str] = []  # defect IDs activated on completion
+    execution_mode: str = "automatic"  # automatic | manual
 
 
 class ScenarioDefectDef(BaseModel):

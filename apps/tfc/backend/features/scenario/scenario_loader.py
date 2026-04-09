@@ -5,7 +5,7 @@ ScheduledInject / TrackedDefect / EngineConfig dataclasses.
 """
 from __future__ import annotations
 
-from engine.inject_scheduler import InjectType, ScheduledInject
+from engine.inject_scheduler import ExecutionMode, InjectType, ScheduledInject
 from engine.exercise_engine import (
     DecisionTemplate,
     EngineConfig,
@@ -29,6 +29,7 @@ def load_scenario_injects(content: ScenarioContent) -> list[ScheduledInject]:
                 duration_ms=inj.duration_ms,
                 dependencies=list(inj.dependencies),
                 triggered_defects=list(inj.triggered_defects),
+                execution_mode=ExecutionMode(inj.execution_mode),
             ),
         )
     return injects

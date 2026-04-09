@@ -2,6 +2,7 @@
 import pytest
 
 from engine.inject_scheduler import (
+    ExecutionMode,
     InjectLifecycle,
     InjectScheduler,
     InjectType,
@@ -188,3 +189,52 @@ class TestSnapshotIncludesTriggeredDefects:
         sched.load_injects([inj])
         snap = sched.snapshot()
         assert snap[0]["triggered_defects"] == ["i1", "i2"]
+
+
+class TestExecutionMode:
+    def test_manual_inject_does_not_auto_activate(self) -> None:
+        scheduler = InjectScheduler()
+        scheduler.load_injects([ScheduledInject(
+            id="m1", title="Manual", description="",
+            inject_type=InjectType.INFORMATIONAL,
+            scheduled_pt_ms=0,
+            execution_mode=ExecutionMode.MANUAL,
+        )])
+        changes = scheduler.tick(1000)
+        assert len(changes) == 0
+        assert scheduler.injects["m1"].lifecycle == InjectLifecycle.SCHEDULED
+
+    def test_automatic_inject_activates_normally(self) -> None:
+        scheduler = InjectScheduler()
+        scheduler.load_injects([ScheduledInject(
+            id="a1", title="Auto", description="",
+            inject_type=InjectType.INFORMATIONAL,
+            scheduled_pt_ms=0,
+            execution_mode=ExecutionMode.AUTOMATIC,
+        )])
+        changes = scheduler.tick(1000)
+        assert len(changes) > 0
+
+    def test_manual_inject_can_be_force_triggered(self) -> None:
+        scheduler = InjectScheduler()
+        scheduler.load_injects([ScheduledInject(
+            id="m1", title="Manual", description="",
+            inject_type=InjectType.INFORMATIONAL,
+            scheduled_pt_ms=0,
+            execution_mode=ExecutionMode.MANUAL,
+        )])
+        change = scheduler.force_trigger("m1", current_pt_ms=1000)
+        assert change is not None
+        assert scheduler.injects["m1"].lifecycle == InjectLifecycle.RUNNING
+
+    def test_execution_mode_included_in_snapshot(self) -> None:
+        sched = InjectScheduler()
+        inj = ScheduledInject(
+            id="m1", title="Manual", description="",
+            inject_type=InjectType.INFORMATIONAL,
+            scheduled_pt_ms=0.0,
+            execution_mode=ExecutionMode.MANUAL,
+        )
+        sched.load_injects([inj])
+        snap = sched.snapshot()
+        assert snap[0]["execution_mode"] == "manual"

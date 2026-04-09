@@ -26,6 +26,11 @@ class InjectType(StrEnum):
     DECISION = "decision"
 
 
+class ExecutionMode(StrEnum):
+    AUTOMATIC = "automatic"
+    MANUAL = "manual"
+
+
 VALID_TRANSITIONS: dict[InjectLifecycle, set[InjectLifecycle]] = {
     InjectLifecycle.SCHEDULED: {InjectLifecycle.PENDING, InjectLifecycle.CANCELLED},
     InjectLifecycle.PENDING: {InjectLifecycle.RUNNING, InjectLifecycle.CANCELLED},
@@ -51,6 +56,7 @@ class ScheduledInject:
     duration_ms: float | None = None
     dependencies: list[str] = field(default_factory=list)
     triggered_defects: list[str] = field(default_factory=list)
+    execution_mode: ExecutionMode = ExecutionMode.AUTOMATIC
     lifecycle: InjectLifecycle = InjectLifecycle.SCHEDULED
     started_at_pt_ms: float | None = None
     completed_at_pt_ms: float | None = None
@@ -184,6 +190,8 @@ class InjectScheduler:
         self, inject: ScheduledInject, current_pt_ms: float,
     ) -> bool:
         """Check if inject should transition from scheduled to pending."""
+        if inject.execution_mode == ExecutionMode.MANUAL:
+            return False
         if current_pt_ms < inject.scheduled_pt_ms:
             return False
         # Check dependencies are completed
@@ -222,6 +230,7 @@ class InjectScheduler:
                 "duration_ms": e.duration_ms,
                 "dependencies": e.dependencies,
                 "triggered_defects": e.triggered_defects,
+                "execution_mode": e.execution_mode.value,
                 "lifecycle": e.lifecycle.value,
                 "started_at_pt_ms": e.started_at_pt_ms,
                 "completed_at_pt_ms": e.completed_at_pt_ms,
