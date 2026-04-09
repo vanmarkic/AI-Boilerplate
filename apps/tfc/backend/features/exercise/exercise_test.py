@@ -101,45 +101,23 @@ async def test_phase_transition_invalid(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_classic_exercise_auto_assigns_trainer(client: AsyncClient) -> None:
-    """Creating a classic exercise auto-joins a 'trainer' participant."""
-    from features.waiting_room.waiting_room_store import waiting_room_store
-
-    # Clear store to avoid stale state from prior tests
-    waiting_room_store._rooms.clear()
-
-    resp = await client.post(
-        "/api/exercises",
-        json={"title": "Classic Auto", "game_mode": "classic"},
-    )
-    assert resp.status_code == 201
-    eid = resp.json()["id"]
-
-    participants = waiting_room_store.list_participants(eid)
-    assert len(participants) == 1
-    assert participants[0].role == "trainer"
-    assert participants[0].display_name == "Trainer"
-
-
-@pytest.mark.asyncio
-async def test_collaborative_exercise_does_not_auto_assign_trainer(
+async def test_classic_exercise_does_not_auto_assign_trainer(
     client: AsyncClient,
 ) -> None:
-    """Creating a collaborative exercise does NOT auto-join a trainer."""
+    """Creating a classic exercise does NOT auto-join anyone — trainer joins manually."""
     from features.waiting_room.waiting_room_store import waiting_room_store
 
     waiting_room_store._rooms.clear()
 
     resp = await client.post(
         "/api/exercises",
-        json={"title": "Collab No Trainer", "game_mode": "simple_collaborative"},
+        json={"title": "Classic Manual", "game_mode": "classic"},
     )
     assert resp.status_code == 201
     eid = resp.json()["id"]
 
     participants = waiting_room_store.list_participants(eid)
-    trainers = [p for p in participants if p.role == "trainer"]
-    assert len(trainers) == 0
+    assert len(participants) == 0
 
 
 @pytest.mark.asyncio

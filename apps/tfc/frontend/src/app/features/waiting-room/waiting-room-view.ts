@@ -334,7 +334,13 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     const name = this.displayName().trim();
     if (!name) return;
     this.joining.set(true);
-    this.api.join(this.exerciseId(), name, "player").subscribe({
+    // Classic mode: first joiner is the trainer (exercise creator)
+    const trainerAlreadyPresent = this.participants().some(
+      (p) => p.role === "trainer",
+    );
+    const role =
+      this.requiresGm() && !trainerAlreadyPresent ? "trainer" : "player";
+    this.api.join(this.exerciseId(), name, role).subscribe({
       next: (p) => {
         this.participantId.set(p.id);
         this.joining.set(false);

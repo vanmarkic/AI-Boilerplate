@@ -194,8 +194,10 @@ test.describe.serial(
     test.beforeAll(async () => {
       scenarioId = await findScenario();
       exerciseId = await createExercise(scenarioId);
-      // Small delay for DB commit visibility across async connections
       await new Promise((r) => setTimeout(r, 200));
+      // Trainer joins first (classic mode — exercise creator is the trainer)
+      await joinWaitingRoom(exerciseId, "Lt. Smith", "trainer");
+      // Trainee joins as CO
       participantId = await joinWaitingRoom(exerciseId, "CO Player", "co");
       await startEngine(exerciseId);
       await beginExercise(exerciseId);
@@ -209,18 +211,21 @@ test.describe.serial(
       return `/player?exerciseId=${exerciseId}&participantId=${participantId}&role=co&gameMode=classic`;
     }
 
-    // ── 0. Trainer auto-assigned on exercise creation ─────────────
+    // ── 0. Trainer joined to waiting room ─────────────────────────
 
-    test("trainer is auto-assigned to waiting room", async () => {
+    test("trainer and trainee both present in waiting room", async () => {
       const res = await apiFetch(
         `${API_BASE}/api/exercises/${exerciseId}/waiting-room`,
       );
       const data = (await res.json()) as {
-        participants: { role: string; display_name: string }[];
+        participants: { id: string; role: string; display_name: string }[];
       };
       const trainer = data.participants.find((p) => p.role === "trainer");
       expect(trainer).toBeDefined();
-      expect(trainer!.display_name).toBe("Trainer");
+      expect(trainer!.display_name).toBe("Lt. Smith");
+      const co = data.participants.find((p) => p.role === "co");
+      expect(co).toBeDefined();
+      expect(co!.display_name).toBe("CO Player");
     });
 
     // ── 1. Classic layout renders correctly ─────────────────────────
