@@ -1,7 +1,7 @@
 """GameMode protocol and factory.
 
 A GameMode defines policy hooks that the ExerciseEngine delegates to,
-allowing different exercise modes (classic GM-driven, simple_collaborative)
+allowing different exercise modes (classic trainer-driven, simple_collaborative)
 to coexist without branching inside the engine.
 """
 

@@ -1,6 +1,6 @@
 """Simple-Collaborative game mode.
 
-No GM required. Decisions chain sequentially — each opens immediately
+No Trainer required. Decisions chain sequentially — each opens immediately
 when the previous one closes. Advisors submit recommendations in
 real-time; the decision-maker makes the final call. Wrong answers
 increase stress, which reduces the time available for subsequent decisions.
@@ -153,5 +153,5 @@ class SimpleCollaborativeMode:
         """
         return STRESS_TIME_TABLE.get(self.stress, 180_000)
 
-    def requires_gm(self) -> bool:
+    def requires_trainer(self) -> bool:
         return False

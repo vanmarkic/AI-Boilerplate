@@ -136,9 +136,9 @@ MUTATIONS: list[Mutation] = [
     ),
     Mutation(
         file="engine/game_modes/simple_collaborative.py",
-        description="requires_gm: return True (should break collab mode test)",
-        original="    def requires_gm(self) -> bool:\n        return False",
-        mutated="    def requires_gm(self) -> bool:\n        return True",
+        description="requires_trainer: return True (should break collab mode test)",
+        original="    def requires_trainer(self) -> bool:\n        return False",
+        mutated="    def requires_trainer(self) -> bool:\n        return True",
     ),
     # ── classic.py mutations ────────────────────────────────────────────
     Mutation(
@@ -149,9 +149,9 @@ MUTATIONS: list[Mutation] = [
     ),
     Mutation(
         file="engine/game_modes/classic.py",
-        description="requires_gm: return False (should break classic mode test)",
-        original="    def requires_gm(self) -> bool:\n        return True",
-        mutated="    def requires_gm(self) -> bool:\n        return False",
+        description="requires_trainer: return False (should break classic mode test)",
+        original="    def requires_trainer(self) -> bool:\n        return True",
+        mutated="    def requires_trainer(self) -> bool:\n        return False",
     ),
     # ── forced card mutation ────────────────────────────────────────────
     Mutation(

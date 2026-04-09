@@ -145,7 +145,7 @@ class TestJoinableEndpoint:
         role_ids = {r["id"] for r in data[0]["roles"]}
         assert role_ids == {"co", "nav"}
         assert data[0]["participants"] == []
-        assert data[0]["requires_gm"] is False
+        assert data[0]["requires_trainer"] is False
 
     @pytest.mark.asyncio
     async def test_ignores_running_exercises(
@@ -195,7 +195,7 @@ class TestJoinableEndpoint:
         assert resp.status_code == 200
         data = resp.json()
         assert len(data) == 1
-        assert data[0]["requires_gm"] is True
+        assert data[0]["requires_trainer"] is True
         assert data[0]["max_players"] == 3  # 2 roles + 1 GM
 
     @pytest.mark.asyncio

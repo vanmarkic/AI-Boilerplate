@@ -133,7 +133,7 @@ import { switchMap } from "rxjs";
             routerLink="/gm"
             class="text-sm text-muted-foreground"
             style="margin-left: var(--spacing-md)"
-            >Game Master</a
+            >Trainer</a
           >
         </div>
       }

@@ -50,6 +50,6 @@ class GameMode(Protocol):
         """Return the effective decision timer duration in ms."""
         ...
 
-    def requires_gm(self) -> bool:
-        """Return True if the mode requires a Game Master to drive."""
+    def requires_trainer(self) -> bool:
+        """Return True if the mode requires a Trainer to drive."""
         ...

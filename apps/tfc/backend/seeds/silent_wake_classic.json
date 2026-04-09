@@ -1,81 +1,58 @@
 {
-  "title": "Silent Wake \u2014 Classic (EXCON)",
-  "description": "Classic (GM-driven) variant of Silent Wake with manual injects, ETBOL PT/RT split. 3 turns.",
+  "title": "Silent Wake — Classic (EXCON)",
+  "description": "Classic GM-driven exercise. One trainer (GM view), one trainee (CO). 3 turns with manual/automatic injects and ETBOL PT/RT split.",
   "content": {
     "game_mode": "classic",
     "stress_effect_preset": "standard",
     "default_time_factor": 1.0,
-    "briefing": "You are the crew of a Frigate on independent transit to patrol sector Alpha-3. NLT 112000B arrival. Transit time approx. 6 hrs at planned speed 15 kts. Regional posture: heightened readiness. ROE: Weapons Tight. Intelligence indicates possible hostile naval presence in theatre with potential use of visual and electronic deception tactics. No escort assigned. All systems nominal. Organic helicopter joins upon arrival.",
+    "briefing": "You are the Commanding Officer of a Frigate on independent transit to patrol sector Alpha-3. NLT 112000B arrival. Transit time approx. 6 hrs at planned speed 15 kts. Regional posture: heightened readiness. ROE: Weapons Tight. Intelligence indicates possible hostile naval presence in theatre. No escort assigned.",
     "objectives": [
       "Maintain mission tempo through escalating anomalies",
-      "Identify and respond to AIS spoofing and cyber intrusion"
+      "Identify and respond to AIS spoofing and sensor discrepancies"
     ],
     "rules": [
-      "ROE: Weapons Tight \u2014 do not engage unless positively identified as hostile and authorised.",
-      "CO selects up to 2 blue cards per turn after hearing advisor recommendations."
+      "ROE: Weapons Tight — do not engage unless positively identified as hostile and authorised.",
+      "Select up to 2 blue cards per turn."
     ],
     "roles": [
       {
         "id": "co",
         "label": "Commanding Officer",
         "player_type": "decision_maker"
-      },
-      {
-        "id": "ops_nav",
-        "label": "Operations & Navigation Officer",
-        "player_type": "advisor"
-      },
-      {
-        "id": "eng",
-        "label": "Engineering Officer",
-        "player_type": "advisor"
-      },
-      {
-        "id": "warfare",
-        "label": "Warfare & Cyber Officer",
-        "player_type": "advisor"
       }
     ],
     "events": [
       {
         "id": "evt-t1",
-        "title": "Turn 1 \u2014 In Transit",
+        "title": "Turn 1 — In Transit",
         "description": "Transit proceeding as planned. All systems nominal. No contacts of concern. EMCON: Navigation radar only.",
         "event_type": "decision",
         "scheduled_pt_ms": 0,
-        "triggered_issues": [
-          "iss-transit-nominal"
-        ],
+        "triggered_issues": ["iss-transit-nominal"],
         "target_roles": [],
         "role_descriptions": {},
         "execution_mode": "automatic"
       },
       {
         "id": "evt-t2",
-        "title": "Turn 2 \u2014 Subtle Anomalies",
+        "title": "Turn 2 — Subtle Anomalies",
         "description": "Speed discrepancy detected. Ghost AIS contact bearing 035 / 18 nm with no radar echo or ESM emissions.",
         "event_type": "decision",
         "scheduled_pt_ms": 300000,
-        "dependencies": [
-          "evt-t1"
-        ],
-        "triggered_issues": [
-          "iss-sensor-anomaly"
-        ],
+        "dependencies": ["evt-t1"],
+        "triggered_issues": ["iss-sensor-anomaly"],
         "target_roles": [],
         "role_descriptions": {},
         "execution_mode": "manual"
       },
       {
         "id": "evt-t3",
-        "title": "Turn 3 \u2014 Faulty Component / Increased Traffic",
+        "title": "Turn 3 — Faulty Component / Increased Traffic",
         "description": "Faulty speed component identified (ETBOL 5 min). AIS traffic density increasing beyond expected baseline.",
         "event_type": "decision",
         "scheduled_pt_ms": 600000,
         "duration_ms": 300000,
-        "dependencies": [
-          "evt-t2"
-        ],
+        "dependencies": ["evt-t2"],
         "triggered_issues": [],
         "target_roles": [],
         "role_descriptions": {},
@@ -85,7 +62,7 @@
     "issues": [
       {
         "id": "iss-transit-nominal",
-        "title": "Transit \u2014 All Systems Nominal",
+        "title": "Transit — All Systems Nominal",
         "description": "All systems Green. NAV RADAR, IBMS/INS, COMMS ON. Weapons OFF.",
         "trigger_mode": "event-based",
         "trigger_event_id": "evt-t1",
@@ -105,57 +82,32 @@
     "decision_templates": [
       {
         "id": "evt-t1",
-        "title": "Turn 1 \u2014 Choose your actions",
-        "description": "Transit proceeding as planned. Systems nominal. No contacts of concern. Select up to 2 cards from your available options.",
+        "title": "Turn 1 — Choose your actions",
+        "description": "Transit proceeding as planned. Systems nominal. Select up to 2 cards.",
         "issue_id": "iss-transit-nominal",
         "question_type": "multi_choice",
-        "completion_mode": "consensus",
+        "completion_mode": "first_response",
         "max_selections": 2,
-        "target_roles": [
-          "co"
-        ],
+        "target_roles": ["co"],
         "stress_delta": 0,
         "options": [
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0,
-            "stress_delta": 0
-          },
-          {
-            "id": "SWB03",
-            "label": "Internal Sync (60 s)",
-            "score": 10.0,
-            "stress_delta": 0
-          }
+          { "id": "SWB01", "label": "Continue Mission", "description": "Maintain current course, speed, and posture.", "score": 10.0, "stress_delta": 0 },
+          { "id": "SWB03", "label": "Internal Sync (60 s)", "description": "Pause for 60-second crew coordination.", "score": 10.0, "stress_delta": 0 }
         ]
       },
       {
         "id": "evt-t2",
-        "title": "Turn 2 \u2014 Choose your actions",
+        "title": "Turn 2 — Choose your actions",
         "description": "Speed discrepancy detected. Ghost AIS contact bearing 035 / 18 nm. Select up to 2 cards.",
         "issue_id": "iss-sensor-anomaly",
         "question_type": "multi_choice",
-        "completion_mode": "consensus",
+        "completion_mode": "first_response",
         "max_selections": 2,
-        "target_roles": [
-          "co"
-        ],
+        "target_roles": ["co"],
         "stress_delta": 1,
         "options": [
-          {
-            "id": "SWB01",
-            "label": "Continue Mission",
-            "score": 10.0,
-            "stress_delta": 1
-          },
-          {
-            "id": "SWB07",
-            "label": "Start Investigation",
-            "score": 10.0,
-            "stress_delta": 0,
-            "max_plays": 2
-          }
+          { "id": "SWB01", "label": "Continue Mission", "description": "Maintain course despite anomalies.", "score": 5.0, "stress_delta": 1 },
+          { "id": "SWB07", "label": "Start Investigation", "description": "Task crew to investigate speed discrepancy and ghost contact.", "score": 10.0, "stress_delta": 0, "max_plays": 2 }
         ]
       }
     ],
@@ -163,92 +115,44 @@
       {
         "turn_index": 1,
         "title": "In Transit",
-        "facilitator_prompt": "Transit proceeding as planned. Deliver role-targeted injects. Emphasise that this is a calm baseline \u2014 players should establish communication rhythm.",
+        "facilitator_prompt": "Transit proceeding as planned. Deliver the inject and let the trainee respond. Baseline turn — establish rhythm.",
         "has_decisions": true,
-        "inject_ids": [
-          "evt-t1"
-        ],
+        "inject_ids": ["evt-t1"],
         "decision_template_id": "evt-t1",
         "base_stress_delta": 0
       },
       {
         "turn_index": 2,
         "title": "Subtle Anomalies",
-        "facilitator_prompt": "Introduce speed discrepancy and ghost AIS contact. Gauge whether players treat this as routine or begin investigating. Do not prompt \u2014 let them decide.",
+        "facilitator_prompt": "Introduce speed discrepancy and ghost AIS contact. This is a MANUAL inject — trigger it when ready. Gauge whether the trainee treats this as routine or begins investigating.",
         "has_decisions": true,
-        "inject_ids": [
-          "evt-t2"
-        ],
+        "inject_ids": ["evt-t2"],
         "decision_template_id": "evt-t2",
         "base_stress_delta": 0
       },
       {
         "turn_index": 3,
         "title": "Faulty Component / Increased Traffic",
-        "facilitator_prompt": "Faulty speed component identified with 5-min ETBOL. AIS traffic density rising. Watch whether players repair or press on \u2014 both are valid but carry different risk.",
+        "facilitator_prompt": "Faulty speed component identified with 5-min ETBOL. AIS traffic density rising. Watch whether the trainee repairs or presses on.",
         "has_decisions": true,
-        "inject_ids": [
-          "evt-t3"
-        ],
+        "inject_ids": ["evt-t3"],
         "decision_template_id": "evt-t3",
         "base_stress_delta": 0
       }
     ],
     "initial_system_states": [
-      {
-        "system_id": "nav_radar",
-        "label": "NAV RADAR",
-        "operational_state": "green",
-        "power_state": true
-      },
-      {
-        "system_id": "ibms_ins",
-        "label": "IBMS / INS",
-        "operational_state": "green",
-        "power_state": true
-      },
-      {
-        "system_id": "nav_sensors",
-        "label": "NAV SENSORS",
-        "operational_state": "green",
-        "power_state": true
-      },
-      {
-        "system_id": "comms",
-        "label": "COMMS",
-        "operational_state": "green",
-        "power_state": true
-      }
+      { "system_id": "nav_radar", "label": "NAV RADAR", "operational_state": "green", "power_state": true },
+      { "system_id": "ibms_ins", "label": "IBMS / INS", "operational_state": "green", "power_state": true },
+      { "system_id": "nav_sensors", "label": "NAV SENSORS", "operational_state": "green", "power_state": true },
+      { "system_id": "comms", "label": "COMMS", "operational_state": "green", "power_state": true }
     ],
     "initial_warfare_domains": [
-      {
-        "domain_id": "asuw",
-        "label": "ASUW",
-        "initial_threat_level": "green"
-      },
-      {
-        "domain_id": "asw",
-        "label": "ASW",
-        "initial_threat_level": "green"
-      },
-      {
-        "domain_id": "aaw",
-        "label": "AAW",
-        "initial_threat_level": "green"
-      },
-      {
-        "domain_id": "cyber",
-        "label": "CYBER",
-        "initial_threat_level": "green"
-      }
+      { "domain_id": "asuw", "label": "ASUW", "initial_threat_level": "green" },
+      { "domain_id": "asw", "label": "ASW", "initial_threat_level": "green" },
+      { "domain_id": "aaw", "label": "AAW", "initial_threat_level": "green" },
+      { "domain_id": "cyber", "label": "CYBER", "initial_threat_level": "green" }
     ],
-    "decision_sequence": [
-      "evt-t1",
-      "evt-t2"
-    ],
-    "score_tier_thresholds": {
-      "lo": 0.33,
-      "mid": 0.66
-    }
+    "decision_sequence": ["evt-t1", "evt-t2"],
+    "score_tier_thresholds": { "lo": 0.33, "mid": 0.66 }
   }
 }

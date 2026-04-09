@@ -7,7 +7,7 @@ export interface TerminologyMap {
   event: string;
   issue: string;
   player: string;
-  gameMaster: string;
+  trainer: string;
   exercise: string;
   scenario: string;
   decision: string;

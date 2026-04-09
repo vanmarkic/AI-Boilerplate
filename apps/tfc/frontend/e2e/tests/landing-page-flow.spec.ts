@@ -102,7 +102,7 @@ test.describe("Landing page — active lobby @home @landing", () => {
       participants: [],
       roles: MOCK_ROLES,
       max_players: 2,
-      requires_gm: false,
+      requires_trainer: false,
     });
     await mockApi.install();
     await page.goto("/home");
@@ -126,7 +126,7 @@ test.describe("Landing page — active lobby @home @landing", () => {
       participants: [],
       roles: MOCK_ROLES,
       max_players: 2,
-      requires_gm: false,
+      requires_trainer: false,
     });
     await mockApi.install();
     await page.goto("/home");
@@ -154,7 +154,7 @@ test.describe("Landing page — active lobby @home @landing", () => {
       participants: [alice],
       roles: MOCK_ROLES,
       max_players: 2,
-      requires_gm: false,
+      requires_trainer: false,
     });
     await mockApi.install();
     await page.goto("/home");
@@ -211,7 +211,7 @@ test.describe("Join Exercise card @home @landing", () => {
       participants: [],
       roles: MOCK_ROLES,
       max_players: 2,
-      requires_gm: false,
+      requires_trainer: false,
     });
     await mockApi.install();
     await page.goto("/home");
@@ -234,11 +234,11 @@ test.describe("Join Exercise card @home @landing", () => {
       participants: [],
       roles: MOCK_ROLES,
       max_players: 3,
-      requires_gm: true,
+      requires_trainer: true,
     });
     await mockApi.install();
     await page.goto("/home");
 
-    await expect(page.getByText("Game Master")).toBeVisible();
+    await expect(page.getByText("Trainer")).toBeVisible();
   });
 });

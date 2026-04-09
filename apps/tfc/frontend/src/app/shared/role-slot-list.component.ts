@@ -53,7 +53,7 @@ import type { ParticipantResponse } from "../core/waiting-room-api.service";
         </div>
       }
       @if (showGmSlot()) {
-        @let gmHolder = holderOf("game-master");
+        @let gmHolder = holderOf("trainer");
         <div
           class="crew-station"
           [attr.data-filled]="gmHolder ? '' : null"
@@ -64,8 +64,8 @@ import type { ParticipantResponse } from "../core/waiting-room-api.service";
               class="crew-station__light"
               [attr.data-active]="gmHolder ? '' : null"
             ></span>
-            <span class="crew-station__role">Game Master (Trainer)</span>
-            <span class="crew-station__type">GM</span>
+            <span class="crew-station__role">Trainer</span>
+            <span class="crew-station__type">TRN</span>
           </div>
           @if (gmHolder) {
             <div class="flex items-center gap-sm">
@@ -79,7 +79,7 @@ import type { ParticipantResponse } from "../core/waiting-room-api.service";
               uiButton
               variant="outline"
               size="sm"
-              (click)="claimed.emit('game-master')"
+              (click)="claimed.emit('trainer')"
             >
               Claim
             </button>

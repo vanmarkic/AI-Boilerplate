@@ -395,7 +395,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
       });
       return;
     }
-    const isGm = role === "game-master";
+    const isGm = role === "trainer";
     this.router.navigate([isGm ? "/gm" : "/player"], {
       queryParams: {
         exerciseId: this.exerciseId(),

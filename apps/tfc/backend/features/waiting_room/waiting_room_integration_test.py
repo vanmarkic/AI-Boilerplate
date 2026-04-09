@@ -130,13 +130,13 @@ class TestBroadcastOnRoleChange:
         ) as mock_broadcast:
             resp = await client.put(
                 f"/api/exercises/{eid}/waiting-room/participants/{p['id']}/role",
-                json={"role": "game-master"},
+                json={"role": "trainer"},
             )
             assert resp.status_code == 200
 
             mock_broadcast.assert_called_once()
             payload = mock_broadcast.call_args[0][1]
-            assert payload["participants"][0]["role"] == "game-master"
+            assert payload["participants"][0]["role"] == "trainer"
 
     @pytest.mark.asyncio
     async def test_role_change_does_not_broadcast_on_404(
@@ -225,48 +225,48 @@ class TestBroadcastOnLeave:
             mock_broadcast.assert_not_called()
 
 
-# ── Game Master Flow ────────────────────────────────────────────────────
+# ── Trainer Flow ────────────────────────────────────────────────────────
 
 
-class TestGameMasterFlow:
-    """Integration tests for game-master-specific scenarios."""
+class TestTrainerFlow:
+    """Integration tests for trainer-specific scenarios."""
 
     @pytest.mark.asyncio
-    async def test_join_as_game_master(self, client: AsyncClient) -> None:
+    async def test_join_as_trainer(self, client: AsyncClient) -> None:
         eid = await _create_exercise(client)
-        gm = await _join(client, eid, "GM Lead", "game-master")
-        assert gm["role"] == "game-master"
+        gm = await _join(client, eid, "GM Lead", "trainer")
+        assert gm["role"] == "trainer"
         assert gm["display_name"] == "GM Lead"
 
     @pytest.mark.asyncio
     async def test_gm_promotes_player(self, client: AsyncClient) -> None:
-        """GM joins, a player joins, GM promotes player to game-master."""
+        """Trainer joins, a player joins, trainer promotes player to trainer."""
         eid = await _create_exercise(client)
-        await _join(client, eid, "GM Lead", "game-master")
+        await _join(client, eid, "GM Lead", "trainer")
         player = await _join(client, eid, "Trainee", "player")
 
         resp = await client.put(
             f"/api/exercises/{eid}/waiting-room/participants/{player['id']}/role",
-            json={"role": "game-master"},
+            json={"role": "trainer"},
         )
         assert resp.status_code == 200
-        assert resp.json()["role"] == "game-master"
+        assert resp.json()["role"] == "trainer"
 
-        # Verify both are now game-masters
+        # Verify both are now trainers
         listing = await client.get(
             f"/api/exercises/{eid}/waiting-room",
         )
         roles = [p["role"] for p in listing.json()["participants"]]
-        assert roles.count("game-master") == 2
+        assert roles.count("trainer") == 2
 
     @pytest.mark.asyncio
     async def test_gm_demotes_self_to_player(
         self,
         client: AsyncClient,
     ) -> None:
-        """GM can demote themselves to player."""
+        """Trainer can demote themselves to player."""
         eid = await _create_exercise(client)
-        gm = await _join(client, eid, "GM Lead", "game-master")
+        gm = await _join(client, eid, "GM Lead", "trainer")
 
         resp = await client.put(
             f"/api/exercises/{eid}/waiting-room/participants/{gm['id']}/role",
@@ -280,9 +280,9 @@ class TestGameMasterFlow:
         self,
         client: AsyncClient,
     ) -> None:
-        """GM sets up a room with player, observer, and soc-analyst roles."""
+        """Trainer sets up a room with player, observer, and soc-analyst roles."""
         eid = await _create_exercise(client)
-        await _join(client, eid, "GM Lead", "game-master")
+        await _join(client, eid, "GM Lead", "trainer")
         p1 = await _join(client, eid, "Alice", "player")
         p2 = await _join(client, eid, "Bob", "player")
         p3 = await _join(client, eid, "Carol", "player")
@@ -303,7 +303,7 @@ class TestGameMasterFlow:
         )
         role_map = {p["display_name"]: p["role"] for p in listing.json()["participants"]}
         assert role_map == {
-            "GM Lead": "game-master",
+            "GM Lead": "trainer",
             "Alice": "observer",
             "Bob": "soc-analyst",
             "Carol": "player",
@@ -367,11 +367,11 @@ class TestWsBroadcastLive:
             # Change role
             sync_client.put(
                 f"/api/exercises/{eid}/waiting-room/participants/{pid}/role",
-                json={"role": "game-master"},
+                json={"role": "trainer"},
             )
 
             msg = _recv_type(ws, "waiting_room_update")
-            assert msg["participants"][0]["role"] == "game-master"
+            assert msg["participants"][0]["role"] == "trainer"
 
     def test_ws_client_receives_leave_broadcast(self) -> None:
         """WS client sees participant removed after DELETE."""
@@ -443,8 +443,8 @@ class TestFullLifecycle:
         """Simulate a realistic pre-exercise setup flow."""
         eid = await _create_exercise(client)
 
-        # 1. Game master joins first
-        _gm = await _join(client, eid, "Commander", "game-master")
+        # 1. Trainer joins first
+        _gm = await _join(client, eid, "Commander", "trainer")
 
         # 2. Players join with default role
         p1 = await _join(client, eid, "Alice", "player")
@@ -480,7 +480,7 @@ class TestFullLifecycle:
 
         role_map = {p["display_name"]: p["role"] for p in data["participants"]}
         assert role_map == {
-            "Commander": "game-master",
+            "Commander": "trainer",
             "Alice": "soc-analyst",
             "Bob": "observer",
             "Dave": "player",
@@ -495,8 +495,8 @@ class TestFullLifecycle:
         eid1 = await _create_exercise(client)
         eid2 = await _create_exercise(client)
 
-        gm1 = await _join(client, eid1, "GM-Alpha", "game-master")
-        _gm2 = await _join(client, eid2, "GM-Bravo", "game-master")
+        gm1 = await _join(client, eid1, "GM-Alpha", "trainer")
+        _gm2 = await _join(client, eid2, "GM-Bravo", "trainer")
         await _join(client, eid1, "Alice", "player")
         await _join(client, eid2, "Bob", "player")
 
@@ -562,7 +562,7 @@ class TestFullLifecycle:
 
             await client.put(  # 3
                 f"/api/exercises/{eid}/waiting-room/participants/{p1['id']}/role",
-                json={"role": "game-master"},
+                json={"role": "trainer"},
             )
             await client.delete(  # 4
                 f"/api/exercises/{eid}/waiting-room/participants/{p2['id']}",

@@ -39,7 +39,7 @@ export interface MockJoinableResponse {
   participants: MockParticipant[];
   roles: MockRole[];
   max_players: number;
-  requires_gm: boolean;
+  requires_trainer: boolean;
 }
 
 let participantCounter = 0;
@@ -63,7 +63,7 @@ function deriveRoles(participants: MockParticipant[]): MockRole[] {
   const seen = new Set<string>();
   const roles: MockRole[] = [];
   for (const p of participants) {
-    if (p.role === "game-master" || seen.has(p.role)) continue;
+    if (p.role === "trainer" || seen.has(p.role)) continue;
     seen.add(p.role);
     const isDecisionMaker = p.role === "decision_maker" || p.role === "co";
     roles.push({

@@ -10,7 +10,7 @@ const FALLBACK_TERMINOLOGY: TerminologyMap = {
   event: "Event",
   issue: "Issue",
   player: "Player",
-  gameMaster: "Game Master",
+  trainer: "Trainer",
   exercise: "Exercise",
   scenario: "Scenario",
   decision: "Decision",

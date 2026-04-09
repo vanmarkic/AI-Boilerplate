@@ -22,7 +22,7 @@ describe("DomainConfigApiService", () => {
       event: "Incident",
       issue: "Vulnerability",
       player: "SOC Analyst",
-      gameMaster: "Exercise Director",
+      trainer: "Exercise Director",
       exercise: "Cyber Exercise",
       scenario: "Attack Scenario",
       decision: "Response Action",

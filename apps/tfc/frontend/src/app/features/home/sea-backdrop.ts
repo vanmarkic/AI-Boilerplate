@@ -23,10 +23,10 @@ const WAVE_VERTEX_SHADER = `
 uniform float uTime;
 void main() {
   vec3 pos = position;
-  pos.y = sin(pos.x * 0.4 + uTime * 0.6) * 0.35
-        + sin(pos.z * 0.55 + uTime * 0.45) * 0.25
-        + sin((pos.x + pos.z) * 0.3 + uTime * 0.35) * 0.15
-        + sin(pos.x * 0.9 - uTime * 0.25) * 0.1;
+  pos.y = sin(pos.x * 0.4 + uTime * 0.6) * 0.7
+        + sin(pos.z * 0.55 + uTime * 0.45) * 0.5
+        + sin((pos.x + pos.z) * 0.3 + uTime * 0.35) * 0.3
+        + sin(pos.x * 0.9 - uTime * 0.25) * 0.2;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `;
@@ -130,8 +130,8 @@ export class SeaBackdrop implements OnDestroy {
     this.scene = new THREE.Scene();
     this.scene.background = bgColor;
     this.camera = new THREE.PerspectiveCamera(27, w / h, 0.1, 100);
-    this.camera.position.set(0, 6, 5);
-    this.camera.lookAt(0, -0.4, -2);
+    this.camera.position.set(0, 8, 3);
+    this.camera.lookAt(0, -2, -4);
 
     this.scene.add(new THREE.AmbientLight(0xffffff, 0.5));
     const dir = new THREE.DirectionalLight(0xffffff, 0.8);
@@ -151,7 +151,7 @@ export class SeaBackdrop implements OnDestroy {
       uniforms: {
         uTime: { value: 0 },
         uColor: { value: primary },
-        uOpacity: { value: 0.06 },
+        uOpacity: { value: 0.035 },
       },
       vertexShader: WAVE_VERTEX_SHADER,
       fragmentShader: WAVE_FRAGMENT_SHADER,

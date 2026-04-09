@@ -82,7 +82,7 @@ class TestJoin:
         store = _fresh_store()
         store.join(1, "Alice", "player")
         store.join(1, "Bob", "observer")
-        store.join(1, "Carol", "game-master")
+        store.join(1, "Carol", "trainer")
         assert len(store.list_participants(1)) == 3
 
     def test_join_separate_exercises(self) -> None:
@@ -96,7 +96,7 @@ class TestJoin:
         store = _fresh_store()
         store.join(1, "Alice", "player")
         store.join(1, "Bob", "observer")
-        store.join(1, "Carol", "game-master")
+        store.join(1, "Carol", "trainer")
         names = [p.display_name for p in store.list_participants(1)]
         assert names == ["Alice", "Bob", "Carol"]
 
@@ -167,9 +167,9 @@ class TestUpdateRole:
     def test_update_role_returns_participant(self) -> None:
         store = _fresh_store()
         p = store.join(1, "Alice", "player")
-        updated = store.update_role(1, p.id, "game-master")
+        updated = store.update_role(1, p.id, "trainer")
         assert updated is not None
-        assert updated.role == "game-master"
+        assert updated.role == "trainer"
 
     def test_update_role_persists(self) -> None:
         store = _fresh_store()
@@ -192,7 +192,7 @@ class TestUpdateRole:
         store = _fresh_store()
         p1 = store.join(1, "Alice", "player")
         p2 = store.join(1, "Bob", "player")
-        store.update_role(1, p1.id, "game-master")
+        store.update_role(1, p1.id, "trainer")
         assert store.get_participant(1, p2.id).role == "player"  # type: ignore[union-attr]
 
     def test_update_role_same_role_is_noop(self) -> None:
@@ -206,7 +206,7 @@ class TestUpdateRole:
         store = _fresh_store()
         p = store.join(1, "Alice", "player")
         store.update_role(1, p.id, "observer")
-        store.update_role(1, p.id, "game-master")
+        store.update_role(1, p.id, "trainer")
         store.update_role(1, p.id, "soc-analyst")
         assert store.get_participant(1, p.id).role == "soc-analyst"  # type: ignore[union-attr]
 

@@ -61,7 +61,7 @@ function joinable(overrides: Record<string, unknown> = {}) {
     roles,
     max_players:
       overrides["max_players"] ?? roles.length + (requiresGm ? 1 : 0),
-    requires_gm: overrides["requires_gm"] ?? requiresGm,
+    requires_trainer: overrides["requires_trainer"] ?? requiresGm,
   };
 }
 
@@ -344,7 +344,7 @@ test.describe("/waiting-room — with scenario roles @waiting-room", () => {
     await mockApi.install();
     await page.goto(wrUrl(me.id));
 
-    await expect(page.getByText("Game Master")).toBeVisible();
+    await expect(page.getByText("Trainer")).toBeVisible();
   });
 });
 

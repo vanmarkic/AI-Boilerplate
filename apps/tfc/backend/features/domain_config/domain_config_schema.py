@@ -9,7 +9,7 @@ class TerminologyPayload(BaseModel):
     event: str
     issue: str
     player: str
-    gameMaster: str
+    trainer: str
     exercise: str
     scenario: str
     decision: str

@@ -102,9 +102,9 @@ test.describe("Waiting room view @waiting-room", () => {
   });
 });
 
-// ── Game Master Controls ───────────────────────────────────────────────
+// ── Trainer Controls ──────────────────────────────────────────────────
 
-test.describe("Game master controls @waiting-room @game-master", () => {
+test.describe("Trainer controls @waiting-room @trainer", () => {
   const exerciseId = 200;
 
   function waitingRoomUrl(participantId: string): string {
@@ -114,7 +114,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
   test('GM sees "Deploy" button', async ({ page, mockApi }) => {
     const gm = mockParticipant({
       display_name: "Commander",
-      role: "game-master",
+      role: "trainer",
     });
     const player = mockParticipant({
       display_name: "Alice",
@@ -155,7 +155,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
   }) => {
     const gm = mockParticipant({
       display_name: "Commander",
-      role: "game-master",
+      role: "trainer",
     });
     const player = mockParticipant({
       display_name: "Alice",
@@ -179,7 +179,7 @@ test.describe("Game master controls @waiting-room @game-master", () => {
   }) => {
     const gm = mockParticipant({
       display_name: "Commander",
-      role: "game-master",
+      role: "trainer",
     });
     const p1 = mockParticipant({
       display_name: "Alice",

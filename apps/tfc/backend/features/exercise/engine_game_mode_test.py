@@ -241,16 +241,16 @@ async def test_classic_mode_no_scoring_on_close(
 
 
 @pytest.mark.asyncio
-async def test_classic_mode_requires_gm(client: AsyncClient) -> None:
+async def test_classic_mode_requires_trainer(client: AsyncClient) -> None:
     eid = await _setup_exercise(client, CLASSIC_SCENARIO)
     engine = session_store.get(eid)
-    assert engine.game_mode.requires_gm() is True
+    assert engine.game_mode.requires_trainer() is True
 
 
 @pytest.mark.asyncio
-async def test_collaborative_mode_no_gm_required(
+async def test_collaborative_mode_no_trainer_required(
     client: AsyncClient,
 ) -> None:
     eid = await _setup_exercise(client, COLLABORATIVE_SCENARIO)
     engine = session_store.get(eid)
-    assert engine.game_mode.requires_gm() is False
+    assert engine.game_mode.requires_trainer() is False

@@ -1,4 +1,4 @@
-"""Tests for ClassicMode — verifies default GM-driven behaviour."""
+"""Tests for ClassicMode — verifies default trainer-driven behaviour."""
 
 from __future__ import annotations
 
@@ -54,9 +54,9 @@ def test_get_decision_time_ms_passthrough() -> None:
     assert mode.get_decision_time_ms(300_000) == 300_000
 
 
-def test_requires_gm() -> None:
+def test_requires_trainer() -> None:
     mode = ClassicMode()
-    assert mode.requires_gm() is True
+    assert mode.requires_trainer() is True
 
 
 def test_snapshot_returns_none() -> None:

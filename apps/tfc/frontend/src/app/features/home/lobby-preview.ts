@@ -20,7 +20,7 @@ export interface JoinableExercise {
   participants: ParticipantResponse[];
   roles: RoleDef[];
   max_players: number;
-  requires_gm: boolean;
+  requires_trainer: boolean;
   player_count_mode: string;
 }
 
@@ -67,16 +67,16 @@ export interface JoinableExercise {
           </div>
         }
 
-        @if (data().requires_gm) {
-          @let gmHolder = holderOf("game-master");
+        @if (data().requires_trainer) {
+          @let gmHolder = holderOf("trainer");
           <div class="crew-station" [attr.data-filled]="gmHolder ? '' : null">
             <div class="crew-station__info">
               <span
                 class="crew-station__light"
                 [attr.data-active]="gmHolder ? '' : null"
               ></span>
-              <span class="crew-station__role">Game Master</span>
-              <span class="crew-station__type">GM</span>
+              <span class="crew-station__role">Trainer</span>
+              <span class="crew-station__type">TRN</span>
             </div>
             @if (gmHolder) {
               <ui-badge variant="outline">{{ gmHolder.display_name }}</ui-badge>

@@ -224,7 +224,7 @@
     <div class="player-footer__group">
       <p class="text-sm text-muted-foreground">
         <!-- prettier-ignore -->
-        @if (store.isPracticeMode()) { Practice Mode — playing all roles } @else if (store.isCollaborative()) { @if (store.isAllAdvisors()) { You are the All Advisors player } @else { You are the {{ roleLabel() }} } } @else { Waiting for {{ domain.term('gameMaster') }} actions... }
+        @if (store.isPracticeMode()) { Practice Mode — playing all roles } @else if (store.isCollaborative()) { @if (store.isAllAdvisors()) { You are the All Advisors player } @else { You are the {{ roleLabel() }} } } @else { Waiting for {{ domain.term('trainer') }} actions... }
       </p>
       <div class="player-footer__actions">
         <button

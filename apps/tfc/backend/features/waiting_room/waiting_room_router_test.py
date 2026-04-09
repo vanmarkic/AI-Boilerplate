@@ -75,8 +75,8 @@ class TestJoinEndpoint:
     @pytest.mark.asyncio
     async def test_join_custom_role(self, client: AsyncClient) -> None:
         eid = await _create_exercise(client)
-        data = await _join(client, eid, "Carol", "game-master")
-        assert data["role"] == "game-master"
+        data = await _join(client, eid, "Carol", "trainer")
+        assert data["role"] == "trainer"
 
     @pytest.mark.asyncio
     async def test_join_multiple_participants(
@@ -86,7 +86,7 @@ class TestJoinEndpoint:
         eid = await _create_exercise(client)
         p1 = await _join(client, eid, "Alice", "player")
         p2 = await _join(client, eid, "Bob", "observer")
-        p3 = await _join(client, eid, "Carol", "game-master")
+        p3 = await _join(client, eid, "Carol", "trainer")
         assert p1["id"] != p2["id"] != p3["id"]
 
     @pytest.mark.asyncio
@@ -187,13 +187,13 @@ class TestListEndpoint:
 
         await client.put(
             f"/api/exercises/{eid}/waiting-room/participants/{p['id']}/role",
-            json={"role": "game-master"},
+            json={"role": "trainer"},
         )
         resp = await client.get(
             f"/api/exercises/{eid}/waiting-room",
         )
         participants = resp.json()["participants"]
-        assert participants[0]["role"] == "game-master"
+        assert participants[0]["role"] == "trainer"
 
     @pytest.mark.asyncio
     async def test_list_reflects_leaves(
@@ -229,10 +229,10 @@ class TestUpdateRoleEndpoint:
 
         resp = await client.put(
             f"/api/exercises/{eid}/waiting-room/participants/{p['id']}/role",
-            json={"role": "game-master"},
+            json={"role": "trainer"},
         )
         assert resp.status_code == 200
-        assert resp.json()["role"] == "game-master"
+        assert resp.json()["role"] == "trainer"
 
     @pytest.mark.asyncio
     async def test_update_role_preserves_other_fields(
@@ -317,10 +317,10 @@ class TestUpdateRoleEndpoint:
         # Alice changes Bob's role
         resp = await client.put(
             f"/api/exercises/{eid}/waiting-room/participants/{p2['id']}/role",
-            json={"role": "game-master"},
+            json={"role": "trainer"},
         )
         assert resp.status_code == 200
-        assert resp.json()["role"] == "game-master"
+        assert resp.json()["role"] == "trainer"
         # Alice's role unchanged
         listing = await client.get(
             f"/api/exercises/{eid}/waiting-room",
@@ -337,7 +337,7 @@ class TestUpdateRoleEndpoint:
         eid = await _create_exercise(client)
         p = await _join(client, eid, "Alice", "player")
 
-        for role in ["observer", "game-master", "soc-analyst", "player"]:
+        for role in ["observer", "trainer", "soc-analyst", "player"]:
             resp = await client.put(
                 f"/api/exercises/{eid}/waiting-room/participants/{p['id']}/role",
                 json={"role": role},
@@ -450,10 +450,10 @@ class TestFullFlow:
         p2 = await _join(client, eid, "Bob", "player")
         p3 = await _join(client, eid, "Carol", "observer")
 
-        # Alice changes Bob's role to game-master
+        # Alice changes Bob's role to trainer
         await client.put(
             f"/api/exercises/{eid}/waiting-room/participants/{p2['id']}/role",
-            json={"role": "game-master"},
+            json={"role": "trainer"},
         )
 
         # Carol changes her own role to player
@@ -474,7 +474,7 @@ class TestFullFlow:
         participants = listing.json()["participants"]
         assert len(participants) == 2
         roles = {p["display_name"]: p["role"] for p in participants}
-        assert roles == {"Bob": "game-master", "Carol": "player"}
+        assert roles == {"Bob": "trainer", "Carol": "player"}
 
     @pytest.mark.asyncio
     async def test_multiple_exercises_independent(
@@ -490,7 +490,7 @@ class TestFullFlow:
         # Change role in exercise 1 only
         await client.put(
             f"/api/exercises/{eid1}/waiting-room/participants/{p1['id']}/role",
-            json={"role": "game-master"},
+            json={"role": "trainer"},
         )
 
         # Verify exercise 2 unaffected

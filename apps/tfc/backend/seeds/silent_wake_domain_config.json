@@ -6,7 +6,7 @@
     "event": "Inject",
     "issue": "Defect",
     "player": "Crew Member",
-    "gameMaster": "Exercise Controller",
+    "trainer": "Exercise Controller",
     "exercise": "Exercise",
     "scenario": "Scenario",
     "decision": "Command Decision"

@@ -23,7 +23,7 @@ TERMINOLOGY_KEYS = [
     "event",
     "issue",
     "player",
-    "gameMaster",
+    "trainer",
     "exercise",
     "scenario",
     "decision",

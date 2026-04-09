@@ -63,8 +63,8 @@ def test_should_not_pause() -> None:
     assert _mode().should_pause_on_decision() is False
 
 
-def test_does_not_require_gm() -> None:
-    assert _mode().requires_gm() is False
+def test_does_not_require_trainer() -> None:
+    assert _mode().requires_trainer() is False
 
 
 def test_auto_submit_picks_worst_option() -> None:

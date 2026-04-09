@@ -1,4 +1,4 @@
-"""Classic game mode — GM-driven, pause-on-decision, no scoring."""
+"""Classic game mode — trainer-driven, pause-on-decision, no scoring."""
 
 from __future__ import annotations
 
@@ -41,5 +41,5 @@ class ClassicMode:
     def get_decision_time_ms(self, base_time_ms: int) -> int:
         return base_time_ms
 
-    def requires_gm(self) -> bool:
+    def requires_trainer(self) -> bool:
         return True

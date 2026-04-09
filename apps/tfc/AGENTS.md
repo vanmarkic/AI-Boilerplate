@@ -7,7 +7,7 @@ Before writing any code:
 3. Read `apps/tfc/SPECS.md` — it is the **single source of truth** for TFC domain model, business rules, API surface, game modes, scoring, systems, backlog, and glossary. It must be kept up to date with every feature or business-rule change. If a feature's `manifest.yaml` exists, read it for feature-specific context.
 
 ## What TFC Is
-TFC is a domain-agnostic exercise simulation platform. A Game Master (GM) loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
+TFC is a domain-agnostic exercise simulation platform. A Trainer loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
 
 ## Terminology Mapping (Domain ↔ Code)
 
@@ -99,7 +99,7 @@ src/app/
     exercise.store.ts  # central NgRx Signal Store for exercise state
     format-time.ts
   features/
-    game-master/  # GM view (engine controls, event timeline, issue management)
+    game-master/  # Trainer view (engine controls, event timeline, issue management)
     player/       # Player view (events, decisions, read-only timeline)
     join/         # Exercise join/lobby
     review/       # Post-exercise review
@@ -170,7 +170,7 @@ Create a new dataclass implementing all 7 methods of the `GameMode` protocol (`e
 - `snapshot() -> dict | None` — current scoring state for client sync
 - `get_next_decision_id(closed_decision_id) -> str | None` — next decision template ID in sequence, or `None`
 - `get_decision_time_ms(base_time_ms) -> int` — effective decision timer duration in ms
-- `requires_gm() -> bool` — whether the mode requires a Game Master to drive
+- `requires_trainer() -> bool` — whether the mode requires a Trainer to drive
 
 Use `ClassicMode` (`engine/game_modes/classic.py`) or `SimpleCollaborativeMode` (`engine/game_modes/simple_collaborative.py`) as reference implementations.
 

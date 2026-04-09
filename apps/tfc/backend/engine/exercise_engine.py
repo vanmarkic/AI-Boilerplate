@@ -260,8 +260,8 @@ class ExerciseEngine:
         advance = await self._advance_to_next_turn(decision_id, pt)
         changes.extend(advance)
 
-        # 6. Auto-resume for GM mode
-        if self._config.game_mode.requires_gm():
+        # 6. Auto-resume for trainer mode
+        if self._config.game_mode.requires_trainer():
             if not self._decisions.get_open_decisions():
                 changes.append(await self.resume())
 

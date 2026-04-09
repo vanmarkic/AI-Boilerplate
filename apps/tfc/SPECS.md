@@ -10,14 +10,14 @@
 
 ## What This Is
 
-A domain-agnostic exercise simulation platform. A Game Master (GM) loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
+A domain-agnostic exercise simulation platform. A Trainer loads a scenario, starts the exercise, and players respond to events, issues, and decision points in real time. Think crisis-management tabletop exercise, but digital and real-time.
 
-**Users:** Exercise facilitators (Game Masters) and participants (Players) in training, crisis management, or educational settings.
+**Users:** Exercise facilitators (Trainers) and participants (Players) in training, crisis management, or educational settings.
 
 ## Non-Goals
 
 - Not a real-time multiplayer game — no physics, no spatial simulation.
-- No player-vs-player mechanics — all decisions are collaborative or GM-driven.
+- No player-vs-player mechanics — all decisions are collaborative or trainer-driven.
 - No persistent player accounts or progression — exercises are standalone sessions.
 - No competitive scoring between teams — score is internal, never shown as numbers.
 - Not a content authoring tool beyond the scenario builder — bulk content authored as JSON seeds.
@@ -26,7 +26,7 @@ A domain-agnostic exercise simulation platform. A Game Master (GM) loads a scena
 
 These invariants define what "correct" means for TFC. Every change must preserve them.
 
-1. **Path-independence.** Same business event, same outcome regardless of entry path. Player submit, timeout, scheduled tick, force-trigger, and GM trigger must converge on the same engine truth.
+1. **Path-independence.** Same business event, same outcome regardless of entry path. Player submit, timeout, scheduled tick, force-trigger, and Trainer trigger must converge on the same engine truth.
 2. **Atomic consequences.** If a card affects score, forced-card state, systems, and completion flow, those effects must all happen together — never partially applied.
 3. **Engine is canonical.** The engine is the single source of runtime truth. Frontend and router layers orchestrate transport and validation but must not create alternate simulation semantics.
 4. **Scenario stability.** Schema or default changes are only quality improvements if they preserve authored intent. Seed scenarios must produce identical exercise behaviour before and after.
@@ -38,7 +38,7 @@ Scenario ──loads──▶ Exercise ──runs──▶ Engine
                         │                   │
                         │              ┌────┴──────┐
                      Participants    TimeManager
-                     (GM + Players)  EventScheduler
+                  (Trainer + Players) EventScheduler
                         │            IssueManager
                    WaitingRoom       DecisionManager
                    (lobby, roles)    SystemManager
@@ -54,7 +54,7 @@ DomainConfig ──referenced-by──▶ Scenario
 ### Entity Relationships
 
 - **Scenario** 1:N **Exercise** — a scenario is a reusable template; exercises are instances.
-- **Exercise** 1:N **Participant** — each exercise has a GM and multiple players.
+- **Exercise** 1:N **Participant** — each exercise has a Trainer and multiple players.
 - **Exercise** 1:1 **Engine** — each running exercise has one engine instance.
 - **Engine** contains: TimeManager, EventScheduler, IssueManager, DecisionManager, SystemManager, GameMode.
 - **Scenario** N:1 **DomainConfig** — a scenario references a domain config for terminology/theming.
@@ -95,7 +95,7 @@ Exercise lifecycle management + engine HTTP/WS API.
 - Engine tick loop runs at 250ms interval.
 - Speed factor adjusts play time vs real time (e.g., 2× = 2 play-minutes per 1 real minute).
 - In classic mode, DECISION events auto-pause the engine until resolved. In collaborative mode, the engine continues running.
-- **Decision sequencing (backend-driven):** In simple collaborative mode, the backend owns turn advancement. After a decision is closed (player submission or timeout), the engine force-triggers the next event in the game mode's `decision_sequence` and opens the next decision. The tick loop guard skips DECISION events when one is already open, preventing pile-up. The frontend is purely reactive — no frontend-side auto-advance logic. Classic mode is unaffected (GM-driven).
+- **Decision sequencing (backend-driven):** In simple collaborative mode, the backend owns turn advancement. After a decision is closed (player submission or timeout), the engine force-triggers the next event in the game mode's `decision_sequence` and opens the next decision. The tick loop guard skips DECISION events when one is already open, preventing pile-up. The frontend is purely reactive — no frontend-side auto-advance logic. Classic mode is unaffected (trainer-driven).
 - WebSocket broadcasts state changes to all connected participants. Role-targeted events/decisions are split-broadcast: matching roles + GMs + generic `player` connections.
 - Force-triggering a decision-type event via `POST .../engine/events/{id}/trigger` opens the decision immediately.
 
@@ -117,7 +117,7 @@ Decision CRUD — questions, responses, outcomes.
 - Timeout auto-submits the worst option (lowest `score`).
 - `forced_option_ids` on a decision template causes auto-inclusion with penalty when omitted.
 - `max_selections` caps how many options can be selected in a `multi_choice` decision (`null` = unlimited).
-- **Two decision APIs exist:** The DB-backed CRUD API (`/api/decisions/...`) uses numeric IDs and is for GM observation/reporting. The engine API (`/api/exercises/{id}/engine/decisions/...`) uses string IDs (e.g., `evt-t1`) and is used by players during gameplay. Player submission flow uses only the engine close endpoint — never the DB response endpoint.
+- **Two decision APIs exist:** The DB-backed CRUD API (`/api/decisions/...`) uses numeric IDs and is for Trainer observation/reporting. The engine API (`/api/exercises/{id}/engine/decisions/...`) uses string IDs (e.g., `evt-t1`) and is used by players during gameplay. Player submission flow uses only the engine close endpoint — never the DB response endpoint.
 
 **API:** `POST /api/decisions` · `GET /api/decisions` · `GET /api/decisions/{id}` · `POST /api/decisions/{id}/respond` · `POST /api/decisions/{id}/close`
 
@@ -175,7 +175,7 @@ Warfare domain threat-level board showing ASUW, ASW, AAW, CYBER domains with Gre
 - [x] Silent Wake seed data — 4 domains, 6 events with domain_effects
 - [x] Frontend store + WS handler — warfare_domain_change state change
 - [x] WarfareDomainBoardComponent — threat-level traffic lights
-- [x] Player and GM views render warfare domain board
+- [x] Player and Trainer views render warfare domain board
 
 ### Feature: waiting_room · backend + frontend
 
@@ -229,8 +229,8 @@ Readiness/liveness probe. Returns `{ status: "ok" }`, no auth, < 100ms.
 
 ## Game Modes
 
-- **Classic:** GM-driven, no scoring. GM manually triggers events and closes decisions. Engine pauses on decisions. Requires a Game Master.
-- **Simple Collaborative:** Turn-based with advisor/decision-maker roles. Sequential decisions with time-penalty scoring. Advisors recommend, decision-maker rules. Engine continues running during decisions. Does not require a GM. Supports practice mode (solo play with 1.5× decision timer).
+- **Classic:** Trainer-driven, no scoring. Trainer manually triggers events and closes decisions. Engine pauses on decisions. Requires a Trainer.
+- **Simple Collaborative:** Turn-based with advisor/decision-maker roles. Sequential decisions with time-penalty scoring. Advisors recommend, decision-maker rules. Engine continues running during decisions. Does not require a Trainer. Supports practice mode (solo play with 1.5× decision timer).
 
 ### Stress Model (Simple Collaborative)
 
@@ -266,7 +266,7 @@ Identified from domain reference docs, PM questions, and known gaps. Items gradu
 - **Problem:** If 2 cards chosen per turn, they must be different. Exception: SWB07/SWB08 may repeat if each targets a different component.
 - **Solution:** Card-play validation in `close_decision()` checking selected IDs against same-turn history.
 
-#### Manual GM stress override
+#### Manual Trainer stress override
 - **Problem:** In Classic mode, the facilitator sets stress directly. No endpoint exists.
 - **Solution:** `PUT .../engine/stress` endpoint + `SystemManager.set_stress()` method.
 
@@ -311,7 +311,7 @@ Identified from domain reference docs, PM questions, and known gaps. Items gradu
 | Scenario | `Scenario` / `ScenarioContent` | A reusable exercise template. |
 | Engine | `ExerciseEngine` | Pure-Python tick-based runtime (250ms). No DB, no HTTP. |
 | Game Mode | `GameMode` protocol / `ClassicMode` / `SimpleCollaborativeMode` | Pluggable strategy for scoring and turn mechanics. |
-| GM (Game Master) | — | The facilitator who runs the exercise. |
+| Trainer | — | The facilitator who runs the exercise. |
 | Player / Participant | `Participant` | Someone responding to injects and making decisions. |
 | Advisor | — | In collaborative mode, submits non-binding recommendations. |
 | Decision-Maker | — | In collaborative mode, submits the binding ruling. |

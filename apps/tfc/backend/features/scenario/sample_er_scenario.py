@@ -32,7 +32,7 @@ ER_SCENARIO_CONTENT: dict = {
     ],
     "rules": [
         "All decisions must be made within the time limit or they auto-close",
-        "The Game Master may inject additional events at any time",
+        "The Trainer may inject additional events at any time",
         "Players should communicate role changes to the GM immediately",
     ],
     "default_time_factor": 1.5,

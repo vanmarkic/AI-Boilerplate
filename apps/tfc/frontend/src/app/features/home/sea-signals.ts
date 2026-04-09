@@ -57,9 +57,9 @@ export function createGlowTexture(): THREE.Texture {
 
 export function waveY(x: number, z: number, t: number): number {
   return (
-    Math.sin(x * 0.4 + t * 0.6) * 0.35 +
-    Math.sin(z * 0.55 + t * 0.45) * 0.25 +
-    Math.sin((x + z) * 0.3 + t * 0.35) * 0.15 +
-    Math.sin(x * 0.9 - t * 0.25) * 0.1
+    Math.sin(x * 0.4 + t * 0.6) * 0.7 +
+    Math.sin(z * 0.55 + t * 0.45) * 0.5 +
+    Math.sin((x + z) * 0.3 + t * 0.35) * 0.3 +
+    Math.sin(x * 0.9 - t * 0.25) * 0.2
   );
 }
