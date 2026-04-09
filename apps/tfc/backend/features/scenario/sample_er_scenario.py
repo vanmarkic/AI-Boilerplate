@@ -32,7 +32,7 @@ ER_SCENARIO_CONTENT: dict = {
     ],
     "rules": [
         "All decisions must be made within the time limit or they auto-close",
-        "The Game Master may inject additional events at any time",
+        "The Game Master may inject additional injects at any time",
         "Players should communicate role changes to the GM immediately",
     ],
     "default_time_factor": 1.5,
@@ -43,7 +43,7 @@ ER_SCENARIO_CONTENT: dict = {
             "title": "Alert & Activation",
             "description": ("Hospital receives MCI notification and activates the emergency plan."),
             "duration_ms": 10 * _MIN,
-            "events": ["evt-dispatch", "evt-mci-activation"],
+            "injects": ["evt-dispatch", "evt-mci-activation"],
         },
         {
             "id": "phase-triage",
@@ -52,7 +52,7 @@ ER_SCENARIO_CONTENT: dict = {
                 "First ambulances arrive. Triage area is set up and patients are categorised."
             ),
             "duration_ms": 15 * _MIN,
-            "events": [
+            "injects": [
                 "evt-first-ambulances",
                 "evt-triage-setup",
                 "evt-red-patients",
@@ -66,7 +66,7 @@ ER_SCENARIO_CONTENT: dict = {
                 "resource allocation and transfers are required."
             ),
             "duration_ms": 20 * _MIN,
-            "events": [
+            "injects": [
                 "evt-second-wave",
                 "evt-blood-shortage",
                 "evt-icu-full",
@@ -81,11 +81,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "operations and begin handoff to recovery phase."
             ),
             "duration_ms": 15 * _MIN,
-            "events": ["evt-mutual-aid", "evt-debrief"],
+            "injects": ["evt-mutual-aid", "evt-debrief"],
         },
     ],
-    # ── Events ───────────────────────────────────────────────────────────
-    "events": [
+    # ── Injects ───────────────────────────────────────────────────────────
+    "injects": [
         {
             "id": "evt-dispatch",
             "title": "Dispatch Notification",
@@ -93,11 +93,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "County dispatch calls: industrial explosion confirmed, "
                 "40+ casualties, first ambulances ETA 8 minutes."
             ),
-            "event_type": "informational",
+            "inject_type": "informational",
             "scheduled_pt_ms": 0,
             "duration_ms": 2 * _MIN,
             "dependencies": [],
-            "triggered_issues": [],
+            "triggered_defects": [],
         },
         {
             "id": "evt-mci-activation",
@@ -106,11 +106,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "Decision point: activate the hospital Mass Casualty "
                 "Incident plan at Level II or Level III?"
             ),
-            "event_type": "decision",
+            "inject_type": "decision",
             "scheduled_pt_ms": 2 * _MIN,
             "duration_ms": 5 * _MIN,
             "dependencies": ["evt-dispatch"],
-            "triggered_issues": ["iss-staff-recall"],
+            "triggered_defects": ["iss-staff-recall"],
         },
         {
             "id": "evt-first-ambulances",
@@ -119,11 +119,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "Three ambulances arrive simultaneously with 9 patients: "
                 "2 critical (red), 4 delayed (yellow), 3 minor (green)."
             ),
-            "event_type": "operational",
+            "inject_type": "operational",
             "scheduled_pt_ms": 8 * _MIN,
             "duration_ms": 5 * _MIN,
             "dependencies": [],
-            "triggered_issues": ["iss-triage-bottleneck"],
+            "triggered_defects": ["iss-triage-bottleneck"],
         },
         {
             "id": "evt-triage-setup",
@@ -132,11 +132,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "Triage tent is operational outside the ED entrance. "
                 "START triage protocol is in effect."
             ),
-            "event_type": "informational",
+            "inject_type": "informational",
             "scheduled_pt_ms": 10 * _MIN,
             "duration_ms": None,
             "dependencies": ["evt-first-ambulances"],
-            "triggered_issues": [],
+            "triggered_defects": [],
         },
         {
             "id": "evt-red-patients",
@@ -146,11 +146,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "One requires emergency surgery, the other needs "
                 "ventilator support."
             ),
-            "event_type": "decision",
+            "inject_type": "decision",
             "scheduled_pt_ms": 14 * _MIN,
             "duration_ms": 4 * _MIN,
             "dependencies": ["evt-first-ambulances"],
-            "triggered_issues": ["iss-or-contention"],
+            "triggered_defects": ["iss-or-contention"],
         },
         {
             "id": "evt-second-wave",
@@ -159,11 +159,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "Additional 15 patients arrive — including 4 paediatric "
                 "burn victims requiring specialised care."
             ),
-            "event_type": "operational",
+            "inject_type": "operational",
             "scheduled_pt_ms": 22 * _MIN,
             "duration_ms": 8 * _MIN,
             "dependencies": [],
-            "triggered_issues": ["iss-paediatric-capacity"],
+            "triggered_defects": ["iss-paediatric-capacity"],
         },
         {
             "id": "evt-blood-shortage",
@@ -172,11 +172,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "Blood bank reports O-negative supply is critically low. "
                 "Request to regional blood centre has 45-minute ETA."
             ),
-            "event_type": "decision",
+            "inject_type": "decision",
             "scheduled_pt_ms": 26 * _MIN,
             "duration_ms": 5 * _MIN,
             "dependencies": [],
-            "triggered_issues": ["iss-blood-supply"],
+            "triggered_defects": ["iss-blood-supply"],
         },
         {
             "id": "evt-media-arrival",
@@ -185,11 +185,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "News crews are at the hospital entrance. Families are "
                 "gathering in the lobby demanding information."
             ),
-            "event_type": "informational",
+            "inject_type": "informational",
             "scheduled_pt_ms": 28 * _MIN,
             "duration_ms": None,
             "dependencies": [],
-            "triggered_issues": ["iss-public-info"],
+            "triggered_defects": ["iss-public-info"],
         },
         {
             "id": "evt-icu-full",
@@ -198,11 +198,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "ICU reports all beds occupied. Three additional patients "
                 "need intensive care. Transfer or convert step-down unit?"
             ),
-            "event_type": "decision",
+            "inject_type": "decision",
             "scheduled_pt_ms": 30 * _MIN,
             "duration_ms": 5 * _MIN,
             "dependencies": [],
-            "triggered_issues": ["iss-bed-shortage"],
+            "triggered_defects": ["iss-bed-shortage"],
         },
         {
             "id": "evt-mutual-aid",
@@ -211,11 +211,11 @@ ER_SCENARIO_CONTENT: dict = {
                 "Neighbouring St. Mary's Hospital confirms capacity for "
                 "8 non-critical transfers. Transport coordination needed."
             ),
-            "event_type": "operational",
+            "inject_type": "operational",
             "scheduled_pt_ms": 40 * _MIN,
             "duration_ms": 10 * _MIN,
             "dependencies": [],
-            "triggered_issues": [],
+            "triggered_defects": [],
         },
         {
             "id": "evt-debrief",
@@ -225,15 +225,15 @@ ER_SCENARIO_CONTENT: dict = {
                 "report from all section chiefs before transitioning "
                 "to sustained operations."
             ),
-            "event_type": "informational",
+            "inject_type": "informational",
             "scheduled_pt_ms": 55 * _MIN,
             "duration_ms": 5 * _MIN,
             "dependencies": [],
-            "triggered_issues": [],
+            "triggered_defects": [],
         },
     ],
-    # ── Issues ───────────────────────────────────────────────────────────
-    "issues": [
+    # ── Defects ───────────────────────────────────────────────────────────
+    "defects": [
         {
             "id": "iss-staff-recall",
             "title": "Staff Recall Delays",
@@ -241,8 +241,8 @@ ER_SCENARIO_CONTENT: dict = {
                 "Off-duty staff recall is underway but responses are "
                 "slow. ED is running at 60 % staffing."
             ),
-            "trigger_mode": "event-based",
-            "trigger_event_id": "evt-mci-activation",
+            "trigger_mode": "inject-based",
+            "trigger_inject_id": "evt-mci-activation",
             "auto_resolve_ms": 20 * _MIN,
         },
         {
@@ -252,8 +252,8 @@ ER_SCENARIO_CONTENT: dict = {
                 "Only one triage nurse is available at the entrance. "
                 "Patients are queuing in ambulances."
             ),
-            "trigger_mode": "event-based",
-            "trigger_event_id": "evt-first-ambulances",
+            "trigger_mode": "inject-based",
+            "trigger_inject_id": "evt-first-ambulances",
             "auto_resolve_ms": 10 * _MIN,
         },
         {
@@ -263,8 +263,8 @@ ER_SCENARIO_CONTENT: dict = {
                 "Both available ORs are occupied with scheduled "
                 "surgeries. Emergency cases need immediate access."
             ),
-            "trigger_mode": "event-based",
-            "trigger_event_id": "evt-red-patients",
+            "trigger_mode": "inject-based",
+            "trigger_inject_id": "evt-red-patients",
             "auto_resolve_ms": 0,
         },
         {
@@ -274,8 +274,8 @@ ER_SCENARIO_CONTENT: dict = {
                 "Hospital has limited paediatric burn capability. "
                 "Regional burn centre is 90 minutes by ground transport."
             ),
-            "trigger_mode": "event-based",
-            "trigger_event_id": "evt-second-wave",
+            "trigger_mode": "inject-based",
+            "trigger_inject_id": "evt-second-wave",
             "auto_resolve_ms": 0,
         },
         {
@@ -285,8 +285,8 @@ ER_SCENARIO_CONTENT: dict = {
                 "O-negative units exhausted. MTP protocol activated. "
                 "Regional resupply ETA 45 minutes."
             ),
-            "trigger_mode": "event-based",
-            "trigger_event_id": "evt-blood-shortage",
+            "trigger_mode": "inject-based",
+            "trigger_inject_id": "evt-blood-shortage",
             "auto_resolve_ms": 45 * _MIN,
         },
         {
@@ -296,8 +296,8 @@ ER_SCENARIO_CONTENT: dict = {
                 "No ICU beds available. Patients boarding in ED and "
                 "PACU. Step-down conversion under consideration."
             ),
-            "trigger_mode": "event-based",
-            "trigger_event_id": "evt-icu-full",
+            "trigger_mode": "inject-based",
+            "trigger_inject_id": "evt-icu-full",
             "auto_resolve_ms": 0,
         },
         {
@@ -318,7 +318,7 @@ ER_SCENARIO_CONTENT: dict = {
                 "Choose the hospital MCI activation level based on "
                 "reported casualty numbers and severity."
             ),
-            "issue_id": "iss-staff-recall",
+            "defect_id": "iss-staff-recall",
             "question_type": "single_choice",
             "options": [
                 {
@@ -341,7 +341,7 @@ ER_SCENARIO_CONTENT: dict = {
                 "Two critical patients need surgery but only one OR can "
                 "be freed immediately. Who gets priority?"
             ),
-            "issue_id": "iss-or-contention",
+            "defect_id": "iss-or-contention",
             "question_type": "single_choice",
             "options": [
                 {
@@ -369,7 +369,7 @@ ER_SCENARIO_CONTENT: dict = {
                 "O-negative supply is critically low. How should blood "
                 "resources be managed until resupply arrives?"
             ),
-            "issue_id": "iss-blood-supply",
+            "defect_id": "iss-blood-supply",
             "question_type": "single_choice",
             "options": [
                 {
@@ -397,7 +397,7 @@ ER_SCENARIO_CONTENT: dict = {
                 "ICU is full with three more patients needing intensive "
                 "care. What is the best course of action?"
             ),
-            "issue_id": "iss-bed-shortage",
+            "defect_id": "iss-bed-shortage",
             "question_type": "single_choice",
             "options": [
                 {
@@ -425,7 +425,7 @@ ER_SCENARIO_CONTENT: dict = {
                 "Four paediatric burn victims need specialised care "
                 "beyond this hospital's capability. Choose a strategy."
             ),
-            "issue_id": "iss-paediatric-capacity",
+            "defect_id": "iss-paediatric-capacity",
             "question_type": "single_choice",
             "options": [
                 {

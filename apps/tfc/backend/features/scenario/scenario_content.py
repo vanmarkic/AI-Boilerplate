@@ -20,43 +20,43 @@ class DecisionTemplateDef(BaseModel):
     id: str
     title: str
     description: str = ""
-    issue_id: str  # linked issue
+    defect_id: str  # linked defect
     question_type: str  # single_choice, multi_choice, free_text, scale
     options: list[DecisionOptionDef] = []
     completion_mode: str = "first_response"
     timeout_ms: float = 0  # 0 = no timeout
 
 
-class ScenarioEventDef(BaseModel):
-    """Definition of a single event within a scenario."""
+class ScenarioInjectDef(BaseModel):
+    """Definition of a single inject within a scenario."""
     id: str
     title: str
     description: str = ""
-    event_type: str  # informational, operational, decision
+    inject_type: str  # informational, operational, decision
     scheduled_pt_ms: float  # when to trigger in play time
     duration_ms: float | None = None  # auto-complete after duration
-    dependencies: list[str] = []  # event IDs that must complete first
-    triggered_issues: list[str] = []  # issue IDs activated on completion
+    dependencies: list[str] = []  # inject IDs that must complete first
+    triggered_defects: list[str] = []  # defect IDs activated on completion
 
 
-class ScenarioIssueDef(BaseModel):
-    """Definition of a single issue within a scenario."""
+class ScenarioDefectDef(BaseModel):
+    """Definition of a single defect within a scenario."""
     id: str
     title: str
     description: str = ""
-    trigger_mode: str  # time-based, event-based, manual
+    trigger_mode: str  # time-based, inject-based, manual
     trigger_time_pt_ms: float | None = None
-    trigger_event_id: str | None = None
+    trigger_inject_id: str | None = None
     auto_resolve_ms: float = 0  # 0 = no auto-resolve
 
 
 class ScenarioPhaseDef(BaseModel):
-    """Definition of a phase grouping events within a scenario."""
+    """Definition of a phase grouping injects within a scenario."""
     id: str
     title: str
     description: str = ""
     duration_ms: float | None = None  # auto-advance after duration
-    events: list[str] = []  # event IDs in this phase
+    injects: list[str] = []  # inject IDs in this phase
 
 
 class ScenarioContent(BaseModel):
@@ -67,8 +67,8 @@ class ScenarioContent(BaseModel):
     loader converts it into runtime objects at exercise start.
     """
     phases: list[ScenarioPhaseDef] = []
-    events: list[ScenarioEventDef] = []
-    issues: list[ScenarioIssueDef] = []
+    injects: list[ScenarioInjectDef] = []
+    defects: list[ScenarioDefectDef] = []
     decision_templates: list[DecisionTemplateDef] = []
     default_time_factor: float = 1.0
     briefing: str = ""

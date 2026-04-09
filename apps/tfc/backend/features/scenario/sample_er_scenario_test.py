@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
-from engine.event_scheduler import EventType
+from engine.inject_scheduler import InjectType
 from engine.exercise_engine import EngineConfig, ExerciseEngine
-from engine.issue_manager import TriggerMode
+from engine.defect_manager import TriggerMode
 from features.scenario.sample_er_scenario import ER_SCENARIO_CONTENT
 from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_loader import (
     build_engine_config,
     load_decision_templates,
-    load_scenario_events,
-    load_scenario_issues,
+    load_scenario_injects,
+    load_scenario_defects,
 )
 
 
@@ -25,8 +25,8 @@ def _content() -> ScenarioContent:
 def test_er_scenario_validates_against_schema() -> None:
     content = _content()
     assert len(content.phases) == 4
-    assert len(content.events) == 11
-    assert len(content.issues) == 7
+    assert len(content.injects) == 11
+    assert len(content.defects) == 7
     assert len(content.decision_templates) == 5
     assert content.default_time_factor == 1.5
     assert content.briefing != ""
@@ -34,45 +34,45 @@ def test_er_scenario_validates_against_schema() -> None:
     assert len(content.rules) == 3
 
 
-# ── Event loading ────────────────────────────────────────────────────────
+# ── Inject loading ────────────────────────────────────────────────────────
 
 
-def test_er_events_load_with_correct_types() -> None:
-    events = load_scenario_events(_content())
-    assert len(events) == 11
+def test_er_injects_load_with_correct_types() -> None:
+    injects = load_scenario_injects(_content())
+    assert len(injects) == 11
 
-    dispatch = next(e for e in events if e.id == "evt-dispatch")
-    assert dispatch.event_type == EventType.INFORMATIONAL
+    dispatch = next(e for e in injects if e.id == "evt-dispatch")
+    assert dispatch.inject_type == InjectType.INFORMATIONAL
     assert dispatch.scheduled_pt_ms == 0
 
-    mci = next(e for e in events if e.id == "evt-mci-activation")
-    assert mci.event_type == EventType.DECISION
+    mci = next(e for e in injects if e.id == "evt-mci-activation")
+    assert mci.inject_type == InjectType.DECISION
     assert "evt-dispatch" in mci.dependencies
 
-    blood = next(e for e in events if e.id == "evt-blood-shortage")
-    assert blood.event_type == EventType.DECISION
-    assert "iss-blood-supply" in blood.triggered_issues
+    blood = next(e for e in injects if e.id == "evt-blood-shortage")
+    assert blood.inject_type == InjectType.DECISION
+    assert "iss-blood-supply" in blood.triggered_defects
 
 
-def test_er_events_are_chronologically_ordered() -> None:
-    events = load_scenario_events(_content())
-    times = [e.scheduled_pt_ms for e in events]
+def test_er_injects_are_chronologically_ordered() -> None:
+    injects = load_scenario_injects(_content())
+    times = [e.scheduled_pt_ms for e in injects]
     assert times == sorted(times)
 
 
-# ── Issue loading ────────────────────────────────────────────────────────
+# ── Defect loading ────────────────────────────────────────────────────────
 
 
-def test_er_issues_load_with_correct_triggers() -> None:
-    issues = load_scenario_issues(_content())
-    assert len(issues) == 7
+def test_er_defects_load_with_correct_triggers() -> None:
+    defects = load_scenario_defects(_content())
+    assert len(defects) == 7
 
-    event_based = [i for i in issues if i.trigger_mode == TriggerMode.EVENT_BASED]
-    time_based = [i for i in issues if i.trigger_mode == TriggerMode.TIME_BASED]
-    assert len(event_based) == 6
+    inject_based = [i for i in defects if i.trigger_mode == TriggerMode.INJECT_BASED]
+    time_based = [i for i in defects if i.trigger_mode == TriggerMode.TIME_BASED]
+    assert len(inject_based) == 6
     assert len(time_based) == 1
 
-    pio = next(i for i in issues if i.id == "iss-public-info")
+    pio = next(i for i in defects if i.id == "iss-public-info")
     assert pio.trigger_mode == TriggerMode.TIME_BASED
     assert pio.trigger_time_pt_ms == 28 * 60_000
 
@@ -105,48 +105,48 @@ def test_er_scenario_round_trip_to_engine() -> None:
     assert isinstance(config, EngineConfig)
     assert config.exercise_id == 100
     assert config.time_factor == 1.5
-    assert len(config.events) == 11
-    assert len(config.issues) == 7
+    assert len(config.injects) == 11
+    assert len(config.defects) == 7
     assert len(config.decision_templates) == 5
 
     engine = ExerciseEngine(config)
     snap = engine.snapshot()
     assert snap["exercise_id"] == 100
     assert snap["phase"] == "setup"
-    assert len(snap["events"]) == 11
-    assert len(snap["issues"]) == 7
+    assert len(snap["injects"]) == 11
+    assert len(snap["defects"]) == 7
 
 
-def test_er_scenario_all_issue_refs_valid() -> None:
-    """Every triggered_issues ref in events points to a real issue."""
+def test_er_scenario_all_defect_refs_valid() -> None:
+    """Every triggered_defects ref in injects points to a real defect."""
     content = _content()
-    issue_ids = {iss.id for iss in content.issues}
-    for evt in content.events:
-        for ref in evt.triggered_issues:
-            assert ref in issue_ids, f"Event {evt.id} references unknown issue {ref}"
+    defect_ids = {d.id for d in content.defects}
+    for inj in content.injects:
+        for ref in inj.triggered_defects:
+            assert ref in defect_ids, f"Inject {inj.id} references unknown defect {ref}"
 
 
 def test_er_scenario_all_dependency_refs_valid() -> None:
-    """Every dependency ref in events points to a real event."""
+    """Every dependency ref in injects points to a real inject."""
     content = _content()
-    event_ids = {evt.id for evt in content.events}
-    for evt in content.events:
-        for dep in evt.dependencies:
-            assert dep in event_ids, f"Event {evt.id} depends on unknown event {dep}"
+    inject_ids = {inj.id for inj in content.injects}
+    for inj in content.injects:
+        for dep in inj.dependencies:
+            assert dep in inject_ids, f"Inject {inj.id} depends on unknown inject {dep}"
 
 
-def test_er_scenario_all_decision_issue_refs_valid() -> None:
-    """Every decision template references a real issue."""
+def test_er_scenario_all_decision_defect_refs_valid() -> None:
+    """Every decision template references a real defect."""
     content = _content()
-    issue_ids = {iss.id for iss in content.issues}
+    defect_ids = {d.id for d in content.defects}
     for dt in content.decision_templates:
-        assert dt.issue_id in issue_ids, f"Decision {dt.id} references unknown issue {dt.issue_id}"
+        assert dt.defect_id in defect_ids, f"Decision {dt.id} references unknown defect {dt.defect_id}"
 
 
-def test_er_scenario_phase_event_refs_valid() -> None:
-    """Every event listed in a phase exists in the events list."""
+def test_er_scenario_phase_inject_refs_valid() -> None:
+    """Every inject listed in a phase exists in the injects list."""
     content = _content()
-    event_ids = {evt.id for evt in content.events}
+    inject_ids = {inj.id for inj in content.injects}
     for phase in content.phases:
-        for ref in phase.events:
-            assert ref in event_ids, f"Phase {phase.id} references unknown event {ref}"
+        for ref in phase.injects:
+            assert ref in inject_ids, f"Phase {phase.id} references unknown inject {ref}"

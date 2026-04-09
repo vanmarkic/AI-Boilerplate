@@ -1,55 +1,55 @@
 """Converts ScenarioContent into engine-ready runtime objects.
 
 Bridges the gap between the authored scenario JSON and the engine's
-ScheduledEvent / TrackedIssue / EngineConfig dataclasses.
+ScheduledInject / TrackedDefect / EngineConfig dataclasses.
 """
 from __future__ import annotations
 
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.inject_scheduler import InjectType, ScheduledInject
 from engine.exercise_engine import (
     DecisionTemplate,
     EngineConfig,
     ScenarioContext,
 )
-from engine.issue_manager import TrackedIssue, TriggerMode
+from engine.defect_manager import TrackedDefect, TriggerMode
 from features.scenario.scenario_content import ScenarioContent
 
 
-def load_scenario_events(content: ScenarioContent) -> list[ScheduledEvent]:
-    """Convert scenario event definitions to engine ScheduledEvent objects."""
-    events: list[ScheduledEvent] = []
-    for evt in content.events:
-        events.append(
-            ScheduledEvent(
-                id=evt.id,
-                title=evt.title,
-                description=evt.description,
-                event_type=EventType(evt.event_type),
-                scheduled_pt_ms=evt.scheduled_pt_ms,
-                duration_ms=evt.duration_ms,
-                dependencies=list(evt.dependencies),
-                triggered_issues=list(evt.triggered_issues),
+def load_scenario_injects(content: ScenarioContent) -> list[ScheduledInject]:
+    """Convert scenario inject definitions to engine ScheduledInject objects."""
+    injects: list[ScheduledInject] = []
+    for inj in content.injects:
+        injects.append(
+            ScheduledInject(
+                id=inj.id,
+                title=inj.title,
+                description=inj.description,
+                inject_type=InjectType(inj.inject_type),
+                scheduled_pt_ms=inj.scheduled_pt_ms,
+                duration_ms=inj.duration_ms,
+                dependencies=list(inj.dependencies),
+                triggered_defects=list(inj.triggered_defects),
             ),
         )
-    return events
+    return injects
 
 
-def load_scenario_issues(content: ScenarioContent) -> list[TrackedIssue]:
-    """Convert scenario issue definitions to engine TrackedIssue objects."""
-    issues: list[TrackedIssue] = []
-    for iss in content.issues:
-        issues.append(
-            TrackedIssue(
-                id=iss.id,
-                title=iss.title,
-                description=iss.description,
-                trigger_mode=TriggerMode(iss.trigger_mode),
-                trigger_time_pt_ms=iss.trigger_time_pt_ms,
-                trigger_event_id=iss.trigger_event_id,
-                auto_resolve_ms=iss.auto_resolve_ms,
+def load_scenario_defects(content: ScenarioContent) -> list[TrackedDefect]:
+    """Convert scenario defect definitions to engine TrackedDefect objects."""
+    defects: list[TrackedDefect] = []
+    for defect in content.defects:
+        defects.append(
+            TrackedDefect(
+                id=defect.id,
+                title=defect.title,
+                description=defect.description,
+                trigger_mode=TriggerMode(defect.trigger_mode),
+                trigger_time_pt_ms=defect.trigger_time_pt_ms,
+                trigger_inject_id=defect.trigger_inject_id,
+                auto_resolve_ms=defect.auto_resolve_ms,
             ),
         )
-    return issues
+    return defects
 
 
 def load_decision_templates(
@@ -61,7 +61,7 @@ def load_decision_templates(
             id=dt.id,
             title=dt.title,
             description=dt.description,
-            issue_id=dt.issue_id,
+            defect_id=dt.defect_id,
             question_type=dt.question_type,
             options=[
                 {"id": o.id, "label": o.label, "score": o.score}
@@ -91,8 +91,8 @@ def build_engine_config(
         exercise_id=exercise_id,
         title=title,
         time_factor=content.default_time_factor,
-        events=load_scenario_events(content),
-        issues=load_scenario_issues(content),
+        injects=load_scenario_injects(content),
+        defects=load_scenario_defects(content),
         decision_templates=load_decision_templates(content),
         context=context,
     )

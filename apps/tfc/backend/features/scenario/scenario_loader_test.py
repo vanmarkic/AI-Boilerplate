@@ -5,7 +5,7 @@ from features.scenario.scenario_content import (
     DecisionOptionDef,
     DecisionTemplateDef,
     ScenarioContent,
-    ScenarioEventDef,
+    ScenarioInjectDef,
 )
 from features.scenario.scenario_loader import (
     build_engine_config,
@@ -16,8 +16,8 @@ from features.scenario.scenario_loader import (
 def _minimal_content(**overrides: object) -> ScenarioContent:
     """Create a minimal ScenarioContent with optional overrides."""
     defaults: dict = {
-        "events": [],
-        "issues": [],
+        "injects": [],
+        "defects": [],
         "phases": [],
         "decision_templates": [],
         "default_time_factor": 1.0,
@@ -31,7 +31,7 @@ def test_build_engine_config_loads_decision_templates() -> None:
         id="dt1",
         title="Evacuate?",
         description="Should we evacuate?",
-        issue_id="i1",
+        defect_id="i1",
         question_type="single_choice",
         options=[
             DecisionOptionDef(id="o1", label="Yes", score=1.0),
@@ -46,7 +46,7 @@ def test_build_engine_config_loads_decision_templates() -> None:
     tmpl = config.decision_templates[0]
     assert tmpl.id == "dt1"
     assert tmpl.title == "Evacuate?"
-    assert tmpl.issue_id == "i1"
+    assert tmpl.defect_id == "i1"
     assert tmpl.question_type == "single_choice"
     assert len(tmpl.options) == 2
     assert tmpl.options[0] == {"id": "o1", "label": "Yes", "score": 1.0}
@@ -59,7 +59,7 @@ def test_build_engine_config_loads_context() -> None:
         objectives=["Save lives", "Minimize damage"],
         rules=["No running", "Follow protocol"],
     )
-    # Also add a title/description via a scenario event for the title
+    # Also add a title/description via a scenario inject for the title
     config = build_engine_config(
         exercise_id=2, title="Scenario Title", content=content,
     )
@@ -81,7 +81,7 @@ def test_load_decision_templates_preserves_target_roles() -> None:
         id="dt2",
         title="Deploy team?",
         description="Deploy response team",
-        issue_id="i2",
+        defect_id="i2",
         question_type="multi_choice",
         options=[],
         completion_mode="all_respond",

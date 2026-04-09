@@ -7,14 +7,14 @@ from features.scenario.scenario_content import (
 
 def test_decision_template_default_timeout() -> None:
     dt = DecisionTemplateDef(
-        id="dt1", title="T", issue_id="i1", question_type="single_choice",
+        id="dt1", title="T", defect_id="i1", question_type="single_choice",
     )
     assert dt.timeout_ms == 0
 
 
 def test_decision_template_custom_timeout() -> None:
     dt = DecisionTemplateDef(
-        id="dt1", title="T", issue_id="i1", question_type="single_choice",
+        id="dt1", title="T", defect_id="i1", question_type="single_choice",
         timeout_ms=5000.0,
     )
     assert dt.timeout_ms == 5000.0
@@ -40,11 +40,11 @@ def test_scenario_content_with_briefing() -> None:
 
 def test_scenario_content_round_trip() -> None:
     data = {
-        "events": [],
-        "issues": [],
+        "injects": [],
+        "defects": [],
         "decision_templates": [
             {
-                "id": "dt1", "title": "D1", "issue_id": "i1",
+                "id": "dt1", "title": "D1", "defect_id": "i1",
                 "question_type": "free_text", "timeout_ms": 3000,
             },
         ],
