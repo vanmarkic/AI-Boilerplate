@@ -334,12 +334,7 @@ export class WaitingRoomView implements OnInit, OnDestroy {
     const name = this.displayName().trim();
     if (!name) return;
     this.joining.set(true);
-    // Classic mode: first joiner is the trainer (exercise creator)
-    const trainerAlreadyPresent = this.participants().some(
-      (p) => p.role === "trainer",
-    );
-    const role =
-      this.requiresGm() && !trainerAlreadyPresent ? "trainer" : "player";
+    const role = this.resolveJoinRole();
     this.api.join(this.exerciseId(), name, role).subscribe({
       next: (p) => {
         this.participantId.set(p.id);
@@ -347,9 +342,39 @@ export class WaitingRoomView implements OnInit, OnDestroy {
         if (this.twoPlayerMode()) {
           this.autoAssignTwoPlayerRole(p.id);
         }
+        // Classic mode: auto-claim the first available scenario role
+        if (role === "player" && this.requiresGm()) {
+          this.autoClaimAvailableRole(p.id);
+        }
       },
       error: () => this.joining.set(false),
     });
+  }
+
+  /** Determine the join role based on game mode and current participants. */
+  private resolveJoinRole(): string {
+    if (!this.requiresGm()) return "player";
+    const trainerPresent = this.participants().some(
+      (p) => p.role === "trainer",
+    );
+    return trainerPresent ? "player" : "trainer";
+  }
+
+  /** In classic mode, assign the first unclaimed scenario role to a player. */
+  private autoClaimAvailableRole(participantId: string): void {
+    const takenRoles = new Set(
+      this.participants()
+        .filter((p) => p.id !== participantId)
+        .map((p) => p.role),
+    );
+    const availableRole = this.scenarioRoles().find(
+      (r) => !takenRoles.has(r.id),
+    );
+    if (availableRole) {
+      this.api
+        .updateRole(this.exerciseId(), participantId, availableRole.id)
+        .subscribe();
+    }
   }
 
   protected onClaimRole(roleId: string): void {
