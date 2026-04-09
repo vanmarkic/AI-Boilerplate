@@ -1,35 +1,35 @@
-"""Property tests for IssueManager lifecycle and triggers."""
+"""Property tests for DefectManager lifecycle and triggers."""
 from __future__ import annotations
 
 from hypothesis import given, settings, assume
 from hypothesis import strategies as st
 
-from engine.issue_manager import (
+from engine.defect_manager import (
     VALID_TRANSITIONS,
-    IssueLifecycle,
-    IssueManager,
-    TrackedIssue,
+    DefectLifecycle,
+    DefectManager,
+    TrackedDefect,
     TriggerMode,
 )
 from engine.strategies import durations, monotonic_play_times, play_times
 
-TERMINAL = {IssueLifecycle.RESOLVED}
+TERMINAL = {DefectLifecycle.RESOLVED}
 
 
-def _issue(
+def _defect(
     iid: str = "i0",
     trigger_mode: TriggerMode = TriggerMode.TIME_BASED,
     trigger_time_pt_ms: float | None = None,
-    trigger_event_id: str | None = None,
+    trigger_inject_id: str | None = None,
     auto_resolve_ms: float = 0.0,
-) -> TrackedIssue:
-    return TrackedIssue(
+) -> TrackedDefect:
+    return TrackedDefect(
         id=iid,
-        title=f"Issue {iid}",
+        title=f"Defect {iid}",
         description="generated",
         trigger_mode=trigger_mode,
         trigger_time_pt_ms=trigger_time_pt_ms,
-        trigger_event_id=trigger_event_id,
+        trigger_inject_id=trigger_inject_id,
         auto_resolve_ms=auto_resolve_ms,
     )
 
@@ -49,13 +49,13 @@ class TestTransitionsAlwaysValid:
         auto_resolve: float,
         ticks: list[float],
     ) -> None:
-        issue = _issue(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
-        prev = IssueLifecycle.INACTIVE
+        defect = _defect(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
+        prev = DefectLifecycle.INACTIVE
         for pt in ticks:
             mgr.tick(pt, set())
-            current = mgr.issues["i0"].lifecycle
+            current = mgr.defects["i0"].lifecycle
             if current != prev:
                 assert current in VALID_TRANSITIONS[prev], (
                     f"Invalid transition {prev} -> {current} at pt={pt}"
@@ -78,33 +78,33 @@ class TestResolvedAbsorbing:
         auto_resolve: float,
         extra_ticks: list[float],
     ) -> None:
-        issue = _issue(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        defect = _defect(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         # Activate then wait for auto-resolve
         far_future = trigger_time + auto_resolve + 1.0
         mgr.tick(far_future, set())  # activates
         mgr.tick(far_future + auto_resolve + 1.0, set())  # auto-resolves
-        if mgr.issues["i0"].lifecycle != IssueLifecycle.RESOLVED:
+        if mgr.defects["i0"].lifecycle != DefectLifecycle.RESOLVED:
             return  # timing edge case, skip
         for pt in extra_ticks:
             mgr.tick(far_future + auto_resolve + 1.0 + pt, set())
-            assert mgr.issues["i0"].lifecycle == IssueLifecycle.RESOLVED
+            assert mgr.defects["i0"].lifecycle == DefectLifecycle.RESOLVED
 
     @given(extra_ticks=monotonic_play_times(min_size=3, max_size=15))
     @settings(max_examples=100)
     def test_manually_resolved_stays_resolved(
         self, extra_ticks: list[float],
     ) -> None:
-        issue = _issue(trigger_mode=TriggerMode.MANUAL)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        defect = _defect(trigger_mode=TriggerMode.MANUAL)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         mgr.manual_activate("i0", 0.0)
         mgr.resolve("i0", 100.0)
-        assert mgr.issues["i0"].lifecycle == IssueLifecycle.RESOLVED
+        assert mgr.defects["i0"].lifecycle == DefectLifecycle.RESOLVED
         for pt in extra_ticks:
             mgr.tick(pt, set())
-            assert mgr.issues["i0"].lifecycle == IssueLifecycle.RESOLVED
+            assert mgr.defects["i0"].lifecycle == DefectLifecycle.RESOLVED
 
 
 class TestMitigateResolveGuards:
@@ -113,35 +113,35 @@ class TestMitigateResolveGuards:
     @given(data=st.data())
     @settings(max_examples=100)
     def test_mitigate_inactive_returns_none(self, data: st.DataObject) -> None:
-        issue = _issue(trigger_mode=TriggerMode.MANUAL)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        defect = _defect(trigger_mode=TriggerMode.MANUAL)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         assert mgr.mitigate("i0") is None
 
     @given(data=st.data())
     @settings(max_examples=100)
     def test_resolve_inactive_returns_none(self, data: st.DataObject) -> None:
-        issue = _issue(trigger_mode=TriggerMode.MANUAL)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        defect = _defect(trigger_mode=TriggerMode.MANUAL)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         assert mgr.resolve("i0", 0.0) is None
 
     @given(data=st.data())
     @settings(max_examples=50)
     def test_resolve_already_resolved_returns_none(self, data: st.DataObject) -> None:
-        issue = _issue(trigger_mode=TriggerMode.MANUAL)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        defect = _defect(trigger_mode=TriggerMode.MANUAL)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         mgr.manual_activate("i0", 0.0)
         mgr.resolve("i0", 100.0)
         assert mgr.resolve("i0", 200.0) is None
 
 
-class TestEventBasedActivation:
-    """Event-triggered issues only activate when their event is completed."""
+class TestInjectBasedActivation:
+    """Inject-triggered defects only activate when their inject is completed."""
 
     @given(
-        event_id=st.text(min_size=1, max_size=5, alphabet=st.characters(whitelist_categories=("L",))),
+        inject_id=st.text(min_size=1, max_size=5, alphabet=st.characters(whitelist_categories=("L",))),
         wrong_ids=st.lists(
             st.text(min_size=1, max_size=5, alphabet=st.characters(whitelist_categories=("L",))),
             min_size=1,
@@ -149,20 +149,20 @@ class TestEventBasedActivation:
         ),
     )
     @settings(max_examples=100)
-    def test_wrong_event_does_not_activate(
-        self, event_id: str, wrong_ids: list[str],
+    def test_wrong_inject_does_not_activate(
+        self, inject_id: str, wrong_ids: list[str],
     ) -> None:
-        issue = _issue(
-            trigger_mode=TriggerMode.EVENT_BASED,
-            trigger_event_id=event_id,
+        defect = _defect(
+            trigger_mode=TriggerMode.INJECT_BASED,
+            trigger_inject_id=inject_id,
         )
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         for wid in wrong_ids:
-            if wid == event_id:
+            if wid == inject_id:
                 continue
-            mgr.activate_by_event(wid, 0.0)
-            assert mgr.issues["i0"].lifecycle == IssueLifecycle.INACTIVE
+            mgr.activate_by_inject(wid, 0.0)
+            assert mgr.defects["i0"].lifecycle == DefectLifecycle.INACTIVE
 
 
 class TestActivationSetsReleasedFlag:
@@ -171,32 +171,32 @@ class TestActivationSetsReleasedFlag:
     @given(pt=play_times())
     @settings(max_examples=50)
     def test_time_activated_is_released(self, pt: float) -> None:
-        issue = _issue(trigger_time_pt_ms=0.0)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        defect = _defect(trigger_time_pt_ms=0.0)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         mgr.tick(pt, set())
-        if mgr.issues["i0"].lifecycle == IssueLifecycle.ACTIVE:
-            assert mgr.issues["i0"].released_to_players is True
+        if mgr.defects["i0"].lifecycle == DefectLifecycle.ACTIVE:
+            assert mgr.defects["i0"].released_to_players is True
 
     @given(pt=play_times())
     @settings(max_examples=50)
     def test_manual_activated_is_released(self, pt: float) -> None:
-        issue = _issue(trigger_mode=TriggerMode.MANUAL)
-        mgr = IssueManager()
-        mgr.load_issues([issue])
+        defect = _defect(trigger_mode=TriggerMode.MANUAL)
+        mgr = DefectManager()
+        mgr.load_defects([defect])
         mgr.manual_activate("i0", pt)
-        assert mgr.issues["i0"].released_to_players is True
+        assert mgr.defects["i0"].released_to_players is True
 
 
 class TestSnapshotConsistency:
-    """Snapshot length matches loaded issues."""
+    """Snapshot length matches loaded defects."""
 
     @given(n=st.integers(min_value=0, max_value=15))
     @settings(max_examples=50)
     def test_snapshot_length_matches_loaded(self, n: int) -> None:
-        issues = [
-            _issue(iid=f"i{i}", trigger_mode=TriggerMode.MANUAL) for i in range(n)
+        defects = [
+            _defect(iid=f"i{i}", trigger_mode=TriggerMode.MANUAL) for i in range(n)
         ]
-        mgr = IssueManager()
-        mgr.load_issues(issues)
+        mgr = DefectManager()
+        mgr.load_defects(defects)
         assert len(mgr.snapshot()) == n
