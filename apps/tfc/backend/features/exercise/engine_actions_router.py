@@ -1,4 +1,4 @@
-"""REST endpoints for engine entity actions (events, issues, decisions).
+"""REST endpoints for engine entity actions (injects, defects, decisions).
 
 Split from engine_router.py to stay under the 250-line limit.
 """
@@ -33,111 +33,111 @@ def _or_404(result: dict | None, detail: str) -> dict:
     return result
 
 
-# ── Event actions ────────────────────────────────────────────────────────
+# ── Inject actions ───────────────────────────────────────────────────────
 
 
-@router.post("/events/{event_id}/trigger", operation_id="triggerEvent")
-async def trigger_event(exercise_id: int, event_id: str) -> dict:
+@router.post("/injects/{inject_id}/trigger", operation_id="triggerInject")
+async def trigger_inject(exercise_id: int, inject_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
-        engine.event_scheduler.force_trigger(event_id, pt),
-        f"Event {event_id} not found or not triggerable",
+        engine.inject_scheduler.force_trigger(inject_id, pt),
+        f"Inject {inject_id} not found or not triggerable",
     )
 
 
-@router.post("/events/{event_id}/cancel", operation_id="cancelEvent")
-async def cancel_event(exercise_id: int, event_id: str) -> dict:
+@router.post("/injects/{inject_id}/cancel", operation_id="cancelInject")
+async def cancel_inject(exercise_id: int, inject_id: str) -> dict:
     return _or_404(
-        _get_engine(exercise_id).event_scheduler.cancel_event(event_id),
-        f"Event {event_id} not found or not cancellable",
+        _get_engine(exercise_id).inject_scheduler.cancel_inject(inject_id),
+        f"Inject {inject_id} not found or not cancellable",
     )
 
 
-@router.post("/events/{event_id}/complete", operation_id="completeEvent")
-async def complete_event(exercise_id: int, event_id: str) -> dict:
+@router.post("/injects/{inject_id}/complete", operation_id="completeInject")
+async def complete_inject(exercise_id: int, inject_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
-        engine.event_scheduler.complete_event(event_id, pt),
-        f"Event {event_id} not found or not completable",
+        engine.inject_scheduler.complete_inject(inject_id, pt),
+        f"Inject {inject_id} not found or not completable",
     )
 
 
-@router.post("/events/{event_id}/pause", operation_id="pauseEvent")
-async def pause_event(exercise_id: int, event_id: str) -> dict:
+@router.post("/injects/{inject_id}/pause", operation_id="pauseInject")
+async def pause_inject(exercise_id: int, inject_id: str) -> dict:
     return _or_404(
-        _get_engine(exercise_id).event_scheduler.pause_event(event_id),
-        f"Event {event_id} not found or not pausable",
+        _get_engine(exercise_id).inject_scheduler.pause_inject(inject_id),
+        f"Inject {inject_id} not found or not pausable",
     )
 
 
-@router.post("/events/{event_id}/resume", operation_id="resumeEvent")
-async def resume_event(exercise_id: int, event_id: str) -> dict:
+@router.post("/injects/{inject_id}/resume", operation_id="resumeInject")
+async def resume_inject(exercise_id: int, inject_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
-        engine.event_scheduler.resume_event(event_id, pt),
-        f"Event {event_id} not found or not resumable",
+        engine.inject_scheduler.resume_inject(inject_id, pt),
+        f"Inject {inject_id} not found or not resumable",
     )
 
 
-@router.post("/events/{event_id}/delay", operation_id="delayEvent")
-async def delay_event(
-    exercise_id: int, event_id: str, body: DelayRequest,
+@router.post("/injects/{inject_id}/delay", operation_id="delayInject")
+async def delay_inject(
+    exercise_id: int, inject_id: str, body: DelayRequest,
 ) -> dict:
     return _or_404(
-        _get_engine(exercise_id).event_scheduler.delay_event(
-            event_id, body.delay_ms,
+        _get_engine(exercise_id).inject_scheduler.delay_inject(
+            inject_id, body.delay_ms,
         ),
-        f"Event {event_id} not found or not delayable",
+        f"Inject {inject_id} not found or not delayable",
     )
 
 
-@router.post("/events/{event_id}/skip", operation_id="skipEvent")
-async def skip_event(exercise_id: int, event_id: str) -> dict:
+@router.post("/injects/{inject_id}/skip", operation_id="skipInject")
+async def skip_inject(exercise_id: int, inject_id: str) -> dict:
     return _or_404(
-        _get_engine(exercise_id).event_scheduler.skip_event(event_id),
-        f"Event {event_id} not found or not skippable",
+        _get_engine(exercise_id).inject_scheduler.skip_inject(inject_id),
+        f"Inject {inject_id} not found or not skippable",
     )
 
 
-# ── Issue actions ────────────────────────────────────────────────────────
+# ── Defect actions ───────────────────────────────────────────────────────
 
 
-@router.post("/issues/{issue_id}/activate", operation_id="activateIssue")
-async def activate_issue(exercise_id: int, issue_id: str) -> dict:
+@router.post("/defects/{defect_id}/activate", operation_id="activateDefect")
+async def activate_defect(exercise_id: int, defect_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
-        engine.issue_manager.manual_activate(issue_id, pt),
-        f"Issue {issue_id} not found or not activatable",
+        engine.defect_manager.manual_activate(defect_id, pt),
+        f"Defect {defect_id} not found or not activatable",
     )
 
 
-@router.post("/issues/{issue_id}/mitigate", operation_id="mitigateIssue")
-async def mitigate_issue(exercise_id: int, issue_id: str) -> dict:
+@router.post("/defects/{defect_id}/mitigate", operation_id="mitigateDefect")
+async def mitigate_defect(exercise_id: int, defect_id: str) -> dict:
     return _or_404(
-        _get_engine(exercise_id).issue_manager.mitigate(issue_id),
-        f"Issue {issue_id} not found or not mitigatable",
+        _get_engine(exercise_id).defect_manager.mitigate(defect_id),
+        f"Defect {defect_id} not found or not mitigatable",
     )
 
 
-@router.post("/issues/{issue_id}/resolve", operation_id="resolveIssue")
-async def resolve_issue(exercise_id: int, issue_id: str) -> dict:
+@router.post("/defects/{defect_id}/resolve", operation_id="resolveDefect")
+async def resolve_defect(exercise_id: int, defect_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
     return _or_404(
-        engine.issue_manager.resolve(issue_id, pt),
-        f"Issue {issue_id} not found or not resolvable",
+        engine.defect_manager.resolve(defect_id, pt),
+        f"Defect {defect_id} not found or not resolvable",
     )
 
 
-@router.post("/issues/{issue_id}/release", operation_id="releaseIssue")
-async def release_issue(exercise_id: int, issue_id: str) -> dict:
+@router.post("/defects/{defect_id}/release", operation_id="releaseDefect")
+async def release_defect(exercise_id: int, defect_id: str) -> dict:
     return _or_404(
-        _get_engine(exercise_id).issue_manager.release_to_players(issue_id),
-        f"Issue {issue_id} not found or not releasable",
+        _get_engine(exercise_id).defect_manager.release_to_players(defect_id),
+        f"Defect {defect_id} not found or not releasable",
     )
 
 

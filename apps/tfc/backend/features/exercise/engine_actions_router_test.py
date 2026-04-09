@@ -1,22 +1,22 @@
-"""Tests for engine entity action endpoints (P2: pause/resume/delay/skip events, session code)."""
+"""Tests for engine entity action endpoints (P2: pause/resume/delay/skip injects, session code)."""
 from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
 
-from engine.event_scheduler import EventType, ScheduledEvent
+from engine.inject_scheduler import InjectType, ScheduledInject
 from engine.exercise_engine import EngineConfig
 from engine.session_store import session_store
 
 
-def _config(exercise_id: int = 1, events: list | None = None) -> EngineConfig:
+def _config(exercise_id: int = 1, injects: list | None = None) -> EngineConfig:
     return EngineConfig(
         exercise_id=exercise_id,
         title="Test",
-        events=events or [
-            ScheduledEvent(
+        injects=injects or [
+            ScheduledInject(
                 id="e1", title="E1", description="",
-                event_type=EventType.OPERATIONAL,
+                inject_type=InjectType.OPERATIONAL,
                 scheduled_pt_ms=0.0, duration_ms=99999.0,
             ),
         ],
@@ -35,15 +35,15 @@ def _cleanup_sessions():
 
 
 def _start_engine(exercise_id: int = 1) -> None:
-    """Create an engine with a running event for testing."""
+    """Create an engine with a running inject for testing."""
     from unittest.mock import patch
     config = _config(exercise_id)
     engine = session_store.create(config)
     with patch("engine.time_manager._now_ms", return_value=0.0):
         engine._time.start()
         engine._time._paused = False
-        engine._events.tick(0.0)  # -> pending
-        engine._events.tick(0.0)  # -> running
+        engine._injects.tick(0.0)  # -> pending
+        engine._injects.tick(0.0)  # -> running
     engine._phase = engine._phase.__class__("running")
 
 
@@ -51,66 +51,66 @@ def _start_engine(exercise_id: int = 1) -> None:
 
 
 @pytest.mark.asyncio
-async def test_trigger_event_no_engine_404(client: AsyncClient) -> None:
-    resp = await client.post("/api/exercises/9999/engine/events/e1/trigger")
+async def test_trigger_inject_no_engine_404(client: AsyncClient) -> None:
+    resp = await client.post("/api/exercises/9999/engine/injects/e1/trigger")
     assert resp.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_pause_event_no_engine_404(client: AsyncClient) -> None:
-    resp = await client.post("/api/exercises/9999/engine/events/e1/pause")
+async def test_pause_inject_no_engine_404(client: AsyncClient) -> None:
+    resp = await client.post("/api/exercises/9999/engine/injects/e1/pause")
     assert resp.status_code == 404
 
 
-# ── Event pause/resume ───────────────────────────────────────────────────
+# ── Inject pause/resume ───────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_pause_running_event(client: AsyncClient) -> None:
+async def test_pause_running_inject(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _start_engine(eid)
-    resp = await client.post(f"/api/exercises/{eid}/engine/events/e1/pause")
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/pause")
     assert resp.status_code == 200
     assert resp.json()["action"] == "paused"
 
 
 @pytest.mark.asyncio
-async def test_resume_paused_event(client: AsyncClient) -> None:
+async def test_resume_paused_inject(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _start_engine(eid)
-    await client.post(f"/api/exercises/{eid}/engine/events/e1/pause")
-    resp = await client.post(f"/api/exercises/{eid}/engine/events/e1/resume")
+    await client.post(f"/api/exercises/{eid}/engine/injects/e1/pause")
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/resume")
     assert resp.status_code == 200
     assert resp.json()["action"] == "resumed"
 
 
 @pytest.mark.asyncio
-async def test_pause_non_running_event_404(client: AsyncClient) -> None:
+async def test_pause_non_running_inject_404(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _start_engine(eid)
     # e1 is running, pause it first
-    await client.post(f"/api/exercises/{eid}/engine/events/e1/pause")
-    # pausing a paused event should 404
-    resp = await client.post(f"/api/exercises/{eid}/engine/events/e1/pause")
+    await client.post(f"/api/exercises/{eid}/engine/injects/e1/pause")
+    # pausing a paused inject should 404
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/pause")
     assert resp.status_code == 404
 
 
-# ── Event delay/skip ─────────────────────────────────────────────────────
+# ── Inject delay/skip ─────────────────────────────────────────────────────
 
 
 @pytest.mark.asyncio
-async def test_delay_scheduled_event(client: AsyncClient) -> None:
+async def test_delay_scheduled_inject(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     config = EngineConfig(
         exercise_id=eid, title="T",
-        events=[ScheduledEvent(
+        injects=[ScheduledInject(
             id="e2", title="E2", description="",
-            event_type=EventType.OPERATIONAL, scheduled_pt_ms=9999.0,
+            inject_type=InjectType.OPERATIONAL, scheduled_pt_ms=9999.0,
         )],
     )
     session_store.create(config)
     resp = await client.post(
-        f"/api/exercises/{eid}/engine/events/e2/delay",
+        f"/api/exercises/{eid}/engine/injects/e2/delay",
         json={"delay_ms": 5000},
     )
     assert resp.status_code == 200
@@ -118,20 +118,20 @@ async def test_delay_scheduled_event(client: AsyncClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_skip_event(client: AsyncClient) -> None:
+async def test_skip_inject(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _start_engine(eid)
-    resp = await client.post(f"/api/exercises/{eid}/engine/events/e1/skip")
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/skip")
     assert resp.status_code == 200
     assert resp.json()["action"] == "skipped"
 
 
 @pytest.mark.asyncio
-async def test_skip_completed_event_404(client: AsyncClient) -> None:
+async def test_skip_completed_inject_404(client: AsyncClient) -> None:
     eid = await _create_exercise(client)
     _start_engine(eid)
-    await client.post(f"/api/exercises/{eid}/engine/events/e1/complete")
-    resp = await client.post(f"/api/exercises/{eid}/engine/events/e1/skip")
+    await client.post(f"/api/exercises/{eid}/engine/injects/e1/complete")
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/skip")
     assert resp.status_code == 404
 
 
