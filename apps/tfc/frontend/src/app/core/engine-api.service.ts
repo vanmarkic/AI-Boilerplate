@@ -10,11 +10,11 @@ export interface TimeSnapshot {
   paused: boolean;
 }
 
-export interface EventSnapshot {
+export interface InjectSnapshot {
   id: string;
   title: string;
   description: string;
-  event_type: string;
+  inject_type: string;
   scheduled_pt_ms: number;
   duration_ms: number | null;
   dependencies: string[];
@@ -23,12 +23,12 @@ export interface EventSnapshot {
   completed_at_pt_ms: number | null;
 }
 
-export interface IssueSnapshot {
+export interface DefectSnapshot {
   id: string;
   title: string;
   description: string;
   trigger_mode: string;
-  auto_resolve_ms: number;
+  auto_resolve_pt_ms: number;
   lifecycle: string;
   activated_at_pt_ms: number | null;
   resolved_at_pt_ms: number | null;
@@ -40,8 +40,8 @@ export interface EngineSnapshot {
   title: string;
   phase: string;
   time: TimeSnapshot;
-  events: EventSnapshot[];
-  issues: IssueSnapshot[];
+  injects: InjectSnapshot[];
+  defects: DefectSnapshot[];
 }
 
 export interface PhaseChange {
@@ -100,79 +100,79 @@ export class EngineApiService {
     );
   }
 
-  triggerEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+  triggerInject(exerciseId: number, injectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/trigger`,
+      `${this.base}/api/exercises/${exerciseId}/engine/injects/${injectId}/trigger`,
       {},
     );
   }
 
-  cancelEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+  cancelInject(exerciseId: number, injectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/cancel`,
+      `${this.base}/api/exercises/${exerciseId}/engine/injects/${injectId}/cancel`,
       {},
     );
   }
 
-  completeEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+  completeInject(exerciseId: number, injectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/complete`,
+      `${this.base}/api/exercises/${exerciseId}/engine/injects/${injectId}/complete`,
       {},
     );
   }
 
-  pauseEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+  pauseInject(exerciseId: number, injectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/pause`,
+      `${this.base}/api/exercises/${exerciseId}/engine/injects/${injectId}/pause`,
       {},
     );
   }
 
-  resumeEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+  resumeInject(exerciseId: number, injectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/resume`,
+      `${this.base}/api/exercises/${exerciseId}/engine/injects/${injectId}/resume`,
       {},
     );
   }
 
-  delayEvent(exerciseId: number, eventId: string, delayMs: number): Observable<Record<string, unknown>> {
+  delayInject(exerciseId: number, injectId: string, delayMs: number): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/delay`,
+      `${this.base}/api/exercises/${exerciseId}/engine/injects/${injectId}/delay`,
       { delay_ms: delayMs },
     );
   }
 
-  skipEvent(exerciseId: number, eventId: string): Observable<Record<string, unknown>> {
+  skipInject(exerciseId: number, injectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/events/${eventId}/skip`,
+      `${this.base}/api/exercises/${exerciseId}/engine/injects/${injectId}/skip`,
       {},
     );
   }
 
-  activateIssue(exerciseId: number, issueId: string): Observable<Record<string, unknown>> {
+  activateDefect(exerciseId: number, defectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/issues/${issueId}/activate`,
+      `${this.base}/api/exercises/${exerciseId}/engine/defects/${defectId}/activate`,
       {},
     );
   }
 
-  mitigateIssue(exerciseId: number, issueId: string): Observable<Record<string, unknown>> {
+  mitigateDefect(exerciseId: number, defectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/issues/${issueId}/mitigate`,
+      `${this.base}/api/exercises/${exerciseId}/engine/defects/${defectId}/mitigate`,
       {},
     );
   }
 
-  resolveIssue(exerciseId: number, issueId: string): Observable<Record<string, unknown>> {
+  resolveDefect(exerciseId: number, defectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/issues/${issueId}/resolve`,
+      `${this.base}/api/exercises/${exerciseId}/engine/defects/${defectId}/resolve`,
       {},
     );
   }
 
-  releaseIssue(exerciseId: number, issueId: string): Observable<Record<string, unknown>> {
+  releaseDefect(exerciseId: number, defectId: string): Observable<Record<string, unknown>> {
     return this.http.post<Record<string, unknown>>(
-      `${this.base}/api/exercises/${exerciseId}/engine/issues/${issueId}/release`,
+      `${this.base}/api/exercises/${exerciseId}/engine/defects/${defectId}/release`,
       {},
     );
   }

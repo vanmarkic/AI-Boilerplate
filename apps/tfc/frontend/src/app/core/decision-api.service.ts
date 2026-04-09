@@ -11,8 +11,8 @@ export interface DecisionOption {
 
 export interface ActiveDecision {
   id: string;
-  event_id: string | null;
-  issue_id: string | null;
+  inject_id: string | null;
+  defect_id: string | null;
   title: string;
   description: string;
   question_type: string;
@@ -44,7 +44,7 @@ export interface DecisionResponseItem {
 export interface DecisionDetail {
   id: number;
   exercise_id: number;
-  issue_id: string;
+  defect_id: string;
   title: string;
   description: string;
   question_type: string;

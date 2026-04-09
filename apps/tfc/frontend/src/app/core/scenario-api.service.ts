@@ -3,24 +3,24 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from './environment';
 
-export interface ScenarioEventDef {
+export interface ScenarioInjectDef {
   id: string;
   title: string;
   description: string;
-  event_type: string;
+  inject_type: string;
   scheduled_pt_ms: number;
   duration_ms: number | null;
   dependencies: string[];
-  triggered_issues: string[];
+  triggered_defects: string[];
 }
 
-export interface ScenarioIssueDef {
+export interface ScenarioDefectDef {
   id: string;
   title: string;
   description: string;
   trigger_mode: string;
   trigger_time_pt_ms: number | null;
-  trigger_event_id: string | null;
+  trigger_inject_id: string | null;
   auto_resolve_ms: number;
 }
 
@@ -42,8 +42,8 @@ export interface DecisionTemplateDef {
 
 export interface ScenarioContent {
   phases: { id: string; title: string; description: string; duration_ms: number | null; events: string[] }[];
-  events: ScenarioEventDef[];
-  issues: ScenarioIssueDef[];
+  injects: ScenarioInjectDef[];
+  defects: ScenarioDefectDef[];
   decision_templates: DecisionTemplateDef[];
   default_time_factor: number;
   briefing?: string;
@@ -55,7 +55,6 @@ export interface ScenarioResponse {
   id: number;
   title: string;
   description: string;
-  domain_id: number | null;
   content: ScenarioContent | null;
   version: number;
   created_at: string;
@@ -65,7 +64,6 @@ export interface ScenarioResponse {
 export interface CreateScenarioRequest {
   title: string;
   description?: string;
-  domain_id?: number | null;
   content?: ScenarioContent | null;
 }
 
