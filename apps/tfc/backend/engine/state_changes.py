@@ -16,17 +16,17 @@ class PhaseChange(TypedDict):
     time: dict[str, Any]
 
 
-class EventChange(TypedDict):
-    type: str          # "event_change"
-    event_id: str
+class InjectChange(TypedDict):
+    type: str          # "inject_change"
+    inject_id: str
     action: str        # activated | started | completed | force_triggered | cancelled
     lifecycle: str     # scheduled | pending | running | paused | completed | cancelled
     title: str
 
 
-class IssueChange(TypedDict):
-    type: str          # "issue_change"
-    issue_id: str
+class DefectChange(TypedDict):
+    type: str          # "defect_change"
+    defect_id: str
     action: str        # activated | mitigated | resolved | auto_resolve_expired
     lifecycle: str     # inactive | active | mitigated | resolved
     title: str
@@ -55,4 +55,4 @@ class SpeedChange(TypedDict):
 
 
 # Union of all change types for type-narrowing on `change["type"]`.
-StateChange = PhaseChange | EventChange | IssueChange | DecisionOpened | DecisionClosed | SpeedChange
+StateChange = PhaseChange | InjectChange | DefectChange | DecisionOpened | DecisionClosed | SpeedChange
