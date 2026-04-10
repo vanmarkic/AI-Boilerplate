@@ -28,12 +28,23 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
                     <option value="event-based">Event-based</option>
                   </select>
                 </div>
-                <ui-input id="edit-def-ar" label="Auto-resolve (ms)"
-                  [value]="'' + editAutoResolve()" (valueChange)="editAutoResolve.set(+$event)" />
+                <ui-input id="edit-def-trigger-inj" label="Linked Inject ID"
+                  [value]="editTriggerInjectId()"
+                  (valueChange)="editTriggerInjectId.set($event)" />
               </div>
               <div class="flex gap-sm">
-                <button uiButton variant="default" size="sm" (click)="save(defect.id)">Save</button>
-                <button uiButton variant="outline" size="sm" (click)="editingId.set(null)">Cancel</button>
+                <ui-input id="edit-def-ar-pt" label="ETBOL (Play Time, ms)"
+                  [value]="'' + editAutoResolvePt()"
+                  (valueChange)="editAutoResolvePt.set(+$event)" />
+                <ui-input id="edit-def-ar-rt" label="ETBOL (Real Time, ms)"
+                  [value]="'' + editAutoResolveRt()"
+                  (valueChange)="editAutoResolveRt.set(+$event)" />
+              </div>
+              <div class="flex gap-sm">
+                <button uiButton variant="default" size="sm"
+                  (click)="save(defect.id)">Save</button>
+                <button uiButton variant="outline" size="sm"
+                  (click)="editingId.set(null)">Cancel</button>
               </div>
             </div>
           } @else {
@@ -41,14 +52,20 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
               <div>
                 <span class="text-sm font-medium">{{ defect.title }}</span>
                 <ui-badge variant="secondary">{{ defect.trigger_mode }}</ui-badge>
-                @if (defect.auto_resolve_ms > 0) {
+                @if (defect.auto_resolve_pt_ms > 0) {
                   <span class="text-xs text-muted-foreground ml-sm">
-                    auto-resolve: {{ defect.auto_resolve_ms / 1000 }}s
+                    ETBOL PT: {{ defect.auto_resolve_pt_ms / 1000 }}s
+                  </span>
+                }
+                @if ((defect.auto_resolve_rt_ms ?? 0) > 0) {
+                  <span class="text-xs text-muted-foreground ml-sm">
+                    RT: {{ defect.auto_resolve_rt_ms! / 1000 }}s
                   </span>
                 }
               </div>
               <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm" (click)="edit(defect)">Edit</button>
+                <button uiButton variant="outline" size="sm"
+                  (click)="edit(defect)">Edit</button>
                 <button uiButton variant="destructive" size="sm"
                   (click)="store.removeDefect(defect.id)">Remove</button>
               </div>
@@ -83,7 +100,9 @@ export class ScenarioDefectEditorComponent {
   protected readonly editTitle = signal('');
   protected readonly editDesc = signal('');
   protected readonly editTrigger = signal('manual');
-  protected readonly editAutoResolve = signal(0);
+  protected readonly editTriggerInjectId = signal('');
+  protected readonly editAutoResolvePt = signal(0);
+  protected readonly editAutoResolveRt = signal(0);
 
   protected sel(event: Event): string {
     return (event.target as HTMLSelectElement).value;
@@ -99,7 +118,8 @@ export class ScenarioDefectEditorComponent {
       trigger_mode: this.newTrigger(),
       trigger_time_pt_ms: null,
       trigger_inject_id: null,
-      auto_resolve_ms: 0,
+      auto_resolve_pt_ms: 0,
+      auto_resolve_rt_ms: 0,
     });
     this.newTitle.set('');
   }
@@ -109,15 +129,20 @@ export class ScenarioDefectEditorComponent {
     this.editTitle.set(defect.title);
     this.editDesc.set(defect.description);
     this.editTrigger.set(defect.trigger_mode);
-    this.editAutoResolve.set(defect.auto_resolve_ms);
+    this.editTriggerInjectId.set(defect.trigger_inject_id ?? '');
+    this.editAutoResolvePt.set(defect.auto_resolve_pt_ms);
+    this.editAutoResolveRt.set(defect.auto_resolve_rt_ms ?? 0);
   }
 
   protected save(defectId: string): void {
+    const triggerInjectId = this.editTriggerInjectId().trim() || null;
     this.store.updateDefect(defectId, {
       title: this.editTitle(),
       description: this.editDesc(),
       trigger_mode: this.editTrigger(),
-      auto_resolve_ms: this.editAutoResolve(),
+      trigger_inject_id: triggerInjectId,
+      auto_resolve_pt_ms: this.editAutoResolvePt(),
+      auto_resolve_rt_ms: this.editAutoResolveRt(),
     });
     this.editingId.set(null);
   }

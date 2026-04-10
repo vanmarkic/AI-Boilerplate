@@ -10,9 +10,9 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
   imports: [FormsModule, CardComponent, ButtonDirective, InputComponent, BadgeComponent],
   template: `
     <ui-card title="Injects">
-      @for (inject of store.content().injects; track inject.id) {
+      @for (injectDef of store.content().injects; track injectDef.id) {
         <div class="flex flex-col gap-xs p-sm border-b">
-          @if (editingId() === inject.id) {
+          @if (editingId() === injectDef.id) {
             <div class="flex flex-col gap-xs">
               <ui-input id="edit-inj-title" label="Title"
                 [value]="editTitle()" (valueChange)="editTitle.set($event)" />
@@ -28,29 +28,49 @@ import { ScenarioBuilderStore } from './scenario-builder.store';
                     <option value="decision">Decision</option>
                   </select>
                 </div>
+                <div class="flex flex-col gap-xs" style="flex:1">
+                  <label class="text-xs">Execution Mode</label>
+                  <select class="input-base" [value]="editExecMode()"
+                    (change)="editExecMode.set(sel($event))">
+                    <option value="automatic">Automatic</option>
+                    <option value="manual">Manual</option>
+                  </select>
+                </div>
+              </div>
+              <div class="flex gap-sm">
                 <ui-input id="edit-inj-pt" label="PT (ms)"
                   [value]="'' + editPt()" (valueChange)="editPt.set(+$event)" />
                 <ui-input id="edit-inj-dur" label="Duration (ms)"
-                  [value]="'' + (editDur() ?? '')" (valueChange)="editDur.set($event ? +$event : null)" />
+                  [value]="'' + (editDur() ?? '')"
+                  (valueChange)="editDur.set($event ? +$event : null)" />
               </div>
+              <ui-input id="edit-inj-deps" label="Dependencies (comma-sep inject IDs)"
+                [value]="editDeps()" (valueChange)="editDeps.set($event)" />
+              <ui-input id="edit-inj-roles" label="Target Roles (comma-sep)"
+                [value]="editRoles()" (valueChange)="editRoles.set($event)" />
               <div class="flex gap-sm">
-                <button uiButton variant="default" size="sm" (click)="save(inject.id)">Save</button>
-                <button uiButton variant="outline" size="sm" (click)="editingId.set(null)">Cancel</button>
+                <button uiButton variant="default" size="sm" (click)="save(injectDef.id)">Save</button>
+                <button uiButton variant="outline" size="sm"
+                  (click)="editingId.set(null)">Cancel</button>
               </div>
             </div>
           } @else {
             <div class="flex items-center justify-between">
               <div>
-                <span class="text-sm font-medium">{{ inject.title }}</span>
-                <ui-badge variant="secondary">{{ inject.inject_type }}</ui-badge>
+                <span class="text-sm font-medium">{{ injectDef.title }}</span>
+                <ui-badge variant="secondary">{{ injectDef.inject_type }}</ui-badge>
+                @if (injectDef.execution_mode === 'manual') {
+                  <ui-badge variant="outline">manual</ui-badge>
+                }
                 <span class="text-xs text-muted-foreground ml-sm">
-                  @ {{ inject.scheduled_pt_ms / 1000 }}s
+                  @ {{ injectDef.scheduled_pt_ms / 1000 }}s
                 </span>
               </div>
               <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm" (click)="edit(inject)">Edit</button>
+                <button uiButton variant="outline" size="sm"
+                  (click)="edit(injectDef)">Edit</button>
                 <button uiButton variant="destructive" size="sm"
-                  (click)="store.removeInject(inject.id)">Remove</button>
+                  (click)="store.removeInject(injectDef.id)">Remove</button>
               </div>
             </div>
           }
@@ -86,8 +106,11 @@ export class ScenarioInjectEditorComponent {
   protected readonly editTitle = signal('');
   protected readonly editDesc = signal('');
   protected readonly editType = signal('operational');
+  protected readonly editExecMode = signal('automatic');
   protected readonly editPt = signal(0);
   protected readonly editDur = signal<number | null>(null);
+  protected readonly editDeps = signal('');
+  protected readonly editRoles = signal('');
 
   protected sel(event: Event): string {
     return (event.target as HTMLSelectElement).value;
@@ -106,6 +129,7 @@ export class ScenarioInjectEditorComponent {
       duration_ms: null,
       dependencies: [],
       triggered_defects: [],
+      execution_mode: 'automatic',
     });
     this.newTitle.set('');
     this.newTime.set('');
@@ -116,17 +140,25 @@ export class ScenarioInjectEditorComponent {
     this.editTitle.set(injectDef.title);
     this.editDesc.set(injectDef.description);
     this.editType.set(injectDef.inject_type);
+    this.editExecMode.set(injectDef.execution_mode ?? 'automatic');
     this.editPt.set(injectDef.scheduled_pt_ms);
     this.editDur.set(injectDef.duration_ms);
+    this.editDeps.set((injectDef.dependencies ?? []).join(', '));
+    this.editRoles.set((injectDef.target_roles ?? []).join(', '));
   }
 
   protected save(injectId: string): void {
+    const deps = this.editDeps().split(',').map((s) => s.trim()).filter(Boolean);
+    const roles = this.editRoles().split(',').map((s) => s.trim()).filter(Boolean);
     this.store.updateInject(injectId, {
       title: this.editTitle(),
       description: this.editDesc(),
       inject_type: this.editType(),
+      execution_mode: this.editExecMode(),
       scheduled_pt_ms: this.editPt(),
       duration_ms: this.editDur(),
+      dependencies: deps,
+      target_roles: roles.length ? roles : undefined,
     });
     this.editingId.set(null);
   }

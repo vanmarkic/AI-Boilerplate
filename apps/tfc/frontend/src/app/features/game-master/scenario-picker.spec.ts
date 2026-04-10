@@ -23,7 +23,7 @@ describe('ScenarioPickerComponent', () => {
           { id: 'e2', title: 'Evacuation', description: '', inject_type: 'operational', scheduled_pt_ms: 5000, duration_ms: null, dependencies: [], triggered_defects: [] },
         ],
         defects: [
-          { id: 'i1', title: 'Blocked Exit', description: '', trigger_mode: 'manual', trigger_time_pt_ms: null, trigger_inject_id: null, auto_resolve_ms: 0 },
+          { id: 'i1', title: 'Blocked Exit', description: '', trigger_mode: 'manual', trigger_time_pt_ms: null, trigger_inject_id: null, auto_resolve_pt_ms: 0 },
         ],
         decision_templates: [],
         default_time_factor: 2.0,

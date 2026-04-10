@@ -12,6 +12,8 @@ export interface ScenarioInjectDef {
   duration_ms: number | null;
   dependencies: string[];
   triggered_defects: string[];
+  execution_mode?: string;
+  target_roles?: string[];
 }
 
 export interface ScenarioDefectDef {
@@ -21,7 +23,8 @@ export interface ScenarioDefectDef {
   trigger_mode: string;
   trigger_time_pt_ms: number | null;
   trigger_inject_id: string | null;
-  auto_resolve_ms: number;
+  auto_resolve_pt_ms: number;
+  auto_resolve_rt_ms?: number;
 }
 
 export interface DecisionOptionDef {
@@ -34,10 +37,12 @@ export interface DecisionTemplateDef {
   id: string;
   title: string;
   description: string;
-  issue_id: string;
+  defect_id: string | null;
   question_type: string;
   options: DecisionOptionDef[];
   completion_mode: string;
+  target_roles?: string[];
+  timeout_ms?: number;
 }
 
 export interface ScenarioContent {
