@@ -8,8 +8,6 @@ Review the following code against the AI Boilerplate project rules.
 Check each category and report violations with file path and line number:
 
 ### Universal
-- [ ] Any file > 350 lines? (> 150 for Angular UI primitives in `shared/ui/`, > 500 for test files)
-- [ ] Barrel exports (`index.ts` re-exporting multiple things)?
 - [ ] Any real auth logic (must remain a stub)?
 - [ ] Missing `manifest.yaml` or missing `tier` field?
 

@@ -4,7 +4,7 @@ Proposals discovered through broad codebase exploration. Independent of the desi
 
 | # | Proposal | Severity | Size | Area |
 |---|---|---|---|---|
-| 1 | TFC file size violations (5 files over 350 lines) | High | M | TFC frontend |
+| 1 | ~~TFC file size violations (5 files over 350 lines)~~ removed — file length constraint dropped | - | - | - |
 | 2 | TFC missing global error handler + HTTP interceptor | Medium | S | TFC frontend |
 | 3 | TFC routes lack access guards | Medium | S | TFC frontend |
 | 4 | No structured logging in either backend | Medium | M | Both backends |

@@ -1535,7 +1535,7 @@ Expected: FAIL
 
 Key implementation detail: Title and Description register their IDs with the dialog context on mount and deregister on unmount, so Content can conditionally set the ARIA attributes.
 
-Reference spec lines 224-273 for the full behavior contract. Keep under 350 lines.
+Reference spec lines 224-273 for the full behavior contract.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
@@ -1592,7 +1592,7 @@ Expected: FAIL
 
 Internal design: Root provides context with `{ value, onValueChange, orientation, activationMode, registerTrigger, registerContent }`. Triggers register on mount to get their index for roving focus. Content checks context value to decide whether to render.
 
-Reference spec lines 275-319 for the full behavior contract. Keep under 350 lines.
+Reference spec lines 275-319 for the full behavior contract.
 
 - [ ] **Step 4: Run tests to verify they pass**
 
@@ -1649,7 +1649,7 @@ Expected: FAIL
 
 `src/accordion/accordion.tsx` — implement Root, Item, Header, Trigger, Content. Root manages open items using `useControllableState` (string for single, string[] for multiple). Use `useRovingFocus` with vertical orientation for keyboard nav between triggers across items.
 
-If the file approaches 350 lines, split into `accordion-root.tsx` (Root + context) and `accordion-item.tsx` (Item + Header + Trigger + Content).
+If the file grows large, consider splitting into `accordion-root.tsx` (Root + context) and `accordion-item.tsx` (Item + Header + Trigger + Content).
 
 Reference spec lines 352-406 for the full behavior contract.
 

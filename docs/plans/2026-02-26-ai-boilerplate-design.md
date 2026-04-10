@@ -8,13 +8,11 @@
 
 ## Design Principles
 
-1. **Files under 350 lines** — every file fits in a small LLM's context window
-2. **Feature-sliced vertical architecture** — self-contained modules, no cross-cutting jumps
-3. **Contract-first (OpenAPI)** — single source of truth, auto-generated types
-4. **Strict types everywhere** — TypeScript strict mode, Python type hints on all functions
-5. **No barrel exports** — direct imports only, traceable paths
-6. **Colocated TDD** — failing tests ship with every scaffold
-7. **AGENTS.md convention files** — ~70 rules across 3 levels, within 14B model capacity
+1. **Feature-sliced vertical architecture** — self-contained modules, no cross-cutting jumps
+2. **Contract-first (OpenAPI)** — single source of truth, auto-generated types
+3. **Strict types everywhere** — TypeScript strict mode, Python type hints on all functions
+4. **Colocated TDD** — failing tests ship with every scaffold
+5. **AGENTS.md convention files** — ~70 rules across 3 levels, within 14B model capacity
 8. **Metadata-rich features** — manifest.yaml per feature for 80x context compression
 9. **Automated governance** — architecture linter enforces layer boundaries in CI
 
@@ -122,7 +120,7 @@ ai-boilerplate/
 
 ## Backend Architecture (FastAPI + Pragmatic DDD)
 
-### Feature Module Pattern (6 files per feature, all under 350 lines)
+### Feature Module Pattern (6 files per feature)
 
 | File | Responsibility | Imports from |
 |------|---------------|-------------|
@@ -204,7 +202,6 @@ Endpoints use: `user: CurrentUser = Depends(get_current_user)`
 - **`inject()` function** — NEVER constructor injection
 - **`ChangeDetectionStrategy.OnPush`** — on EVERY component
 - **Lazy-loaded routes** — each feature loaded independently
-- **Direct imports** — no barrel exports (except `shared/ui/` public API)
 - **Inline templates** for components ≤30 lines of template
 
 ### Stale Knowledge Corrections (critical for small LLMs)

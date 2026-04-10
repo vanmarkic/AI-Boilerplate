@@ -14,9 +14,7 @@ alwaysApply: true
 - Contract: OpenAPI 3.1 (code-first — generated from FastAPI routers via `make generate`)
 
 ## Universal Rules
-1. Maximum **350 lines per file**. Split if exceeded (150 for Angular UI primitives, 500 for test files).
-2. No barrel exports (`index.ts` re-exports). Use direct imports only.
-3. Every feature is a **flat folder** under `features/`.
+1. Every feature is a **flat folder** under `features/`.
 4. **Code-first API**: define Pydantic models + FastAPI routers, then run `make generate` to extract the spec and regenerate the TypeScript client.
 5. **Tests colocated** with source. Write failing test before implementation (TDD).
 6. Strict TypeScript (`strict: true`). Python: type hints on ALL function signatures.

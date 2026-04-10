@@ -22,9 +22,7 @@ This file describes HOW to write code (conventions, architecture, constraints).
 Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 
 ## Universal Rules
-1. Maximum 350 lines per file (500 for test files). Split if exceeded.
-2. No barrel exports (index.ts re-exports). Use direct imports.
-3. Every feature is a flat folder under `features/`.
+1. Every feature is a flat folder under `features/`.
 4. API contract is code-first: define Pydantic models + FastAPI routers, then run `make generate` to extract the spec and regenerate the TypeScript client.
 5. Tests colocated with source files. Write failing test before implementation.
 6. Use strict TypeScript (`strict: true`). Use Python type hints on all functions.
@@ -37,7 +35,6 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 - Do NOT write CSS in Angular component `styles` arrays — add styles to `packages/design-system/components.css` instead.
 - Do NOT hardcode colors, spacing, or font sizes — use design tokens (`var(--color-primary)`, `var(--spacing-md)`, etc.).
 - Do NOT create a feature without a `manifest.yaml`.
-- Do NOT use barrel exports (`index.ts` re-exports).
 - Do NOT modify the database schema without an Alembic migration.
 - Do NOT use `any` in TypeScript or untyped signatures in Python.
 - Do NOT bypass Keycloak auth — all protected endpoints must use `Depends(get_current_user)`.

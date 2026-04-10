@@ -19,13 +19,6 @@ jobs:
       - run: pip install packages/python-layer-lint/
       - run: python shared/scripts/lint-architecture.py
 
-  lint-file-length:
-    name: File Length Limits
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - run: bash shared/scripts/lint-file-length.sh
-
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest

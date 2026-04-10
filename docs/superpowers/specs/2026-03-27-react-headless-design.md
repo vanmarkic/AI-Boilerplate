@@ -79,7 +79,7 @@ packages/react-headless/
 
 ## Public API
 
-The top-level `src/index.ts` re-exports all public symbols. This is an intentional exception to the project's "no barrel exports" rule — library packages require a single entry point for `package.json` `"exports"`. The same pattern is used by `@aspect/react-ui`. No barrel exports exist inside subdirectories.
+The top-level `src/index.ts` re-exports all public symbols — library packages require a single entry point for `package.json` `"exports"`. The same pattern is used by `@aspect/react-ui`.
 
 ```ts
 // Compound components (primary API)
@@ -403,7 +403,7 @@ interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
 
 **State attributes:** `data-state="open" | "closed"`, `data-disabled`, and `aria-disabled` on all sub-components for CSS targeting and screen reader support.
 
-**File size note:** Accordion has the most complex state management (single/multiple discriminated union, roving focus, disabled items). If `accordion.tsx` approaches 350 lines, split into `accordion-root.tsx` (Root + context) and `accordion-item.tsx` (Item + Header + Trigger + Content).
+**File size note:** Accordion has the most complex state management (single/multiple discriminated union, roving focus, disabled items). If `accordion.tsx` grows large, consider splitting into `accordion-root.tsx` (Root + context) and `accordion-item.tsx` (Item + Header + Trigger + Content).
 
 ## Testing Strategy
 
@@ -620,6 +620,5 @@ The current CSS uses `[open]` which targets the native `<details open>` attribut
 - No animation logic (consumers use `data-state` + CSS transitions)
 - No SSR support (not needed — frontend apps are SPAs)
 - No replacement for `@tanstack/react-table` (it already follows the headless pattern)
-- No barrel exports inside subdirectories (per project conventions)
 - No iOS Safari scroll lock workaround (initial scope — can be added later)
 - No `forwardRef` — uses React 19's ref-as-prop throughout

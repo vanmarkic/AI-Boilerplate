@@ -10,7 +10,7 @@
 
 **Design spec:** `docs/superpowers/specs/2026-04-07-tfc-excon-default-mode-design.md`
 
-**Conventions:** Read `apps/tfc/AGENTS.md` before any code change. Engine must remain pure Python (no DB/HTTP). Max 350 lines per file (500 for tests).
+**Conventions:** Read `apps/tfc/AGENTS.md` before any code change. Engine must remain pure Python (no DB/HTTP).
 
 ---
 

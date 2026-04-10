@@ -2,13 +2,11 @@
 
 > **Superseded (client):** References to `@hey-api/client-fetch`, `firstValueFrom()`, and CLI-based generation in this plan are outdated. The project now uses `@hey-api/client-angular` (bundled in `@hey-api/openapi-ts ^0.93.0`) with `frontend/openapi-ts.config.ts`. Generated functions return Promises — no `firstValueFrom()` needed.
 
-> **Superseded (file-length limit):** References to "250 lines" in this plan are outdated. The limit was raised to **350 lines** (500 for test files) based on research showing scattered small files degrade large-LLM performance ("Lost in the Middle", Context Rot). 350 lines (~4,900 tokens) still fits comfortably in a 32K local-model context.
-
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
 **Goal:** Build a full-stack monorepo boilerplate (Angular 18+ / FastAPI / PostgreSQL) optimized for small local LLM coding agents (7B-14B).
 
-**Architecture:** Feature-sliced pragmatic DDD with OpenAPI contract-first design. Each backend feature is a flat 6-file module (model, schema, repository, service, router, test). Each frontend feature is a 5-file standalone Angular module with signals. AGENTS.md files at 3 levels guide LLM behavior. All files under 250 lines.
+**Architecture:** Feature-sliced pragmatic DDD with OpenAPI contract-first design. Each backend feature is a flat 6-file module (model, schema, repository, service, router, test). Each frontend feature is a 5-file standalone Angular module with signals. AGENTS.md files at 3 levels guide LLM behavior.
 
 **Tech Stack:** Angular 18+, FastAPI, SQLAlchemy 2.0, Alembic, PostgreSQL 17, Docker Compose, GitHub Actions, Ruff, ESLint
 
@@ -88,9 +86,7 @@ coverage/
 Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 
 ## Universal Rules
-1. Maximum 250 lines per file. Split if exceeded.
-2. No barrel exports (index.ts re-exports). Use direct imports.
-3. Every feature is a flat folder under `features/`.
+1. Every feature is a flat folder under `features/`.
 4. API contract lives in `shared/openapi.yaml`. Modify spec first, then implement.
 5. Tests colocated with source files. Write failing test before implementation.
 6. Use strict TypeScript (`strict: true`). Use Python type hints on all functions.
@@ -1613,12 +1609,9 @@ Standalone components with Angular signals. Feature-sliced modules. No NgModules
 ## File Organization
 10. Each feature is a folder under `src/app/features/`.
 11. Feature files: `component.ts`, `service.ts`, `types.ts`, `routes.ts`, `spec.ts`.
-12. No barrel exports (index.ts). Use direct imports.
-13. Maximum 250 lines per file.
 
 ## Imports
-14. No barrel imports. Import directly: `from './user-profile/user-profile.service'`.
-15. Shared UI components live in `src/app/shared/ui/`.
+14. Shared UI components live in `src/app/shared/ui/`.
 16. Auth utilities live in `src/app/shared/auth/`.
 17. Generated API client is read-only: `src/app/shared/api/generated/`.
 
@@ -2779,8 +2772,6 @@ protected readonly hostClasses = computed(() =>
 15. Each feature is a folder under `src/app/features/`.
 16. Feature files: component.ts, service.ts, types.ts, routes.ts, spec.ts.
 17. UI components in `src/app/shared/ui/` with colocated `.stories.ts`.
-18. No barrel exports except `shared/ui/` public API.
-19. Maximum 250 lines per file (150 for UI primitives).
 
 ## Testing
 20. Tests colocated as `component.spec.ts`.
@@ -2833,7 +2824,6 @@ Pragmatic DDD with feature-sliced modules. Each feature is a flat folder under `
 ## File Naming
 7. Feature files use underscores: `user_model.py`, `user_service.py`.
 8. Each feature folder has: model, schema, repository, service, router, test, manifest.yaml.
-9. Maximum 250 lines per file.
 
 ## FastAPI Conventions
 10. All routers mounted in `main.py` via `app.include_router()`.

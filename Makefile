@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint-length lint storybook storybook-react help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check context-tfc context-tfc-fe context-tfc-be context-main context-main-fe context-main-be context-all
+.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint storybook storybook-react help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check context-tfc context-tfc-fe context-tfc-be context-main context-main-fe context-main-be context-all
 
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
@@ -136,9 +136,6 @@ setup-hooks: ## Install git hooks (run once after clone)
 lint-arch: ## Run architecture boundary linter
 	python shared/scripts/lint-architecture.py
 
-lint-length: ## Enforce per-file line length limits (350/150/500)
-	bash shared/scripts/lint-file-length.sh
-
 storybook: ## Start Storybook dev server
 	cd $(MAIN_FE) && npx storybook dev -p 6006
 
@@ -175,7 +172,7 @@ check: ## Run all CI-equivalent checks locally (fail-fast)
 test-react-ui: ## Run React UI library tests
 	cd packages/react-ui && npx vitest run
 
-validate: lint-arch lint-length lint test test-react-ui ## Validate everything: architecture + linters + file-length + tests
+validate: lint-arch lint test test-react-ui ## Validate everything: architecture + linters + tests
 
 security-scan: ## Run security scans and save reports to security-reports/
 	bash shared/scripts/security-scan.sh

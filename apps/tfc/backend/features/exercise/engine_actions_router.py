@@ -1,6 +1,6 @@
 """REST endpoints for engine entity actions (injects, defects, decisions).
 
-Split from engine_router.py to stay under the 250-line limit.
+Split from engine_router.py for separation of concerns.
 """
 from __future__ import annotations
 

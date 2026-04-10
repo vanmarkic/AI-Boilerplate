@@ -2,7 +2,7 @@
 
 ## First Steps
 Before writing any code:
-1. Read the root `AGENTS.md` — all universal rules (250-line limit, strict types, no barrel exports, feature manifests, `make validate`) apply here.
+1. Read the root `AGENTS.md` — all universal rules (strict types, feature manifests, `make validate`) apply here.
 2. Read `backend/AGENTS.md` (coming from `apps/main/backend/AGENTS.md` conventions) and `frontend/AGENTS.md` (from `apps/main/frontend/AGENTS.md` conventions) for layer-specific rules — TFC follows the same patterns.
 
 ## What TFC Is

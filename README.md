@@ -2,7 +2,7 @@
 
 A full-stack monorepo (Angular 21 / FastAPI / PostgreSQL) architected to maximize productivity with small local LLM coding agents (7B–14B parameters).
 
-> **Philosophy:** The bottleneck for local LLMs is not model quality — it's codebase structure. Files under 350 lines, explicit types, feature-sliced modules, and AGENTS.md convention files reduce context burden enough for a 14B model to make reliable single-file edits.
+> **Philosophy:** The bottleneck for local LLMs is not model quality — it's codebase structure. Explicit types, feature-sliced modules, and AGENTS.md convention files reduce context burden enough for a 14B model to make reliable single-file edits.
 
 ## Stack
 
@@ -135,14 +135,12 @@ Components use `data-*` HTML attributes for variants, styled via CSS attribute s
 
 ## Design Decisions for LLM Agents
 
-1. **Files ≤ 350 lines** — fits in a small model's context window (~4,900 tokens)
-2. **Feature-sliced vertical architecture** — self-contained flat folders, no cross-cutting jumps
-3. **Code-first API (OpenAPI)** — FastAPI routers are the single source of truth; `make generate` regenerates the TS client
-4. **Strict types everywhere** — TypeScript `strict: true`, Python type hints on all signatures
-5. **No barrel exports** — direct imports only, faster builds, less token waste
-6. **AGENTS.md at 3 levels** — root (~16 rules), backend (~31), frontend (~50+)
-7. **Angular: correcting stale training data** — explicit overrides for modern Angular patterns (signals, `inject()`, no NgModules)
-8. **Colocated TDD** — tests ship alongside source files
+1. **Feature-sliced vertical architecture** — self-contained flat folders, no cross-cutting jumps
+2. **Code-first API (OpenAPI)** — FastAPI routers are the single source of truth; `make generate` regenerates the TS client
+3. **Strict types everywhere** — TypeScript `strict: true`, Python type hints on all signatures
+4. **AGENTS.md at 3 levels** — root (~16 rules), backend (~31), frontend (~50+)
+5. **Angular: correcting stale training data** — explicit overrides for modern Angular patterns (signals, `inject()`, no NgModules)
+6. **Colocated TDD** — tests ship alongside source files
 
 ## CI / CD
 

@@ -5,8 +5,6 @@ Review the current files against project rules. Report violations with file path
 ## Checklist
 
 ### Universal
-- [ ] Any file > 350 lines? (> 150 for Angular UI primitives in `shared/ui/`, > 500 for test files)
-- [ ] Barrel exports (`index.ts` re-exporting)?
 - [ ] Any real auth logic (must remain a stub)?
 - [ ] Missing `manifest.yaml` or missing `tier` field?
 

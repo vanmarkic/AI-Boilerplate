@@ -77,8 +77,6 @@ See `docs/conventions/frontend-patterns.md` for code examples (variant pattern, 
 15. Each feature is a folder under `src/app/features/`.
 16. Feature files: component.ts, store.ts (NgRx signalStore with `withResource`), types.ts, routes.ts, spec.ts.
 17. UI components live in `packages/ui/src/` (symlinked at `src/app/shared/ui/`) with colocated `.stories.ts`.
-18. No barrel exports except `packages/ui/src/public-api.ts`.
-19. Maximum 350 lines per file (150 for UI primitives, 500 for test files).
 
 ## Testing
 20. Tests colocated as `component.spec.ts`.
