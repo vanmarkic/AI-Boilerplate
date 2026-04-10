@@ -220,3 +220,28 @@ async def test_reset_clears_decisions() -> None:
     await engine.reset()
     assert len(engine.decision_manager.get_open_decisions()) == 0
     assert engine.decision_manager.snapshot() == []
+
+
+# ── Scoring visibility tests ─────────────────────────────────────────────
+
+
+class TestScoringVisibility:
+    """Verify that scoring is never exposed in snapshots."""
+
+    def test_snapshot_has_no_score_key_in_setup(self) -> None:
+        """Snapshot should not contain a 'score' key during SETUP phase."""
+        config = EngineConfig(exercise_id=1, title="Test")
+        engine = ExerciseEngine(config)
+        snap = engine.snapshot()
+        assert "score" not in snap
+
+    @pytest.mark.asyncio
+    async def test_snapshot_has_no_score_key_in_running(self) -> None:
+        """Snapshot should not contain a 'score' key during RUNNING phase."""
+        config = EngineConfig(exercise_id=1, title="Test")
+        engine = ExerciseEngine(config)
+        with patch("engine.time_manager._now_ms", return_value=0.0):
+            await engine.start()
+            snap = engine.snapshot()
+        assert "score" not in snap
+        engine._stop_tick_loop()

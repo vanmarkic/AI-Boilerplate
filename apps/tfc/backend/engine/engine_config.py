@@ -18,10 +18,10 @@ class DecisionTemplate:
     id: str
     title: str
     description: str
-    defect_id: str
     question_type: str
     options: list[dict]
     completion_mode: str
+    defect_id: str | None = None
     target_roles: list[str] = field(default_factory=list)
     timeout_ms: float = 0.0
 

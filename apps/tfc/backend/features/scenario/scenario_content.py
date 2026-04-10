@@ -20,7 +20,7 @@ class DecisionTemplateDef(BaseModel):
     id: str
     title: str
     description: str = ""
-    defect_id: str  # linked defect
+    defect_id: str | None = None  # linked defect
     question_type: str  # single_choice, multi_choice, free_text, scale
     options: list[DecisionOptionDef] = []
     completion_mode: str = "first_response"

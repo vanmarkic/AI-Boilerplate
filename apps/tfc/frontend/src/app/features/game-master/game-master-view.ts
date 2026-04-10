@@ -14,7 +14,7 @@ import { ExerciseStore } from '../../core/exercise.store';
 import { ScenarioPickerComponent } from './scenario-picker';
 import type { ScenarioResponse } from '../../core/scenario-api.service';
 import { handleGmWsMessage } from './gm-ws-handler';
-import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-engine-actions';
+import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-inject-actions';
 import { InjectTimelineComponent } from './inject-timeline.component';
 import { GmItemActionsComponent } from './gm-item-actions.component';
 import { Subscription } from 'rxjs';

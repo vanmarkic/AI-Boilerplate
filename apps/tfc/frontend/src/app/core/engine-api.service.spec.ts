@@ -21,33 +21,33 @@ describe('EngineApiService', () => {
     httpTesting.verify();
   });
 
-  describe('pauseEvent', () => {
+  describe('pauseInject', () => {
     it('sends POST to correct URL', () => {
-      service.pauseEvent(1, 'e1').subscribe();
+      service.pauseInject(1, 'e1').subscribe();
       const req = httpTesting.expectOne(
-        `${base}/api/exercises/1/engine/events/e1/pause`,
+        `${base}/api/exercises/1/engine/injects/e1/pause`,
       );
       expect(req.request.method).toBe('POST');
       req.flush({});
     });
   });
 
-  describe('resumeEvent', () => {
+  describe('resumeInject', () => {
     it('sends POST to correct URL', () => {
-      service.resumeEvent(1, 'e1').subscribe();
+      service.resumeInject(1, 'e1').subscribe();
       const req = httpTesting.expectOne(
-        `${base}/api/exercises/1/engine/events/e1/resume`,
+        `${base}/api/exercises/1/engine/injects/e1/resume`,
       );
       expect(req.request.method).toBe('POST');
       req.flush({});
     });
   });
 
-  describe('delayEvent', () => {
+  describe('delayInject', () => {
     it('sends POST with delay_ms in body', () => {
-      service.delayEvent(1, 'e1', 5000).subscribe();
+      service.delayInject(1, 'e1', 5000).subscribe();
       const req = httpTesting.expectOne(
-        `${base}/api/exercises/1/engine/events/e1/delay`,
+        `${base}/api/exercises/1/engine/injects/e1/delay`,
       );
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ delay_ms: 5000 });
@@ -55,11 +55,11 @@ describe('EngineApiService', () => {
     });
   });
 
-  describe('skipEvent', () => {
+  describe('skipInject', () => {
     it('sends POST to correct URL', () => {
-      service.skipEvent(1, 'e1').subscribe();
+      service.skipInject(1, 'e1').subscribe();
       const req = httpTesting.expectOne(
-        `${base}/api/exercises/1/engine/events/e1/skip`,
+        `${base}/api/exercises/1/engine/injects/e1/skip`,
       );
       expect(req.request.method).toBe('POST');
       req.flush({});
