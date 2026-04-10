@@ -215,3 +215,58 @@ def test_round_trip_content_to_engine() -> None:
     assert len(snap["injects"]) == 2
     assert len(snap["defects"]) == 2
     assert snap["phase"] == "setup"
+
+
+# ── Referential integrity validation ─────────────────────────────────────
+
+
+def test_validate_valid_scenario_returns_no_errors() -> None:
+    content = ScenarioContent.model_validate(_full_content())
+    errors = content.validate()
+    assert errors == []
+
+
+def test_validate_invalid_inject_dependency() -> None:
+    data = _full_content()
+    # evt-2 depends on "evt-1" which exists; add a bad dependency
+    data["injects"][1]["dependencies"] = ["evt-1", "evt-nonexistent"]
+    content = ScenarioContent.model_validate(data)
+    errors = content.validate()
+    assert any("evt-nonexistent" in e for e in errors)
+    assert len(errors) == 1
+
+
+def test_validate_invalid_triggered_defect() -> None:
+    data = _full_content()
+    data["injects"][0]["triggered_defects"] = ["iss-1", "iss-does-not-exist"]
+    content = ScenarioContent.model_validate(data)
+    errors = content.validate()
+    assert any("iss-does-not-exist" in e for e in errors)
+    assert len(errors) == 1
+
+
+def test_validate_invalid_trigger_inject_id() -> None:
+    data = _full_content()
+    data["defects"][0]["trigger_inject_id"] = "evt-ghost"
+    content = ScenarioContent.model_validate(data)
+    errors = content.validate()
+    assert any("evt-ghost" in e for e in errors)
+    assert len(errors) == 1
+
+
+def test_validate_invalid_decision_defect_id() -> None:
+    data = _full_content()
+    data["decision_templates"][0]["defect_id"] = "iss-ghost"
+    content = ScenarioContent.model_validate(data)
+    errors = content.validate()
+    assert any("iss-ghost" in e for e in errors)
+    assert len(errors) == 1
+
+
+def test_validate_multiple_errors_returned() -> None:
+    data = _full_content()
+    data["injects"][0]["triggered_defects"] = ["iss-bad-1", "iss-bad-2"]
+    data["decision_templates"][0]["defect_id"] = "iss-also-bad"
+    content = ScenarioContent.model_validate(data)
+    errors = content.validate()
+    assert len(errors) == 3

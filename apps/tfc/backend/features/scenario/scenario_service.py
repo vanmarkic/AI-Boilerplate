@@ -1,5 +1,6 @@
 from fastapi import HTTPException, status
 
+from features.scenario.scenario_content import ScenarioContent
 from features.scenario.scenario_model import Scenario
 from features.scenario.scenario_repository import ScenarioRepository
 from features.scenario.scenario_schema import (
@@ -9,6 +10,19 @@ from features.scenario.scenario_schema import (
 )
 
 
+def _check_content_integrity(raw_content: object) -> None:
+    """Parse raw content dict and raise HTTP 422 if referential integrity fails."""
+    if raw_content is None:
+        return
+    content = ScenarioContent.model_validate(raw_content)
+    errors = content.validate()
+    if errors:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"validation_errors": errors},
+        )
+
+
 class ScenarioService:
     def __init__(self, repository: ScenarioRepository) -> None:
         self.repository = repository
@@ -16,6 +30,7 @@ class ScenarioService:
     async def create_scenario(
         self, request: CreateScenarioRequest,
     ) -> ScenarioResponse:
+        _check_content_integrity(request.content)
         scenario = Scenario(
             title=request.title,
             description=request.description,
@@ -48,6 +63,7 @@ class ScenarioService:
                 detail="Scenario not found",
             )
 
+        _check_content_integrity(request.content)
         update_data = request.model_dump(exclude_unset=True)
         for field, value in update_data.items():
             setattr(scenario, field, value)

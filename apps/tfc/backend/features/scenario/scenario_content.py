@@ -76,3 +76,37 @@ class ScenarioContent(BaseModel):
     briefing: str = ""
     objectives: list[str] = []
     rules: list[str] = []
+
+    def validate(self) -> list[str]:
+        """Return a list of referential integrity errors; empty means valid."""
+        errors: list[str] = []
+        inject_ids = {inj.id for inj in self.injects}
+        defect_ids = {d.id for d in self.defects}
+
+        for inj in self.injects:
+            for dep in inj.dependencies:
+                if dep not in inject_ids:
+                    errors.append(
+                        f"Inject '{inj.id}' depends on unknown inject '{dep}'"
+                    )
+            for td in inj.triggered_defects:
+                if td not in defect_ids:
+                    errors.append(
+                        f"Inject '{inj.id}' triggers unknown defect '{td}'"
+                    )
+
+        for d in self.defects:
+            if d.trigger_inject_id and d.trigger_inject_id not in inject_ids:
+                errors.append(
+                    f"Defect '{d.id}' trigger_inject_id references unknown inject"
+                    f" '{d.trigger_inject_id}'"
+                )
+
+        for dt in self.decision_templates:
+            if dt.defect_id and dt.defect_id not in defect_ids:
+                errors.append(
+                    f"Decision '{dt.id}' defect_id references unknown defect"
+                    f" '{dt.defect_id}'"
+                )
+
+        return errors
