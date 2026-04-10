@@ -12,6 +12,13 @@ from engine.state_changes import DecisionClosed, DecisionOpened
 
 
 @dataclass
+class Recommendation:
+    """A single role recommendation submitted for a decision."""
+    role: str
+    participant_id: str
+
+
+@dataclass
 class ActiveDecision:
     """Runtime representation of a decision point."""
     id: str
@@ -28,6 +35,7 @@ class ActiveDecision:
     opened_at_pt_ms: float = 0.0
     opened_at_rt_ms: float = 0.0  # wall clock for timeout tracking
     closed_at_pt_ms: float | None = None
+    recommendations: list[Recommendation] = field(default_factory=list)
 
 
 class DecisionManager:
@@ -109,6 +117,25 @@ class DecisionManager:
                     "title": d.title,
                 })
         return changes
+
+    def record_recommendation(
+        self, decision_id: str, *, role: str, participant_id: str,
+    ) -> None:
+        """Record that a role has submitted a recommendation."""
+        decision = self._decisions.get(decision_id)
+        if decision is None:
+            return
+        decision.recommendations.append(
+            Recommendation(role=role, participant_id=participant_id),
+        )
+
+    def all_target_roles_responded(self, decision_id: str) -> bool:
+        """Check if every target role has at least one recommendation."""
+        decision = self._decisions.get(decision_id)
+        if not decision or not decision.target_roles:
+            return False
+        responded_roles = {r.role for r in decision.recommendations}
+        return all(role in responded_roles for role in decision.target_roles)
 
     def get_open_decisions(self) -> list[ActiveDecision]:
         """Return only decisions with status 'open'."""

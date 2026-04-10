@@ -16,6 +16,11 @@ class DelayRequest(BaseModel):
     delay_ms: float = Field(..., gt=0)
 
 
+class RecommendationRequest(BaseModel):
+    role: str = Field(..., min_length=1)
+    participant_id: str = Field(..., min_length=1)
+
+
 def _get_engine(exercise_id: int):
     """Retrieve engine or raise 404."""
     engine = session_store.get(exercise_id)
@@ -167,6 +172,42 @@ async def close_decision(exercise_id: int, decision_id: str) -> dict:
     if not engine.decision_manager.get_open_decisions():
         await engine.resume()
     return result
+
+
+@router.post(
+    "/decisions/{decision_id}/recommendations",
+    operation_id="submitDecisionRecommendation",
+    status_code=status.HTTP_201_CREATED,
+)
+async def submit_decision_recommendation(
+    exercise_id: int,
+    decision_id: str,
+    body: RecommendationRequest,
+) -> dict:
+    """Record a role recommendation and auto-close if all_respond is satisfied."""
+    engine = _get_engine(exercise_id)
+    dm = engine.decision_manager
+    open_ids = {d.id for d in dm.get_open_decisions()}
+    if decision_id not in open_ids:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Decision {decision_id} not found or already closed",
+        )
+    dm.record_recommendation(
+        decision_id, role=body.role, participant_id=body.participant_id,
+    )
+    auto_closed: dict | None = None
+    decision = dm._decisions.get(decision_id)
+    if (
+        decision is not None
+        and decision.completion_mode == "all_respond"
+        and dm.all_target_roles_responded(decision_id)
+    ):
+        pt = engine.time_manager.play_time_ms
+        auto_closed = dm.close_decision(decision_id, current_pt_ms=pt)
+        if auto_closed and not dm.get_open_decisions():
+            await engine.resume()
+    return {"recorded": True, "auto_closed": auto_closed is not None}
 
 
 # ── Context ──────────────────────────────────────────────────────────────
