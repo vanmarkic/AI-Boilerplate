@@ -16,8 +16,8 @@ async def seed() -> None:
             return
 
         scenario = Scenario(
-            title=ER_SCENARIO_CONTENT["title"],
-            description=ER_SCENARIO_CONTENT.get("description", ""),
+            title="Emergency Response — Hospital MCI",
+            description="Mass casualty incident triggered by industrial explosion",
             content=ER_SCENARIO_CONTENT,
             version=1,
         )
