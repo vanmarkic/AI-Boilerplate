@@ -3,7 +3,7 @@ import asyncio
 
 from core.database import async_session_factory
 from features.scenario.scenario_model import Scenario
-from features.scenario.sample_er_scenario import SAMPLE_ER_SCENARIO
+from features.scenario.sample_er_scenario import ER_SCENARIO_CONTENT
 
 
 async def seed() -> None:
@@ -16,9 +16,9 @@ async def seed() -> None:
             return
 
         scenario = Scenario(
-            title=SAMPLE_ER_SCENARIO["title"],
-            description=SAMPLE_ER_SCENARIO.get("description", ""),
-            content=SAMPLE_ER_SCENARIO,
+            title=ER_SCENARIO_CONTENT["title"],
+            description=ER_SCENARIO_CONTENT.get("description", ""),
+            content=ER_SCENARIO_CONTENT,
             version=1,
         )
         session.add(scenario)
