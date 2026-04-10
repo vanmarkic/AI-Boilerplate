@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
-import { BadgeComponent, ButtonDirective, CollapsiblePanelComponent } from '@aspect/ui';
+import { BadgeComponent, ButtonDirective, CardComponent } from '@aspect/ui';
 import { ClockDisplayComponent } from '../../shared/clock-display.component';
 import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { SpeedDisplayComponent } from '../../shared/speed-display.component';
@@ -7,34 +7,40 @@ import { ContextPanelComponent } from '../../shared/context-panel.component';
 import { PresenceIndicatorComponent } from '../../shared/presence-indicator.component';
 import { EngineApiService } from '../../core/engine-api.service';
 import { DecisionApiService } from '../../core/decision-api.service';
-import type { DecisionDetail } from '../../core/decision-api.service';
 import { ExerciseApiService } from '../../core/exercise-api.service';
 import { ExerciseWsService } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
 import { ScenarioPickerComponent } from './scenario-picker';
 import type { ScenarioResponse } from '../../core/scenario-api.service';
+import type { InjectSnapshot, DefectSnapshot } from '../../core/engine-api.service';
 import { handleGmWsMessage } from './gm-ws-handler';
 import { startExercise, pauseExercise, resetExercise, completeExercise } from './gm-inject-actions';
 import { InjectTimelineComponent } from './inject-timeline.component';
-import { GmItemActionsComponent } from './gm-item-actions.component';
+import { DetailPanelComponent } from './detail-panel.component';
+import { TraineeMonitorComponent } from './trainee-monitor.component';
+import { formatTimeMs } from '../../core/format-time';
 import { Subscription } from 'rxjs';
+
+type SelectedItem = { kind: 'inject'; item: InjectSnapshot } | { kind: 'defect'; item: DefectSnapshot } | null;
 
 @Component({
   selector: 'tfc-game-master-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore],
   imports: [
-    BadgeComponent, ButtonDirective, CollapsiblePanelComponent,
+    BadgeComponent, ButtonDirective, CardComponent,
     ClockDisplayComponent, PhaseBadgeComponent, SpeedDisplayComponent,
     ContextPanelComponent, ScenarioPickerComponent,
     PresenceIndicatorComponent,
-    InjectTimelineComponent, GmItemActionsComponent,
+    InjectTimelineComponent, DetailPanelComponent, TraineeMonitorComponent,
   ],
   template: `
     @if (!exerciseId()) {
       <tfc-scenario-picker (scenarioSelected)="onScenarioSelected($event)" />
     } @else {
     <div class="exercise-layout">
+
+      <!-- Row 1: Header -->
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || 'Exercise Control Panel' }}</span>
         <tfc-presence-indicator [participants]="store.participants()" />
@@ -46,55 +52,61 @@ import { Subscription } from 'rxjs';
         </div>
       </header>
 
-      <tfc-inject-timeline
-        [injects]="store.injects()"
-        [defects]="store.defects()"
-        [playTimeMs]="store.playTimeMs()" />
+      <!-- Row 2: Overview (timeline left, defect list right) -->
+      <div class="exercise-overview exercise-overview--wide">
+        <tfc-inject-timeline
+          [injects]="store.injects()"
+          [defects]="store.defects()"
+          [playTimeMs]="store.playTimeMs()" />
 
-      <div class="exercise-overview">
-        <tfc-gm-item-actions
-          [injects]="store.injects()" [defects]="store.defects()"
-          (triggerInject)="triggerInject($event)" (completeInject)="completeInject($event)"
-          (cancelInject)="cancelInject($event)" (activateDefect)="activateDefect($event)"
-          (mitigateDefect)="mitigateDefect($event)" (resolveDefect)="resolveDefect($event)" />
-
-        <ui-collapsible-panel>
-          <span panelTitle>Decisions</span>
-          @for (decision of store.openDecisions(); track decision.id) {
-            <div class="flex items-center justify-between p-sm border-b">
+        <ui-card title="Defects">
+          @for (defect of store.defects(); track defect.id) {
+            <div class="flex items-center justify-between p-sm border-b"
+              [class.selected-item]="isSelectedDefect(defect.id)"
+              (click)="selectDefect(defect)">
               <div>
-                <span class="text-sm font-medium">{{ decision.title }}</span>
-                <ui-badge variant="default">open</ui-badge>
+                <span class="text-sm font-medium">{{ defect.title }}</span>
+                <ui-badge [variant]="defect.lifecycle === 'active' ? 'destructive' : 'secondary'">
+                  {{ defect.lifecycle }}
+                </ui-badge>
               </div>
-              <div class="flex gap-xs">
-                <button uiButton variant="outline" size="sm" (click)="viewDecision(decision.id)">View</button>
-                <button uiButton variant="destructive" size="sm" (click)="closeDecision(decision.id)">Close</button>
-              </div>
+              @if (defect.lifecycle === 'active' && defect.auto_resolve_pt_ms > 0) {
+                @for (cd of store.defectsWithCountdown(); track cd.id) {
+                  @if (cd.id === defect.id) {
+                    <span class="text-xs text-muted-foreground">
+                      ETBOL: {{ formatMs(cd.remaining_ms) }}
+                    </span>
+                  }
+                }
+              }
             </div>
           } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No active decisions.</p>
+            <p class="text-muted-foreground text-sm p-sm">No defects loaded.</p>
           }
-        </ui-collapsible-panel>
+        </ui-card>
       </div>
 
+      <!-- Row 3: Trainee Monitor -->
+      <section class="trainee-monitor">
+        <tfc-trainee-monitor
+          [participants]="store.participants()"
+          [decisions]="store.openDecisions()"
+          (closeDecision)="closeDecision($event)" />
+      </section>
+
+      <!-- Row 4: Detail Panel (collapsible) -->
       <div class="exercise-details">
-        <ui-collapsible-panel>
-          <span panelTitle>Detail Panel</span>
-          @if (selectedDecision(); as detail) {
-            <p class="text-sm font-medium">{{ detail.title }}</p>
-            <p class="text-sm text-muted-foreground">{{ detail.description }}</p>
-            @for (resp of detail.responses; track resp.id) {
-              <div class="flex items-center justify-between p-sm border-b">
-                <span class="text-sm">{{ resp.participant_name }}</span>
-                <span class="text-xs text-muted-foreground">{{ resp.submitted_at }}</span>
-              </div>
-            } @empty {
-              <p class="text-muted-foreground text-sm">No responses yet.</p>
-            }
-          } @else {
-            <p class="text-muted-foreground text-sm">Select a decision to view context.</p>
-          }
-        </ui-collapsible-panel>
+        <tfc-detail-panel
+          [inject]="selectedInject()"
+          [defect]="selectedDefect()"
+          (triggerInject)="triggerInject($event)"
+          (cancelInject)="cancelInject($event)"
+          (completeInject)="completeInject($event)"
+          (pauseInject)="pauseInject($event)"
+          (resumeInject)="resumeInject($event)"
+          (activateDefect)="activateDefect($event)"
+          (mitigateDefect)="mitigateDefect($event)"
+          (resolveDefect)="resolveDefect($event)" />
         @if (store.context(); as ctx) {
           <tfc-context-panel
             [title]="ctx.title" [briefing]="ctx.briefing"
@@ -102,6 +114,7 @@ import { Subscription } from 'rxjs';
         }
       </div>
 
+      <!-- Row 5: Controls Footer -->
       <footer class="exercise-controls">
         <div class="exercise-controls__group">
           @if (store.phase() === 'setup' || store.phase() === 'paused') {
@@ -133,10 +146,33 @@ export class GameMasterView implements OnDestroy {
   private readonly exerciseApi = inject(ExerciseApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
-  protected readonly selectedDecision = signal<DecisionDetail | null>(null);
   protected readonly exerciseId = signal<number | null>(null);
+  protected readonly selectedItem = signal<SelectedItem>(null);
   private sub: Subscription | null = null;
   private connSub: Subscription | null = null;
+
+  protected readonly selectedInject = () => {
+    const s = this.selectedItem();
+    return s?.kind === 'inject' ? s.item : null;
+  };
+
+  protected readonly selectedDefect = () => {
+    const s = this.selectedItem();
+    return s?.kind === 'defect' ? s.item : null;
+  };
+
+  protected selectDefect(defect: DefectSnapshot): void {
+    this.selectedItem.set({ kind: 'defect', item: defect });
+  }
+
+  protected isSelectedDefect(id: string): boolean {
+    const s = this.selectedItem();
+    return s?.kind === 'defect' && s.item.id === id;
+  }
+
+  protected formatMs(ms: number): string {
+    return formatTimeMs(ms);
+  }
 
   protected onScenarioSelected(scenario: ScenarioResponse): void {
     this.exerciseApi.create({
@@ -166,12 +202,6 @@ export class GameMasterView implements OnDestroy {
     });
   }
 
-  protected viewDecision(id: string): void {
-    this.decisionApi.getDecisionDetail(Number(id)).subscribe({
-      next: (detail) => this.selectedDecision.set(detail),
-    });
-  }
-
   protected closeDecision(id: string): void {
     this.decisionApi.closeEngineDecision(this.exerciseId()!, id).subscribe({
       next: () => this.store.closeDecision(id),
@@ -190,6 +220,8 @@ export class GameMasterView implements OnDestroy {
   protected triggerInject(id: string): void { this.api.triggerInject(this.eid(), id).subscribe(); }
   protected cancelInject(id: string): void { this.api.cancelInject(this.eid(), id).subscribe(); }
   protected completeInject(id: string): void { this.api.completeInject(this.eid(), id).subscribe(); }
+  protected pauseInject(id: string): void { this.api.pauseInject(this.eid(), id).subscribe(); }
+  protected resumeInject(id: string): void { this.api.resumeInject(this.eid(), id).subscribe(); }
   protected activateDefect(id: string): void { this.api.activateDefect(this.eid(), id).subscribe(); }
   protected mitigateDefect(id: string): void { this.api.mitigateDefect(this.eid(), id).subscribe(); }
   protected resolveDefect(id: string): void { this.api.resolveDefect(this.eid(), id).subscribe(); }

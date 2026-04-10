@@ -301,4 +301,87 @@
     border-bottom: 1px solid var(--color-muted);
     flex-shrink: 0;
   }
+
+  /* ── Trainee Monitor ───────────────────────────────────── */
+
+  .trainee-monitor__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+  }
+
+  .trainee-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2xs);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-muted);
+    background: var(--color-card);
+    min-width: 180px;
+    max-width: 260px;
+  }
+
+  .trainee-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+  }
+
+  .trainee-card__name {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    flex: 1;
+  }
+
+  .trainee-card__decision {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+    padding-top: var(--spacing-2xs);
+    border-top: 1px solid var(--color-muted);
+  }
+
+  /* ── Detail Panel ──────────────────────────────────────── */
+
+  .detail-panel__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) 0;
+  }
+
+  .detail-panel__row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacing-sm);
+  }
+
+  .detail-panel__label {
+    font-size: var(--font-size-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-muted-foreground);
+    min-width: 8ch;
+    flex-shrink: 0;
+  }
+
+  .detail-panel__value {
+    font-size: var(--font-size-sm);
+  }
+
+  .detail-panel__actions {
+    display: flex;
+    gap: var(--spacing-xs);
+    flex-wrap: wrap;
+    padding-top: var(--spacing-xs);
+  }
+
+  /* ── Selected item highlight ───────────────────────────── */
+
+  .selected-item {
+    background: var(--color-muted);
+    cursor: pointer;
+  }
 }
