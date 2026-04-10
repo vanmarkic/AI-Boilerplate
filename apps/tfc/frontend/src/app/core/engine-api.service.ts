@@ -15,12 +15,15 @@ export interface InjectSnapshot {
   title: string;
   description: string;
   inject_type: string;
+  execution_mode: string;
   scheduled_pt_ms: number;
   duration_ms: number | null;
   dependencies: string[];
   lifecycle: string;
   started_at_pt_ms: number | null;
   completed_at_pt_ms: number | null;
+  target_roles: string[];
+  role_descriptions: Record<string, string>;
 }
 
 export interface DefectSnapshot {
@@ -29,6 +32,7 @@ export interface DefectSnapshot {
   description: string;
   trigger_mode: string;
   auto_resolve_pt_ms: number;
+  auto_resolve_rt_ms: number;
   lifecycle: string;
   activated_at_pt_ms: number | null;
   resolved_at_pt_ms: number | null;
