@@ -23,7 +23,7 @@
 
   @if (!store.isCollaborative()) {
   <main class="player-main player-main--board player-main--classic">
-    <div class="classic-layout">
+    <div class="classic-layout" [class.classic-layout--decision-open]="store.hasOpenDecision()">
       <aside class="classic-layout__feed">
         <h2 class="inject-feed__heading">Inject Feed</h2>
         <tfc-inject-feed
@@ -36,14 +36,12 @@
           [issues]="store.releasedIssues()"
           [playTimeMs]="store.playTimeMs()"
           [realTimeMs]="store.realTimeMs()"
+          (mitigated)="onIssueMitigated($event)"
         />
       </aside>
       <div class="classic-layout__board">
         @if (currentTurnEvent(); as event) {
         <div class="board-turn-banner">
-          @if (store.score(); as score) {
-          <span class="board-turn-banner__turn">TURN {{ score.turnNumber }}</span>
-          }
           <span class="board-turn-banner__title">{{ event.title }}</span>
         </div>
         } @else {
@@ -96,15 +94,12 @@
       </div>
     </div>
 
-    <!-- Classic mode: no blocking overlay — decisions are inline in the board grid -->
+    <!-- Classic mode: decisions are inline in the board grid; feed/defects dimmed and non-interactive while open -->
   </main>
   } @else {
   <main class="player-main player-main--board">
     @if (currentTurnEvent(); as event) {
     <div class="board-turn-banner">
-      @if (store.score(); as score) {
-      <span class="board-turn-banner__turn">TURN {{ score.turnNumber }}</span>
-      }
       <span class="board-turn-banner__title">{{ event.title }}</span>
     </div>
     } @else {
@@ -205,6 +200,18 @@
   />
   }
 
+  @if (contextOpen() && store.context(); as ctx) {
+  <div class="player-context-drawer">
+    <tfc-context-panel
+      [title]="ctx.title"
+      [briefing]="ctx.briefing"
+      [objectives]="ctx.objectives"
+      [rules]="ctx.rules ?? []"
+      [open]="true"
+    />
+  </div>
+  }
+
   <footer class="player-footer">
     <div class="player-footer__group">
       <p class="text-sm text-muted-foreground">
@@ -212,6 +219,14 @@
         @if (store.isPracticeMode()) { Practice Mode — playing all roles } @else if (store.isCollaborative()) { @if (store.isAllAdvisors()) { You are the All Advisors player } @else { You are the {{ roleLabel() }} } } @else { Waiting for {{ domain.term('trainer') }} actions... }
       </p>
       <div class="player-footer__actions">
+        <button
+          class="btn"
+          data-variant="ghost"
+          data-size="sm"
+          (click)="contextOpen.set(!contextOpen())"
+        >
+          Context
+        </button>
         <button
           class="btn"
           data-variant="ghost"

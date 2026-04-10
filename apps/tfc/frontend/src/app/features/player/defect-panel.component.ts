@@ -3,8 +3,9 @@ import {
   Component,
   computed,
   input,
+  output,
 } from "@angular/core";
-import { BadgeComponent } from "@aspect/ui";
+import { BadgeComponent, ButtonDirective } from "@aspect/ui";
 import type { IssueSnapshot } from "../../core/generated/state-changes.types";
 import { formatTimeMs } from "../../core/format-time";
 
@@ -13,7 +14,7 @@ type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
 @Component({
   selector: "tfc-defect-panel",
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BadgeComponent],
+  imports: [BadgeComponent, ButtonDirective],
   host: { class: "defect-panel" },
   template: `
     <h2 class="defect-panel__heading">Defects</h2>
@@ -37,6 +38,17 @@ type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
           <div class="defect-panel__countdown">
             ETBOL {{ countdown(issue) }}
           </div>
+        }
+        @if (issue.lifecycle === 'active') {
+          <button
+            uiButton
+            variant="outline"
+            size="sm"
+            class="defect-panel__mitigate-btn"
+            (click)="mitigated.emit(issue.id)"
+          >
+            Report Mitigation
+          </button>
         }
       </div>
     }
@@ -62,6 +74,7 @@ export class DefectPanelComponent {
   readonly issues = input<IssueSnapshot[]>([]);
   readonly playTimeMs = input(0);
   readonly realTimeMs = input(0);
+  readonly mitigated = output<string>();
 
   protected readonly activeIssues = computed(() =>
     this.issues().filter(

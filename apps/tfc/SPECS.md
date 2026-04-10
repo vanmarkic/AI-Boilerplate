@@ -111,6 +111,7 @@ Exercise lifecycle management + engine HTTP/WS API.
 Decision CRUD — questions, responses, outcomes.
 
 - Decisions have a `question_type`: `single_choice` or `multi_choice`.
+- Completion modes: `first_response` (auto-close on first submission), `all_respond` (auto-close when all target roles submit), `gm_closes` (GM manually closes), `trainer_validation` (players submit, then trainer reviews and closes — identical engine behaviour to `gm_closes`, distinct label for authoring clarity).
 - In collaborative mode, advisors submit non-binding recommendations; the decision-maker submits the binding ruling.
 - Scoring: `penalty_ms = (max_possible_score - selected_score) * penalty_factor * 1000`.
 - Effective decision time: `max(min_decision_time_ms, base_decision_time_ms - accumulated_penalty_ms)`.

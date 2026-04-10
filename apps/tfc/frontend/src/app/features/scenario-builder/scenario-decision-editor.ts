@@ -67,6 +67,7 @@ import { ScenarioBuilderStore } from "./scenario-builder.store";
                     <option value="first_response">First response</option>
                     <option value="all_respond">All respond</option>
                     <option value="gm_closes">GM closes</option>
+                    <option value="trainer_validation">Trainer validation</option>
                   </select>
                 </div>
               </div>

@@ -332,8 +332,8 @@ test.describe.serial(
       await page.goto(playerUrl());
       await dismissViteErrors(page);
 
-      // Classic mode: no blocking overlay — decision is inline in the board
-      await expect(page.locator(".decision-overlay")).not.toBeAttached();
+      // Classic mode: decision is inline; feed/defects are dimmed and non-interactive
+      await expect(page.locator(".classic-layout--decision-open")).toBeAttached();
 
       // Role card with checkboxes visible in the board grid
       const card = page.locator(".board-grid tfc-role-card").first();

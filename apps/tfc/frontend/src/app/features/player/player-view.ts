@@ -42,6 +42,7 @@ import {
   type CoDecisionConfirmation,
 } from "./co-decision-bar.component";
 import { DefectPanelComponent } from "./defect-panel.component";
+import { ContextPanelComponent } from "../../shared/context-panel.component";
 import { buildRoleCards } from "./role-card.types";
 
 @Component({
@@ -63,6 +64,7 @@ import { buildRoleCards } from "./role-card.types";
     RoleCardComponent,
     CoDecisionBarComponent,
     DefectPanelComponent,
+    ContextPanelComponent,
     SystemStatusBoardComponent,
     WarfareDomainBoardComponent,
     SeaBackdrop,
@@ -75,6 +77,7 @@ export class PlayerView implements OnInit, OnDestroy {
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
   protected readonly logsOpen = signal(false);
+  protected readonly contextOpen = signal(false);
   private readonly ws = inject(ExerciseWsService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -311,6 +314,10 @@ export class PlayerView implements OnInit, OnDestroy {
     this.sub?.unsubscribe();
     this.connSub?.unsubscribe();
   }
+  protected onIssueMitigated(issueId: string): void {
+    this.api.mitigateIssue(this.exerciseId(), issueId).subscribe();
+  }
+
   protected onRoleCardSubmitted(submission: RoleCardSubmission): void {
     const decision = this.activeDecisions()[0];
     if (!decision) return;

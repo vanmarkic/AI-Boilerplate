@@ -40,6 +40,14 @@
     padding: var(--spacing-sm) 0;
   }
 
+  /* Block interaction on feed/defects while a decision is open */
+  .classic-layout--decision-open > .classic-layout__feed,
+  .classic-layout--decision-open > .classic-layout__defects {
+    pointer-events: none;
+    opacity: 0.45;
+    transition: opacity 300ms ease;
+  }
+
   /* ── Defect Panel ────────────────────────────────────────── */
 
   .defect-panel {
@@ -131,6 +139,11 @@
     font-variant-numeric: tabular-nums;
     color: var(--color-destructive);
     letter-spacing: 0.04em;
+  }
+
+  .defect-panel__mitigate-btn {
+    align-self: flex-start;
+    margin-top: var(--spacing-2xs);
   }
 
   .defect-panel__resolved-section {

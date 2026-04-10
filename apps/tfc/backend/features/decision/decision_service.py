@@ -17,7 +17,7 @@ VALID_QUESTION_TYPES = {
     "free_text",
     "scale",
 }
-VALID_COMPLETION_MODES = {"first_response", "all_respond", "gm_closes"}
+VALID_COMPLETION_MODES = {"first_response", "all_respond", "gm_closes", "trainer_validation"}
 
 
 class DecisionService:
