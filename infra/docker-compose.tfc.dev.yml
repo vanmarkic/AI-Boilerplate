@@ -39,7 +39,7 @@ services:
     volumes:
       - ../:/app
       - tfc-dev-node-modules:/app/node_modules
-    command: sh -c "npm install --workspace=apps/tfc/frontend && npx --workspace=apps/tfc/frontend ng serve --host 0.0.0.0 --port 4201"
+    command: sh -c "npm install && npx --workspace=apps/tfc/frontend ng serve --host 0.0.0.0 --port 4201"
     depends_on:
       - tfc-api
 
