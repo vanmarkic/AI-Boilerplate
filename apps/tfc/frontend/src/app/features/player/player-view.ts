@@ -1,110 +1,68 @@
 import { ChangeDetectionStrategy, Component, OnInit, OnDestroy, inject, signal } from '@angular/core';
-import {
-  CardComponent,
-  BadgeComponent,
-} from '@aspect/ui';
-import { ClockDisplayComponent } from '../../shared/clock-display.component';
-import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { DecisionPanelComponent } from '../../shared/decision-panel.component';
 import { ContextPanelComponent } from '../../shared/context-panel.component';
+import { ClockDisplayComponent } from '../../shared/clock-display.component';
+import { PhaseBadgeComponent } from '../../shared/phase-badge.component';
 import { EngineApiService } from '../../core/engine-api.service';
 import { ExerciseWsService, WsMessage } from '../../core/exercise-ws.service';
 import { ExerciseStore } from '../../core/exercise.store';
-import { formatTimeMs } from '../../core/format-time';
 import { DecisionApiService } from '../../core/decision-api.service';
 import type { ActiveDecision, DecisionDetail } from '../../core/decision-api.service';
-import { Subscription } from 'rxjs';
+import { InjectFeedComponent } from './inject-feed.component';
+import { DefectPanelComponent } from './defect-panel.component';
 import { handleDecisionWsChanges } from './player-ws-handler';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'tfc-player-view',
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [ExerciseStore],
   imports: [
-    CardComponent, BadgeComponent,
-    ClockDisplayComponent, PhaseBadgeComponent, DecisionPanelComponent, ContextPanelComponent,
+    ClockDisplayComponent, PhaseBadgeComponent,
+    DecisionPanelComponent, ContextPanelComponent,
+    InjectFeedComponent, DefectPanelComponent,
   ],
   template: `
-    <div class="exercise-layout">
+    <div class="player-layout">
       <header class="exercise-header">
         <span class="exercise-header__title">{{ store.title() || 'Exercise Dashboard' }}</span>
         <div class="exercise-header__clocks">
-          <tfc-clock-display label="RT" [value]="store.rtClock()" />
           <tfc-clock-display label="PT" [value]="store.ptClock()" />
           <tfc-phase-badge [phase]="store.phase()" />
         </div>
       </header>
 
-      <div class="exercise-overview">
-        <ui-card title="Released Injects">
-          @for (inject of visibleInjects(); track inject.id) {
-            <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm font-medium">{{ inject.title }}</span>
-              <ui-badge variant="secondary">{{ inject.lifecycle }}</ui-badge>
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No injects released yet.</p>
+      <div class="player-main">
+        <!-- Left column: inject feed -->
+        <div class="player-column">
+          <p class="player-column__heading">Inject Feed</p>
+          <tfc-inject-feed
+            [injects]="store.injects()"
+            [playTimeMs]="store.playTimeMs()"
+            [playerRole]="store.playerRole()" />
+        </div>
+
+        <!-- Center column: defect panel -->
+        <div class="player-column">
+          <p class="player-column__heading">Defects</p>
+          <tfc-defect-panel
+            [defects]="store.releasedDefects()"
+            [countdowns]="store.defectsWithCountdown()" />
+        </div>
+
+        <!-- Right column: context sidebar -->
+        <div class="player-column player-sidebar">
+          <p class="player-column__heading">Context</p>
+          @if (store.context(); as ctx) {
+            <tfc-context-panel
+              [title]="ctx.title"
+              [briefing]="ctx.briefing"
+              [objectives]="ctx.objectives"
+              [rules]="ctx.rules" />
+          } @else {
+            <p class="text-muted-foreground text-sm p-sm">No scenario context available.</p>
           }
-        </ui-card>
-
-        <ui-card title="Active Defects">
-          @for (defect of store.releasedDefects(); track defect.id) {
-            <div class="flex items-center justify-between p-sm border-b"
-              [class.cursor-pointer]="defect.lifecycle === 'active'"
-              (click)="selectDefect(defect.id)">
-              <span class="text-sm font-medium">{{ defect.title }}</span>
-              <ui-badge [variant]="defect.lifecycle === 'active' ? 'destructive' : 'secondary'">
-                {{ defect.lifecycle }}
-              </ui-badge>
-              @if (getDefectCountdown(defect.id); as cd) {
-                <span class="text-xs text-muted-foreground ml-sm">
-                  Auto-resolve: {{ cd }}
-                </span>
-              }
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No defects assigned yet.</p>
-          }
-        </ui-card>
-      </div>
-
-      <div class="exercise-details">
-        @if (selectedDefectId()) {
-          <ui-card title="Defect Details">
-            @for (defect of store.releasedDefects(); track defect.id) {
-              @if (defect.id === selectedDefectId()) {
-                <p class="text-sm">{{ defect.description }}</p>
-                <div class="flex gap-sm mt-md">
-                  <ui-badge variant="secondary">{{ defect.trigger_mode }}</ui-badge>
-                  <ui-badge variant="secondary">{{ defect.lifecycle }}</ui-badge>
-                </div>
-              }
-            }
-          </ui-card>
-        } @else {
-          <p class="text-muted-foreground text-sm p-sm">
-            Select a defect to view details and submit a decision.
-          </p>
-        }
-
-        @if (store.context(); as ctx) {
-          <tfc-context-panel
-            [title]="ctx.title"
-            [briefing]="ctx.briefing"
-            [objectives]="ctx.objectives"
-            [rules]="ctx.rules" />
-        }
-
-        <ui-card title="Decision History">
-          @for (decision of decisionHistory(); track decision.id) {
-            <div class="flex items-center justify-between p-sm border-b">
-              <span class="text-sm font-medium">{{ decision.title }}</span>
-              <ui-badge variant="secondary">{{ decision.status }}</ui-badge>
-            </div>
-          } @empty {
-            <p class="text-muted-foreground text-sm p-sm">No past decisions.</p>
-          }
-        </ui-card>
+        </div>
       </div>
 
       @if (activeDecision(); as decision) {
@@ -121,11 +79,35 @@ import { handleDecisionWsChanges } from './player-ws-handler';
 
       <footer class="exercise-controls">
         <div class="exercise-controls__group">
-          <p class="text-sm text-muted-foreground">
-            Waiting for Game Master actions...
-          </p>
+          <span class="text-sm text-muted-foreground">
+            Role: <strong>{{ store.playerRole() }}</strong>
+          </span>
+        </div>
+        <div class="exercise-controls__spacer"></div>
+        <div class="exercise-controls__group">
+          @if (showHistory()) {
+            <span class="text-xs text-muted-foreground">
+              {{ decisionHistory().length }} past decision(s)
+            </span>
+          }
+          <button class="text-sm" (click)="toggleHistory()">
+            {{ showHistory() ? 'Hide History' : 'Decision History' }}
+          </button>
         </div>
       </footer>
+
+      @if (showHistory()) {
+        <div class="exercise-details">
+          @for (decision of decisionHistory(); track decision.id) {
+            <div class="flex items-center justify-between p-sm border-b">
+              <span class="text-sm font-medium">{{ decision.title }}</span>
+              <span class="text-xs text-muted-foreground">{{ decision.status }}</span>
+            </div>
+          } @empty {
+            <p class="text-muted-foreground text-sm p-sm">No past decisions.</p>
+          }
+        </div>
+      }
     </div>
   `,
 })
@@ -134,16 +116,11 @@ export class PlayerView implements OnInit, OnDestroy {
   private readonly api = inject(EngineApiService);
   private readonly decisionApi = inject(DecisionApiService);
   private readonly ws = inject(ExerciseWsService);
-  protected readonly selectedDefectId = signal<string | null>(null);
   protected readonly decisionHistory = signal<DecisionDetail[]>([]);
+  protected readonly showHistory = signal(false);
   private readonly exerciseId = signal(1); // TODO: from route param
   private sub: Subscription | null = null;
-
-  protected visibleInjects() {
-    return this.store.injects().filter(
-      (e) => e.lifecycle === 'running' || e.lifecycle === 'completed',
-    );
-  }
+  private connSub: Subscription | null = null;
 
   protected activeDecision(): ActiveDecision | undefined {
     const role = this.store.playerRole();
@@ -169,7 +146,11 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   }
 
-  private connSub: Subscription | null = null;
+  ngOnDestroy(): void {
+    this.ws.disconnect();
+    this.sub?.unsubscribe();
+    this.connSub?.unsubscribe();
+  }
 
   private loadSnapshot(exerciseId: number): void {
     this.api.snapshot(exerciseId).subscribe({
@@ -178,20 +159,8 @@ export class PlayerView implements OnInit, OnDestroy {
     });
   }
 
-  ngOnDestroy(): void {
-    this.ws.disconnect();
-    this.sub?.unsubscribe();
-    this.connSub?.unsubscribe();
-  }
-
-  protected getDefectCountdown(defectId: string): string | null {
-    const item = this.store.defectsWithCountdown().find((i) => i.id === defectId);
-    if (!item || item.remaining_ms <= 0) return null;
-    return formatTimeMs(item.remaining_ms);
-  }
-
-  protected selectDefect(defectId: string): void {
-    this.selectedDefectId.set(defectId);
+  protected toggleHistory(): void {
+    this.showHistory.update((v) => !v);
   }
 
   protected onDecisionSubmitted(
