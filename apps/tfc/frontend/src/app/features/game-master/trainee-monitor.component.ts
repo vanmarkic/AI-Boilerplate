@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { BadgeComponent, ButtonDirective, CardComponent } from '@aspect/ui';
+import { BadgeComponent, ButtonDirective } from '@aspect/ui';
 import type { ParticipantPresence } from '../../core/exercise.store';
 import type { ActiveDecision } from '../../core/decision-api.service';
 
 @Component({
   selector: 'tfc-trainee-monitor',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [BadgeComponent, ButtonDirective, CardComponent],
+  imports: [BadgeComponent, ButtonDirective],
   template: `
     <div class="trainee-monitor__grid">
       @for (p of participants(); track p.id) {
