@@ -85,7 +85,7 @@ def tracked_defects(
         trigger_mode=mode,
         trigger_time_pt_ms=trigger_time,
         trigger_inject_id=trigger_inject,
-        auto_resolve_ms=auto_resolve,
+        auto_resolve_pt_ms=auto_resolve,
     )
 
 

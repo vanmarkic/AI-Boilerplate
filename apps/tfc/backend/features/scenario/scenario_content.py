@@ -48,7 +48,8 @@ class ScenarioDefectDef(BaseModel):
     trigger_mode: str  # time-based, inject-based, manual
     trigger_time_pt_ms: float | None = None
     trigger_inject_id: str | None = None
-    auto_resolve_ms: float = 0  # 0 = no auto-resolve
+    auto_resolve_pt_ms: float = 0  # 0 = no PT auto-resolve
+    auto_resolve_rt_ms: float = 0  # 0 = no RT auto-resolve
 
 
 class ScenarioPhaseDef(BaseModel):

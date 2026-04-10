@@ -21,7 +21,7 @@ def _defect(
     trigger_mode: TriggerMode = TriggerMode.TIME_BASED,
     trigger_time_pt_ms: float | None = None,
     trigger_inject_id: str | None = None,
-    auto_resolve_ms: float = 0.0,
+    auto_resolve_pt_ms: float = 0.0,
 ) -> TrackedDefect:
     return TrackedDefect(
         id=iid,
@@ -30,7 +30,7 @@ def _defect(
         trigger_mode=trigger_mode,
         trigger_time_pt_ms=trigger_time_pt_ms,
         trigger_inject_id=trigger_inject_id,
-        auto_resolve_ms=auto_resolve_ms,
+        auto_resolve_pt_ms=auto_resolve_pt_ms,
     )
 
 
@@ -49,7 +49,7 @@ class TestTransitionsAlwaysValid:
         auto_resolve: float,
         ticks: list[float],
     ) -> None:
-        defect = _defect(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
+        defect = _defect(trigger_time_pt_ms=trigger_time, auto_resolve_pt_ms=auto_resolve)
         mgr = DefectManager()
         mgr.load_defects([defect])
         prev = DefectLifecycle.INACTIVE
@@ -78,7 +78,7 @@ class TestResolvedAbsorbing:
         auto_resolve: float,
         extra_ticks: list[float],
     ) -> None:
-        defect = _defect(trigger_time_pt_ms=trigger_time, auto_resolve_ms=auto_resolve)
+        defect = _defect(trigger_time_pt_ms=trigger_time, auto_resolve_pt_ms=auto_resolve)
         mgr = DefectManager()
         mgr.load_defects([defect])
         # Activate then wait for auto-resolve

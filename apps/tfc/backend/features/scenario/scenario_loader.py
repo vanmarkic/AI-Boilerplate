@@ -47,7 +47,8 @@ def load_scenario_defects(content: ScenarioContent) -> list[TrackedDefect]:
                 trigger_mode=TriggerMode(defect.trigger_mode),
                 trigger_time_pt_ms=defect.trigger_time_pt_ms,
                 trigger_inject_id=defect.trigger_inject_id,
-                auto_resolve_ms=defect.auto_resolve_ms,
+                auto_resolve_pt_ms=defect.auto_resolve_pt_ms,
+                auto_resolve_rt_ms=defect.auto_resolve_rt_ms,
             ),
         )
     return defects

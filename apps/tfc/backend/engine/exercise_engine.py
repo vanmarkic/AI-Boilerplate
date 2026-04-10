@@ -129,7 +129,7 @@ class ExerciseEngine:
                 defect_changes = self._defects.activate_by_inject(inject_id, pt)
                 changes.extend(defect_changes)
 
-        defect_changes = self._defects.tick(pt, completed_injects)
+        defect_changes = self._defects.tick(pt, completed_injects, current_rt_ms=self._time.real_time_ms)
         changes.extend(defect_changes)
 
         if changes and self._on_state_change:

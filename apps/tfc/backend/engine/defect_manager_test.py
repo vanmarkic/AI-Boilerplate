@@ -14,7 +14,7 @@ def _defect(
     trigger_mode: TriggerMode = TriggerMode.TIME_BASED,
     trigger_time_pt_ms: float | None = None,
     trigger_inject_id: str | None = None,
-    auto_resolve_ms: float = 0.0,
+    auto_resolve_pt_ms: float = 0.0,
 ) -> TrackedDefect:
     return TrackedDefect(
         id=id,
@@ -23,7 +23,7 @@ def _defect(
         trigger_mode=trigger_mode,
         trigger_time_pt_ms=trigger_time_pt_ms,
         trigger_inject_id=trigger_inject_id,
-        auto_resolve_ms=auto_resolve_ms,
+        auto_resolve_pt_ms=auto_resolve_pt_ms,
     )
 
 
@@ -113,7 +113,7 @@ class TestMitigateResolve:
 class TestAutoResolveCountdown:
     def test_auto_resolve_expires(self) -> None:
         mgr = DefectManager()
-        mgr.load_defects([_defect("i1", trigger_time_pt_ms=0.0, auto_resolve_ms=1000.0)])
+        mgr.load_defects([_defect("i1", trigger_time_pt_ms=0.0, auto_resolve_pt_ms=1000.0)])
         mgr.tick(0.0, set())  # activates
         assert mgr.defects["i1"].lifecycle == DefectLifecycle.ACTIVE
         changes = mgr.tick(1000.0, set())
@@ -146,3 +146,61 @@ class TestInactiveGuards:
         mgr = DefectManager()
         mgr.load_defects([_defect("i1", trigger_mode=TriggerMode.MANUAL)])
         assert mgr.resolve("i1", 0.0) is None
+
+
+class TestRTCountdown:
+    def test_defect_resolves_by_pt_countdown(self) -> None:
+        """PT countdown expires, RT = 0 (disabled) — resolves by PT."""
+        manager = DefectManager()
+        manager.load_defects([TrackedDefect(
+            id="d1", title="PT defect", description="",
+            trigger_mode=TriggerMode.MANUAL,
+            auto_resolve_pt_ms=5000,
+            auto_resolve_rt_ms=0,
+        )])
+        manager.manual_activate("d1", current_pt_ms=0)
+        changes = manager.tick(6000, set(), current_rt_ms=1000)  # PT expired, RT not
+        assert any(c["defect_id"] == "d1" and c["lifecycle"] == "resolved" for c in changes)
+
+    def test_defect_resolves_by_rt_countdown(self) -> None:
+        """RT countdown expires, PT = 0 (disabled) — resolves by RT."""
+        manager = DefectManager()
+        manager.load_defects([TrackedDefect(
+            id="d1", title="RT defect", description="",
+            trigger_mode=TriggerMode.MANUAL,
+            auto_resolve_pt_ms=0,
+            auto_resolve_rt_ms=5000,
+        )])
+        manager.manual_activate("d1", current_pt_ms=0)
+        manager.defects["d1"].activated_at_rt_ms = 0  # manually set for test
+        changes = manager.tick(1000, set(), current_rt_ms=6000)  # RT expired
+        assert any(c["defect_id"] == "d1" and c["lifecycle"] == "resolved" for c in changes)
+
+    def test_defect_resolves_by_whichever_expires_first(self) -> None:
+        """Both PT and RT set; RT expires first — resolves on RT."""
+        manager = DefectManager()
+        manager.load_defects([TrackedDefect(
+            id="d1", title="Both", description="",
+            trigger_mode=TriggerMode.MANUAL,
+            auto_resolve_pt_ms=10000,  # won't expire yet
+            auto_resolve_rt_ms=3000,   # will expire
+        )])
+        manager.manual_activate("d1", current_pt_ms=0)
+        manager.defects["d1"].activated_at_rt_ms = 0
+        changes = manager.tick(2000, set(), current_rt_ms=4000)  # RT expired, PT not
+        assert any(c["defect_id"] == "d1" and c["lifecycle"] == "resolved" for c in changes)
+
+    def test_defect_not_resolved_when_neither_expired(self) -> None:
+        """Neither countdown expired — defect stays active."""
+        manager = DefectManager()
+        manager.load_defects([TrackedDefect(
+            id="d1", title="Neither", description="",
+            trigger_mode=TriggerMode.MANUAL,
+            auto_resolve_pt_ms=10000,
+            auto_resolve_rt_ms=10000,
+        )])
+        manager.manual_activate("d1", current_pt_ms=0)
+        manager.defects["d1"].activated_at_rt_ms = 0
+        changes = manager.tick(1000, set(), current_rt_ms=1000)
+        assert not any(c.get("lifecycle") == "resolved" for c in changes)
+        assert manager.defects["d1"].lifecycle == DefectLifecycle.ACTIVE

@@ -2,7 +2,8 @@
 
 Defects progress through: inactive -> active -> mitigated -> resolved.
 Trigger modes: time-based, inject-based, manual (GM).
-Auto-resolve countdown = time in PT before the defect resolves automatically.
+ETBOL countdowns: auto_resolve_pt_ms (play time) and/or auto_resolve_rt_ms (real
+time). The defect resolves on whichever countdown expires first.
 """
 from __future__ import annotations
 
@@ -42,9 +43,11 @@ class TrackedDefect:
     trigger_mode: TriggerMode
     trigger_time_pt_ms: float | None = None
     trigger_inject_id: str | None = None
-    auto_resolve_ms: float = 0.0
+    auto_resolve_pt_ms: float = 0.0
+    auto_resolve_rt_ms: float = 0.0
     lifecycle: DefectLifecycle = DefectLifecycle.INACTIVE
     activated_at_pt_ms: float | None = None
+    activated_at_rt_ms: float | None = None
     resolved_at_pt_ms: float | None = None
     released_to_players: bool = False
 
@@ -69,12 +72,15 @@ class DefectManager:
         self,
         current_pt_ms: float,
         completed_inject_ids: set[str],
+        *,
+        current_rt_ms: float = 0.0,
     ) -> list[dict]:
         """Check all defects for activation and auto-resolve expiry.
 
         Args:
             current_pt_ms: Current play time in milliseconds.
             completed_inject_ids: Set of inject IDs that have completed.
+            current_rt_ms: Current real time in milliseconds (for RT countdown).
 
         Returns:
             List of state change dicts for broadcasting.
@@ -84,16 +90,28 @@ class DefectManager:
         for defect in self._defects.values():
             if defect.lifecycle == DefectLifecycle.INACTIVE:
                 if self._should_activate(defect, current_pt_ms, completed_inject_ids):
-                    self._activate(defect, current_pt_ms)
+                    self._activate(defect, current_pt_ms, current_rt_ms)
                     changes.append(self._change(defect, "activated"))
 
-            if defect.lifecycle == DefectLifecycle.ACTIVE and defect.auto_resolve_ms > 0:
-                if defect.activated_at_pt_ms is not None:
-                    elapsed = current_pt_ms - defect.activated_at_pt_ms
-                    if elapsed >= defect.auto_resolve_ms:
-                        self._transition(defect, DefectLifecycle.RESOLVED)
-                        defect.resolved_at_pt_ms = current_pt_ms
-                        changes.append(self._change(defect, "auto_resolve_expired"))
+            if defect.lifecycle == DefectLifecycle.ACTIVE:
+                resolved = False
+
+                # PT countdown
+                if not resolved and defect.auto_resolve_pt_ms > 0:
+                    if defect.activated_at_pt_ms is not None:
+                        if (current_pt_ms - defect.activated_at_pt_ms) >= defect.auto_resolve_pt_ms:
+                            resolved = True
+
+                # RT countdown
+                if not resolved and defect.auto_resolve_rt_ms > 0:
+                    if defect.activated_at_rt_ms is not None:
+                        if (current_rt_ms - defect.activated_at_rt_ms) >= defect.auto_resolve_rt_ms:
+                            resolved = True
+
+                if resolved:
+                    self._transition(defect, DefectLifecycle.RESOLVED)
+                    defect.resolved_at_pt_ms = current_pt_ms
+                    changes.append(self._change(defect, "auto_resolve_expired"))
 
         return changes
 
@@ -170,9 +188,12 @@ class DefectManager:
         return False  # manual triggers don't auto-activate
 
     @staticmethod
-    def _activate(defect: TrackedDefect, current_pt_ms: float) -> None:
+    def _activate(
+        defect: TrackedDefect, current_pt_ms: float, current_rt_ms: float = 0.0,
+    ) -> None:
         defect.lifecycle = DefectLifecycle.ACTIVE
         defect.activated_at_pt_ms = current_pt_ms
+        defect.activated_at_rt_ms = current_rt_ms
         defect.released_to_players = True
 
     @staticmethod
@@ -200,7 +221,8 @@ class DefectManager:
                 "title": i.title,
                 "description": i.description,
                 "trigger_mode": i.trigger_mode.value,
-                "auto_resolve_ms": i.auto_resolve_ms,
+                "auto_resolve_pt_ms": i.auto_resolve_pt_ms,
+                "auto_resolve_rt_ms": i.auto_resolve_rt_ms,
                 "lifecycle": i.lifecycle.value,
                 "activated_at_pt_ms": i.activated_at_pt_ms,
                 "resolved_at_pt_ms": i.resolved_at_pt_ms,

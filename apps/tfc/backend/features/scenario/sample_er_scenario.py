@@ -243,7 +243,7 @@ ER_SCENARIO_CONTENT: dict = {
             ),
             "trigger_mode": "inject-based",
             "trigger_inject_id": "evt-mci-activation",
-            "auto_resolve_ms": 20 * _MIN,
+            "auto_resolve_pt_ms": 20 * _MIN,
         },
         {
             "id": "iss-triage-bottleneck",
@@ -254,7 +254,7 @@ ER_SCENARIO_CONTENT: dict = {
             ),
             "trigger_mode": "inject-based",
             "trigger_inject_id": "evt-first-ambulances",
-            "auto_resolve_ms": 10 * _MIN,
+            "auto_resolve_pt_ms": 10 * _MIN,
         },
         {
             "id": "iss-or-contention",
@@ -265,7 +265,7 @@ ER_SCENARIO_CONTENT: dict = {
             ),
             "trigger_mode": "inject-based",
             "trigger_inject_id": "evt-red-patients",
-            "auto_resolve_ms": 0,
+            "auto_resolve_pt_ms": 0,
         },
         {
             "id": "iss-paediatric-capacity",
@@ -276,7 +276,7 @@ ER_SCENARIO_CONTENT: dict = {
             ),
             "trigger_mode": "inject-based",
             "trigger_inject_id": "evt-second-wave",
-            "auto_resolve_ms": 0,
+            "auto_resolve_pt_ms": 0,
         },
         {
             "id": "iss-blood-supply",
@@ -287,7 +287,7 @@ ER_SCENARIO_CONTENT: dict = {
             ),
             "trigger_mode": "inject-based",
             "trigger_inject_id": "evt-blood-shortage",
-            "auto_resolve_ms": 45 * _MIN,
+            "auto_resolve_pt_ms": 45 * _MIN,
         },
         {
             "id": "iss-bed-shortage",
@@ -298,7 +298,7 @@ ER_SCENARIO_CONTENT: dict = {
             ),
             "trigger_mode": "inject-based",
             "trigger_inject_id": "evt-icu-full",
-            "auto_resolve_ms": 0,
+            "auto_resolve_pt_ms": 0,
         },
         {
             "id": "iss-public-info",
@@ -306,7 +306,7 @@ ER_SCENARIO_CONTENT: dict = {
             "description": ("Media and families require updates. No PIO has been designated yet."),
             "trigger_mode": "time-based",
             "trigger_time_pt_ms": 28 * _MIN,
-            "auto_resolve_ms": 0,
+            "auto_resolve_pt_ms": 0,
         },
     ],
     # ── Decision Templates ───────────────────────────────────────────────
