@@ -3,9 +3,11 @@ from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
+from unittest.mock import AsyncMock
 
 from engine.inject_scheduler import InjectType, ScheduledInject
 from engine.exercise_engine import EngineConfig
+from engine.defect_manager import TrackedDefect, TriggerMode
 from engine.session_store import session_store
 
 
@@ -168,6 +170,179 @@ async def test_lookup_by_session_code_case_insensitive(client: AsyncClient) -> N
 async def test_lookup_by_invalid_code_404(client: AsyncClient) -> None:
     resp = await client.get("/api/exercises/by-code/XXXXXX")
     assert resp.status_code == 404
+
+
+# ── Broadcast (audit) tests ───────────────────────────────────────────────
+
+
+def _start_engine_with_callback(
+    exercise_id: int,
+    on_state_change: AsyncMock,
+    defect_id: str | None = None,
+) -> None:
+    """Create a running engine with an inject (and optional manual defect)."""
+    from unittest.mock import patch
+
+    injects = [
+        ScheduledInject(
+            id="e1", title="E1", description="",
+            inject_type=InjectType.OPERATIONAL,
+            scheduled_pt_ms=0.0, duration_ms=99999.0,
+        ),
+    ]
+    defects: list[TrackedDefect] = []
+    if defect_id:
+        defects.append(TrackedDefect(
+            id=defect_id, title="D1", description="",
+            trigger_mode=TriggerMode.MANUAL,
+        ))
+    config = EngineConfig(
+        exercise_id=exercise_id,
+        title="Broadcast Test",
+        injects=injects,
+        defects=defects,
+    )
+    session_store.remove(exercise_id)
+    engine = session_store.create(config, on_state_change=on_state_change)
+    with patch("engine.time_manager._now_ms", return_value=0.0):
+        engine._time.start()
+        engine._time._paused = False
+        engine._injects.tick(0.0)
+        engine._injects.tick(0.0)
+    engine._phase = engine._phase.__class__("running")
+
+
+@pytest.mark.asyncio
+async def test_cancel_inject_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb)
+    # skip to COMPLETED so cancel isn't an option; pause first then cancel
+    await client.post(f"/api/exercises/{eid}/engine/injects/e1/pause")
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/cancel")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_complete_inject_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb)
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/complete")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_pause_inject_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb)
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/pause")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_resume_inject_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb)
+    await client.post(f"/api/exercises/{eid}/engine/injects/e1/pause")
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/resume")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_delay_inject_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    # Use a future-scheduled inject so delay is valid
+    config = EngineConfig(
+        exercise_id=eid, title="T",
+        injects=[ScheduledInject(
+            id="e2", title="E2", description="",
+            inject_type=InjectType.OPERATIONAL, scheduled_pt_ms=99999.0,
+        )],
+    )
+    session_store.remove(eid)
+    session_store.create(config, on_state_change=cb)
+    resp = await client.post(
+        f"/api/exercises/{eid}/engine/injects/e2/delay",
+        json={"delay_ms": 5000},
+    )
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_skip_inject_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb)
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/injects/e1/skip")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_activate_defect_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb, defect_id="d1")
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/defects/d1/activate")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_mitigate_defect_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb, defect_id="d1")
+    engine = session_store.get(eid)
+    assert engine is not None
+    engine.defect_manager.manual_activate("d1", 0.0)
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/defects/d1/mitigate")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_resolve_defect_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb, defect_id="d1")
+    engine = session_store.get(eid)
+    assert engine is not None
+    engine.defect_manager.manual_activate("d1", 0.0)
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/defects/d1/resolve")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_release_defect_broadcasts(client: AsyncClient) -> None:
+    eid = await _create_exercise(client)
+    cb = AsyncMock()
+    _start_engine_with_callback(eid, cb, defect_id="d1")
+    engine = session_store.get(eid)
+    assert engine is not None
+    engine.defect_manager.manual_activate("d1", 0.0)
+    cb.reset_mock()
+    resp = await client.post(f"/api/exercises/{eid}/engine/defects/d1/release")
+    assert resp.status_code == 200
+    cb.assert_awaited_once()
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────

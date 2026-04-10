@@ -106,6 +106,11 @@ class ExerciseEngine:
         self._time.factor = factor
         return {"type": "speed_change", "factor": factor}
 
+    async def broadcast_changes(self, changes: list[dict]) -> None:
+        """Broadcast state changes to listeners (WS + audit)."""
+        if self._on_state_change and changes:
+            await self._on_state_change(changes)
+
     async def tick(self) -> list[StateChange]:
         """Advance time, check triggers, return state changes."""
         changes: list[dict] = []

@@ -53,58 +53,72 @@ async def trigger_inject(exercise_id: int, inject_id: str) -> dict:
 
 @router.post("/injects/{inject_id}/cancel", operation_id="cancelInject")
 async def cancel_inject(exercise_id: int, inject_id: str) -> dict:
-    return _or_404(
-        _get_engine(exercise_id).inject_scheduler.cancel_inject(inject_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.inject_scheduler.cancel_inject(inject_id),
         f"Inject {inject_id} not found or not cancellable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/injects/{inject_id}/complete", operation_id="completeInject")
 async def complete_inject(exercise_id: int, inject_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.inject_scheduler.complete_inject(inject_id, pt),
         f"Inject {inject_id} not found or not completable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/injects/{inject_id}/pause", operation_id="pauseInject")
 async def pause_inject(exercise_id: int, inject_id: str) -> dict:
-    return _or_404(
-        _get_engine(exercise_id).inject_scheduler.pause_inject(inject_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.inject_scheduler.pause_inject(inject_id),
         f"Inject {inject_id} not found or not pausable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/injects/{inject_id}/resume", operation_id="resumeInject")
 async def resume_inject(exercise_id: int, inject_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.inject_scheduler.resume_inject(inject_id, pt),
         f"Inject {inject_id} not found or not resumable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/injects/{inject_id}/delay", operation_id="delayInject")
 async def delay_inject(
     exercise_id: int, inject_id: str, body: DelayRequest,
 ) -> dict:
-    return _or_404(
-        _get_engine(exercise_id).inject_scheduler.delay_inject(
-            inject_id, body.delay_ms,
-        ),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.inject_scheduler.delay_inject(inject_id, body.delay_ms),
         f"Inject {inject_id} not found or not delayable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/injects/{inject_id}/skip", operation_id="skipInject")
 async def skip_inject(exercise_id: int, inject_id: str) -> dict:
-    return _or_404(
-        _get_engine(exercise_id).inject_scheduler.skip_inject(inject_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.inject_scheduler.skip_inject(inject_id),
         f"Inject {inject_id} not found or not skippable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 # ── Defect actions ───────────────────────────────────────────────────────
@@ -114,36 +128,46 @@ async def skip_inject(exercise_id: int, inject_id: str) -> dict:
 async def activate_defect(exercise_id: int, defect_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.defect_manager.manual_activate(defect_id, pt),
         f"Defect {defect_id} not found or not activatable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/defects/{defect_id}/mitigate", operation_id="mitigateDefect")
 async def mitigate_defect(exercise_id: int, defect_id: str) -> dict:
-    return _or_404(
-        _get_engine(exercise_id).defect_manager.mitigate(defect_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.defect_manager.mitigate(defect_id),
         f"Defect {defect_id} not found or not mitigatable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/defects/{defect_id}/resolve", operation_id="resolveDefect")
 async def resolve_defect(exercise_id: int, defect_id: str) -> dict:
     engine = _get_engine(exercise_id)
     pt = engine.time_manager.play_time_ms
-    return _or_404(
+    change = _or_404(
         engine.defect_manager.resolve(defect_id, pt),
         f"Defect {defect_id} not found or not resolvable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 @router.post("/defects/{defect_id}/release", operation_id="releaseDefect")
 async def release_defect(exercise_id: int, defect_id: str) -> dict:
-    return _or_404(
-        _get_engine(exercise_id).defect_manager.release_to_players(defect_id),
+    engine = _get_engine(exercise_id)
+    change = _or_404(
+        engine.defect_manager.release_to_players(defect_id),
         f"Defect {defect_id} not found or not releasable",
     )
+    await engine.broadcast_changes([change])
+    return change
 
 
 # ── Decision actions ─────────────────────────────────────────────────────
