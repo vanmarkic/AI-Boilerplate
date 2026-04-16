@@ -49,7 +49,7 @@ jobs:
           SHORT="${SHA:0:7}"
           echo "<script>console.log('Storybook build: ${SHORT}');</script><div id='sb-git-sha' style='position:fixed;bottom:4px;right:4px;font-size:10px;color:#888;z-index:99999;pointer-events:none;'>${SHORT}</div>" >> apps/main/frontend/storybook-static/index.html
         shell: bash
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: apps/main/frontend/storybook-static
 
