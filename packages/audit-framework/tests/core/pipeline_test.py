@@ -291,5 +291,65 @@ def test_channel_failure_marks_notification_failed() -> None:
     assert ctx.notifications[0].error
 
 
+def test_escalation_present_but_disabled_does_not_publish() -> None:
+    broadcast = [
+        BroadcastPolicy(
+            name="notify",
+            match={},
+            targets=[BroadcastTarget(type="role", value="admin", channels=["in_app"])],
+            escalation=EscalationConfig(enabled=False, severity=3),
+        )
+    ]
+    store = FakePolicyStore(audit=[AuditPolicy(name="all", match={})], broadcast=broadcast)
+    identity = FakeIdentityResolver(roles={"admin": ["u1"]})
+    bus = FakeEventBus()
+
+    pipeline, _ = _build(
+        store,
+        sinks=[],
+        identity=identity,
+        owners=FakeOwnerResolver(),
+        throttle=FakeThrottleStore(),
+        notif_store=FakeNotificationStore(),
+        bus=bus,
+    )
+
+    ctx = asyncio.run(pipeline.execute(_event()))
+
+    # policy still matched (a directive was produced) ...
+    assert len(ctx.directives) == 1
+    # ... but escalation is opted out, so nothing is published to the bus
+    assert bus.published == []
+
+
+def test_group_and_user_targets_resolution() -> None:
+    broadcast = [
+        BroadcastPolicy(
+            name="multi",
+            match={},
+            targets=[
+                BroadcastTarget(type="group", value="ops", channels=["in_app"]),
+                BroadcastTarget(type="user", value="u9", channels=["in_app"]),
+            ],
+        )
+    ]
+    store = FakePolicyStore(audit=[AuditPolicy(name="all", match={})], broadcast=broadcast)
+    identity = FakeIdentityResolver(groups={"ops": ["g1", "g2"]})
+
+    pipeline, _ = _build(
+        store,
+        sinks=[],
+        identity=identity,
+        owners=FakeOwnerResolver(),
+        throttle=FakeThrottleStore(),
+        notif_store=FakeNotificationStore(),
+        bus=FakeEventBus(),
+    )
+
+    ctx = asyncio.run(pipeline.execute(_event()))
+    recipients = {d.recipient_id for d in ctx.directives}
+    assert recipients == {"g1", "g2", "u9"}  # group members + passthrough user
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))

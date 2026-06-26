@@ -9,6 +9,11 @@ coupling via the bus, AD-1).
 This middleware re-evaluates broadcast policies through the same engine the
 broadcast middleware uses, so escalation works regardless of chain ordering and
 without sharing mutable state between middlewares.
+
+Note: escalation is intentionally independent of broadcast throttling. Throttle
+limits suppress *notification noise*; a security-relevant incident must still
+escalate even when notifications are being rate-limited, so this middleware does
+not consult the :class:`ThrottleStore`.
 """
 
 from __future__ import annotations

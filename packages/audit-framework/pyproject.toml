@@ -39,3 +39,5 @@ packages = ["src/audit_framework"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+# Match the monorepo's *_test.py convention (and pytest's test_*.py default).
+python_files = ["*_test.py", "test_*.py"]

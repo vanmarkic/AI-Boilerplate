@@ -74,22 +74,26 @@ class Dispatcher:
         """Deliver every directive concurrently; return the notifications.
 
         Each returned :class:`Notification` reflects the final outcome
-        (``delivered`` or ``failed``). Failures are isolated per directive — a
-        raised channel error is captured on its own notification and never
-        aborts sibling deliveries.
+        (``delivered`` or ``failed``). Failures are isolated per directive: an
+        error in *any* step — rendering, persistence, recipient resolution, or
+        channel send — is captured on that directive's own notification and
+        never aborts sibling deliveries. ``gather`` runs with
+        ``return_exceptions=True`` so a single failure cannot cancel in-flight
+        siblings (and to honour the framework's fan-out contract).
         """
         if not directives:
             return []
         results = await asyncio.gather(
             *(self._deliver(d) for d in directives),
-            return_exceptions=False,
+            return_exceptions=True,
         )
-        return list(results)
+        # _deliver is total (never raises); the filter is defensive belt-and-braces.
+        return [r for r in results if isinstance(r, Notification)]
 
     async def _deliver(self, directive: NotificationDirective) -> Notification:
-        payload = self._renderer.render(
-            directive.template_key, directive.event, directive.channel
-        )
+        # Build the record first so every failure mode — including a failing
+        # render() or store.save() — can be captured on a real Notification
+        # rather than escaping and aborting the whole gather batch.
         notification = Notification(
             id=self._id_factory(),
             audit_event_request_id=directive.event.request_id,
@@ -97,19 +101,19 @@ class Dispatcher:
             recipient_id=directive.recipient_id,
             channel=directive.channel,
             status="pending",
-            payload=payload,
+            payload={},
             created_at=self._clock(),
         )
-        await self._store.save(notification)
-
-        channel = self._channels.get(directive.channel)
-        if channel is None:
-            await self._fail(notification, f"no channel registered: {directive.channel!r}")
-            return notification
-
         try:
+            notification.payload = self._renderer.render(
+                directive.template_key, directive.event, directive.channel
+            )
+            await self._store.save(notification)
+            channel = self._channels.get(directive.channel)
+            if channel is None:
+                raise LookupError(f"no channel registered: {directive.channel!r}")
             contact = await self._resolve_contact(directive)
-            await channel.send(directive.recipient_id, contact, payload)
+            await channel.send(directive.recipient_id, contact, notification.payload)
         except Exception as exc:  # best-effort: capture, never propagate
             await self._fail(notification, str(exc))
             return notification
@@ -132,4 +136,10 @@ class Dispatcher:
     async def _fail(self, notification: Notification, error: str) -> None:
         notification.status = "failed"
         notification.error = error
-        await self._store.mark_failed(notification.id, error)
+        try:
+            await self._store.mark_failed(notification.id, error)
+        except Exception:
+            # The returned Notification still reflects the failure even if the
+            # store is unreachable or the row was never persisted (e.g. render
+            # failed before save). Best-effort, never re-raise.
+            pass

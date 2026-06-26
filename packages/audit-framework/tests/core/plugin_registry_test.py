@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import pytest
 
-from audit_framework.core.plugin_registry import PluginError, PluginRegistry
+from audit_framework.core.plugin_registry import (
+    ENTRYPOINT_GROUP,
+    PluginError,
+    PluginRegistry,
+)
 
 
 class _ImplA:
@@ -82,6 +86,69 @@ def test_load_from_config_missing_module_raises() -> None:
     reg = PluginRegistry()
     with pytest.raises(PluginError):
         reg.load_from_config(["definitely_not_a_real_module_xyz"])
+
+
+class _FakeEntryPoint:
+    def __init__(self, name, fn) -> None:
+        self.name = name
+        self._fn = fn
+
+    def load(self):
+        return self._fn
+
+
+class _FakeEntryPoints:
+    def __init__(self, eps, calls) -> None:
+        self._eps = eps
+        self._calls = calls
+
+    def select(self, group):
+        self._calls.append(group)
+        return list(self._eps)
+
+
+def _patch_entry_points(monkeypatch, eps, calls):
+    import importlib.metadata as md
+
+    monkeypatch.setattr(md, "entry_points", lambda: _FakeEntryPoints(eps, calls))
+
+
+def test_discover_entrypoints_invokes_register(monkeypatch: pytest.MonkeyPatch) -> None:
+    def register(registry: PluginRegistry) -> None:
+        registry.register("redactor", "hash", _ImplA)
+
+    calls: list[str] = []
+    _patch_entry_points(monkeypatch, [_FakeEntryPoint("hash-redactor", register)], calls)
+
+    reg = PluginRegistry()
+    count = reg.discover_entrypoints()
+
+    assert count == 1
+    assert calls == [ENTRYPOINT_GROUP]  # selected the default plugin group
+    assert reg.get("redactor", "hash") is _ImplA
+
+
+def test_discover_entrypoints_honours_custom_group(monkeypatch: pytest.MonkeyPatch) -> None:
+    calls: list[str] = []
+    _patch_entry_points(monkeypatch, [], calls)
+
+    reg = PluginRegistry()
+    count = reg.discover_entrypoints(group="custom.group")
+
+    assert count == 0
+    assert calls == ["custom.group"]
+
+
+def test_discover_entrypoints_wraps_register_errors(monkeypatch: pytest.MonkeyPatch) -> None:
+    def bad_register(registry: PluginRegistry) -> None:
+        raise ValueError("boom")
+
+    calls: list[str] = []
+    _patch_entry_points(monkeypatch, [_FakeEntryPoint("bad", bad_register)], calls)
+
+    reg = PluginRegistry()
+    with pytest.raises(PluginError):
+        reg.discover_entrypoints()
 
 
 if __name__ == "__main__":

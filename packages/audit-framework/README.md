@@ -32,14 +32,18 @@ Plugins (Postgres store, Keycloak identity, SSE push, JSONL/Splunk/ELK sinks,
 
 ```
 Event
-  → RedactMiddleware        — strip sensitive fields
   → AuditPolicyMiddleware   — decide IF/HOW to record (or halt)
+  → RedactMiddleware        — strip sensitive fields (per selected policy + base_fields)
   → StoreMiddleware         — append to the audit store
   → SinkFanOutMiddleware    — fan out to SIEM/file sinks (parallel, best-effort)
   → BroadcastPolicyMiddleware — produce NotificationDirectives
   → DispatchMiddleware      — render + deliver over channels
   → EscalationMiddleware    — emit escalation.requested onto the event bus
 ```
+
+> Redaction runs **after** policy selection so a policy's `redact_fields` are
+> honoured; add a second `RedactMiddleware(base_fields=[...])` at the front if
+> you need pre-policy scrubbing of always-sensitive fields.
 
 Two **independent** policy layers are evaluated per event (audit ≠ broadcast).
 Fan-out (many sinks, many channels) happens *inside* a middleware via
@@ -162,7 +166,7 @@ store = registry.get("audit_store", "postgres")
 
 ```bash
 pip install -e ".[dev]"
-pytest                  # 34 stdlib-only tests, no infrastructure needed
+pytest                  # 48 stdlib-only tests, no infrastructure needed
 ```
 
 The core test-suite drives coroutines with `asyncio.run` and uses in-memory

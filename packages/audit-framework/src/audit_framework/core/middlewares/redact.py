@@ -1,17 +1,19 @@
-"""RedactMiddleware — strip sensitive fields before anything else sees them.
+"""RedactMiddleware — strip sensitive fields before storage/fan-out/delivery.
 
-Runs first in the chain so no downstream middleware (store, sinks, channels)
-ever observes raw secrets. Redaction is applied in two waves:
+Place this **after** :class:`AuditPolicyMiddleware` (see the recommended
+ordering in this package's ``__init__``) so it can apply the ``redact_fields``
+of the selected policy. Redaction combines two sources:
 
-* a fixed ``base_fields`` set configured once at wiring time (always redacted), and
-* any ``redact_fields`` declared by the audit policy *once it has been selected*
-  — applied on a second pass if this middleware is also placed after policy
-  evaluation, or honoured by re-running redaction when ``context.audit_policy``
-  is already present.
+* a fixed ``base_fields`` set configured once at wiring time (always redacted,
+  regardless of chain position), and
+* the ``redact_fields`` of ``context.audit_policy`` — only available once
+  ``AuditPolicyMiddleware`` has selected a policy. If this middleware runs
+  before policy selection, ``context.audit_policy`` is ``None`` and only
+  ``base_fields`` are scrubbed.
 
 Because :class:`AuditEvent` is immutable, redaction produces a new event via
-``dataclasses.replace`` and swaps it onto ``context.event`` so the rest of the
-chain sees only the sanitised version.
+``dataclasses.replace`` and swaps it onto ``context.event`` so every downstream
+middleware (store, sinks, channels) sees only the sanitised version.
 """
 
 from __future__ import annotations
