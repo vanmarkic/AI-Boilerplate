@@ -82,8 +82,20 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install pip-audit
-      - run: pip install -e .
-      # Audit the installed dependency tree of the package (zero runtime deps
-      # today, so this stays green — and starts failing the moment a vulnerable
-      # dependency is introduced).
-      - run: pip-audit --strict
+      # Audit only the package's third-party dependency tree — NOT the package
+      # itself, which is unpublished and so can't be resolved on PyPI. Zero
+      # runtime deps today (stays green); starts failing the moment a vulnerable
+      # dependency is introduced.
+      - name: Resolve dependency tree
+        run: |
+          python -m venv /tmp/auditenv
+          /tmp/auditenv/bin/pip install --quiet .
+          /tmp/auditenv/bin/pip freeze | grep -viE '^audit[-_]framework' > /tmp/deps.txt || true
+          echo "Dependencies to audit:"; cat /tmp/deps.txt
+      - name: Audit dependencies
+        run: |
+          if [ -s /tmp/deps.txt ]; then
+            pip-audit --strict --requirement /tmp/deps.txt
+          else
+            echo "No third-party runtime dependencies to audit."
+          fi
