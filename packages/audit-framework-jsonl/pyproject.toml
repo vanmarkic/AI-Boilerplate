@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "audit-framework-jsonl"
+version = "0.1.0"
+description = "Append-only JSONL file ExternalSink for audit-framework — the reference sink plugin."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+keywords = ["audit", "audit-log", "sink", "jsonl", "siem", "plugin"]
+dependencies = ["audit-framework"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+# Discovered by audit-framework's PluginRegistry.discover_entrypoints().
+[project.entry-points."audit_framework.plugins"]
+file_jsonl = "audit_framework_jsonl.plugin:register"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/audit_framework_jsonl"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Resolve the sibling core package without an install during local dev.
+pythonpath = ["src", "../audit-framework/src"]
+python_files = ["*_test.py", "test_*.py"]
