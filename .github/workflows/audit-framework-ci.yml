@@ -1,0 +1,89 @@
+name: audit-framework CI (tests + SAST + vuln)
+
+# Scoped gate for the publishable `packages/audit-framework` library: runs the
+# unit tests plus SAST (Bandit, Semgrep) and dependency vulnerability scanning
+# (pip-audit) on every PR that touches the package. Kept package-scoped on
+# purpose so it stays cheap — the repo-wide `security.yml` (CodeQL + full
+# Semgrep sweep) remains opt-in (workflow_dispatch) as the maintainers intended.
+
+on:
+  pull_request:
+    paths:
+      - 'packages/audit-framework/**'
+      - '.github/workflows/audit-framework-ci.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'packages/audit-framework/**'
+      - '.github/workflows/audit-framework-ci.yml'
+
+permissions:
+  contents: read
+  security-events: write
+
+defaults:
+  run:
+    working-directory: packages/audit-framework
+
+jobs:
+  tests:
+    name: Unit tests (pytest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install -e ".[dev]"
+      - run: pytest -q
+
+  bandit:
+    name: Bandit SAST
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install "bandit[sarif]"
+      # Gate on MEDIUM+ findings (-ll). Emits SARIF for the Security tab too.
+      - run: bandit -r src/ -ll -f sarif -o bandit.sarif
+      - name: Upload Bandit SARIF
+        if: always()
+        continue-on-error: true  # best-effort: don't fail if code scanning is off
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: packages/audit-framework/bandit.sarif
+          category: audit-framework-bandit
+
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: semgrep/semgrep
+    steps:
+      - uses: actions/checkout@v6
+      # --error makes Semgrep exit non-zero on findings, so the PR is gated.
+      - run: semgrep scan --config auto --error --sarif --output semgrep.sarif .
+      - name: Upload Semgrep SARIF
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: packages/audit-framework/semgrep.sarif
+          category: audit-framework-semgrep
+
+  pip-audit:
+    name: pip-audit (dependency vulns)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install pip-audit
+      - run: pip install -e .
+      # Audit the installed dependency tree of the package (zero runtime deps
+      # today, so this stays green — and starts failing the moment a vulnerable
+      # dependency is introduced).
+      - run: pip-audit --strict
