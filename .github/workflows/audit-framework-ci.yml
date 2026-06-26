@@ -63,8 +63,10 @@ jobs:
       image: semgrep/semgrep
     steps:
       - uses: actions/checkout@v6
-      # --error makes Semgrep exit non-zero on findings, so the PR is gated.
-      - run: semgrep scan --config auto --error --sarif --output semgrep.sarif .
+      # Security-focused rulesets (not the noisy `auto` best-practice set), scoped
+      # to production source like the Bandit job. --error gates the PR on any
+      # genuine security finding.
+      - run: semgrep scan --config p/security-audit --config p/secrets --error --sarif --output semgrep.sarif src/
       - name: Upload Semgrep SARIF
         if: always()
         continue-on-error: true

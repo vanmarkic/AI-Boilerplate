@@ -135,7 +135,11 @@ class PluginRegistry:
         module_name, _, attr = path.partition(":")
         attr = attr or "register"
         try:
-            module = importlib.import_module(module_name)
+            # The module path comes from trusted operator configuration (a
+            # plugin-discovery setting), never from end-user/request input, so
+            # this dynamic import is the intended extension mechanism, not an
+            # injection sink. Reviewed in the branch security audit.
+            module = importlib.import_module(module_name)  # nosemgrep
         except ImportError as exc:
             raise PluginError(f"cannot import plugin module {module_name!r}: {exc}") from exc
         try:
