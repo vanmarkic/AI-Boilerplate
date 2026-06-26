@@ -9,6 +9,7 @@ Zero dependencies beyond the standard library and ``typing``.
 
 from __future__ import annotations
 
+import copy
 from dataclasses import dataclass, field
 from typing import Any, Optional
 
@@ -56,9 +57,9 @@ class AuditEvent:
             "resource_id": self.resource_id,
             "timestamp": self.timestamp,
             "request_id": self.request_id,
-            "changes": dict(self.changes),
+            "changes": copy.deepcopy(self.changes),
             "ip_address": self.ip_address,
-            "metadata": dict(self.metadata),
+            "metadata": copy.deepcopy(self.metadata),
         }
 
 
@@ -236,7 +237,7 @@ class Notification:
             "recipient_id": self.recipient_id,
             "channel": self.channel,
             "status": self.status,
-            "payload": dict(self.payload),
+            "payload": copy.deepcopy(self.payload),
             "created_at": self.created_at,
             "delivered_at": self.delivered_at,
             "error": self.error,
@@ -280,5 +281,5 @@ class PipelineContext:
             "stored_id": self.stored_id,
             "directives": [d.to_dict() for d in self.directives],
             "notifications": [n.to_dict() for n in self.notifications],
-            "metadata": dict(self.metadata),
+            "metadata": copy.deepcopy(self.metadata),
         }

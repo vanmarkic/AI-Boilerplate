@@ -148,5 +148,52 @@ def test_empty_directives_returns_empty() -> None:
     assert asyncio.run(dispatcher.dispatch([])) == []
 
 
+class _MarkDeliveredBoom(FakeNotificationStore):
+    async def mark_delivered(self, notification_id: str, delivered_at: str) -> None:
+        raise RuntimeError("delivered-write failed")
+
+
+def test_mark_delivered_failure_is_captured_not_dropped() -> None:
+    # A failure in the post-send mark_delivered() write must be captured on the
+    # notification, not escape _deliver and abort the batch.
+    dispatcher = Dispatcher(
+        channels={"in_app": FakeChannel("in_app")},
+        renderer=FakeTemplateRenderer(),
+        store=_MarkDeliveredBoom(),
+        id_factory=_counter(),
+    )
+
+    notifications = asyncio.run(
+        dispatcher.dispatch([_directive("u1", "in_app"), _directive("u2", "in_app")])
+    )
+
+    assert len(notifications) == 2  # batch not aborted
+    assert all(n.status == "failed" for n in notifications)
+    assert "delivered-write failed" in notifications[0].error
+
+
+class _CancelChannel:
+    @property
+    def channel_name(self) -> str:
+        return "in_app"
+
+    async def send(self, recipient_id, contact, payload) -> None:  # type: ignore[no-untyped-def]
+        raise asyncio.CancelledError()
+
+
+def test_cancelled_error_propagates_and_is_not_silently_dropped() -> None:
+    # CancelledError is a BaseException, not caught by _deliver; dispatch must
+    # propagate it rather than filter it out and lose the directive.
+    dispatcher = Dispatcher(
+        channels={"in_app": _CancelChannel()},
+        renderer=FakeTemplateRenderer(),
+        store=FakeNotificationStore(),
+        id_factory=_counter(),
+    )
+
+    with pytest.raises(asyncio.CancelledError):
+        asyncio.run(dispatcher.dispatch([_directive("u1", "in_app")]))
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))

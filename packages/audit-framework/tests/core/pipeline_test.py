@@ -322,6 +322,88 @@ def test_escalation_present_but_disabled_does_not_publish() -> None:
     assert bus.published == []
 
 
+def test_throttle_caps_notification_fanout_within_one_event() -> None:
+    broadcast = [
+        BroadcastPolicy(
+            name="noisy",
+            match={},
+            targets=[BroadcastTarget(type="role", value="admin", channels=["in_app"])],
+            throttle=ThrottleConfig(window_seconds=60, max_per_window=2),
+        )
+    ]
+    store = FakePolicyStore(audit=[AuditPolicy(name="all", match={})], broadcast=broadcast)
+    identity = FakeIdentityResolver(roles={"admin": ["u1", "u2", "u3"]})
+
+    pipeline, _ = _build(
+        store,
+        sinks=[],
+        identity=identity,
+        owners=FakeOwnerResolver(),
+        throttle=FakeThrottleStore(),
+        notif_store=FakeNotificationStore(),
+        bus=FakeEventBus(),
+    )
+
+    ctx = asyncio.run(pipeline.execute(_event()))
+    # 3 admins but max_per_window=2 → fan-out is capped at 2 notifications
+    assert len(ctx.directives) == 2
+
+
+def test_duplicate_recipient_across_policies_is_deduped() -> None:
+    broadcast = [
+        BroadcastPolicy(
+            name="p1",
+            match={},
+            targets=[BroadcastTarget(type="role", value="admin", channels=["in_app"])],
+        ),
+        BroadcastPolicy(
+            name="p2",
+            match={},
+            targets=[BroadcastTarget(type="role", value="admin", channels=["in_app"])],
+        ),
+    ]
+    store = FakePolicyStore(audit=[AuditPolicy(name="all", match={})], broadcast=broadcast)
+    identity = FakeIdentityResolver(roles={"admin": ["u1"]})
+
+    pipeline, _ = _build(
+        store,
+        sinks=[],
+        identity=identity,
+        owners=FakeOwnerResolver(),
+        throttle=FakeThrottleStore(),
+        notif_store=FakeNotificationStore(),
+        bus=FakeEventBus(),
+    )
+
+    ctx = asyncio.run(pipeline.execute(_event()))
+    # same recipient+channel matched by two policies → a single notification
+    assert len(ctx.directives) == 1
+
+
+def test_user_target_with_none_value_yields_no_directive() -> None:
+    broadcast = [
+        BroadcastPolicy(
+            name="u",
+            match={},
+            targets=[BroadcastTarget(type="user", value=None, channels=["in_app"])],
+        )
+    ]
+    store = FakePolicyStore(audit=[AuditPolicy(name="all", match={})], broadcast=broadcast)
+
+    pipeline, _ = _build(
+        store,
+        sinks=[],
+        identity=FakeIdentityResolver(),
+        owners=FakeOwnerResolver(),
+        throttle=FakeThrottleStore(),
+        notif_store=FakeNotificationStore(),
+        bus=FakeEventBus(),
+    )
+
+    ctx = asyncio.run(pipeline.execute(_event()))
+    assert ctx.directives == []  # no bogus empty-recipient directive
+
+
 def test_group_and_user_targets_resolution() -> None:
     broadcast = [
         BroadcastPolicy(

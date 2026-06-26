@@ -50,24 +50,35 @@ class BroadcastPolicyMiddleware:
         self, event: AuditEvent, context: PipelineContext, next: NextCallable
     ) -> None:
         policies = self._policy_store.get_broadcast_policies()
+        # `seen` spans every policy for this event so two policies targeting the
+        # same recipient+channel produce a single notification, not duplicates.
+        seen: set[tuple[str, str]] = set()
         for policy in self._engine.evaluate(policies, event):
-            if await self._throttled(policy):
-                continue
-            await self._apply_policy(policy, event, context)
+            await self._apply_policy(policy, event, context, seen)
         await next()
 
     async def _apply_policy(
-        self, policy: BroadcastPolicy, event: AuditEvent, context: PipelineContext
+        self,
+        policy: BroadcastPolicy,
+        event: AuditEvent,
+        context: PipelineContext,
+        seen: set[tuple[str, str]],
     ) -> None:
-        seen: set[tuple[str, str]] = set()
         for target in policy.targets:
             recipients = await self._resolve_target(target, event)
             for recipient_id in recipients:
+                if not recipient_id:
+                    continue  # never address an empty/blank recipient
                 for channel in target.channels:
                     key = (recipient_id, channel)
                     if key in seen:
                         continue
                     seen.add(key)
+                    # Throttle per emitted notification: each unique
+                    # recipient+channel consumes one slot, so max_per_window
+                    # actually caps notification volume across fan-out.
+                    if await self._throttled(policy):
+                        continue
                     context.directives.append(
                         NotificationDirective(
                             recipient_id=recipient_id,
@@ -81,6 +92,8 @@ class BroadcastPolicyMiddleware:
     async def _resolve_target(
         self, target: BroadcastTarget, event: AuditEvent
     ) -> list[str]:
+        if target.type in ("role", "group", "user") and not target.value:
+            return []  # a value-less role/group/user target resolves to nobody
         if target.type == "role":
             return await self._identity.resolve_role(target.value or "")
         if target.type == "group":
@@ -96,6 +109,13 @@ class BroadcastPolicyMiddleware:
         return []
 
     async def _throttled(self, policy: BroadcastPolicy) -> bool:
+        """Consume one throttle slot for a single notification of ``policy``.
+
+        Returns True when this notification exceeds ``max_per_window`` and must
+        be suppressed. Called once per emitted notification (not once per event)
+        so the cap bounds notification volume, including within a single event's
+        fan-out to many recipients.
+        """
         if self._throttle is None or policy.throttle is None:
             return False
         cfg = policy.throttle

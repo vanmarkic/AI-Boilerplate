@@ -87,13 +87,22 @@ class Dispatcher:
             *(self._deliver(d) for d in directives),
             return_exceptions=True,
         )
-        # _deliver is total (never raises); the filter is defensive belt-and-braces.
-        return [r for r in results if isinstance(r, Notification)]
+        # _deliver catches every Exception internally, so a non-Notification
+        # result can only be a BaseException (e.g. asyncio.CancelledError on
+        # shutdown). Re-raise it rather than silently dropping the directive —
+        # cancellation must propagate, not vanish.
+        notifications: list[Notification] = []
+        for r in results:
+            if isinstance(r, Notification):
+                notifications.append(r)
+            elif isinstance(r, BaseException):
+                raise r
+        return notifications
 
     async def _deliver(self, directive: NotificationDirective) -> Notification:
         # Build the record first so every failure mode — including a failing
-        # render() or store.save() — can be captured on a real Notification
-        # rather than escaping and aborting the whole gather batch.
+        # render(), store.save(), or mark_delivered() — can be captured on a
+        # real Notification rather than escaping and aborting the gather batch.
         notification = Notification(
             id=self._id_factory(),
             audit_event_request_id=directive.event.request_id,
@@ -114,14 +123,12 @@ class Dispatcher:
                 raise LookupError(f"no channel registered: {directive.channel!r}")
             contact = await self._resolve_contact(directive)
             await channel.send(directive.recipient_id, contact, notification.payload)
+            delivered_at = self._clock()
+            notification.status = "delivered"
+            notification.delivered_at = delivered_at
+            await self._store.mark_delivered(notification.id, delivered_at)
         except Exception as exc:  # best-effort: capture, never propagate
             await self._fail(notification, str(exc))
-            return notification
-
-        delivered_at = self._clock()
-        notification.status = "delivered"
-        notification.delivered_at = delivered_at
-        await self._store.mark_delivered(notification.id, delivered_at)
         return notification
 
     async def _resolve_contact(

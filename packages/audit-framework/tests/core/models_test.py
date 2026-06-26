@@ -97,6 +97,16 @@ def test_notification_directive_is_frozen_notification_is_mutable() -> None:
     assert notification.to_dict()["status"] == "delivered"
 
 
+def test_to_dict_deep_copies_nested_mutables() -> None:
+    event = _event()
+    d = event.to_dict()
+    # mutating a NESTED value of the serialised copy must not touch the event
+    d["changes"]["amount"]["new"] = "tampered"
+    d["metadata"]["source"] = "tampered"
+    assert event.changes["amount"]["new"] == 2
+    assert event.metadata["source"] == "api"
+
+
 def test_pipeline_context_halt() -> None:
     ctx = PipelineContext(event=_event())
     assert ctx.halted is False

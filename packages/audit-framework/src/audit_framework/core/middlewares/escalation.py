@@ -7,8 +7,11 @@ open a case — the audit pipeline stays ignorant of case internals (loose
 coupling via the bus, AD-1).
 
 This middleware re-evaluates broadcast policies through the same engine the
-broadcast middleware uses, so escalation works regardless of chain ordering and
-without sharing mutable state between middlewares.
+broadcast middleware uses, so escalation does not depend on the broadcast
+middleware having run. It does, however, read ``context.stored_id`` (written by
+:class:`StoreMiddleware`) to correlate the incident with the persisted audit
+row, so place it **after** ``StoreMiddleware`` — otherwise the emitted payload
+carries ``stored_id=None`` and the case manager cannot link back to the row.
 
 Note: escalation is intentionally independent of broadcast throttling. Throttle
 limits suppress *notification noise*; a security-relevant incident must still

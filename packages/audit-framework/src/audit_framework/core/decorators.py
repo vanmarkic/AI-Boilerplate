@@ -162,9 +162,13 @@ def auditable(
             bound = dict(bound_args.arguments)
         except TypeError:
             bound = dict(kwargs)
-        resolved_actor = (
-            _resolve(actor_id, bound, result, "") if actor_id is not None else None
-        ) or _actor_id.get() or "system"
+        # An explicit actor_id spec wins even when it resolves to a falsy value
+        # (e.g. "" for an anonymous actor); only fall back to the ambient/system
+        # actor when no actor_id override was given.
+        if actor_id is not None:
+            resolved_actor = _resolve(actor_id, bound, result, "")
+        else:
+            resolved_actor = _actor_id.get() or "system"
         return AuditEvent(
             actor_id=resolved_actor,
             action=action,

@@ -133,6 +133,28 @@ def test_auditable_disabled_when_provider_returns_none() -> None:
     assert asyncio.run(Service().read("c-1")) == "value"
 
 
+def test_explicit_actor_resolving_to_empty_wins_over_ambient() -> None:
+    pipeline, capture = _pipeline_with_capture()
+    set_pipeline_provider(lambda: pipeline)
+    tokens = set_actor_context(actor_id="ambient-user")
+
+    class Service:
+        @auditable(
+            action="READ", resource_type="doc", resource_id="doc_id", actor_id="uid"
+        )
+        async def read(self, doc_id: str, uid: str) -> None:
+            return None
+
+    try:
+        asyncio.run(Service().read("d-1", uid=""))
+    finally:
+        reset_actor_context(tokens)
+        set_pipeline_provider(lambda: None)
+
+    # explicit (empty) actor override is preserved, NOT replaced by ambient/system
+    assert capture.events[0].actor_id == ""
+
+
 def test_auditable_rejects_sync_function() -> None:
     with pytest.raises(TypeError):
 

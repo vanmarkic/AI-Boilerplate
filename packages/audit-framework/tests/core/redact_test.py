@@ -82,5 +82,36 @@ def test_policy_redact_fields_inert_before_policy_selected() -> None:
     assert ctx.event.changes["ssn"] == {"old": "1", "new": "2"}  # policy field NOT yet redacted
 
 
+def _event_with_ip(ip: str | None) -> AuditEvent:
+    return AuditEvent(
+        actor_id="alice",
+        action="LOGIN",
+        resource_type="session",
+        resource_id="s-1",
+        timestamp="t",
+        request_id="r",
+        ip_address=ip,
+    )
+
+
+def test_base_fields_redact_top_level_ip_address() -> None:
+    ctx = PipelineContext(event=_event_with_ip("10.0.0.1"))
+    mw = RedactMiddleware(FakeRedactor(), base_fields=["ip_address"])
+
+    asyncio.run(_run(mw, ctx))
+
+    assert ctx.event.ip_address == "***"  # top-level field actually scrubbed
+    assert ctx.event.actor_id == "alice"  # unrelated top-level field untouched
+
+
+def test_top_level_redaction_does_not_fabricate_absent_field() -> None:
+    ctx = PipelineContext(event=_event_with_ip(None))
+    mw = RedactMiddleware(FakeRedactor(), base_fields=["ip_address"])
+
+    asyncio.run(_run(mw, ctx))
+
+    assert ctx.event.ip_address is None  # a None field is not masked into "***"
+
+
 if __name__ == "__main__":
     raise SystemExit(pytest.main([__file__, "-v"]))
