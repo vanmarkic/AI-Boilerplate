@@ -1,0 +1,41 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "audit-framework"
+version = "0.1.0"
+description = "Technology-agnostic audit logging, notification and case-management core. Pipe-and-filter pipeline + ports/adapters, zero runtime dependencies."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+keywords = [
+    "audit",
+    "audit-log",
+    "notifications",
+    "pipe-and-filter",
+    "hexagonal",
+    "ports-and-adapters",
+    "plugins",
+    "siem",
+]
+dependencies = []
+
+[project.optional-dependencies]
+# Core tests are stdlib-only (they drive coroutines with asyncio.run), so only
+# pytest itself is needed. pytest-asyncio is for the (future) plugin packages.
+dev = ["pytest>=8.0"]
+
+[project.urls]
+Homepage = "https://github.com/vanmarkic/AI-Boilerplate"
+Repository = "https://github.com/vanmarkic/AI-Boilerplate"
+
+# Plugins register against this entry-point group. The core never imports them.
+[project.entry-points."audit_framework.plugins"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/audit_framework"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
