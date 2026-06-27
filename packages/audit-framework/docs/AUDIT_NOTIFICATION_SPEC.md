@@ -1,7 +1,7 @@
 # Audit, Notification & Case Management — Architecture Specification
 
 > **Status:** Draft v1 — extracted from design session, not yet implemented.
-> **Stack context:** Angular frontend, FastAPI/Python backend, SQLAlchemy ORM, Keycloak OIDC/SSO, PostgreSQL, intranet/air-gapped deployment (defence sector).
+> **Stack context:** Angular frontend, FastAPI/Python backend, SQLAlchemy ORM, Keycloak OIDC/SSO, PostgreSQL, intranet/air-gapped deployment.
 
 ---
 

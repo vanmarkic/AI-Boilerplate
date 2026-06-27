@@ -12,7 +12,7 @@ plugin system — with **zero runtime dependencies**.
 
 ## Why
 
-Applications in regulated/defence contexts need to record *who did what, when,
+Applications in regulated, compliance-sensitive contexts need to record *who did what, when,
 to which resource*, fan those events out to SIEM platforms, notify the right
 people in real time, and escalate incidents into case management — **without
 coupling core logic to any specific database, IdP, or SIEM**. Customers must be
