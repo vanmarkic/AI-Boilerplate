@@ -73,12 +73,16 @@ class BroadcastPolicyMiddleware:
                     key = (recipient_id, channel)
                     if key in seen:
                         continue
-                    seen.add(key)
                     # Throttle per emitted notification: each unique
                     # recipient+channel consumes one slot, so max_per_window
                     # actually caps notification volume across fan-out.
                     if await self._throttled(policy):
                         continue
+                    # Claim the dedup slot only once a directive is actually
+                    # produced — a throttled (suppressed) notification must NOT
+                    # block a different, un-throttled policy from notifying the
+                    # same recipient+channel for this event.
+                    seen.add(key)
                     context.directives.append(
                         NotificationDirective(
                             recipient_id=recipient_id,

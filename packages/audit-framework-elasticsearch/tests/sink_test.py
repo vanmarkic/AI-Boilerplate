@@ -16,6 +16,7 @@ from audit_framework_elasticsearch.sink import (
     ElasticsearchSink,
     ElasticsearchSinkError,
     HttpResult,
+    httpx_transport,
 )
 
 
@@ -110,7 +111,7 @@ def test_api_key_sets_authorization_header() -> None:
         (HttpResult(200, {"status": "yellow"}), True),
         (HttpResult(200, {"status": "red"}), False),
         (HttpResult(503, None), False),
-        (HttpResult(200, None), False),
+        (HttpResult(200, None), True),  # reachable but unparseable body → usable, not red
     ],
 )
 def test_health_check(result, expected) -> None:
@@ -159,6 +160,76 @@ def test_end_to_end_through_the_pipeline() -> None:
     assert "sink_failures" not in ctx.metadata
     assert len(transport.calls) == 1
     assert transport.calls[0][2]["resource_id"] == "c-42"  # event doc was indexed
+
+
+def test_emit_coerces_non_json_native_values() -> None:
+    # A datetime in the free-form metadata bag must not crash the transport;
+    # it is stringified (like the JSONL sink's default=str), not passed raw.
+    transport = FakeTransport()
+    sink = ElasticsearchSink("http://es:9200", transport=transport)
+    ev = AuditEvent(
+        actor_id="a",
+        action="LOGIN",
+        resource_type="session",
+        resource_id="s-1",
+        timestamp="2026-06-26T00:00:00+00:00",
+        request_id="r",
+        metadata={"at": datetime(2026, 6, 26, tzinfo=timezone.utc)},
+    )
+
+    asyncio.run(sink.emit(ev, _ctx(ev)))
+
+    body = transport.calls[0][2]
+    assert isinstance(body["metadata"]["at"], str)  # coerced, not a datetime
+    assert "2026-06-26" in body["metadata"]["at"]
+
+
+class _FakeResponse:
+    def __init__(self, status_code, payload):
+        self.status_code = status_code
+        self._payload = payload
+
+    def json(self):
+        return self._payload
+
+
+class _FakeHttpxClient:
+    """Duck-typed stand-in for httpx.AsyncClient (no httpx needed)."""
+
+    def __init__(self, response):
+        self.requests: list[dict] = []
+        self._response = response
+
+    async def request(self, method, url, *, json=None, headers=None):
+        self.requests.append({"method": method, "url": url, "json": json, "headers": headers})
+        return self._response
+
+
+def test_httpx_transport_with_injected_client_is_exercised() -> None:
+    # Covers the production default transport's request/parse path without
+    # requiring httpx installed (a passed client skips the lazy import).
+    client = _FakeHttpxClient(_FakeResponse(201, {"result": "created"}))
+    transport = httpx_transport(client)
+
+    result = asyncio.run(transport("POST", "http://es:9200/audit/_doc", {"a": 1}, {"h": "v"}))
+
+    assert isinstance(result, HttpResult)
+    assert result.status == 201
+    assert result.data == {"result": "created"}
+    assert client.requests[0]["method"] == "POST"
+    assert client.requests[0]["json"] == {"a": 1}
+
+
+def test_httpx_transport_handles_unparseable_body() -> None:
+    class _Boom(_FakeResponse):
+        def json(self):
+            raise ValueError("not json")
+
+    client = _FakeHttpxClient(_Boom(200, None))
+    transport = httpx_transport(client)
+    result = asyncio.run(transport("GET", "http://es:9200/_cluster/health", None, {}))
+    assert result.status == 200
+    assert result.data is None
 
 
 if __name__ == "__main__":

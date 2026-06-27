@@ -13,6 +13,7 @@ extra: ``pip install audit-framework-elasticsearch[httpx]``).
 
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, Optional
@@ -46,6 +47,17 @@ Transport = Callable[[str, str, Optional[dict], dict], Awaitable[HttpResult]]
 
 def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
+
+
+def _json_safe(doc: dict) -> dict:
+    """Coerce a document to JSON-native types (e.g. datetime/UUID/Decimal → str).
+
+    The event ``changes``/``metadata`` bags are free-form (``dict[str, Any]``),
+    so application code can deposit non-JSON-native values. Round-tripping with
+    ``default=str`` mirrors the JSONL sink and guarantees any transport receives
+    serialisable data, rather than letting httpx raise a bare ``TypeError``.
+    """
+    return json.loads(json.dumps(doc, default=str))
 
 
 class ElasticsearchSink:
@@ -110,7 +122,7 @@ class ElasticsearchSink:
         """
         index = self._index_for()
         result = await self._transport(
-            "POST", f"{self._base}/{index}/_doc", event.to_dict(), dict(self._headers)
+            "POST", f"{self._base}/{index}/_doc", _json_safe(event.to_dict()), dict(self._headers)
         )
         if result.status >= 300:
             raise ElasticsearchSinkError(
@@ -118,7 +130,13 @@ class ElasticsearchSink:
             )
 
     async def health_check(self) -> bool:
-        """Return True when the cluster is reachable and not red."""
+        """Return True when the cluster is reachable and not red.
+
+        A reachable cluster (HTTP 200) whose body can't be parsed is treated as
+        usable — only an explicit ``red`` status (or an unreachable/non-200
+        response) reports unhealthy — so a transient body-parse glitch doesn't
+        flap readiness checks.
+        """
         try:
             result = await self._transport(
                 "GET", f"{self._base}/_cluster/health", None, dict(self._headers)
@@ -128,7 +146,7 @@ class ElasticsearchSink:
         if result.status != 200:
             return False
         status = result.data.get("status") if isinstance(result.data, dict) else None
-        return status in ("green", "yellow")
+        return status != "red"
 
     def _index_for(self) -> str:
         if not self._daily:
@@ -150,8 +168,6 @@ def httpx_transport(
     async def _send(
         method: str, url: str, json_body: Optional[dict], headers: dict
     ) -> HttpResult:
-        import httpx  # lazy: keep httpx an optional dependency
-
         async def _do(c: Any) -> HttpResult:
             resp = await c.request(method, url, json=json_body, headers=headers)
             try:
@@ -162,6 +178,8 @@ def httpx_transport(
 
         if client is not None:
             return await _do(client)
+        import httpx  # lazy: only needed to create an owned client
+
         async with httpx.AsyncClient(timeout=timeout) as owned:
             return await _do(owned)
 

@@ -33,10 +33,13 @@ from audit_framework.core.ports import Redactor
 
 __all__ = ["RedactMiddleware"]
 
-# Top-level event fields eligible for name-based redaction. The immutable
-# correlation/identity scaffolding (timestamp, request_id, action) is excluded
-# so a stray field name can't blank out fields the pipeline relies on.
-_REDACTABLE_FIELDS = ("actor_id", "resource_type", "resource_id", "ip_address")
+# Top-level event fields eligible for name-based redaction. Excluded on purpose:
+# the correlation/identity scaffolding (timestamp, request_id, action) AND the
+# routing keys (resource_type, resource_id) — downstream broadcast resource-owner
+# resolution and policy matching read those, so masking them would silently
+# misroute or drop notifications. Redact sensitive resource values inside the
+# `changes`/`metadata` bags instead.
+_REDACTABLE_FIELDS = ("actor_id", "ip_address")
 
 
 class RedactMiddleware:

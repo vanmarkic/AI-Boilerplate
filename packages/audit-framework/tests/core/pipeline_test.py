@@ -380,6 +380,43 @@ def test_duplicate_recipient_across_policies_is_deduped() -> None:
     assert len(ctx.directives) == 1
 
 
+def test_throttled_policy_does_not_suppress_another_policys_delivery() -> None:
+    # Two policies match and target the same recipient+channel. Policy A is fully
+    # throttled (evaluated first by priority); policy B is not. B must still
+    # deliver — a suppressed notification must not poison the cross-policy dedup.
+    broadcast = [
+        BroadcastPolicy(
+            name="a-throttled",
+            match={},
+            priority=10,  # evaluated before b-open
+            targets=[BroadcastTarget(type="role", value="admin", channels=["in_app"])],
+            throttle=ThrottleConfig(window_seconds=60, max_per_window=0),
+        ),
+        BroadcastPolicy(
+            name="b-open",
+            match={},
+            priority=1,
+            targets=[BroadcastTarget(type="role", value="admin", channels=["in_app"])],
+        ),
+    ]
+    store = FakePolicyStore(audit=[AuditPolicy(name="all", match={})], broadcast=broadcast)
+    identity = FakeIdentityResolver(roles={"admin": ["u1"]})
+
+    pipeline, _ = _build(
+        store,
+        sinks=[],
+        identity=identity,
+        owners=FakeOwnerResolver(),
+        throttle=FakeThrottleStore(),
+        notif_store=FakeNotificationStore(),
+        bus=FakeEventBus(),
+    )
+
+    ctx = asyncio.run(pipeline.execute(_event()))
+    # b-open delivers to u1 even though a-throttled was suppressed on the same key
+    assert [d.rule_id for d in ctx.directives] == ["b-open"]
+
+
 def test_user_target_with_none_value_yields_no_directive() -> None:
     broadcast = [
         BroadcastPolicy(
