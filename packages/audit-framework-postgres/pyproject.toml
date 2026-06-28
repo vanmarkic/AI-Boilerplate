@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 requires-python = ">=3.11"
 keywords = ["audit", "audit-log", "postgresql", "asyncpg", "append-only", "plugin"]
-dependencies = ["audit-framework"]
+dependencies = ["audit-framework>=0.1,<0.2"]
 
 [project.optional-dependencies]
 asyncpg = ["asyncpg>=0.29"]

@@ -1,0 +1,67 @@
+name: Release audit-framework packages
+
+# Publishes one audit-framework package to PyPI per tag push, using PyPI
+# Trusted Publishing (OIDC) — no API tokens stored in the repo.
+#
+# Per-package tags so each package versions independently:
+#   audit-framework-v0.1.0
+#   audit-framework-jsonl-v0.1.0
+#   audit-framework-elasticsearch-v0.1.0
+#   audit-framework-postgres-v0.1.0
+# The package directory and version are derived from the tag; the tag version
+# must match the package's pyproject version (guarded below).
+#
+# One-time setup (per PyPI project): pypi.org → the project → Publishing → add a
+# Trusted Publisher pointing at repo `vanmarkic/AI-Boilerplate`, workflow
+# `release-audit-framework.yml`, environment `pypi`. Also create a GitHub
+# Environment named `pypi`. Publish `audit-framework` (the core) first so the
+# plugins' `audit-framework>=0.1,<0.2` dependency resolves.
+
+on:
+  push:
+    tags:
+      - 'audit-framework-v*'
+      - 'audit-framework-jsonl-v*'
+      - 'audit-framework-elasticsearch-v*'
+      - 'audit-framework-postgres-v*'
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # required for PyPI Trusted Publishing (OIDC)
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Resolve package + version from tag
+        id: pkg
+        run: |
+          set -euo pipefail
+          tag="${GITHUB_REF_NAME}"
+          package="${tag%-v*}"          # strip the trailing -vX.Y.Z
+          version="${tag##*-v}"         # keep only X.Y.Z
+          dir="packages/${package}"
+          test -d "${dir}" || { echo "::error::no package directory ${dir} for tag ${tag}"; exit 1; }
+          # Guard: the tag version must match the package's declared version.
+          grep -q "^version = \"${version}\"" "${dir}/pyproject.toml" || {
+            echo "::error::tag version ${version} does not match ${dir}/pyproject.toml"; exit 1; }
+          echo "package=${package}" >> "${GITHUB_OUTPUT}"
+          echo "dir=${dir}" >> "${GITHUB_OUTPUT}"
+          echo "Releasing ${package} ${version}"
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - run: pip install build
+      - run: python -m build
+        working-directory: ${{ steps.pkg.outputs.dir }}
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: ${{ steps.pkg.outputs.dir }}/dist
+          print-hash: true
