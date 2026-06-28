@@ -1,37 +1,53 @@
 name: audit-framework CI (tests + SAST + vuln)
 
-# Scoped gate for the publishable audit-framework library packages: runs the
-# unit tests plus SAST (Bandit, Semgrep) and dependency vulnerability scanning
-# (pip-audit) on every PR that touches them. A matrix covers each package so new
-# plugin packages just need a matrix entry. Kept package-scoped on purpose so it
-# stays cheap — the repo-wide `security.yml` (CodeQL + full Semgrep sweep)
-# remains opt-in (workflow_dispatch) as the maintainers intended.
+# Gate for the publishable audit-framework library packages: unit tests + SAST
+# (Bandit, Semgrep) + dependency vuln scanning (pip-audit), one matrix leg per
+# package. A single `audit-framework gate` check aggregates them, so branch
+# protection needs to require just that one check.
+#
+# This runs on EVERY PR (no path filter) so the aggregate gate check always
+# reports — a path-filtered required check would block unrelated PRs forever,
+# waiting for a status that never arrives. The lightweight `changes` job skips
+# the heavy work when no audit-framework package is touched.
 
 on:
   pull_request:
-    paths:
-      - 'packages/audit-framework/**'
-      - 'packages/audit-framework-jsonl/**'
-      - 'packages/audit-framework-elasticsearch/**'
-      - 'packages/audit-framework-postgres/**'
-      - '.github/workflows/audit-framework-ci.yml'
   push:
     branches: [master]
-    paths:
-      - 'packages/audit-framework/**'
-      - 'packages/audit-framework-jsonl/**'
-      - 'packages/audit-framework-elasticsearch/**'
-      - 'packages/audit-framework-postgres/**'
-      - '.github/workflows/audit-framework-ci.yml'
 
 permissions:
   contents: read
   security-events: write
 
 jobs:
+  changes:
+    name: Detect package changes
+    runs-on: ubuntu-latest
+    outputs:
+      affected: ${{ steps.detect.outputs.affected }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+      - id: detect
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [ -z "$BASE" ]; then
+            echo "affected=true" >> "$GITHUB_OUTPUT"; exit 0   # push events: always run
+          fi
+          if git diff --name-only "$BASE...HEAD" \
+              | grep -Eq '^packages/audit-framework|^\.github/workflows/audit-framework-ci\.yml'; then
+            echo "affected=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "affected=false" >> "$GITHUB_OUTPUT"
+          fi
+
   tests:
     name: Unit tests (pytest)
     runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.affected == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -60,6 +76,8 @@ jobs:
   bandit:
     name: Bandit SAST
     runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.affected == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -84,6 +102,8 @@ jobs:
   semgrep:
     name: Semgrep SAST
     runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.affected == 'true' }}
     container:
       image: semgrep/semgrep
     strategy:
@@ -104,9 +124,11 @@ jobs:
           sarif_file: packages/${{ matrix.package }}/semgrep.sarif
           category: semgrep-${{ matrix.package }}
 
-  pip-audit:
+  pip_audit:
     name: pip-audit (dependency vulns)
     runs-on: ubuntu-latest
+    needs: changes
+    if: ${{ needs.changes.outputs.affected == 'true' }}
     strategy:
       fail-fast: false
       matrix:
@@ -146,3 +168,28 @@ jobs:
           else
             echo "No third-party runtime dependencies to audit."
           fi
+
+  gate:
+    name: audit-framework gate
+    runs-on: ubuntu-latest
+    needs: [changes, tests, bandit, semgrep, pip_audit]
+    if: always()
+    steps:
+      - name: Require all audit-framework checks to pass (or be skipped)
+        run: |
+          fail=0
+          check() {
+            case "$2" in
+              success|skipped) echo "ok: $1 = $2" ;;
+              *) echo "::error::$1 = $2"; fail=1 ;;
+            esac
+          }
+          check changes   "${{ needs.changes.result }}"
+          check tests     "${{ needs.tests.result }}"
+          check bandit    "${{ needs.bandit.result }}"
+          check semgrep   "${{ needs.semgrep.result }}"
+          check pip_audit "${{ needs.pip_audit.result }}"
+          if [ "$fail" = "1" ]; then
+            echo "audit-framework gate: FAILED"; exit 1
+          fi
+          echo "audit-framework gate: OK"
