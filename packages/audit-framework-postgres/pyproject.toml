@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "audit-framework-postgres"
+version = "0.1.0"
+description = "Append-only PostgreSQL AuditStore for audit-framework — the authoritative, queryable audit log."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+keywords = ["audit", "audit-log", "postgresql", "asyncpg", "append-only", "plugin"]
+dependencies = ["audit-framework"]
+
+[project.optional-dependencies]
+asyncpg = ["asyncpg>=0.29"]
+dev = ["pytest>=8.0"]
+
+# Discovered by audit-framework's PluginRegistry.discover_entrypoints().
+[project.entry-points."audit_framework.plugins"]
+postgres = "audit_framework_postgres.plugin:register"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/audit_framework_postgres"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "../audit-framework/src"]
+python_files = ["*_test.py", "test_*.py"]

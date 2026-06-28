@@ -13,6 +13,7 @@ on:
       - 'packages/audit-framework/**'
       - 'packages/audit-framework-jsonl/**'
       - 'packages/audit-framework-elasticsearch/**'
+      - 'packages/audit-framework-postgres/**'
       - '.github/workflows/audit-framework-ci.yml'
   push:
     branches: [master]
@@ -20,6 +21,7 @@ on:
       - 'packages/audit-framework/**'
       - 'packages/audit-framework-jsonl/**'
       - 'packages/audit-framework-elasticsearch/**'
+      - 'packages/audit-framework-postgres/**'
       - '.github/workflows/audit-framework-ci.yml'
 
 permissions:
@@ -40,6 +42,8 @@ jobs:
             needs_core: true
           - package: audit-framework-elasticsearch
             needs_core: true
+          - package: audit-framework-postgres
+            needs_core: true
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -59,7 +63,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [audit-framework, audit-framework-jsonl, audit-framework-elasticsearch]
+        package: [audit-framework, audit-framework-jsonl, audit-framework-elasticsearch, audit-framework-postgres]
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -85,7 +89,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [audit-framework, audit-framework-jsonl, audit-framework-elasticsearch]
+        package: [audit-framework, audit-framework-jsonl, audit-framework-elasticsearch, audit-framework-postgres]
     steps:
       - uses: actions/checkout@v6
       # Security-focused rulesets (not the noisy `auto` best-practice set),
@@ -112,6 +116,8 @@ jobs:
           - package: audit-framework-jsonl
             needs_core: true
           - package: audit-framework-elasticsearch
+            needs_core: true
+          - package: audit-framework-postgres
             needs_core: true
     steps:
       - uses: actions/checkout@v6
