@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "audit-framework"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Technology-agnostic audit logging, notification and case-management core. Pipe-and-filter pipeline + ports/adapters, zero runtime dependencies."
 readme = "README.md"
 license = "MIT"
@@ -41,3 +41,7 @@ testpaths = ["tests"]
 pythonpath = ["src"]
 # Match the monorepo's *_test.py convention (and pytest's test_*.py default).
 python_files = ["*_test.py", "test_*.py"]
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { tag_regex = "^audit-framework-v(?P<version>.+)$", fallback_version = "0.0.0" }

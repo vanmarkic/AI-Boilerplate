@@ -36,22 +36,24 @@ jobs:
       id-token: write  # required for PyPI Trusted Publishing (OIDC)
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0      # full history + tags so hatch-vcs derives the version
+          fetch-tags: true
 
-      - name: Resolve package + version from tag
+      - name: Resolve package from tag
         id: pkg
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME}"
           package="${tag%-v*}"          # strip the trailing -vX.Y.Z
-          version="${tag##*-v}"         # keep only X.Y.Z
+          version="${tag##*-v}"         # keep only X.Y.Z (informational)
           dir="packages/${package}"
           test -d "${dir}" || { echo "::error::no package directory ${dir} for tag ${tag}"; exit 1; }
-          # Guard: the tag version must match the package's declared version.
-          grep -q "^version = \"${version}\"" "${dir}/pyproject.toml" || {
-            echo "::error::tag version ${version} does not match ${dir}/pyproject.toml"; exit 1; }
+          # The built version comes from the tag via hatch-vcs (single source of
+          # truth), so there is no pyproject version to cross-check.
           echo "package=${package}" >> "${GITHUB_OUTPUT}"
           echo "dir=${dir}" >> "${GITHUB_OUTPUT}"
-          echo "Releasing ${package} ${version}"
+          echo "Releasing ${package} ${version} (from tag ${tag})"
 
       - uses: actions/setup-python@v6
         with:

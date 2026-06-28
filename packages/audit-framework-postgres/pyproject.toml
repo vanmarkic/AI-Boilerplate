@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [project]
 name = "audit-framework-postgres"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Append-only PostgreSQL AuditStore for audit-framework — the authoritative, queryable audit log."
 readme = "README.md"
 license = "MIT"
@@ -27,3 +27,7 @@ packages = ["src/audit_framework_postgres"]
 testpaths = ["tests"]
 pythonpath = ["src", "../audit-framework/src"]
 python_files = ["*_test.py", "test_*.py"]
+
+[tool.hatch.version]
+source = "vcs"
+raw-options = { tag_regex = "^audit-framework-postgres-v(?P<version>.+)$", fallback_version = "0.0.0" }

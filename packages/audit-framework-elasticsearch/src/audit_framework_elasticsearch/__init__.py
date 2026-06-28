@@ -13,7 +13,12 @@ from audit_framework_elasticsearch.sink import (
     httpx_transport,
 )
 
-__version__ = "0.1.0"
+import importlib.metadata as _md
+
+try:
+    __version__ = _md.version("audit-framework-elasticsearch")
+except _md.PackageNotFoundError:  # running from source without an install
+    __version__ = "0.0.0+unknown"
 
 __all__ = [
     "ElasticsearchSink",

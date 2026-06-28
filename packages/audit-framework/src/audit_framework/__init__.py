@@ -28,7 +28,12 @@ from audit_framework.core import (
     auditable,
 )
 
-__version__ = "0.1.0"
+import importlib.metadata as _md
+
+try:
+    __version__ = _md.version("audit-framework")
+except _md.PackageNotFoundError:  # running from source without an install
+    __version__ = "0.0.0+unknown"
 
 __all__ = [
     "__version__",
