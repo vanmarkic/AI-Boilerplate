@@ -44,4 +44,4 @@ python_files = ["*_test.py", "test_*.py"]
 
 [tool.hatch.version]
 source = "vcs"
-raw-options = { tag_regex = "^audit-framework-v(?P<version>.+)$", fallback_version = "0.0.0" }
+raw-options = { tag_regex = "^audit-framework-v(?P<version>.+)$", fallback_version = "0.1.0" }
