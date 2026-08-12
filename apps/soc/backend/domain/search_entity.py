@@ -10,7 +10,6 @@ from datetime import datetime
 
 from domain.event_entity import NormalizedEvent
 from domain.observable_entity import Observable
-from domain.verdict_entity import Severity
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,7 +19,6 @@ class EventQuery:
     text: str | None = None
     observables: tuple[Observable, ...] = field(default_factory=tuple)
     hosts: tuple[str, ...] = field(default_factory=tuple)
-    severities: tuple[Severity, ...] = field(default_factory=tuple)
     since: datetime | None = None
     until: datetime | None = None
     limit: int = 50
