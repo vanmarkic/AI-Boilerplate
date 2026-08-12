@@ -2,27 +2,28 @@
 
 from uuid import UUID
 
+from adapters.memory.memory_store import MemoryStore
 from domain.verdict_entity import Alert
 
 
 class MemoryAlertRepository:
     """Keys alerts by id, with a secondary index on the dedup key."""
 
-    def __init__(self) -> None:
-        self._alerts: dict[UUID, Alert] = {}
+    def __init__(self, store: MemoryStore) -> None:
+        self._store = store
 
     async def save(self, alert: Alert) -> Alert:
         """Insert or replace by id."""
-        self._alerts[alert.alert_id] = alert
+        self._store.alerts[alert.alert_id] = alert
         return alert
 
     async def get(self, alert_id: UUID) -> Alert | None:
         """Return an alert, or None."""
-        return self._alerts.get(alert_id)
+        return self._store.alerts.get(alert_id)
 
     async def find_by_dedup_key(self, dedup_key: str) -> Alert | None:
         """Return the alert already raised for an event, if any."""
-        for alert in self._alerts.values():
+        for alert in self._store.alerts.values():
             if alert.dedup_key == dedup_key:
                 return alert
         return None
@@ -30,7 +31,7 @@ class MemoryAlertRepository:
     async def list_recent(self, *, limit: int, offset: int = 0) -> tuple[Alert, ...]:
         """Return a page of alerts, newest first."""
         ordered = sorted(
-            self._alerts.values(),
+            self._store.alerts.values(),
             key=lambda a: (a.created_at, str(a.alert_id)),
             reverse=True,
         )

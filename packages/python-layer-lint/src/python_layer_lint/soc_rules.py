@@ -50,6 +50,9 @@ SOC_LAYER_RULES: dict[str, set[str]] = {
     "usecase": {"entity", "policy", "error", "port", "dto", "usecase"},
     # --- adapters: the only place that knows a vendor exists ---------------
     "client": {"error", "client"},
+    # A store is long-lived storage a repository is constructed around. It holds
+    # domain objects but implements no port, so it may not reach for one.
+    "store": {"entity", "dto", "error", "store"},
     # SQLAlchemy tables may NOT import domain entities: an explicit mapper is
     # the only place the ORM and the domain are allowed to meet.
     "model": {"model"},
@@ -58,7 +61,7 @@ SOC_LAYER_RULES: dict[str, set[str]] = {
     # silently breaks on values only that vendor formats a particular way.
     "mapper": {"entity", "dto", "error", "policy", "model", "mapper"},
     "adapter": {"entity", "dto", "error", "port", "mapper", "client", "adapter"},
-    "repository": {"entity", "dto", "error", "port", "mapper", "model", "repository"},
+    "repository": {"entity", "dto", "error", "port", "mapper", "model", "repository", "store"},
     "fake": {"entity", "dto", "error", "port", "fake"},
     # --- inbound HTTP ------------------------------------------------------
     "schema": {"entity", "dto", "schema"},
@@ -68,7 +71,7 @@ SOC_LAYER_RULES: dict[str, set[str]] = {
     "test": {
         "entity", "policy", "error", "dto", "port", "usecase", "client",
         "model", "mapper", "adapter", "repository", "fake", "schema",
-        "router", "contract",
+        "router", "contract", "store",
     },
 }
 
@@ -89,6 +92,8 @@ SOC_ROOT_RULES: dict[str, set[str]] = {
     # so it can never smuggle vendor vocabulary inward.
     "client": {"domain", "application", "adapters", "core"},
     "model": {"core"},
+    # A store holds domain objects but knows nothing of ports or frameworks.
+    "store": {"domain", "adapters"},
     "mapper": {"domain", "application", "adapters"},
     "adapter": {"domain", "application", "adapters", "core"},
     "repository": {"domain", "application", "adapters", "core"},

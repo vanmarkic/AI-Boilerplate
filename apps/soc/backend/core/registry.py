@@ -18,6 +18,7 @@ from adapters.memory.memory_indicator_repository import MemoryIndicatorRepositor
 from adapters.memory.memory_orchestration_adapter import MemoryOrchestrationAdapter
 from adapters.memory.memory_playbook_run_repository import MemoryPlaybookRunRepository
 from adapters.memory.memory_search_adapter import MemorySearchAdapter
+from adapters.memory.memory_store import MemoryStore
 from adapters.memory.memory_threat_intel_adapter import MemoryThreatIntelAdapter
 from adapters.system.system_clock_adapter import SystemClockAdapter, UuidIdAdapter
 from application.alert_repository_port import AlertRepositoryPort
@@ -31,9 +32,8 @@ from application.playbook_run_repository_port import PlaybookRunRepositoryPort
 from application.search_port import DocumentSearchPort
 from application.threat_intel_port import ThreatIntelPort
 from core.config import Settings, settings
+from core.storage import MEMORY, Storage
 from domain.playbook_entity import PlaybookSummary
-
-MEMORY = "memory"
 
 # A small default catalogue so the in-memory orchestrator has something to run.
 DEFAULT_PLAYBOOKS = (
@@ -200,34 +200,76 @@ def orchestration_port() -> PlaybookOrchestrationPort:
     return builder(settings)
 
 
-@lru_cache(maxsize=1)
-def indicator_repository() -> IndicatorRepositoryPort:
-    """Return the configured indicator repository."""
-    return MemoryIndicatorRepository()
+# --- repositories --------------------------------------------------------
+#
+# Unlike the ports above, a repository is NOT a singleton: it is constructed
+# per request around the storage handle for that request. Both providers follow
+# that one rule, which is why none of these needs a provider branch beyond the
+# builder lookup.
 
 
-@lru_cache(maxsize=1)
-def allowlist_repository() -> AllowlistRepositoryPort:
-    """Return the configured allowlist repository."""
-    return MemoryAllowlistRepository()
+def _require_memory(storage: Storage) -> MemoryStore:
+    """Narrow a storage handle to the in-memory store."""
+    if not isinstance(storage, MemoryStore):
+        raise TypeError(f"memory repositories need a MemoryStore, got {type(storage).__name__}")
+    return storage
 
 
-@lru_cache(maxsize=1)
-def alert_repository() -> AlertRepositoryPort:
-    """Return the configured alert repository."""
-    return MemoryAlertRepository()
+INDICATOR_BUILDERS: Mapping[str, Callable[[Storage], IndicatorRepositoryPort]] = {
+    MEMORY: lambda s: MemoryIndicatorRepository(_require_memory(s)),
+}
+ALLOWLIST_BUILDERS: Mapping[str, Callable[[Storage], AllowlistRepositoryPort]] = {
+    MEMORY: lambda s: MemoryAllowlistRepository(_require_memory(s)),
+}
+ALERT_BUILDERS: Mapping[str, Callable[[Storage], AlertRepositoryPort]] = {
+    MEMORY: lambda s: MemoryAlertRepository(_require_memory(s)),
+}
+CASE_REPOSITORY_BUILDERS: Mapping[str, Callable[[Storage], CaseRepositoryPort]] = {
+    MEMORY: lambda s: MemoryCaseRepository(_require_memory(s)),
+}
+PLAYBOOK_RUN_BUILDERS: Mapping[str, Callable[[Storage], PlaybookRunRepositoryPort]] = {
+    MEMORY: lambda s: MemoryPlaybookRunRepository(_require_memory(s)),
+}
 
 
-@lru_cache(maxsize=1)
-def case_repository() -> CaseRepositoryPort:
-    """Return the configured case repository."""
-    return MemoryCaseRepository()
+def indicator_repository(storage: Storage) -> IndicatorRepositoryPort:
+    """Return the configured indicator repository for this request."""
+    builder = INDICATOR_BUILDERS.get(settings.repository_provider)
+    if builder is None:
+        raise _unknown("repository", settings.repository_provider, INDICATOR_BUILDERS)
+    return builder(storage)
 
 
-@lru_cache(maxsize=1)
-def playbook_run_repository() -> PlaybookRunRepositoryPort:
-    """Return the configured playbook run repository."""
-    return MemoryPlaybookRunRepository()
+def allowlist_repository(storage: Storage) -> AllowlistRepositoryPort:
+    """Return the configured allowlist repository for this request."""
+    builder = ALLOWLIST_BUILDERS.get(settings.repository_provider)
+    if builder is None:
+        raise _unknown("repository", settings.repository_provider, ALLOWLIST_BUILDERS)
+    return builder(storage)
+
+
+def alert_repository(storage: Storage) -> AlertRepositoryPort:
+    """Return the configured alert repository for this request."""
+    builder = ALERT_BUILDERS.get(settings.repository_provider)
+    if builder is None:
+        raise _unknown("repository", settings.repository_provider, ALERT_BUILDERS)
+    return builder(storage)
+
+
+def case_repository(storage: Storage) -> CaseRepositoryPort:
+    """Return the configured case repository for this request."""
+    builder = CASE_REPOSITORY_BUILDERS.get(settings.repository_provider)
+    if builder is None:
+        raise _unknown("repository", settings.repository_provider, CASE_REPOSITORY_BUILDERS)
+    return builder(storage)
+
+
+def playbook_run_repository(storage: Storage) -> PlaybookRunRepositoryPort:
+    """Return the configured playbook run repository for this request."""
+    builder = PLAYBOOK_RUN_BUILDERS.get(settings.repository_provider)
+    if builder is None:
+        raise _unknown("repository", settings.repository_provider, PLAYBOOK_RUN_BUILDERS)
+    return builder(storage)
 
 
 @lru_cache(maxsize=1)
@@ -264,11 +306,6 @@ def reset() -> None:
         search_port,
         case_management_port,
         orchestration_port,
-        indicator_repository,
-        allowlist_repository,
-        alert_repository,
-        case_repository,
-        playbook_run_repository,
         clock,
         ids,
     ):

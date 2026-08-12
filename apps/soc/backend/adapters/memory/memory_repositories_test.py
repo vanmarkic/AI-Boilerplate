@@ -14,6 +14,7 @@ from adapters.memory.memory_allowlist_repository import MemoryAllowlistRepositor
 from adapters.memory.memory_case_repository import MemoryCaseRepository
 from adapters.memory.memory_indicator_repository import MemoryIndicatorRepository
 from adapters.memory.memory_playbook_run_repository import MemoryPlaybookRunRepository
+from adapters.memory.memory_store import MemoryStore
 from application.alert_repository_port import AlertRepositoryPort
 from application.allowlist_repository_port import AllowlistRepositoryPort
 from application.case_repository_port import CaseRepositoryPort
@@ -24,28 +25,28 @@ from application.playbook_run_repository_port import PlaybookRunRepositoryPort
 class TestMemoryIndicatorRepository(IndicatorRepositoryContract):
     @pytest.fixture
     def repo(self) -> IndicatorRepositoryPort:
-        return MemoryIndicatorRepository()
+        return MemoryIndicatorRepository(MemoryStore())
 
 
 class TestMemoryAllowlistRepository(AllowlistRepositoryContract):
     @pytest.fixture
     def repo(self) -> AllowlistRepositoryPort:
-        return MemoryAllowlistRepository()
+        return MemoryAllowlistRepository(MemoryStore())
 
 
 class TestMemoryAlertRepository(AlertRepositoryContract):
     @pytest.fixture
     def repo(self) -> AlertRepositoryPort:
-        return MemoryAlertRepository()
+        return MemoryAlertRepository(MemoryStore())
 
 
 class TestMemoryCaseRepository(CaseRepositoryContract):
     @pytest.fixture
     def repo(self) -> CaseRepositoryPort:
-        return MemoryCaseRepository()
+        return MemoryCaseRepository(MemoryStore())
 
 
 class TestMemoryPlaybookRunRepository(PlaybookRunRepositoryContract):
     @pytest.fixture
     def repo(self) -> PlaybookRunRepositoryPort:
-        return MemoryPlaybookRunRepository()
+        return MemoryPlaybookRunRepository(MemoryStore())

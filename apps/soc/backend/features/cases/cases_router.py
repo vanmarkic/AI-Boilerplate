@@ -5,9 +5,9 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
+from application.case_repository_port import CaseRepositoryPort
 from application.transition_case_usecase import TransitionCaseUseCase
-from core import registry
-from core.dependencies import get_transition_case_usecase
+from core.dependencies import get_case_repository, get_transition_case_usecase
 from domain.case_entity import CaseStatus
 from domain.soc_error import InvalidIndicatorError, UnknownEntityError
 from features.cases.cases_schema import (
@@ -26,11 +26,12 @@ router = APIRouter(prefix="/api/cases", tags=["cases"])
     operation_id="listCases",
 )
 async def list_cases(
+    repository: Annotated[CaseRepositoryPort, Depends(get_case_repository)],
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> CaseListResponse:
     """Return a page of open cases."""
-    cases = await registry.case_repository().list_open(limit=limit, offset=offset)
+    cases = await repository.list_open(limit=limit, offset=offset)
     return CaseListResponse(items=[CaseResponse.of(c) for c in cases])
 
 
@@ -40,9 +41,12 @@ async def list_cases(
     status_code=status.HTTP_200_OK,
     operation_id="getCase",
 )
-async def get_case(case_id: UUID) -> CaseResponse:
+async def get_case(
+    case_id: UUID,
+    repository: Annotated[CaseRepositoryPort, Depends(get_case_repository)],
+) -> CaseResponse:
     """Return one case."""
-    case = await registry.case_repository().get(case_id)
+    case = await repository.get(case_id)
     if case is None:
         raise UnknownEntityError(f"unknown case {case_id}")
     return CaseResponse.of(case)

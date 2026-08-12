@@ -5,10 +5,14 @@ from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
+from application.alert_repository_port import AlertRepositoryPort
 from application.escalate_alert_usecase import EscalateAlertUseCase
 from application.respond_to_alert_usecase import RespondToAlertUseCase
-from core import registry
-from core.dependencies import get_escalate_alert_usecase, get_respond_to_alert_usecase
+from core.dependencies import (
+    get_alert_repository,
+    get_escalate_alert_usecase,
+    get_respond_to_alert_usecase,
+)
 from core.presentation_schema import AlertResponse
 from domain.soc_error import UnknownEntityError
 from features.alerts.alerts_schema import AlertListResponse, PlaybookRunResponse
@@ -24,11 +28,12 @@ router = APIRouter(prefix="/api/alerts", tags=["alerts"])
     operation_id="listAlerts",
 )
 async def list_alerts(
+    repository: Annotated[AlertRepositoryPort, Depends(get_alert_repository)],
     limit: Annotated[int, Query(ge=1, le=200)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
 ) -> AlertListResponse:
     """Return a page of alerts, newest first."""
-    alerts = await registry.alert_repository().list_recent(limit=limit, offset=offset)
+    alerts = await repository.list_recent(limit=limit, offset=offset)
     return AlertListResponse(items=[AlertResponse.of(a) for a in alerts])
 
 
@@ -38,9 +43,12 @@ async def list_alerts(
     status_code=status.HTTP_200_OK,
     operation_id="getAlert",
 )
-async def get_alert(alert_id: UUID) -> AlertResponse:
+async def get_alert(
+    alert_id: UUID,
+    repository: Annotated[AlertRepositoryPort, Depends(get_alert_repository)],
+) -> AlertResponse:
     """Return one alert."""
-    alert = await registry.alert_repository().get(alert_id)
+    alert = await repository.get(alert_id)
     if alert is None:
         raise UnknownEntityError(f"unknown alert {alert_id}")
     return AlertResponse.of(alert)

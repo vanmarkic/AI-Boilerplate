@@ -3,14 +3,15 @@
 from datetime import datetime
 from uuid import UUID
 
+from adapters.memory.memory_store import MemoryStore
 from domain.indicator_entity import AllowlistEntry
 
 
 class MemoryAllowlistRepository:
     """Keys allowlist entries by id."""
 
-    def __init__(self) -> None:
-        self._entries: dict[UUID, AllowlistEntry] = {}
+    def __init__(self, store: MemoryStore) -> None:
+        self._store = store
 
     async def list_active(self, now: datetime) -> tuple[AllowlistEntry, ...]:
         """Return entries that have not expired.
@@ -21,14 +22,14 @@ class MemoryAllowlistRepository:
         function — is what keeps the two honest.
         """
         return tuple(
-            e for e in self._entries.values() if e.expires_at is None or e.expires_at > now
+            e for e in self._store.allowlist.values() if e.expires_at is None or e.expires_at > now
         )
 
     async def add(self, entry: AllowlistEntry) -> AllowlistEntry:
         """Add an entry."""
-        self._entries[entry.entry_id] = entry
+        self._store.allowlist[entry.entry_id] = entry
         return entry
 
     async def remove(self, entry_id: UUID) -> bool:
         """Remove an entry; False if it was not there."""
-        return self._entries.pop(entry_id, None) is not None
+        return self._store.allowlist.pop(entry_id, None) is not None

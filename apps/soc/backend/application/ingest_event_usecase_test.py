@@ -11,6 +11,7 @@ from adapters.memory.memory_alert_repository import MemoryAlertRepository
 from adapters.memory.memory_allowlist_repository import MemoryAllowlistRepository
 from adapters.memory.memory_indicator_repository import MemoryIndicatorRepository
 from adapters.memory.memory_search_adapter import MemorySearchAdapter
+from adapters.memory.memory_store import MemoryStore
 from adapters.memory.memory_threat_intel_adapter import MemoryThreatIntelAdapter
 from application.ingest_dto import IngestEventCommand
 from application.ingest_event_usecase import IngestEventUseCase
@@ -99,18 +100,24 @@ def clock() -> FixedClockAdapter:
 
 
 @pytest.fixture
-def alerts() -> MemoryAlertRepository:
-    return MemoryAlertRepository()
+def store() -> MemoryStore:
+    """One store per test, as a fresh database would be."""
+    return MemoryStore()
 
 
 @pytest.fixture
-def indicators() -> MemoryIndicatorRepository:
-    return MemoryIndicatorRepository()
+def alerts(store: MemoryStore) -> MemoryAlertRepository:
+    return MemoryAlertRepository(store)
 
 
 @pytest.fixture
-def allowlist() -> MemoryAllowlistRepository:
-    return MemoryAllowlistRepository()
+def indicators(store: MemoryStore) -> MemoryIndicatorRepository:
+    return MemoryIndicatorRepository(store)
+
+
+@pytest.fixture
+def allowlist(store: MemoryStore) -> MemoryAllowlistRepository:
+    return MemoryAllowlistRepository(store)
 
 
 @pytest.fixture

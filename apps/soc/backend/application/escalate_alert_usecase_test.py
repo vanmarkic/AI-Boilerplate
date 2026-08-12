@@ -9,6 +9,7 @@ from adapters.memory.fixed_clock_adapter import FixedClockAdapter, SequentialIdA
 from adapters.memory.memory_alert_repository import MemoryAlertRepository
 from adapters.memory.memory_case_adapter import MemoryCaseAdapter
 from adapters.memory.memory_case_repository import MemoryCaseRepository
+from adapters.memory.memory_store import MemoryStore
 from application.escalate_alert_usecase import EscalateAlertUseCase
 from domain.case_entity import CaseStatus
 from domain.event_entity import AssetCriticality
@@ -46,13 +47,19 @@ def make_alert(
 
 
 @pytest.fixture
-def alerts() -> MemoryAlertRepository:
-    return MemoryAlertRepository()
+def store() -> MemoryStore:
+    """One store per test, as a fresh database would be."""
+    return MemoryStore()
 
 
 @pytest.fixture
-def cases() -> MemoryCaseRepository:
-    return MemoryCaseRepository()
+def alerts(store: MemoryStore) -> MemoryAlertRepository:
+    return MemoryAlertRepository(store)
+
+
+@pytest.fixture
+def cases(store: MemoryStore) -> MemoryCaseRepository:
+    return MemoryCaseRepository(store)
 
 
 @pytest.fixture
