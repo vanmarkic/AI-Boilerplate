@@ -11,6 +11,20 @@ Also enforces tier boundaries:
 
 And validates manifest endpoint sync:
   api_endpoints in manifest.yaml must match actual router decorators.
+
+Two checks are applied to every import of a first-party module:
+
+* **layer rules** — derived from the *filename suffix* of the imported module
+  (``user_service.py`` → ``service``).  This is the original mechanism.
+* **root rules** — derived from the *top-level package* of the imported module
+  (``adapters.misp.misp_client`` → ``adapters``).  Suffix matching alone cannot
+  see package imports such as ``from adapters.misp import client``, whose last
+  segment carries no layer suffix.  Root rules close that hole, which matters
+  for hexagonal layouts where "the application layer must never import an
+  adapter" is the invariant worth enforcing.
+
+Which modules count as first-party is controlled by ``local_roots`` so that
+layouts without a ``features/`` package can be linted too.
 """
 import ast
 from pathlib import Path
@@ -32,6 +46,8 @@ LAYER_RULES: dict[str, set[str]] = {
     "test": {"router", "service", "repository", "model", "schema", "core"},
 }
 
+DEFAULT_LOCAL_ROOTS: frozenset[str] = frozenset({"features"})
+
 
 def get_layer(filename: str) -> str | None:
     """Extract layer name from filename like 'user_router.py' → 'router'."""
@@ -51,8 +67,28 @@ def get_feature_tier(feature_dir: Path) -> int:
     return data.get("tier", 1)
 
 
-def check_imports(filepath: Path, layer_rules: dict[str, set[str]] | None = None) -> list[str]:
-    """Check a file's imports against layer rules."""
+def _imported_modules(node: ast.AST) -> str:
+    """Return the dotted module path an import node refers to."""
+    if isinstance(node, ast.ImportFrom):
+        return node.module or ""
+    if isinstance(node, ast.Import):
+        return ".".join(alias.name for alias in node.names)
+    return ""
+
+
+def check_imports(
+    filepath: Path,
+    layer_rules: dict[str, set[str]] | None = None,
+    local_roots: frozenset[str] = DEFAULT_LOCAL_ROOTS,
+    root_rules: dict[str, set[str]] | None = None,
+) -> list[str]:
+    """Check a file's imports against layer rules and (optionally) root rules.
+
+    ``local_roots`` names the top-level packages considered first-party; imports
+    of anything else (stdlib, third party) are ignored.  ``root_rules`` maps a
+    layer to the set of top-level packages it may import from, catching package
+    imports whose final segment carries no layer suffix.
+    """
     rules = layer_rules or LAYER_RULES
     violations: list[str] = []
     layer = get_layer(filepath.name)
@@ -60,30 +96,37 @@ def check_imports(filepath: Path, layer_rules: dict[str, set[str]] | None = None
         return violations
 
     allowed = rules[layer]
+    allowed_roots = root_rules.get(layer) if root_rules else None
     try:
         tree = ast.parse(filepath.read_text())
     except SyntaxError:
         return [f"{filepath}: SyntaxError, cannot parse"]
 
     for node in ast.walk(tree):
-        if isinstance(node, (ast.Import, ast.ImportFrom)):
-            module = ""
-            if isinstance(node, ast.ImportFrom) and node.module:
-                module = node.module
-            elif isinstance(node, ast.Import):
-                module = ".".join(alias.name for alias in node.names)
+        if not isinstance(node, (ast.Import, ast.ImportFrom)):
+            continue
+        module = _imported_modules(node)
+        parts = module.split(".")
+        root = parts[0]
+        # Only check first-party imports.
+        if root not in local_roots:
+            continue
 
-            # Only check feature-local imports
-            if module.startswith("features."):
-                parts = module.split(".")
-                if len(parts) >= 3:
-                    imported_suffix = parts[-1].rsplit("_", 1)[-1]
-                    if imported_suffix in rules and imported_suffix not in allowed:
-                        violations.append(
-                            f"{filepath}:{node.lineno} - "
-                            f"'{layer}' layer imports '{imported_suffix}' "
-                            f"(allowed: {sorted(allowed)})"
-                        )
+        if allowed_roots is not None and root not in allowed_roots:
+            violations.append(
+                f"{filepath}:{node.lineno} - "
+                f"'{layer}' layer imports package '{root}' "
+                f"(allowed: {sorted(allowed_roots)})"
+            )
+
+        if len(parts) >= 2:
+            imported_suffix = parts[-1].rsplit("_", 1)[-1]
+            if imported_suffix in rules and imported_suffix not in allowed:
+                violations.append(
+                    f"{filepath}:{node.lineno} - "
+                    f"'{layer}' layer imports '{imported_suffix}' "
+                    f"(allowed: {sorted(allowed)})"
+                )
     return violations
 
 
@@ -127,14 +170,21 @@ def check_tier_boundaries(filepath: Path, features_dir: Path) -> list[str]:
     return violations
 
 
-def lint_features_dir(features_dir: Path, layer_rules: dict[str, set[str]] | None = None) -> list[str]:
+def lint_features_dir(
+    features_dir: Path,
+    layer_rules: dict[str, set[str]] | None = None,
+    local_roots: frozenset[str] = DEFAULT_LOCAL_ROOTS,
+    root_rules: dict[str, set[str]] | None = None,
+) -> list[str]:
     """Lint all Python files in a features directory."""
     if not features_dir.exists():
         return []
 
     all_violations: list[str] = []
     for py_file in features_dir.rglob("*.py"):
-        all_violations.extend(check_imports(py_file, layer_rules))
+        all_violations.extend(
+            check_imports(py_file, layer_rules, local_roots, root_rules)
+        )
         all_violations.extend(check_tier_boundaries(py_file, features_dir))
 
     # Validate manifest api_endpoints match actual router decorators
@@ -142,4 +192,27 @@ def lint_features_dir(features_dir: Path, layer_rules: dict[str, set[str]] | Non
         if feature_dir.is_dir() and not feature_dir.name.startswith("_"):
             all_violations.extend(check_manifest_endpoints(feature_dir))
 
+    return all_violations
+
+
+def lint_package_dir(
+    package_dir: Path,
+    layer_rules: dict[str, set[str]],
+    local_roots: frozenset[str],
+    root_rules: dict[str, set[str]] | None = None,
+) -> list[str]:
+    """Lint every Python file under a package that is not feature-sliced.
+
+    Used by layouts (e.g. hexagonal ``domain``/``application``/``adapters``)
+    that have no ``features/`` directory, and therefore no tiers and no
+    per-feature manifests.  Manifest checks are the caller's business.
+    """
+    if not package_dir.exists():
+        return []
+
+    all_violations: list[str] = []
+    for py_file in sorted(package_dir.rglob("*.py")):
+        all_violations.extend(
+            check_imports(py_file, layer_rules, local_roots, root_rules)
+        )
     return all_violations
