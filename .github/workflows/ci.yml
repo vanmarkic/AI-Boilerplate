@@ -112,6 +112,22 @@ jobs:
       - run: python -m pytest -v --tb=short
         working-directory: apps/tfc/backend
 
+  test-soc-backend:
+    name: SOC Backend Tests
+    runs-on: ubuntu-latest
+    # No services: the SOC suite runs the whole hexagon - domain, use cases,
+    # every vendor adapter and every router - with no database, no network and
+    # no third party running. That is the architecture's main claim, checked.
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install -e ".[dev]"
+        working-directory: apps/soc/backend
+      - run: python -m pytest -v --tb=short --cov=domain --cov=application --cov=adapters --cov-report=term-missing
+        working-directory: apps/soc/backend
+
   lint-backend:
     name: Backend Lint
     runs-on: ubuntu-latest
@@ -131,6 +147,11 @@ jobs:
         working-directory: apps/tfc/backend
       - run: ruff format --check .
         working-directory: apps/tfc/backend
+      # SOC backend
+      - run: ruff check .
+        working-directory: apps/soc/backend
+      - run: ruff format --check .
+        working-directory: apps/soc/backend
 
   tier1-build-smoke:
     if: false  # disabled — expensive (full npm install + frontend production build)
