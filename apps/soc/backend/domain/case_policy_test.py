@@ -46,6 +46,7 @@ def make_alert(alert_id: UUID, severity: Severity = Severity.HIGH) -> Alert:
         alert_id=alert_id,
         event_id=EVENT_ID,
         dedup_key="d",
+        correlation_key="corr",
         title="t",
         severity=severity,
         disposition=Disposition.ESCALATE,

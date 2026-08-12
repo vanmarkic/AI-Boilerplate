@@ -74,11 +74,17 @@ class TriageVerdict:
 
 @dataclass(frozen=True, slots=True)
 class Alert:
-    """A persisted, actionable finding. Created when disposition is not DROP."""
+    """A persisted, actionable finding. Created when disposition is not DROP.
+
+    ``dedup_key`` identifies the *event* (so a replay does not raise a second
+    alert); ``correlation_key`` identifies the *investigation* (so related
+    alerts converge on one case). They are deliberately different keys.
+    """
 
     alert_id: UUID
     event_id: UUID
     dedup_key: str
+    correlation_key: str
     title: str
     severity: Severity
     disposition: Disposition

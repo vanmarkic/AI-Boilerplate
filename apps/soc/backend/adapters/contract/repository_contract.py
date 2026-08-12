@@ -62,6 +62,7 @@ def make_alert(dedup_key: str = "dedup-1", alert_id: UUID | None = None) -> Aler
         alert_id=alert_id or uuid4(),
         event_id=uuid4(),
         dedup_key=dedup_key,
+        correlation_key=f"corr-{dedup_key}",
         title="Suspicious",
         severity=Severity.HIGH,
         disposition=Disposition.ESCALATE,

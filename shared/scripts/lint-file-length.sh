@@ -45,9 +45,12 @@ while IFS= read -r filepath; do
   # Make path relative to repo root
   relpath="${filepath#"$REPO_ROOT"/}"
 
-  # Skip excluded directories
+  # Skip excluded directories.
+  # .venv/site-packages are third-party sources: gitignored, and `uv venv`
+  # inside a backend would otherwise drown the report in vendor files.
   case "$relpath" in
     */node_modules/*|*/generated/*|*/dist/*|*/alembic/versions/*|*/__pycache__/*) continue ;;
+    .venv/*|*/.venv/*|*/site-packages/*) continue ;;
   esac
 
   # Skip E2E files (no limit)
