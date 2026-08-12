@@ -39,7 +39,9 @@ SOC_LOCAL_ROOTS: frozenset[str] = frozenset(
 # Which *filename-suffix layers* each layer may import.
 SOC_LAYER_RULES: dict[str, set[str]] = {
     # --- domain: the pure core --------------------------------------------
-    "entity": {"entity"},
+    # Entities may raise the error taxonomy: enforcing your own invariants at
+    # construction is the entity's job, not a caller's.
+    "entity": {"entity", "error"},
     "policy": {"entity", "policy", "error"},
     "error": {"error"},
     # --- application: ports + use cases, depends on domain only ------------
@@ -51,7 +53,10 @@ SOC_LAYER_RULES: dict[str, set[str]] = {
     # SQLAlchemy tables may NOT import domain entities: an explicit mapper is
     # the only place the ORM and the domain are allowed to meet.
     "model": {"model"},
-    "mapper": {"entity", "dto", "error", "model", "mapper"},
+    # Mappers may use domain policies, and must: a vendor value has to be
+    # canonicalised by the domain's own rules on the way in, or deduplication
+    # silently breaks on values only that vendor formats a particular way.
+    "mapper": {"entity", "dto", "error", "policy", "model", "mapper"},
     "adapter": {"entity", "dto", "error", "port", "mapper", "client", "adapter"},
     "repository": {"entity", "dto", "error", "port", "mapper", "model", "repository"},
     "fake": {"entity", "dto", "error", "port", "fake"},
@@ -79,7 +84,10 @@ SOC_ROOT_RULES: dict[str, set[str]] = {
     # The invariant this whole module exists for: no adapters, no features, no
     # core, no framework — use cases see the domain and their own ports, period.
     "usecase": {"domain", "application"},
-    "client": {"application", "adapters", "core"},
+    # Vendor transport may raise the shared error taxonomy (domain/soc_error.py,
+    # layer "error") but the layer rules above deny it every other domain type,
+    # so it can never smuggle vendor vocabulary inward.
+    "client": {"domain", "application", "adapters", "core"},
     "model": {"core"},
     "mapper": {"domain", "application", "adapters"},
     "adapter": {"domain", "application", "adapters", "core"},

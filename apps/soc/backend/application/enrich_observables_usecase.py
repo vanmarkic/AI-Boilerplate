@@ -13,10 +13,10 @@ from application.clock_port import ClockPort, IdGeneratorPort
 from application.indicator_repository_port import IndicatorRepositoryPort
 from application.threat_intel_port import ThreatIntelPort
 from domain.allowlist_policy import is_allowlisted
-from domain.errors_entity import IntegrationError
 from domain.indicator_entity import Indicator, IndicatorIntel, Sighting
 from domain.indicator_policy import from_intel, merge, record_sighting
 from domain.observable_entity import Observable
+from domain.soc_error import IntegrationError
 from domain.verdict_entity import EnrichmentResult
 
 

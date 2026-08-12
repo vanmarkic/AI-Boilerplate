@@ -14,9 +14,9 @@ from domain.case_policy import (
     transition,
 )
 from domain.correlation_policy import correlation_key, should_open_case
-from domain.errors_entity import ConflictingStateError
 from domain.event_entity import AssetCriticality, NormalizedEvent
 from domain.observable_entity import Observable, ObservableType
+from domain.soc_error import ConflictingStateError
 from domain.verdict_entity import Alert, Disposition, Severity, TriageVerdict
 
 NOW = datetime(2026, 8, 12, 12, 0, tzinfo=UTC)

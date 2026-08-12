@@ -8,7 +8,7 @@ from collections.abc import Mapping
 from datetime import datetime
 
 from domain.case_entity import TERMINAL_STATUSES, Case, CaseRef, CaseStatus
-from domain.errors_entity import ConflictingStateError
+from domain.soc_error import ConflictingStateError
 from domain.verdict_entity import SEVERITY_RANK, Alert
 
 ALLOWED_TRANSITIONS: Mapping[CaseStatus, frozenset[CaseStatus]] = {

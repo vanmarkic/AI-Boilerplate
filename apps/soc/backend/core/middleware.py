@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from core.exceptions import AppError, domain_error_status
-from domain.errors_entity import DomainError
+from domain.soc_error import DomainError
 
 
 def setup_middleware(app: FastAPI) -> None:

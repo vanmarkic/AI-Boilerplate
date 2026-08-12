@@ -11,7 +11,6 @@ from application.alert_repository_port import AlertRepositoryPort
 from application.clock_port import ClockPort, IdGeneratorPort
 from application.orchestration_port import PlaybookOrchestrationPort
 from application.playbook_run_repository_port import PlaybookRunRepositoryPort
-from domain.errors_entity import IntegrationError, UnknownEntityError
 from domain.playbook_entity import (
     PlaybookCatalog,
     PlaybookDecision,
@@ -19,6 +18,7 @@ from domain.playbook_entity import (
     PlaybookRunStatus,
 )
 from domain.playbook_policy import select
+from domain.soc_error import IntegrationError, UnknownEntityError
 from domain.verdict_entity import Alert
 
 

@@ -2,7 +2,6 @@
 
 import pytest
 
-from domain.errors_entity import InvalidIndicatorError
 from domain.observable_entity import Observable, ObservableType
 from domain.observable_policy import (
     canonicalize,
@@ -12,6 +11,7 @@ from domain.observable_policy import (
     refang,
     require_observable,
 )
+from domain.soc_error import InvalidIndicatorError
 
 
 class TestRefangDefang:

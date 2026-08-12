@@ -10,7 +10,6 @@ from adapters.memory.memory_alert_repository import MemoryAlertRepository
 from adapters.memory.memory_orchestration_adapter import MemoryOrchestrationAdapter
 from adapters.memory.memory_playbook_run_repository import MemoryPlaybookRunRepository
 from application.respond_to_alert_usecase import RespondToAlertUseCase
-from domain.errors_entity import UnknownEntityError
 from domain.event_entity import AssetCriticality
 from domain.observable_entity import Observable, ObservableType
 from domain.playbook_entity import (
@@ -19,6 +18,7 @@ from domain.playbook_entity import (
     PlaybookRunStatus,
     PlaybookSummary,
 )
+from domain.soc_error import UnknownEntityError
 from domain.verdict_entity import Alert, Disposition, Severity
 
 NOW = datetime(2026, 8, 12, 12, 0, tzinfo=UTC)

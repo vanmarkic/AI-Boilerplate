@@ -1,11 +1,11 @@
 """HTTP-facing errors and the domain → HTTP translation table.
 
 The domain raises framework-free ``DomainError`` subclasses (see
-``domain/errors_entity.py``).  This module is the only place that knows what
+``domain/soc_error.py``).  This module is the only place that knows what
 those mean in HTTP terms, which is what keeps status codes out of the core.
 """
 
-from domain.errors_entity import (
+from domain.soc_error import (
     ConflictingStateError,
     DomainError,
     IntegrationAuthError,

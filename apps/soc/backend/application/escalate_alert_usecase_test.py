@@ -11,9 +11,9 @@ from adapters.memory.memory_case_adapter import MemoryCaseAdapter
 from adapters.memory.memory_case_repository import MemoryCaseRepository
 from application.escalate_alert_usecase import EscalateAlertUseCase
 from domain.case_entity import CaseStatus
-from domain.errors_entity import UnknownEntityError
 from domain.event_entity import AssetCriticality
 from domain.observable_entity import Observable, ObservableType
+from domain.soc_error import UnknownEntityError
 from domain.verdict_entity import Alert, Disposition, Severity
 
 NOW = datetime(2026, 8, 12, 12, 0, tzinfo=UTC)

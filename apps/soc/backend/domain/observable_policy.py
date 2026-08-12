@@ -3,8 +3,8 @@
 import ipaddress
 import re
 
-from domain.errors_entity import InvalidIndicatorError
 from domain.observable_entity import Observable, ObservableType
+from domain.soc_error import InvalidIndicatorError
 
 _DEFANG_REPLACEMENTS: tuple[tuple[str, str], ...] = (
     ("[.]", "."),

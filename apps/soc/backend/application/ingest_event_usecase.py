@@ -17,11 +17,11 @@ from application.search_port import DocumentSearchPort
 from application.threat_intel_port import ThreatIntelPort
 from domain.correlation_policy import DEFAULT_BUCKET_HOURS, correlation_key
 from domain.disposition_policy import decide
-from domain.errors_entity import IntegrationError, PolicyViolationError
 from domain.event_entity import NormalizedEvent, RawEvent, SourceProfile
 from domain.normalization_policy import normalize
 from domain.rules_entity import DispositionRules, ScoringRules
 from domain.severity_policy import labels_from, score_event
+from domain.soc_error import IntegrationError, PolicyViolationError
 from domain.verdict_entity import Alert, Disposition, EnrichmentResult, TriageVerdict
 
 

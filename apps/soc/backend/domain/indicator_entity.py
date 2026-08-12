@@ -10,8 +10,8 @@ from datetime import datetime
 from enum import StrEnum
 from uuid import UUID
 
-from domain.errors_entity import InvalidIndicatorError
 from domain.observable_entity import Observable
+from domain.soc_error import InvalidIndicatorError
 
 CONFIDENCE_MIN = 0
 CONFIDENCE_MAX = 100

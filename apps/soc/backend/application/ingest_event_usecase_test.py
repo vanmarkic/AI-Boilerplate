@@ -14,7 +14,6 @@ from adapters.memory.memory_search_adapter import MemorySearchAdapter
 from adapters.memory.memory_threat_intel_adapter import MemoryThreatIntelAdapter
 from application.ingest_dto import IngestEventCommand
 from application.ingest_event_usecase import IngestEventUseCase
-from domain.errors_entity import IntegrationUnavailableError, PolicyViolationError
 from domain.event_entity import AssetCriticality, SourceProfile
 from domain.indicator_entity import (
     AllowlistEntry,
@@ -27,6 +26,7 @@ from domain.indicator_policy import from_intel
 from domain.observable_entity import Observable, ObservableType
 from domain.rules_entity import DEFAULT_DISPOSITION_RULES, DEFAULT_SCORING_RULES
 from domain.search_entity import EventQuery
+from domain.soc_error import IntegrationUnavailableError, PolicyViolationError
 from domain.verdict_entity import Disposition, Severity
 
 

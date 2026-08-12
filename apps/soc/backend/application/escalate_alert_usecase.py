@@ -13,7 +13,7 @@ from application.case_repository_port import CaseRepositoryPort
 from application.clock_port import ClockPort, IdGeneratorPort
 from domain.case_entity import Case, CaseDraft, CaseNote, CaseStatus
 from domain.case_policy import attach_external_ref, merge_alert
-from domain.errors_entity import IntegrationError, UnknownEntityError
+from domain.soc_error import IntegrationError, UnknownEntityError
 from domain.verdict_entity import Alert
 
 

@@ -16,8 +16,8 @@ from domain.case_entity import (
     CaseStatus,
     ExternalCaseSnapshot,
 )
-from domain.errors_entity import UnknownEntityError
 from domain.observable_entity import Observable
+from domain.soc_error import UnknownEntityError
 
 SYSTEM_NAME = "memory"
 
