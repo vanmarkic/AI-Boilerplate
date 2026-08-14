@@ -1,7 +1,7 @@
 """In-memory threat intelligence.
 
 Production-selectable, not merely a test double: with
-``SOC_THREAT_INTEL_PROVIDER=memory`` the platform runs its full triage pipeline
+``THREAT_INTEL_PROVIDER=memory`` the platform runs its full triage pipeline
 with no intel platform deployed at all.
 """
 

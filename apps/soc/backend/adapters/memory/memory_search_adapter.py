@@ -1,6 +1,6 @@
 """In-memory document search.
 
-Production-selectable: with ``SOC_SEARCH_PROVIDER=memory`` the platform runs
+Production-selectable: with ``SEARCH_PROVIDER=memory`` the platform runs
 its full pipeline with no search engine deployed.
 """
 

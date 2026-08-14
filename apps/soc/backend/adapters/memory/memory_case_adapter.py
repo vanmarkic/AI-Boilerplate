@@ -1,6 +1,6 @@
 """In-memory case management.
 
-Production-selectable: with ``SOC_CASE_PROVIDER=memory`` the platform opens and
+Production-selectable: with ``CASE_PROVIDER=memory`` the platform opens and
 tracks cases with no external case manager deployed.
 """
 

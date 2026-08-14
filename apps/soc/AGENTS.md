@@ -37,4 +37,16 @@ curl localhost:8002/api/health/adapters   # shows what is bound to each port
 ```
 
 serves the entire pipeline with no third party deployed. Point at real systems by
-setting `SOC_*_PROVIDER` env vars — no code changes.
+setting the provider variables — no code changes:
+
+| Variable | Values |
+|---|---|
+| `SEARCH_PROVIDER` | `memory` · `opensearch` |
+| `THREAT_INTEL_PROVIDER` | `memory` · `misp` |
+| `CASE_PROVIDER` | `memory` · `iris` |
+| `ORCHESTRATION_PROVIDER` | `memory` · `shuffle` |
+| `REPOSITORY_PROVIDER` | `memory` (`postgres` not yet implemented) |
+
+The names are bare — `Settings` sets no `env_prefix`, so a prefixed variable is
+read by nothing and leaves the default in place with no error.
+`tests/config_test.py` fails if any document names a variable nothing binds.

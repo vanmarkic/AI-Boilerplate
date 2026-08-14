@@ -1,6 +1,6 @@
 """In-memory playbook orchestration.
 
-Production-selectable: with ``SOC_ORCHESTRATION_PROVIDER=memory`` the platform
+Production-selectable: with ``ORCHESTRATION_PROVIDER=memory`` the platform
 makes and records response decisions with no SOAR deployed. Runs complete
 immediately, which makes the decisioning path testable end to end.
 """
