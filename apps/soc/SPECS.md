@@ -59,7 +59,15 @@
 - **Persistence is in-memory.** PostgreSQL models, repositories and Alembic
   migrations are not yet written, so state does not survive a restart. The
   repository ports and their contract suites exist, so a relational
-  implementation is a drop-in that must pass the same contracts.
+  implementation is a drop-in that must pass the same contracts. The target
+  schema — six tables, and which constraint makes which rule above structural —
+  is specified in `SCHEMA.md`.
+- **The dedup and correlation rules are enforced by a read-then-write**, so
+  under concurrency two callers can both read "absent" and both insert. The
+  `UNIQUE` and partial-unique constraints in `SCHEMA.md` are what make them
+  real. "Containment fires once" has a second hole that persistence does *not*
+  close: `adapters/resilient_client.py` retries `POST` on transport errors, so
+  a timed-out launch can start a workflow twice below the idempotency guard.
 - Endpoints are not yet behind `Depends(get_current_user)`; `core/auth.py` is in
   place but not applied to routers.
 - Threat-intel sync and the scheduled confidence-decay sweep have use-case-level

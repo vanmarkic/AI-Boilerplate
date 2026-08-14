@@ -7,11 +7,14 @@ automated response — with every third party swappable.
 ## First Steps
 1. Read `SPECS.md` for the domain (WHAT the software does).
 2. Read `backend/AGENTS.md` for conventions (HOW to write code here).
+3. Read `SCHEMA.md` before touching persistence (the relational schema, and
+   which constraint carries which guarantee).
 
 ## Stack
 - Backend: FastAPI (Python 3.12+), hexagonal (ports & adapters)
 - Database: PostgreSQL 17 intended as the system of record — **not yet wired**;
-  repositories are in-memory today (see SPECS.md, Known Gaps)
+  repositories are in-memory today (see SPECS.md, Known Gaps). The target
+  schema is specified in `SCHEMA.md`.
 - Auth: Keycloak (OIDC, JWT via PyJWT)
 - Integrations, all optional and all swappable:
   OpenSearch (search sink) · MISP (threat intel) · DFIR-IRIS (cases) ·
