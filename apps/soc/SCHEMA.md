@@ -244,7 +244,7 @@ the three `handle_*` columns.
 ```sql
 CREATE TABLE soc_playbook_runs (
     run_id               UUID         PRIMARY KEY,
-    idempotency_key      TEXT,
+    idempotency_key      TEXT         NOT NULL,
     playbook_id          TEXT,
     status               VARCHAR(32)  NOT NULL,
     inputs               JSONB        NOT NULL DEFAULT '{}',
@@ -267,13 +267,21 @@ CREATE INDEX ix_soc_playbook_runs_alert ON soc_playbook_runs (alert_id);
 guarantee rather than a hope, with the same `IntegrityError`-then-re-read
 handling as alerts.
 
-**`idempotency_key` and `playbook_id` must be nullable.** A `SKIPPED` run
-represents "no playbook matched", and today
-`RespondToAlertUseCase._skip` writes `""` for both. `''` is a value, not `NULL`,
-so under this unique constraint the *second* skipped alert would fail to
-insert. The domain field must become `str | None` with `None` for skips —
-Postgres excludes `NULL` from unique indexes, which is exactly the wanted
-behaviour. **This is a prerequisite for the migration, not a follow-up.**
+**`idempotency_key` is `NOT NULL` for skipped runs too**, and that is the
+interesting part. A `SKIPPED` run represents "no playbook matched", which
+originally wrote `""` for both this and `playbook_id`. Under the unique
+constraint that breaks on the *second* skipped alert, since `''` is a value
+rather than `NULL`.
+
+The obvious fix — make the column nullable — works for the constraint and
+leaves the real problem: repeated `POST /alerts/{id}/respond` on a declining
+alert would keep appending indistinguishable rows. So `playbook_policy` gives a
+decline a real key instead, derived from the alert exactly as a launch's is.
+Deciding not to act is a decision worth recording once, and the endpoint is now
+idempotent on both paths.
+
+`playbook_id` stays nullable: a decline genuinely names no playbook, and `NULL`
+says that where `''` only pretended to.
 
 ## Open decision — a secret at rest
 

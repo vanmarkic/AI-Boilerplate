@@ -43,13 +43,22 @@ class RespondToAlertUseCase:
         self._ids = ids
 
     async def _skip(self, alert: Alert, decision: PlaybookDecision) -> PlaybookRun:
-        """Record that no response was warranted, and why."""
+        """Record that no response was warranted, and why — once.
+
+        A decline goes through the same idempotency lookup as a launch. Deciding
+        not to act is still a decision, and asking twice should return the first
+        answer rather than filing a second identical refusal.
+        """
+        already = await self._runs.find_by_idempotency_key(decision.idempotency_key)
+        if already is not None:
+            return already
+
         now = self._clock.now()
         return await self._runs.save(
             PlaybookRun(
                 run_id=self._ids.new_id(),
-                idempotency_key="",
-                playbook_id="",
+                idempotency_key=decision.idempotency_key,
+                playbook_id=None,
                 status=PlaybookRunStatus.SKIPPED,
                 inputs={},
                 started_at=now,

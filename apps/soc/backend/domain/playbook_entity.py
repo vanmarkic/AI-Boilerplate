@@ -97,7 +97,9 @@ class PlaybookRun:
 
     run_id: UUID
     idempotency_key: str
-    playbook_id: str
+    # None for a declined response: there is no playbook to name, and the
+    # relational store makes this column NULL rather than "".
+    playbook_id: str | None
     status: PlaybookRunStatus
     inputs: Mapping[str, str]
     started_at: datetime

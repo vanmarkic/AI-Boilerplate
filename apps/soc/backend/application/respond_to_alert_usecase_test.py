@@ -1,5 +1,6 @@
 """Automated response, driven through in-memory ports."""
 
+from dataclasses import replace
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
@@ -162,7 +163,7 @@ class TestRespondToAlert:
         run = await usecase.execute(alert.alert_id)
 
         assert run.status is PlaybookRunStatus.SKIPPED
-        assert run.playbook_id == ""
+        assert run.playbook_id is None
         assert "no playbook rule matched" in (run.error or "")
 
     async def test_a_skipped_alert_is_not_sent_to_the_orchestrator(
@@ -191,3 +192,65 @@ class TestRespondToAlert:
         run = await usecase.execute(alert.alert_id)
 
         assert run.alert_id == alert.alert_id
+
+
+class TestSkipsAreIdempotentToo:
+    """A declined response is still a response, recorded once.
+
+    ``idempotency_key=""`` made every skip share one sentinel value. Nothing
+    failed in memory — but the planned schema puts UNIQUE(idempotency_key) on
+    this column, and '' is a value rather than NULL, so the *second* skipped
+    alert would fail to insert. Giving a decline a real key fixes that and makes
+    the endpoint idempotent on the declining path, which the sentinel never was.
+    """
+
+    async def test_skipping_twice_returns_the_same_run(
+        self,
+        alerts: MemoryAlertRepository,
+        runs: MemoryPlaybookRunRepository,
+        usecase: RespondToAlertUseCase,
+    ) -> None:
+        alert = await alerts.save(make_alert(Severity.LOW, Disposition.MONITOR))
+
+        first = await usecase.execute(alert.alert_id)
+        second = await usecase.execute(alert.alert_id)
+
+        assert second.run_id == first.run_id
+
+    async def test_repeated_skips_do_not_accumulate_rows(
+        self,
+        alerts: MemoryAlertRepository,
+        runs: MemoryPlaybookRunRepository,
+        usecase: RespondToAlertUseCase,
+    ) -> None:
+        alert = await alerts.save(make_alert(Severity.LOW, Disposition.MONITOR))
+
+        for _ in range(5):
+            await usecase.execute(alert.alert_id)
+
+        recorded = [r for r in runs._store.playbook_runs.values() if r.alert_id == alert.alert_id]
+        assert len(recorded) == 1
+
+    async def test_two_declining_alerts_get_different_keys(
+        self, alerts: MemoryAlertRepository, usecase: RespondToAlertUseCase
+    ) -> None:
+        """A shared key would make the second alert's skip collide with the first."""
+        one = await alerts.save(make_alert(Severity.LOW, Disposition.MONITOR))
+        other = await alerts.save(
+            replace(make_alert(Severity.LOW, Disposition.MONITOR), dedup_key="other-event")
+        )
+
+        assert (await usecase.execute(one.alert_id)).idempotency_key != (
+            await usecase.execute(other.alert_id)
+        ).idempotency_key
+
+    async def test_a_skip_names_no_playbook(
+        self, alerts: MemoryAlertRepository, usecase: RespondToAlertUseCase
+    ) -> None:
+        """None, not "" — the column has to be nullable for UNIQUE to be usable."""
+        alert = await alerts.save(make_alert(Severity.LOW, Disposition.MONITOR))
+
+        run = await usecase.execute(alert.alert_id)
+
+        assert run.playbook_id is None
+        assert run.idempotency_key

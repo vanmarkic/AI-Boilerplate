@@ -1,7 +1,11 @@
 """In-memory playbook run storage.
 
-The dict keyed by idempotency key is what supplies the guarantee the
-orchestrator does not: the same intended action can only be recorded once.
+``find_by_idempotency_key`` is what supplies the guarantee the orchestrator does
+not: the same intended action can only be recorded once. Here it is a scan,
+which is honest at in-process scale but enforces nothing — two concurrent
+callers can both scan, both miss, and both save. The relational implementation
+gets ``UNIQUE(idempotency_key)``, which is what makes the guarantee structural
+rather than a convention two callers can race past.
 """
 
 from uuid import UUID
@@ -11,7 +15,7 @@ from domain.playbook_entity import PlaybookRun
 
 
 class MemoryPlaybookRunRepository:
-    """Keys runs by id, with a secondary index on the idempotency key."""
+    """Keys runs by id, and scans for the idempotency key."""
 
     def __init__(self, store: MemoryStore) -> None:
         self._store = store

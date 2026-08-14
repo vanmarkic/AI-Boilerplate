@@ -18,7 +18,7 @@ class PlaybookRunResponse(ResponseBase):
     """The record of an automated response action."""
 
     run_id: UUID
-    playbook_id: str
+    playbook_id: str | None
     status: str
     idempotency_key: str
     inputs: dict[str, str]

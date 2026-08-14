@@ -49,14 +49,24 @@ def rule_matches(rule: PlaybookRule, alert: Alert, labels: frozenset[str]) -> bo
     return True
 
 
-def _declined(reason: str) -> PlaybookDecision:
-    """A decision not to run anything, with the reason recorded."""
+# Stands in for "no playbook" when keying a decline. A NUL byte cannot occur in
+# a real playbook id, so a decline's key can never collide with a launch's.
+NO_PLAYBOOK = "\x00no-playbook"
+
+
+def _declined(alert: Alert, reason: str) -> PlaybookDecision:
+    """A decision not to run anything, with the reason recorded.
+
+    Declines get a real key too. Deciding not to act is a decision worth
+    recording exactly once: asking twice must return the first answer rather
+    than filing a second identical refusal.
+    """
     return PlaybookDecision(
         should_run=False,
         playbook_id=None,
         inputs={},
         reason=reason,
-        idempotency_key="",
+        idempotency_key=idempotency_key(NO_PLAYBOOK, str(alert.alert_id), alert.dedup_key),
     )
 
 
@@ -68,12 +78,12 @@ def select(alert: Alert, catalog: PlaybookCatalog) -> PlaybookDecision:
     at response time.
     """
     if alert.disposition is Disposition.DROP:
-        return _declined("disposition is drop")
+        return _declined(alert, "disposition is drop")
 
     labels = frozenset(label.lower() for label in alert.labels)
     candidates = [rule for rule in catalog.rules if rule_matches(rule, alert, labels)]
     if not candidates:
-        return _declined("no playbook rule matched")
+        return _declined(alert, "no playbook rule matched")
 
     winner = sorted(candidates, key=lambda r: (-r.priority, r.playbook_id))[0]
     inputs = {
