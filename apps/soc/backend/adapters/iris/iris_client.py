@@ -39,17 +39,25 @@ class IrisClient:
     def _unwrap(self, payload: object, where: str) -> object:
         """Return the envelope's data, raising when it reports an error.
 
-        A bare object is returned as-is: not every IRIS deployment wraps.
+        A bare object is returned as-is: not every IRIS deployment wraps. That
+        makes the detection load-bearing, and ``status`` alone will not do it —
+        an unwrapped *case* carries a status of its own, and reading ``"open"``
+        as "not success" reported a case that opened fine as a protocol error.
+        Both envelope keys must be present before this treats a body as one.
+
+        The failure's ``message`` is deliberately not quoted. It is a response
+        body field, and the transport states flatly that it never puts one in an
+        error — bodies carry keys and personal data, and APIs routinely echo
+        submitted values back on rejection. The endpoint alone locates the
+        failure; the vendor's own logs hold the prose.
         """
         if not isinstance(payload, Mapping):
             return payload
-        status = payload.get("status")
-        if status is None:
+        if "status" not in payload or "data" not in payload:
             return payload
-        if str(status).lower() != "success":
-            message = payload.get("message") or "operation reported failure"
-            raise IntegrationProtocolError(SYSTEM, f"{where}: {message}")
-        return payload.get("data", {})
+        if str(payload["status"]).lower() != "success":
+            raise IntegrationProtocolError(SYSTEM, f"{where}: operation reported failure")
+        return payload["data"]
 
     async def request(
         self,
