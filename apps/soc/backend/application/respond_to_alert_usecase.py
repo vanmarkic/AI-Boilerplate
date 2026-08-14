@@ -5,6 +5,7 @@ recorded under a domain-derived key *before* the orchestrator is called, so a
 retry finds the existing record instead of firing containment a second time.
 """
 
+from dataclasses import replace
 from uuid import UUID
 
 from application.alert_repository_port import AlertRepositoryPort
@@ -101,15 +102,9 @@ class RespondToAlertUseCase:
             handle = await self._orchestrator.launch(decision)
         except IntegrationError as exc:
             return await self._runs.save(
-                PlaybookRun(
-                    run_id=pending.run_id,
-                    idempotency_key=pending.idempotency_key,
-                    playbook_id=pending.playbook_id,
+                replace(
+                    pending,
                     status=PlaybookRunStatus.FAILED,
-                    inputs=pending.inputs,
-                    started_at=pending.started_at,
-                    alert_id=pending.alert_id,
-                    case_id=pending.case_id,
                     error=str(exc),
                     finished_at=self._clock.now(),
                 )
@@ -118,15 +113,9 @@ class RespondToAlertUseCase:
         outcome = await self._orchestrator.get_outcome(handle)
         status = outcome.status if outcome else PlaybookRunStatus.RUNNING
         return await self._runs.save(
-            PlaybookRun(
-                run_id=pending.run_id,
-                idempotency_key=pending.idempotency_key,
-                playbook_id=pending.playbook_id,
+            replace(
+                pending,
                 status=status,
-                inputs=pending.inputs,
-                started_at=pending.started_at,
-                alert_id=pending.alert_id,
-                case_id=pending.case_id,
                 handle=handle,
                 output=outcome.output if outcome else {},
                 error=outcome.error if outcome else None,

@@ -5,6 +5,7 @@ called, and the external reference is attached afterwards. An outage in the
 case manager therefore costs us a mirror, never the investigation itself.
 """
 
+from dataclasses import replace
 from uuid import UUID
 
 from application.alert_repository_port import AlertRepositoryPort
@@ -81,27 +82,7 @@ class EscalateAlertUseCase:
         """Point the alert at its case so an analyst can navigate between them."""
         if alert.case_id == case.case_id:
             return
-        await self._alerts.save(
-            Alert(
-                alert_id=alert.alert_id,
-                event_id=alert.event_id,
-                dedup_key=alert.dedup_key,
-                correlation_key=alert.correlation_key,
-                title=alert.title,
-                severity=alert.severity,
-                disposition=alert.disposition,
-                score=alert.score,
-                reasons=alert.reasons,
-                observables=alert.observables,
-                source=alert.source,
-                host=alert.host,
-                asset_criticality=alert.asset_criticality,
-                occurred_at=alert.occurred_at,
-                created_at=alert.created_at,
-                case_id=case.case_id,
-                labels=alert.labels,
-            )
-        )
+        await self._alerts.save(replace(alert, case_id=case.case_id))
 
     async def execute(self, alert_id: UUID, *, actor: str) -> Case:
         """Escalate one alert and return the case it now belongs to."""

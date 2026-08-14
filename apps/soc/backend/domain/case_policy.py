@@ -5,6 +5,7 @@ declared as data so it can be asserted over directly in tests.
 """
 
 from collections.abc import Mapping
+from dataclasses import replace
 from datetime import datetime
 
 from domain.case_entity import TERMINAL_STATUSES, Case, CaseRef, CaseStatus
@@ -50,17 +51,11 @@ def transition(case: Case, target: CaseStatus, now: datetime) -> Case:
         raise ConflictingStateError(
             f"cannot move case {case.case_id} from {case.status.value} to {target.value}"
         )
-    return Case(
-        case_id=case.case_id,
-        correlation_key=case.correlation_key,
-        title=case.title,
+    return replace(
+        case,
         status=target,
-        severity=case.severity,
-        alert_ids=case.alert_ids,
-        opened_at=case.opened_at,
         updated_at=now,
         closed_at=now if target in TERMINAL_STATUSES else None,
-        external_ref=case.external_ref,
     )
 
 
@@ -80,17 +75,11 @@ def merge_alert(case: Case, alert: Alert, now: datetime) -> Case:
         if SEVERITY_RANK[alert.severity] > SEVERITY_RANK[case.severity]
         else case.severity
     )
-    return Case(
-        case_id=case.case_id,
-        correlation_key=case.correlation_key,
-        title=case.title,
-        status=case.status,
+    return replace(
+        case,
         severity=severity,
         alert_ids=(*case.alert_ids, alert.alert_id),
-        opened_at=case.opened_at,
         updated_at=now,
-        closed_at=case.closed_at,
-        external_ref=case.external_ref,
     )
 
 
@@ -101,15 +90,4 @@ def attach_external_ref(case: Case, ref: CaseRef, now: datetime) -> Case:
     and the external reference is bolted on afterwards, so an outage in the
     case manager can never lose the investigation.
     """
-    return Case(
-        case_id=case.case_id,
-        correlation_key=case.correlation_key,
-        title=case.title,
-        status=case.status,
-        severity=case.severity,
-        alert_ids=case.alert_ids,
-        opened_at=case.opened_at,
-        updated_at=now,
-        closed_at=case.closed_at,
-        external_ref=ref,
-    )
+    return replace(case, external_ref=ref, updated_at=now)
