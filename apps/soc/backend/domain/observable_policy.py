@@ -26,11 +26,30 @@ _HEX_RE = re.compile(r"^[0-9a-f]+$")
 _DOMAIN_RE = re.compile(r"^(?=.{1,253}$)(?!-)[a-z0-9-]{1,63}(?<!-)(\.(?!-)[a-z0-9-]{1,63}(?<!-))+$")
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+# Extraction runs on untrusted text inside a request. Every repeat below is
+# bounded, because an unbounded one is not merely slow: "\b" matches at every
+# hyphen (a hyphen is not a word character), so an unbounded label pattern gets
+# O(n) start positions each backtracking over O(n) characters. On 64 KB of
+# "a-a-a..." that measured 50 seconds of CPU inside the event loop.
+#
+# The bounds are the real protocol limits, so nothing legitimate is lost:
+# a DNS label is at most 63 characters (RFC 1035) and a TLD at most 63.
+_LABEL = r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?"
+
 _IPV4_FIND_RE = re.compile(r"\b(?:\d{1,3}\.){3}\d{1,3}\b")
-_DOMAIN_FIND_RE = re.compile(r"\b(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z]{2,}\b")
-_URL_FIND_RE = re.compile(r"\bhttps?://[^\s\"'<>]+", re.IGNORECASE)
-_EMAIL_FIND_RE = re.compile(r"\b[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b", re.IGNORECASE)
-_HASH_FIND_RE = re.compile(r"\b[0-9a-f]{32}(?:[0-9a-f]{8})?(?:[0-9a-f]{24})?\b", re.IGNORECASE)
+_DOMAIN_FIND_RE = re.compile(rf"\b(?:{_LABEL}\.){{1,32}}[a-z]{{2,63}}\b")
+_URL_FIND_RE = re.compile(r"\bhttps?://[^\s\"'<>]{1,2048}", re.IGNORECASE)
+_EMAIL_FIND_RE = re.compile(
+    r"\b[a-z0-9._%+-]{1,64}@[a-z0-9.-]{1,253}\.[a-z]{2,63}\b", re.IGNORECASE
+)
+# Exactly the three lengths _HASH_LENGTHS knows, longest first so the alternation
+# never leaves a longer hash half-matched.
+_HASH_FIND_RE = re.compile(r"\b(?:[0-9a-f]{64}|[0-9a-f]{40}|[0-9a-f]{32})\b", re.IGNORECASE)
+
+# How much of one string extraction will look at. A syslog line is under 2 KB
+# and RFC 5424 caps a transport at 8 KB, so this is generous for real telemetry
+# while keeping the worst case bounded regardless of which adapter calls in.
+MAX_SCAN_CHARS = 16_384
 
 
 def refang(value: str) -> str:
@@ -119,6 +138,21 @@ def _hash_type_for(value: str) -> ObservableType | None:
     return None
 
 
+def _scannable(text: str) -> str:
+    """Return the leading slice of text extraction is willing to scan.
+
+    Truncation falls back to the last whitespace so a token is never cut in
+    half: ``evil.example`` sliced at eight characters is ``evil.exa``, still a
+    well-formed domain and a wrong one. Dropping a partial token is safe;
+    reporting an artefact nobody sent is not.
+    """
+    if len(text) <= MAX_SCAN_CHARS:
+        return text
+    window = text[:MAX_SCAN_CHARS]
+    cut = window.rfind(" ")
+    return window[:cut] if cut > 0 else window
+
+
 def extract_observables(text: str) -> tuple[Observable, ...]:
     """Pull every recognisable artefact out of free text, deduplicated.
 
@@ -126,10 +160,14 @@ def extract_observables(text: str) -> tuple[Observable, ...]:
     can rely on it.  A URL's host is emitted as its own DOMAIN observable in
     addition to the URL: the host is worth looking up against threat intel
     independently of the full path.
+
+    Only the first ``MAX_SCAN_CHARS`` characters are scanned. The input is
+    untrusted and this runs in a request, so the cost of one string has to be
+    bounded; an artefact past the cap is not extracted.
     """
     found: list[Observable] = []
     seen: set[Observable] = set()
-    refanged = refang(text)
+    refanged = refang(_scannable(text))
 
     def add(observable_type: ObservableType, raw: str) -> None:
         observable = parse_observable(observable_type, raw)
