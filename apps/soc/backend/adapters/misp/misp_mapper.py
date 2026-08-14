@@ -13,25 +13,30 @@ from domain.indicator_entity import Confidence, IndicatorIntel, TlpLevel
 from domain.observable_entity import ObservableType
 from domain.observable_policy import parse_observable
 
-# MISP attribute type -> our observable type. Unlisted types are ignored
-# rather than guessed at.
-ATTRIBUTE_TYPES: Mapping[str, ObservableType] = {
-    "ip-src": ObservableType.IPV4,
-    "ip-dst": ObservableType.IPV4,
-    "ip-src|port": ObservableType.IPV4,
-    "ip-dst|port": ObservableType.IPV4,
-    "domain": ObservableType.DOMAIN,
-    "hostname": ObservableType.HOSTNAME,
-    "url": ObservableType.URL,
-    "md5": ObservableType.MD5,
-    "sha1": ObservableType.SHA1,
-    "sha256": ObservableType.SHA256,
-    "filename|md5": ObservableType.MD5,
-    "filename|sha1": ObservableType.SHA1,
-    "filename|sha256": ObservableType.SHA256,
-    "email-src": ObservableType.EMAIL,
-    "email-dst": ObservableType.EMAIL,
-    "filename": ObservableType.FILENAME,
+# MISP attribute type -> (our observable type, which "|"-separated part holds
+# the artefact). Unlisted types are ignored rather than guessed at.
+#
+# The part index is explicit because MISP's composite types are not consistent
+# about it: ``ip-dst|port`` is "203.0.113.9|8443" (artefact first) while
+# ``filename|md5`` is "evil.exe|d41d8cd9…" (artefact second). Inferring one rule
+# from the other silently discards every file hash MISP publishes.
+ATTRIBUTE_TYPES: Mapping[str, tuple[ObservableType, int]] = {
+    "ip-src": (ObservableType.IPV4, 0),
+    "ip-dst": (ObservableType.IPV4, 0),
+    "ip-src|port": (ObservableType.IPV4, 0),
+    "ip-dst|port": (ObservableType.IPV4, 0),
+    "domain": (ObservableType.DOMAIN, 0),
+    "hostname": (ObservableType.HOSTNAME, 0),
+    "url": (ObservableType.URL, 0),
+    "md5": (ObservableType.MD5, 0),
+    "sha1": (ObservableType.SHA1, 0),
+    "sha256": (ObservableType.SHA256, 0),
+    "filename|md5": (ObservableType.MD5, 1),
+    "filename|sha1": (ObservableType.SHA1, 1),
+    "filename|sha256": (ObservableType.SHA256, 1),
+    "email-src": (ObservableType.EMAIL, 0),
+    "email-dst": (ObservableType.EMAIL, 0),
+    "filename": (ObservableType.FILENAME, 0),
 }
 
 # MISP threat_level_id -> base confidence. 1 is High, 4 is Undefined.
@@ -114,13 +119,19 @@ def to_indicator_intel(attribute: Mapping[str, Any]) -> IndicatorIntel | None:
     Returns None for anything we cannot faithfully represent — an unknown
     attribute type or a malformed value — so one bad row never loses a page.
     """
-    observable_type = ATTRIBUTE_TYPES.get(str(attribute.get("type", "")))
-    if observable_type is None:
+    mapping = ATTRIBUTE_TYPES.get(str(attribute.get("type", "")))
+    if mapping is None:
+        return None
+    observable_type, part = mapping
+
+    # Composite types carry "value1|value2"; which half is the artefact is
+    # declared per type in ATTRIBUTE_TYPES, never inferred. A composite missing
+    # its artefact half is dropped rather than falling back to the other one.
+    parts = str(attribute.get("value", "")).split("|")
+    if part >= len(parts):
         return None
 
-    raw_value = str(attribute.get("value", ""))
-    # Composite types carry "value1|value2"; the artefact is the first part.
-    observable = parse_observable(observable_type, raw_value.split("|")[0])
+    observable = parse_observable(observable_type, parts[part])
     if observable is None:
         return None
 
