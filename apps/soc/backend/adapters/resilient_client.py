@@ -10,6 +10,7 @@ API keys and personal data. Errors name the method, the host and the status.
 """
 
 import asyncio
+import math
 import secrets
 from collections.abc import Awaitable, Callable, Mapping
 from dataclasses import dataclass, field
@@ -83,10 +84,17 @@ class ResilientHttpClient:
         request indefinitely.
         """
         if retry_after:
+            # A vendor-supplied value, so it is input rather than instruction.
+            # float() accepts "nan" and "-5"; nan survives min() (min keeps its
+            # first argument, since cap < nan is False) and sleeping on nan waits
+            # for a deadline that never arrives.
             try:
-                return min(float(retry_after), self._config.backoff_cap_seconds)
+                seconds = float(retry_after)
             except ValueError:
-                pass
+                pass  # the RFC 9110 HTTP-date form; fall through to exponential
+            else:
+                if math.isfinite(seconds):
+                    return min(max(seconds, 0.0), self._config.backoff_cap_seconds)
         exponential = self._config.backoff_base_seconds * (2**attempt)
         jitter = secrets.randbelow(int(MAX_JITTER_SECONDS * 1000)) / 1000
         return min(exponential + jitter, self._config.backoff_cap_seconds)

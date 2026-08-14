@@ -74,10 +74,17 @@ def _encode_cursor(offset: int) -> str:
 
 
 def _decode_cursor(cursor: str | None) -> int:
-    """Decode an opaque paging token, treating anything unreadable as the start."""
+    """Decode an opaque paging token, treating anything unusable as the start.
+
+    A cursor comes from a client, so it is untrusted. Unusable includes negative:
+    ``int`` parses "-5" happily, and a negative offset produces an empty window,
+    which leaves ``consumed`` negative, which re-encodes the same cursor — a page
+    that never advances and a caller that never stops asking.
+    """
     if not cursor:
         return 0
     try:
-        return int(base64.urlsafe_b64decode(cursor.encode()).decode())
+        offset = int(base64.urlsafe_b64decode(cursor.encode()).decode())
     except (ValueError, UnicodeDecodeError):
         return 0
+    return max(0, offset)

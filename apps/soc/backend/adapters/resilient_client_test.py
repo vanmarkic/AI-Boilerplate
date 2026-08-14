@@ -259,3 +259,71 @@ class TestRetryIsMethodAware:
         handler, _ = self._counting("transport")
         with pytest.raises(IntegrationUnavailableError, match="transport failure"):
             await build(handler).request_json("POST", "/thing")
+
+
+class TestRetryAfterIsUntrusted:
+    """Retry-After comes from the vendor, so it is input, not instruction.
+
+    float() accepts more than digits. "nan" survives min() — min keeps its first
+    argument because 4.0 < nan is False — and asyncio.sleep(nan) computes a
+    deadline of nan, which never arrives. The httpx timeout bounds the request,
+    not the wait between attempts, so the call hangs.
+    """
+
+    def _recording(self, retry_after: str) -> tuple[ResilientHttpClient, list[float]]:
+        """Build a client that records every backoff it would sleep for."""
+        waits: list[float] = []
+
+        async def record(seconds: float) -> None:
+            waits.append(seconds)
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            return httpx.Response(503, headers={"Retry-After": retry_after}, json={})
+
+        client = ResilientHttpClient(
+            HttpConfig(
+                system="test_system",
+                base_url="https://vendor.invalid",
+                max_attempts=3,
+                backoff_cap_seconds=4.0,
+            ),
+            transport=httpx.MockTransport(handler),
+            sleep=record,
+        )
+        return client, waits
+
+    @pytest.mark.parametrize(
+        "retry_after",
+        [
+            "nan",
+            "NaN",
+            "-5",
+            "-0.001",
+            "inf",
+            "-inf",
+            "1e400",
+            "garbage",
+            "Fri, 31 Dec 1999 23:59:59 GMT",
+        ],
+    )
+    async def test_every_backoff_is_a_usable_duration(self, retry_after: str) -> None:
+        client, waits = self._recording(retry_after)
+        with pytest.raises(IntegrationUnavailableError):
+            await client.request_json("GET", "/thing")
+
+        assert waits, "no backoff was recorded — the test is not exercising the wait"
+        for seconds in waits:
+            assert seconds == seconds, f"{retry_after!r} produced a NaN backoff"
+            assert 0.0 <= seconds <= 4.0, f"{retry_after!r} produced {seconds}s"
+
+    async def test_a_sane_retry_after_is_honoured(self) -> None:
+        client, waits = self._recording("2")
+        with pytest.raises(IntegrationUnavailableError):
+            await client.request_json("GET", "/thing")
+        assert waits == [2.0, 2.0]
+
+    async def test_a_retry_after_beyond_the_cap_is_clamped(self) -> None:
+        client, waits = self._recording("600")
+        with pytest.raises(IntegrationUnavailableError):
+            await client.request_json("GET", "/thing")
+        assert waits == [4.0, 4.0]
