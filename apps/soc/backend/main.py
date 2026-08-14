@@ -1,4 +1,5 @@
 import importlib.util
+import logging
 import re
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
@@ -9,6 +10,8 @@ from fastapi import FastAPI
 
 from core.config import settings
 from core.middleware import setup_middleware
+
+_log = logging.getLogger(__name__)
 
 _FEATURE_NAME_RE = re.compile(r"^[a-z][a-z0-9_]*$")
 
@@ -44,13 +47,47 @@ def discover_routers(app: FastAPI) -> None:
             app.include_router(module.router)
 
 
+OUTBOUND_PORTS = (
+    "threat_intel_port",
+    "search_port",
+    "case_management_port",
+    "orchestration_port",
+)
+
+
 @asynccontextmanager
 async def _lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    """Resolve every configured adapter at startup, so misconfiguration fails fast."""
+    """Resolve every configured adapter at startup, and release them at shutdown.
+
+    Resolution is the fail-fast check: a provider name with a typo in it raises
+    here, at boot, rather than on the first request that happens to need that
+    port. (``bound_providers`` only reports the configured *names*, so calling
+    it proved nothing — it cannot fail.)
+
+    Shutdown is best-effort by design. An adapter that cannot close is a pool we
+    were losing anyway; letting it raise would strand every adapter after it in
+    the list, which is strictly worse than the leak it is complaining about.
+    """
     from core import registry
 
-    registry.bound_providers()
-    yield
+    adapters = [getattr(registry, name)() for name in OUTBOUND_PORTS]
+    try:
+        yield
+    finally:
+        for adapter in adapters:
+            closer = getattr(adapter, "aclose", None)
+            if closer is None:
+                continue  # an in-memory adapter owns no pool to release
+            try:
+                await closer()
+            except Exception as exc:  # shutdown must not be interruptible
+                # Type only: an adapter's message can carry its base URL, and
+                # those hold credentials for some vendors.
+                _log.warning(
+                    "adapter %s failed to close: %s",
+                    type(adapter).__name__,
+                    type(exc).__name__,
+                )
 
 
 def create_app() -> FastAPI:
