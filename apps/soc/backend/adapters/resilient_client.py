@@ -27,6 +27,11 @@ RETRYABLE_STATUSES = frozenset({429, 500, 502, 503, 504})
 AUTH_STATUSES = frozenset({401, 403})
 MAX_JITTER_SECONDS = 0.1
 
+# Methods RFC 9110 §9.2.2 defines as idempotent: replaying one has the same
+# effect as issuing it once, so a retry cannot duplicate a side effect. POST and
+# PATCH are absent on purpose — see ``request_json``.
+IDEMPOTENT_METHODS = frozenset({"GET", "HEAD", "PUT", "DELETE", "OPTIONS", "TRACE"})
+
 
 @dataclass(frozen=True, slots=True)
 class HttpConfig:
@@ -86,6 +91,11 @@ class ResilientHttpClient:
         jitter = secrets.randbelow(int(MAX_JITTER_SECONDS * 1000)) / 1000
         return min(exponential + jitter, self._config.backoff_cap_seconds)
 
+    @staticmethod
+    def _may_retry(method: str, retry_unsafe: bool) -> bool:
+        """Return True if replaying this request cannot duplicate a side effect."""
+        return retry_unsafe or method.upper() in IDEMPOTENT_METHODS
+
     def _describe(self, method: str, path: str, status: int | None = None) -> str:
         """Describe a failed request without leaking its contents."""
         suffix = f" -> {status}" if status is not None else ""
@@ -126,11 +136,26 @@ class ResilientHttpClient:
         params: Mapping[str, str] | None = None,
         content: bytes | None = None,
         headers: Mapping[str, str] | None = None,
+        retry_unsafe: bool = False,
     ) -> object:
-        """Perform a request, retrying transient failures, and decode the body."""
+        """Perform a request, retrying transient failures, and decode the body.
+
+        Only methods RFC 9110 defines as idempotent are retried. A transport
+        error after the server accepted a request is indistinguishable from one
+        it never received, so replaying a POST can perform the write twice —
+        and the core's idempotency guards all sit *above* this call, where they
+        cannot see it.
+
+        ``retry_unsafe=True`` opts one call site back in, for a POST that is
+        idempotent in fact even though the method is not: a bulk index keyed by
+        document id, or a search expressed as a POST because the query is too
+        big for a query string. It is a claim about that endpoint, so it is made
+        per call rather than configured once for a whole vendor.
+        """
+        attempts = self._config.max_attempts if self._may_retry(method, retry_unsafe) else 1
         last_error: Exception | None = None
 
-        for attempt in range(self._config.max_attempts):
+        for attempt in range(attempts):
             retry_after: str | None = None
             try:
                 response = await self._client.request(
@@ -157,7 +182,7 @@ class ResilientHttpClient:
                     f"unavailable: {self._describe(method, path, response.status_code)}",
                 )
 
-            if attempt + 1 < self._config.max_attempts:
+            if attempt + 1 < attempts:
                 await self._sleep(self._backoff_seconds(attempt, retry_after))
 
         raise (

@@ -200,3 +200,62 @@ class TestRetries:
             await client.request_json("GET", "/thing")
         assert attempts["n"] == 1
         await client.aclose()
+
+
+class TestRetryIsMethodAware:
+    """Retrying a write can perform it twice. Only safe methods are replayed.
+
+    A transport error after the server accepted the request is indistinguishable
+    from one it never received. For GET that is harmless; for the POST that
+    launches containment it is a second launch, below every idempotency guard
+    the core has.
+    """
+
+    def _counting(self, outcome: str) -> tuple[object, list[str]]:
+        """Return a handler recording each attempt, and the record."""
+        seen: list[str] = []
+
+        def handler(request: httpx.Request) -> httpx.Response:
+            seen.append(request.method)
+            if outcome == "transport":
+                raise httpx.ConnectError("boom")
+            return httpx.Response(503, json={})
+
+        return handler, seen
+
+    @pytest.mark.parametrize("outcome", ["transport", "unavailable"])
+    @pytest.mark.parametrize("method", ["GET", "HEAD", "PUT", "DELETE"])
+    async def test_a_safe_method_is_retried(self, method: str, outcome: str) -> None:
+        handler, seen = self._counting(outcome)
+        with pytest.raises(IntegrationUnavailableError):
+            await build(handler).request_json(method, "/thing")
+        assert len(seen) == 3
+
+    @pytest.mark.parametrize("outcome", ["transport", "unavailable"])
+    @pytest.mark.parametrize("method", ["POST", "PATCH"])
+    async def test_an_unsafe_method_is_not_retried(self, method: str, outcome: str) -> None:
+        """The whole point: one attempt, so the write happens at most once."""
+        handler, seen = self._counting(outcome)
+        with pytest.raises(IntegrationUnavailableError):
+            await build(handler).request_json(method, "/thing")
+        assert seen == [method]
+
+    @pytest.mark.parametrize("outcome", ["transport", "unavailable"])
+    async def test_an_unsafe_method_may_opt_in(self, outcome: str) -> None:
+        """A caller that knows its POST is idempotent can ask for retries."""
+        handler, seen = self._counting(outcome)
+        with pytest.raises(IntegrationUnavailableError):
+            await build(handler).request_json("POST", "/thing", retry_unsafe=True)
+        assert len(seen) == 3
+
+    async def test_the_method_check_is_case_insensitive(self) -> None:
+        handler, seen = self._counting("transport")
+        with pytest.raises(IntegrationUnavailableError):
+            await build(handler).request_json("post", "/thing")
+        assert len(seen) == 1
+
+    async def test_a_declined_retry_still_reports_unavailable(self) -> None:
+        """Not retrying must not change what the caller is told."""
+        handler, _ = self._counting("transport")
+        with pytest.raises(IntegrationUnavailableError, match="transport failure"):
+            await build(handler).request_json("POST", "/thing")

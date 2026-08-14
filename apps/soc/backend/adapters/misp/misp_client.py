@@ -66,7 +66,11 @@ class MispClient:
                 "enforceWarninglist": True,
                 **criteria,
             }
-            payload = await self._http.request_json("POST", REST_SEARCH_PATH, json_body=body)
+            # restSearch is a query, not a write — POST only because the
+            # criteria do not fit a query string. Safe to replay.
+            payload = await self._http.request_json(
+                "POST", REST_SEARCH_PATH, json_body=body, retry_unsafe=True
+            )
             attributes = self._attributes_of(payload)
             collected.extend(attributes)
             if len(attributes) < page_size or len(collected) >= limit:
@@ -89,7 +93,11 @@ class MispClient:
         return await self._search({"timestamp": str(int(since.timestamp()))}, limit)
 
     async def add_sighting(self, value: str, observed_at: datetime) -> None:
-        """Report that we saw a value in our own telemetry."""
+        """Report that we saw a value in our own telemetry.
+
+        Deliberately not retried: a replay adds a second sighting, inflating the
+        count the intel platform reports back to everyone sharing the feed.
+        """
         await self._http.request_json(
             "POST",
             SIGHTINGS_PATH,

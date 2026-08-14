@@ -41,7 +41,14 @@ class ShuffleClient:
         workflow_id: str,
         arguments: Mapping[str, str],
     ) -> Mapping[str, Any]:
-        """Start a workflow execution."""
+        """Start a workflow execution.
+
+        Never retried, and this is the call the rule exists for. A read timeout
+        after Shuffle accepted the request looks exactly like one it never
+        received — and replaying it launches containment twice, below the
+        idempotency guard in ``RespondToAlertUseCase``, which sits above this
+        call and cannot see a second attempt.
+        """
         payload = await self._http.request_json(
             "POST",
             f"{WORKFLOWS_PATH}/{workflow_id}/execute",
@@ -61,7 +68,10 @@ class ShuffleClient:
         """
         body = {"execution_id": execution_id, "authorization": authorization or ""}
         try:
-            payload = await self._http.request_json("POST", RESULTS_PATH, json_body=body)
+            # Reading an execution's state changes nothing, so a replay is safe.
+            payload = await self._http.request_json(
+                "POST", RESULTS_PATH, json_body=body, retry_unsafe=True
+            )
         except IntegrationRejectedError:
             return None
         return payload if isinstance(payload, Mapping) else None

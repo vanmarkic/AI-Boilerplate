@@ -52,7 +52,9 @@
 - The highest-priority matching playbook rule wins; ties break by playbook id, so
   selection is deterministic.
 - Orchestrators provide no idempotency, so the core supplies its own key and
-  enforces it before launching. Containment fires once.
+  enforces it before launching. Containment fires once — and the transport
+  agrees: the launch is a `POST`, and only idempotent methods are retried, so a
+  timed-out launch is reported rather than replayed below the guard.
 - An alert matching no rule is recorded as skipped, with the reason.
 
 ## Known Gaps
@@ -65,9 +67,7 @@
 - **The dedup and correlation rules are enforced by a read-then-write**, so
   under concurrency two callers can both read "absent" and both insert. The
   `UNIQUE` and partial-unique constraints in `SCHEMA.md` are what make them
-  real. "Containment fires once" has a second hole that persistence does *not*
-  close: `adapters/resilient_client.py` retries `POST` on transport errors, so
-  a timed-out launch can start a workflow twice below the idempotency guard.
+  real.
 - Endpoints are not yet behind `Depends(get_current_user)`; `core/auth.py` is in
   place but not applied to routers.
 - Threat-intel sync and the scheduled confidence-decay sweep have use-case-level

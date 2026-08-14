@@ -54,17 +54,26 @@ class OpenSearchClient:
             BULK_PATH,
             content=body.encode(),
             headers={"Content-Type": NDJSON_CONTENT_TYPE},
+            # Every action above carries an explicit "_id", so a replay
+            # overwrites the same documents rather than adding duplicates.
+            retry_unsafe=True,
         )
         return payload if isinstance(payload, Mapping) else {}
 
     async def search(self, index: str, body: Mapping[str, Any]) -> Mapping[str, Any]:
         """Run a search against one index."""
-        payload = await self._http.request_json("POST", f"/{index}/_search", json_body=body)
+        # A POST only because the query is too large for a query string; this
+        # reads and writes nothing.
+        payload = await self._http.request_json(
+            "POST", f"/{index}/_search", json_body=body, retry_unsafe=True
+        )
         return payload if isinstance(payload, Mapping) else {}
 
     async def count(self, index: str, body: Mapping[str, Any]) -> int:
         """Count documents matching a query."""
-        payload = await self._http.request_json("POST", f"/{index}/_count", json_body=body)
+        payload = await self._http.request_json(
+            "POST", f"/{index}/_count", json_body=body, retry_unsafe=True
+        )
         if isinstance(payload, Mapping):
             raw = payload.get("count", 0)
             if isinstance(raw, int):
