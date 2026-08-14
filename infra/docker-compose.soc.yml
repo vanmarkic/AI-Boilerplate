@@ -21,7 +21,15 @@ services:
       CASE_PROVIDER: ${CASE_PROVIDER:-memory}
       ORCHESTRATION_PROVIDER: ${ORCHESTRATION_PROVIDER:-memory}
     volumes:
-      - ../apps/soc/backend:/app
+      # Source only, never the whole directory: /app also holds the .venv built
+      # into the image, and mounting over it hides the interpreter's packages,
+      # so the container starts and immediately fails to import anything.
+      - ../apps/soc/backend/core:/app/core
+      - ../apps/soc/backend/domain:/app/domain
+      - ../apps/soc/backend/application:/app/application
+      - ../apps/soc/backend/adapters:/app/adapters
+      - ../apps/soc/backend/features:/app/features
+      - ../apps/soc/backend/main.py:/app/main.py
     command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
 
   soc-db:
