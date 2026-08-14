@@ -2,8 +2,8 @@
 
 ## First Steps
 Before writing any code:
-1. Determine which app you are working on: `apps/main/` or `apps/tfc/`.
-2. Read the app-level AGENTS.md: `apps/main/AGENTS.md` or `apps/tfc/AGENTS.md`.
+1. Determine which app you are working on: `apps/main/`, `apps/tfc/` or `apps/soc/`.
+2. Read the app-level AGENTS.md: `apps/main/AGENTS.md`, `apps/tfc/AGENTS.md` or `apps/soc/AGENTS.md`.
 3. Read the relevant subdirectory AGENTS.md for the layer: `backend/AGENTS.md` for backend work, `frontend/AGENTS.md` for frontend work.
 
 `SPECS.md` describes WHAT the software does (domain, business rules, glossary).
@@ -20,6 +20,11 @@ This file describes HOW to write code (conventions, architecture, constraints).
 
 ## Architecture
 Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
+
+**Exception:** `apps/soc/` is hexagonal (ports & adapters), because its whole
+purpose is keeping business logic independent of four interchangeable third
+parties. There, `features/` holds inbound HTTP adapters only; the core lives in
+`domain/` and `application/`. See `apps/soc/backend/AGENTS.md`.
 
 ## Universal Rules
 1. Maximum 350 lines per file (500 for test files). Split if exceeded.
@@ -49,7 +54,7 @@ Feature-sliced pragmatic DDD monorepo. Each feature is a self-contained folder.
 - TFC and main app share NO backend/frontend code — they are independent apps.
 - **Before starting work, run the appropriate `make context-*` target based on the task scope.** If the scope is unclear, ask the user.
 - Available scopes:
-  - `context-tfc` / `context-main` — full app (frontend + backend)
+  - `context-tfc` / `context-main` / `context-soc` — full app (frontend + backend; soc is backend-only)
   - `context-tfc-fe` / `context-main-fe` — frontend only (pure GUI work)
   - `context-tfc-be` / `context-main-be` — backend only
   - `context-all` — full monorepo

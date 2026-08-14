@@ -1,0 +1,47 @@
+# SOC platform stack.
+#
+# Deliberately contains only what WE own: the API and (when persistence lands)
+# its database. MISP, DFIR-IRIS, Shuffle and OpenSearch are configured by URL,
+# never vendored here — pointing at them is an environment change, and the
+# service runs perfectly well with none of them present.
+services:
+  soc-api:
+    build:
+      context: ..
+      dockerfile: apps/soc/backend/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://dev:dev@soc-db:5432/soc
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: boilerplate
+      KEYCLOAK_AUDIENCE: soc-api
+      SEARCH_PROVIDER: ${SEARCH_PROVIDER:-memory}
+      THREAT_INTEL_PROVIDER: ${THREAT_INTEL_PROVIDER:-memory}
+      CASE_PROVIDER: ${CASE_PROVIDER:-memory}
+      ORCHESTRATION_PROVIDER: ${ORCHESTRATION_PROVIDER:-memory}
+    volumes:
+      # Source only, never the whole directory: /app also holds the .venv built
+      # into the image, and mounting over it hides the interpreter's packages,
+      # so the container starts and immediately fails to import anything.
+      - ../apps/soc/backend/core:/app/core
+      - ../apps/soc/backend/domain:/app/domain
+      - ../apps/soc/backend/application:/app/application
+      - ../apps/soc/backend/adapters:/app/adapters
+      - ../apps/soc/backend/features:/app/features
+      - ../apps/soc/backend/main.py:/app/main.py
+    command: uvicorn main:app --host 0.0.0.0 --port 8002 --reload
+
+  soc-db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: soc
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: dev
+    ports:
+      - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dev -d soc"]
+      interval: 5s
+      timeout: 5s
+      retries: 10

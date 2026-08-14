@@ -1,4 +1,4 @@
-.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint-length lint storybook storybook-react help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check context-tfc context-tfc-fe context-tfc-be context-main context-main-fe context-main-be context-all
+.PHONY: dev dev-local dev-backend dev-frontend dev-all dev-tfc dev-tfc-local dev-tfc-frontend dev-tfc-backend test test-backend test-frontend test-changed test-changed-backend test-changed-frontend e2e-changed e2e-tag test-tfc-backend test-tfc-frontend test-scaffold generate generate-map-style lock migrate migrate-tfc new-feature lint-arch lint-length lint storybook storybook-react help build build-main build-tfc build-tier-1 build-tier-2 build-tier-3 validate verify-tier spec aider-fill-in aider-debug aider-review setup-hooks security-scan check context-tfc context-tfc-fe context-tfc-be context-main context-main-fe context-main-be context-soc context-all dev-soc test-soc lock-soc migrate-soc
 
 # ── Paths ──────────────────────────────────────────────────
 MAIN_FE  = apps/main/frontend
@@ -6,12 +6,14 @@ MAIN_BE  = apps/main/backend
 REACT_FE = apps/main/react-frontend
 TFC_FE   = apps/tfc/frontend
 TFC_BE   = apps/tfc/backend
+SOC_BE   = apps/soc/backend
 INFRA    = infra
 
 # Compose file combinations
 DC_INFRA = docker compose -f $(INFRA)/docker-compose.yml
 DC_MAIN  = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml
 DC_TFC   = docker compose -f $(INFRA)/docker-compose.tfc.yml
+DC_SOC   = docker compose -f $(INFRA)/docker-compose.soc.yml
 DC_TFC_DEV = docker compose -f $(INFRA)/docker-compose.tfc.dev.yml
 DC_ALL   = $(DC_INFRA) -f $(INFRA)/docker-compose.main.yml
 
@@ -148,6 +150,7 @@ storybook-react: ## Start React Storybook dev server
 lint: ## Run all linters
 	cd $(MAIN_BE) && ruff check . && ruff format --check .
 	cd $(TFC_BE) && ruff check . && ruff format --check .
+	cd $(SOC_BE) && ruff check . && ruff format --check .
 	cd $(MAIN_FE) && npx eslint "**/*.{js,ts,html,json}"
 
 verify-tier: ## Verify tier-N build has no higher-tier leaks (usage: make verify-tier TIER=1)
@@ -162,6 +165,8 @@ check: ## Run all CI-equivalent checks locally (fail-fast)
 	cd $(CURDIR)/$(TFC_BE) && ruff check . && \
 	cd $(CURDIR)/$(MAIN_BE) && ruff format --check . && \
 	cd $(CURDIR)/$(TFC_BE) && ruff format --check . && \
+	cd $(CURDIR)/$(SOC_BE) && ruff check . && \
+	cd $(CURDIR)/$(SOC_BE) && ruff format --check . && \
 	cd $(CURDIR)/$(MAIN_FE) && npx eslint "**/*.{js,ts,html,json}" && \
 	cd $(CURDIR)/$(TFC_FE) && npx eslint "**/*.{js,ts,html,json}" && \
 	cd $(CURDIR)/$(MAIN_FE) && npm run lint:tsc:all && \
@@ -175,7 +180,19 @@ check: ## Run all CI-equivalent checks locally (fail-fast)
 test-react-ui: ## Run React UI library tests
 	cd packages/react-ui && npx vitest run
 
-validate: lint-arch lint-length lint test test-react-ui ## Validate everything: architecture + linters + file-length + tests
+validate: lint-arch lint-length lint test test-soc test-react-ui ## Validate everything: architecture + linters + file-length + tests
+
+dev-soc: ## Start the SOC platform stack (API + its database)
+	$(DC_SOC) up --build
+
+test-soc: ## Run SOC backend tests (no database, network or vendor required)
+	cd $(SOC_BE) && python -m pytest -v
+
+lock-soc: ## Regenerate the SOC lock file
+	cd $(SOC_BE) && uv lock
+
+migrate-soc: ## Run SOC database migrations
+	cd $(SOC_BE) && alembic upgrade head
 
 security-scan: ## Run security scans and save reports to security-reports/
 	bash shared/scripts/security-scan.sh
@@ -235,6 +252,11 @@ context-tfc-fe: ## Set LLM context to TFC frontend only (excludes all backends)
 context-tfc-be: ## Set LLM context to TFC backend only (excludes all frontends)
 	@printf "apps/main/\napps/tfc/frontend/\n" > .claudeignore
 	@echo "LLM context set to TFC backend only"
+	@$(MAKE) --no-print-directory _apply-slim
+
+context-soc: ## Set LLM context to the SOC platform only (backend-only app)
+	@printf "apps/main/\napps/tfc/\n" > .claudeignore
+	@echo "LLM context set to SOC platform only"
 	@$(MAKE) --no-print-directory _apply-slim
 
 context-main: ## Set LLM context to main app only

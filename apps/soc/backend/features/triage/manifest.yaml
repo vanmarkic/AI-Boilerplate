@@ -1,0 +1,17 @@
+name: triage
+tier: 1
+description: Ingest raw events and return a scored, explained triage verdict.
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [threat_intel, search]
+api_endpoints:
+  - "POST /api/triage/events"
+models: []
+events_emitted: [AlertRaised]
+events_consumed: []
+business_rules:
+  - "An event from an unconfigured source is rejected rather than guessed at."
+  - "A dropped event is still indexed; dropping is a triage decision, not data loss."
+  - "A replayed event returns the existing alert instead of raising a second one."
+  - "An unreachable threat intel source degrades the verdict, never fails the request."

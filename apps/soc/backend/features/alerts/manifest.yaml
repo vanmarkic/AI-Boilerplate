@@ -1,0 +1,19 @@
+name: alerts
+tier: 1
+description: List alerts and act on them by escalating or launching a response.
+version: 0.1.0
+dependencies:
+  internal: [triage, cases]
+  external: [case_management, orchestration]
+api_endpoints:
+  - "GET /api/alerts"
+  - "GET /api/alerts/{alert_id}"
+  - "POST /api/alerts/{alert_id}/escalate"
+  - "POST /api/alerts/{alert_id}/respond"
+models: []
+events_emitted: [CaseOpened, PlaybookLaunched]
+events_consumed: []
+business_rules:
+  - "Escalating twice returns the same case rather than opening a second one."
+  - "Responding twice launches the playbook once; the idempotency key is ours."
+  - "An alert matching no playbook rule is recorded as skipped, with the reason."

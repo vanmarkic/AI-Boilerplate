@@ -63,3 +63,8 @@ coverage/
 # K8s secrets (never commit actual credentials)
 k8s/secrets.yaml
 clusters/*/boilerplate/secrets.yaml
+
+# Agent skills installed by the `skills` CLI. skills-lock.json is committed and
+# is the source of truth; restore the artifacts with:
+#   npx skills experimental_install
+.agents/

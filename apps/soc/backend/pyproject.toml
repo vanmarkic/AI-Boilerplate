@@ -1,0 +1,67 @@
+[project]
+name = "soc-backend"
+version = "0.1.0"
+description = "Hexagonal security-operations backend (triage, TI, cases, playbooks)"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.32.0",
+    "sqlalchemy[asyncio]>=2.0.36",
+    "asyncpg>=0.30.0",
+    "alembic>=1.14.0",
+    "pydantic>=2.10.0",
+    "pydantic-settings>=2.7.0",
+    "PyJWT[crypto]>=2.9.0",
+    "httpx>=0.28.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+    "pyyaml>=6.0.0",
+]
+
+[tool.setuptools]
+packages = ["core", "domain", "application", "adapters", "features"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["domain", "application", "adapters", "features", "tests"]
+python_files = ["*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "postgres: requires a live PostgreSQL (excluded by `-m 'not postgres'`)",
+]
+
+[tool.bandit]
+skips = ["B101"]
+exclude_dirs = []
+
+[tool.bandit.assert_used]
+skips = ["*_test.py", "test_*.py"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+# TID is added on top of the repo-standard set: relative imports are invisible
+# to the architecture linter (they carry no package root), so they are banned
+# outright rather than silently escaping the hexagonal dependency rule.
+select = ["E", "F", "I", "N", "UP", "ANN", "ASYNC", "S", "PT", "T20", "RUF", "TID"]
+ignore = [
+    "S101",   # assert used in tests
+]
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.per-file-ignores]
+"alembic/**" = ["ANN"]
+# Contract suites are abstract pytest base classes: the fixtures they declare
+# exist to be overridden, so the base implementations are deliberately inert.
+"adapters/contract/*.py" = ["PT004"]

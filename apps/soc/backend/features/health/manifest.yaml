@@ -1,0 +1,15 @@
+name: health
+tier: 1
+description: Liveness probe and a report of which adapter is bound to each port.
+version: 0.1.0
+dependencies:
+  internal: []
+  external: []
+api_endpoints:
+  - "GET /api/health"
+  - "GET /api/health/adapters"
+models: []
+events_emitted: []
+events_consumed: []
+business_rules:
+  - "The adapter report names the configured provider for every outbound port."

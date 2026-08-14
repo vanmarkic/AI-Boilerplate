@@ -112,6 +112,22 @@ jobs:
       - run: python -m pytest -v --tb=short
         working-directory: apps/tfc/backend
 
+  test-soc-backend:
+    name: SOC Backend Tests
+    runs-on: ubuntu-latest
+    # No services: the SOC suite runs the whole hexagon - domain, use cases,
+    # every vendor adapter and every router - with no database, no network and
+    # no third party running. That is the architecture's main claim, checked.
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - run: pip install -e ".[dev]"
+        working-directory: apps/soc/backend
+      - run: python -m pytest -v --tb=short --cov=domain --cov=application --cov=adapters --cov-report=term-missing
+        working-directory: apps/soc/backend
+
   lint-backend:
     name: Backend Lint
     runs-on: ubuntu-latest
@@ -131,6 +147,11 @@ jobs:
         working-directory: apps/tfc/backend
       - run: ruff format --check .
         working-directory: apps/tfc/backend
+      # SOC backend
+      - run: ruff check .
+        working-directory: apps/soc/backend
+      - run: ruff format --check .
+        working-directory: apps/soc/backend
 
   tier1-build-smoke:
     if: false  # disabled — expensive (full npm install + frontend production build)
@@ -251,6 +272,34 @@ jobs:
     steps:
       - uses: actions/checkout@v6
       - run: docker build -f apps/tfc/backend/Dockerfile .
+
+  docker-build-soc-backend:
+    name: Docker Build (SOC backend)
+    runs-on: ubuntu-latest
+    # Nothing built this image, so its Dockerfile and compose file were the only
+    # part of apps/soc/ no check ever executed. The build is the check.
+    steps:
+      - uses: actions/checkout@v6
+      - run: docker build -f apps/soc/backend/Dockerfile -t soc-backend:ci .
+      - name: The image serves with no third party deployed
+        run: |
+          docker run -d --name soc -p 8002:8002 soc-backend:ci
+          for _ in $(seq 1 30); do
+            curl -fsS localhost:8002/api/health >/dev/null 2>&1 && break
+            sleep 1
+          done
+          curl -fsS localhost:8002/api/health
+          curl -fsS localhost:8002/api/health/adapters
+          docker rm -f soc
+      - name: The dev compose mount does not hide the image's virtualenv
+        run: |
+          docker compose -f infra/docker-compose.soc.yml up -d soc-api
+          for _ in $(seq 1 30); do
+            curl -fsS localhost:8002/api/health >/dev/null 2>&1 && break
+            sleep 1
+          done
+          curl -fsS localhost:8002/api/health
+          docker compose -f infra/docker-compose.soc.yml down -v
 
   openapi-validate:
     name: OpenAPI Validation

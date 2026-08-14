@@ -1,0 +1,17 @@
+name: cases
+tier: 1
+description: List investigations and move them through their lifecycle.
+version: 0.1.0
+dependencies:
+  internal: []
+  external: [case_management]
+api_endpoints:
+  - "GET /api/cases"
+  - "GET /api/cases/{case_id}"
+  - "POST /api/cases/{case_id}/transition"
+models: []
+events_emitted: [CaseTransitioned]
+events_consumed: []
+business_rules:
+  - "A closed case is terminal; no transition out of it is legal."
+  - "Our own case state changes first; mirroring outward may fail without undoing it."
