@@ -168,19 +168,19 @@ jobs:
             npx playwright test --shard=${{ matrix.shard }}
           fi
         working-directory: apps/tfc/frontend
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: tfc-playwright-report-${{ strategy.job-index }}
           path: apps/tfc/frontend/playwright-report/
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: tfc-route-screenshots-${{ strategy.job-index }}
           path: apps/tfc/frontend/screenshots/
           retention-days: 7
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: ${{ !cancelled() }}
         with:
           name: tfc-e2e-failure-screenshots-${{ strategy.job-index }}
